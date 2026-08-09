@@ -23,6 +23,7 @@ flutter test
 ```
  
 ## Detailed guides (read the relevant one before starting a task)
+- Backlog with milestones and issues: @docs/issue-backlog.md
 - Overall planed scope of app functionalities: @docs/functionality.md
 - Backend architecture design: @docs/data-model.md
 - Architecture and folder structure: @docs/guidelines.md,00-tech-stack-and-philosophy.md, 01-architecture-and-folder-structure.md,
