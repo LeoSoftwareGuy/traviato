@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Create .env (bundled as an asset; git-ignored so absent in CI)
+        run: cp .env.example .env
+
       - name: Verify formatting
         run: dart format --set-exit-if-changed .
 
