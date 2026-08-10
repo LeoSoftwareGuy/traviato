@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit",
+      "Bash(flutter:*)",
+      "Bash(dart:*)",
+      "Bash(supabase db reset)",
+      "Bash(supabase migration:*)",
+      "Bash(git add:*)", "Bash(git commit:*)", "Bash(git checkout:*)",
+      "Bash(git push:*)", "Bash(git status)", "Bash(git diff:*)", "Bash(git log:*)",
+      "Bash(gh issue:*)", "Bash(gh pr create:*)", "Bash(gh pr comment:*)"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(gh pr merge:*)",
+      "Read(.env)"
+    ]
+  }
+}
