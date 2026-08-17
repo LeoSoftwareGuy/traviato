@@ -19,4 +19,5 @@ abstract class AppColors {
   static const Color accentCoral = Color(0xFFFF6D79);
   static const Color accentCoralTint = Color(0x26FF6D79);
   static const Color accentPurple = Color(0xFF8962C5);
+  static const Color accentPurpleTint = Color(0x1A8962C5);
 }
