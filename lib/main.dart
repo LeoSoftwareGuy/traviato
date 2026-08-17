@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'core/config/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 
 Future<void> main() async {
@@ -22,32 +23,11 @@ class TraviatoApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // TODO(#5): switch to MaterialApp.router with routerProvider once the
-    // auth-aware GoRouter and splash land.
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Traviato',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
-      home: const BootstrapPage(),
-    );
-  }
-}
-
-/// Placeholder home for the bootstrap milestone — proves the app builds and runs
-/// against an initialized Supabase client. Replaced by the router + real screens
-/// in later issues.
-class BootstrapPage extends StatelessWidget {
-  const BootstrapPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text(
-          'Traviato',
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-      ),
+      routerConfig: ref.watch(routerProvider),
     );
   }
 }
