@@ -4,46 +4,55 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import 'guest_images.dart';
 
 class _Moment {
-  const _Moment({required this.icon, required this.title, required this.date});
+  const _Moment({
+    required this.imagePath,
+    required this.title,
+    required this.date,
+  });
 
-  final IconData icon;
+  final String imagePath;
   final String title;
   final String date;
 }
 
 const _moments = [
   _Moment(
-    icon: Icons.temple_buddhist_outlined,
+    imagePath: GuestImages.familyAdventure,
     title: 'Family trip to Tokyo',
     date: '10.07.26-10.08.26',
   ),
   _Moment(
-    icon: Icons.hiking_outlined,
+    imagePath: GuestImages.soloGetaway,
     title: 'A solo getaway',
     date: '13.04.26-15.04.26',
   ),
   _Moment(
-    icon: Icons.favorite_outline,
+    imagePath: GuestImages.honeymoonEscape,
     title: 'Honeymoon',
     date: '12.06.25-10.07.25',
   ),
-  _Moment(icon: Icons.school_outlined, title: 'Graduation', date: '10.06.25'),
   _Moment(
-    icon: Icons.restaurant_outlined,
+    imagePath: GuestImages.epicMilestone,
+    title: 'Graduation',
+    date: '10.06.25',
+  ),
+  _Moment(
+    imagePath: GuestImages.foodLoversWeekend,
     title: "A food lover's weekend",
     date: '15.12.25',
   ),
   _Moment(
-    icon: Icons.landscape_outlined,
+    imagePath: GuestImages.bucketListMoment,
     title: 'A bucket-list moment',
     date: '01.12.25',
   ),
 ];
 
 /// Static sample gallery matching the "Moments worth capturing" section of
-/// the guest landing frame. Icon tiles stand in for the Figma stock photos.
+/// the guest landing frame.
 class MomentsGrid extends StatelessWidget {
   const MomentsGrid({super.key});
 
@@ -79,28 +88,46 @@ class _MomentTile extends StatelessWidget {
     return Container(
       width: 162.5,
       height: 160,
-      padding: const EdgeInsets.all(AppSpacing.md),
-      alignment: Alignment.bottomLeft,
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: AppColors.surface,
         borderRadius: AppRadius.cardRadius,
         border: Border.all(color: AppColors.surfaceBorder),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          Icon(moment.icon, color: AppColors.textSecondary),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            moment.title,
-            style: AppTypography.chipLabel.copyWith(
-              color: AppColors.textPrimary,
+          Image.asset(moment.imagePath, fit: BoxFit.cover),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.transparent, AppColors.background],
+                stops: [0.35, 1.0],
+              ),
             ),
           ),
-          Text(
-            moment.date,
-            style: AppTypography.caption.copyWith(letterSpacing: 0),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    moment.title,
+                    style: AppTypography.chipLabel.copyWith(
+                      color: AppColors.textOnPhoto,
+                    ),
+                  ),
+                  Text(
+                    moment.date,
+                    style: AppTypography.caption.copyWith(letterSpacing: 0),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
