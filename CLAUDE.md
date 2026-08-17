@@ -2,7 +2,7 @@
  
 ## Project
  
-Traviato — a mobile app built with Flutter (Dart) and Supabase.
+Trevy — a mobile app built with Flutter (Dart) and Supabase.
 One-line description: the place where your travel life lives — plan your trip, log it as you go, and it becomes a beautiful journal you keep forever.
  
 ## Golden rules (non-negotiable)
@@ -41,7 +41,7 @@ flutter test
 - Task workflow, branches and PRs: @docs/workflow.md
 ## Figma
  
-Designs live in: https://www.figma.com/design/zpsWfzGG85w1CQPwNmm3b4/travel?node-id=99-2&p=f&t=ccv7lfX9NtJ9b9D3-0
+Designs live in: https://www.figma.com/design/5Z1A1H6eNNsaJN3sbEsNIh/Leo-s-team-library?node-id=449-2&t=QPDHq0Yeo6yxU08J-0
 open journey page for the design.
 
 When implementing UI, pull the exact values (spacing, colors, typography) from the Figma MCP for the specific frame named in the issue. Map design tokens to the theme in `lib/core/theme/` — never hardcode colors or text styles in widgets.
