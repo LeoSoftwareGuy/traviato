@@ -57,6 +57,19 @@ During development keep the generator running:
 dart run build_runner watch -d
 ```
 
+## Database (Supabase)
+
+Schema lives in `supabase/migrations/`; see `docs/supabase.md` for the full rules
+(RLS, grants, migration workflow).
+
+- Local dev: `supabase start`, then `supabase db reset` to apply all migrations
+  (and seeds, once any exist) against the local Postgres instance.
+- New migration: `supabase migration new <description>`, edit the generated SQL
+  file, then `supabase db reset` to verify it applies cleanly before opening a PR.
+- **Deploying to the hosted project is manual for now** (no deploy CI yet): after
+  a migration PR merges to `main`, run `supabase db push` against the linked
+  hosted project to apply it.
+
 ## Before opening a PR
 
 All three must pass (also enforced by CI on every PR — see `.github/workflows/ci.yml`):
