@@ -1,208 +1,173 @@
-# TripJ — Data Model (MVP)
+# Trevy — Data Model (MVP, v2 post-redesign)
 
-Derived from `functionality.md`. Postgres (Supabase) — all schema changes ship as
-migrations in `supabase/migrations/`, RLS enabled on every table.
+Derived from `functionality.md` v3. Postgres (Supabase) — all schema changes ship as
+migrations in `supabase/migrations/`, RLS enabled on every table, **explicit grants
+required** (project has auto-expose disabled).
 
-## Design decisions (read first)
+Naming: the DB keeps the technical term **`trips`** (UI copy says "memory") to avoid
+colliding with the wrap-up artifact. The generated screenplay lives in **`wrap_ups`**
+(renamed from the old `memories` table).
 
-1. **No `trip_days` table.** Days are derived from the trip's date range. Child records
-   (quests, notes, photos) carry a `day_date date` column instead of a FK to a days
-   table. Editing trip dates never requires re-syncing day rows; the UI computes
-   "Day N" as `day_date - start_date + 1`.
-2. **No stored trip status.** Upcoming / current / finished is derived from
-   `start_date` / `end_date` vs today, in a view (`trip_card_view`) or client-side.
-3. **Points are a ledger, not a counter.** Every earn event is a row; the balance is a
-   SUM. Auditable, idempotent, and ready for future spending.
-4. **Owner-only access.** No sharing in MVP, so every RLS policy reduces to "the trip's
-   owner". Child tables check ownership via the parent trip.
-5. **Goals as `text[]`** on the trip (checked ≤ 3) rather than a join table — the list
-   is a fixed app-level enum; a join table adds nothing while there's no discovery.
+## Design decisions (unchanged unless noted)
+
+1. **No `trip_days` table** — child records carry `day_date date`; "Day N" =
+   `day_date - start_date + 1`.
+2. **No stored trip status** — derived from dates in `trip_card_view`/client.
+3. **Points are a ledger** (UI: "stars") — balance is a SUM; awards via RPC only.
+4. **Owner-only access** — every policy reduces to the trip's owner.
+5. **Vibes as `text[]`** on the trip (was `goals`; new fixed list of 10).
+6. **NEW: achievements are server-awarded** — clients never insert their own.
+7. **NEW: expenses are plain owner rows** — no server logic needed in MVP.
 
 ## Tables
 
 ### `profiles`
 | column | type | notes |
 |---|---|---|
-| `id` | `uuid` PK | = `auth.users.id`, created via signup trigger |
-| `username` | `text` | nullable for MVP |
+| `id` | `uuid` PK | = `auth.users.id`, signup trigger |
+| `username` | `text` | nullable |
+| `bio` | `text` | nullable — NEW (profile screen) |
 | `avatar_url` | `text` | nullable |
-| `created_at` | `timestamptz` | default `now()` |
+| `created_at` | `timestamptz` | "Joined March 2024" on profile |
 
-RLS: select/update own row (`id = auth.uid()`). Insert via trigger only.
+RLS: select/update own row. Insert via trigger only.
 
 ### `trips`
 | column | type | notes |
 |---|---|---|
-| `id` | `uuid` PK | client-generated (uuid pkg) so storage paths can exist pre-insert |
+| `id` | `uuid` PK | client-generated |
 | `user_id` | `uuid` FK → profiles | owner |
 | `name` | `text` | |
-| `destination` | `text` | single free-text field (MVP) |
-| `start_date` | `date` | nullable (steps are skippable) |
+| `destination` | `text` | "Where did it happen?" free text |
+| `country_code` | `text` | nullable, ISO-3166-1 alpha-2 — feeds Countries stat & Globetrotter (see open questions) |
+| `start_date` | `date` | nullable |
 | `end_date` | `date` | nullable, `check (end_date >= start_date)` |
-| `goals` | `text[]` | default `{}`, `check (cardinality(goals) <= 3)` |
-| `cover_image_path` | `text` | storage path, nullable |
+| `vibes` | `text[]` | default `{}` — fixed list of 10 (Romantic, Adventure, Cultural, Chill, Foodie, Road trip, Wellness, Wildlife, Nightlife, Photography) |
+| `cover_image_path` | `text` | nullable |
 | `created_at` / `updated_at` | `timestamptz` | |
 
-RLS: all four operations `user_id = auth.uid()`.
-Free-tier 3-trip limit: enforced in app for MVP (revisit server-side before launch).
+RLS: all ops `user_id = auth.uid()`. Grants: select/insert/update/delete to
+`authenticated`. Free-tier 3-memory limit: app-side for MVP.
 
-### `quests` (plan items)
+### `quests` — unchanged
+`id, trip_id (cascade), day_date, time, title, place_text, position, completed_at,
+created_at`. RLS via parent trip (pattern for all child tables):
+`exists (select 1 from trips t where t.id = trip_id and t.user_id = auth.uid())`.
+
+### `day_notes` — unchanged
+`id, trip_id (cascade), day_date, content, created_at/updated_at`,
+`unique (trip_id, day_date)`.
+
+### `photos` — unchanged
+`id (client-generated), trip_id (cascade), day_date, storage_path, caption, lat/lng,
+place_text, people_tags text[], taken_at, created_at`.
+
+### `checklist_items` — upgraded
 | column | type | notes |
 |---|---|---|
 | `id` | `uuid` PK | |
 | `trip_id` | `uuid` FK → trips (cascade) | |
-| `day_date` | `date` | which day of the trip |
-| `time` | `time` | nullable |
 | `title` | `text` | |
-| `place_text` | `text` | optional location/details line |
-| `position` | `int` | order within the day |
-| `completed_at` | `timestamptz` | nullable — set when checked off during the trip (To Do) |
-| `created_at` | `timestamptz` | |
-
-RLS (all ops): `exists (select 1 from trips t where t.id = trip_id and t.user_id = auth.uid())`.
-Same pattern for every trip-child table below.
-
-### `day_notes`
-| column | type | notes |
-|---|---|---|
-| `id` | `uuid` PK | |
-| `trip_id` | `uuid` FK → trips (cascade) | |
-| `day_date` | `date` | |
-| `content` | `text` | |
-| `created_at` / `updated_at` | `timestamptz` | |
-| | | `unique (trip_id, day_date)` — one note per day, edited in place |
-
-### `photos`
-| column | type | notes |
-|---|---|---|
-| `id` | `uuid` PK | client-generated before upload |
-| `trip_id` | `uuid` FK → trips (cascade) | |
-| `day_date` | `date` | nullable (gallery uploads without a day) |
-| `storage_path` | `text` | in `trip-photos` bucket |
-| `caption` | `text` | nullable |
-| `lat` / `lng` | `double precision` | nullable — auto geotag |
-| `place_text` | `text` | nullable — user-entered place tag |
-| `people_tags` | `text[]` | default `{}` — free-text names (no user linking in MVP) |
-| `taken_at` | `timestamptz` | from EXIF when available |
-| `created_at` | `timestamptz` | |
-
-### `checklist_items`
-| column | type | notes |
-|---|---|---|
-| `id` | `uuid` PK | |
-| `trip_id` | `uuid` FK → trips (cascade) | |
-| `title` | `text` | from suggestion or custom |
+| `category` | `text` | NEW — e.g. `travel_essentials`, `clothing_shoes` (check constraint; list per seeded categories) |
+| `is_essential` | `bool` | NEW — default false ("Essential" tag) |
 | `is_checked` | `bool` | default false |
 | `position` | `int` | |
 
-### `checklist_suggestions` (global, seeded)
-| column | type | notes |
-|---|---|---|
-| `id` | `bigint` PK | |
-| `title` | `text` | e.g. Passport, Swimsuit… |
+### `checklist_suggestions` (global, seeded) — upgraded
+`id, title, category, is_essential`. Select for authenticated; no client writes.
 
-RLS: select for any authenticated user; no writes from clients. Seeded by migration.
-
-### `bonus_task_templates` (global, seeded)
-| column | type | notes |
-|---|---|---|
-| `id` | `bigint` PK | |
-| `title` | `text` | "Take a photo of yourself packing…" |
-| `points` | `int` | star reward |
-| `duration_hours` | `int` | countdown window (12/7/4) |
-| `trigger` | `text` | when it's issued (e.g. `pre_trip`, `trip_day`) — app-interpreted |
-
-RLS: select authenticated; no client writes.
-
-### `bonus_task_assignments`
+### `expenses` — NEW
 | column | type | notes |
 |---|---|---|
 | `id` | `uuid` PK | |
 | `trip_id` | `uuid` FK → trips (cascade) | |
-| `template_id` | `bigint` FK → bonus_task_templates | |
-| `issued_at` | `timestamptz` | |
-| `expires_at` | `timestamptz` | issued_at + duration |
-| `status` | `text` | `pending` / `completed` / `dismissed` / `expired`, check constraint |
-| `photo_id` | `uuid` FK → photos | nullable — proof photo |
-| `completed_at` | `timestamptz` | nullable |
+| `title` | `text` | "Sunset dinner in Oia" |
+| `amount` | `numeric(10,2)` | `check (amount > 0)`; EUR only in MVP |
+| `category` | `text` | check: `food_drinks` / `transport` / `accommodation` / `activities` / `shopping` / `other` |
+| `spent_on` | `date` | |
+| `created_at` | `timestamptz` | |
 
-### `points_ledger`
+RLS via parent trip. Totals/compare aggregate client-side or via
+`expense_summary_view` (per-trip totals — used by the Expenses tab list).
+
+### `bonus_task_templates` / `bonus_task_assignments` — unchanged
+Templates seeded (title, points, duration_hours, trigger). Assignments per trip with
+`status` (pending/completed/dismissed/expired), `expires_at`, proof `photo_id`,
+`completed_at`.
+
+### `points_ledger` — unchanged (UI term: stars)
+`id, user_id, trip_id (set null), source (note/photo/quest/bonus_task), source_id,
+points, created_at`, `unique (user_id, source, source_id)`.
+Values (server-side, in `award_points` RPC): note 1 · photo 2 · quest 1 ·
+bonus per template.
+
+### `achievement_templates` (global, seeded) — NEW
 | column | type | notes |
 |---|---|---|
 | `id` | `bigint` PK | |
-| `user_id` | `uuid` FK → profiles | |
-| `trip_id` | `uuid` FK → trips (set null) | survives trip deletion |
-| `source` | `text` | `bonus_task` / `photo` / `note` / `day_logged` / … check constraint |
-| `source_id` | `uuid` | nullable — the row that earned it (idempotency guard) |
-| `points` | `int` | positive in MVP |
-| `created_at` | `timestamptz` | |
-| | | `unique (user_id, source, source_id)` — no double-earning |
+| `code` | `text` unique | `first_adventure`, `globetrotter`, `century`, `star_collector`, `shutterbug`, `storyteller`, … |
+| `title` / `description` | `text` | |
+| `metric` | `text` | what's counted: `trips` / `countries` / `days_logged` / `stars` / `photos` / `notes` |
+| `target` | `int` | e.g. Globetrotter = 10 countries |
+| `position` | `int` | display order |
 
-Awarding goes through an **RPC** (`award_points`) or trigger, not direct client inserts —
-clients must not write their own point values. RLS: select own rows only.
+RLS: select authenticated; no client writes.
 
-**Point values (MVP):**
-
-| action | source | points |
-|---|---|---|
-| Add a day note | `note` | 1 |
-| Add a photo | `photo` | 2 — photos are weighted higher on purpose: more photos → better memory |
-| Complete a quest | `quest` | 1 (proposal — confirm) |
-| Complete a bonus task | `bonus_task` | per `bonus_task_templates.points` (varies by task) |
-
-Values live server-side (inside the `award_points` RPC / a config table), never in the
-client, so they can be tuned without an app release.
-
-### `memories`
+### `user_achievements` — NEW
 | column | type | notes |
 |---|---|---|
-| `trip_id` | `uuid` PK, FK → trips (cascade) | one memory per trip |
-| `content` | `jsonb` | the **screenplay**: ordered blocks (map segment, photo, narrative text, chapter title…) produced by the AI generation edge function; user edits update it |
+| `user_id` | `uuid` FK → profiles | PK part |
+| `template_id` | `bigint` FK → achievement_templates | PK part |
+| `earned_at` | `timestamptz` | |
+
+Composite PK. Awarded by a server-side `check_achievements` RPC (called after
+point-earning actions; compares metrics vs targets and inserts earned rows —
+idempotent via PK). Progress toward unearned achievements is computed from a
+`profile_stats_view`, not stored. RLS: select own rows; no client insert.
+
+### `wrap_ups` — renamed from `memories`
+| column | type | notes |
+|---|---|---|
+| `trip_id` | `uuid` PK, FK → trips (cascade) | one wrap-up per memory |
+| `content` | `jsonb` | the screenplay (ordered blocks) from the `generate_wrap_up` edge function (Anthropic API; keys in function secrets only) |
 | `generated_at` | `timestamptz` | |
-| `published_at` | `timestamptz` | nullable — "published" privately |
+| `published_at` | `timestamptz` | nullable |
 
-Generation: edge function `generate_memory` (trip data + photo metadata → Anthropic
-API → screenplay JSONB). API keys live in the edge function only. The app renders
-`content` live (Flutter + Mapbox + cached photos) — no video file in MVP.
-
-Post-MVP (paid MP4 export — columns added by a future migration, listed here so the
-shape is known): `video_path text` (in a `memories` bucket,
-`{user_id}/{trip_id}.mp4`), `video_status text` (`rendering` / `ready` / `failed`),
-rendered by an edge function calling a template-video API from the same `content`.
+Post-MVP export columns (future migration): `video_path`, `video_status`.
 
 ## Views
 
-- `trip_card_view` — trips + derived `status` (`upcoming`/`current`/`finished`),
-  photo count, points earned for the trip. Home screen reads this instead of joining
-  client-side.
+- `trip_card_view` — trips + derived status, photo count, stars, duration; NEW:
+  expense total. Feeds Home + Expenses list.
+- `profile_stats_view` — per-user: memories count, places count (distinct place
+  tags), countries count (distinct `country_code`), days logged, stars total.
+  Feeds Home stats bar, profile stats, and achievement progress.
+- `expense_summary_view` — per-trip totals + item counts for the Expenses tab.
 
-## Storage (buckets)
+## Storage — unchanged
+`trip-photos` bucket `{user_id}/{trip_id}/{photo_id}.{ext}` (owner-only via first
+path segment); `avatars` bucket.
 
-| bucket | path pattern | policy |
-|---|---|---|
-| `trip-photos` | `{user_id}/{trip_id}/{photo_id}.{ext}` | owner-only read/write via first path segment = `auth.uid()` |
-| `avatars` | `{user_id}/avatar.{ext}` | owner write, public read (or owner-only in MVP) |
+## Signup trigger — unchanged
+`handle_new_user()` → profiles row.
 
-Client compresses images before upload; `photo_id` generated client-side so the
-storage path exists before the DB insert (per coding guidelines doc 04).
-
-## Signup trigger
-
-Migration creates `handle_new_user()` on `auth.users` insert → inserts `profiles` row.
-
-## Seed data (in migrations)
-
-- `checklist_suggestions`: the common-items list.
-- `bonus_task_templates`: initial task set from functionality.md §7.
+## Seed data (migrations)
+- `checklist_suggestions` with categories + essential flags.
+- `bonus_task_templates` per functionality.md §10.
+- `achievement_templates`: the 8 designed badges.
 
 ## Open questions
 
-1. Quest completion points = 1 is a proposal — confirm or adjust.
+1. **Country derivation**: `country_code` from the free-text "where" field — user
+   picks country in UI later, or geocode? MVP fallback: nullable, filled when the
+   place field gets structured input; Globetrotter progress counts non-null codes.
+2. Vibe count limit — old design capped goals at 3; new single-screen form shows no
+   cap. Currently NO db check; confirm desired UX.
+3. Expense currency symbol is € in design — confirm EUR-only MVP is acceptable for
+   launch market.
 
-## Resolved
+## Resolved (carried over)
 
-- Quests can be checked off during the trip → `quests.completed_at` added.
-- Point values: note = 1, photo = 2 (weighted to encourage photos), bonus tasks per
-  template.
-- Deleting a trip **keeps** earned points — ledger rows survive with `trip_id` set to
-  null.
+- Quests checkable during the trip (`completed_at`).
+- Star values: note 1 / photo 2 / quest 1 / bonus per template; server-side only.
+- Deleting a memory keeps earned stars (`trip_id` set null in ledger).
