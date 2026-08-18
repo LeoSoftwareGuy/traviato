@@ -10,6 +10,7 @@ import '../../../features/auth/presentation/pages/register_page.dart';
 import '../../../features/auth/presentation/pages/splash_page.dart';
 import '../../../features/home/presentation/pages/home_page.dart';
 import '../../../features/home/presentation/widgets/home_shell_scaffold.dart';
+import '../../../features/trip/presentation/pages/create_memory_page.dart';
 import '../../widgets/placeholder_page.dart';
 import 'route_constants.dart';
 
@@ -97,7 +98,7 @@ GoRouter router(Ref ref) {
       GoRoute(
         path: RoutePaths.createMemory,
         name: RouteNames.createMemory,
-        builder: (context, state) => const PlaceholderPage(title: 'New memory'),
+        builder: (context, state) => const CreateMemoryPage(),
       ),
       GoRoute(
         path: RoutePaths.tripPlan,

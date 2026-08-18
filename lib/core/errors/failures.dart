@@ -44,3 +44,11 @@ class UnknownFailure extends Failure {
     super.message = 'An unknown error occurred. Try again later.',
   });
 }
+
+class FreeTierLimitFailure extends Failure {
+  const FreeTierLimitFailure({
+    super.message =
+        "You've reached the 3-memory limit on the free plan. Upgrade to "
+        'add more.',
+  });
+}
