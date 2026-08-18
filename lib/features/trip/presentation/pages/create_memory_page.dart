@@ -12,6 +12,7 @@ import '../../../../core/widgets/show_error_snackbar.dart';
 import '../mutations/trip_mutations.dart';
 import '../widgets/memory_date_range_field.dart';
 import '../widgets/memory_text_field.dart';
+import '../widgets/trip_images.dart';
 import '../widgets/vibe_chip_group.dart';
 import 'validate_memory_dates.dart';
 
@@ -196,20 +197,27 @@ class _MemoryPrompt extends StatelessWidget {
         width: double.infinity,
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.surfaceBorder),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppColors.accentPurpleTint, AppColors.primaryTint],
-          ),
         ),
         child: Stack(
+          fit: StackFit.expand,
           children: [
+            Image.asset(TripImages.newMemory, fit: BoxFit.cover),
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.transparent, AppColors.backgroundScrim],
+                  stops: [0.4, 1.0],
+                ),
+              ),
+            ),
             const Positioned(
               top: AppSpacing.lg,
               right: AppSpacing.lg,
               child: Icon(
                 Icons.auto_awesome,
-                color: AppColors.textSecondary,
+                color: AppColors.textOnPhoto,
                 size: 28,
               ),
             ),
@@ -224,12 +232,14 @@ class _MemoryPrompt extends StatelessWidget {
                   Text(
                     'Something worth remembering?',
                     style: AppTypography.chipLabel.copyWith(
-                      color: AppColors.textSecondary,
+                      color: AppColors.textOnPhotoMuted,
                     ),
                   ),
                   Text(
                     'What deserves a memory?',
-                    style: AppTypography.headlineSerif,
+                    style: AppTypography.headlineSerif.copyWith(
+                      color: AppColors.textOnPhoto,
+                    ),
                   ),
                 ],
               ),
