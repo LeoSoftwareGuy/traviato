@@ -34,6 +34,12 @@ class _FakeTripRemoteDataSource implements TripRemoteDataSource {
   }
 
   @override
+  Future<TripCardModel> getTripCard(String tripId) async {
+    if (exception != null) throw exception!;
+    return _trips.firstWhere((t) => t.id == tripId, orElse: () => _trips.first);
+  }
+
+  @override
   Future<TripModel> createTrip({
     required String id,
     required String name,
@@ -103,6 +109,31 @@ void main() {
       final result = await repo.getTripCards();
       result.fold(
         (failure) => expect(failure, const UnknownFailure(message: 'boom')),
+        (_) => fail('expected Left'),
+      );
+    });
+  });
+
+  group('TripRepositoryImpl.getTripCard', () {
+    test('returns Right(trip) on success', () async {
+      final repo = TripRepositoryImpl(remote: _FakeTripRemoteDataSource());
+      final result = await repo.getTripCard('t1');
+      result.fold(
+        (failure) => fail('expected Right, got Left($failure)'),
+        (trip) => expect(trip.id, 't1'),
+      );
+    });
+
+    test('maps AuthenticationException to AuthenticationFailure', () async {
+      final repo = TripRepositoryImpl(
+        remote: _FakeTripRemoteDataSource(
+          exception: const AuthenticationException(message: 'no session'),
+        ),
+      );
+      final result = await repo.getTripCard('t1');
+      result.fold(
+        (failure) =>
+            expect(failure, const AuthenticationFailure(message: 'no session')),
         (_) => fail('expected Left'),
       );
     });

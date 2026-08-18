@@ -27,6 +27,21 @@ class TripRepositoryImpl implements TripRepository {
   }
 
   @override
+  Future<Either<Failure, TripCardEntity>> getTripCard(String tripId) async {
+    try {
+      return Right(await _remote.getTripCard(tripId));
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NotFoundException catch (e) {
+      return Left(NotFoundFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+  }
+
+  @override
   Future<Either<Failure, TripEntity>> createTrip({
     required String name,
     String? destination,

@@ -7,6 +7,8 @@ import '../entities/trip_entity.dart';
 abstract interface class TripRepository {
   Future<Either<Failure, List<TripCardEntity>>> getTripCards();
 
+  Future<Either<Failure, TripCardEntity>> getTripCard(String tripId);
+
   Future<Either<Failure, TripEntity>> createTrip({
     required String name,
     String? destination,
