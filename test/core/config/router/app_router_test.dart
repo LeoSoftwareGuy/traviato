@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:traviato/features/auth/domain/entities/user_entity.dart';
 import 'package:traviato/features/auth/presentation/providers/auth_providers.dart';
+import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 import 'package:traviato/main.dart';
 
 import '../../../features/auth/fakes/fake_auth_repository.dart';
+import '../../../features/trip/fakes/fake_trip_repository.dart';
 
 void main() {
   testWidgets(
@@ -13,10 +16,14 @@ void main() {
     (tester) async {
       final repo = FakeAuthRepository();
       addTearDown(repo.dispose);
+      final tripRepo = FakeTripRepository()..tripsResult = const Right([]);
 
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [authRepositoryProvider.overrideWithValue(repo)],
+          overrides: [
+            authRepositoryProvider.overrideWithValue(repo),
+            tripRepositoryProvider.overrideWithValue(tripRepo),
+          ],
           child: const TraviatoApp(),
         ),
       );

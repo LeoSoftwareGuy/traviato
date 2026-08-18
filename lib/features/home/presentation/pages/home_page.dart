@@ -1,61 +1,178 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/widgets/show_error_snackbar.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../../auth/presentation/mutations/auth_mutations.dart';
+import '../../../trip/domain/entities/trip_card_entity.dart';
+import '../controllers/home_controller.dart';
+import '../controllers/home_state.dart';
+import '../providers/profile_stats_provider.dart';
+import '../widgets/coming_up_section.dart';
+import '../widgets/home_header.dart';
+import '../widgets/home_stats_bar.dart';
+import '../widgets/memories_grid_section.dart';
+import '../widgets/upcoming_hero_card.dart';
 
-/// Placeholder authenticated landing page — replaced by the real Home
-/// screen in #7. Proves the auth vertical slice end-to-end (greeting +
-/// logout).
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen<MutationState<void>>(logoutMutation, (previous, next) {
-      if (next is MutationError) {
-        showErrorSnackbar(
-          context,
-          message: presentationFailureMessage(next.error),
-        );
-      }
-    });
-
     final username = ref.watch(authControllerProvider).user?.username;
-    final isLoggingOut = ref.watch(logoutMutation) is MutationPending;
+    final stats = ref.watch(profileStatsProvider);
+    final homeAsync = ref.watch(homeControllerProvider);
 
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Hello, ${username ?? 'traveler'}',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                ElevatedButton(
-                  onPressed: isLoggingOut ? null : () => runLogout(ref: ref),
-                  child: isLoggingOut
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Log out'),
-                ),
-              ],
-            ),
+        child: homeAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => AsyncErrorRetryScaffold(
+            message: presentationFailureMessage(error),
+            onRetry: () => ref.invalidate(homeControllerProvider),
+          ),
+          data: (state) => _HomeContent(
+            username: username ?? 'traveler',
+            stars: stats.stars,
+            memories: stats.memories,
+            places: stats.places,
+            days: stats.days,
+            state: state,
           ),
         ),
       ),
+    );
+  }
+}
+
+class _HomeContent extends StatelessWidget {
+  const _HomeContent({
+    required this.username,
+    required this.stars,
+    required this.memories,
+    required this.places,
+    required this.days,
+    required this.state,
+  });
+
+  final String username;
+  final int stars;
+  final int memories;
+  final int places;
+  final int days;
+  final HomeState state;
+
+  void _openTrip(BuildContext context, TripCardEntity trip) =>
+      context.pushNamed(
+        RouteNames.tripJournal,
+        pathParameters: {'tripId': trip.id},
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final hero = state.heroTrip;
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xl,
+        AppSpacing.md,
+        AppSpacing.xl,
+        AppSpacing.xxl * 2,
+      ),
+      children: [
+        HomeHeader(
+          username: username,
+          stars: stars,
+          onAvatarTap: () => context.pushNamed(RouteNames.profile),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        HomeStatsBar(
+          stats: ProfileStats(
+            memories: memories,
+            places: places,
+            days: days,
+            stars: stars,
+          ),
+        ),
+        if (state.isEmpty) ...[
+          const SizedBox(height: AppSpacing.xxl),
+          _NoMemoriesYet(
+            onCreateTap: () => context.pushNamed(RouteNames.createMemory),
+          ),
+        ] else ...[
+          if (hero != null) ...[
+            const SizedBox(height: AppSpacing.xl),
+            UpcomingHeroCard(
+              trip: hero,
+              onPlanTap: () => context.pushNamed(
+                RouteNames.tripPlan,
+                pathParameters: {'tripId': hero.id},
+              ),
+              onChecklistTap: () => context.pushNamed(
+                RouteNames.tripChecklist,
+                pathParameters: {'tripId': hero.id},
+              ),
+              onJournalTap: () => context.pushNamed(
+                RouteNames.tripJournal,
+                pathParameters: {'tripId': hero.id},
+              ),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.xl),
+          ComingUpSection(
+            trips: state.upcomingTrips,
+            onTripTap: (trip) => _openTrip(context, trip),
+            onCreateMemoryTap: () => context.pushNamed(RouteNames.createMemory),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          MemoriesGridSection(
+            trips: state.finishedTrips,
+            onTripTap: (trip) => _openTrip(context, trip),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _NoMemoriesYet extends StatelessWidget {
+  const _NoMemoriesYet({required this.onCreateTap});
+
+  final VoidCallback onCreateTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const Icon(
+          Icons.auto_stories_outlined,
+          color: AppColors.textTertiary,
+          size: 40,
+        ),
+        const SizedBox(height: AppSpacing.base),
+        Text(
+          'No memories yet',
+          style: AppTypography.headlineSerif,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Start your first memory and watch it become a journal you keep '
+          'forever.',
+          textAlign: TextAlign.center,
+          style: AppTypography.chipLabel.copyWith(color: AppColors.textMuted),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        ElevatedButton(
+          onPressed: onCreateTap,
+          child: const Text('Create your first memory'),
+        ),
+      ],
     );
   }
 }

@@ -9,6 +9,8 @@ import '../../../features/auth/presentation/pages/login_page.dart';
 import '../../../features/auth/presentation/pages/register_page.dart';
 import '../../../features/auth/presentation/pages/splash_page.dart';
 import '../../../features/home/presentation/pages/home_page.dart';
+import '../../../features/home/presentation/widgets/home_shell_scaffold.dart';
+import '../../widgets/placeholder_page.dart';
 import 'route_constants.dart';
 
 part 'app_router.g.dart';
@@ -62,10 +64,55 @@ GoRouter router(Ref ref) {
         name: RouteNames.signup,
         builder: (context, state) => const RegisterPage(),
       ),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navShell) =>
+            HomeShellScaffold(navigationShell: navShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePaths.home,
+                name: RouteNames.home,
+                builder: (context, state) => const HomePage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePaths.expenses,
+                name: RouteNames.expenses,
+                builder: (context, state) =>
+                    const PlaceholderPage(title: 'Expenses'),
+              ),
+            ],
+          ),
+        ],
+      ),
       GoRoute(
-        path: RoutePaths.home,
-        name: RouteNames.home,
-        builder: (context, state) => const HomePage(),
+        path: RoutePaths.profile,
+        name: RouteNames.profile,
+        builder: (context, state) => const PlaceholderPage(title: 'Profile'),
+      ),
+      GoRoute(
+        path: RoutePaths.createMemory,
+        name: RouteNames.createMemory,
+        builder: (context, state) => const PlaceholderPage(title: 'New memory'),
+      ),
+      GoRoute(
+        path: RoutePaths.tripPlan,
+        name: RouteNames.tripPlan,
+        builder: (context, state) => const PlaceholderPage(title: 'Plan'),
+      ),
+      GoRoute(
+        path: RoutePaths.tripChecklist,
+        name: RouteNames.tripChecklist,
+        builder: (context, state) => const PlaceholderPage(title: 'Checklist'),
+      ),
+      GoRoute(
+        path: RoutePaths.tripJournal,
+        name: RouteNames.tripJournal,
+        builder: (context, state) => const PlaceholderPage(title: 'Journal'),
       ),
     ],
     errorBuilder: (context, state) =>
