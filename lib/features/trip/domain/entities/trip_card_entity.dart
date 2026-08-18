@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'trip_entity.dart';
+
 enum TripStatus { undated, upcoming, current, finished }
 
 class TripCardEntity extends Equatable {
@@ -21,6 +23,50 @@ class TripCardEntity extends Equatable {
     required this.stars,
     required this.expenseTotal,
   });
+
+  /// Synthesizes a card for a trip that was just created — no photos, stars
+  /// or expenses can exist yet, and status/duration are derived the same
+  /// way `trip_card_view` derives them server-side. Lets the create-memory
+  /// mutation publish a [TripCreatedDispatched] event without a round trip
+  /// through the view.
+  factory TripCardEntity.fromNewTrip(TripEntity trip) {
+    final start = trip.startDate;
+    final end = trip.endDate;
+    TripStatus status;
+    int? durationDays;
+    if (start == null || end == null) {
+      status = TripStatus.undated;
+    } else {
+      final today = DateTime.now();
+      final todayDate = DateTime(today.year, today.month, today.day);
+      if (todayDate.isBefore(start)) {
+        status = TripStatus.upcoming;
+      } else if (todayDate.isAfter(end)) {
+        status = TripStatus.finished;
+      } else {
+        status = TripStatus.current;
+      }
+      durationDays = end.difference(start).inDays + 1;
+    }
+    return TripCardEntity(
+      id: trip.id,
+      userId: trip.userId,
+      name: trip.name,
+      destination: trip.destination,
+      countryCode: trip.countryCode,
+      startDate: trip.startDate,
+      endDate: trip.endDate,
+      vibes: trip.vibes,
+      coverImagePath: trip.coverImagePath,
+      createdAt: trip.createdAt,
+      updatedAt: trip.updatedAt,
+      status: status,
+      durationDays: durationDays,
+      photoCount: 0,
+      stars: 0,
+      expenseTotal: 0,
+    );
+  }
 
   final String id;
   final String userId;

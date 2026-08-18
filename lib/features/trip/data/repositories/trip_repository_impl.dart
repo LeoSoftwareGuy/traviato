@@ -1,8 +1,10 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/trip_card_entity.dart';
+import '../../domain/entities/trip_entity.dart';
 import '../../domain/repositories/trip_repository.dart';
 import '../datasources/trip_remote_data_source.dart';
 
@@ -15,6 +17,34 @@ class TripRepositoryImpl implements TripRepository {
   Future<Either<Failure, List<TripCardEntity>>> getTripCards() async {
     try {
       return Right(await _remote.getTripCards());
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, TripEntity>> createTrip({
+    required String name,
+    String? destination,
+    DateTime? startDate,
+    DateTime? endDate,
+    List<String> vibes = const [],
+  }) async {
+    try {
+      return Right(
+        await _remote.createTrip(
+          id: const Uuid().v4(),
+          name: name,
+          destination: destination,
+          startDate: startDate,
+          endDate: endDate,
+          vibes: vibes,
+        ),
+      );
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
     } on NetworkException {
