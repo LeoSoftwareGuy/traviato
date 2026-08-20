@@ -12,10 +12,16 @@ import 'plan_background_glow.dart';
 /// Back button + memory name/place (over an ambient glow), and the cover
 /// photo below it.
 class PlanHeader extends StatelessWidget {
-  const PlanHeader({required this.trip, required this.onBack, super.key});
+  const PlanHeader({
+    required this.trip,
+    required this.onBack,
+    required this.onChecklistTap,
+    super.key,
+  });
 
   final TripCardEntity trip;
   final VoidCallback onBack;
+  final VoidCallback onChecklistTap;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +66,11 @@ class PlanHeader extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 48),
+                IconButton(
+                  key: const Key('plan-checklist-action'),
+                  onPressed: onChecklistTap,
+                  icon: const Icon(Icons.checklist_outlined),
+                ),
               ],
             ),
           ],

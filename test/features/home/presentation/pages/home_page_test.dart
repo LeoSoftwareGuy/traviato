@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:go_router/go_router.dart';
+import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/auth/domain/entities/user_entity.dart';
@@ -97,5 +99,43 @@ void main() {
       find.byKey(const Key('home-greeting')),
     );
     expect(greeting.textSpan?.toPlainText(), 'Hello, ada');
+  });
+
+  testWidgets('the hero-card Checklist shortcut navigates to the checklist '
+      'route', (tester) async {
+    final trip = buildTripCard(
+      id: 't1',
+      name: 'Mountain cabin retreat',
+      startDate: DateTime.now().add(const Duration(days: 5)),
+      status: TripStatus.upcoming,
+    );
+    final tripRepo = FakeTripRepository()..tripsResult = Right([trip]);
+    final router = GoRouter(
+      initialLocation: '/home',
+      routes: [
+        GoRoute(path: '/home', builder: (context, state) => const HomePage()),
+        GoRoute(
+          path: '/memory/:tripId/checklist',
+          name: RouteNames.tripChecklist,
+          builder: (context, state) =>
+              const Scaffold(body: Text('checklist page')),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+          tripRepositoryProvider.overrideWithValue(tripRepo),
+        ],
+        child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Checklist'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('checklist page'), findsOneWidget);
   });
 }

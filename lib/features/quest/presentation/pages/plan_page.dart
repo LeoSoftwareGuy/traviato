@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -69,7 +70,14 @@ class _PlanContent extends ConsumerWidget {
         AppSpacing.xxl,
       ),
       children: [
-        PlanHeader(trip: state.trip, onBack: () => context.pop()),
+        PlanHeader(
+          trip: state.trip,
+          onBack: () => context.pop(),
+          onChecklistTap: () => context.pushNamed(
+            RouteNames.tripChecklist,
+            pathParameters: {'tripId': tripId},
+          ),
+        ),
         const SizedBox(height: AppSpacing.xl),
         if (!state.hasDateRange)
           const _NoDatesYet()
