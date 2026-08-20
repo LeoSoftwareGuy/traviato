@@ -4,16 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
+import '../../../quest/presentation/widgets/plan_background_glow.dart';
+import '../../domain/entities/checklist_category.dart';
 import '../../domain/entities/checklist_item_entity.dart';
 import '../controllers/checklist_controller.dart';
 import '../controllers/checklist_state.dart';
 import '../mutations/checklist_mutations.dart';
 import '../widgets/add_checklist_item_input.dart';
 import '../widgets/category_tabs.dart';
+import '../widgets/checklist_category_icons.dart';
 import '../widgets/checklist_item_tile.dart';
 import '../widgets/checklist_progress_bar.dart';
 
@@ -98,10 +103,7 @@ class _ChecklistContent extends ConsumerWidget {
           onSelect: notifier.selectCategory,
         ),
         const SizedBox(height: AppSpacing.xl),
-        Text(
-          state.selectedCategory.displayName,
-          style: AppTypography.headlineSerif.copyWith(fontSize: 17),
-        ),
+        _CategorySectionHeader(category: state.selectedCategory),
         const SizedBox(height: AppSpacing.md),
         if (itemsForCategory.isEmpty)
           Padding(
@@ -137,17 +139,61 @@ class _ChecklistHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        const Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: PlanBackgroundGlow(),
+        ),
+        Row(
+          children: [
+            IconButton(onPressed: onBack, icon: const Icon(Icons.arrow_back)),
+            Expanded(
+              child: Text(
+                'Checklist',
+                textAlign: TextAlign.center,
+                style: AppTypography.headlineSerif,
+              ),
+            ),
+            const SizedBox(width: 48),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _CategorySectionHeader extends StatelessWidget {
+  const _CategorySectionHeader({required this.category});
+
+  final ChecklistCategory category;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
-        IconButton(onPressed: onBack, icon: const Icon(Icons.arrow_back)),
-        Expanded(
-          child: Text(
-            'Checklist',
-            textAlign: TextAlign.center,
-            style: AppTypography.headlineSerif,
+        Container(
+          width: 32,
+          height: 32,
+          alignment: Alignment.center,
+          decoration: const BoxDecoration(
+            color: AppColors.accentCoralTint,
+            borderRadius: AppRadius.badgeRadius,
+          ),
+          child: Icon(
+            checklistCategoryIcon(category),
+            size: 18,
+            color: AppColors.accentCoral,
           ),
         ),
-        const SizedBox(width: 48),
+        const SizedBox(width: AppSpacing.sm),
+        Text(
+          category.displayName,
+          style: AppTypography.headlineSerif.copyWith(fontSize: 17),
+        ),
       ],
     );
   }
