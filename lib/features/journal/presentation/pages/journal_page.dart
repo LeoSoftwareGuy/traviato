@@ -15,6 +15,7 @@ import '../controllers/journal_controller.dart';
 import '../controllers/journal_state.dart';
 import '../mutations/journal_mutations.dart';
 import '../widgets/day_note_card.dart';
+import '../widgets/day_range_hero.dart';
 import '../widgets/day_tabs.dart';
 import '../widgets/journal_action_buttons.dart';
 import '../widgets/journal_header.dart';
@@ -120,6 +121,7 @@ class _JournalContent extends ConsumerWidget {
     final currentDay = state.currentDayDate;
 
     return ListView(
+      key: const Key('journal-content-list'),
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.base,
         AppSpacing.sm,
@@ -137,6 +139,12 @@ class _JournalContent extends ConsumerWidget {
         if (!state.hasDateRange || currentDay == null)
           const _NoDatesYet()
         else ...[
+          DayRangeHero(
+            days: state.dayDates,
+            selectedDay: currentDay,
+            onSelect: notifier.selectDay,
+          ),
+          const SizedBox(height: AppSpacing.base),
           DayTabs(
             days: state.dayDates,
             selectedDay: currentDay,

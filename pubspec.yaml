@@ -53,3 +53,4 @@ flutter:
     - .env
     - assets/images/guest/
     - assets/images/trip/
+    - assets/images/journal/

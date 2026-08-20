@@ -215,8 +215,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.ensureVisible(find.byKey(const Key('journal-to-do-action')));
-    await tester.pumpAndSettle();
+    await tester.dragUntilVisible(
+      find.byKey(const Key('journal-to-do-action')),
+      find.byKey(const Key('journal-content-list')),
+      const Offset(0, -200),
+    );
     await tester.tap(find.byKey(const Key('journal-to-do-action')));
     await tester.pumpAndSettle();
 

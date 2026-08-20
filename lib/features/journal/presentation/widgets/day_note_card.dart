@@ -66,12 +66,13 @@ class _DayNoteCardState extends State<DayNoteCard> {
             const Icon(
               Icons.edit_note_outlined,
               size: 16,
-              color: AppColors.textSecondary,
+              color: AppColors.textPrimary,
             ),
             const SizedBox(width: AppSpacing.xs),
             Text(
               'Add notes about today',
-              style: AppTypography.fieldLabel.copyWith(
+              style: AppTypography.bodyInput.copyWith(
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),

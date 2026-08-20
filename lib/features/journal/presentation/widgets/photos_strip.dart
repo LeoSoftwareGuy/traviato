@@ -28,12 +28,13 @@ class PhotosStrip extends StatelessWidget {
             const Icon(
               Icons.photo_library_outlined,
               size: 16,
-              color: AppColors.textSecondary,
+              color: AppColors.textPrimary,
             ),
             const SizedBox(width: AppSpacing.xs),
             Text(
               'Photos',
-              style: AppTypography.fieldLabel.copyWith(
+              style: AppTypography.bodyInput.copyWith(
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
