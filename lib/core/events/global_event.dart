@@ -19,3 +19,12 @@ final class TripCreatedDispatched extends GlobalEvent {
   @override
   List<Object?> get props => [trip];
 }
+
+final class TripDeletedDispatched extends GlobalEvent {
+  const TripDeletedDispatched({required this.tripId});
+
+  final String tripId;
+
+  @override
+  List<Object?> get props => [tripId];
+}

@@ -12,6 +12,7 @@ class _FakeTripRemoteDataSource implements TripRemoteDataSource {
 
   Exception? exception;
   String? lastCreateTripId;
+  String? lastDeletedTripId;
 
   static final _trips = [
     TripCardModel(
@@ -61,6 +62,12 @@ class _FakeTripRemoteDataSource implements TripRemoteDataSource {
       createdAt: DateTime(2026, 1, 1),
       updatedAt: DateTime(2026, 1, 1),
     );
+  }
+
+  @override
+  Future<void> deleteTrip(String id) async {
+    if (exception != null) throw exception!;
+    lastDeletedTripId = id;
   }
 }
 
@@ -173,6 +180,30 @@ void main() {
       final result = await repo.createTrip(name: 'Summer in Tokyo');
       result.fold(
         (failure) => expect(failure, const NetworkFailure()),
+        (_) => fail('expected Left'),
+      );
+    });
+  });
+
+  group('TripRepositoryImpl.deleteTrip', () {
+    test('returns Right(null) on success', () async {
+      final remote = _FakeTripRemoteDataSource();
+      final repo = TripRepositoryImpl(remote: remote);
+      final result = await repo.deleteTrip('t1');
+      expect(result.isRight(), isTrue);
+      expect(remote.lastDeletedTripId, 't1');
+    });
+
+    test('maps AuthenticationException to AuthenticationFailure', () async {
+      final repo = TripRepositoryImpl(
+        remote: _FakeTripRemoteDataSource(
+          exception: const AuthenticationException(message: 'no session'),
+        ),
+      );
+      final result = await repo.deleteTrip('t1');
+      result.fold(
+        (failure) =>
+            expect(failure, const AuthenticationFailure(message: 'no session')),
         (_) => fail('expected Left'),
       );
     });

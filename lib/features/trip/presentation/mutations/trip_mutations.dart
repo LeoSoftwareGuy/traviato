@@ -11,6 +11,7 @@ import '../providers/trip_providers.dart';
 const _freeTierMemoryLimit = 3;
 
 final createMemoryMutation = Mutation<TripCardEntity>();
+final deleteMemoryMutation = Mutation<void>();
 
 Future<TripCardEntity> runCreateMemory({
   required WidgetRef ref,
@@ -51,6 +52,18 @@ Future<TripCardEntity> runCreateMemory({
         tsx.get(globalEventBusProvider).add(TripCreatedDispatched(trip: card));
         return card;
       },
+    );
+  });
+}
+
+Future<void> runDeleteMemory({required WidgetRef ref, required String tripId}) {
+  return deleteMemoryMutation.run(ref, (tsx) async {
+    final repo = tsx.get(tripRepositoryProvider);
+    (await repo.deleteTrip(tripId)).fold(
+      (failure) => throw PresentationFailureException(failure),
+      (_) => tsx
+          .get(globalEventBusProvider)
+          .add(TripDeletedDispatched(tripId: tripId)),
     );
   });
 }

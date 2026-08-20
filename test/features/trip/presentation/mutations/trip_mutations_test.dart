@@ -37,10 +37,35 @@ class _Harness extends ConsumerWidget {
   }
 }
 
+class _DeleteHarness extends ConsumerWidget {
+  const _DeleteHarness({required this.tripId});
+
+  final String tripId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp(
+      home: Scaffold(
+        body: ElevatedButton(
+          onPressed: () async {
+            try {
+              await runDeleteMemory(ref: ref, tripId: tripId);
+            } catch (_) {
+              // Surfaced via the mutation's MutationError state instead.
+            }
+          },
+          child: const Text('Delete'),
+        ),
+      ),
+    );
+  }
+}
+
 Future<ProviderContainer> _pumpHarness(
   WidgetTester tester,
   FakeTripRepository tripRepo, {
   GlobalEventBus? bus,
+  Widget Function()? harness,
 }) async {
   late final ProviderContainer container;
   await tester.pumpWidget(
@@ -52,7 +77,7 @@ Future<ProviderContainer> _pumpHarness(
       child: Builder(
         builder: (context) {
           container = ProviderScope.containerOf(context);
-          return const _Harness();
+          return harness?.call() ?? const _Harness();
         },
       ),
     ),
@@ -106,5 +131,31 @@ void main() {
       (error as PresentationFailureException).failure,
       isA<FreeTierLimitFailure>(),
     );
+  });
+
+  testWidgets('deletes a trip and fires TripDeletedDispatched', (
+    tester,
+  ) async {
+    final tripRepo = FakeTripRepository();
+    final bus = GlobalEventBus();
+    addTearDown(bus.dispose);
+    final events = <GlobalEvent>[];
+    final sub = bus.stream.listen(events.add);
+    addTearDown(sub.cancel);
+
+    await _pumpHarness(
+      tester,
+      tripRepo,
+      bus: bus,
+      harness: () => const _DeleteHarness(tripId: 't1'),
+    );
+    await tester.tap(find.text('Delete'));
+    await tester.pumpAndSettle();
+
+    expect(tripRepo.deleteTripCallCount, 1);
+    expect(tripRepo.lastDeletedTripId, 't1');
+    expect(events, hasLength(1));
+    expect(events.single, isA<TripDeletedDispatched>());
+    expect((events.single as TripDeletedDispatched).tripId, 't1');
   });
 }

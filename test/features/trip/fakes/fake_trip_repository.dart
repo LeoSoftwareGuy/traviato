@@ -10,9 +10,12 @@ class FakeTripRepository implements TripRepository {
   Either<Failure, List<TripCardEntity>>? tripsResult;
   Either<Failure, TripCardEntity>? tripCardResult;
   Either<Failure, TripEntity>? createTripResult;
+  Either<Failure, void>? deleteTripResult;
   var callCount = 0;
   var getTripCardCallCount = 0;
   var createTripCallCount = 0;
+  var deleteTripCallCount = 0;
+  String? lastDeletedTripId;
   Duration delay = Duration.zero;
 
   @override
@@ -49,6 +52,14 @@ class FakeTripRepository implements TripRepository {
             vibes: vibes,
           ),
         );
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteTrip(String id) async {
+    deleteTripCallCount++;
+    lastDeletedTripId = id;
+    if (delay > Duration.zero) await Future<void>.delayed(delay);
+    return deleteTripResult ?? const Right(null);
   }
 }
 

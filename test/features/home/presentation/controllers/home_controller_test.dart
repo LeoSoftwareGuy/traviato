@@ -97,4 +97,27 @@ void main() {
       expect(state?.trips, hasLength(1));
     },
   );
+
+  test('removes a trip deleted elsewhere via the event bus', () async {
+    final existing = buildTripCard(id: 't1');
+    final fakeRepo = FakeTripRepository()..tripsResult = Right([existing]);
+    final bus = GlobalEventBus();
+    addTearDown(bus.dispose);
+    final container = ProviderContainer(
+      overrides: [
+        tripRepositoryProvider.overrideWithValue(fakeRepo),
+        globalEventBusProvider.overrideWithValue(bus),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.listen(homeControllerProvider, (_, _) {});
+
+    await container.read(homeControllerProvider.future);
+
+    bus.add(const TripDeletedDispatched(tripId: 't1'));
+    await Future<void>.delayed(Duration.zero);
+
+    final state = container.read(homeControllerProvider).value;
+    expect(state?.trips, isEmpty);
+  });
 }

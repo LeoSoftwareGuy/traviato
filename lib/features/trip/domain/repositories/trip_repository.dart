@@ -16,4 +16,6 @@ abstract interface class TripRepository {
     DateTime? endDate,
     List<String> vibes,
   });
+
+  Future<Either<Failure, void>> deleteTrip(String id);
 }
