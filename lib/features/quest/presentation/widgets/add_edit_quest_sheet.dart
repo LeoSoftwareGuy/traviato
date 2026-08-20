@@ -13,9 +13,7 @@ import '../../domain/entities/quest_entity.dart';
 import '../mutations/quest_mutations.dart';
 import 'quest_time_format.dart';
 
-/// Add/edit bottom sheet reusing the old design's interaction pattern: name
-/// → time → save; editing shows the same fields plus Save/Delete (the new
-/// Figma file has no sheet for this frame — see issue #15).
+/// Add/edit bottom sheet for a quest. If [quest] is provided, the sheet will be in edit mode.
 class AddEditQuestSheet extends ConsumerStatefulWidget {
   const AddEditQuestSheet({
     required this.tripId,

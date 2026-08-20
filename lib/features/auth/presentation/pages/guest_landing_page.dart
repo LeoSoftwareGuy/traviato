@@ -11,9 +11,6 @@ import '../widgets/how_it_works_section.dart';
 import '../widgets/moments_grid.dart';
 import '../widgets/testimonial_card.dart';
 
-/// The unauthenticated entry point (Figma "Guest mode screen"): static
-/// marketing content ending in "Start now" (→ Register) with a "Log in"
-/// shortcut in the header.
 class GuestLandingPage extends StatelessWidget {
   const GuestLandingPage({super.key});
 
