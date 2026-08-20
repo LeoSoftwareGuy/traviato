@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/quest/presentation/pages/plan_page.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
@@ -31,6 +32,12 @@ Future<void> _pump(
       GoRoute(
         path: '/back',
         builder: (context, state) => const Scaffold(body: Text('back')),
+      ),
+      GoRoute(
+        path: '/memory/:tripId/checklist',
+        name: RouteNames.tripChecklist,
+        builder: (context, state) =>
+            const Scaffold(body: Text('checklist page')),
       ),
     ],
   );
@@ -150,5 +157,25 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(questRepo.toggleCallCount, 1);
+  });
+
+  testWidgets('the app-bar checklist action navigates to the checklist '
+      'route', (tester) async {
+    final tripRepo = FakeTripRepository()
+      ..tripCardResult = Right(
+        buildTripCard(
+          id: 't1',
+          startDate: _today.subtract(const Duration(days: 1)),
+          endDate: _today.add(const Duration(days: 1)),
+        ),
+      );
+    final questRepo = FakeQuestRepository()..questsResult = const Right([]);
+    await _pump(tester, tripRepo: tripRepo, questRepo: questRepo);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('plan-checklist-action')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('checklist page'), findsOneWidget);
   });
 }
