@@ -2,4 +2,5 @@
 /// separately from Figma, see the guest landing precedent in #5).
 abstract class TripImages {
   static const newMemory = 'assets/images/trip/new_memory.png';
+  static const planner = 'assets/images/trip/planner.png';
 }

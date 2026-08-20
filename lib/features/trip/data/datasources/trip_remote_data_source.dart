@@ -4,6 +4,8 @@ import '../models/trip_model.dart';
 abstract interface class TripRemoteDataSource {
   Future<List<TripCardModel>> getTripCards();
 
+  Future<TripCardModel> getTripCard(String tripId);
+
   Future<TripModel> createTrip({
     required String id,
     required String name,

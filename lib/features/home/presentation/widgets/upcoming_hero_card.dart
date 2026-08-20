@@ -5,7 +5,7 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
-import 'trip_cover_image.dart';
+import '../../../trip/presentation/widgets/trip_cover_image.dart';
 import 'trip_date_format.dart';
 
 /// Featured "Up next" card for the single soonest current/upcoming trip

@@ -47,6 +47,37 @@ class SupabaseTripRemoteDataSource implements TripRemoteDataSource {
   }
 
   @override
+  Future<TripCardModel> getTripCard(String tripId) async {
+    if (_client.auth.currentUser == null) {
+      throw const AuthenticationException(
+        message: 'User is not authenticated',
+      );
+    }
+    try {
+      final row = await _client
+          .from(Views.tripCardView)
+          .select()
+          .eq('id', tripId)
+          .single();
+      return TripCardModel.fromJson(row);
+    } on AuthenticationException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      if (e.code == PostgresErrors.insufficientPrivilege) {
+        throw PermissionException(message: e.message);
+      }
+      if (e.code == PostgresErrors.moreThanOneOrNoItemsReturned) {
+        throw NotFoundException(message: e.message);
+      }
+      throw DatabaseException(message: e.message);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
   Future<TripModel> createTrip({
     required String id,
     required String name,

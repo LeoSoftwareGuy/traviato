@@ -8,8 +8,10 @@ import 'package:traviato/features/trip/domain/repositories/trip_repository.dart'
 /// empty list) and records how many times it was called.
 class FakeTripRepository implements TripRepository {
   Either<Failure, List<TripCardEntity>>? tripsResult;
+  Either<Failure, TripCardEntity>? tripCardResult;
   Either<Failure, TripEntity>? createTripResult;
   var callCount = 0;
+  var getTripCardCallCount = 0;
   var createTripCallCount = 0;
   Duration delay = Duration.zero;
 
@@ -18,6 +20,13 @@ class FakeTripRepository implements TripRepository {
     callCount++;
     if (delay > Duration.zero) await Future<void>.delayed(delay);
     return tripsResult ?? const Right([]);
+  }
+
+  @override
+  Future<Either<Failure, TripCardEntity>> getTripCard(String tripId) async {
+    getTripCardCallCount++;
+    if (delay > Duration.zero) await Future<void>.delayed(delay);
+    return tripCardResult ?? Right(buildTripCard(id: tripId));
   }
 
   @override

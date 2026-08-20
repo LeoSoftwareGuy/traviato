@@ -6,7 +6,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
 import 'trip_card_pill.dart';
-import 'trip_cover_image.dart';
+import '../../../trip/presentation/widgets/trip_cover_image.dart';
 import 'trip_date_format.dart';
 
 /// "Coming up" horizontal row: remaining current/upcoming trips (the hero
