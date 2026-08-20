@@ -10,7 +10,6 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
-import '../../../quest/presentation/widgets/plan_background_glow.dart';
 import '../../domain/entities/checklist_category.dart';
 import '../../domain/entities/checklist_item_entity.dart';
 import '../controllers/checklist_controller.dart';
@@ -41,6 +40,17 @@ class ChecklistPage extends ConsumerWidget {
       }
     });
     ref.listen<MutationState<dynamic>>(addChecklistItemMutation, (
+      previous,
+      next,
+    ) {
+      if (next is MutationError) {
+        showErrorSnackbar(
+          context,
+          message: presentationFailureMessage(next.error),
+        );
+      }
+    });
+    ref.listen<MutationState<dynamic>>(deleteChecklistItemMutation, (
       previous,
       next,
     ) {
@@ -139,28 +149,17 @@ class _ChecklistHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
+    return Row(
       children: [
-        const Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: PlanBackgroundGlow(),
+        IconButton(onPressed: onBack, icon: const Icon(Icons.arrow_back)),
+        Expanded(
+          child: Text(
+            'Checklist',
+            textAlign: TextAlign.center,
+            style: AppTypography.headlineSerif,
+          ),
         ),
-        Row(
-          children: [
-            IconButton(onPressed: onBack, icon: const Icon(Icons.arrow_back)),
-            Expanded(
-              child: Text(
-                'Checklist',
-                textAlign: TextAlign.center,
-                style: AppTypography.headlineSerif,
-              ),
-            ),
-            const SizedBox(width: 48),
-          ],
-        ),
+        const SizedBox(width: 48),
       ],
     );
   }
@@ -208,11 +207,47 @@ class _ToggleableItemTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final toggleState = ref.watch(toggleChecklistItemMutation(item.id));
-    return ChecklistItemTile(
-      item: item,
-      isToggling: toggleState is MutationPending,
-      onToggle: () =>
-          runToggleChecklistItem(ref: ref, tripId: tripId, item: item),
+    return Dismissible(
+      key: Key('checklist-item-dismiss-${item.id}'),
+      direction: DismissDirection.endToStart,
+      background: const _DeleteBackground(),
+      confirmDismiss: (_) async {
+        try {
+          await runDeleteChecklistItem(
+            ref: ref,
+            tripId: tripId,
+            itemId: item.id,
+          );
+          return true;
+        } catch (_) {
+          // Error already surfaced via the mutation listener; keep the item.
+          return false;
+        }
+      },
+      child: ChecklistItemTile(
+        item: item,
+        isToggling: toggleState is MutationPending,
+        onToggle: () =>
+            runToggleChecklistItem(ref: ref, tripId: tripId, item: item),
+      ),
+    );
+  }
+}
+
+/// Revealed behind an item as it's dragged left — "swipe to delete".
+class _DeleteBackground extends StatelessWidget {
+  const _DeleteBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      decoration: const BoxDecoration(
+        color: AppColors.accentCoral,
+        borderRadius: AppRadius.badgeRadius,
+      ),
+      child: const Icon(Icons.delete_outline, color: AppColors.background),
     );
   }
 }

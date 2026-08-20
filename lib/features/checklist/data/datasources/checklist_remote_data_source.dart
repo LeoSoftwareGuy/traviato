@@ -41,5 +41,7 @@ abstract interface class ChecklistRemoteDataSource {
     required bool checked,
   });
 
+  Future<void> deleteItem(String id);
+
   Future<List<ChecklistItemModel>> insertItems(List<ChecklistItemDraft> items);
 }

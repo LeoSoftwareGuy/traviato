@@ -54,4 +54,15 @@ class ChecklistController extends _$ChecklistController {
         : [...current.items, item];
     state = AsyncData(current.copyWith(items: updated));
   }
+
+  /// Called by the delete mutation after a successful delete.
+  void applyItemRemoved(String itemId) {
+    final current = state.value;
+    if (current == null) return;
+    state = AsyncData(
+      current.copyWith(
+        items: current.items.where((i) => i.id != itemId).toList(),
+      ),
+    );
+  }
 }

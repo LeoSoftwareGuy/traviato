@@ -122,6 +122,20 @@ class SupabaseChecklistRemoteDataSource implements ChecklistRemoteDataSource {
   }
 
   @override
+  Future<void> deleteItem(String id) async {
+    _guardAuthenticated();
+    try {
+      await _client.from(Tables.checklistItems).delete().eq('id', id);
+    } on PostgrestException catch (e) {
+      throw _mapPostgrestException(e);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
   Future<List<ChecklistItemModel>> insertItems(
     List<ChecklistItemDraft> items,
   ) async {

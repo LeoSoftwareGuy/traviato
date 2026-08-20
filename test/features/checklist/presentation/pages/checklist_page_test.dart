@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/checklist/domain/entities/checklist_category.dart';
 import 'package:traviato/features/checklist/presentation/pages/checklist_page.dart';
@@ -105,5 +106,42 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('No items in this category yet.'), findsOneWidget);
+  });
+
+  testWidgets('swiping an item left deletes it', (tester) async {
+    final repo = FakeChecklistRepository()
+      ..itemsResult = Right([buildChecklistItemEntity(id: 'i1')]);
+    await _pump(tester, repo: repo);
+    await tester.pumpAndSettle();
+
+    await tester.drag(
+      find.byKey(const Key('checklist-item-dismiss-i1')),
+      const Offset(-500, 0),
+    );
+    await tester.pumpAndSettle();
+
+    expect(repo.deleteCallCount, 1);
+    expect(repo.lastDeletedId, 'i1');
+    expect(find.byKey(const Key('checklist-item-dismiss-i1')), findsNothing);
+  });
+
+  testWidgets('a failed swipe delete keeps the item and shows an error', (
+    tester,
+  ) async {
+    final repo = FakeChecklistRepository()
+      ..itemsResult = Right([buildChecklistItemEntity(id: 'i1')])
+      ..deleteResult = const Left(NetworkFailure());
+    await _pump(tester, repo: repo);
+    await tester.pumpAndSettle();
+
+    await tester.drag(
+      find.byKey(const Key('checklist-item-dismiss-i1')),
+      const Offset(-500, 0),
+    );
+    await tester.pumpAndSettle();
+
+    expect(repo.deleteCallCount, 1);
+    expect(find.byKey(const Key('checklist-item-dismiss-i1')), findsOneWidget);
+    expect(find.text('Please check your connection.'), findsOneWidget);
   });
 }

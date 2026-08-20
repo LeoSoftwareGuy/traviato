@@ -129,4 +129,24 @@ void main() {
       expect(state.items.single.isChecked, isTrue);
     },
   );
+
+  test('applyItemRemoved removes the item from state', () async {
+    final repo = FakeChecklistRepository()
+      ..itemsResult = Right([
+        buildChecklistItemEntity(id: 'i1'),
+        buildChecklistItemEntity(id: 'i2'),
+      ]);
+    final container = _buildContainer(repo);
+    addTearDown(container.dispose);
+    container.listen(checklistControllerProvider('t1'), (_, _) {});
+
+    await container.read(checklistControllerProvider('t1').future);
+    final notifier = container.read(checklistControllerProvider('t1').notifier);
+
+    notifier.applyItemRemoved('i1');
+
+    final state = container.read(checklistControllerProvider('t1')).value!;
+    expect(state.items, hasLength(1));
+    expect(state.items.single.id, 'i2');
+  });
 }

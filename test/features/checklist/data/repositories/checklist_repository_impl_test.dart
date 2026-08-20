@@ -13,6 +13,7 @@ class _FakeChecklistRemoteDataSource implements ChecklistRemoteDataSource {
   Exception? exception;
   List<ChecklistSuggestionModel>? suggestions;
   String? lastAddItemId;
+  String? lastDeletedId;
   List<ChecklistItemDraft>? lastInsertedItems;
 
   ChecklistItemModel _item({
@@ -61,6 +62,12 @@ class _FakeChecklistRemoteDataSource implements ChecklistRemoteDataSource {
   }) async {
     if (exception != null) throw exception!;
     return _item(id: id, isChecked: checked);
+  }
+
+  @override
+  Future<void> deleteItem(String id) async {
+    if (exception != null) throw exception!;
+    lastDeletedId = id;
   }
 
   @override
@@ -155,6 +162,29 @@ void main() {
       result.fold(
         (failure) => fail('expected Right, got Left($failure)'),
         (item) => expect(item.isChecked, isTrue),
+      );
+    });
+  });
+
+  group('ChecklistRepositoryImpl.deleteItem', () {
+    test('returns Right(null) on success', () async {
+      final remote = _FakeChecklistRemoteDataSource();
+      final repo = ChecklistRepositoryImpl(remote: remote);
+      final result = await repo.deleteItem('i1');
+      expect(result.isRight(), isTrue);
+      expect(remote.lastDeletedId, 'i1');
+    });
+
+    test('maps other AppExceptions to UnknownFailure', () async {
+      final repo = ChecklistRepositoryImpl(
+        remote: _FakeChecklistRemoteDataSource(
+          exception: const UnknownException(message: 'boom'),
+        ),
+      );
+      final result = await repo.deleteItem('i1');
+      result.fold(
+        (failure) => expect(failure, const UnknownFailure(message: 'boom')),
+        (_) => fail('expected Left'),
       );
     });
   });

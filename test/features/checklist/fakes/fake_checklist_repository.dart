@@ -12,14 +12,17 @@ class FakeChecklistRepository implements ChecklistRepository {
   Either<Failure, List<ChecklistSuggestionEntity>>? suggestionsResult;
   Either<Failure, ChecklistItemEntity>? addCustomItemResult;
   Either<Failure, ChecklistItemEntity>? toggleResult;
+  Either<Failure, void>? deleteResult;
   Either<Failure, List<ChecklistItemEntity>>? populateResult;
 
   var getItemsCallCount = 0;
   var getSuggestionsCallCount = 0;
   var addCustomItemCallCount = 0;
   var toggleCallCount = 0;
+  var deleteCallCount = 0;
   var populateCallCount = 0;
   int? lastAddPosition;
+  String? lastDeletedId;
 
   @override
   Future<Either<Failure, List<ChecklistItemEntity>>> getItems(
@@ -64,6 +67,13 @@ class FakeChecklistRepository implements ChecklistRepository {
     toggleCallCount++;
     return toggleResult ??
         Right(buildChecklistItemEntity(id: id, isChecked: checked));
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteItem(String id) async {
+    deleteCallCount++;
+    lastDeletedId = id;
+    return deleteResult ?? const Right(null);
   }
 
   @override

@@ -22,6 +22,8 @@ abstract interface class ChecklistRepository {
     required bool checked,
   });
 
+  Future<Either<Failure, void>> deleteItem(String id);
+
   /// Copies the global suggestions catalog into `checklist_items` for
   /// [tripId] (client-side batch insert), one sequential `position` per
   /// category. Called once, on first open of an empty checklist.

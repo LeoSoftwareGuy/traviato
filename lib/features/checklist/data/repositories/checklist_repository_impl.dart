@@ -87,6 +87,20 @@ class ChecklistRepositoryImpl implements ChecklistRepository {
   }
 
   @override
+  Future<Either<Failure, void>> deleteItem(String id) async {
+    try {
+      await _remote.deleteItem(id);
+      return const Right(null);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<ChecklistItemEntity>>> populateFromSuggestions(
     String tripId,
   ) async {

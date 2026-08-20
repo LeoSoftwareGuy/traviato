@@ -9,6 +9,7 @@ import '../providers/checklist_providers.dart';
 
 final toggleChecklistItemMutation = Mutation<ChecklistItemEntity>();
 final addChecklistItemMutation = Mutation<ChecklistItemEntity>();
+final deleteChecklistItemMutation = Mutation<void>();
 
 int _nextPosition(List<ChecklistItemEntity> itemsInCategory) {
   if (itemsInCategory.isEmpty) return 0;
@@ -38,6 +39,21 @@ Future<ChecklistItemEntity> runToggleChecklistItem({
         controller.applyItemUpserted(updated);
         return updated;
       },
+    );
+  });
+}
+
+Future<void> runDeleteChecklistItem({
+  required WidgetRef ref,
+  required String tripId,
+  required String itemId,
+}) {
+  return deleteChecklistItemMutation.run(ref, (tsx) async {
+    final repo = tsx.get(checklistRepositoryProvider);
+    final controller = tsx.get(checklistControllerProvider(tripId).notifier);
+    (await repo.deleteItem(itemId)).fold(
+      (failure) => throw PresentationFailureException(failure),
+      (_) => controller.applyItemRemoved(itemId),
     );
   });
 }

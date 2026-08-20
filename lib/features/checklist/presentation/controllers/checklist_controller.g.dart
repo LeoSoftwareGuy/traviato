@@ -51,7 +51,7 @@ final class ChecklistControllerProvider
 }
 
 String _$checklistControllerHash() =>
-    r'f16daa6f218cca4a9b5b273a32ed1711e526f6b1';
+    r'7c8dcc0bde64ed52afdb8905590ed2cebeca1a0e';
 
 final class ChecklistControllerFamily extends $Family
     with
