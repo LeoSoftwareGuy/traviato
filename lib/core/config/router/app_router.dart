@@ -11,6 +11,7 @@ import '../../../features/auth/presentation/pages/splash_page.dart';
 import '../../../features/checklist/presentation/pages/checklist_page.dart';
 import '../../../features/home/presentation/pages/home_page.dart';
 import '../../../features/home/presentation/widgets/home_shell_scaffold.dart';
+import '../../../features/journal/presentation/pages/journal_page.dart';
 import '../../../features/quest/presentation/pages/plan_page.dart';
 import '../../../features/trip/presentation/pages/create_memory_page.dart';
 import '../../widgets/placeholder_page.dart';
@@ -117,7 +118,8 @@ GoRouter router(Ref ref) {
       GoRoute(
         path: RoutePaths.tripJournal,
         name: RouteNames.tripJournal,
-        builder: (context, state) => const PlaceholderPage(title: 'Journal'),
+        builder: (context, state) =>
+            JournalPage(tripId: state.pathParameters['tripId']!),
       ),
     ],
     errorBuilder: (context, state) =>

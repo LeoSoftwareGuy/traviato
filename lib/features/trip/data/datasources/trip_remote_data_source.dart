@@ -14,4 +14,6 @@ abstract interface class TripRemoteDataSource {
     DateTime? endDate,
     List<String> vibes,
   });
+
+  Future<void> deleteTrip(String id);
 }

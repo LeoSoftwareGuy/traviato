@@ -30,6 +30,12 @@ class HomeController extends _$HomeController {
       case TripCreatedDispatched(:final trip):
         if (current.trips.any((t) => t.id == trip.id)) return;
         state = AsyncData(current.copyWith(trips: [trip, ...current.trips]));
+      case TripDeletedDispatched(:final tripId):
+        state = AsyncData(
+          current.copyWith(
+            trips: current.trips.where((t) => t.id != tripId).toList(),
+          ),
+        );
     }
   }
 }

@@ -121,6 +121,30 @@ class SupabaseTripRemoteDataSource implements TripRemoteDataSource {
       throw UnknownException(message: e.toString());
     }
   }
+
+  @override
+  Future<void> deleteTrip(String id) async {
+    if (_client.auth.currentUser == null) {
+      throw const AuthenticationException(
+        message: 'User is not authenticated',
+      );
+    }
+    try {
+      await _client.from(Tables.trips).delete().eq('id', id);
+    } on PostgrestException catch (e) {
+      if (e.code == PostgresErrors.insufficientPrivilege) {
+        throw PermissionException(message: e.message);
+      }
+      if (e.code == PostgresErrors.moreThanOneOrNoItemsReturned) {
+        throw NotFoundException(message: e.message);
+      }
+      throw DatabaseException(message: e.message);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
 }
 
 String? _dateOnly(DateTime? date) {
