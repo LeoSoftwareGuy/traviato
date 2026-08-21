@@ -9,6 +9,7 @@ import '../../../features/auth/presentation/pages/login_page.dart';
 import '../../../features/auth/presentation/pages/register_page.dart';
 import '../../../features/auth/presentation/pages/splash_page.dart';
 import '../../../features/checklist/presentation/pages/checklist_page.dart';
+import '../../../features/expense/presentation/pages/expenses_page.dart';
 import '../../../features/home/presentation/pages/home_page.dart';
 import '../../../features/home/presentation/widgets/home_shell_scaffold.dart';
 import '../../../features/journal/presentation/pages/journal_page.dart';
@@ -86,8 +87,7 @@ GoRouter router(Ref ref) {
               GoRoute(
                 path: RoutePaths.expenses,
                 name: RouteNames.expenses,
-                builder: (context, state) =>
-                    const PlaceholderPage(title: 'Expenses'),
+                builder: (context, state) => const ExpensesPage(),
               ),
             ],
           ),
