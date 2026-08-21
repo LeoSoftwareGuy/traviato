@@ -8,11 +8,13 @@ import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/auth/domain/entities/user_entity.dart';
 import 'package:traviato/features/auth/presentation/providers/auth_providers.dart';
+import 'package:traviato/features/expense/presentation/providers/expense_providers.dart';
 import 'package:traviato/features/home/presentation/pages/home_page.dart';
 import 'package:traviato/features/trip/domain/entities/trip_card_entity.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
 import '../../../auth/fakes/fake_auth_repository.dart';
+import '../../../expense/fakes/fake_expense_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
 
 Future<void> _pump(
@@ -138,4 +140,44 @@ void main() {
 
     expect(find.text('checklist page'), findsOneWidget);
   });
+
+  testWidgets(
+    'the hero-card Add expense button opens the sheet pre-selecting that '
+    'trip',
+    (tester) async {
+      final trip = buildTripCard(
+        id: 't1',
+        name: 'Mountain cabin retreat',
+        startDate: DateTime.now().add(const Duration(days: 5)),
+        status: TripStatus.upcoming,
+      );
+      final tripRepo = FakeTripRepository()..tripsResult = Right([trip]);
+      final expenseRepo = FakeExpenseRepository()
+        ..summariesResult = Right([
+          buildExpenseSummaryEntity(
+            tripId: 't1',
+            tripName: 'Mountain cabin retreat',
+          ),
+        ]);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+            tripRepositoryProvider.overrideWithValue(tripRepo),
+            expenseRepositoryProvider.overrideWithValue(expenseRepo),
+          ],
+          child: MaterialApp(theme: AppTheme.dark, home: const HomePage()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Add expense'));
+      await tester.pumpAndSettle();
+
+      expect(expenseRepo.getSummariesCallCount, 1);
+      expect(find.text('What was it?'), findsOneWidget); // sheet is open
+      // The hero card's trip is pre-selected in the memory dropdown.
+      expect(find.text('Mountain cabin retreat'), findsWidgets);
+    },
+  );
 }
