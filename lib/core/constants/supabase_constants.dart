@@ -17,11 +17,13 @@ abstract class Tables {
   static const bonusTaskTemplates = 'bonus_task_templates';
   static const bonusTaskAssignments = 'bonus_task_assignments';
   static const pointsLedger = 'points_ledger';
+  static const expenses = 'expenses';
   static const memories = 'memories';
 }
 
 abstract class Views {
   static const tripCardView = 'trip_card_view';
+  static const expenseSummaryView = 'expense_summary_view';
 }
 
 abstract class Storage {

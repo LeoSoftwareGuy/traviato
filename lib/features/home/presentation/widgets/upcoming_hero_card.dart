@@ -17,6 +17,7 @@ class UpcomingHeroCard extends StatelessWidget {
     required this.onPlanTap,
     required this.onChecklistTap,
     required this.onJournalTap,
+    required this.onAddExpenseTap,
     super.key,
   });
 
@@ -24,6 +25,7 @@ class UpcomingHeroCard extends StatelessWidget {
   final VoidCallback onPlanTap;
   final VoidCallback onChecklistTap;
   final VoidCallback onJournalTap;
+  final VoidCallback onAddExpenseTap;
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +65,7 @@ class UpcomingHeroCard extends StatelessWidget {
                 onPlanTap: onPlanTap,
                 onChecklistTap: onChecklistTap,
                 onJournalTap: onJournalTap,
+                onAddExpenseTap: onAddExpenseTap,
               ),
             ),
           ],
@@ -132,12 +135,14 @@ class _HeroContent extends StatelessWidget {
     required this.onPlanTap,
     required this.onChecklistTap,
     required this.onJournalTap,
+    required this.onAddExpenseTap,
   });
 
   final TripCardEntity trip;
   final VoidCallback onPlanTap;
   final VoidCallback onChecklistTap;
   final VoidCallback onJournalTap;
+  final VoidCallback onAddExpenseTap;
 
   @override
   Widget build(BuildContext context) {
@@ -208,6 +213,15 @@ class _HeroContent extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: onAddExpenseTap,
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('Add expense'),
+            ),
           ),
         ],
       ),

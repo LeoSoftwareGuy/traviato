@@ -8,7 +8,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
+import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../expense/presentation/providers/expense_providers.dart';
+import '../../../expense/presentation/widgets/add_expense_sheet.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
 import '../controllers/home_controller.dart';
 import '../controllers/home_state.dart';
@@ -50,7 +53,7 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-class _HomeContent extends StatelessWidget {
+class _HomeContent extends ConsumerWidget {
   const _HomeContent({
     required this.username,
     required this.stars,
@@ -73,8 +76,28 @@ class _HomeContent extends StatelessWidget {
         pathParameters: {'tripId': trip.id},
       );
 
+  Future<void> _addExpense(
+    BuildContext context,
+    WidgetRef ref,
+    TripCardEntity trip,
+  ) async {
+    final result = await ref.read(expenseRepositoryProvider).getSummaries();
+    if (!context.mounted) return;
+    result.fold(
+      (failure) => showErrorSnackbar(
+        context,
+        message: presentationFailureMessage(failure),
+      ),
+      (summaries) => AddExpenseSheet.show(
+        context,
+        trips: summaries,
+        initialTripId: trip.id,
+      ),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final hero = state.heroTrip;
 
     return ListView(
@@ -121,6 +144,7 @@ class _HomeContent extends StatelessWidget {
                 RouteNames.tripJournal,
                 pathParameters: {'tripId': hero.id},
               ),
+              onAddExpenseTap: () => _addExpense(context, ref, hero),
             ),
           ],
           const SizedBox(height: AppSpacing.xl),
