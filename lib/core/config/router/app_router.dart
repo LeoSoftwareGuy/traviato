@@ -100,6 +100,12 @@ GoRouter router(Ref ref) {
         builder: (context, state) => const PlaceholderPage(title: 'Profile'),
       ),
       GoRoute(
+        path: RoutePaths.bonusTasks,
+        name: RouteNames.bonusTasks,
+        builder: (context, state) =>
+            const PlaceholderPage(title: 'Bonus tasks'),
+      ),
+      GoRoute(
         path: RoutePaths.createMemory,
         name: RouteNames.createMemory,
         builder: (context, state) => const CreateMemoryPage(),
@@ -121,6 +127,11 @@ GoRouter router(Ref ref) {
         name: RouteNames.tripJournal,
         builder: (context, state) =>
             JournalPage(tripId: state.pathParameters['tripId']!),
+      ),
+      GoRoute(
+        path: RoutePaths.tripWrapUp,
+        name: RouteNames.tripWrapUp,
+        builder: (context, state) => const PlaceholderPage(title: 'Wrap-up'),
       ),
     ],
     errorBuilder: (context, state) =>

@@ -8,13 +8,18 @@ import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/auth/domain/entities/user_entity.dart';
 import 'package:traviato/features/auth/presentation/providers/auth_providers.dart';
+import 'package:traviato/features/checklist/presentation/providers/checklist_providers.dart';
 import 'package:traviato/features/expense/presentation/providers/expense_providers.dart';
 import 'package:traviato/features/home/presentation/pages/home_page.dart';
+import 'package:traviato/features/home/presentation/widgets/upcoming_hero_card.dart';
+import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/trip/domain/entities/trip_card_entity.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
 import '../../../auth/fakes/fake_auth_repository.dart';
+import '../../../checklist/fakes/fake_checklist_repository.dart';
 import '../../../expense/fakes/fake_expense_repository.dart';
+import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
 
 Future<void> _pump(
@@ -22,12 +27,17 @@ Future<void> _pump(
   required FakeTripRepository tripRepo,
   FakeAuthRepository? authRepo,
 }) async {
-  final auth = authRepo ?? FakeAuthRepository();
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        authRepositoryProvider.overrideWithValue(auth),
+        authRepositoryProvider.overrideWithValue(
+          authRepo ?? FakeAuthRepository(),
+        ),
         tripRepositoryProvider.overrideWithValue(tripRepo),
+        questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
+        checklistRepositoryProvider.overrideWithValue(
+          FakeChecklistRepository(),
+        ),
       ],
       child: MaterialApp(theme: AppTheme.dark, home: const HomePage()),
     ),
@@ -64,7 +74,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('No memories yet'), findsOneWidget);
-    expect(find.text('Coming up'), findsNothing);
+    expect(find.text('HAPPENING NOW'), findsNothing);
   });
 
   testWidgets('shows the hero card only when a trip is current/upcoming', (
@@ -81,7 +91,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Mountain cabin retreat'), findsOneWidget);
-    expect(find.text('Up next'), findsOneWidget);
+    expect(find.byType(UpcomingHeroCard), findsOneWidget);
   });
 
   testWidgets('renders the greeting from the authenticated user', (
@@ -103,7 +113,7 @@ void main() {
     expect(greeting.textSpan?.toPlainText(), 'Hello, ada');
   });
 
-  testWidgets('the hero-card Checklist shortcut navigates to the checklist '
+  testWidgets('the hero-card Checklist row navigates to the checklist '
       'route', (tester) async {
     final trip = buildTripCard(
       id: 't1',
@@ -129,6 +139,10 @@ void main() {
         overrides: [
           authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
           tripRepositoryProvider.overrideWithValue(tripRepo),
+          questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
+          checklistRepositoryProvider.overrideWithValue(
+            FakeChecklistRepository(),
+          ),
         ],
         child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
       ),
@@ -142,8 +156,7 @@ void main() {
   });
 
   testWidgets(
-    'the hero-card Add expense button opens the sheet pre-selecting that '
-    'trip',
+    'the hero-card Expenses button opens the sheet pre-selecting that trip',
     (tester) async {
       final trip = buildTripCard(
         id: 't1',
@@ -164,6 +177,10 @@ void main() {
           overrides: [
             authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
             tripRepositoryProvider.overrideWithValue(tripRepo),
+            questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
+            checklistRepositoryProvider.overrideWithValue(
+              FakeChecklistRepository(),
+            ),
             expenseRepositoryProvider.overrideWithValue(expenseRepo),
           ],
           child: MaterialApp(theme: AppTheme.dark, home: const HomePage()),
@@ -171,7 +188,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Add expense'));
+      await tester.tap(find.text('Expenses'));
       await tester.pumpAndSettle();
 
       expect(expenseRepo.getSummariesCallCount, 1);
@@ -180,4 +197,137 @@ void main() {
       expect(find.text('Mountain cabin retreat'), findsWidgets);
     },
   );
+
+  testWidgets('a Coming-up card navigates to Plan for that memory', (
+    tester,
+  ) async {
+    final hero = buildTripCard(
+      id: 't1',
+      name: 'Mountain cabin retreat',
+      startDate: DateTime.now().add(const Duration(days: 1)),
+      status: TripStatus.upcoming,
+    );
+    final comingUp = buildTripCard(
+      id: 't2',
+      name: 'Lisbon winter',
+      startDate: DateTime.now().add(const Duration(days: 20)),
+      status: TripStatus.upcoming,
+    );
+    final tripRepo = FakeTripRepository()
+      ..tripsResult = Right([hero, comingUp]);
+    final router = GoRouter(
+      initialLocation: '/home',
+      routes: [
+        GoRoute(path: '/home', builder: (context, state) => const HomePage()),
+        GoRoute(
+          path: '/memory/:tripId/plan',
+          name: RouteNames.tripPlan,
+          builder: (context, state) => Scaffold(
+            body: Text('plan page ${state.pathParameters['tripId']}'),
+          ),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+          tripRepositoryProvider.overrideWithValue(tripRepo),
+          questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
+          checklistRepositoryProvider.overrideWithValue(
+            FakeChecklistRepository(),
+          ),
+        ],
+        child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Lisbon winter'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lisbon winter'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('plan page t2'), findsOneWidget);
+  });
+
+  testWidgets('a Kept-forever card navigates to the Wrap-up placeholder', (
+    tester,
+  ) async {
+    final finished = buildTripCard(
+      id: 't1',
+      name: 'Atlas high road',
+      startDate: DateTime(2025, 1, 1),
+      endDate: DateTime(2025, 1, 9),
+      status: TripStatus.finished,
+    );
+    final tripRepo = FakeTripRepository()..tripsResult = Right([finished]);
+    final router = GoRouter(
+      initialLocation: '/home',
+      routes: [
+        GoRoute(path: '/home', builder: (context, state) => const HomePage()),
+        GoRoute(
+          path: '/memory/:tripId/wrap-up',
+          name: RouteNames.tripWrapUp,
+          builder: (context, state) => const Scaffold(body: Text('Wrap-up')),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+          tripRepositoryProvider.overrideWithValue(tripRepo),
+          questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
+          checklistRepositoryProvider.overrideWithValue(
+            FakeChecklistRepository(),
+          ),
+        ],
+        child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Atlas high road'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Wrap-up'), findsOneWidget);
+  });
+
+  testWidgets('the stars badge navigates to the Bonus tasks placeholder', (
+    tester,
+  ) async {
+    final tripRepo = FakeTripRepository()..tripsResult = const Right([]);
+    final router = GoRouter(
+      initialLocation: '/home',
+      routes: [
+        GoRoute(path: '/home', builder: (context, state) => const HomePage()),
+        GoRoute(
+          path: '/bonus-tasks',
+          name: RouteNames.bonusTasks,
+          builder: (context, state) =>
+              const Scaffold(body: Text('Bonus tasks')),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+          tripRepositoryProvider.overrideWithValue(tripRepo),
+          questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
+          checklistRepositoryProvider.overrideWithValue(
+            FakeChecklistRepository(),
+          ),
+        ],
+        child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('home-stars-badge')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bonus tasks'), findsOneWidget);
+  });
 }
