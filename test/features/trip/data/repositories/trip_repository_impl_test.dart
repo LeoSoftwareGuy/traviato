@@ -48,6 +48,7 @@ class _FakeTripRemoteDataSource implements TripRemoteDataSource {
     DateTime? startDate,
     DateTime? endDate,
     List<String> vibes = const [],
+    String? coverImagePath,
   }) async {
     if (exception != null) throw exception!;
     lastCreateTripId = id;
@@ -59,6 +60,7 @@ class _FakeTripRemoteDataSource implements TripRemoteDataSource {
       startDate: startDate,
       endDate: endDate,
       vibes: vibes,
+      coverImagePath: coverImagePath,
       createdAt: DateTime(2026, 1, 1),
       updatedAt: DateTime(2026, 1, 1),
     );

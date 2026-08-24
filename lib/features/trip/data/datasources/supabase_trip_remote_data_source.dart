@@ -85,6 +85,7 @@ class SupabaseTripRemoteDataSource implements TripRemoteDataSource {
     DateTime? startDate,
     DateTime? endDate,
     List<String> vibes = const [],
+    String? coverImagePath,
   }) async {
     final user = _client.auth.currentUser;
     if (user == null) {
@@ -103,6 +104,7 @@ class SupabaseTripRemoteDataSource implements TripRemoteDataSource {
             'start_date': _dateOnly(startDate),
             'end_date': _dateOnly(endDate),
             'vibes': vibes,
+            'cover_image_path': coverImagePath,
           })
           .select()
           .single();

@@ -13,6 +13,7 @@ abstract interface class TripRemoteDataSource {
     DateTime? startDate,
     DateTime? endDate,
     List<String> vibes,
+    String? coverImagePath,
   });
 
   Future<void> deleteTrip(String id);

@@ -20,6 +20,7 @@ Future<TripCardEntity> runCreateMemory({
   DateTime? startDate,
   DateTime? endDate,
   List<String> vibes = const [],
+  String? coverImagePath,
 }) {
   return createMemoryMutation.run(ref, (tsx) async {
     final repo = tsx.get(tripRepositoryProvider);
@@ -42,6 +43,7 @@ Future<TripCardEntity> runCreateMemory({
       startDate: startDate,
       endDate: endDate,
       vibes: vibes,
+      coverImagePath: coverImagePath,
     );
     return result.fold(
       (failure) => throw PresentationFailureException(failure),
