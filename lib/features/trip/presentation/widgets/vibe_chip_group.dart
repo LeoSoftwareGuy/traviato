@@ -38,7 +38,18 @@ class VibeChipGroup extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('The vibe', style: AppTypography.fieldLabel),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('The vibe', style: AppTypography.fieldLabel),
+            Text(
+              '${selected.length} chosen',
+              style: AppTypography.chipLabel.copyWith(
+                color: AppColors.textMuted,
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: AppSpacing.sm,

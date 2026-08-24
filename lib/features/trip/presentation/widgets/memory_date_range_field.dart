@@ -6,10 +6,9 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
-final _dateFormat = DateFormat('MMM d, y');
+final _dateFormat = DateFormat('d MMM y');
 
-/// Start/end date pickers with a divider, matching the "When?" section of
-/// the "Add trip" Figma frame. Both dates are optional.
+/// Starts / Ends field cards, side by side. `docs/design/README.md` § 4.
 class MemoryDateRangeField extends StatelessWidget {
   const MemoryDateRangeField({
     required this.startDate,
@@ -46,38 +45,19 @@ class MemoryDateRangeField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('When?', style: AppTypography.fieldLabel),
-        const SizedBox(height: AppSpacing.sm),
         Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
-              child: _DateButton(
-                label: 'Start',
+              child: _DateCard(
+                label: 'Starts',
                 date: startDate,
                 onTap: () => _pickDate(context, startDate, onStartDateChanged),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            Container(
-              width: 28,
-              height: 28,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: AppColors.surfaceBorder),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.arrow_forward,
-                color: AppColors.textSecondary,
-                size: 14,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
             Expanded(
-              child: _DateButton(
-                label: 'End',
+              child: _DateCard(
+                label: 'Ends',
                 date: endDate,
                 onTap: () => _pickDate(context, endDate, onEndDateChanged),
               ),
@@ -99,8 +79,8 @@ class MemoryDateRangeField extends StatelessWidget {
   }
 }
 
-class _DateButton extends StatelessWidget {
-  const _DateButton({
+class _DateCard extends StatelessWidget {
+  const _DateCard({
     required this.label,
     required this.date,
     required this.onTap,
@@ -117,8 +97,8 @@ class _DateButton extends StatelessWidget {
       borderRadius: AppRadius.cardRadius,
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.base,
-          vertical: AppSpacing.sm,
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
         ),
         decoration: BoxDecoration(
           color: AppColors.surface,
@@ -131,7 +111,7 @@ class _DateButton extends StatelessWidget {
           children: [
             Text(
               label.toUpperCase(),
-              style: AppTypography.caption.copyWith(letterSpacing: 0.25),
+              style: AppTypography.mono.copyWith(color: AppColors.textTertiary),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
