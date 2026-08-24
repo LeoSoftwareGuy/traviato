@@ -1,147 +1,176 @@
-# Trevy — MVP Functionality (v3, post-redesign)
+# Trevy — MVP Functionality (v4, redesign handoff)
 
 > One-liner: the place where your travel life lives — plan your memory, log it as you
 > go, and it becomes a beautiful journal you keep forever.
 
-Source of truth for screens: Figma file **"Leo's team library"**, Page 1 (14 frames).
-This version supersedes the beautify/journey designs entirely.
+Source of truth for screens: the **redesign handoff** (`docs/design/` — 13-screen
+design reference `Wander - Travel Memory Journal.dc.html` + README with tokens,
+interactions, motion). Supersedes the "Leo's team library" Figma file. A Figma copy
+can be made via `traviato-figma-import.html` (html.to.design).
 
-## Product language (use in ALL UI copy)
+**Canonical values note:** where the design mockup's sample values conflict with our
+data model, the data model wins: quest completion = 1 star flat (no per-quest
+values), photo = 2 stars, the existing 10-vibe list, and the existing 8-achievement
+set. Mockup copy showing other numbers is adjusted at implementation.
 
-- A trip is called a **memory** ("New memory", "17 Memories", "memories in the making").
-- Points are called **stars** ⭐ in the UI (DB keeps the points ledger).
-- The generated cinematic output is the **wrap-up** ("View wrap-up", "Recap" badge).
-- App name: **Trevy** (repo/codename stays `traviato`).
+## Product language (ALL UI copy)
 
-## 1. Guest mode / landing ✅ — in MVP
+- Trip = **memory** · points = **stars ✦** · generated recap = **wrap-up**.
+- App name: **Trevy** (design files say "Traviato"/"Wander" — implement as Trevy;
+  repo/codename stays `traviato`).
 
-- Unauthenticated users land on a marketing screen: value proposition ("Every memory
-  beautifully captured"), how-it-works steps (Capture the moment / Plan your trips /
-  Relive it all), sample memory cards, testimonial, "Start now" CTA + "Log in".
-- Purpose: show new users why to register before asking them to.
-- Static content in MVP (no browsing real app data as guest).
+## 1. Guest landing ✅
 
-## 2. Auth & profile ✅
+- Pre-auth marketing screen: star specks, hero image with overhanging polaroids,
+  eyebrow + serif headline ("Every memory, *beautifully captured*"), occasion chips
+  (Weddings · Trips · Birthdays · Milestones — positioning beyond travel),
+  how-it-works cards (third card highlighted), sample memories scroller,
+  testimonial, sticky pulsing CTA ("Start capturing your moments") + Log in.
+- Static content in MVP.
 
-- Register / Log in screens designed. Supabase Auth email/password.
-- `profiles` row via signup trigger. Profile now includes an editable **bio**.
-- Profile screen ("You"): avatar, name, @handle, bio, joined date, stats row
-  (Memories · Countries · Days · Stars), and the **Achievements** grid.
+## 2. Auth ✅ — redesigned
 
-## 3. Achievements ✅ — in MVP
+- Single screen, segmented toggle Create account | Log in; mono field labels,
+  focus states, password-strength segments; reward-tease card ("first memory earns
+  10 stars"). Supabase email/password unchanged.
 
-- Badge system on the profile, "6/8 earned" style. Seeded set incl.: First Adventure
-  (first memory), Globetrotter (visit 10 countries, shows progress 11/18), Century
-  (100 days capturing), Star Collector, Shutterbug, Storyteller.
-- Each achievement: icon, title, description, earned/unearned state, progress where
-  applicable. Earned server-side (no client self-award).
+## 3. Home ✅ — redesigned
 
-## 4. Home ✅
+- Header: mono date eyebrow, "Hello, {name}"; **stars badge (tappable → Bonus
+  tasks)**; avatar → Profile.
+- Stats bar: Memories · Places · Days.
+- **Happening now** hero card: cover, Day X of Y + vibe chips, title, place/dates,
+  thin trip-progress bar; actions Plan · Expenses · **Journal (primary)**; dashed
+  full-width **Checklist** row with packed count.
+- **Coming up**: cards with countdown badge, planning state ("6 quests planned" /
+  "Nothing planned yet"), **whole card taps into Plan** (plan months ahead).
+- **Kept forever**: finished-memory grid, ▸ Recap badge, days + photo count,
+  tap → Wrap-up.
+- Bottom nav: Home · **FAB ➕** · Expenses.
 
-- Greeting ("Hello, Ada"), top-right: profile avatar + stars badge.
-- Stats bar: Memories / Places / Days totals.
-- **Current memory hero card** (only while a trip runs): cover, name, place, dates,
-  "day X of Y" chip, shortcut buttons **Plan · Expenses · Journal**.
-- **Coming up**: upcoming memories ("3 memories in the making") with vibe chip and
-  countdown ("in 26d").
-- **Memories** grid: finished memories with Recap badge, duration badge, photo count,
-  dates.
-- No search field on home in this design (dropped from MVP).
-- **Bottom nav: Home · ➕ (new memory) · Expenses.** Profile lives top-right.
+## 4. Create memory ✅ — redesigned, + cover picker
 
-## 5. Create memory ✅ — single screen (replaces the 3-step flow)
+- One screen: name, where, start/end dates, **vibe chips** (canonical 10:
+  Romantic, Adventure, Cultural, Chill, Foodie, Road trip, Wellness, Wildlife,
+  Nightlife, Photography), reward-nudge card, Create CTA.
+- **NEW — cover picker**: 8 bundled cover options as thumbnails; explicit choice,
+  or **auto-suggestion from the first selected vibe** (mapping in handoff);
+  empty-state slot shows "Choose a cover / or we'll pick one that suits the vibe".
+  Custom photo upload for covers: see open questions.
 
-- "New memory": name ("e.g. Summer in Tokyo"), where ("Where did it happen?"),
-  start + end dates, **vibe** tags from a fixed list of 10: Romantic, Adventure,
-  Cultural, Chill, Foodie, Road trip, Wellness, Wildlife, Nightlife, Photography.
-- Fields optional (dates nullable); everything editable later.
-- Plan and checklist are reached from the memory afterwards (hero card shortcuts),
-  not steps of creation.
+## 5. Manage memory ✅ — NEW (sheet, from Plan)
 
-## 6. Plan (day quests) ✅ — unchanged concept
+- Rename; **shift start/end by a day — quests move with it** (app-side re-date);
+  change cover (same thumbnail strip); **two-step delete** (armed state shows
+  consequences: "removes N photos, N days of notes and N stars… can't be undone" —
+  per data model, earned stars are actually KEPT; fix the copy at implementation).
 
-- Per-day screen: date + "Day N", arrows between days, "X quests planned / Y days
-  total".
-- Quests: time + title + detail line (e.g. 08:00 Pack the car — Cooler, blankets,
-  hiking boots), check-off circles.
-- Add/edit via sheets. Empty state for unplanned days.
+## 6. Plan (day quests) ✅ — redesigned
 
-## 7. Checklist ✅ — upgraded
+- Cover **banner** with dates + Day X of Y pill; summary line ("25 quests planned ·
+  5 days total"); day pager with segment dots; **timeline rail** with check
+  circles, mono times, quest titles + detail lines; check-off awards ✦1 (flat) via
+  RPC + star toast; dashed "+ Add a quest to Day N"; top-right ☑ Checklist and
+  ⋯ Manage buttons.
 
-- Per-memory checklist with **categories** (tabs: Travel essentials 5/7, Clothing &
-  shoes 7/…), overall progress ("26 of 38 packed", 68% bar).
-- Items can be flagged **Essential**.
-- Suggestions seeded per category; custom "Add an item…" input at the bottom.
+## 7. Checklist ✅ — redesigned
 
-## 8. Journal (during-trip logging) ✅
+- Overall gradient progress bar + "X of Y packed"; category tabs with inline
+  counts (5 categories: travel_essentials, clothing_shoes, toiletries_health,
+  gadgets_tech, nice_to_haves); Essential badges (coral); check-off (toast, no
+  stars); dashed custom-add row.
 
-- Day tabs with photo thumbnails (Aug 18 · Aug 19 · …), "Day N", "Journal started".
-- Per day: long-form **notes** ("Add notes about today"), **Photos** strip (count +
-  add), **To Do** button (the day's quests, check-off), **View wrap-up** button.
-- DROPPED from old design: locked future days and the "Your trip starts TODAY!"
-  screens — any day within the memory is accessible.
+## 8. Journal ✅ — redesigned
 
-## 9. Expenses ✅ — NEW feature, in MVP
+- Day tabs as photo tiles (active = primary border); day title + sub-line; note
+  card (italic serif body, "EDITED · N WORDS" footer, one note/day, ✦1 via RPC);
+  photos strip ("TODAY'S PHOTOS · N", **add tile awards ✦2** on successful photo,
+  tiles → Photo detail); "To Do · N left" → Plan; **"View wrap-up ▸"** gradient
+  button; achievement-nudge card with progress ring.
+- All days in range accessible (no locking).
 
-- Dedicated bottom-nav tab. "Your spending" overview: list of memories with total
-  spent (€), duration, item count, relative spend bar; search; sort ("Biggest
-  spender"); **Compare** action (screen not yet designed).
-- **Add expense** sheet: memory selector, what was it ("e.g. Sunset dinner in Oia"),
-  amount, **category** (Food & Drinks, Transport, Accommodation, Activities,
-  Shopping, Other), date.
-- Single currency (EUR) in MVP.
+## 9. Photo detail + tagging ✅ — NEW, in MVP
 
-## 10. Bonus tasks ✅ — unchanged concept
+- Full-bleed photo, day/time + place overlay, pager dots.
+- Place row (place text + coordinates when geotagged, "Change").
+- **WHO WAS THERE**: person chips (free-text people, tag/untag), + Add.
+- Caption card (tap to edit).
+- Actions: **Set as cover** · **Use in wrap-up** (marks photo for the generator).
 
-- Per-memory list ("Bonus tasks — Cabin 2026"): stars earned summary ("10 stars
-  earned, 3 of 8 tasks done"), available-now count, tasks with star value and expiry
-  countdown ("Expires in 12h"), Completed section.
-- Single new-task popup (photo CTA / Later).
-- Examples: Pack your bags on camera, Share with a friend, Snap your first meal
-  there, Document your outfit, Capture the best view.
+## 10. Expenses ✅ — reworked
 
-## 11. Stars (points) 🟡
+- Overview: search, sort toggle (**latest-first default** ⇄ biggest spender),
+  memory rows with total, meta, **relative spend bar** (÷ max), "Load 3 more"
+  pagination (page size 3).
+- **Selected-memory breakdown**: TOTAL SPENT + PER DAY AVG cards, BIGGEST
+  CATEGORY card, BY CATEGORY bars (÷ largest category), ALL EXPENSES list
+  (zebra rows, sorted by amount desc). Empty state prompts selection.
+- Add-expense sheet: memory selector, description, amount (€), 6 category chips
+  (Food & drinks, Transport, Accommodation, Activities, Shopping, Other), date.
+- EUR only in MVP.
 
-- Earned for logging (notes, photos, quest completion) and bonus tasks; stored as a
-  server-side ledger; shown on profile + per-memory.
-- No spending/redemption in MVP.
+## 11. Expenses · Compare ✅ — NEW, in MVP
 
-## 12. Location capture — backend functionality (unchanged)
+- Pick a pair (A = orange, B = purple; promote/swap rules per handoff).
+- FINANCIAL COMPARISON table: per-category amounts side by side (**larger value
+  emphasized**), missing = "—", Total + Per-day rows; computed **verdict card**
+  ("X cost €N more overall, but Y ran €N/day higher…").
+- "Done comparing" clears. All values derived client-side — no schema impact.
 
-- Photos: auto geotag on upload (with permission). Quests & photos: optional place
-  text. Collected points power the wrap-up map and the Places/Countries stats.
-- Memory's "where" field feeds the Countries stat (see data-model open question on
-  country derivation).
+## 12. Bonus tasks ✅ — redesigned
 
-## 13. Wrap-up (generated memory) 🟡 — in MVP, screen not designed yet
+- Per-memory list: haul card (stars earned / possible + bar), task rows with tint
+  icon tiles, star value, expiry countdown (**coral when < 24h**), COMPLETED
+  section with day earned.
+- Task popup sheet: reward + photo-needed tiles, "Open camera" CTA → capture →
+  completion + stars, "Maybe later".
+- Entry: stars badge on Home header (+ journal contexts).
 
-Architecture unchanged: **one screenplay, two renderers.**
+## 13. Stars ✅
 
-1. **Generation (once)** — edge function gathers the memory's data (notes, quests,
-   places, photo metadata) → Anthropic API for creative direction → screenplay JSONB
-   saved in `wrap_ups.content`.
-2. **Viewing (MVP)** — app plays the screenplay live: Flutter animations, Mapbox
-   route, cached photos, narrative text. Entry points: "View wrap-up" in Journal and
-   the Recap badge on finished memories. Editable before private publish.
-3. **MP4 export (post-MVP, paid)** — same screenplay → template-video API → file in
-   storage; the future feed plays this file.
+- Ledger server-side; values: note 1 · photo 2 · quest 1 · bonus per template.
+- **Star award toast** (shared component): "✦ +2 stars · photo logged" etc.,
+  auto-dismiss ~1.65s; the only success affordance (no snackbars for awards).
+  Unchecking never removes stars.
+
+## 14. Location capture — backend (unchanged)
+
+- Auto geotag on photo upload (permission-gated, never blocks); optional place
+  text on quests/photos; feeds wrap-up map + Places/Countries stats.
+
+## 15. Wrap-up playback ✅ — NOW DESIGNED
+
+- One long controlled scroll (user-driven, not autoplay):
+  **Hero** (ken-burns cover, staggered title reveal) → **Chapter one · The route**
+  (animated route draw, node dots, place labels, KM/stops stats) → **Chapter two ·
+  What you saw** (photo beats with ken-burns + second-person AI narrative in
+  italic serif) → **Chapter three · By the numbers** (stat cards with animating
+  bars) → **Achievement moment** (badge unlocked card) → close line + "Open
+  journal" / "Keep forever".
+- Generation pipeline unchanged: edge function → Anthropic → screenplay JSONB in
+  `wrap_ups.content`; app renders live; MP4 export post-MVP.
+
+## 16. Profile ("You") ✅ — redesigned
+
+- Avatar with stars pill, name, @handle, bio, joined date; stats row (Memories ·
+  Countries · Days · Stars); achievements 2-col grid — earned vs locked with
+  progress bar + mono progress line ("9 OF 14 DAYS"). Canonical badge set: our
+  seeded 8 (design's sample names are placeholders where they differ).
 
 ## Out of scope for MVP
 
 Social feed, follows/likes/comments, public profiles, shared memories, star
-redemption, video export, interactive route planner, multi-currency expenses,
-real guest browsing of app content, web app.
+redemption, video export, route planner, multi-currency, web app.
 
-## Design gaps
+## Design gaps (residual)
 
-1. Wrap-up playback screen — ❌ (biggest gap; coordinate with designer).
-2. Expenses **Compare** screen — ❌ (button exists, screen doesn't).
-3. Photo detail / place & people tagging — ❌ (photos strip only).
-4. Add/edit quest sheets, bonus-task popup states — partially inferred from old
-   design; confirm final sheets.
-5. Standalone gallery — REMOVED (photos live inside Journal days + wrap-up).
+1. Wrap-up **edit** mode (reorder/remove blocks) — playback is designed, editing
+   UI is not. Decide: design it, or ship publish-only first.
+2. Cover **photo upload** (design shows an "Upload photo" pill) — MVP could ship
+   bundled covers + "Set as cover" from Photo detail only. Confirm.
+3. Quest rows in the mockup show per-quest ✦ values — with our flat ✦1, show a
+   uniform ✦1 badge or none. Pick at implementation.
 
 ## Monetization (context)
 
-Freemium: free = 3 memories & basics; paid = unlimited memories, full features,
-beautiful export.
+Freemium: free = 3 memories & basics; paid = unlimited, full features, export.
