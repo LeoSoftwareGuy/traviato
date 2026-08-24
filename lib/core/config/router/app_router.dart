@@ -4,9 +4,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../../features/auth/presentation/controllers/auth_state.dart';
+import '../../../features/auth/presentation/pages/auth_page.dart';
 import '../../../features/auth/presentation/pages/guest_landing_page.dart';
-import '../../../features/auth/presentation/pages/login_page.dart';
-import '../../../features/auth/presentation/pages/register_page.dart';
 import '../../../features/auth/presentation/pages/splash_page.dart';
 import '../../../features/checklist/presentation/pages/checklist_page.dart';
 import '../../../features/expense/presentation/pages/expenses_page.dart';
@@ -62,12 +61,14 @@ GoRouter router(Ref ref) {
       GoRoute(
         path: RoutePaths.login,
         name: RouteNames.login,
-        builder: (context, state) => const LoginPage(),
+        builder: (context, state) =>
+            const AuthPage(initialMode: AuthMode.login),
       ),
       GoRoute(
         path: RoutePaths.signup,
         name: RouteNames.signup,
-        builder: (context, state) => const RegisterPage(),
+        builder: (context, state) =>
+            const AuthPage(initialMode: AuthMode.signup),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navShell) =>

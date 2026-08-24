@@ -5,6 +5,7 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
+/// `docs/design/README.md` § 1 — purple-wash testimonial card.
 class TestimonialCard extends StatelessWidget {
   const TestimonialCard({super.key});
 
@@ -13,39 +14,25 @@ class TestimonialCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.tint(AppColors.accentPurple, .1),
         borderRadius: AppRadius.mediaRadius,
-        border: Border.all(color: AppColors.surfaceBorder),
+        border: Border.all(color: AppColors.tint(AppColors.accentPurple, .32)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: List.generate(
-              5,
-              (_) => const Padding(
-                padding: EdgeInsets.only(right: AppSpacing.xs),
-                child: Icon(Icons.star, color: AppColors.primary, size: 14),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
           Text(
-            '"I used to have a folder called \'Wedding photos FINAL\' on my '
-            'desktop - you know the one. Now I just open Trevy, and my '
-            'entire wedding weekend plays back in order: rehearsal dinner, '
-            'ceremony, after-party. No folders, no chaos."',
-            style: AppTypography.chipLabel.copyWith(
-              fontStyle: FontStyle.italic,
-            ),
+            '"I stopped losing my trips to the camera roll. The wrap-up '
+            'made me cry a little."',
+            style: AppTypography.pullQuote,
           ),
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
               Container(
-                width: 28,
-                height: 28,
+                width: 21,
+                height: 21,
                 alignment: Alignment.center,
                 decoration: const BoxDecoration(
                   color: AppColors.accentCoralTint,
@@ -56,20 +43,16 @@ class TestimonialCard extends StatelessWidget {
                   style: AppTypography.caption.copyWith(
                     color: AppColors.accentCoral,
                     letterSpacing: 0,
+                    fontSize: 8,
                   ),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                'Maya K.',
+                'Mira K. · 14 memories',
                 style: AppTypography.chipLabel.copyWith(
                   color: AppColors.textSecondary,
                 ),
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                '· 3 memories captured',
-                style: AppTypography.caption.copyWith(letterSpacing: 0),
               ),
             ],
           ),

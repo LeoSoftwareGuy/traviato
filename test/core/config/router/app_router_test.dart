@@ -31,8 +31,13 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
       repo.emit(null);
-      await tester.pumpAndSettle();
-      expect(find.text('Start capturing your memories'), findsOneWidget);
+      // Not pumpAndSettle: the guest landing screen has looping animations
+      // (star specks, floating polaroids, the CTA's pulse glow) that never
+      // settle. A couple of bounded pumps is enough for the route
+      // transition to finish.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Start capturing your moments'), findsOneWidget);
 
       const user = UserEntity(
         id: 'u1',
