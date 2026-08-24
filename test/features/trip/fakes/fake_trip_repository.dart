@@ -16,6 +16,7 @@ class FakeTripRepository implements TripRepository {
   var createTripCallCount = 0;
   var deleteTripCallCount = 0;
   String? lastDeletedTripId;
+  String? lastCreateTripCoverImagePath;
   Duration delay = Duration.zero;
 
   @override
@@ -39,8 +40,10 @@ class FakeTripRepository implements TripRepository {
     DateTime? startDate,
     DateTime? endDate,
     List<String> vibes = const [],
+    String? coverImagePath,
   }) async {
     createTripCallCount++;
+    lastCreateTripCoverImagePath = coverImagePath;
     if (delay > Duration.zero) await Future<void>.delayed(delay);
     return createTripResult ??
         Right(
@@ -50,6 +53,7 @@ class FakeTripRepository implements TripRepository {
             startDate: startDate,
             endDate: endDate,
             vibes: vibes,
+            coverImagePath: coverImagePath,
           ),
         );
   }
@@ -71,6 +75,7 @@ TripEntity buildTripEntity({
   DateTime? startDate,
   DateTime? endDate,
   List<String> vibes = const [],
+  String? coverImagePath,
 }) {
   final now = DateTime(2026, 1, 1);
   return TripEntity(
@@ -81,6 +86,7 @@ TripEntity buildTripEntity({
     startDate: startDate,
     endDate: endDate,
     vibes: vibes,
+    coverImagePath: coverImagePath,
     createdAt: now,
     updatedAt: now,
   );
@@ -94,6 +100,7 @@ TripCardEntity buildTripCard({
   DateTime? startDate,
   DateTime? endDate,
   List<String> vibes = const [],
+  String? coverImagePath,
   TripStatus status = TripStatus.upcoming,
   int? durationDays,
   int photoCount = 0,
@@ -109,6 +116,7 @@ TripCardEntity buildTripCard({
     startDate: startDate,
     endDate: endDate,
     vibes: vibes,
+    coverImagePath: coverImagePath,
     createdAt: now,
     updatedAt: now,
     status: status,

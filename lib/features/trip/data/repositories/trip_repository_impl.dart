@@ -48,6 +48,7 @@ class TripRepositoryImpl implements TripRepository {
     DateTime? startDate,
     DateTime? endDate,
     List<String> vibes = const [],
+    String? coverImagePath,
   }) async {
     try {
       return Right(
@@ -58,6 +59,7 @@ class TripRepositoryImpl implements TripRepository {
           startDate: startDate,
           endDate: endDate,
           vibes: vibes,
+          coverImagePath: coverImagePath,
         ),
       );
     } on AuthenticationException catch (e) {
