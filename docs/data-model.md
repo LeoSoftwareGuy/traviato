@@ -1,173 +1,101 @@
-# Trevy — Data Model (MVP, v2 post-redesign)
+# Trevy — Data Model (MVP, v3)
 
-Derived from `functionality.md` v3. Postgres (Supabase) — all schema changes ship as
-migrations in `supabase/migrations/`, RLS enabled on every table, **explicit grants
-required** (project has auto-expose disabled).
+Derived from `functionality.md` v4. Postgres (Supabase) — migrations only, RLS on
+every table, explicit grants (auto-expose disabled). DB keeps `trips` (UI:
+"memory"); screenplay lives in `wrap_ups`.
 
-Naming: the DB keeps the technical term **`trips`** (UI copy says "memory") to avoid
-colliding with the wrap-up artifact. The generated screenplay lives in **`wrap_ups`**
-(renamed from the old `memories` table).
+**v3 note:** the redesign handoff changed NO schema. Its sample star values
+(per-quest ✦, photo ✦1) were rejected — canonical economy stands: note 1 ·
+photo 2 · quest 1 (flat) · bonus per template. Vibes and achievement seeds stay
+as below. Compare and the expenses breakdown are fully derived client-side.
 
-## Design decisions (unchanged unless noted)
+## Design decisions
 
-1. **No `trip_days` table** — child records carry `day_date date`; "Day N" =
-   `day_date - start_date + 1`.
-2. **No stored trip status** — derived from dates in `trip_card_view`/client.
-3. **Points are a ledger** (UI: "stars") — balance is a SUM; awards via RPC only.
-4. **Owner-only access** — every policy reduces to the trip's owner.
-5. **Vibes as `text[]`** on the trip (was `goals`; new fixed list of 10).
-6. **NEW: achievements are server-awarded** — clients never insert their own.
-7. **NEW: expenses are plain owner rows** — no server logic needed in MVP.
+1. No `trip_days` table — children carry `day_date`; "Day N" computed.
+2. No stored trip status — derived from dates.
+3. Points are a ledger (UI: stars); balance = SUM; writes only via RPCs.
+4. Owner-only access everywhere (no sharing in MVP).
+5. Vibes as `text[]` (fixed 10: Romantic, Adventure, Cultural, Chill, Foodie,
+   Road trip, Wellness, Wildlife, Nightlife, Photography).
+6. Achievements server-awarded (`check_achievements` RPC), idempotent.
+7. Expenses are plain owner rows; totals/compare derived, not stored.
+8. **Cover images**: `trips.cover_image_path` holds either a bundled-asset id
+   (`asset:<name>` — MVP cover picker) or a storage path (photo "Set as cover").
+   App interprets by prefix.
 
-## Tables
+## Tables (unchanged from v2 except where noted)
 
 ### `profiles`
-| column | type | notes |
-|---|---|---|
-| `id` | `uuid` PK | = `auth.users.id`, signup trigger |
-| `username` | `text` | nullable |
-| `bio` | `text` | nullable — NEW (profile screen) |
-| `avatar_url` | `text` | nullable |
-| `created_at` | `timestamptz` | "Joined March 2024" on profile |
-
-RLS: select/update own row. Insert via trigger only.
+`id (=auth.users.id), username?, bio?, avatar_url?, created_at`.
+RLS: select/update own; insert via trigger.
 
 ### `trips`
-| column | type | notes |
-|---|---|---|
-| `id` | `uuid` PK | client-generated |
-| `user_id` | `uuid` FK → profiles | owner |
-| `name` | `text` | |
-| `destination` | `text` | "Where did it happen?" free text |
-| `country_code` | `text` | nullable, ISO-3166-1 alpha-2 — feeds Countries stat & Globetrotter (see open questions) |
-| `start_date` | `date` | nullable |
-| `end_date` | `date` | nullable, `check (end_date >= start_date)` |
-| `vibes` | `text[]` | default `{}` — fixed list of 10 (Romantic, Adventure, Cultural, Chill, Foodie, Road trip, Wellness, Wildlife, Nightlife, Photography) |
-| `cover_image_path` | `text` | nullable |
-| `created_at` / `updated_at` | `timestamptz` | |
+`id uuid PK (client-generated), user_id FK, name, destination?, country_code?
+(ISO-3166-1 alpha-2), start_date?, end_date? (check >= start), vibes text[]
+default {}, cover_image_path?, created_at, updated_at`.
+RLS owner-only, all ops. Free-tier 3-memory limit app-side.
+**Manage sheet date-shift**: shifting dates re-dates child rows (quests, notes,
+photos day_date) app-side in the same operation — no schema support needed.
 
-RLS: all ops `user_id = auth.uid()`. Grants: select/insert/update/delete to
-`authenticated`. Free-tier 3-memory limit: app-side for MVP.
+### `quests`
+`id, trip_id (cascade), day_date, time?, title, place_text?, position,
+completed_at?, created_at`. **No per-quest points column** (flat ✦1 rejected the
+mockup's variable values). RLS via parent trip; index (trip_id, day_date).
 
-### `quests` — unchanged
-`id, trip_id (cascade), day_date, time, title, place_text, position, completed_at,
-created_at`. RLS via parent trip (pattern for all child tables):
-`exists (select 1 from trips t where t.id = trip_id and t.user_id = auth.uid())`.
+### `day_notes`
+`id, trip_id (cascade), day_date, content, created_at, updated_at`,
+unique (trip_id, day_date).
 
-### `day_notes` — unchanged
-`id, trip_id (cascade), day_date, content, created_at/updated_at`,
-`unique (trip_id, day_date)`.
+### `photos`
+`id (client-generated), trip_id (cascade), day_date?, storage_path, caption?,
+lat?, lng?, place_text?, people_tags text[] default {}, taken_at?, created_at`.
+Photo detail's tagging edits `place_text` / `people_tags` / `caption` — no new
+columns. **"Use in wrap-up"**: add `use_in_wrap_up bool default false` — the only
+schema addition from the redesign (generator prioritizes flagged photos).
 
-### `photos` — unchanged
-`id (client-generated), trip_id (cascade), day_date, storage_path, caption, lat/lng,
-place_text, people_tags text[], taken_at, created_at`.
+### `checklist_items` / `checklist_suggestions`
+As v2: category check over `travel_essentials, clothing_shoes, toiletries_health,
+gadgets_tech, nice_to_haves`; `is_essential`; suggestions seeded per category.
 
-### `checklist_items` — upgraded
-| column | type | notes |
-|---|---|---|
-| `id` | `uuid` PK | |
-| `trip_id` | `uuid` FK → trips (cascade) | |
-| `title` | `text` | |
-| `category` | `text` | NEW — e.g. `travel_essentials`, `clothing_shoes` (check constraint; list per seeded categories) |
-| `is_essential` | `bool` | NEW — default false ("Essential" tag) |
-| `is_checked` | `bool` | default false |
-| `position` | `int` | |
-
-### `checklist_suggestions` (global, seeded) — upgraded
-`id, title, category, is_essential`. Select for authenticated; no client writes.
-
-### `expenses` — NEW
-| column | type | notes |
-|---|---|---|
-| `id` | `uuid` PK | |
-| `trip_id` | `uuid` FK → trips (cascade) | |
-| `title` | `text` | "Sunset dinner in Oia" |
-| `amount` | `numeric(10,2)` | `check (amount > 0)`; EUR only in MVP |
-| `category` | `text` | check: `food_drinks` / `transport` / `accommodation` / `activities` / `shopping` / `other` |
-| `spent_on` | `date` | |
-| `created_at` | `timestamptz` | |
-
-RLS via parent trip. Totals/compare aggregate client-side or via
-`expense_summary_view` (per-trip totals — used by the Expenses tab list).
+### `expenses`
+As v2: `amount numeric(10,2) > 0`, category check (`food_drinks, transport,
+accommodation, activities, shopping, other`), `spent_on`, EUR-only.
+Breakdown (per-day avg, biggest category, per-category bars) and Compare are
+all client-side derivations; `expense_summary_view` supplies per-trip totals.
 
 ### `bonus_task_templates` / `bonus_task_assignments` — unchanged
-Templates seeded (title, points, duration_hours, trigger). Assignments per trip with
-`status` (pending/completed/dismissed/expired), `expires_at`, proof `photo_id`,
-`completed_at`.
+### `points_ledger` — unchanged (values in `award_points` RPC)
+### `achievement_templates` / `user_achievements` — unchanged (seeded 8:
+first_adventure, globetrotter, century, star_collector, shutterbug, storyteller
++ 2 per design; `check_achievements` RPC)
 
-### `points_ledger` — unchanged (UI term: stars)
-`id, user_id, trip_id (set null), source (note/photo/quest/bonus_task), source_id,
-points, created_at`, `unique (user_id, source, source_id)`.
-Values (server-side, in `award_points` RPC): note 1 · photo 2 · quest 1 ·
-bonus per template.
+### `wrap_ups` — unchanged
+`trip_id PK/FK cascade, content jsonb (screenplay), generated_at, published_at?`.
+Post-MVP: `video_path`, `video_status`.
 
-### `achievement_templates` (global, seeded) — NEW
-| column | type | notes |
-|---|---|---|
-| `id` | `bigint` PK | |
-| `code` | `text` unique | `first_adventure`, `globetrotter`, `century`, `star_collector`, `shutterbug`, `storyteller`, … |
-| `title` / `description` | `text` | |
-| `metric` | `text` | what's counted: `trips` / `countries` / `days_logged` / `stars` / `photos` / `notes` |
-| `target` | `int` | e.g. Globetrotter = 10 countries |
-| `position` | `int` | display order |
-
-RLS: select authenticated; no client writes.
-
-### `user_achievements` — NEW
-| column | type | notes |
-|---|---|---|
-| `user_id` | `uuid` FK → profiles | PK part |
-| `template_id` | `bigint` FK → achievement_templates | PK part |
-| `earned_at` | `timestamptz` | |
-
-Composite PK. Awarded by a server-side `check_achievements` RPC (called after
-point-earning actions; compares metrics vs targets and inserts earned rows —
-idempotent via PK). Progress toward unearned achievements is computed from a
-`profile_stats_view`, not stored. RLS: select own rows; no client insert.
-
-### `wrap_ups` — renamed from `memories`
-| column | type | notes |
-|---|---|---|
-| `trip_id` | `uuid` PK, FK → trips (cascade) | one wrap-up per memory |
-| `content` | `jsonb` | the screenplay (ordered blocks) from the `generate_wrap_up` edge function (Anthropic API; keys in function secrets only) |
-| `generated_at` | `timestamptz` | |
-| `published_at` | `timestamptz` | nullable |
-
-Post-MVP export columns (future migration): `video_path`, `video_status`.
-
-## Views
-
-- `trip_card_view` — trips + derived status, photo count, stars, duration; NEW:
-  expense total. Feeds Home + Expenses list.
-- `profile_stats_view` — per-user: memories count, places count (distinct place
-  tags), countries count (distinct `country_code`), days logged, stars total.
-  Feeds Home stats bar, profile stats, and achievement progress.
-- `expense_summary_view` — per-trip totals + item counts for the Expenses tab.
+## Views — unchanged
+`trip_card_view` (+stars, +expense_total as later migrations land),
+`profile_stats_view`, `expense_summary_view`. All `security_invoker`.
 
 ## Storage — unchanged
-`trip-photos` bucket `{user_id}/{trip_id}/{photo_id}.{ext}` (owner-only via first
-path segment); `avatars` bucket.
+`trip-photos` `{user_id}/{trip_id}/{photo_id}.{ext}` owner-only; `avatars`.
 
-## Signup trigger — unchanged
-`handle_new_user()` → profiles row.
-
-## Seed data (migrations)
-- `checklist_suggestions` with categories + essential flags.
-- `bonus_task_templates` per functionality.md §10.
-- `achievement_templates`: the 8 designed badges.
+## Seeds — unchanged
+Checklist suggestions (5 categories, essentials flagged); bonus templates;
+8 achievement templates.
 
 ## Open questions
 
-1. **Country derivation**: `country_code` from the free-text "where" field — user
-   picks country in UI later, or geocode? MVP fallback: nullable, filled when the
-   place field gets structured input; Globetrotter progress counts non-null codes.
-2. Vibe count limit — old design capped goals at 3; new single-screen form shows no
-   cap. Currently NO db check; confirm desired UX.
-3. Expense currency symbol is € in design — confirm EUR-only MVP is acceptable for
-   launch market.
+1. Country derivation for `country_code` (free-text "where" → code): user picks /
+   geocode / nullable-MVP fallback. Globetrotter counts non-null codes.
+2. Cover photo upload at creation (design's "Upload photo" pill) — in MVP or
+   bundled-assets-only + "Set as cover" later?
+3. EUR-only confirmed acceptable for launch market?
 
-## Resolved (carried over)
+## Resolved
 
-- Quests checkable during the trip (`completed_at`).
-- Star values: note 1 / photo 2 / quest 1 / bonus per template; server-side only.
-- Deleting a memory keeps earned stars (`trip_id` set null in ledger).
+- Redesign's variable quest stars → REJECTED (flat 1, no column).
+- Redesign's photo ✦1 → REJECTED (photo = 2).
+- Redesign's alternate vibes + achievement names → REJECTED (v2 lists stand).
+- Quests checkable (`completed_at`); deletion keeps stars (trip_id set null).
+- Compare + Photo detail: in MVP, no schema impact beyond `use_in_wrap_up`.

@@ -1,141 +1,121 @@
-# Trevy — Issue Backlog (MVP, v3)
+# Trevy — Issue Backlog (MVP, v4 — post-redesign-handoff)
 
-Figma: file **"Leo's team library"**, Page 1.
-
-**Numbering:** GitHub shares one counter between issues and PRs, so numbers drift
-as PRs merge. Rule: a backlog item gets its real number only when the GitHub
-issue is created (create each issue just before starting it). Items below without
-a number use a working ID (M2-x, M3-x, …) until then. Branch names and
-`Closes #N` always use the **GitHub** number.
+Design source: `docs/design/` handoff (13 screens). Numbering rule unchanged:
+real numbers at issue creation; working IDs until then.
 
 ---
 
-## Milestone 1 — Foundation ✅ DONE
-
-| # | Issue | Status |
-|---|-------|--------|
-| #1 | Project scaffold + CI | ✅ merged |
-| #2 | Supabase wiring + app bootstrap | ✅ merged |
-| #3 | Theme from Figma tokens | ✅ merged |
-| #4 | Migration: profiles + signup trigger | ✅ merged |
-| #5 | Auth + guest landing + routing | ✅ merged |
-
-(PRs #6–#10 consumed the intermediate numbers.)
+## Milestone 1 — Foundation ✅ DONE (#1–#5)
+## Milestone 2 — Memories & planning ✅ DONE (#11–#15 + checklist pair)
 
 ---
 
-## Milestone 2 — Memories & planning (in progress)
+## Milestone R — Redesign alignment (new; can interleave with M3)
 
-### #11 Migration: trips + trip_card_view — CREATED
-trips per data-model: vibes text[] (no count check), country_code nullable,
-client uuid PK, date check; RLS owner-only; grants; trip_card_view with derived
-status/photo count/stars/duration/expense total (stars & expense columns return
-0 until later migrations) + security_invoker; db reset.
+Built screens predate the handoff. Tokens already match the repo, so this is
+layout/component work, not a re-theme. Do R-1 first; the rest in any order.
 
-### #12 Home screen — CREATED
-Figma: `Home screen 1`, `Home screen 2`.
-Greeting + avatar + stars badge (stub until points migration); stats bar from
-stubbed profileStatsProvider; current-memory hero card (day X of Y,
-Plan/Expenses/Journal shortcuts); Coming up row; Memories grid (Recap badge,
-duration, photo count); bottom nav Home · ➕ · Expenses via shell route
-(Expenses placeholder); empty/loading/error states; TripCreatedDispatched
-subscription; tests.
+### R-1 Theme additions + shared redesign components
+JetBrains Mono font + `AppTypography.mono`; new colors (primaryLight,
+accentPurpleLight, accentBlue, scrim) + tinted-fill helpers; the three gradient
+recipes; **star award toast** (awardPop, single success affordance);
+bottom nav + gradient FAB restyle; bottom-sheet chrome (riseIn); photo-scrim
+helper; motion constants. Tests for toast + nav.
 
-### #13 Create memory (single screen) — CREATED
-Figma: `Add trip`.
-One screen: name (required), where, start/end dates, vibe chips (10, no hard
-cap). Create mutation, client-generated uuid, TripCreatedDispatched on success;
-app-side 3-memory free-tier check; tests.
+### R-2 Guest landing + auth restyle
+Handoff §1–2: polaroid hero, occasion chips, how-it-works, testimonial, pulsing
+CTA; auth segmented toggle, focus states, reward-tease card. Copy says Trevy.
 
-### #14 Migration: quests — CREATED
-quests per data-model incl. completed_at; RLS via parent trip (first child-table
-pattern); grants; index (trip_id, day_date); db reset.
+### R-3 Home restyle
+Handoff §3: mono eyebrow header, tappable stars badge → Bonus, hero card with
+trip-progress bar + dashed Checklist row, Coming up cards with planning state
+(whole card → Plan), Kept forever grid → Wrap-up (route stub until M4).
 
-### #15 Plan (day quests) — CREATED
-Figma: `current trip - plan`. Add/edit sheets not in new file — reuse old-design
-pattern. Day timeline with check circles (writes completed_at; stars TODO until
-points RPC), "X quests planned / Y days total", day arrows clamped to range,
-add/edit/delete sheets with validation, empty day state, undated-memory UX
-proposed in plan comment; route /memory/:tripId/plan; tests.
+### R-4 Create memory: cover picker (+restyle)
+Handoff §4: 8 bundled cover options, vibe-based auto-suggestion (mapping per
+handoff), selected/empty states; `cover_image_path = asset:<id>`; upload pill
+deferred (open question). Reward-nudge card.
 
-### M2-6 Migration: checklist + seed
-checklist_items with `category` + `is_essential`; checklist_suggestions seeded
-per category with essential flags; RLS + grants; db reset.
+### R-5 Plan: banner + manage-memory sheet (+restyle)
+Handoff §5 + manage sheet: cover banner, day pager segments, timeline rail;
+⋯/Edit → sheet: rename, date shift ±1d (re-dates quests/notes/photos in one
+repo operation + event), cover change, two-step delete (copy: stars are KEPT).
+Quest ✦ badge: uniform ✦1 or none — decide in plan comment.
 
-### M2-7 Checklist UI
-Figma: `current trip - checklist`. Category tabs with per-category progress,
-overall "X of Y packed" bar, essential tags, check-off, custom add input; tests.
+### R-6 Checklist restyle
+Handoff §6: gradient overall bar, tab inline counts, Essential coral badges,
+packed toast (no stars).
 
 ---
 
 ## Milestone 3 — During the trip
 
 ### M3-1 Migration: day_notes + photos + storage bucket
-Both tables per data-model; trip-photos bucket + path-owner policies
-(`{user_id}/{trip_id}/{photo_id}.{ext}`); RLS + grants; db reset.
+As before **plus `photos.use_in_wrap_up bool default false`**.
 
 ### M3-2 Journal screen
-Figma: `current trip - journal`.
-Day tabs with photo thumbs; NO locked days, NO "starts today" screens; per-day
-long-form note (1/day; stars via RPC — stub until points migration); photos
-strip + add; To Do sheet (day's quests, check-off + stars); View wrap-up button
-(disabled until wrap-up issues); delete memory (keeps stars); tests.
+Handoff §7: photo day tabs, day title/sub-line, note card (serif italic body,
+EDITED/WORDS footer, ✦1 via RPC seam), photos strip (add tile ✦2 copy),
+To Do → Plan, wrap-up gradient button (disabled until M4), achievement-nudge
+card (stub until M3-3). Delete moved to manage sheet (R-5) — not here.
 
-### M3-3 Migration: points_ledger + bonus tasks + achievements + RPCs
-points_ledger + award_points RPC (note 1 / photo 2 / quest 1 / bonus per
-template); bonus_task_templates + seed; bonus_task_assignments;
-achievement_templates + seed (8 badges) + user_achievements +
-check_achievements RPC; profile_stats_view; update trip_card_view stars +
-expense totals; RLS + grants; db reset.
+### M3-3 Migration: points_ledger + bonus + achievements + RPCs
+Unchanged from v3 draft (canonical values; 8 badges; profile_stats_view;
+trip_card_view stars).
 
-### M3-4 Migration: expenses + expense_summary_view
-expenses table per data-model (category + amount checks); RLS via parent;
-grants; expense_summary_view; db reset.
+### M3-4 Migration: expenses + expense_summary_view — unchanged
 
-### M3-5 Expenses feature
-Figma: `expenses`, `add expenses`.
-Expenses tab: per-memory totals list with spend bars, search, sort; add-expense
-sheet (memory selector, title, amount, category chips, date). Compare button
-hidden/disabled (screen not designed). Tests.
+### M3-5 Expenses feature — EXPANDED per handoff §8
+Overview (search, sort latest-first⇄biggest, relative bars, load-3-more) +
+**selected-memory breakdown** (total/per-day cards, biggest category, by-category
+bars, all-expenses zebra list, empty state) + add-expense sheet. Compare link
+present → M3-9.
 
 ### M3-6 Photo capture & upload
-Pick/take photo, compression, EXIF geotag/taken_at, upload → row insert,
-caption/place tag, stars; photos render in Journal (no standalone gallery);
-tests with fake storage.
+As before; award ✦2; success toast; feeds Journal strips/tabs.
 
 ### M3-7 Bonus tasks
-Figma: `bonus tasks`, `new bonus`. Issuing from templates, countdown, list +
-popup, completion via photo, expiry; per-memory stars summary header; tests.
+Handoff §10: haul card, urgency-coral countdowns, completed-with-day rows,
+popup sheet with reward/photo tiles, camera CTA → capture → completion.
+Entry: Home stars badge (wired in R-3).
+
+### M3-8 Photo detail + tagging — NEW (handoff §13)
+Full-bleed pager, place row (+coords), people chips (free-text tag/untag),
+caption edit, **Set as cover** (writes cover_image_path storage path),
+**Use in wrap-up** toggle (use_in_wrap_up). From Journal photo tap.
+
+### M3-9 Expenses · Compare — NEW (handoff §9)
+Pair selection (A orange / B purple, promote/swap rules), comparison table
+(larger-value emphasis, — for missing, total + per-day rows), computed verdict
+card, done-comparing reset. Pure client-side derivation; tests for pairing
+rules + verdict math.
 
 ---
 
 ## Milestone 4 — Wrap-up & profile
 
 ### M4-1 Migration: wrap_ups + edge function generate_wrap_up
-wrap_ups table; edge function: gather memory data → Anthropic → screenplay
-JSONB; JWT + ownership validation; idempotent; secrets in function config;
-CI deploy post-merge; RLS + grants; db reset.
+Unchanged; generator prioritizes `use_in_wrap_up` photos.
 
-### M4-2 Wrap-up playback screen — design pending, coordinate first
-Generation trigger + progress UI; screenplay playback (Mapbox route, photo
-sequence, narrative); fallback for no-location memories; mapbox_maps_flutter
-dep (justify); screenplay parsing tests.
+### M4-2 Wrap-up playback — NOW DESIGNED (handoff §12)
+Controlled-scroll recap: ken-burns hero + staggered reveal, route-draw chapter,
+photo beats + second-person narrative, animated number cards, achievement
+moment, close CTAs. Mapbox route per screenplay; fallback for no-location
+memories; mapbox_maps_flutter dep justified.
 
-### M4-3 Wrap-up editing + publish
-Edit blocks (reorder/remove/edit text), save to content; publish sets
-published_at; tests.
+### M4-3 Wrap-up publish (editing TBD)
+Playback ships with "Keep forever" → published_at. Block editing UI is NOT in
+the handoff — design it or defer editing post-MVP (open decision).
 
-### M4-4 Profile & achievements
-Figma: `profile`.
-Avatar, name/@handle, editable bio, joined date; stats row from
-profile_stats_view; achievements grid (earned/unearned, progress from stats);
-logout; tests.
+### M4-4 Profile & achievements — handoff §11
+Avatar + stars pill, @handle, bio, joined, stats row, achievements grid with
+locked-state progress bars (our seeded 8); logout.
 
 ---
 
-## Backlog notes
-
-- Design gaps blocking issues: M4-2 (wrap-up screen), expenses Compare (future
-  issue when designed), photo detail/tagging (future issue).
-- Gallery removed from MVP — photos live in Journal + wrap-up.
-- MP4 export, social feed, shared memories: post-MVP.
+## Notes
+- Copy the handoff into the repo: `docs/design/` (README + dc.html + assets;
+  incl. `journal/balloons_wide.png` into `assets/images/journal/`).
+- Suggested weave: R-1 → M3-1 → M3-3 → R-3/R-5 → M3-2 → M3-6 → M3-8 →
+  M3-4 → M3-5 → M3-9 → M3-7 → R-2/R-4/R-6 anytime → M4.
+- Residual design gaps: wrap-up EDIT mode; cover upload pill.
