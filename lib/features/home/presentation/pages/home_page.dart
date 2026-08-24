@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
@@ -32,20 +33,27 @@ class HomePage extends ConsumerWidget {
     final homeAsync = ref.watch(homeControllerProvider);
 
     return Scaffold(
-      body: SafeArea(
-        child: homeAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => AsyncErrorRetryScaffold(
-            message: presentationFailureMessage(error),
-            onRetry: () => ref.invalidate(homeControllerProvider),
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: AppGradients.screenGroundRadial(
+            AppGradients.groundTopHome,
           ),
-          data: (state) => _HomeContent(
-            username: username ?? 'traveler',
-            stars: stats.stars,
-            memories: stats.memories,
-            places: stats.places,
-            days: stats.days,
-            state: state,
+        ),
+        child: SafeArea(
+          child: homeAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => AsyncErrorRetryScaffold(
+              message: presentationFailureMessage(error),
+              onRetry: () => ref.invalidate(homeControllerProvider),
+            ),
+            data: (state) => _HomeContent(
+              username: username ?? 'traveler',
+              stars: stats.stars,
+              memories: stats.memories,
+              places: stats.places,
+              days: stats.days,
+              state: state,
+            ),
           ),
         ),
       ),
@@ -70,9 +78,15 @@ class _HomeContent extends ConsumerWidget {
   final int days;
   final HomeState state;
 
-  void _openTrip(BuildContext context, TripCardEntity trip) =>
+  void _openPlan(BuildContext context, TripCardEntity trip) =>
       context.pushNamed(
-        RouteNames.tripJournal,
+        RouteNames.tripPlan,
+        pathParameters: {'tripId': trip.id},
+      );
+
+  void _openWrapUp(BuildContext context, TripCardEntity trip) =>
+      context.pushNamed(
+        RouteNames.tripWrapUp,
         pathParameters: {'tripId': trip.id},
       );
 
@@ -112,6 +126,7 @@ class _HomeContent extends ConsumerWidget {
           username: username,
           stars: stars,
           onAvatarTap: () => context.pushNamed(RouteNames.profile),
+          onStarsTap: () => context.pushNamed(RouteNames.bonusTasks),
         ),
         const SizedBox(height: AppSpacing.xl),
         HomeStatsBar(
@@ -130,12 +145,16 @@ class _HomeContent extends ConsumerWidget {
         ] else ...[
           if (hero != null) ...[
             const SizedBox(height: AppSpacing.xl),
+            Text(
+              'HAPPENING NOW',
+              style: AppTypography.mono.copyWith(
+                color: AppColors.textTertiary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.base),
             UpcomingHeroCard(
               trip: hero,
-              onPlanTap: () => context.pushNamed(
-                RouteNames.tripPlan,
-                pathParameters: {'tripId': hero.id},
-              ),
+              onPlanTap: () => _openPlan(context, hero),
               onChecklistTap: () => context.pushNamed(
                 RouteNames.tripChecklist,
                 pathParameters: {'tripId': hero.id},
@@ -150,13 +169,13 @@ class _HomeContent extends ConsumerWidget {
           const SizedBox(height: AppSpacing.xl),
           ComingUpSection(
             trips: state.upcomingTrips,
-            onTripTap: (trip) => _openTrip(context, trip),
+            onTripTap: (trip) => _openPlan(context, trip),
             onCreateMemoryTap: () => context.pushNamed(RouteNames.createMemory),
           ),
           const SizedBox(height: AppSpacing.xl),
           MemoriesGridSection(
             trips: state.finishedTrips,
-            onTripTap: (trip) => _openTrip(context, trip),
+            onTripTap: (trip) => _openWrapUp(context, trip),
           ),
         ],
       ],
@@ -173,15 +192,14 @@ class _NoMemoriesYet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Icon(
-          Icons.auto_stories_outlined,
-          color: AppColors.textTertiary,
-          size: 40,
+        Text(
+          '✦',
+          style: AppTypography.bigNumber.copyWith(color: AppColors.primary),
         ),
         const SizedBox(height: AppSpacing.base),
         Text(
           'No memories yet',
-          style: AppTypography.headlineSerif,
+          style: AppTypography.screenTitle.copyWith(fontSize: 20),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.xs),
