@@ -21,8 +21,23 @@ abstract class AppColors {
 
   static const Color primary = Color(0xFFF29520);
   static const Color primaryTint = Color(0x26F29520);
+  // Warm light variant of primary — serif emphasis spans, headline italics.
+  static const Color primaryLight = Color(0xFFF2A65A);
   static const Color accentCoral = Color(0xFFFF6D79);
   static const Color accentCoralTint = Color(0x26FF6D79);
   static const Color accentPurple = Color(0xFF8962C5);
   static const Color accentPurpleTint = Color(0x1A8962C5);
+  // Light variant of accentPurple — compare column B text.
+  static const Color accentPurpleLight = Color(0xFFC9A9F5);
+  // Shopping category color.
+  static const Color accentBlue = Color(0xFF4FB0D8);
+
+  // Modal barrier scrim — #07091A @ 72%.
+  static const Color scrim = Color(0xB807091A);
+
+  /// Tints an accent [color] to the given [opacity] (0–1) for icon-chip
+  /// fills, card washes and borders — the 10–18% alpha fills used throughout
+  /// the redesign (e.g. `AppColors.tint(AppColors.primary, .16)`).
+  static Color tint(Color color, double opacity) =>
+      color.withValues(alpha: opacity);
 }
