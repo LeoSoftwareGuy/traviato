@@ -129,6 +129,40 @@ void main() {
     },
   );
 
+  test(
+    'applyItemUpserted invalidates checklistProgressForTripProvider so '
+    'Home reflects the new counts',
+    () async {
+      final repo = FakeChecklistRepository()
+        ..itemsResult = Right([buildChecklistItemEntity(id: 'i1')]);
+      final container = _buildContainer(repo);
+      addTearDown(container.dispose);
+      container.listen(checklistControllerProvider('t1'), (_, _) {});
+      container.listen(checklistProgressForTripProvider('t1'), (_, _) {});
+
+      await container.read(checklistControllerProvider('t1').future);
+      final staleProgress = await container.read(
+        checklistProgressForTripProvider('t1').future,
+      );
+      expect(staleProgress.packed, 0);
+
+      final notifier = container.read(
+        checklistControllerProvider('t1').notifier,
+      );
+      repo.itemsResult = Right([
+        buildChecklistItemEntity(id: 'i1', isChecked: true),
+      ]);
+      notifier.applyItemUpserted(
+        buildChecklistItemEntity(id: 'i1', isChecked: true),
+      );
+
+      final freshProgress = await container.read(
+        checklistProgressForTripProvider('t1').future,
+      );
+      expect(freshProgress.packed, 1);
+    },
+  );
+
   test('applyItemRemoved removes the item from state', () async {
     final repo = FakeChecklistRepository()
       ..itemsResult = Right([
