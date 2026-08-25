@@ -10,6 +10,9 @@ part 'checklist_controller.g.dart';
 
 @riverpod
 class ChecklistController extends _$ChecklistController {
+  ChecklistProgressForTrip get _progressNotifier =>
+      ref.read(checklistProgressForTripProvider(tripId).notifier);
+
   @override
   Future<ChecklistState> build(String tripId) async {
     final repo = ref.watch(checklistRepositoryProvider);
@@ -29,7 +32,7 @@ class ChecklistController extends _$ChecklistController {
       );
     }
 
-    ref.invalidate(checklistProgressForTripProvider(tripId));
+    _progressNotifier.applyItems(items);
 
     return ChecklistState(
       items: items,
@@ -55,18 +58,15 @@ class ChecklistController extends _$ChecklistController {
           ]
         : [...current.items, item];
     state = AsyncData(current.copyWith(items: updated));
-    ref.invalidate(checklistProgressForTripProvider(tripId));
+    _progressNotifier.applyItems(updated);
   }
 
   /// Called by the delete mutation after a successful delete.
   void applyItemRemoved(String itemId) {
     final current = state.value;
     if (current == null) return;
-    state = AsyncData(
-      current.copyWith(
-        items: current.items.where((i) => i.id != itemId).toList(),
-      ),
-    );
-    ref.invalidate(checklistProgressForTripProvider(tripId));
+    final remaining = current.items.where((i) => i.id != itemId).toList();
+    state = AsyncData(current.copyWith(items: remaining));
+    _progressNotifier.applyItems(remaining);
   }
 }

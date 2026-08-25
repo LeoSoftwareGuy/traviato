@@ -105,19 +105,12 @@ final class ChecklistRepositoryProvider
 String _$checklistRepositoryHash() =>
     r'99f967ec0f686abd9579d6cf0c3da9070cd3de5a';
 
-@ProviderFor(checklistProgressForTrip)
+@ProviderFor(ChecklistProgressForTrip)
 final checklistProgressForTripProvider = ChecklistProgressForTripFamily._();
 
 final class ChecklistProgressForTripProvider
     extends
-        $FunctionalProvider<
-          AsyncValue<ChecklistProgress>,
-          ChecklistProgress,
-          FutureOr<ChecklistProgress>
-        >
-    with
-        $FutureModifier<ChecklistProgress>,
-        $FutureProvider<ChecklistProgress> {
+        $AsyncNotifierProvider<ChecklistProgressForTrip, ChecklistProgress> {
   ChecklistProgressForTripProvider._({
     required ChecklistProgressForTripFamily super.from,
     required String super.argument,
@@ -141,15 +134,7 @@ final class ChecklistProgressForTripProvider
 
   @$internal
   @override
-  $FutureProviderElement<ChecklistProgress> $createElement(
-    $ProviderPointer pointer,
-  ) => $FutureProviderElement(pointer);
-
-  @override
-  FutureOr<ChecklistProgress> create(Ref ref) {
-    final argument = this.argument as String;
-    return checklistProgressForTrip(ref, argument);
-  }
+  ChecklistProgressForTrip create() => ChecklistProgressForTrip();
 
   @override
   bool operator ==(Object other) {
@@ -164,10 +149,17 @@ final class ChecklistProgressForTripProvider
 }
 
 String _$checklistProgressForTripHash() =>
-    r'23b0fd481832d1280b1005a72da109e455e26419';
+    r'9d5cf773bfd18f5350c15bc067b9182a9f5a3b0a';
 
 final class ChecklistProgressForTripFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<ChecklistProgress>, String> {
+    with
+        $ClassFamilyOverride<
+          ChecklistProgressForTrip,
+          AsyncValue<ChecklistProgress>,
+          ChecklistProgress,
+          FutureOr<ChecklistProgress>,
+          String
+        > {
   ChecklistProgressForTripFamily._()
     : super(
         retry: null,
@@ -182,4 +174,27 @@ final class ChecklistProgressForTripFamily extends $Family
 
   @override
   String toString() => r'checklistProgressForTripProvider';
+}
+
+abstract class _$ChecklistProgressForTrip
+    extends $AsyncNotifier<ChecklistProgress> {
+  late final _$args = ref.$arg as String;
+  String get tripId => _$args;
+
+  FutureOr<ChecklistProgress> build(String tripId);
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<ChecklistProgress>, ChecklistProgress>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<ChecklistProgress>, ChecklistProgress>,
+              AsyncValue<ChecklistProgress>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, () => build(_$args));
+  }
 }

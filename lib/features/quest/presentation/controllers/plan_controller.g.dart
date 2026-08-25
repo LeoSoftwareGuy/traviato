@@ -50,7 +50,7 @@ final class PlanControllerProvider
   }
 }
 
-String _$planControllerHash() => r'6961b58331cf98f4020235098bf6cebe1d4ad8ca';
+String _$planControllerHash() => r'7434dc72e543b49b4bce2958d5f552709e39df2d';
 
 final class PlanControllerFamily extends $Family
     with

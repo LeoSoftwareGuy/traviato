@@ -34,7 +34,7 @@ final class ExpenseListControllerProvider
 }
 
 String _$expenseListControllerHash() =>
-    r'133bc7dedf0fffb3a792b55461ad87a10a3f75f1';
+    r'7f7f4d5a8c26e379a87cf75613946a01c554262e';
 
 abstract class _$ExpenseListController
     extends $AsyncNotifier<ExpenseListState> {
