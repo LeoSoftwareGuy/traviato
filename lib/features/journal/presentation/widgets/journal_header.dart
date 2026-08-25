@@ -5,19 +5,17 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
-/// Back, memory name, and a stars badge — stub `0` until the points
-/// migration lands (Figma "current trip - journal" doesn't show the badge
-/// in this frame, but the issue's acceptance criteria calls for it).
+/// Back, mono `JOURNAL` eyebrow, and a stars badge — stub `0` until the
+/// points migration lands (Figma "current trip - journal" doesn't show the
+/// badge in this frame, but the issue's acceptance criteria calls for it).
 /// Delete lives in Plan's manage-memory sheet (R-5), not here.
 class JournalHeader extends StatelessWidget {
   const JournalHeader({
-    required this.tripName,
     required this.stars,
     required this.onBack,
     super.key,
   });
 
-  final String tripName;
   final int stars;
   final VoidCallback onBack;
 
@@ -26,14 +24,14 @@ class JournalHeader extends StatelessWidget {
     return Row(
       children: [
         _CircleIconButton(icon: Icons.arrow_back, onTap: onBack),
-        const SizedBox(width: AppSpacing.sm),
         Expanded(
-          child: Text(
-            tripName,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.headlineSerif.copyWith(fontSize: 18),
+          child: Center(
+            child: Text(
+              'JOURNAL',
+              style: AppTypography.mono.copyWith(
+                color: AppColors.textTertiary,
+              ),
+            ),
           ),
         ),
         const SizedBox(width: AppSpacing.sm),

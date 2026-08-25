@@ -9,6 +9,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
+import '../../../../core/widgets/star_award_toast.dart';
 import '../controllers/journal_controller.dart';
 import '../controllers/journal_state.dart';
 import '../mutations/journal_mutations.dart';
@@ -83,7 +84,7 @@ class _JournalContent extends ConsumerWidget {
         AppSpacing.xxl,
       ),
       children: [
-        JournalHeader(tripName: state.trip.name, stars: 0, onBack: onBack),
+        JournalHeader(stars: 0, onBack: onBack),
         const SizedBox(height: AppSpacing.lg),
         if (!state.hasDateRange || currentDay == null)
           const _NoDatesYet()
@@ -101,18 +102,9 @@ class _JournalContent extends ConsumerWidget {
             onSelect: notifier.selectDay,
           ),
           const SizedBox(height: AppSpacing.base),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Day ${state.currentDayNumber}',
-                style: AppTypography.fieldLabel,
-              ),
-              Text(
-                'Journal started',
-                style: AppTypography.caption.copyWith(letterSpacing: 0),
-              ),
-            ],
+          Text(
+            'Day ${state.currentDayNumber} — ${state.trip.name}',
+            style: AppTypography.screenTitle.copyWith(fontSize: 26),
           ),
           const SizedBox(height: AppSpacing.lg),
           if (!state.isCurrentDayNoteCached)
@@ -126,13 +118,20 @@ class _JournalContent extends ConsumerWidget {
             DayNoteCard(
               key: ValueKey(currentDay),
               content: state.currentNote?.content ?? '',
+              updatedAt: state.currentNote?.updatedAt,
               isSaving: isSavingNote,
-              onSave: (content) => runUpsertNote(
-                ref: ref,
-                tripId: tripId,
-                dayDate: currentDay,
-                content: content,
-              ),
+              onSave: (content) {
+                final isFirstNote = state.currentNote == null;
+                runUpsertNote(
+                  ref: ref,
+                  tripId: tripId,
+                  dayDate: currentDay,
+                  content: content,
+                );
+                if (isFirstNote && content.trim().isNotEmpty) {
+                  showStarToast(context, '✦ +1 star · note logged');
+                }
+              },
             ),
           const SizedBox(height: AppSpacing.xl),
           PhotosStrip(
