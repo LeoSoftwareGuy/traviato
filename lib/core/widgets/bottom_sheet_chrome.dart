@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
-import '../theme/app_motion.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
+import 'rise_in.dart';
 
 /// Sheet background gradient — `docs/design/README.md` § Shared: Add-expense
 /// sheet / Manage memory sheet. Distinct from the three ground/photo/CTA
@@ -27,17 +27,7 @@ class BottomSheetChrome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: AppMotion.riseInDuration,
-      curve: AppMotion.riseInCurve,
-      builder: (context, t, child) => Opacity(
-        opacity: t,
-        child: Transform.translate(
-          offset: Offset(0, AppMotion.riseInOffset * (1 - t)),
-          child: child,
-        ),
-      ),
+    return RiseIn(
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: _sheetGradient,

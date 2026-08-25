@@ -10,12 +10,16 @@ import 'expense_money_format.dart';
 /// One "Memories" row: selection circle, name/place, total, duration ·
 /// items, and a spend bar proportional to [maxTotal] (`docs/design/README.md`
 /// § 8). Tapping selects the memory's detail drill-down below the list.
+///
+/// Shared with the Compare screen (§ 9), which passes [accentColor] —
+/// primary for pick A, purple for pick B — instead of the default.
 class ExpenseSummaryTile extends StatelessWidget {
   const ExpenseSummaryTile({
     required this.summary,
     required this.maxTotal,
     required this.isSelected,
     required this.onTap,
+    this.accentColor = AppColors.primary,
     super.key,
   });
 
@@ -23,10 +27,11 @@ class ExpenseSummaryTile extends StatelessWidget {
   final double maxTotal;
   final bool isSelected;
   final VoidCallback onTap;
+  final Color accentColor;
 
   @override
   Widget build(BuildContext context) {
-    final barColor = isSelected ? AppColors.primary : AppColors.accentPurple;
+    final barColor = isSelected ? accentColor : AppColors.accentPurple;
     final proportion = maxTotal <= 0
         ? 0.0
         : (summary.totalAmount / maxTotal).clamp(0.0, 1.0);
@@ -41,11 +46,11 @@ class ExpenseSummaryTile extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.tint(AppColors.primary, .08)
+              ? AppColors.tint(accentColor, .08)
               : AppColors.surface,
           border: Border.all(
             color: isSelected
-                ? AppColors.tint(AppColors.primary, .55)
+                ? AppColors.tint(accentColor, .55)
                 : AppColors.surfaceBorder,
           ),
           borderRadius: AppRadius.cardRadius,
@@ -56,7 +61,10 @@ class ExpenseSummaryTile extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _SelectionCircle(isSelected: isSelected),
+                _SelectionCircle(
+                  isSelected: isSelected,
+                  accentColor: accentColor,
+                ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Column(
@@ -118,9 +126,10 @@ class ExpenseSummaryTile extends StatelessWidget {
 }
 
 class _SelectionCircle extends StatelessWidget {
-  const _SelectionCircle({required this.isSelected});
+  const _SelectionCircle({required this.isSelected, required this.accentColor});
 
   final bool isSelected;
+  final Color accentColor;
 
   @override
   Widget build(BuildContext context) {
@@ -130,10 +139,10 @@ class _SelectionCircle extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: isSelected
-            ? AppColors.tint(AppColors.primary, .28)
+            ? AppColors.tint(accentColor, .28)
             : Colors.transparent,
         border: Border.all(
-          color: isSelected ? AppColors.primary : AppColors.surfaceBorder,
+          color: isSelected ? accentColor : AppColors.surfaceBorder,
           width: 1.5,
         ),
         shape: BoxShape.circle,
