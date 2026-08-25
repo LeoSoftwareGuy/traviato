@@ -144,7 +144,6 @@ class _ToDoSheetState extends ConsumerState<ToDoSheet> {
                 quests: _quests!,
                 onToggle: _toggle,
                 onEditQuest: (_) {},
-                onAddQuest: () {},
               ),
           ],
         ),

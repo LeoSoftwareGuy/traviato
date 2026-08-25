@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
@@ -14,7 +15,9 @@ import '../controllers/plan_controller.dart';
 import '../controllers/plan_state.dart';
 import '../mutations/quest_mutations.dart';
 import '../widgets/add_edit_quest_sheet.dart';
+import '../widgets/add_quest_row.dart';
 import '../widgets/day_navigator.dart';
+import '../widgets/manage_memory_sheet.dart';
 import '../widgets/plan_header.dart';
 import '../widgets/quest_timeline.dart';
 
@@ -22,6 +25,13 @@ class PlanPage extends ConsumerWidget {
   const PlanPage({required this.tripId, super.key});
 
   final String tripId;
+
+  Future<void> _openManageSheet(BuildContext context, WidgetRef ref) async {
+    final deleted = await ManageMemorySheet.show(context, tripId: tripId);
+    if (deleted == true && context.mounted) {
+      context.goNamed(RouteNames.home);
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,14 +50,25 @@ class PlanPage extends ConsumerWidget {
     final planAsync = ref.watch(planControllerProvider(tripId));
 
     return Scaffold(
-      body: SafeArea(
-        child: planAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => AsyncErrorRetryScaffold(
-            message: presentationFailureMessage(error),
-            onRetry: () => ref.invalidate(planControllerProvider(tripId)),
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: AppGradients.screenGroundVertical(
+            topColor: AppGradients.groundTopPlanChecklistExpenses,
           ),
-          data: (state) => _PlanContent(tripId: tripId, state: state),
+        ),
+        child: SafeArea(
+          child: planAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => AsyncErrorRetryScaffold(
+              message: presentationFailureMessage(error),
+              onRetry: () => ref.invalidate(planControllerProvider(tripId)),
+            ),
+            data: (state) => _PlanContent(
+              tripId: tripId,
+              state: state,
+              onManageTap: () => _openManageSheet(context, ref),
+            ),
+          ),
         ),
       ),
     );
@@ -55,13 +76,21 @@ class PlanPage extends ConsumerWidget {
 }
 
 class _PlanContent extends ConsumerWidget {
-  const _PlanContent({required this.tripId, required this.state});
+  const _PlanContent({
+    required this.tripId,
+    required this.state,
+    required this.onManageTap,
+  });
 
   final String tripId;
   final PlanState state;
+  final VoidCallback onManageTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentDay = state.questsForCurrentDay;
+    final doneCount = currentDay.where((q) => q.isCompleted).length;
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.base,
@@ -72,19 +101,31 @@ class _PlanContent extends ConsumerWidget {
       children: [
         PlanHeader(
           trip: state.trip,
+          currentDayNumber: state.currentDayNumber,
+          totalDays: state.totalDays,
           onBack: () => context.pop(),
           onChecklistTap: () => context.pushNamed(
             RouteNames.tripChecklist,
             pathParameters: {'tripId': tripId},
           ),
+          onManageTap: onManageTap,
         ),
-        const SizedBox(height: AppSpacing.xl),
+        const SizedBox(height: AppSpacing.base),
         if (!state.hasDateRange)
           const _NoDatesYet()
         else ...[
+          Text(
+            '${state.totalQuestsPlanned} quests planned · '
+            '${state.totalDays} days total',
+            style: AppTypography.chipLabel.copyWith(color: AppColors.textMuted),
+          ),
+          const SizedBox(height: AppSpacing.lg),
           DayNavigator(
             currentDate: state.currentDayDate!,
             dayNumber: state.currentDayNumber!,
+            totalDays: state.totalDays,
+            doneCount: doneCount,
+            totalForDay: currentDay.length,
             canGoToPreviousDay: state.canGoToPreviousDay,
             canGoToNextDay: state.canGoToNextDay,
             onPreviousDay: () => ref
@@ -92,25 +133,14 @@ class _PlanContent extends ConsumerWidget {
                 .goToPreviousDay(),
             onNextDay: () =>
                 ref.read(planControllerProvider(tripId).notifier).goToNextDay(),
+            onSelectDayNumber: (day) => ref
+                .read(planControllerProvider(tripId).notifier)
+                .goToDayNumber(day),
           ),
-          const SizedBox(height: AppSpacing.xl),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${state.totalQuestsPlanned} quests planned',
-                style: AppTypography.fieldLabel,
-              ),
-              Text(
-                '${state.totalDays} days total',
-                style: AppTypography.caption.copyWith(letterSpacing: 0),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.base),
+          const SizedBox(height: AppSpacing.lg),
           QuestTimeline(
             tripId: tripId,
-            quests: state.questsForCurrentDay,
+            quests: currentDay,
             onToggle: (quest) =>
                 runToggleQuest(ref: ref, tripId: tripId, quest: quest),
             onEditQuest: (quest) => AddEditQuestSheet.show(
@@ -119,27 +149,16 @@ class _PlanContent extends ConsumerWidget {
               dayDate: state.currentDayDate!,
               quest: quest,
             ),
-            onAddQuest: () => AddEditQuestSheet.show(
+          ),
+          if (currentDay.isNotEmpty) const SizedBox(height: AppSpacing.sm),
+          AddQuestRow(
+            dayNumber: state.currentDayNumber!,
+            onTap: () => AddEditQuestSheet.show(
               context,
               tripId: tripId,
               dayDate: state.currentDayDate!,
             ),
           ),
-          if (state.questsForCurrentDay.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.lg),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => AddEditQuestSheet.show(
-                  context,
-                  tripId: tripId,
-                  dayDate: state.currentDayDate!,
-                ),
-                icon: const Icon(Icons.add),
-                label: const Text('Add plan'),
-              ),
-            ),
-          ],
         ],
       ],
     );
