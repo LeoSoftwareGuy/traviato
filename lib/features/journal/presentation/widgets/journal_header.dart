@@ -5,22 +5,21 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
-/// Back, memory name, delete (bin), and a stars badge — stub `0` until the
-/// points migration lands (Figma "current trip - journal" doesn't show the
-/// badge in this frame, but the issue's acceptance criteria calls for it).
+/// Back, memory name, and a stars badge — stub `0` until the points
+/// migration lands (Figma "current trip - journal" doesn't show the badge
+/// in this frame, but the issue's acceptance criteria calls for it).
+/// Delete lives in Plan's manage-memory sheet (R-5), not here.
 class JournalHeader extends StatelessWidget {
   const JournalHeader({
     required this.tripName,
     required this.stars,
     required this.onBack,
-    required this.onDelete,
     super.key,
   });
 
   final String tripName;
   final int stars;
   final VoidCallback onBack;
-  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -39,19 +38,13 @@ class JournalHeader extends StatelessWidget {
         ),
         const SizedBox(width: AppSpacing.sm),
         _StarsBadge(stars: stars),
-        const SizedBox(width: AppSpacing.sm),
-        _CircleIconButton(
-          key: const Key('journal-delete-action'),
-          icon: Icons.delete_outline,
-          onTap: onDelete,
-        ),
       ],
     );
   }
 }
 
 class _CircleIconButton extends StatelessWidget {
-  const _CircleIconButton({super.key, required this.icon, required this.onTap});
+  const _CircleIconButton({required this.icon, required this.onTap});
 
   final IconData icon;
   final VoidCallback onTap;
