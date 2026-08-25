@@ -285,10 +285,16 @@ class _ChecklistRow extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       borderRadius: AppRadius.badgeRadius,
+      splashColor: AppColors.tint(AppColors.primary, .18),
+      highlightColor: AppColors.tint(AppColors.primary, .1),
       child: DashedRRectBorder(
-        color: AppColors.surfaceBorder,
+        color: AppColors.tint(AppColors.textSecondary, .24),
         borderRadius: AppRadius.badgeRadius,
-        child: Padding(
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.tint(AppColors.surfaceBorder, .4),
+            borderRadius: AppRadius.badgeRadius,
+          ),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
             vertical: AppSpacing.sm,
