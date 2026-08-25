@@ -172,7 +172,10 @@ class _DayNoteCardState extends State<DayNoteCard> {
               hintStyle: AppTypography.bodyInput.copyWith(
                 color: AppColors.textTertiary,
               ),
+              filled: false,
               border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
               isCollapsed: true,
             ),
           ),
