@@ -4,8 +4,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/dashed_rrect_border.dart';
 
-/// "Add an item..." row pinned under a category's item list.
+/// Dashed "+ Add something of your own..." row pinned under a category's
+/// item list. `docs/design/README.md` § 6.
 class AddChecklistItemInput extends StatefulWidget {
   const AddChecklistItemInput({required this.onSubmit, super.key});
 
@@ -33,54 +35,41 @@ class _AddChecklistItemInputState extends State<AddChecklistItemInput> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              border: Border.all(color: AppColors.surfaceBorder),
-              borderRadius: AppRadius.badgeRadius,
+    return DashedRRectBorder(
+      color: AppColors.surfaceBorder,
+      borderRadius: AppRadius.cardRadius,
+      child: Row(
+        children: [
+          const SizedBox(width: AppSpacing.base),
+          Text(
+            '+',
+            style: AppTypography.bodyInput.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
             ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
             child: TextField(
               controller: _controller,
               style: AppTypography.bodyInput,
               onSubmitted: (_) => _submit(),
               decoration: InputDecoration(
-                hintText: 'Add an item...',
+                hintText: 'Add something of your own...',
                 hintStyle: AppTypography.bodyInput.copyWith(
                   color: AppColors.textTertiary,
                   fontWeight: FontWeight.w500,
                 ),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.base,
                   vertical: AppSpacing.md,
                 ),
               ),
             ),
           ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        InkWell(
-          onTap: _submit,
-          borderRadius: AppRadius.badgeRadius,
-          child: Container(
-            width: 44,
-            height: 44,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: AppColors.surfaceBorder,
-              borderRadius: AppRadius.badgeRadius,
-            ),
-            child: const Icon(
-              Icons.add,
-              color: AppColors.textPrimary,
-              size: 20,
-            ),
-          ),
-        ),
-      ],
+          const SizedBox(width: AppSpacing.base),
+        ],
+      ),
     );
   }
 }

@@ -71,7 +71,6 @@ void main() {
 
     expect(state.totalCount, 3);
     expect(state.checkedCount, 2);
-    expect(state.progressPercent, 67);
     expect(state.countFor(ChecklistCategory.travelEssentials), 2);
     expect(state.checkedCountFor(ChecklistCategory.travelEssentials), 1);
     expect(state.countFor(ChecklistCategory.clothingShoes), 1);

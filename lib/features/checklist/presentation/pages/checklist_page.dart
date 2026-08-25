@@ -5,19 +5,19 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
-import '../../domain/entities/checklist_category.dart';
+import '../../../../core/widgets/star_award_toast.dart';
 import '../../domain/entities/checklist_item_entity.dart';
 import '../controllers/checklist_controller.dart';
 import '../controllers/checklist_state.dart';
 import '../mutations/checklist_mutations.dart';
 import '../widgets/add_checklist_item_input.dart';
 import '../widgets/category_tabs.dart';
-import '../widgets/checklist_category_icons.dart';
 import '../widgets/checklist_item_tile.dart';
 import '../widgets/checklist_progress_bar.dart';
 
@@ -65,14 +65,22 @@ class ChecklistPage extends ConsumerWidget {
     final checklistAsync = ref.watch(checklistControllerProvider(tripId));
 
     return Scaffold(
-      body: SafeArea(
-        child: checklistAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => AsyncErrorRetryScaffold(
-            message: presentationFailureMessage(error),
-            onRetry: () => ref.invalidate(checklistControllerProvider(tripId)),
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: AppGradients.screenGroundVertical(
+            topColor: AppGradients.groundTopPlanChecklistExpenses,
           ),
-          data: (state) => _ChecklistContent(tripId: tripId, state: state),
+        ),
+        child: SafeArea(
+          child: checklistAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => AsyncErrorRetryScaffold(
+              message: presentationFailureMessage(error),
+              onRetry: () =>
+                  ref.invalidate(checklistControllerProvider(tripId)),
+            ),
+            data: (state) => _ChecklistContent(tripId: tripId, state: state),
+          ),
         ),
       ),
     );
@@ -103,7 +111,6 @@ class _ChecklistContent extends ConsumerWidget {
         ChecklistProgressBar(
           checkedCount: state.checkedCount,
           totalCount: state.totalCount,
-          progressPercent: state.progressPercent,
         ),
         const SizedBox(height: AppSpacing.base),
         CategoryTabs(
@@ -113,8 +120,6 @@ class _ChecklistContent extends ConsumerWidget {
           onSelect: notifier.selectCategory,
         ),
         const SizedBox(height: AppSpacing.xl),
-        _CategorySectionHeader(category: state.selectedCategory),
-        const SizedBox(height: AppSpacing.md),
         if (itemsForCategory.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
@@ -149,49 +154,47 @@ class _ChecklistHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        IconButton(onPressed: onBack, icon: const Icon(Icons.arrow_back)),
-        Expanded(
-          child: Text(
-            'Checklist',
-            textAlign: TextAlign.center,
-            style: AppTypography.headlineSerif,
-          ),
+        Row(
+          children: [
+            InkWell(
+              onTap: onBack,
+              borderRadius: AppRadius.badgeRadius,
+              child: Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  border: Border.all(color: AppColors.surfaceBorder),
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: const Icon(
+                  Icons.arrow_back,
+                  size: 18,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Text(
+                  'CHECKLIST',
+                  style: AppTypography.mono.copyWith(
+                    color: AppColors.textTertiary,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 36),
+          ],
         ),
-        const SizedBox(width: 48),
-      ],
-    );
-  }
-}
-
-class _CategorySectionHeader extends StatelessWidget {
-  const _CategorySectionHeader({required this.category});
-
-  final ChecklistCategory category;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          alignment: Alignment.center,
-          decoration: const BoxDecoration(
-            color: AppColors.accentCoralTint,
-            borderRadius: AppRadius.badgeRadius,
-          ),
-          child: Icon(
-            checklistCategoryIcon(category),
-            size: 18,
-            color: AppColors.accentCoral,
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.base),
         Text(
-          category.displayName,
-          style: AppTypography.headlineSerif.copyWith(fontSize: 17),
+          'Pack for the trip',
+          style: AppTypography.screenTitle.copyWith(fontSize: 26),
         ),
       ],
     );
@@ -227,8 +230,11 @@ class _ToggleableItemTile extends ConsumerWidget {
       child: ChecklistItemTile(
         item: item,
         isToggling: toggleState is MutationPending,
-        onToggle: () =>
-            runToggleChecklistItem(ref: ref, tripId: tripId, item: item),
+        onToggle: () {
+          final wasChecked = item.isChecked;
+          runToggleChecklistItem(ref: ref, tripId: tripId, item: item);
+          if (!wasChecked) showStarToast(context, '✦ Packed — nice');
+        },
       ),
     );
   }

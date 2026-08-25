@@ -53,11 +53,9 @@ void main() {
     await _pump(tester, repo: repo);
     await tester.pumpAndSettle();
 
-    // Appears both in the tab pill and the section header below it.
-    expect(find.text('Travel essentials'), findsNWidgets(2));
+    expect(find.text('Travel essentials'), findsOneWidget);
     expect(find.text('1/2'), findsOneWidget);
     expect(find.text('1 of 2 packed'), findsOneWidget);
-    expect(find.text('50%'), findsOneWidget);
   });
 
   testWidgets('shows the essential badge on flagged items', (tester) async {
@@ -81,6 +79,34 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repo.toggleCallCount, 1);
+  });
+
+  testWidgets('checking an item shows the star toast', (tester) async {
+    final repo = FakeChecklistRepository()
+      ..itemsResult = Right([buildChecklistItemEntity(id: 'i1')]);
+    await _pump(tester, repo: repo);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('checklist-item-check-i1')));
+    await tester.pump();
+
+    expect(find.text('✦ Packed — nice'), findsOneWidget);
+  });
+
+  testWidgets('unchecking an item does not show the star toast', (
+    tester,
+  ) async {
+    final repo = FakeChecklistRepository()
+      ..itemsResult = Right([
+        buildChecklistItemEntity(id: 'i1', isChecked: true),
+      ]);
+    await _pump(tester, repo: repo);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('checklist-item-check-i1')));
+    await tester.pump();
+
+    expect(find.text('✦ Packed — nice'), findsNothing);
   });
 
   testWidgets('submitting the add-item input adds to the selected category', (
