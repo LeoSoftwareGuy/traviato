@@ -28,3 +28,14 @@ final class TripDeletedDispatched extends GlobalEvent {
   @override
   List<Object?> get props => [tripId];
 }
+
+/// Fired after a rename, cover change, or date shift — the manage memory
+/// sheet's edits (`docs/design/README.md` Shared: Manage memory sheet).
+final class TripUpdatedDispatched extends GlobalEvent {
+  const TripUpdatedDispatched({required this.trip});
+
+  final TripCardEntity trip;
+
+  @override
+  List<Object?> get props => [trip];
+}

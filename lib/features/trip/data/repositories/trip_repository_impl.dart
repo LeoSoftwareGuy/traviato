@@ -72,6 +72,47 @@ class TripRepositoryImpl implements TripRepository {
   }
 
   @override
+  Future<Either<Failure, TripEntity>> updateTrip({
+    required String id,
+    String? name,
+    String? coverImagePath,
+  }) async {
+    try {
+      return Right(
+        await _remote.updateTrip(
+          id: id,
+          name: name,
+          coverImagePath: coverImagePath,
+        ),
+      );
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, TripEntity>> shiftTripDates({
+    required String id,
+    required int deltaDays,
+  }) async {
+    try {
+      return Right(
+        await _remote.shiftTripDates(id: id, deltaDays: deltaDays),
+      );
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> deleteTrip(String id) async {
     try {
       await _remote.deleteTrip(id);

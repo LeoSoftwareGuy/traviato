@@ -10,6 +10,10 @@ abstract interface class DayNoteRepository {
     required DateTime dayDate,
   });
 
+  /// Every note across the trip — used for the manage sheet's delete
+  /// consequence count ("N days of notes").
+  Future<Either<Failure, List<DayNoteEntity>>> getNotesForTrip(String tripId);
+
   Future<Either<Failure, DayNoteEntity>> upsertNote({
     required String tripId,
     required DateTime dayDate,

@@ -30,6 +30,21 @@ class DayNoteRepositoryImpl implements DayNoteRepository {
   }
 
   @override
+  Future<Either<Failure, List<DayNoteEntity>>> getNotesForTrip(
+    String tripId,
+  ) async {
+    try {
+      return Right(await _remote.getNotesForTrip(tripId));
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+  }
+
+  @override
   Future<Either<Failure, DayNoteEntity>> upsertNote({
     required String tripId,
     required DateTime dayDate,

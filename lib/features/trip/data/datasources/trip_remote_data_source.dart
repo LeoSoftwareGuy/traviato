@@ -17,4 +17,15 @@ abstract interface class TripRemoteDataSource {
   });
 
   Future<void> deleteTrip(String id);
+
+  Future<TripModel> updateTrip({
+    required String id,
+    String? name,
+    String? coverImagePath,
+  });
+
+  Future<TripModel> shiftTripDates({
+    required String id,
+    required int deltaDays,
+  });
 }

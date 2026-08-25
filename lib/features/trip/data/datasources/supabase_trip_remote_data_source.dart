@@ -125,6 +125,68 @@ class SupabaseTripRemoteDataSource implements TripRemoteDataSource {
   }
 
   @override
+  Future<TripModel> updateTrip({
+    required String id,
+    String? name,
+    String? coverImagePath,
+  }) async {
+    if (_client.auth.currentUser == null) {
+      throw const AuthenticationException(
+        message: 'User is not authenticated',
+      );
+    }
+    try {
+      final row = await _client
+          .from(Tables.trips)
+          .update({'name': ?name, 'cover_image_path': ?coverImagePath})
+          .eq('id', id)
+          .select()
+          .single();
+      return TripModel.fromJson(row);
+    } on PostgrestException catch (e) {
+      if (e.code == PostgresErrors.insufficientPrivilege) {
+        throw PermissionException(message: e.message);
+      }
+      if (e.code == PostgresErrors.moreThanOneOrNoItemsReturned) {
+        throw NotFoundException(message: e.message);
+      }
+      throw DatabaseException(message: e.message);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<TripModel> shiftTripDates({
+    required String id,
+    required int deltaDays,
+  }) async {
+    if (_client.auth.currentUser == null) {
+      throw const AuthenticationException(
+        message: 'User is not authenticated',
+      );
+    }
+    try {
+      final row = await _client.rpc(
+        DBFunctions.shiftTripDates,
+        params: {'p_trip_id': id, 'p_delta_days': deltaDays},
+      );
+      return TripModel.fromJson(row as Map<String, dynamic>);
+    } on PostgrestException catch (e) {
+      if (e.code == PostgresErrors.insufficientPrivilege) {
+        throw PermissionException(message: e.message);
+      }
+      throw DatabaseException(message: e.message);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
   Future<void> deleteTrip(String id) async {
     if (_client.auth.currentUser == null) {
       throw const AuthenticationException(

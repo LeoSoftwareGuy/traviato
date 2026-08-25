@@ -5,8 +5,10 @@ import 'package:traviato/features/journal/domain/repositories/day_note_repositor
 
 class FakeDayNoteRepository implements DayNoteRepository {
   Either<Failure, DayNoteEntity?>? getNoteResult;
+  Either<Failure, List<DayNoteEntity>>? notesForTripResult;
   Either<Failure, DayNoteEntity>? upsertNoteResult;
   var getNoteCallCount = 0;
+  var getNotesForTripCallCount = 0;
   var upsertNoteCallCount = 0;
   DateTime? lastGetNoteDay;
   String? lastUpsertedContent;
@@ -19,6 +21,14 @@ class FakeDayNoteRepository implements DayNoteRepository {
     getNoteCallCount++;
     lastGetNoteDay = dayDate;
     return getNoteResult ?? const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, List<DayNoteEntity>>> getNotesForTrip(
+    String tripId,
+  ) async {
+    getNotesForTripCallCount++;
+    return notesForTripResult ?? const Right([]);
   }
 
   @override
