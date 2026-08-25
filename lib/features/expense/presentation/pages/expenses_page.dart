@@ -9,13 +9,17 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
+import '../../domain/entities/expense_entity.dart';
 import '../../domain/entities/expense_summary_entity.dart';
 import '../controllers/expense_list_controller.dart';
 import '../controllers/expense_list_state.dart';
 import '../widgets/add_expense_sheet.dart';
+import '../widgets/expense_biggest_category_card.dart';
 import '../widgets/expense_category_breakdown.dart';
+import '../widgets/expense_empty_selection_panel.dart';
 import '../widgets/expense_item_tile.dart';
-import '../widgets/expense_sort_dropdown.dart';
+import '../widgets/expense_load_more_row.dart';
+import '../widgets/expense_sort_toggle.dart';
 import '../widgets/expense_stats_strip.dart';
 import '../widgets/expense_summary_tile.dart';
 
@@ -27,14 +31,17 @@ class ExpensesPage extends ConsumerWidget {
     final expensesAsync = ref.watch(expenseListControllerProvider);
 
     return Scaffold(
-      body: SafeArea(
-        child: expensesAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => AsyncErrorRetryScaffold(
-            message: presentationFailureMessage(error),
-            onRetry: () => ref.invalidate(expenseListControllerProvider),
+      body: DecoratedBox(
+        decoration: const BoxDecoration(color: AppColors.background50),
+        child: SafeArea(
+          child: expensesAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => AsyncErrorRetryScaffold(
+              message: presentationFailureMessage(error),
+              onRetry: () => ref.invalidate(expenseListControllerProvider),
+            ),
+            data: (state) => _ExpensesContent(state: state),
           ),
-          data: (state) => _ExpensesContent(state: state),
         ),
       ),
     );
@@ -50,7 +57,7 @@ class _ExpensesContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(expenseListControllerProvider.notifier);
     final visible = state.visibleSummaries;
-    final maxTotal = state.maxVisibleTotal;
+    final maxTotal = state.maxTotalAmount;
     final selected = state.selectedSummary;
 
     return ListView(
@@ -61,13 +68,7 @@ class _ExpensesContent extends ConsumerWidget {
         AppSpacing.xxl,
       ),
       children: [
-        _ExpensesHeader(
-          onAddTap: () => AddExpenseSheet.show(
-            context,
-            trips: state.summaries,
-            initialTripId: state.selectedTripId,
-          ),
-        ),
+        const _ExpensesHeader(),
         if (state.isEmpty) ...[
           const SizedBox(height: AppSpacing.xxl),
           _NoExpensesYet(
@@ -75,14 +76,6 @@ class _ExpensesContent extends ConsumerWidget {
           ),
         ] else ...[
           const SizedBox(height: AppSpacing.xl),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Memories', style: AppTypography.chipLabel),
-              const _CompareButton(),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
               Expanded(
@@ -99,13 +92,24 @@ class _ExpensesContent extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              ExpenseSortDropdown(
+              ExpenseSortToggle(
                 value: state.sortMode,
                 onChanged: notifier.setSortMode,
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.base),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('MEMORIES', style: AppTypography.mono),
+              Text(
+                '${visible.length} OF ${state.matchingSummaries.length}',
+                style: AppTypography.mono,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
           if (visible.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
@@ -124,10 +128,31 @@ class _ExpensesContent extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.sm),
             ],
-          if (selected != null) ...[
-            const SizedBox(height: AppSpacing.xl),
-            _SelectedMemoryDetail(state: state, selected: selected),
+          if (state.hasMoreSummaries) ...[
+            const SizedBox(height: AppSpacing.xs),
+            ExpenseLoadMoreRow(
+              label: 'Load 3 more',
+              onTap: notifier.loadMoreSummaries,
+            ),
           ],
+          const SizedBox(height: AppSpacing.xl),
+          if (selected == null)
+            const ExpenseEmptySelectionPanel()
+          else
+            _SelectedMemoryDetail(state: state, selected: selected),
+          const SizedBox(height: AppSpacing.xl),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => AddExpenseSheet.show(
+                context,
+                trips: state.summaries,
+                initialTripId: state.selectedTripId,
+              ),
+              icon: const Icon(Icons.add),
+              label: const Text('Add expense'),
+            ),
+          ),
         ],
       ],
     );
@@ -135,83 +160,24 @@ class _ExpensesContent extends ConsumerWidget {
 }
 
 class _ExpensesHeader extends StatelessWidget {
-  const _ExpensesHeader({required this.onAddTap});
-
-  final VoidCallback onAddTap;
+  const _ExpensesHeader();
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Your spending',
-                style: AppTypography.chipLabel.copyWith(
-                  color: AppColors.textMuted,
-                ),
-              ),
-              Text('Expenses', style: AppTypography.displaySerif),
-            ],
-          ),
-        ),
-        InkWell(
-          onTap: onAddTap,
-          customBorder: const CircleBorder(),
-          child: Container(
-            width: 44,
-            height: 44,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: AppColors.primary,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.add, color: AppColors.background, size: 24),
+        Text('EXPENSES', style: AppTypography.mono),
+        // Expenses · Compare isn't built yet (separate milestone) — present
+        // but inert, matching "not built" prototype affordances.
+        Text(
+          'Compare',
+          style: AppTypography.chipLabel.copyWith(
+            color: AppColors.primary,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Compare-memories screen isn't designed yet (issue #29 AC) — rendered
-/// disabled rather than hidden, matching its Figma placement.
-class _CompareButton extends StatelessWidget {
-  const _CompareButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.surfaceBorder),
-        borderRadius: AppRadius.pillRadius,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.bar_chart_rounded,
-            size: 14,
-            color: AppColors.textTertiary,
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
-            'Compare',
-            style: AppTypography.caption.copyWith(
-              color: AppColors.textTertiary,
-              letterSpacing: 0,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -260,62 +226,94 @@ class _SelectedMemoryDetail extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Selected memory',
-          style: AppTypography.caption.copyWith(letterSpacing: 0),
-        ),
-        Text(selected.tripName, style: AppTypography.headlineSerif),
-        if (selected.place != null)
-          Text(
-            selected.place!,
-            style: AppTypography.chipLabel.copyWith(color: AppColors.textMuted),
-          ),
-        const SizedBox(height: AppSpacing.base),
-        if (state.isLoadingSelectedTripExpenses)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(AppSpacing.lg),
-              child: CircularProgressIndicator(),
+    final label = selected.place == null
+        ? selected.tripName.toUpperCase()
+        : '${selected.tripName} · ${selected.place}'.toUpperCase();
+
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(top: AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: AppTypography.mono.copyWith(color: AppColors.primary),
             ),
-          )
-        else ...[
-          ExpenseStatsStrip(
-            totalAmount: selected.totalAmount,
-            biggestCategory: state.biggestCategory,
-            perDay: selected.perDay,
-            durationDays: selected.durationDays,
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          Text('By category', style: AppTypography.fieldLabel),
-          const SizedBox(height: AppSpacing.sm),
-          ExpenseCategoryBreakdown(
-            totals: state.categoryTotals,
-            totalAmount: selected.totalAmount,
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          Text('Expenses', style: AppTypography.fieldLabel),
-          const SizedBox(height: AppSpacing.sm),
-          for (final expense in state.visibleSelectedExpenses)
-            ExpenseItemTile(expense: expense),
-          if (state.hasMoreSelectedExpenses) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Center(
-              child: TextButton(
-                onPressed: ref
-                    .read(expenseListControllerProvider.notifier)
-                    .loadMoreExpenses,
-                child: Text(
-                  'Load more '
-                  '(${(state.selectedTripExpenses?.length ?? 0) - state.visibleExpenseCount} more)',
+            const SizedBox(height: AppSpacing.base),
+            if (state.isLoadingSelectedTripExpenses)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(AppSpacing.lg),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else ...[
+              ExpenseStatsStrip(
+                totalAmount: selected.totalAmount,
+                perDay: selected.perDay,
+                durationDays: selected.durationDays,
+              ),
+              if (state.biggestCategory case final category?) ...[
+                const SizedBox(height: AppSpacing.sm),
+                ExpenseBiggestCategoryCard(
+                  category: category,
+                  amount: state.categoryTotals[category] ?? 0,
+                  totalAmount: selected.totalAmount,
+                ),
+              ],
+              const SizedBox(height: AppSpacing.xl),
+              Text('BY CATEGORY', style: AppTypography.mono),
+              const SizedBox(height: AppSpacing.sm),
+              ExpenseCategoryBreakdown(totals: state.categoryTotalsSorted),
+              const SizedBox(height: AppSpacing.xl),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('ALL EXPENSES', style: AppTypography.mono),
+                  Text(
+                    '${selected.itemCount} ITEMS · '
+                    '${_distinctDayCount(state.selectedTripExpenses)} DAYS',
+                    style: AppTypography.mono,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              ClipRRect(
+                borderRadius: AppRadius.cardRadius,
+                child: Column(
+                  children: [
+                    for (final (index, expense)
+                        in state.visibleSelectedExpenses.indexed)
+                      ExpenseItemTile(
+                        expense: expense,
+                        dayNumber: state.dayNumberFor(expense.spentOn),
+                        isEven: index.isEven,
+                      ),
+                  ],
                 ),
               ),
-            ),
+              if (state.hasMoreSelectedExpenses) ...[
+                const SizedBox(height: AppSpacing.sm),
+                ExpenseLoadMoreRow(
+                  label:
+                      'Load more '
+                      '(${(state.selectedTripExpenses?.length ?? 0) - state.visibleExpenseCount} more)',
+                  onTap: ref
+                      .read(expenseListControllerProvider.notifier)
+                      .loadMoreExpenses,
+                ),
+              ],
+            ],
           ],
-        ],
-      ],
+        ),
+      ),
     );
   }
+
+  static int _distinctDayCount(List<ExpenseEntity>? expenses) =>
+      expenses == null ? 0 : expenses.map((e) => e.spentOn).toSet().length;
 }

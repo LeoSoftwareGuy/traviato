@@ -8,6 +8,7 @@ class ExpenseSummaryEntity extends Equatable {
     required this.tripId,
     required this.tripName,
     this.place,
+    this.startDate,
     this.durationDays,
     required this.totalAmount,
     required this.itemCount,
@@ -16,6 +17,9 @@ class ExpenseSummaryEntity extends Equatable {
   final String tripId;
   final String tripName;
   final String? place;
+
+  /// Used to compute each expense's "Day N" label in the itemized list.
+  final DateTime? startDate;
   final int? durationDays;
   final double totalAmount;
   final int itemCount;
@@ -32,6 +36,7 @@ class ExpenseSummaryEntity extends Equatable {
     tripId,
     tripName,
     place,
+    startDate,
     durationDays,
     totalAmount,
     itemCount,

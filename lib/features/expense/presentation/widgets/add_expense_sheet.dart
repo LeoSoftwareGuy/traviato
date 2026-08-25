@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/bottom_sheet_chrome.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../domain/entities/expense_category.dart';
 import '../../domain/entities/expense_summary_entity.dart';
@@ -16,9 +17,10 @@ import 'expense_category_chip_group.dart';
 import 'expense_trip_selector.dart';
 
 final _dateFormat = DateFormat('MMM d, y');
+final _dateChipFormat = DateFormat('MMM d');
 
-/// Bottom sheet to log a new expense against one memory (Figma
-/// "add expenses"), same chrome as `ToDoSheet`.
+/// Bottom sheet to log a new expense against one memory.
+/// `docs/design/README.md` § Shared: Add-expense sheet.
 class AddExpenseSheet extends ConsumerStatefulWidget {
   const AddExpenseSheet({
     required this.trips,
@@ -34,14 +36,11 @@ class AddExpenseSheet extends ConsumerStatefulWidget {
     required List<ExpenseSummaryEntity> trips,
     String? initialTripId,
   }) {
-    return showModalBottomSheet<void>(
+    return showAppBottomSheet<void>(
       context: context,
       // The Expenses tab's Scaffold sets extendBody (so its own content
-      // scrolls under the shell's bottom nav) — without the root navigator,
-      // this sheet would be inserted below that nav bar instead of over it.
-      useRootNavigator: true,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      // scrolls under the shell's bottom nav) — the root navigator keeps
+      // this sheet above that nav bar instead of inserting it below.
       builder: (context) =>
           AddExpenseSheet(trips: trips, initialTripId: initialTripId),
     );
@@ -58,8 +57,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
   var _autovalidate = AutovalidateMode.disabled;
   String? _tripId;
   var _category = ExpenseCategory.foodDrinks;
-  DateTime? _spentOn;
-  String? _dateError;
+  var _spentOn = DateTime.now();
 
   @override
   void initState() {
@@ -91,24 +89,17 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
     final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
-      initialDate: _spentOn ?? now,
+      initialDate: _spentOn,
       firstDate: DateTime(now.year - 5),
       lastDate: DateTime(now.year + 5),
     );
-    if (picked != null) {
-      setState(() {
-        _spentOn = picked;
-        _dateError = null;
-      });
-    }
+    if (picked != null) setState(() => _spentOn = picked);
   }
 
   Future<void> _submit() async {
     setState(() => _autovalidate = AutovalidateMode.always);
     final formValid = _formKey.currentState?.validate() ?? false;
-    final dateValid = _spentOn != null;
-    setState(() => _dateError = dateValid ? null : 'Pick a date.');
-    if (!formValid || !dateValid || _tripId == null) return;
+    if (!formValid || _tripId == null) return;
 
     try {
       await runAddExpense(
@@ -117,7 +108,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
         title: _title.text.trim(),
         amount: double.parse(_amount.text.trim()),
         category: _category,
-        spentOn: _spentOn!,
+        spentOn: _spentOn,
       );
     } catch (_) {
       // Surfaced to the user via the mutation's MutationError state below.
@@ -139,18 +130,10 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
     });
     final isLoading = ref.watch(addExpenseMutation) is MutationPending;
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.sizeOf(context).height * 0.9,
-      ),
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+    return Padding(
       padding: EdgeInsets.fromLTRB(
         AppSpacing.xl,
-        AppSpacing.base,
+        AppSpacing.sm,
         AppSpacing.xl,
         MediaQuery.viewInsetsOf(context).bottom + AppSpacing.xl,
       ),
@@ -162,62 +145,85 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: const BoxDecoration(
-                    color: AppColors.surfaceBorder,
-                    borderRadius: AppRadius.pillRadius,
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'New expense',
+                      style: AppTypography.displaySerif,
+                    ),
                   ),
-                ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
+                  ),
+                ],
               ),
-              const SizedBox(height: AppSpacing.lg),
-              Text('Add expense', style: AppTypography.headlineSerif),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.base),
               ExpenseTripSelector(
                 trips: widget.trips,
                 value: _tripId,
                 onChanged: (value) => setState(() => _tripId = value),
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text('What was it?', style: AppTypography.fieldLabel),
-              const SizedBox(height: AppSpacing.sm),
-              TextFormField(
-                controller: _title,
-                style: AppTypography.bodyInput,
-                textInputAction: TextInputAction.next,
-                validator: _validateTitle,
-                decoration: const InputDecoration(
-                  hintText: 'e.g. Sunset dinner in Oia',
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 8,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Description', style: AppTypography.fieldLabel),
+                        const SizedBox(height: AppSpacing.sm),
+                        TextFormField(
+                          controller: _title,
+                          style: AppTypography.bodyInput,
+                          textInputAction: TextInputAction.next,
+                          validator: _validateTitle,
+                          decoration: const InputDecoration(
+                            hintText: 'Sunset dinner',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    flex: 5,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Amount', style: AppTypography.fieldLabel),
+                        const SizedBox(height: AppSpacing.sm),
+                        TextFormField(
+                          controller: _amount,
+                          style: AppTypography.headlineSerif.copyWith(
+                            fontSize: 19,
+                          ),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          textInputAction: TextInputAction.done,
+                          validator: _validateAmount,
+                          decoration: const InputDecoration(
+                            prefixText: '€ ',
+                            hintText: '0',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text('Amount', style: AppTypography.fieldLabel),
-              const SizedBox(height: AppSpacing.sm),
-              TextFormField(
-                controller: _amount,
-                style: AppTypography.bodyInput,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                textInputAction: TextInputAction.done,
-                validator: _validateAmount,
-                decoration: const InputDecoration(
-                  prefixText: '€ ',
-                  hintText: '0',
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Text('Category', style: AppTypography.fieldLabel),
+              Text('CATEGORY', style: AppTypography.mono),
               const SizedBox(height: AppSpacing.sm),
               ExpenseCategoryChipGroup(
                 selected: _category,
                 onSelect: (category) => setState(() => _category = category),
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text('Date', style: AppTypography.fieldLabel),
-              const SizedBox(height: AppSpacing.sm),
               InkWell(
                 onTap: _pickDate,
                 borderRadius: AppRadius.cardRadius,
@@ -235,14 +241,8 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                     children: [
                       Expanded(
                         child: Text(
-                          _spentOn == null
-                              ? 'Pick a date'
-                              : _dateFormat.format(_spentOn!),
-                          style: AppTypography.bodyInput.copyWith(
-                            color: _spentOn == null
-                                ? AppColors.textTertiary
-                                : AppColors.textPrimary,
-                          ),
+                          _dateChipDescription(_spentOn),
+                          style: AppTypography.bodyInput,
                         ),
                       ),
                       const Icon(
@@ -254,16 +254,6 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                   ),
                 ),
               ),
-              if (_dateError != null) ...[
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  _dateError!,
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.accentCoral,
-                    letterSpacing: 0,
-                  ),
-                ),
-              ],
               const SizedBox(height: AppSpacing.xl),
               SizedBox(
                 width: double.infinity,
@@ -284,5 +274,16 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
         ),
       ),
     );
+  }
+
+  static String _dateChipDescription(DateTime date) {
+    final today = DateTime.now();
+    final isToday =
+        date.year == today.year &&
+        date.month == today.month &&
+        date.day == today.day;
+    return isToday
+        ? 'Today · ${_dateChipFormat.format(date)}'
+        : _dateFormat.format(date);
   }
 }

@@ -23,23 +23,23 @@ void main() {
     itemCount: 0,
   );
 
-  group('visibleSummaries', () {
-    test('sorts by biggest spender by default', () {
+  group('matchingSummaries / visibleSummaries', () {
+    test('latestFirst (default) does not re-sort', () {
       final state = ExpenseListState(summaries: [santorini, iceland]);
       expect(
-        state.visibleSummaries.map((s) => s.tripId),
-        ['t1', 't2'], // Iceland (2280) before Santorini (1341)
+        state.matchingSummaries.map((s) => s.tripId),
+        ['t2', 't1'], // passthrough order, not by amount
       );
     });
 
-    test('sorts alphabetically by name', () {
+    test('biggestSpender sorts by total descending', () {
       final state = ExpenseListState(
-        summaries: [iceland, santorini],
-        sortMode: ExpenseSortMode.name,
+        summaries: [santorini, iceland],
+        sortMode: ExpenseSortMode.biggestSpender,
       );
       expect(
-        state.visibleSummaries.map((s) => s.tripId),
-        ['t1', 't2'], // "Iceland" before "Santorini"
+        state.matchingSummaries.map((s) => s.tripId),
+        ['t1', 't2'], // Iceland (2280) before Santorini (1341)
       );
     });
 
@@ -48,7 +48,7 @@ void main() {
         summaries: [iceland, santorini],
         searchQuery: 'SANTO',
       );
-      expect(state.visibleSummaries.map((s) => s.tripId), ['t2']);
+      expect(state.matchingSummaries.map((s) => s.tripId), ['t2']);
     });
 
     test('an empty search query keeps every summary', () {
@@ -56,51 +56,64 @@ void main() {
         summaries: [iceland, santorini],
         searchQuery: '  ',
       );
-      expect(state.visibleSummaries, hasLength(2));
+      expect(state.matchingSummaries, hasLength(2));
     });
+
+    test(
+      'visibleSummaries pages matchingSummaries down to visibleSummaryCount',
+      () {
+        final state = ExpenseListState(
+          summaries: [iceland, santorini, noExpenses],
+          visibleSummaryCount: 2,
+        );
+        expect(state.visibleSummaries, hasLength(2));
+        expect(state.hasMoreSummaries, isTrue);
+
+        final loaded = state.copyWith(visibleSummaryCount: 3);
+        expect(loaded.visibleSummaries, hasLength(3));
+        expect(loaded.hasMoreSummaries, isFalse);
+      },
+    );
   });
 
-  group('maxVisibleTotal', () {
-    test('is the highest total among the visible rows', () {
-      final state = ExpenseListState(summaries: [iceland, santorini]);
-      expect(state.maxVisibleTotal, 2280);
-    });
-
-    test('is 0 when there are no visible summaries', () {
-      const state = ExpenseListState(summaries: []);
-      expect(state.maxVisibleTotal, 0);
-    });
-
-    test('respects the active search filter', () {
+  group('maxTotalAmount', () {
+    test('is the highest total across every memory, filtered or not', () {
       final state = ExpenseListState(
         summaries: [iceland, santorini],
         searchQuery: 'santorini',
       );
-      expect(state.maxVisibleTotal, 1341);
+      // Iceland's 2280 still wins even though the search filters it out of
+      // matchingSummaries — the spend bar compares against the true max.
+      expect(state.maxTotalAmount, 2280);
+    });
+
+    test('is 0 when there are no summaries', () {
+      const state = ExpenseListState(summaries: []);
+      expect(state.maxTotalAmount, 0);
     });
   });
 
-  group('spend bar proportion (via maxVisibleTotal)', () {
+  group('spend bar proportion (via maxTotalAmount)', () {
     test('a memory with the highest total reads as 100%', () {
       final state = ExpenseListState(summaries: [iceland, santorini]);
-      final proportion = iceland.totalAmount / state.maxVisibleTotal;
+      final proportion = iceland.totalAmount / state.maxTotalAmount;
       expect(proportion, 1.0);
     });
 
     test('a smaller total reads as its fraction of the max', () {
       final state = ExpenseListState(summaries: [iceland, santorini]);
-      final proportion = santorini.totalAmount / state.maxVisibleTotal;
+      final proportion = santorini.totalAmount / state.maxTotalAmount;
       expect(proportion, closeTo(1341 / 2280, 0.0001));
     });
 
     test('a memory with 0 expenses reads as 0%, not NaN', () {
       final state = ExpenseListState(summaries: [iceland, noExpenses]);
-      final proportion = noExpenses.totalAmount / state.maxVisibleTotal;
+      final proportion = noExpenses.totalAmount / state.maxTotalAmount;
       expect(proportion, 0.0);
     });
   });
 
-  group('categoryTotals / biggestCategory', () {
+  group('categoryTotals / categoryTotalsSorted / biggestCategory', () {
     test('sums each category from the selected trip\'s expenses', () {
       final state = ExpenseListState(
         summaries: [iceland],
@@ -116,6 +129,17 @@ void main() {
       expect(state.categoryTotals[ExpenseCategory.transport], 200);
       expect(state.categoryTotals[ExpenseCategory.accommodation], 0);
       expect(state.biggestCategory, ExpenseCategory.transport);
+      expect(
+        state.categoryTotalsSorted.map((e) => e.key),
+        [
+          ExpenseCategory.transport,
+          ExpenseCategory.foodDrinks,
+          ExpenseCategory.accommodation,
+          ExpenseCategory.activities,
+          ExpenseCategory.shopping,
+          ExpenseCategory.other,
+        ],
+      );
     });
 
     test('biggestCategory is null with no selected expenses', () {
@@ -125,6 +149,26 @@ void main() {
         selectedTripExpenses: const [],
       );
       expect(state.biggestCategory, isNull);
+    });
+  });
+
+  group('dayNumberFor', () {
+    test('is 1-based from the selected memory\'s start date', () {
+      final trip = buildExpenseSummaryEntity(
+        tripId: 't1',
+        startDate: DateTime(2026, 3, 1),
+      );
+      final state = ExpenseListState(summaries: [trip], selectedTripId: 't1');
+      expect(state.dayNumberFor(DateTime(2026, 3, 1)), 1);
+      expect(state.dayNumberFor(DateTime(2026, 3, 3)), 3);
+    });
+
+    test('is null when the memory has no start date', () {
+      final state = ExpenseListState(
+        summaries: [iceland],
+        selectedTripId: 't1',
+      );
+      expect(state.dayNumberFor(DateTime(2026, 3, 1)), isNull);
     });
   });
 

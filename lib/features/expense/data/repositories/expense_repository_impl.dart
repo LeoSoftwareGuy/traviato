@@ -34,6 +34,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
               tripId: trip.id,
               tripName: trip.name,
               place: trip.destination,
+              startDate: trip.startDate,
               durationDays: trip.durationDays,
               totalAmount: trip.expenseTotal,
               itemCount: itemCounts[trip.id] ?? 0,

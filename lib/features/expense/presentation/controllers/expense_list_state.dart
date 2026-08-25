@@ -8,11 +8,16 @@ import 'expense_sort_mode.dart';
 /// How many of the selected memory's expenses are shown before "Load more".
 const kExpenseListPageSize = 12;
 
+/// How many rows of the "Memories" list are shown before "Load 3 more"
+/// (`docs/design/README.md` § 8 — `shown` starts at 3, +3 per tap).
+const kExpenseSummaryPageSize = 3;
+
 class ExpenseListState extends Equatable {
   const ExpenseListState({
     required this.summaries,
     this.searchQuery = '',
-    this.sortMode = ExpenseSortMode.biggestSpender,
+    this.sortMode = ExpenseSortMode.latestFirst,
+    this.visibleSummaryCount = kExpenseSummaryPageSize,
     this.selectedTripId,
     this.selectedTripExpenses,
     this.visibleExpenseCount = kExpenseListPageSize,
@@ -21,6 +26,7 @@ class ExpenseListState extends Equatable {
   final List<ExpenseSummaryEntity> summaries;
   final String searchQuery;
   final ExpenseSortMode sortMode;
+  final int visibleSummaryCount;
   final String? selectedTripId;
 
   /// Full expense list for [selectedTripId], loaded lazily on row tap. Null
@@ -30,33 +36,34 @@ class ExpenseListState extends Equatable {
 
   bool get isEmpty => summaries.isEmpty;
 
-  List<ExpenseSummaryEntity> get visibleSummaries {
+  /// Search-filtered and sorted, but not yet paged down to [visibleSummaryCount].
+  List<ExpenseSummaryEntity> get matchingSummaries {
     final query = searchQuery.trim().toLowerCase();
     final filtered = query.isEmpty
         ? summaries
         : summaries
               .where((s) => s.tripName.toLowerCase().contains(query))
               .toList();
-    final sorted = [...filtered];
     switch (sortMode) {
+      case ExpenseSortMode.latestFirst:
+        return filtered;
       case ExpenseSortMode.biggestSpender:
-        sorted.sort((a, b) => b.totalAmount.compareTo(a.totalAmount));
-      case ExpenseSortMode.name:
-        sorted.sort(
-          (a, b) =>
-              a.tripName.toLowerCase().compareTo(b.tripName.toLowerCase()),
-        );
+        return [...filtered]
+          ..sort((a, b) => b.totalAmount.compareTo(a.totalAmount));
     }
-    return sorted;
   }
 
-  /// Highest total among the visible rows — the spend bar's proportion
-  /// denominator. 0 when every visible row has no expenses yet.
-  double get maxVisibleTotal => visibleSummaries.isEmpty
+  List<ExpenseSummaryEntity> get visibleSummaries =>
+      matchingSummaries.take(visibleSummaryCount).toList();
+
+  bool get hasMoreSummaries => visibleSummaryCount < matchingSummaries.length;
+
+  /// Highest total across every memory (not just the visible/filtered ones)
+  /// — the spend bar's proportion denominator. 0 when nothing has any
+  /// expenses yet.
+  double get maxTotalAmount => summaries.isEmpty
       ? 0
-      : visibleSummaries
-            .map((s) => s.totalAmount)
-            .reduce((a, b) => a > b ? a : b);
+      : summaries.map((s) => s.totalAmount).reduce((a, b) => a > b ? a : b);
 
   ExpenseSummaryEntity? get selectedSummary {
     final id = selectedTripId;
@@ -88,16 +95,30 @@ class ExpenseListState extends Equatable {
     return totals.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
   }
 
+  /// [categoryTotals], descending — matches the "By category" bar order.
+  List<MapEntry<ExpenseCategory, double>> get categoryTotalsSorted =>
+      categoryTotals.entries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value));
+
   List<ExpenseEntity> get visibleSelectedExpenses =>
       (selectedTripExpenses ?? const []).take(visibleExpenseCount).toList();
 
   bool get hasMoreSelectedExpenses =>
       visibleExpenseCount < (selectedTripExpenses?.length ?? 0);
 
+  /// 1-based day number of [date] within the selected memory, for the "DAY
+  /// N · CATEGORY" row subtitle — null when the memory has no start date.
+  int? dayNumberFor(DateTime date) {
+    final start = selectedSummary?.startDate;
+    if (start == null) return null;
+    return date.difference(start).inDays + 1;
+  }
+
   ExpenseListState copyWith({
     List<ExpenseSummaryEntity>? summaries,
     String? searchQuery,
     ExpenseSortMode? sortMode,
+    int? visibleSummaryCount,
     String? selectedTripId,
     bool clearSelectedTripId = false,
     List<ExpenseEntity>? selectedTripExpenses,
@@ -107,6 +128,7 @@ class ExpenseListState extends Equatable {
     summaries: summaries ?? this.summaries,
     searchQuery: searchQuery ?? this.searchQuery,
     sortMode: sortMode ?? this.sortMode,
+    visibleSummaryCount: visibleSummaryCount ?? this.visibleSummaryCount,
     selectedTripId: clearSelectedTripId
         ? null
         : (selectedTripId ?? this.selectedTripId),
@@ -120,6 +142,7 @@ class ExpenseListState extends Equatable {
   List<Object?> get props => [
     summaries,
     searchQuery,
+    visibleSummaryCount,
     sortMode,
     selectedTripId,
     selectedTripExpenses,

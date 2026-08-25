@@ -23,23 +23,30 @@ ProviderContainer _buildContainer(
 }
 
 void main() {
-  test('loads summaries and selects the top spender by default', () async {
-    final repo = FakeExpenseRepository()
-      ..summariesResult = Right([
-        buildExpenseSummaryEntity(tripId: 't1', totalAmount: 100),
-        buildExpenseSummaryEntity(tripId: 't2', totalAmount: 900),
-      ])
-      ..expensesForTripResult = Right([buildExpenseEntity(tripId: 't2')]);
-    final container = _buildContainer(repo);
-    addTearDown(container.dispose);
+  test(
+    'loads summaries and selects the first one (latestFirst default)',
+    () async {
+      final repo = FakeExpenseRepository()
+        ..summariesResult = Right([
+          buildExpenseSummaryEntity(tripId: 't1', totalAmount: 100),
+          buildExpenseSummaryEntity(tripId: 't2', totalAmount: 900),
+        ])
+        ..expensesForTripResult = Right([buildExpenseEntity(tripId: 't1')]);
+      final container = _buildContainer(repo);
+      addTearDown(container.dispose);
 
-    final state = await container.read(expenseListControllerProvider.future);
+      final state = await container.read(
+        expenseListControllerProvider.future,
+      );
 
-    expect(state.summaries, hasLength(2));
-    expect(state.selectedTripId, 't2'); // biggest spender
-    expect(repo.lastExpensesForTripId, 't2');
-    expect(state.selectedTripExpenses, hasLength(1));
-  });
+      expect(state.summaries, hasLength(2));
+      // latestFirst does no re-sort — the first summary as returned wins,
+      // regardless of amount.
+      expect(state.selectedTripId, 't1');
+      expect(repo.lastExpensesForTripId, 't1');
+      expect(state.selectedTripExpenses, hasLength(1));
+    },
+  );
 
   test('does not select anything when there are no memories', () async {
     final repo = FakeExpenseRepository()..summariesResult = const Right([]);
@@ -150,6 +157,58 @@ void main() {
       expect(state.selectedTripExpenses, isNull);
     },
   );
+
+  test('loadMoreSummaries pages the memories list by 3', () async {
+    final repo = FakeExpenseRepository()
+      ..summariesResult = Right(
+        List.generate(
+          5,
+          (i) => buildExpenseSummaryEntity(tripId: 't$i', totalAmount: 10),
+        ),
+      )
+      ..expensesForTripResult = const Right([]);
+    final container = _buildContainer(repo);
+    addTearDown(container.dispose);
+    container.listen(expenseListControllerProvider, (_, _) {});
+
+    await container.read(expenseListControllerProvider.future);
+    var state = container.read(expenseListControllerProvider).value!;
+    expect(state.visibleSummaries, hasLength(3));
+    expect(state.hasMoreSummaries, isTrue);
+
+    container.read(expenseListControllerProvider.notifier).loadMoreSummaries();
+    state = container.read(expenseListControllerProvider).value!;
+    expect(state.visibleSummaries, hasLength(5));
+    expect(state.hasMoreSummaries, isFalse);
+  });
+
+  test('setSearchQuery resets the memories page back to 3', () async {
+    final repo = FakeExpenseRepository()
+      ..summariesResult = Right(
+        List.generate(
+          5,
+          (i) => buildExpenseSummaryEntity(tripId: 't$i', totalAmount: 10),
+        ),
+      )
+      ..expensesForTripResult = const Right([]);
+    final container = _buildContainer(repo);
+    addTearDown(container.dispose);
+    container.listen(expenseListControllerProvider, (_, _) {});
+
+    await container.read(expenseListControllerProvider.future);
+    final notifier = container.read(expenseListControllerProvider.notifier);
+    notifier.loadMoreSummaries();
+    expect(
+      container.read(expenseListControllerProvider).value!.visibleSummaryCount,
+      6,
+    );
+
+    notifier.setSearchQuery('t1');
+    expect(
+      container.read(expenseListControllerProvider).value!.visibleSummaryCount,
+      3,
+    );
+  });
 
   test('applyExpenseAdded updates the summary total and item count', () async {
     final repo = FakeExpenseRepository()

@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/expense_category.dart';
 
-/// Icon + accent color per category (Figma "expenses" / "add expenses" —
-/// the "By category" bars and chips reuse only 3 accents across the 6
-/// categories: coral for food/shopping, orange for transport/activities,
-/// purple for accommodation, muted gray for other). Kept out of the domain
-/// entity since `IconData`/`Color` are Flutter types (docs/05-domain-layer.md).
+/// Icon + accent color per category (`docs/design/README.md` § 8 — the
+/// fixed 6-way mapping: Food & drinks coral, Transport purple, Accommodation
+/// primary, Activities success, Shopping blue, Other neutral). Kept out of
+/// the domain entity since `IconData`/`Color` are Flutter types
+/// (docs/05-domain-layer.md).
 IconData expenseCategoryIcon(ExpenseCategory category) {
   switch (category) {
     case ExpenseCategory.foodDrinks:
@@ -28,29 +28,35 @@ IconData expenseCategoryIcon(ExpenseCategory category) {
 Color expenseCategoryColor(ExpenseCategory category) {
   switch (category) {
     case ExpenseCategory.foodDrinks:
-    case ExpenseCategory.shopping:
       return AppColors.accentCoral;
     case ExpenseCategory.transport:
-    case ExpenseCategory.activities:
-      return AppColors.primary;
-    case ExpenseCategory.accommodation:
       return AppColors.accentPurple;
+    case ExpenseCategory.accommodation:
+      return AppColors.primary;
+    case ExpenseCategory.activities:
+      return AppColors.success;
+    case ExpenseCategory.shopping:
+      return AppColors.accentBlue;
     case ExpenseCategory.other:
-      return AppColors.textMuted;
+      return AppColors.textSecondary;
   }
 }
 
+/// The category's accent at the ~10–18% alpha used for icon-chip fills and
+/// card washes throughout the redesign.
 Color expenseCategoryTint(ExpenseCategory category) {
   switch (category) {
     case ExpenseCategory.foodDrinks:
-    case ExpenseCategory.shopping:
       return AppColors.accentCoralTint;
     case ExpenseCategory.transport:
-    case ExpenseCategory.activities:
-      return AppColors.primaryTint;
-    case ExpenseCategory.accommodation:
       return AppColors.accentPurpleTint;
+    case ExpenseCategory.accommodation:
+      return AppColors.primaryTint;
+    case ExpenseCategory.activities:
+      return AppColors.tint(AppColors.success, .16);
+    case ExpenseCategory.shopping:
+      return AppColors.tint(AppColors.accentBlue, .16);
     case ExpenseCategory.other:
-      return AppColors.surfaceBorder;
+      return AppColors.tint(AppColors.textSecondary, .14);
   }
 }

@@ -55,24 +55,23 @@ void main() {
 
     expect(find.text('What was it?'), findsWidgets);
     expect(find.text('Enter an amount greater than 0.'), findsOneWidget);
-    expect(find.text('Pick a date.'), findsOneWidget);
     expect(repo.lastAddExpenseArgs, isNull);
   });
 
-  testWidgets('defaults to the initial memory and lets a category be picked', (
-    tester,
-  ) async {
+  testWidgets('defaults to the initial memory, today\'s date, and lets a '
+      'category be picked', (tester) async {
     final repo = FakeExpenseRepository();
     await _pump(tester, repo: repo);
 
     expect(find.text('Santorini'), findsOneWidget); // pre-selected dropdown
+    expect(find.textContaining('Today ·'), findsOneWidget);
 
     await tester.ensureVisible(find.text('Transport'));
     await tester.tap(find.text('Transport'));
     await tester.pumpAndSettle();
 
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'e.g. Sunset dinner in Oia'),
+      find.widgetWithText(TextFormField, 'Sunset dinner'),
       'Fuel fill-up',
     );
     await tester.enterText(find.widgetWithText(TextFormField, '0'), '55');
@@ -80,14 +79,13 @@ void main() {
     await tester.tap(find.text('Save expense'));
     await tester.pumpAndSettle();
 
-    // Date is still missing, so the save should not go through yet.
-    expect(find.text('Pick a date.'), findsOneWidget);
-    expect(repo.lastAddExpenseArgs, isNull);
+    expect(repo.lastAddExpenseArgs, isNotNull);
+    expect(repo.lastAddExpenseArgs!['tripId'], 't2');
+    expect(repo.lastAddExpenseArgs!['category'], ExpenseCategory.transport);
   });
 
-  testWidgets('saves with the selected memory, category and amount', (
-    tester,
-  ) async {
+  testWidgets('saves with the selected memory, category, amount and a '
+      'picked date', (tester) async {
     final repo = FakeExpenseRepository()
       ..addExpenseResult = Right(
         buildExpenseEntity(tripId: 't2', title: 'Fuel fill-up', amount: 55),
@@ -98,15 +96,14 @@ void main() {
     await tester.tap(find.text('Transport'));
     await tester.pumpAndSettle();
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'e.g. Sunset dinner in Oia'),
+      find.widgetWithText(TextFormField, 'Sunset dinner'),
       'Fuel fill-up',
     );
     await tester.enterText(find.widgetWithText(TextFormField, '0'), '55');
 
-    // Pick the date directly on the controller-visible state via the date
-    // picker button, then submit through the platform date picker.
-    await tester.ensureVisible(find.text('Pick a date'));
-    await tester.tap(find.text('Pick a date'));
+    // Change the pre-filled (today's) date via the platform date picker.
+    await tester.ensureVisible(find.textContaining('Today ·'));
+    await tester.tap(find.textContaining('Today ·'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
@@ -130,15 +127,10 @@ void main() {
     await _pump(tester, repo: repo);
 
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'e.g. Sunset dinner in Oia'),
+      find.widgetWithText(TextFormField, 'Sunset dinner'),
       'Fuel fill-up',
     );
     await tester.enterText(find.widgetWithText(TextFormField, '0'), '55');
-    await tester.ensureVisible(find.text('Pick a date'));
-    await tester.tap(find.text('Pick a date'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('OK'));
-    await tester.pumpAndSettle();
 
     await tester.ensureVisible(find.text('Save expense'));
     await tester.tap(find.text('Save expense'));

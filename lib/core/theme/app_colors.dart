@@ -41,6 +41,8 @@ abstract class AppColors {
   static const Color accentPurpleLight = Color(0xFFC9A9F5);
   // Shopping category color.
   static const Color accentBlue = Color(0xFF4FB0D8);
+  // Success / positive — Activities category color.
+  static const Color success = Color(0xFF5FBF8E);
 
   // Modal barrier scrim — #07091A @ 72%.
   static const Color scrim = Color(0xB807091A);

@@ -7,9 +7,9 @@ import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/expense_summary_entity.dart';
 import 'expense_money_format.dart';
 
-/// One "Your spending" row: name/place, total, duration · items, and a
-/// spend bar proportional to [maxTotal] (Figma "expenses"). Tapping selects
-/// the memory's detail drill-down below the list.
+/// One "Memories" row: selection circle, name/place, total, duration ·
+/// items, and a spend bar proportional to [maxTotal] (`docs/design/README.md`
+/// § 8). Tapping selects the memory's detail drill-down below the list.
 class ExpenseSummaryTile extends StatelessWidget {
   const ExpenseSummaryTile({
     required this.summary,
@@ -35,11 +35,18 @@ class ExpenseSummaryTile extends StatelessWidget {
       onTap: onTap,
       borderRadius: AppRadius.cardRadius,
       child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.base,
+        ),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: isSelected
+              ? AppColors.tint(AppColors.primary, .08)
+              : AppColors.surface,
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.surfaceBorder,
+            color: isSelected
+                ? AppColors.tint(AppColors.primary, .55)
+                : AppColors.surfaceBorder,
           ),
           borderRadius: AppRadius.cardRadius,
         ),
@@ -49,20 +56,7 @@ class ExpenseSummaryTile extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  alignment: Alignment.center,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primaryTint,
-                    borderRadius: AppRadius.badgeRadius,
-                  ),
-                  child: const Icon(
-                    Icons.place_outlined,
-                    size: 16,
-                    color: AppColors.primary,
-                  ),
-                ),
+                _SelectionCircle(isSelected: isSelected),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Column(
@@ -70,16 +64,17 @@ class ExpenseSummaryTile extends StatelessWidget {
                     children: [
                       Text(
                         summary.tripName,
-                        style: AppTypography.bodyInput.copyWith(
-                          fontWeight: FontWeight.w600,
+                        style: AppTypography.bodyEmphasis.copyWith(
+                          fontSize: 13.5,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                       if (summary.place != null)
                         Text(
                           summary.place!,
-                          style: AppTypography.caption.copyWith(
-                            letterSpacing: 0,
+                          style: AppTypography.chipLabel.copyWith(
+                            fontSize: 11,
+                            color: AppColors.textMuted,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -92,16 +87,14 @@ class ExpenseSummaryTile extends StatelessWidget {
                   children: [
                     Text(
                       formatEuro(summary.totalAmount),
-                      style: AppTypography.bodyInput.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: AppTypography.bigNumber.copyWith(fontSize: 18),
                     ),
                     Text(
                       summary.durationDays == null
                           ? '${summary.itemCount} items'
                           : '${summary.durationDays}d · '
                                 '${summary.itemCount} items',
-                      style: AppTypography.caption.copyWith(letterSpacing: 0),
+                      style: AppTypography.mono,
                     ),
                   ],
                 ),
@@ -112,7 +105,7 @@ class ExpenseSummaryTile extends StatelessWidget {
               borderRadius: AppRadius.pillRadius,
               child: LinearProgressIndicator(
                 value: proportion,
-                minHeight: 4,
+                minHeight: 5,
                 backgroundColor: AppColors.surfaceBorder,
                 valueColor: AlwaysStoppedAnimation(barColor),
               ),
@@ -120,6 +113,34 @@ class ExpenseSummaryTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SelectionCircle extends StatelessWidget {
+  const _SelectionCircle({required this.isSelected});
+
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 26,
+      height: 26,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: isSelected
+            ? AppColors.tint(AppColors.primary, .28)
+            : Colors.transparent,
+        border: Border.all(
+          color: isSelected ? AppColors.primary : AppColors.surfaceBorder,
+          width: 1.5,
+        ),
+        shape: BoxShape.circle,
+      ),
+      child: isSelected
+          ? const Icon(Icons.check, size: 14, color: AppColors.textOnPhoto)
+          : null,
     );
   }
 }
