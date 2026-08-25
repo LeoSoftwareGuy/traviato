@@ -59,6 +59,7 @@ class ExpenseListController extends _$ExpenseListController {
                 tripId: trip.id,
                 tripName: trip.name,
                 place: trip.destination,
+                startDate: trip.startDate,
                 durationDays: trip.durationDays,
                 totalAmount: 0,
                 itemCount: 0,
@@ -92,6 +93,7 @@ class ExpenseListController extends _$ExpenseListController {
                     tripId: trip.id,
                     tripName: trip.name,
                     place: trip.destination,
+                    startDate: trip.startDate,
                     durationDays: trip.durationDays,
                     totalAmount: s.totalAmount,
                     itemCount: s.itemCount,
@@ -107,13 +109,34 @@ class ExpenseListController extends _$ExpenseListController {
   void setSearchQuery(String query) {
     final current = state.value;
     if (current == null) return;
-    state = AsyncData(current.copyWith(searchQuery: query));
+    state = AsyncData(
+      current.copyWith(
+        searchQuery: query,
+        visibleSummaryCount: kExpenseSummaryPageSize,
+      ),
+    );
   }
 
   void setSortMode(ExpenseSortMode mode) {
     final current = state.value;
     if (current == null) return;
-    state = AsyncData(current.copyWith(sortMode: mode));
+    state = AsyncData(
+      current.copyWith(
+        sortMode: mode,
+        visibleSummaryCount: kExpenseSummaryPageSize,
+      ),
+    );
+  }
+
+  void loadMoreSummaries() {
+    final current = state.value;
+    if (current == null) return;
+    state = AsyncData(
+      current.copyWith(
+        visibleSummaryCount:
+            current.visibleSummaryCount + kExpenseSummaryPageSize,
+      ),
+    );
   }
 
   Future<void> selectTrip(String tripId) async {

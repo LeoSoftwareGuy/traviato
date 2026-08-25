@@ -8,28 +8,28 @@ import '../../domain/entities/expense_category.dart';
 import 'expense_category_style.dart';
 import 'expense_money_format.dart';
 
-/// "By category" section: one bar row per category, proportional to
-/// [totalAmount] (Figma "expenses").
+/// "By category" section: one bar row per category, sorted descending,
+/// proportional to the largest category total (`docs/design/README.md` § 8).
 class ExpenseCategoryBreakdown extends StatelessWidget {
-  const ExpenseCategoryBreakdown({
-    required this.totals,
-    required this.totalAmount,
-    super.key,
-  });
+  const ExpenseCategoryBreakdown({required this.totals, super.key});
 
-  final Map<ExpenseCategory, double> totals;
-  final double totalAmount;
+  /// Category → total, descending (see `ExpenseListState.categoryTotalsSorted`).
+  final List<MapEntry<ExpenseCategory, double>> totals;
 
   @override
   Widget build(BuildContext context) {
+    final maxTotal = totals.isEmpty
+        ? 0.0
+        : totals.map((e) => e.value).reduce((a, b) => a > b ? a : b);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final category in ExpenseCategory.values) ...[
+        for (final entry in totals) ...[
           _CategoryRow(
-            category: category,
-            amount: totals[category] ?? 0,
-            totalAmount: totalAmount,
+            category: entry.key,
+            amount: entry.value,
+            maxTotal: maxTotal,
           ),
           const SizedBox(height: AppSpacing.sm),
         ],
@@ -42,57 +42,69 @@ class _CategoryRow extends StatelessWidget {
   const _CategoryRow({
     required this.category,
     required this.amount,
-    required this.totalAmount,
+    required this.maxTotal,
   });
 
   final ExpenseCategory category;
   final double amount;
-  final double totalAmount;
+  final double maxTotal;
 
   @override
   Widget build(BuildContext context) {
-    final proportion = totalAmount <= 0
-        ? 0.0
-        : (amount / totalAmount).clamp(0.0, 1.0);
-    final percent = (proportion * 100).round();
+    final proportion = maxTotal <= 0 ? 0.0 : (amount / maxTotal).clamp(0, 1);
+    final percent = maxTotal <= 0 ? 0 : (proportion * 100).round();
+    final color = expenseCategoryColor(category);
 
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          expenseCategoryIcon(category),
-          size: 16,
-          color: expenseCategoryColor(category),
+        Row(
+          children: [
+            Container(
+              width: 22,
+              height: 22,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: expenseCategoryTint(category),
+                borderRadius: BorderRadius.circular(7),
+              ),
+              child: Icon(
+                expenseCategoryIcon(category),
+                size: 12,
+                color: color,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                category.displayName,
+                style: AppTypography.chipLabel,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Text('$percent%', style: AppTypography.mono),
+            SizedBox(
+              width: 50,
+              child: Text(
+                formatEuro(amount),
+                textAlign: TextAlign.right,
+                style: AppTypography.headlineSerif.copyWith(fontSize: 15),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: AppSpacing.sm),
-        SizedBox(
-          width: 96,
-          child: Text(
-            category.displayName,
-            style: AppTypography.chipLabel,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        Expanded(
+        const SizedBox(height: AppSpacing.xs),
+        Padding(
+          padding: const EdgeInsets.only(left: 31),
           child: ClipRRect(
             borderRadius: AppRadius.pillRadius,
             child: LinearProgressIndicator(
-              value: proportion,
-              minHeight: 6,
+              value: proportion.toDouble(),
+              minHeight: 5,
               backgroundColor: AppColors.surfaceBorder,
-              valueColor: AlwaysStoppedAnimation(
-                expenseCategoryColor(category),
-              ),
+              valueColor: AlwaysStoppedAnimation(color),
             ),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        SizedBox(
-          width: 64,
-          child: Text(
-            '${formatEuro(amount)} · $percent%',
-            textAlign: TextAlign.right,
-            style: AppTypography.caption.copyWith(letterSpacing: 0),
-            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

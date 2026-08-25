@@ -4,66 +4,45 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../domain/entities/expense_category.dart';
-import 'expense_category_style.dart';
 import 'expense_money_format.dart';
 
-/// Total spent / biggest category / per-day average tiles under the
-/// selected memory (Figma "expenses" — "Total spent" / "Biggest category" /
-/// "Per day").
+/// Total spent / per-day average tiles under the selected memory
+/// (`docs/design/README.md` § 8 — "Biggest category" is its own full-width
+/// card, see [ExpenseBiggestCategoryCard]).
 class ExpenseStatsStrip extends StatelessWidget {
   const ExpenseStatsStrip({
     required this.totalAmount,
-    required this.biggestCategory,
     required this.perDay,
     required this.durationDays,
     super.key,
   });
 
   final double totalAmount;
-  final ExpenseCategory? biggestCategory;
   final double? perDay;
   final int? durationDays;
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: _StatTile(
-            icon: Icons.savings_outlined,
-            iconColor: AppColors.primary,
-            iconTint: AppColors.primaryTint,
-            label: 'Total spent',
+          flex: 5,
+          child: _StatCard(
+            label: 'TOTAL SPENT',
             value: formatEuro(totalAmount),
+            emphasized: true,
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
-          child: _StatTile(
-            icon: biggestCategory == null
-                ? Icons.category_outlined
-                : expenseCategoryIcon(biggestCategory!),
-            iconColor: biggestCategory == null
-                ? AppColors.textMuted
-                : expenseCategoryColor(biggestCategory!),
-            iconTint: biggestCategory == null
-                ? AppColors.surfaceBorder
-                : expenseCategoryTint(biggestCategory!),
-            label: 'Biggest category',
-            value: biggestCategory?.displayName ?? '—',
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: _StatTile(
-            icon: Icons.calendar_today_outlined,
-            iconColor: AppColors.accentPurple,
-            iconTint: AppColors.accentPurpleTint,
+          flex: 4,
+          child: _StatCard(
             label: durationDays == null
-                ? 'Per day'
-                : 'Per day · $durationDays d',
+                ? 'PER DAY AVG'
+                : 'PER DAY AVG · $durationDays D',
             value: perDay == null ? '—' : formatEuro(perDay!),
+            emphasized: false,
           ),
         ),
       ],
@@ -71,55 +50,46 @@ class ExpenseStatsStrip extends StatelessWidget {
   }
 }
 
-class _StatTile extends StatelessWidget {
-  const _StatTile({
-    required this.icon,
-    required this.iconColor,
-    required this.iconTint,
+class _StatCard extends StatelessWidget {
+  const _StatCard({
     required this.label,
     required this.value,
+    required this.emphasized,
   });
 
-  final IconData icon;
-  final Color iconColor;
-  final Color iconTint;
   final String label;
   final String value;
+  final bool emphasized;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.surfaceBorder),
+        color: emphasized ? AppColors.primaryTint : AppColors.surface,
+        border: Border.all(
+          color: emphasized
+              ? AppColors.tint(AppColors.primary, .32)
+              : AppColors.surfaceBorder,
+        ),
         borderRadius: AppRadius.cardRadius,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 28,
-            height: 28,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: iconTint,
-              borderRadius: AppRadius.badgeRadius,
-            ),
-            child: Icon(icon, size: 14, color: iconColor),
-          ),
-          const SizedBox(height: AppSpacing.xs),
           Text(
             label,
-            style: AppTypography.caption.copyWith(letterSpacing: 0),
+            style: AppTypography.mono,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             value,
-            style: AppTypography.bodyInput.copyWith(
-              fontWeight: FontWeight.w600,
+            style: AppTypography.bigNumber.copyWith(
+              fontSize: emphasized ? 29 : 22,
+              color: emphasized ? AppColors.primary : AppColors.textPrimary,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

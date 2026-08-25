@@ -192,7 +192,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(expenseRepo.getSummariesCallCount, 1);
-      expect(find.text('What was it?'), findsOneWidget); // sheet is open
+      expect(find.text('Description'), findsOneWidget); // sheet is open
       // The hero card's trip is pre-selected in the memory dropdown.
       expect(find.text('Mountain cabin retreat'), findsWidgets);
     },

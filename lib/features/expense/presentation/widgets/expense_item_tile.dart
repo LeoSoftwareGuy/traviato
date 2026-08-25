@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -9,24 +8,36 @@ import '../../domain/entities/expense_entity.dart';
 import 'expense_category_style.dart';
 import 'expense_money_format.dart';
 
-final _dateFormat = DateFormat('MMM d');
-
-/// One row of the selected memory's itemized expense list (Figma
-/// "expenses" — bottom "Expenses" section).
+/// One row of the selected memory's itemized expense list — zebra striped,
+/// "DAY N · CATEGORY" subtitle (`docs/design/README.md` § 8, "ALL EXPENSES").
 class ExpenseItemTile extends StatelessWidget {
-  const ExpenseItemTile({required this.expense, super.key});
+  const ExpenseItemTile({
+    required this.expense,
+    required this.dayNumber,
+    required this.isEven,
+    super.key,
+  });
 
   final ExpenseEntity expense;
 
+  /// 1-based day-of-trip for [expense.spentOn]; null when the memory has no
+  /// start date to compute it from.
+  final int? dayNumber;
+  final bool isEven;
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+    return Container(
+      color: isEven ? AppColors.tint(AppColors.surface, .55) : null,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.sm,
+      ),
       child: Row(
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: 28,
+            height: 28,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: expenseCategoryTint(expense.category),
@@ -34,7 +45,7 @@ class ExpenseItemTile extends StatelessWidget {
             ),
             child: Icon(
               expenseCategoryIcon(expense.category),
-              size: 16,
+              size: 14,
               color: expenseCategoryColor(expense.category),
             ),
           ),
@@ -45,22 +56,22 @@ class ExpenseItemTile extends StatelessWidget {
               children: [
                 Text(
                   expense.title,
-                  style: AppTypography.bodyInput,
+                  style: AppTypography.bodyEmphasis,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  _dateFormat.format(expense.spentOn),
-                  style: AppTypography.caption.copyWith(letterSpacing: 0),
+                  dayNumber == null
+                      ? expense.category.displayName.toUpperCase()
+                      : 'DAY $dayNumber · '
+                            '${expense.category.displayName.toUpperCase()}',
+                  style: AppTypography.mono,
                 ),
               ],
             ),
           ),
           Text(
             formatEuro(expense.amount),
-            style: AppTypography.bodyInput.copyWith(
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+            style: AppTypography.headlineSerif.copyWith(fontSize: 16),
           ),
         ],
       ),
