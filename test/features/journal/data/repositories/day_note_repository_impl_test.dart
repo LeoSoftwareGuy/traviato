@@ -22,6 +22,12 @@ class _FakeDayNoteRemoteDataSource implements DayNoteRemoteDataSource {
   }
 
   @override
+  Future<List<DayNoteModel>> getNotesForTrip(String tripId) async {
+    if (exception != null) throw exception!;
+    return existingNote == null ? [] : [existingNote!];
+  }
+
+  @override
   Future<DayNoteModel> upsertNote({
     required String id,
     required String tripId,

@@ -45,6 +45,24 @@ class SupabaseDayNoteRemoteDataSource implements DayNoteRemoteDataSource {
   }
 
   @override
+  Future<List<DayNoteModel>> getNotesForTrip(String tripId) async {
+    _guardAuthenticated();
+    try {
+      final rows = await _client
+          .from(Tables.dayNotes)
+          .select()
+          .eq('trip_id', tripId);
+      return rows.map(DayNoteModel.fromJson).toList(growable: false);
+    } on PostgrestException catch (e) {
+      throw _mapPostgrestException(e);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
   Future<DayNoteModel> upsertNote({
     required String id,
     required String tripId,

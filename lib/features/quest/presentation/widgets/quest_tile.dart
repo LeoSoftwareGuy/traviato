@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/quest_entity.dart';
 import 'quest_time_format.dart';
 
-/// One timeline row: check circle + connector line, time badge, title,
-/// detail line, and an edit affordance.
+/// One timeline row: check circle + connector rail, mono time, serif title,
+/// detail line. `docs/design/README.md` § 5.
 class QuestTile extends StatelessWidget {
   const QuestTile({
     required this.quest,
@@ -39,11 +40,20 @@ class QuestTile extends StatelessWidget {
                 onTap: onToggle,
               ),
               if (!isLast)
-                const Expanded(
-                  child: VerticalDivider(
-                    color: AppColors.surfaceBorder,
-                    width: 1,
-                    thickness: 1,
+                Expanded(
+                  child: Container(
+                    width: 1.5,
+                    margin: const EdgeInsets.symmetric(vertical: 2),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          AppColors.tint(AppColors.primary, .5),
+                          AppColors.surfaceBorder,
+                        ],
+                      ),
+                    ),
                   ),
                 ),
             ],
@@ -58,29 +68,24 @@ class QuestTile extends StatelessWidget {
                   vertical: AppSpacing.md,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  border: Border.all(color: AppColors.surfaceBorder),
-                  borderRadius: BorderRadius.circular(16),
+                  color: quest.isCompleted
+                      ? AppColors.tint(AppColors.primary, .09)
+                      : AppColors.surface,
+                  border: Border.all(
+                    color: quest.isCompleted
+                        ? AppColors.tint(AppColors.primary, .4)
+                        : AppColors.surfaceBorder,
+                  ),
+                  borderRadius: AppRadius.cardRadius,
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (quest.time != null) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.sm,
-                          vertical: AppSpacing.xs,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          border: Border.all(color: AppColors.surfaceBorder),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          formatQuestTime(quest.time!),
-                          style: AppTypography.chipLabel.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                      Text(
+                        formatQuestTime(quest.time!),
+                        style: AppTypography.mono.copyWith(
+                          color: AppColors.primary,
                         ),
                       ),
                       const SizedBox(width: AppSpacing.md),
@@ -91,13 +96,13 @@ class QuestTile extends StatelessWidget {
                         children: [
                           Text(
                             quest.title,
-                            style: AppTypography.bodyInput.copyWith(
-                              fontWeight: FontWeight.w600,
+                            style: AppTypography.screenTitle.copyWith(
+                              fontSize: 16,
                               decoration: quest.isCompleted
                                   ? TextDecoration.lineThrough
                                   : null,
                               color: quest.isCompleted
-                                  ? AppColors.textMuted
+                                  ? AppColors.textSecondary
                                   : AppColors.textPrimary,
                             ),
                           ),
@@ -107,6 +112,7 @@ class QuestTile extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTypography.chipLabel.copyWith(
+                                fontSize: 11.5,
                                 color: AppColors.textMuted,
                               ),
                             ),
@@ -150,30 +156,30 @@ class _CheckCircle extends StatelessWidget {
       onTap: isToggling ? null : onTap,
       customBorder: const CircleBorder(),
       child: Container(
-        width: 28,
-        height: 28,
+        width: 22,
+        height: 22,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: isCompleted ? AppColors.accentCoral : AppColors.background,
+          color: isCompleted ? AppColors.primary : Colors.transparent,
           border: Border.all(
-            color: AppColors.accentCoral.withValues(
-              alpha: isCompleted ? 1 : 0.7,
-            ),
-            width: 2,
+            color: isCompleted
+                ? AppColors.primary
+                : AppColors.tint(AppColors.textSecondary, .4),
+            width: 1.5,
           ),
         ),
         child: isToggling
             ? const SizedBox(
-                width: 12,
-                height: 12,
+                width: 11,
+                height: 11,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppColors.accentCoral,
+                  color: AppColors.primary,
                 ),
               )
             : isCompleted
-            ? const Icon(Icons.check, size: 16, color: AppColors.background)
+            ? const Icon(Icons.check, size: 14, color: AppColors.background)
             : null,
       ),
     );

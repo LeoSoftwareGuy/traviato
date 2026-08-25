@@ -3,14 +3,12 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
-import '../../../trip/presentation/mutations/trip_mutations.dart';
 import '../controllers/journal_controller.dart';
 import '../controllers/journal_state.dart';
 import '../mutations/journal_mutations.dart';
@@ -27,50 +25,9 @@ class JournalPage extends ConsumerWidget {
 
   final String tripId;
 
-  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.background,
-        title: const Text('Delete this memory?'),
-        content: const Text(
-          'This removes the memory and everything in it. Stars you already '
-          'earned are kept.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.accentCoral),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-
-    try {
-      await runDeleteMemory(ref: ref, tripId: tripId);
-    } catch (_) {
-      return;
-    }
-    if (context.mounted) context.goNamed(RouteNames.home);
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen<MutationState<dynamic>>(upsertNoteMutation, (previous, next) {
-      if (next is MutationError) {
-        showErrorSnackbar(
-          context,
-          message: presentationFailureMessage(next.error),
-        );
-      }
-    });
-    ref.listen<MutationState<void>>(deleteMemoryMutation, (previous, next) {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
@@ -93,7 +50,6 @@ class JournalPage extends ConsumerWidget {
             tripId: tripId,
             state: state,
             onBack: () => context.pop(),
-            onDelete: () => _confirmDelete(context, ref),
           ),
         ),
       ),
@@ -106,13 +62,11 @@ class _JournalContent extends ConsumerWidget {
     required this.tripId,
     required this.state,
     required this.onBack,
-    required this.onDelete,
   });
 
   final String tripId;
   final JournalState state;
   final VoidCallback onBack;
-  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -129,12 +83,7 @@ class _JournalContent extends ConsumerWidget {
         AppSpacing.xxl,
       ),
       children: [
-        JournalHeader(
-          tripName: state.trip.name,
-          stars: 0,
-          onBack: onBack,
-          onDelete: onDelete,
-        ),
+        JournalHeader(tripName: state.trip.name, stars: 0, onBack: onBack),
         const SizedBox(height: AppSpacing.lg),
         if (!state.hasDateRange || currentDay == null)
           const _NoDatesYet()

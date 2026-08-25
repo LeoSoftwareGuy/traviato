@@ -30,24 +30,10 @@ class TripCardEntity extends Equatable {
   /// mutation publish a [TripCreatedDispatched] event without a round trip
   /// through the view.
   factory TripCardEntity.fromNewTrip(TripEntity trip) {
-    final start = trip.startDate;
-    final end = trip.endDate;
-    TripStatus status;
-    int? durationDays;
-    if (start == null || end == null) {
-      status = TripStatus.undated;
-    } else {
-      final today = DateTime.now();
-      final todayDate = DateTime(today.year, today.month, today.day);
-      if (todayDate.isBefore(start)) {
-        status = TripStatus.upcoming;
-      } else if (todayDate.isAfter(end)) {
-        status = TripStatus.finished;
-      } else {
-        status = TripStatus.current;
-      }
-      durationDays = end.difference(start).inDays + 1;
-    }
+    final (status, durationDays) = _deriveStatusAndDuration(
+      trip.startDate,
+      trip.endDate,
+    );
     return TripCardEntity(
       id: trip.id,
       userId: trip.userId,
@@ -66,6 +52,54 @@ class TripCardEntity extends Equatable {
       stars: 0,
       expenseTotal: 0,
     );
+  }
+
+  /// Rebuilds this card after a rename, cover change, or date shift — an
+  /// `updateTrip`/`shiftTripDates` call only ever returns the raw `trips`
+  /// row, not a fresh `trip_card_view` read. `status`/`durationDays` are
+  /// recomputed from the new dates; `photoCount`/`stars`/`expenseTotal`
+  /// (derived from other tables `trips` doesn't touch) carry over unchanged.
+  TripCardEntity mergeUpdatedTrip(TripEntity trip) {
+    final (status, durationDays) = _deriveStatusAndDuration(
+      trip.startDate,
+      trip.endDate,
+    );
+    return TripCardEntity(
+      id: trip.id,
+      userId: trip.userId,
+      name: trip.name,
+      destination: trip.destination,
+      countryCode: trip.countryCode,
+      startDate: trip.startDate,
+      endDate: trip.endDate,
+      vibes: trip.vibes,
+      coverImagePath: trip.coverImagePath,
+      createdAt: trip.createdAt,
+      updatedAt: trip.updatedAt,
+      status: status,
+      durationDays: durationDays,
+      photoCount: photoCount,
+      stars: stars,
+      expenseTotal: expenseTotal,
+    );
+  }
+
+  static (TripStatus, int?) _deriveStatusAndDuration(
+    DateTime? start,
+    DateTime? end,
+  ) {
+    if (start == null || end == null) return (TripStatus.undated, null);
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final TripStatus status;
+    if (todayDate.isBefore(start)) {
+      status = TripStatus.upcoming;
+    } else if (todayDate.isAfter(end)) {
+      status = TripStatus.finished;
+    } else {
+      status = TripStatus.current;
+    }
+    return (status, end.difference(start).inDays + 1);
   }
 
   final String id;

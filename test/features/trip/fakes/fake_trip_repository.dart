@@ -11,12 +11,21 @@ class FakeTripRepository implements TripRepository {
   Either<Failure, TripCardEntity>? tripCardResult;
   Either<Failure, TripEntity>? createTripResult;
   Either<Failure, void>? deleteTripResult;
+  Either<Failure, TripEntity>? updateTripResult;
+  Either<Failure, TripEntity>? shiftTripDatesResult;
   var callCount = 0;
   var getTripCardCallCount = 0;
   var createTripCallCount = 0;
   var deleteTripCallCount = 0;
+  var updateTripCallCount = 0;
+  var shiftTripDatesCallCount = 0;
   String? lastDeletedTripId;
   String? lastCreateTripCoverImagePath;
+  String? lastUpdateTripId;
+  String? lastUpdateName;
+  String? lastUpdateCoverImagePath;
+  String? lastShiftTripId;
+  int? lastShiftDeltaDays;
   Duration delay = Duration.zero;
 
   @override
@@ -64,6 +73,39 @@ class FakeTripRepository implements TripRepository {
     lastDeletedTripId = id;
     if (delay > Duration.zero) await Future<void>.delayed(delay);
     return deleteTripResult ?? const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, TripEntity>> updateTrip({
+    required String id,
+    String? name,
+    String? coverImagePath,
+  }) async {
+    updateTripCallCount++;
+    lastUpdateTripId = id;
+    lastUpdateName = name;
+    lastUpdateCoverImagePath = coverImagePath;
+    if (delay > Duration.zero) await Future<void>.delayed(delay);
+    return updateTripResult ??
+        Right(
+          buildTripEntity(
+            id: id,
+            name: name ?? 'Weekend in the woods',
+            coverImagePath: coverImagePath,
+          ),
+        );
+  }
+
+  @override
+  Future<Either<Failure, TripEntity>> shiftTripDates({
+    required String id,
+    required int deltaDays,
+  }) async {
+    shiftTripDatesCallCount++;
+    lastShiftTripId = id;
+    lastShiftDeltaDays = deltaDays;
+    if (delay > Duration.zero) await Future<void>.delayed(delay);
+    return shiftTripDatesResult ?? Right(buildTripEntity(id: id));
   }
 }
 

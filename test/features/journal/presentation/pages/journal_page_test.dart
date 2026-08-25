@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/journal/presentation/pages/journal_page.dart';
 import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
@@ -38,11 +37,6 @@ Future<void> _pump(
       GoRoute(
         path: '/back',
         builder: (context, state) => const Scaffold(body: Text('back')),
-      ),
-      GoRoute(
-        path: '/home',
-        name: RouteNames.home,
-        builder: (context, state) => const Scaffold(body: Text('home page')),
       ),
     ],
   );
@@ -164,29 +158,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('2 saved'), findsOneWidget);
-  });
-
-  testWidgets('deleting the memory navigates to Home', (tester) async {
-    final tripRepo = FakeTripRepository()
-      ..tripCardResult = Right(buildTripCard(id: 't1'))
-      ..deleteTripResult = const Right(null);
-    final photoRepo = FakePhotoRepository();
-    final noteRepo = FakeDayNoteRepository();
-    await _pump(
-      tester,
-      tripRepo: tripRepo,
-      photoRepo: photoRepo,
-      noteRepo: noteRepo,
-    );
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key('journal-delete-action')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
-    await tester.pumpAndSettle();
-
-    expect(tripRepo.deleteTripCallCount, 1);
-    expect(find.text('home page'), findsOneWidget);
   });
 
   testWidgets('the To Do sheet check-off toggles the quest', (tester) async {

@@ -71,6 +71,40 @@ class _FakeTripRemoteDataSource implements TripRemoteDataSource {
     if (exception != null) throw exception!;
     lastDeletedTripId = id;
   }
+
+  @override
+  Future<TripModel> updateTrip({
+    required String id,
+    String? name,
+    String? coverImagePath,
+  }) async {
+    if (exception != null) throw exception!;
+    return TripModel(
+      id: id,
+      userId: 'u1',
+      name: name ?? 'Weekend in the woods',
+      coverImagePath: coverImagePath,
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    );
+  }
+
+  @override
+  Future<TripModel> shiftTripDates({
+    required String id,
+    required int deltaDays,
+  }) async {
+    if (exception != null) throw exception!;
+    return TripModel(
+      id: id,
+      userId: 'u1',
+      name: 'Weekend in the woods',
+      startDate: DateTime(2026, 8, 22 + deltaDays),
+      endDate: DateTime(2026, 8, 26 + deltaDays),
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    );
+  }
 }
 
 void main() {

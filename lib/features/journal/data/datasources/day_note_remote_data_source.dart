@@ -6,6 +6,8 @@ abstract interface class DayNoteRemoteDataSource {
     required DateTime dayDate,
   });
 
+  Future<List<DayNoteModel>> getNotesForTrip(String tripId);
+
   Future<DayNoteModel> upsertNote({
     required String id,
     required String tripId,

@@ -7,13 +7,15 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/bottom_sheet_chrome.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
-import '../../../trip/presentation/widgets/memory_text_field.dart';
+import '../../../trip/presentation/widgets/create_memory_field.dart';
 import '../../domain/entities/quest_entity.dart';
 import '../mutations/quest_mutations.dart';
 import 'quest_time_format.dart';
 
-/// Add/edit bottom sheet for a quest. If [quest] is provided, the sheet will be in edit mode.
+/// Add/edit bottom sheet for a quest, on the R-1 sheet chrome. If [quest]
+/// is provided, the sheet will be in edit mode.
 class AddEditQuestSheet extends ConsumerStatefulWidget {
   const AddEditQuestSheet({
     required this.tripId,
@@ -32,10 +34,8 @@ class AddEditQuestSheet extends ConsumerStatefulWidget {
     required DateTime dayDate,
     QuestEntity? quest,
   }) {
-    return showModalBottomSheet<void>(
+    return showAppBottomSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (context) =>
           AddEditQuestSheet(tripId: tripId, dayDate: dayDate, quest: quest),
     );
@@ -160,15 +160,10 @@ class _AddEditQuestSheetState extends ConsumerState<AddEditQuestSheet> {
 
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.background,
-          border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
+      child: Padding(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.xl,
-          AppSpacing.base,
+          AppSpacing.sm,
           AppSpacing.xl,
           AppSpacing.xl,
         ),
@@ -179,28 +174,14 @@ class _AddEditQuestSheetState extends ConsumerState<AddEditQuestSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: const BoxDecoration(
-                    color: AppColors.surfaceBorder,
-                    borderRadius: AppRadius.pillRadius,
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
               Text(
                 _isEditing ? 'Edit plan' : 'Add plan',
-                style: AppTypography.headlineSerif,
+                style: AppTypography.screenTitle.copyWith(fontSize: 21),
               ),
               const SizedBox(height: AppSpacing.lg),
-              MemoryTextField(
+              CreateMemoryField(
                 label: 'Name this plan',
                 controller: _title,
-                icon: Icons.edit_outlined,
-                iconTint: AppColors.primaryTint,
-                iconColor: AppColors.primary,
                 hintText: 'e.g. Pack the car',
                 textInputAction: TextInputAction.next,
                 validator: _validateTitle,
@@ -261,12 +242,9 @@ class _AddEditQuestSheetState extends ConsumerState<AddEditQuestSheet> {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              MemoryTextField(
+              CreateMemoryField(
                 label: 'Detail (optional)',
                 controller: _detail,
-                icon: Icons.notes_outlined,
-                iconTint: AppColors.accentPurpleTint,
-                iconColor: AppColors.accentPurple,
                 hintText: 'e.g. Cooler, blankets, hiking boots',
                 textInputAction: TextInputAction.done,
               ),

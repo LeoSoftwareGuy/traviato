@@ -33,6 +33,7 @@ abstract class Storage {
 
 abstract class DBFunctions {
   static const awardPoints = 'award_points';
+  static const shiftTripDates = 'shift_trip_dates';
 }
 
 /// Postgres / PostgREST error codes surfaced via `PostgrestException.code`.

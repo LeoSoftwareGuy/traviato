@@ -82,6 +82,25 @@ class ExpenseListController extends _$ExpenseListController {
             clearSelectedTripExpenses: clearSelection,
           ),
         );
+      case TripUpdatedDispatched(:final trip):
+        state = AsyncData(
+          current.copyWith(
+            summaries: [
+              for (final s in current.summaries)
+                if (s.tripId == trip.id)
+                  ExpenseSummaryEntity(
+                    tripId: trip.id,
+                    tripName: trip.name,
+                    place: trip.destination,
+                    durationDays: trip.durationDays,
+                    totalAmount: s.totalAmount,
+                    itemCount: s.itemCount,
+                  )
+                else
+                  s,
+            ],
+          ),
+        );
     }
   }
 

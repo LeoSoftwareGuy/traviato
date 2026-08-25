@@ -98,6 +98,30 @@ void main() {
     },
   );
 
+  test('replaces a trip renamed elsewhere via the event bus', () async {
+    final existing = buildTripCard(id: 't1', name: 'Old name');
+    final fakeRepo = FakeTripRepository()..tripsResult = Right([existing]);
+    final bus = GlobalEventBus();
+    addTearDown(bus.dispose);
+    final container = ProviderContainer(
+      overrides: [
+        tripRepositoryProvider.overrideWithValue(fakeRepo),
+        globalEventBusProvider.overrideWithValue(bus),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.listen(homeControllerProvider, (_, _) {});
+
+    await container.read(homeControllerProvider.future);
+
+    final renamed = buildTripCard(id: 't1', name: 'New name');
+    bus.add(TripUpdatedDispatched(trip: renamed));
+    await Future<void>.delayed(Duration.zero);
+
+    final state = container.read(homeControllerProvider).value;
+    expect(state?.trips.single.name, 'New name');
+  });
+
   test('removes a trip deleted elsewhere via the event bus', () async {
     final existing = buildTripCard(id: 't1');
     final fakeRepo = FakeTripRepository()..tripsResult = Right([existing]);
