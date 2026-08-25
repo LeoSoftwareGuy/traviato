@@ -176,6 +176,57 @@ void main() {
     expect(questRepo.toggleCallCount, 1);
   });
 
+  testWidgets('checking a quest shows the star toast', (tester) async {
+    final tripRepo = FakeTripRepository()
+      ..tripCardResult = Right(
+        buildTripCard(
+          id: 't1',
+          startDate: _today.subtract(const Duration(days: 1)),
+          endDate: _today.add(const Duration(days: 1)),
+        ),
+      );
+    final quest = buildQuestEntity(
+      id: 'q1',
+      dayDate: _today,
+      title: 'Pack the car',
+    );
+    final questRepo = FakeQuestRepository()..questsResult = Right([quest]);
+    await _pump(tester, tripRepo: tripRepo, questRepo: questRepo);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('quest-check-q1')));
+    await tester.pump();
+
+    expect(find.text('✦ +1 star · quest done'), findsOneWidget);
+  });
+
+  testWidgets('unchecking a quest does not show the star toast', (
+    tester,
+  ) async {
+    final tripRepo = FakeTripRepository()
+      ..tripCardResult = Right(
+        buildTripCard(
+          id: 't1',
+          startDate: _today.subtract(const Duration(days: 1)),
+          endDate: _today.add(const Duration(days: 1)),
+        ),
+      );
+    final quest = buildQuestEntity(
+      id: 'q1',
+      dayDate: _today,
+      title: 'Pack the car',
+      completedAt: DateTime(2026, 1, 2),
+    );
+    final questRepo = FakeQuestRepository()..questsResult = Right([quest]);
+    await _pump(tester, tripRepo: tripRepo, questRepo: questRepo);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('quest-check-q1')));
+    await tester.pump();
+
+    expect(find.text('✦ +1 star · quest done'), findsNothing);
+  });
+
   testWidgets('the app-bar checklist action navigates to the checklist '
       'route', (tester) async {
     final tripRepo = FakeTripRepository()

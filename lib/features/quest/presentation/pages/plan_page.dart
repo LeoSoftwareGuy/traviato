@@ -11,6 +11,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
+import '../../../../core/widgets/star_award_toast.dart';
 import '../controllers/plan_controller.dart';
 import '../controllers/plan_state.dart';
 import '../mutations/quest_mutations.dart';
@@ -141,8 +142,13 @@ class _PlanContent extends ConsumerWidget {
           QuestTimeline(
             tripId: tripId,
             quests: currentDay,
-            onToggle: (quest) =>
-                runToggleQuest(ref: ref, tripId: tripId, quest: quest),
+            onToggle: (quest) {
+              final wasCompleted = quest.isCompleted;
+              runToggleQuest(ref: ref, tripId: tripId, quest: quest);
+              if (!wasCompleted) {
+                showStarToast(context, '✦ +1 star · quest done');
+              }
+            },
             onEditQuest: (quest) => AddEditQuestSheet.show(
               context,
               tripId: tripId,
