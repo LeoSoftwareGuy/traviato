@@ -26,9 +26,15 @@ class ChecklistItemTile extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.surfaceBorder),
-        borderRadius: AppRadius.badgeRadius,
+        color: item.isChecked
+            ? AppColors.tint(AppColors.primary, .09)
+            : AppColors.surface,
+        border: Border.all(
+          color: item.isChecked
+              ? AppColors.tint(AppColors.primary, .4)
+              : AppColors.surfaceBorder,
+        ),
+        borderRadius: AppRadius.cardRadius,
       ),
       child: Row(
         children: [
@@ -43,7 +49,8 @@ class ChecklistItemTile extends StatelessWidget {
             child: Text(
               item.title,
               style: AppTypography.bodyInput.copyWith(
-                fontWeight: FontWeight.w400,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w500,
                 decoration: item.isChecked ? TextDecoration.lineThrough : null,
                 color: item.isChecked
                     ? AppColors.textMuted

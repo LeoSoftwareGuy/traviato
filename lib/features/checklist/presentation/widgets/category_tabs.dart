@@ -5,7 +5,6 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/checklist_category.dart';
-import 'checklist_category_icons.dart';
 
 /// Horizontally scrollable category pills, each showing "checked/total" —
 /// same active/inactive treatment as `VibeChipGroup`.
@@ -81,12 +80,6 @@ class _CategoryTab extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              checklistCategoryIcon(category),
-              size: 16,
-              color: isSelected ? AppColors.background : AppColors.textPrimary,
-            ),
-            const SizedBox(width: AppSpacing.xs),
             Text(
               category.displayName,
               style: AppTypography.chipLabel.copyWith(
