@@ -9,6 +9,7 @@ import 'package:traviato/features/journal/presentation/providers/day_note_provid
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/presentation/pages/plan_page.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
+import 'package:traviato/features/quest/presentation/widgets/plan_images.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
 import '../../../journal/fakes/fake_day_note_repository.dart';
@@ -266,6 +267,28 @@ void main() {
     expect(find.text('Cortina d\'Ampezzo'), findsOneWidget);
     expect(find.text('Day 1 of 5'), findsOneWidget);
   });
+
+  testWidgets(
+    'the cover banner always uses the fixed balloons-wide asset, not the '
+    'trip cover',
+    (tester) async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(id: 't1', coverImagePath: 'asset:hero'),
+        );
+      final questRepo = FakeQuestRepository()..questsResult = const Right([]);
+      await _pump(tester, tripRepo: tripRepo, questRepo: questRepo);
+      await tester.pumpAndSettle();
+
+      final bannerFinder = find.byWidgetPredicate(
+        (widget) =>
+            widget is Image &&
+            widget.image is AssetImage &&
+            (widget.image as AssetImage).assetName == PlanImages.banner,
+      );
+      expect(bannerFinder, findsOneWidget);
+    },
+  );
 
   testWidgets('tapping a pager segment jumps to that day', (tester) async {
     final tripRepo = FakeTripRepository()

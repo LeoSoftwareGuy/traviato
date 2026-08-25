@@ -6,6 +6,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/photo_scrim.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
+import 'plan_images.dart';
 import 'trip_date_range_mono.dart';
 
 /// Back / mono `THE PLAN` / ☑ Checklist / ⋯ Manage, the trip name + Edit
@@ -96,10 +97,7 @@ class PlanHeader extends StatelessWidget {
             border: Border.all(color: AppColors.surfaceBorder),
           ),
           child: PhotoScrim(
-            image: Image.asset(
-              'assets/images/journal/balloons_wide.png',
-              fit: BoxFit.cover,
-            ),
+            image: Image.asset(PlanImages.banner, fit: BoxFit.cover),
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Stack(

@@ -29,6 +29,8 @@ class ChecklistController extends _$ChecklistController {
       );
     }
 
+    ref.invalidate(checklistProgressForTripProvider(tripId));
+
     return ChecklistState(
       items: items,
       selectedCategory: ChecklistCategory.values.first,
@@ -53,6 +55,7 @@ class ChecklistController extends _$ChecklistController {
           ]
         : [...current.items, item];
     state = AsyncData(current.copyWith(items: updated));
+    ref.invalidate(checklistProgressForTripProvider(tripId));
   }
 
   /// Called by the delete mutation after a successful delete.
@@ -64,5 +67,6 @@ class ChecklistController extends _$ChecklistController {
         items: current.items.where((i) => i.id != itemId).toList(),
       ),
     );
+    ref.invalidate(checklistProgressForTripProvider(tripId));
   }
 }
