@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/dashed_rrect_border.dart';
 import '../../../photo/domain/entities/photo_entity.dart';
+
+const _photoTileWidth = 88.0;
+const _photoTileHeight = 110.0;
 
 /// "Photos" section: count + a wrap of thumbnails, plus an "Add" tile.
 /// Photo capture is a separate issue, so Add is a stub — it doesn't route
@@ -67,10 +72,10 @@ class _PhotoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: AppRadius.cardRadius,
       child: SizedBox(
-        width: 106,
-        height: 106,
+        width: _photoTileWidth,
+        height: _photoTileHeight,
         child: photo.imageUrl != null
             ? Image.network(photo.imageUrl!, fit: BoxFit.cover)
             : const ColoredBox(color: AppColors.surface),
@@ -79,6 +84,10 @@ class _PhotoTile extends StatelessWidget {
   }
 }
 
+/// "Add ✦2" tile — dashed primary border, primary-tinted fill
+/// (`docs/design/README.md` § 7). Photo = 2 stars canonically
+/// (`docs/data-model.md`); the handoff's "Add ✦1" copy is one of the
+/// mockup's non-canonical star values.
 class _AddPhotoTile extends StatelessWidget {
   const _AddPhotoTile({required this.onTap});
 
@@ -89,33 +98,33 @@ class _AddPhotoTile extends StatelessWidget {
     return InkWell(
       key: const Key('journal-add-photo'),
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 106,
-        height: 106,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceDisabled,
-          border: Border.all(
-            color: AppColors.surfaceBorder,
-            style: BorderStyle.solid,
+      borderRadius: AppRadius.cardRadius,
+      child: DashedRRectBorder(
+        color: AppColors.tint(AppColors.primary, .5),
+        borderRadius: AppRadius.cardRadius,
+        child: Container(
+          width: _photoTileWidth,
+          height: _photoTileHeight,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: AppColors.tint(AppColors.primary, .08),
+            borderRadius: AppRadius.cardRadius,
           ),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.add_a_photo_outlined,
-              size: 20,
-              color: AppColors.textMuted,
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Add',
-              style: AppTypography.caption.copyWith(letterSpacing: 0),
-            ),
-          ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.add, size: 20, color: AppColors.primary),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Add ✦2',
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

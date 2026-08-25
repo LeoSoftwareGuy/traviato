@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../../core/widgets/star_award_toast.dart';
@@ -40,6 +42,7 @@ class JournalPage extends ConsumerWidget {
     final journalAsync = ref.watch(journalControllerProvider(tripId));
 
     return Scaffold(
+      extendBody: true,
       body: SafeArea(
         child: journalAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -53,6 +56,23 @@ class JournalPage extends ConsumerWidget {
             onBack: () => context.pop(),
           ),
         ),
+      ),
+      bottomNavigationBar: AppBottomNavBar(
+        onFabTap: () => context.pushNamed(RouteNames.createMemory),
+        items: [
+          AppBottomNavBarItem(
+            icon: Icons.home_rounded,
+            label: 'Home',
+            selected: false,
+            onTap: () => context.goNamed(RouteNames.home),
+          ),
+          AppBottomNavBarItem(
+            icon: Icons.receipt_long_outlined,
+            label: 'Expenses',
+            selected: false,
+            onTap: () => context.goNamed(RouteNames.expenses),
+          ),
+        ],
       ),
     );
   }
