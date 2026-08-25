@@ -13,9 +13,6 @@ class ChecklistState extends Equatable {
 
   int get checkedCount => items.where((i) => i.isChecked).length;
 
-  int get progressPercent =>
-      totalCount == 0 ? 0 : ((checkedCount / totalCount) * 100).round();
-
   List<ChecklistItemEntity> itemsFor(ChecklistCategory category) {
     final forCategory = items.where((i) => i.category == category).toList()
       ..sort((a, b) => a.position.compareTo(b.position));
