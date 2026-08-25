@@ -5,6 +5,7 @@ abstract class RoutePaths {
   static const signup = '/signup';
   static const home = '/home';
   static const expenses = '/expenses';
+  static const expensesCompare = '/expenses/compare';
   static const profile = '/profile';
   static const bonusTasks = '/bonus-tasks';
   static const createMemory = '/create-memory';
@@ -21,6 +22,7 @@ abstract class RouteNames {
   static const signup = 'signup';
   static const home = 'home';
   static const expenses = 'expenses';
+  static const expensesCompare = 'expensesCompare';
   static const profile = 'profile';
   static const bonusTasks = 'bonusTasks';
   static const createMemory = 'createMemory';

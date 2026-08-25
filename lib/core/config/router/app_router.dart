@@ -8,6 +8,7 @@ import '../../../features/auth/presentation/pages/auth_page.dart';
 import '../../../features/auth/presentation/pages/guest_landing_page.dart';
 import '../../../features/auth/presentation/pages/splash_page.dart';
 import '../../../features/checklist/presentation/pages/checklist_page.dart';
+import '../../../features/expense/presentation/pages/expense_compare_page.dart';
 import '../../../features/expense/presentation/pages/expenses_page.dart';
 import '../../../features/home/presentation/pages/home_page.dart';
 import '../../../features/home/presentation/widgets/home_shell_scaffold.dart';
@@ -109,6 +110,11 @@ GoRouter router(Ref ref) {
         path: RoutePaths.createMemory,
         name: RouteNames.createMemory,
         builder: (context, state) => const CreateMemoryPage(),
+      ),
+      GoRoute(
+        path: RoutePaths.expensesCompare,
+        name: RouteNames.expensesCompare,
+        builder: (context, state) => const ExpenseComparePage(),
       ),
       GoRoute(
         path: RoutePaths.tripPlan,

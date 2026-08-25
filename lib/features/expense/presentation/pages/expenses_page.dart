@@ -68,7 +68,9 @@ class _ExpensesContent extends ConsumerWidget {
         AppSpacing.xxl,
       ),
       children: [
-        const _ExpensesHeader(),
+        _ExpensesHeader(
+          onCompareTap: () => context.pushNamed(RouteNames.expensesCompare),
+        ),
         if (state.isEmpty) ...[
           const SizedBox(height: AppSpacing.xxl),
           _NoExpensesYet(
@@ -160,7 +162,9 @@ class _ExpensesContent extends ConsumerWidget {
 }
 
 class _ExpensesHeader extends StatelessWidget {
-  const _ExpensesHeader();
+  const _ExpensesHeader({required this.onCompareTap});
+
+  final VoidCallback onCompareTap;
 
   @override
   Widget build(BuildContext context) {
@@ -168,13 +172,14 @@ class _ExpensesHeader extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text('EXPENSES', style: AppTypography.mono),
-        // Expenses · Compare isn't built yet (separate milestone) — present
-        // but inert, matching "not built" prototype affordances.
-        Text(
-          'Compare',
-          style: AppTypography.chipLabel.copyWith(
-            color: AppColors.primary,
-            fontWeight: FontWeight.w600,
+        InkWell(
+          onTap: onCompareTap,
+          child: Text(
+            'Compare',
+            style: AppTypography.chipLabel.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
