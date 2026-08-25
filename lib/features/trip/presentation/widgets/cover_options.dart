@@ -74,14 +74,22 @@ String assetCoverImagePath(String coverId) => '$_assetPrefix$coverId';
 /// if it isn't an `asset:` reference (a real upload path, once that ships)
 /// or the id isn't one of [kCoverOptions].
 String? resolveAssetCoverPath(String? coverImagePath) {
-  if (coverImagePath == null || !coverImagePath.startsWith(_assetPrefix)) {
-    return null;
-  }
-  final id = coverImagePath.substring(_assetPrefix.length);
+  final id = coverIdFromPath(coverImagePath);
+  if (id == null) return null;
   for (final option in kCoverOptions) {
     if (option.id == id) return option.assetPath;
   }
   return null;
+}
+
+/// The bare id out of a stored `'asset:<id>'` path — null for a non-asset
+/// path or null input. Used to mark the current selection in a thumbnail
+/// strip.
+String? coverIdFromPath(String? coverImagePath) {
+  if (coverImagePath == null || !coverImagePath.startsWith(_assetPrefix)) {
+    return null;
+  }
+  return coverImagePath.substring(_assetPrefix.length);
 }
 
 /// Auto-selection rule: the first cover option whose vibe is among

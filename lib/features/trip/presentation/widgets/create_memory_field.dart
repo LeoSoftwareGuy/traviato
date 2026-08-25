@@ -5,11 +5,11 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
-/// New memory's field-card style: mono uppercase label above the value,
-/// border/label turn primary on focus. Deliberately separate from the
-/// shared `MemoryTextField` (still used by the not-yet-restyled quest
-/// sheet) rather than restyling it in place.
-/// `docs/design/README.md` § 4.
+/// The redesign's field-card style: mono uppercase label above the value,
+/// border/label turn primary on focus. Introduced for New memory (§4),
+/// reused by the quest add/edit sheet (§5) once it moved onto the R-1
+/// sheet chrome — replaced the old `MemoryTextField` in both places, which
+/// is why this lives under `trip/`.
 class CreateMemoryField extends StatefulWidget {
   const CreateMemoryField({
     required this.label,

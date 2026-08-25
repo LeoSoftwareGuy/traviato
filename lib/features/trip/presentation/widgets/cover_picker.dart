@@ -35,23 +35,44 @@ class CoverPicker extends StatelessWidget {
           selectedVibes: selectedVibes,
         ),
         const SizedBox(height: AppSpacing.sm),
-        SizedBox(
-          height: 46,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: kCoverOptions.length,
-            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
-            itemBuilder: (context, index) {
-              final option = kCoverOptions[index];
-              return _Thumbnail(
-                option: option,
-                selected: option.id == selectedCoverId,
-                onTap: () => onSelect(option.id),
-              );
-            },
-          ),
+        CoverThumbnailStrip(
+          selectedCoverId: selectedCoverId,
+          onSelect: onSelect,
         ),
       ],
+    );
+  }
+}
+
+/// The 8-thumbnail strip on its own — reused by the manage-memory sheet's
+/// cover-change section, which doesn't need the empty/chosen slot above it.
+class CoverThumbnailStrip extends StatelessWidget {
+  const CoverThumbnailStrip({
+    required this.selectedCoverId,
+    required this.onSelect,
+    super.key,
+  });
+
+  final String? selectedCoverId;
+  final ValueChanged<String> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 46,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: kCoverOptions.length,
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
+        itemBuilder: (context, index) {
+          final option = kCoverOptions[index];
+          return _Thumbnail(
+            option: option,
+            selected: option.id == selectedCoverId,
+            onTap: () => onSelect(option.id),
+          );
+        },
+      ),
     );
   }
 }
