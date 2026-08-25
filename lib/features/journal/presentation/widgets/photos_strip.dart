@@ -105,11 +105,7 @@ class _AddPhotoTile extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.add_a_photo_outlined,
-              size: 20,
-              color: AppColors.textMuted,
-            ),
+            const Icon(Icons.add, size: 20, color: AppColors.textMuted),
             const SizedBox(height: AppSpacing.xs),
             Text(
               'Add',
