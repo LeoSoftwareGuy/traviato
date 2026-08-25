@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -66,11 +65,7 @@ class ChecklistPage extends ConsumerWidget {
 
     return Scaffold(
       body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: AppGradients.screenGroundVertical(
-            topColor: AppGradients.groundTopPlanChecklistExpenses,
-          ),
-        ),
+        decoration: const BoxDecoration(color: AppColors.background50),
         child: SafeArea(
           child: checklistAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),

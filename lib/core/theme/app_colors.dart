@@ -6,9 +6,19 @@ import 'package:flutter/material.dart';
 abstract class AppColors {
   static const Color background = Color(0xFF0C0F27);
   static const Color backgroundScrim = Color(0xB30C0F27);
+  // "background-50" — `background`'s navy hue scaled darker (not a
+  // different, more violet color), so it reads as unmistakably dark blue
+  // rather than purple. Cards in the `surface*` navy family read as a
+  // distinct layer on top of it instead of blending in (e.g. Plan's quest
+  // cards).
+  static const Color background50 = Color(0xFF0A0D21);
   static const Color surface = Color(0xB3131736);
   static const Color surfaceBorder = Color(0x991D2248);
   static const Color surfaceDisabled = Color(0xB31D2248);
+  // Card fill for idle/unchecked rows on very dark screens (e.g. Plan) where
+  // `surface` reads as barely-there — bumped opacity so the card visibly
+  // separates from the background instead of melting into it.
+  static const Color surfaceElevated = Color(0xCC131736);
 
   static const Color textPrimary = Color(0xFFFBFAF6);
   static const Color textSecondary = Color(0xFFAEACB7);

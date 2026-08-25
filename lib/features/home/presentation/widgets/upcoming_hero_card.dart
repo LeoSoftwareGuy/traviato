@@ -286,12 +286,16 @@ class _ChecklistRow extends StatelessWidget {
       onTap: onTap,
       borderRadius: AppRadius.badgeRadius,
       child: DashedRRectBorder(
-        color: AppColors.surfaceBorder,
+        color: AppColors.tint(AppColors.textSecondary, .35),
         borderRadius: AppRadius.badgeRadius,
-        child: Padding(
+        child: Container(
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: AppRadius.badgeRadius,
+          ),
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
+            horizontal: AppSpacing.base,
+            vertical: AppSpacing.md,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

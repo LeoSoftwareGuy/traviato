@@ -81,6 +81,22 @@ void main() {
     expect(repo.toggleCallCount, 1);
   });
 
+  testWidgets('checking an item updates the packed progress label', (
+    tester,
+  ) async {
+    final repo = FakeChecklistRepository()
+      ..itemsResult = Right([buildChecklistItemEntity(id: 'i1')]);
+    await _pump(tester, repo: repo);
+    await tester.pumpAndSettle();
+
+    expect(find.text('0 of 1 packed'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('checklist-item-check-i1')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 of 1 packed'), findsOneWidget);
+  });
+
   testWidgets('checking an item shows the star toast', (tester) async {
     final repo = FakeChecklistRepository()
       ..itemsResult = Right([buildChecklistItemEntity(id: 'i1')]);
