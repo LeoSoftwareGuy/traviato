@@ -24,14 +24,17 @@ abstract class AppGradients {
 
   /// Simple vertical screen-ground gradient (Plan / Checklist / Expenses use
   /// [groundTopPlanChecklistExpenses] at [stop] .34–.38; Journal uses
-  /// [groundTopJournal] at .40).
+  /// [groundTopJournal] at .40). [bottomColor] defaults to
+  /// [AppColors.background]; Plan passes [AppColors.background50] so its
+  /// navy quest cards read as a layer above the ground, not fused to it.
   static LinearGradient screenGroundVertical({
     required Color topColor,
     double stop = 0.36,
+    Color bottomColor = AppColors.background,
   }) => LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [topColor, AppColors.background],
+    colors: [topColor, bottomColor],
     stops: [stop, 1],
   );
 

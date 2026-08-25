@@ -129,13 +129,6 @@ class _StarToastState extends State<_StarToast>
               decoration: BoxDecoration(
                 color: AppColors.tint(AppColors.primary, .94),
                 borderRadius: AppRadius.pillRadius,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.tint(AppColors.primary, .35),
-                    blurRadius: 34,
-                    offset: const Offset(0, 14),
-                  ),
-                ],
               ),
               child: Text(
                 widget.text,

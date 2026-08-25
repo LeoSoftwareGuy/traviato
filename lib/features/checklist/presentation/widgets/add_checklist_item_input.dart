@@ -60,7 +60,10 @@ class _AddChecklistItemInputState extends State<AddChecklistItemInput> {
                   color: AppColors.textTertiary,
                   fontWeight: FontWeight.w500,
                 ),
+                filled: false,
                 border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(
                   vertical: AppSpacing.md,
                 ),

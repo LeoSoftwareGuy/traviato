@@ -296,8 +296,8 @@ class _ChecklistRow extends StatelessWidget {
             borderRadius: AppRadius.badgeRadius,
           ),
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
+            horizontal: AppSpacing.base,
+            vertical: AppSpacing.md,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

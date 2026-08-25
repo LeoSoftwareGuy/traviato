@@ -6,11 +6,12 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
+import '../../../../core/widgets/star_award_toast.dart';
 import '../controllers/plan_controller.dart';
 import '../controllers/plan_state.dart';
 import '../mutations/quest_mutations.dart';
@@ -50,12 +51,9 @@ class PlanPage extends ConsumerWidget {
     final planAsync = ref.watch(planControllerProvider(tripId));
 
     return Scaffold(
+      extendBody: true,
       body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: AppGradients.screenGroundVertical(
-            topColor: AppGradients.groundTopPlanChecklistExpenses,
-          ),
-        ),
+        decoration: const BoxDecoration(color: AppColors.background50),
         child: SafeArea(
           child: planAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -70,6 +68,23 @@ class PlanPage extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+      bottomNavigationBar: AppBottomNavBar(
+        onFabTap: () => context.pushNamed(RouteNames.createMemory),
+        items: [
+          AppBottomNavBarItem(
+            icon: Icons.home_rounded,
+            label: 'Home',
+            selected: false,
+            onTap: () => context.goNamed(RouteNames.home),
+          ),
+          AppBottomNavBarItem(
+            icon: Icons.receipt_long_outlined,
+            label: 'Expenses',
+            selected: false,
+            onTap: () => context.goNamed(RouteNames.expenses),
+          ),
+        ],
       ),
     );
   }
@@ -96,7 +111,7 @@ class _PlanContent extends ConsumerWidget {
         AppSpacing.base,
         AppSpacing.sm,
         AppSpacing.base,
-        AppSpacing.xxl,
+        AppSpacing.xxl * 2,
       ),
       children: [
         PlanHeader(
@@ -141,8 +156,13 @@ class _PlanContent extends ConsumerWidget {
           QuestTimeline(
             tripId: tripId,
             quests: currentDay,
-            onToggle: (quest) =>
-                runToggleQuest(ref: ref, tripId: tripId, quest: quest),
+            onToggle: (quest) {
+              final wasCompleted = quest.isCompleted;
+              runToggleQuest(ref: ref, tripId: tripId, quest: quest);
+              if (!wasCompleted) {
+                showStarToast(context, '✦ +1 star · quest done');
+              }
+            },
             onEditQuest: (quest) => AddEditQuestSheet.show(
               context,
               tripId: tripId,

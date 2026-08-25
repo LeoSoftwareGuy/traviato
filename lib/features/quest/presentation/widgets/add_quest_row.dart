@@ -19,7 +19,7 @@ class AddQuestRow extends StatelessWidget {
       onTap: onTap,
       borderRadius: AppRadius.cardRadius,
       child: DashedRRectBorder(
-        color: AppColors.surfaceBorder,
+        color: AppColors.tint(AppColors.primary, .7),
         borderRadius: AppRadius.cardRadius,
         child: Container(
           width: double.infinity,
