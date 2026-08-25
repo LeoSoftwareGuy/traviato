@@ -47,10 +47,11 @@ class PlanState extends Equatable {
   }
 
   PlanState copyWith({
+    TripCardEntity? trip,
     List<QuestEntity>? quests,
     DateTime? Function()? currentDayDate,
   }) => PlanState(
-    trip: trip,
+    trip: trip ?? this.trip,
     quests: quests ?? this.quests,
     currentDayDate: currentDayDate != null
         ? currentDayDate()

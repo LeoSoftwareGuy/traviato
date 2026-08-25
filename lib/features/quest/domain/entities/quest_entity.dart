@@ -27,6 +27,20 @@ class QuestEntity extends Equatable {
 
   bool get isCompleted => completedAt != null;
 
+  /// A copy re-dated to [newDayDate] — used when a manage-sheet date shift
+  /// moves every quest on the trip by the same delta.
+  QuestEntity withDayDate(DateTime newDayDate) => QuestEntity(
+    id: id,
+    tripId: tripId,
+    dayDate: newDayDate,
+    time: time,
+    title: title,
+    placeText: placeText,
+    position: position,
+    completedAt: completedAt,
+    createdAt: createdAt,
+  );
+
   @override
   List<Object?> get props => [
     id,

@@ -159,4 +159,98 @@ void main() {
       );
     },
   );
+
+  test(
+    'applyTripUpdated replaces the held trip without touching quests',
+    () async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(
+            id: 't1',
+            name: 'Old name',
+            startDate: DateTime(2026, 8, 18),
+            endDate: DateTime(2026, 8, 19),
+          ),
+        );
+      final quest = buildQuestEntity(id: 'q1', dayDate: DateTime(2026, 8, 18));
+      final questRepo = FakeQuestRepository()..questsResult = Right([quest]);
+      final container = _buildContainer(
+        tripRepo: tripRepo,
+        questRepo: questRepo,
+      );
+      addTearDown(container.dispose);
+      container.listen(planControllerProvider('t1'), (_, _) {});
+
+      await container.read(planControllerProvider('t1').future);
+      final notifier = container.read(planControllerProvider('t1').notifier);
+
+      final renamed = buildTripCard(
+        id: 't1',
+        name: 'New name',
+        startDate: DateTime(2026, 8, 18),
+        endDate: DateTime(2026, 8, 19),
+      );
+      notifier.applyTripUpdated(renamed);
+
+      final state = container.read(planControllerProvider('t1')).value!;
+      expect(state.trip.name, 'New name');
+      expect(state.quests.single.id, 'q1');
+      expect(state.quests.single.dayDate, DateTime(2026, 8, 18));
+    },
+  );
+
+  test(
+    'applyDatesShifted moves the trip, every quest, and the current day '
+    'by the same delta — both directions',
+    () async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(
+            id: 't1',
+            startDate: DateTime(2026, 8, 18),
+            endDate: DateTime(2026, 8, 19),
+          ),
+        );
+      final quest = buildQuestEntity(id: 'q1', dayDate: DateTime(2026, 8, 18));
+      final questRepo = FakeQuestRepository()..questsResult = Right([quest]);
+      final container = _buildContainer(
+        tripRepo: tripRepo,
+        questRepo: questRepo,
+      );
+      addTearDown(container.dispose);
+      container.listen(planControllerProvider('t1'), (_, _) {});
+
+      await container.read(planControllerProvider('t1').future);
+      final notifier = container.read(planControllerProvider('t1').notifier);
+      final before = container.read(planControllerProvider('t1')).value!;
+      final beforeDay = before.currentDayDate!;
+
+      final shiftedForward = buildTripCard(
+        id: 't1',
+        startDate: DateTime(2026, 8, 19),
+        endDate: DateTime(2026, 8, 20),
+      );
+      notifier.applyDatesShifted(shiftedForward, 1);
+      final forwardState = container.read(planControllerProvider('t1')).value!;
+      expect(forwardState.trip.startDate, DateTime(2026, 8, 19));
+      expect(forwardState.trip.endDate, DateTime(2026, 8, 20));
+      expect(forwardState.quests.single.dayDate, DateTime(2026, 8, 19));
+      expect(
+        forwardState.currentDayDate,
+        beforeDay.add(const Duration(days: 1)),
+      );
+
+      final shiftedBack = buildTripCard(
+        id: 't1',
+        startDate: DateTime(2026, 8, 18),
+        endDate: DateTime(2026, 8, 19),
+      );
+      notifier.applyDatesShifted(shiftedBack, -1);
+      final backState = container.read(planControllerProvider('t1')).value!;
+      expect(backState.trip.startDate, DateTime(2026, 8, 18));
+      expect(backState.trip.endDate, DateTime(2026, 8, 19));
+      expect(backState.quests.single.dayDate, DateTime(2026, 8, 18));
+      expect(backState.currentDayDate, beforeDay);
+    },
+  );
 }
