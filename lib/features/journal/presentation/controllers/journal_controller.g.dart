@@ -50,7 +50,7 @@ final class JournalControllerProvider
   }
 }
 
-String _$journalControllerHash() => r'f202c6a847e50508cb87fe3a8ca10081ee00c3a2';
+String _$journalControllerHash() => r'5ae8e1e7d0a6962ddf61bb61eb2bb5a9a09925d5';
 
 final class JournalControllerFamily extends $Family
     with
