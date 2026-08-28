@@ -98,3 +98,87 @@ final class PhotoRepositoryProvider
 }
 
 String _$photoRepositoryHash() => r'2b9de6cb84dc4dd83d3694f1472961eaf88f3929';
+
+@ProviderFor(photoCompressor)
+final photoCompressorProvider = PhotoCompressorProvider._();
+
+final class PhotoCompressorProvider
+    extends
+        $FunctionalProvider<PhotoCompressor, PhotoCompressor, PhotoCompressor>
+    with $Provider<PhotoCompressor> {
+  PhotoCompressorProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'photoCompressorProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$photoCompressorHash();
+
+  @$internal
+  @override
+  $ProviderElement<PhotoCompressor> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  PhotoCompressor create(Ref ref) {
+    return photoCompressor(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(PhotoCompressor value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<PhotoCompressor>(value),
+    );
+  }
+}
+
+String _$photoCompressorHash() => r'cfdbd02f0727a62fcdc7a06c7a29768e248ad109';
+
+@ProviderFor(photoExifReader)
+final photoExifReaderProvider = PhotoExifReaderProvider._();
+
+final class PhotoExifReaderProvider
+    extends
+        $FunctionalProvider<PhotoExifReader, PhotoExifReader, PhotoExifReader>
+    with $Provider<PhotoExifReader> {
+  PhotoExifReaderProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'photoExifReaderProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$photoExifReaderHash();
+
+  @$internal
+  @override
+  $ProviderElement<PhotoExifReader> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  PhotoExifReader create(Ref ref) {
+    return photoExifReader(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(PhotoExifReader value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<PhotoExifReader>(value),
+    );
+  }
+}
+
+String _$photoExifReaderHash() => r'1cb26cd60e7bcce9a6faef380c7f7ed6575d9bf3';

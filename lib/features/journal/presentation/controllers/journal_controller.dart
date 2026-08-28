@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/errors/presentation_failure_exception.dart';
+import '../../../photo/domain/entities/photo_entity.dart';
 import '../../../photo/presentation/providers/photo_providers.dart';
 import '../../../trip/presentation/providers/trip_providers.dart';
 import '../../domain/entities/day_note_entity.dart';
@@ -80,6 +81,13 @@ class JournalController extends _$JournalController {
     final updated = Map<DateTime, DayNoteEntity?>.from(current.notesByDay)
       ..[day] = note;
     state = AsyncData(current.copyWith(notesByDay: updated));
+  }
+
+  /// Called by the add-photo mutation after a successful upload.
+  void applyPhotoAdded(PhotoEntity photo) {
+    final current = state.value;
+    if (current == null) return;
+    state = AsyncData(current.copyWith(photos: [...current.photos, photo]));
   }
 }
 

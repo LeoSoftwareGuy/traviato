@@ -12,6 +12,7 @@ import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../../core/widgets/star_award_toast.dart';
+import '../../../photo/presentation/widgets/add_photo_sheet.dart';
 import '../controllers/journal_controller.dart';
 import '../controllers/journal_state.dart';
 import '../mutations/journal_mutations.dart';
@@ -156,8 +157,10 @@ class _JournalContent extends ConsumerWidget {
           const SizedBox(height: AppSpacing.xl),
           PhotosStrip(
             photos: state.photosForCurrentDay,
-            onAddTap: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Photo capture is coming soon.')),
+            onAddTap: () => AddPhotoSheet.show(
+              context,
+              tripId: tripId,
+              dayDate: currentDay,
             ),
           ),
           const SizedBox(height: AppSpacing.xl),

@@ -209,6 +209,31 @@ void main() {
     expect(find.text('2 saved'), findsOneWidget);
   });
 
+  testWidgets('tapping the Add tile opens the photo capture entry sheet', (
+    tester,
+  ) async {
+    final tripRepo = FakeTripRepository()
+      ..tripCardResult = Right(
+        buildTripCard(id: 't1', startDate: _today, endDate: _today),
+      );
+    final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
+    final noteRepo = FakeDayNoteRepository();
+    await _pump(
+      tester,
+      tripRepo: tripRepo,
+      photoRepo: photoRepo,
+      noteRepo: noteRepo,
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('journal-add-photo')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add a photo'), findsOneWidget);
+    expect(find.text('Take a photo'), findsOneWidget);
+    expect(find.text('Choose from gallery'), findsOneWidget);
+  });
+
   testWidgets('the To Do sheet check-off toggles the quest', (tester) async {
     final tripRepo = FakeTripRepository()
       ..tripCardResult = Right(
