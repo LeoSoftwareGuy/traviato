@@ -12,6 +12,7 @@ abstract class RoutePaths {
   static const tripPlan = '/memory/:tripId/plan';
   static const tripChecklist = '/memory/:tripId/checklist';
   static const tripJournal = '/memory/:tripId/journal';
+  static const tripBonusTasks = '/memory/:tripId/bonus-tasks';
   static const tripWrapUp = '/memory/:tripId/wrap-up';
 }
 
@@ -29,5 +30,6 @@ abstract class RouteNames {
   static const tripPlan = 'tripPlan';
   static const tripChecklist = 'tripChecklist';
   static const tripJournal = 'tripJournal';
+  static const tripBonusTasks = 'tripBonusTasks';
   static const tripWrapUp = 'tripWrapUp';
 }

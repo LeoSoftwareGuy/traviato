@@ -13,11 +13,13 @@ class JournalHeader extends StatelessWidget {
   const JournalHeader({
     required this.stars,
     required this.onBack,
+    required this.onStarsTap,
     super.key,
   });
 
   final int stars;
   final VoidCallback onBack;
+  final VoidCallback onStarsTap;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,7 @@ class JournalHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
-        _StarsBadge(stars: stars),
+        _StarsBadge(stars: stars, onTap: onStarsTap),
       ],
     );
   }
@@ -68,33 +70,43 @@ class _CircleIconButton extends StatelessWidget {
 }
 
 class _StarsBadge extends StatelessWidget {
-  const _StarsBadge({required this.stars});
+  const _StarsBadge({required this.stars, required this.onTap});
 
   final int stars;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 36,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.surfaceBorder),
-        borderRadius: AppRadius.pillRadius,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.star_rounded, color: AppColors.primary, size: 16),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
-            '$stars',
-            style: AppTypography.chipLabel.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
+    return InkWell(
+      key: const Key('journal-stars-badge'),
+      onTap: onTap,
+      borderRadius: AppRadius.pillRadius,
+      child: Container(
+        height: 36,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: Border.all(color: AppColors.surfaceBorder),
+          borderRadius: AppRadius.pillRadius,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.star_rounded,
+              color: AppColors.primary,
+              size: 16,
             ),
-          ),
-        ],
+            const SizedBox(width: AppSpacing.xs),
+            Text(
+              '$stars',
+              style: AppTypography.chipLabel.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

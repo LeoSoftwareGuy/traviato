@@ -105,7 +105,14 @@ class _JournalContent extends ConsumerWidget {
         AppSpacing.xxl,
       ),
       children: [
-        JournalHeader(stars: 0, onBack: onBack),
+        JournalHeader(
+          stars: 0,
+          onBack: onBack,
+          onStarsTap: () => context.pushNamed(
+            RouteNames.tripBonusTasks,
+            pathParameters: {'tripId': tripId},
+          ),
+        ),
         const SizedBox(height: AppSpacing.lg),
         if (!state.hasDateRange || currentDay == null)
           const _NoDatesYet()

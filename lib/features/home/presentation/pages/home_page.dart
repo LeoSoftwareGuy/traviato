@@ -11,6 +11,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../bonus/presentation/providers/bonus_badge_provider.dart';
 import '../../../expense/presentation/providers/expense_providers.dart';
 import '../../../expense/presentation/widgets/add_expense_sheet.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
@@ -113,6 +114,11 @@ class _HomeContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hero = state.heroTrip;
+    final hasOpenBonusTasks = hero == null
+        ? false
+        : ref
+              .watch(bonusOpenCountForTripProvider(hero.id))
+              .maybeWhen(data: (count) => count > 0, orElse: () => false);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -126,7 +132,13 @@ class _HomeContent extends ConsumerWidget {
           username: username,
           stars: stars,
           onAvatarTap: () => context.pushNamed(RouteNames.profile),
-          onStarsTap: () => context.pushNamed(RouteNames.bonusTasks),
+          hasOpenBonusTasks: hasOpenBonusTasks,
+          onStarsTap: () => hero != null
+              ? context.pushNamed(
+                  RouteNames.tripBonusTasks,
+                  pathParameters: {'tripId': hero.id},
+                )
+              : context.pushNamed(RouteNames.bonusTasks),
         ),
         const SizedBox(height: AppSpacing.xl),
         HomeStatsBar(

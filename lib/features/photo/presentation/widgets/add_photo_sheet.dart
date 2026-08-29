@@ -15,11 +15,15 @@ import '../../../../core/widgets/bottom_sheet_chrome.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../../core/widgets/star_award_toast.dart';
 import '../../../trip/presentation/widgets/create_memory_field.dart';
+import '../../domain/entities/photo_entity.dart';
 import '../mutations/photo_mutations.dart';
 
 /// Entry point for issue #30 — the Journal "Add ✦2" tile and any future
 /// day-tab-context add affordance both call this. [dayDate] is whichever
-/// day the caller currently has selected in Journal.
+/// day the caller currently has selected in Journal. [onSaved], when given,
+/// runs instead of the default "+2 stars · photo logged" toast — used by
+/// the bonus-task popup sheet (#64) to complete its own assignment with the
+/// new photo before showing its own toast.
 class AddPhotoSheet {
   const AddPhotoSheet._();
 
@@ -27,19 +31,29 @@ class AddPhotoSheet {
     BuildContext context, {
     required String tripId,
     required DateTime dayDate,
+    Future<void> Function(PhotoEntity photo)? onSaved,
   }) {
     return showAppBottomSheet<void>(
       context: context,
-      builder: (context) => _SourcePicker(tripId: tripId, dayDate: dayDate),
+      builder: (context) => _SourcePicker(
+        tripId: tripId,
+        dayDate: dayDate,
+        onSaved: onSaved,
+      ),
     );
   }
 }
 
 class _SourcePicker extends StatelessWidget {
-  const _SourcePicker({required this.tripId, required this.dayDate});
+  const _SourcePicker({
+    required this.tripId,
+    required this.dayDate,
+    this.onSaved,
+  });
 
   final String tripId;
   final DateTime dayDate;
+  final Future<void> Function(PhotoEntity photo)? onSaved;
 
   Future<void> _pick(BuildContext context, ImageSource source) async {
     final file = await ImagePicker().pickImage(source: source);
@@ -52,6 +66,7 @@ class _SourcePicker extends StatelessWidget {
       tripId: tripId,
       dayDate: dayDate,
       bytes: bytes,
+      onSaved: onSaved,
     );
   }
 
@@ -140,18 +155,21 @@ class AddPhotoDetailsSheet extends ConsumerStatefulWidget {
     required this.tripId,
     required this.dayDate,
     required this.bytes,
+    this.onSaved,
     super.key,
   });
 
   final String tripId;
   final DateTime dayDate;
   final Uint8List bytes;
+  final Future<void> Function(PhotoEntity photo)? onSaved;
 
   static Future<void> show(
     BuildContext context, {
     required String tripId,
     required DateTime dayDate,
     required Uint8List bytes,
+    Future<void> Function(PhotoEntity photo)? onSaved,
   }) {
     return showAppBottomSheet<void>(
       context: context,
@@ -159,6 +177,7 @@ class AddPhotoDetailsSheet extends ConsumerStatefulWidget {
         tripId: tripId,
         dayDate: dayDate,
         bytes: bytes,
+        onSaved: onSaved,
       ),
     );
   }
@@ -183,8 +202,9 @@ class _AddPhotoDetailsSheetState extends ConsumerState<AddPhotoDetailsSheet> {
     final locationGranted = await _resolveLocationPermission(context);
     if (!mounted) return;
 
+    final PhotoEntity photo;
     try {
-      await runAddPhoto(
+      photo = await runAddPhoto(
         ref: ref,
         tripId: widget.tripId,
         dayDate: widget.dayDate,
@@ -197,7 +217,14 @@ class _AddPhotoDetailsSheetState extends ConsumerState<AddPhotoDetailsSheet> {
       return;
     }
     if (!mounted) return;
-    showStarToast(context, '✦ +2 stars · photo logged');
+
+    final onSaved = widget.onSaved;
+    if (onSaved != null) {
+      await onSaved(photo);
+    } else {
+      showStarToast(context, '✦ +2 stars · photo logged');
+    }
+    if (!mounted) return;
     Navigator.of(context).pop();
   }
 

@@ -7,6 +7,8 @@ import '../../../features/auth/presentation/controllers/auth_state.dart';
 import '../../../features/auth/presentation/pages/auth_page.dart';
 import '../../../features/auth/presentation/pages/guest_landing_page.dart';
 import '../../../features/auth/presentation/pages/splash_page.dart';
+import '../../../features/bonus/presentation/pages/bonus_tasks_empty_page.dart';
+import '../../../features/bonus/presentation/pages/bonus_tasks_page.dart';
 import '../../../features/checklist/presentation/pages/checklist_page.dart';
 import '../../../features/expense/presentation/pages/expense_compare_page.dart';
 import '../../../features/expense/presentation/pages/expenses_page.dart';
@@ -103,8 +105,13 @@ GoRouter router(Ref ref) {
       GoRoute(
         path: RoutePaths.bonusTasks,
         name: RouteNames.bonusTasks,
+        builder: (context, state) => const BonusTasksEmptyPage(),
+      ),
+      GoRoute(
+        path: RoutePaths.tripBonusTasks,
+        name: RouteNames.tripBonusTasks,
         builder: (context, state) =>
-            const PlaceholderPage(title: 'Bonus tasks'),
+            BonusTasksPage(tripId: state.pathParameters['tripId']!),
       ),
       GoRoute(
         path: RoutePaths.createMemory,
