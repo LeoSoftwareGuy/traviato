@@ -236,9 +236,19 @@ Header: back, mono `JOURNAL`, per-memory stars badge (informational).
 - **Verdict card** below — primary wash, Roboto 12/1.6: computed sentence, e.g. "Iceland ring road cost €939 more overall, but Santorini blues ran €16/day higher. Santorini blues was the cheaper trip per day."
 
 ### 10. Bonus tasks
-Header with stars badge. Title "Little dares," / *"while you're there."* + intro. Task rows: 44px radius-14 icon tile in the task's tint, title Fraunces 16/1.2, then `✦{n}` in primary and an expiry in mono — **coral when urgent (< 24h), textFaint otherwise**. Completed tasks use the success tint, a `✓` glyph, textSecondary title, and read `COMPLETED · DAY 2`. Haul card: "46 / 70 ✦" + a `[primary → coral]` bar at 66%.
-**Task popup** (bottom sheet): 40×4 grab handle, 50px radius-16 `◉` tile, title Fraunces 21, expiry in coral mono; detail Roboto 13/1.6; two stat tiles (REWARD `✦n`, PHOTO NEEDED `1`); primary CTA "◉ Open camera" — **awards the task's stars and dismisses**; "Maybe later" text button.
-Content: *Snap your first meal there* ✦1, 4h, urgent · *Something that reflects* ✦2, 19h · *A stranger who helped* ✦3, 2d · *Sunrise before anyone else* ✦2, completed.
+**System rules live in `BONUS_TASKS.md`** — tray size and cadence, the template pool and draw algorithm, non-completion behaviour, EXIF-reactive tasks, notifications, and the seed math. That file is authoritative for behaviour; this section covers the visual design only.
+
+Header with stars badge. Title "Today's dares," / *"while you're there."* + a sub-line that changes with tray state. **A segmented row switches the four tray states — that is a prototype demo affordance, not production UI.**
+
+Task rows: 44px radius-14 icon tile in the task's tint, title Fraunces 16/1.25, then `✦{n}` in primary and the expiry in mono — **always `TODAY`, never a countdown**. A **reactive** task adds a trigger line above the row, separated by a hairline: `◍ BECAUSE YOU JUST SHOT WATER` in blue mono 9, and the whole card takes a blue `.07` wash with a blue `.3` border.
+
+**Day one** shows 3 tasks, the trivial starter first (success tint, `◉`). **Both done** replaces the rows with the earned card — primary→purple 150° wash, floating `✦`, "Both done." Fraunces 20, "New dares tomorrow. You took **3 stars** off today." — followed by the **stretch task**: dashed purple border, `UNLOCKED · OPTIONAL` in purple-light mono, ✦3. **Gone quiet** shows the **streak-saver**: coral wash/border, `◐` tile, `TWO QUIET DAYS · NO RUSH`, ✦2, no expiry.
+
+**Location card** (only in the default state, until answered): blue `.09` wash, blue `.3` border, 32px `◎` tile, "Want your memories on a map?" Fraunces 16, the body copy from `BONUS_TASKS.md` §6, then "Not now" (surface) and "Pin my photos" (flat blue, `#0C0F27` text).
+
+Haul card: `46 / 70 ✦` + a `[primary → coral]` bar, plus the ratio note "Dares are the seasoning — most of a trip's stars come from the plan you actually kept." Below it a dashed **Yesterday** card carrying the playful miss copy.
+
+**Task popup** (bottom sheet): 40×4 grab handle; for a reactive task the trigger renders as a blue stadium pill at the top; then a 50px radius-16 tile in the task's own tint/colour, title Fraunces 21/1.18, expiry in mono (coral for the saver, purple-light for the stretch); detail Roboto 13/1.6; two stat tiles (REWARD `✦n`, PHOTO NEEDED `1`); primary CTA "◉ Open camera" — **awards the stars and dismisses**; a text button reading "Maybe later" ("Not today" for the streak-saver).
 
 ### 11. Profile ("You")
 Centred column: 86px avatar with a 2px primary `.55` ring and an overlapping `✦ 318` pill (flat primary) at bottom-right; name Fraunces 25; `@adawanders` mono 11 primary; bio Roboto 12.5/1.6 max-width 270; `JOINED MARCH 2024` mono 9.5.
@@ -283,7 +293,7 @@ Sticky, with a `[transparent → #0C0F27 @ 55%]` fade above it. Bar: `surface @ 
 
 **Navigation graph.** Landing ⇄ Auth → Home. Home → Plan / Expenses / Journal / Checklist / Profile / Bonus (via the stars badge) / New memory (FAB) / Wrap-up (finished cards) / Plan (coming-up cards). Plan → Checklist, manage sheet. Journal → Photo detail, Plan, Wrap-up. Expenses → Compare, add-expense sheet. Photo detail → Journal, Wrap-up.
 
-**Star economy.** Every logging action awards stars and fires the toast: quest check-off (1–3 per quest, per its own value), photo add (1), bonus task completion (its reward), packing an item (no stars, but a "Packed — nice" toast). Unchecking never removes stars. The Home and Profile counters read the same running total.
+**Star economy.** Every logging action awards stars and fires the toast: quest check-off (1–3 per quest, per its own value), photo add (1), bonus task completion (its reward), packing an item (no stars, but a "Packed — nice" toast). Unchecking never removes stars. The Home and Profile counters read the same running total. **No per-day cap on bonus stars in MVP** — see `BONUS_TASKS.md` §10 for the reasoning and when to add one.
 
 **Optimistic + instant.** All of these are local-state toggles with no spinner: quest checks, packing checks, vibe chips, cover selection, person tags, memory selection, compare pairing, sort, load-more. Progress bars animate to their new width over 400–450ms; the toast is the only "success" affordance — no snackbars, no dialogs.
 
@@ -316,6 +326,8 @@ Screen-level state needed per feature (names from the prototype, map to your not
 | `sortBig` | bool | false = latest-first, true = biggest-spender |
 | `cmpA`, `cmpB` | `String?` | compare pair, with the promote/clear rules above |
 | `sheet`, `manage`, `deleteArmed`, `bonusOpen` | bool / id | overlays |
+| `scene` | `dayone \| open \| cleared \| quiet` | **prototype only** — demos the four tray states; production derives this from assignment data |
+| `locGranted`, `locDismissed` | bool | location permission card state |
 | `tripName`, `startShift`, `endShift` | String / int | manage-sheet edits |
 
 **Derived, never stored:** memory total (sum of items), per-day average (total ÷ days), category totals, biggest category, all bar widths (always a ratio against the max in the visible set), packed counts, quest done-counts.
@@ -337,6 +349,7 @@ Fonts: Fraunces + Roboto are already in use; **JetBrains Mono is new** and must 
 ## Files
 
 - `Wander - Travel Memory Journal.dc.html` — the design reference. All 13 screens in one file with a left-hand rail to jump between them; every interaction listed above is live and tappable.
+- `BONUS_TASKS.md` — **final system rules for the bonus-task mechanic**, plus the three ready-to-file issue texts (M3-7a migration + seed, M3-7b tray feature, M3-7c notifications).
 - `traviato-figma-import.html` — the same design as a single self-contained file, for importing into Figma via the html.to.design plugin if a Figma copy is wanted.
 - `github.md` — records the repo association, the theme files the tokens came from, and a screen → source-file map.
 

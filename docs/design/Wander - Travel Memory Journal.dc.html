@@ -753,45 +753,119 @@ a{color:#F29520;text-decoration:none}a:hover{color:#FFB055}
           </div>
 
           <div style="padding:16px 22px 0">
-            <div style="font:400 27px/1.15 Fraunces,serif">Little dares,<br><em style="color:#F2A65A">while you're there.</em></div>
-            <div style="margin-top:7px;font:400 12px/1.55 Roboto;color:#92909E">Three challenges are live right now. Snap them before they expire and the stars are yours.</div>
+            <div style="font:400 27px/1.15 Fraunces,serif">Today's dares,<br><em style="color:#F2A65A">{{ daresHeadline }}</em></div>
+            <div style="margin-top:7px;font:400 12px/1.55 Roboto;color:#92909E">{{ daresSub }}</div>
           </div>
 
-          <div style="padding:20px 22px 0;display:flex;flex-direction:column;gap:10px">
-            <sc-for list="{{ bonusTasks }}" as="b" hint-placeholder-count="4">
-              <div onClick="{{ b.open }}" style="display:flex;gap:13px;align-items:center;padding:14px;border-radius:16px;background:{{ b.bg }};border:1px solid {{ b.bd }};cursor:pointer" style-hover="border-color:#F29520">
-                <div style="width:44px;height:44px;flex:none;border-radius:14px;background:{{ b.tint }};display:flex;align-items:center;justify-content:center;font-size:17px;color:{{ b.color }}">{{ b.icon }}</div>
-                <div style="flex:1;min-width:0">
-                  <div style="font:400 16px/1.2 Fraunces,serif;color:{{ b.fg }}">{{ b.title }}</div>
-                  <div style="margin-top:4px;display:flex;align-items:center;gap:8px">
-                    <span style="font:600 10px Roboto;color:#F29520">✦{{ b.stars }}</span>
-                    <span style="font:500 9.5px 'JetBrains Mono',monospace;color:{{ b.expColor }}">{{ b.expires }}</span>
-                  </div>
-                </div>
-                <span style="font-size:13px;color:#6D6D7A">›</span>
+          <div style="display:flex;gap:7px;padding:16px 22px 0">
+            <sc-for list="{{ dayScenes }}" as="d" hint-placeholder-count="3">
+              <div onClick="{{ d.go }}" style="flex:1;padding:8px 4px;border-radius:12px;text-align:center;cursor:pointer;background:{{ d.bg }};border:1px solid {{ d.bd }}">
+                <div style="font:600 10px Roboto;color:{{ d.fg }};white-space:nowrap">{{ d.label }}</div>
               </div>
             </sc-for>
           </div>
 
+          <div style="padding:18px 22px 0;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ bonusTasks }}" as="b" hint-placeholder-count="2">
+              <div onClick="{{ b.open }}" style="padding:14px;border-radius:16px;background:{{ b.bg }};border:1px solid {{ b.bd }};cursor:pointer" style-hover="border-color:#F29520">
+                <sc-if value="{{ b.reactive }}">
+                  <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(79,176,216,.22)">
+                    <span style="font-size:10px;color:#4FB0D8">◍</span>
+                    <span style="font:500 9px 'JetBrains Mono',monospace;letter-spacing:.1em;color:#4FB0D8">{{ b.trigger }}</span>
+                  </div>
+                </sc-if>
+                <div style="display:flex;gap:13px;align-items:center">
+                  <div style="width:44px;height:44px;flex:none;border-radius:14px;background:{{ b.tint }};display:flex;align-items:center;justify-content:center;font-size:17px;color:{{ b.color }}">{{ b.icon }}</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font:400 16px/1.25 Fraunces,serif;color:{{ b.fg }}">{{ b.title }}</div>
+                    <div style="margin-top:5px;display:flex;align-items:center;gap:8px">
+                      <span style="font:600 10px Roboto;color:#F29520">✦{{ b.stars }}</span>
+                      <span style="font:500 9.5px 'JetBrains Mono',monospace;color:{{ b.expColor }}">{{ b.expires }}</span>
+                    </div>
+                  </div>
+                  <span style="font-size:13px;color:#6D6D7A">›</span>
+                </div>
+              </div>
+            </sc-for>
+
+            <sc-if value="{{ dayCleared }}">
+              <div style="padding:22px 18px;border-radius:20px;background:linear-gradient(150deg,rgba(242,149,32,.14),rgba(137,98,197,.12));border:1px solid rgba(242,149,32,.32);text-align:center;animation:riseIn .35s ease both">
+                <div style="font-size:19px;color:#F29520;animation:floatY 4.5s ease-in-out infinite">✦</div>
+                <div style="margin-top:9px;font:400 20px Fraunces,serif">Both done.</div>
+                <div style="margin-top:5px;font:400 11.5px/1.55 Roboto;color:#AEACB7">New dares tomorrow. You took <b style="color:#FBFAF6">{{ todayStars }} stars</b> off today.</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ stretchOffered }}">
+              <div onClick="{{ openStretch }}" style="display:flex;gap:13px;align-items:center;padding:14px;border-radius:16px;background:rgba(137,98,197,.1);border:1px dashed rgba(137,98,197,.45);cursor:pointer" style-hover="border-color:#8962C5">
+                <div style="width:40px;height:40px;flex:none;border-radius:13px;background:rgba(137,98,197,.2);display:flex;align-items:center;justify-content:center;font-size:15px;color:#C9A9F5">◈</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font:500 9px 'JetBrains Mono',monospace;letter-spacing:.1em;color:#C9A9F5">UNLOCKED · OPTIONAL</div>
+                  <div style="margin-top:3px;font:400 15px/1.25 Fraunces,serif">Whatever you're pretending not to be lost next to</div>
+                </div>
+                <span style="font:600 10px Roboto;color:#C9A9F5">✦3</span>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ streakSaver }}">
+              <div onClick="{{ openSaver }}" style="display:flex;gap:13px;align-items:center;padding:14px;border-radius:16px;background:rgba(255,109,121,.1);border:1px solid rgba(255,109,121,.35);cursor:pointer" style-hover="border-color:#FF6D79">
+                <div style="width:40px;height:40px;flex:none;border-radius:13px;background:rgba(255,109,121,.18);display:flex;align-items:center;justify-content:center;font-size:15px;color:#FF6D79">◐</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font:500 9px 'JetBrains Mono',monospace;letter-spacing:.1em;color:#FF6D79">TWO QUIET DAYS · NO RUSH</div>
+                  <div style="margin-top:3px;font:400 15px/1.25 Fraunces,serif">Anything at all. Truly, anything.</div>
+                </div>
+                <span style="font:600 10px Roboto;color:#FF6D79">✦2</span>
+              </div>
+            </sc-if>
+          </div>
+
+          <sc-if value="{{ showLocCard }}">
+            <div style="margin:18px 22px 0;padding:15px 16px;border-radius:16px;background:rgba(79,176,216,.09);border:1px solid rgba(79,176,216,.3)">
+              <div style="display:flex;gap:11px;align-items:flex-start">
+                <span style="width:32px;height:32px;flex:none;border-radius:11px;background:rgba(79,176,216,.18);display:flex;align-items:center;justify-content:center;font-size:14px;color:#4FB0D8">◎</span>
+                <div style="flex:1;min-width:0">
+                  <div style="font:400 16px/1.2 Fraunces,serif">Want your memories on a map?</div>
+                  <div style="margin-top:5px;font:400 11.5px/1.55 Roboto;color:#92909E">We'll pin each photo where you took it, so your wrap-up can draw the route you actually walked. Only while you're using the app.</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:13px">
+                <div onClick="{{ dismissLoc }}" style="flex:1;padding:11px 0;border-radius:13px;text-align:center;background:rgba(29,34,72,.7);font:600 11.5px Roboto;color:#AEACB7;cursor:pointer">Not now</div>
+                <div onClick="{{ grantLoc }}" style="flex:1.3;padding:11px 0;border-radius:13px;text-align:center;background:#4FB0D8;font:600 11.5px Roboto;color:#0C0F27;cursor:pointer">Pin my photos</div>
+              </div>
+            </div>
+          </sc-if>
+
           <div style="margin:20px 22px 0;padding:15px;border-radius:16px;background:rgba(19,23,54,.7);border:1px solid rgba(29,34,72,.9)">
             <div style="display:flex;align-items:baseline;justify-content:space-between">
               <span style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.12em;color:#6D6D7A">THIS TRIP'S HAUL</span>
-              <span style="font:600 11px Roboto;color:#F29520">46 / 70 ✦</span>
+              <span style="font:600 11px Roboto;color:#F29520">{{ haulLabel }}</span>
             </div>
             <div style="margin-top:10px;height:7px;border-radius:4px;background:rgba(29,34,72,.9);overflow:hidden">
-              <div style="width:66%;height:100%;border-radius:4px;background:linear-gradient(90deg,#F29520,#FF6D79)"></div>
+              <div style="width:{{ haulPct }};height:100%;border-radius:4px;background:linear-gradient(90deg,#F29520,#FF6D79);transition:width .45s cubic-bezier(.2,.8,.2,1)"></div>
             </div>
+            <div style="margin-top:9px;font:400 10.5px/1.5 Roboto;color:#6D6D7A">{{ haulNote }}</div>
+          </div>
+
+          <div style="margin:14px 22px 0;padding:14px 15px;border-radius:16px;background:rgba(19,23,54,.5);border:1px dashed rgba(174,172,183,.2)">
+            <div style="font:500 9px 'JetBrains Mono',monospace;letter-spacing:.12em;color:#6D6D7A">YESTERDAY</div>
+            <div style="margin-top:5px;font:400 12px/1.55 Roboto;color:#92909E">{{ yesterdayCopy }}</div>
           </div>
 
           <sc-if value="{{ bonusOpen }}">
             <div style="position:absolute;inset:0;background:rgba(7,9,26,.72);backdrop-filter:blur(7px);display:flex;align-items:flex-end;z-index:40">
               <div style="width:100%;background:linear-gradient(180deg,#1A1742,#0F1230);border-radius:26px 26px 0 0;border-top:1px solid rgba(242,149,32,.35);padding:22px 22px 40px;animation:riseIn .32s cubic-bezier(.2,.8,.2,1)">
                 <div style="display:flex;justify-content:center"><span style="width:40px;height:4px;border-radius:2px;background:rgba(174,172,183,.3)"></span></div>
-                <div style="margin-top:20px;display:flex;gap:13px;align-items:center">
-                  <span style="width:50px;height:50px;border-radius:16px;background:rgba(242,149,32,.16);display:flex;align-items:center;justify-content:center;font-size:20px;color:#F29520">◉</span>
-                  <div>
-                    <div style="font:400 21px/1.15 Fraunces,serif">{{ bonusTitle }}</div>
-                    <div style="margin-top:3px;font:500 10px 'JetBrains Mono',monospace;color:#FF6D79">{{ bonusExpires }}</div>
+                <sc-if value="{{ bonusReactive }}">
+                  <div style="margin-top:18px;display:flex;align-items:center;gap:7px;padding:9px 12px;border-radius:999px;background:rgba(79,176,216,.12);border:1px solid rgba(79,176,216,.3);width:fit-content">
+                    <span style="font-size:10px;color:#4FB0D8">◍</span>
+                    <span style="font:500 9px 'JetBrains Mono',monospace;letter-spacing:.1em;color:#4FB0D8">{{ bonusTrigger }}</span>
+                  </div>
+                </sc-if>
+                <div style="margin-top:16px;display:flex;gap:13px;align-items:center">
+                  <span style="width:50px;height:50px;flex:none;border-radius:16px;background:{{ bonusTint }};display:flex;align-items:center;justify-content:center;font-size:20px;color:{{ bonusColor }}">{{ bonusIcon }}</span>
+                  <div style="flex:1;min-width:0">
+                    <div style="font:400 21px/1.18 Fraunces,serif">{{ bonusTitle }}</div>
+                    <div style="margin-top:4px;font:500 10px 'JetBrains Mono',monospace;color:{{ bonusExpColor }}">{{ bonusExpires }}</div>
                   </div>
                 </div>
                 <div style="margin-top:16px;font:400 13px/1.6 Roboto;color:#AEACB7">{{ bonusDetail }}</div>
@@ -806,7 +880,7 @@ a{color:#F29520;text-decoration:none}a:hover{color:#FFB055}
                   </div>
                 </div>
                 <div onClick="{{ completeBonus }}" style="margin-top:18px;padding:16px;border-radius:16px;text-align:center;background:#F29520;color:#0C0F27;font:600 15px Roboto;cursor:pointer">◉ Open camera</div>
-                <div onClick="{{ closeBonus }}" style="margin-top:9px;text-align:center;font:600 12.5px Roboto;color:#6D6D7A;cursor:pointer;padding:8px">Maybe later</div>
+                <div onClick="{{ closeBonus }}" style="margin-top:9px;text-align:center;font:600 12.5px Roboto;color:#6D6D7A;cursor:pointer;padding:8px">{{ bonusDismiss }}</div>
               </div>
             </div>
           </sc-if>
@@ -1268,12 +1342,33 @@ const MEMORIES = [
       { title:'Villa gardens', cat:'Activity', v:36, day:'23 MAY' },
     ] },
 ];
-const BONUS = [
-  {id:'meal', title:'Snap your first meal there', stars:1, expires:'EXPIRES IN 4H', icon:'✱', color:'#FF6D79', tint:'rgba(255,109,121,.16)', urgent:true, detail:'Whatever is on the table in the next four hours. Blurry counts — this one is about the memory, not the photo.'},
-  {id:'water', title:'Something that reflects', stars:2, expires:'EXPIRES IN 19H', icon:'◍', color:'#8962C5', tint:'rgba(137,98,197,.16)', detail:'A lake, a window, a puddle. Find a surface doubling the world and keep it.'},
-  {id:'stranger', title:'A stranger who helped', stars:3, expires:'EXPIRES IN 2D', icon:'☺', color:'#F29520', tint:'rgba(242,149,32,.16)', detail:'Ask first, always. Three stars because it is the hardest one — and the one you will reread.'},
-  {id:'done', title:'Sunrise before anyone else', stars:2, expires:'COMPLETED · DAY 2', icon:'✓', color:'#5FBF8E', tint:'rgba(95,191,142,.16)', done:true, detail:'Already yours.'},
-];
+// Two live dares per day. Reactive ones fire off the last photo's EXIF — no location permission needed.
+const BONUS_SCENES = {
+  dayone: [
+    {id:'anything', title:'Snap anything at all', stars:1, expires:'TODAY', icon:'◉', color:'#5FBF8E', tint:'rgba(95,191,142,.16)',
+     starter:true, detail:'The bar is deliberately on the floor. Point the camera at literally anything and this is done — we just want you to feel how easy it is.'},
+    {id:'firstmeal', title:'Snap your first meal there', stars:1, expires:'TODAY', icon:'✱', color:'#FF6D79', tint:'rgba(255,109,121,.16)',
+     detail:'Whatever is on the table first. Petrol-station pastry counts and honestly makes the better story.'},
+    {id:'slept', title:'The view from where you slept', stars:2, expires:'TODAY', icon:'⌂', color:'#F29520', tint:'rgba(242,149,32,.16)',
+     detail:'Window, tent flap, ceiling. In a year this is the photo that puts you back in the room.'},
+  ],
+  open: [
+    {id:'worst', title:'The worst photo of the day', stars:1, expires:'TODAY', icon:'✱', color:'#FF6D79', tint:'rgba(255,109,121,.16)',
+     detail:'Blurred, badly lit, someone blinking. The one you would normally delete is the one you will laugh at in a year. Keep it on purpose.'},
+    {id:'water', title:'Something that reflects — puddles count, and count double', stars:2, expires:'TODAY', icon:'◍', color:'#4FB0D8', tint:'rgba(79,176,216,.16)',
+     reactive:true, trigger:'BECAUSE YOU JUST SHOT WATER',
+     detail:'Your last photo was taken by the lake, so here is a dare while you are still standing there. Find a surface doubling the world.'},
+  ],
+  cleared: [],
+  quiet: [
+    {id:'meal', title:'The least impressive meal you\u2019ve had here', stars:1, expires:'TODAY', icon:'✱', color:'#FF6D79', tint:'rgba(255,109,121,.16)',
+     detail:'Service-station sandwich, sad hotel banana. No filter, no apology.'},
+  ],
+};
+const STRETCH = {id:'lost', title:'Whatever you\u2019re pretending not to be lost next to', stars:3, expires:'BONUS · NO DEADLINE', icon:'◈', color:'#C9A9F5', tint:'rgba(137,98,197,.2)',
+  detail:'You unlocked this by clearing both. Entirely optional, worth three stars, and best attempted while insisting you know exactly where you are.'};
+const SAVER = {id:'saver', title:'Anything at all. Truly, anything.', stars:2, expires:'NO RUSH · WAITS FOR YOU', icon:'◐', color:'#FF6D79', tint:'rgba(255,109,121,.18)',
+  detail:'It\u2019s been two quiet days, so this one doesn\u2019t expire and the bar is on the floor. A ceiling. Your shoes. We just want you back.'};
 const ACH = [
   {name:'Globetrotter', desc:'10 countries collected', icon:'◍', color:'#F29520'},
   {name:'Shutterbug', desc:'500 photos logged', icon:'◉', color:'#8962C5'},
@@ -1296,6 +1391,7 @@ class Component extends DCLogic {
     cover: null, manage: false, deleteArmed: false,
     tripName: 'Dolomites, slowly', startShift: 0, endShift: 0,
     selMem: 'dolomites', shown: 3, cmpA: null, cmpB: null,
+    scene: 'open', locGranted: false, locDismissed: false,
   };
 
   eur(n) { return '\u20AC' + n.toLocaleString('en-US'); }
@@ -1475,10 +1571,17 @@ class Component extends DCLogic {
         + '. ' + lo.name + ' was the cheaper trip per day.';
     }
 
-    const bonusTasks = BONUS.map(b => ({ ...b, open: () => this.setState({ bonus: b.id }),
-      bg: b.done ? 'rgba(95,191,142,.08)' : P.surf, bd: b.done ? 'rgba(95,191,142,.3)' : P.bd,
-      fg: b.done ? P.fg2 : P.fg, expColor: b.urgent ? P.coral : P.fg3 }));
-    const bt = BONUS.find(b => b.id === s.bonus);
+    const scene = s.scene || 'open';
+    const live = BONUS_SCENES[scene].slice();
+    const cleared = scene === 'cleared';
+    const quiet = scene === 'quiet';
+    const dayone = scene === 'dayone';
+    const pool = live.concat([STRETCH, SAVER]);
+    const bonusTasks = live.map(b => ({ ...b, open: () => this.setState({ bonus: b.id }),
+      bg: b.reactive ? 'rgba(79,176,216,.07)' : P.surf,
+      bd: b.reactive ? 'rgba(79,176,216,.3)' : P.bd,
+      fg: P.fg, expColor: P.fg3, reactive: !!b.reactive, trigger: b.trigger || '' }));
+    const bt = pool.filter(b => b.id === s.bonus)[0];
 
     const photoGrads = [GRADS.fjords, GRADS.family, GRADS.bucket, GRADS.solo, GRADS.planner, GRADS.newmem];
 
@@ -1616,8 +1719,40 @@ class Component extends DCLogic {
 
       bonusTasks, bonusOpen: !!bt, bonusTitle: bt ? bt.title : '', bonusDetail: bt ? bt.detail : '',
       bonusStars: bt ? bt.stars : 0, bonusExpires: bt ? bt.expires : '',
+      bonusIcon: bt ? bt.icon : '', bonusColor: bt ? bt.color : P.primary, bonusTint: bt ? bt.tint : 'rgba(242,149,32,.16)',
+      bonusReactive: !!(bt && bt.reactive), bonusTrigger: bt ? (bt.trigger || '') : '',
+      bonusExpColor: bt && bt.id === 'saver' ? P.coral : (bt && bt.id === 'lost' ? '#C9A9F5' : P.fg3),
+      bonusDismiss: bt && bt.id === 'saver' ? 'Not today' : 'Maybe later',
       closeBonus: () => this.setState({ bonus: null }),
-      completeBonus: () => { const n = bt ? bt.stars : 1; this.setState({ bonus: null }); this.fly('+' + n + ' stars · challenge done', n); },
+      completeBonus: () => { const n = bt ? bt.stars : 1; this.setState({ bonus: null }); this.fly('+' + n + ' stars · dare done', n); },
+
+      daresHeadline: quiet ? 'no rush.' : (cleared ? 'all taken.' : (dayone ? 'starting easy.' : 'while you\u2019re there.')),
+      daresSub: cleared
+        ? 'Nothing left today — that\u2019s the point. Two fresh ones land in the morning.'
+        : (quiet
+          ? 'One easy dare, and one that waits for you. We\u2019ll stop nudging after this.'
+          : (dayone
+            ? 'Three on your first day, and the first one is free. From tomorrow it\u2019s two a day.'
+            : 'Two live right now. Miss them and they quietly disappear — no penalty, new ones tomorrow.')),
+      dayScenes: [['dayone','Day one'],['open','Two live'],['cleared','Both done'],['quiet','Gone quiet']].map(x => ({
+        label: x[1], go: () => this.setState({ scene: x[0], bonus: null }),
+        bg: scene === x[0] ? 'rgba(242,149,32,.16)' : P.surf,
+        bd: scene === x[0] ? 'rgba(242,149,32,.5)' : P.bd,
+        fg: scene === x[0] ? P.primary : P.fg2,
+      })),
+      dayCleared: cleared, todayStars: 3,
+      stretchOffered: cleared, openStretch: () => this.setState({ bonus: 'lost' }),
+      streakSaver: quiet, openSaver: () => this.setState({ bonus: 'saver' }),
+      showLocCard: scene === 'open' && !s.locGranted && !s.locDismissed,
+      grantLoc: () => { this.setState({ locGranted: true }); this.fly('Photos will be pinned'); },
+      dismissLoc: () => this.setState({ locDismissed: true }),
+      haulLabel: (cleared ? 49 : 46) + ' / 70 ✦',
+      haulPct: (cleared ? 70 : 66) + '%',
+      haulNote: 'Dares are the seasoning — most of a trip\u2019s stars come from the plan you actually kept.',
+      yesterdayCopy: quiet
+        ? 'Two days of dares got away. Two new ones tomorrow, as always.'
+        : (cleared ? 'You cleared both yesterday too. Second day running.'
+          : (dayone ? 'Nothing behind you yet — this memory started today.' : 'Yesterday\u2019s dares got away. These two are new.')),
 
       profileStats: [
         { v: 12, k: 'MEMORIES', color: P.fg }, { v: 10, k: 'COUNTRIES', color: P.fg },
