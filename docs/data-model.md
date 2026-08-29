@@ -1,4 +1,4 @@
-# Trevy — Data Model (MVP, v3)
+# Trevy — Data Model (MVP, v4)
 
 Derived from `functionality.md` v4. Postgres (Supabase) — migrations only, RLS on
 every table, explicit grants (auto-expose disabled). DB keeps `trips` (UI:
@@ -63,7 +63,24 @@ accommodation, activities, shopping, other`), `spent_on`, EUR-only.
 Breakdown (per-day avg, biggest category, per-category bars) and Compare are
 all client-side derivations; `expense_summary_view` supplies per-trip totals.
 
-### `bonus_task_templates` / `bonus_task_assignments` — unchanged
+### `bonus_task_templates` — RESHAPED (v4; migration amends the M3-3 tables)
+`id bigint PK, code text unique, title (the prompt, slot-filled client-side),
+detail?, points int (regular 1–3 · starter 1 · stretch 3 · milestone 5 ·
+streak_saver 2), phase check (arrival/middle/departure/anytime), kind check
+(regular/starter/stretch/milestone/streak_saver)`.
+Dropped: `duration_hours`, `trigger`. Seed ~30–35 with **≥ 20 in
+anytime+middle** (2/day × 10-day no-repeat window must not run dry).
+Select-only for clients.
+
+### `bonus_task_assignments` — RESHAPED (v4)
+`id uuid PK, trip_id (cascade), template_id FK, day_date date, completed_at?,
+photo_id?, created_at`, **unique (trip_id, template_id, day_date)**.
+Dropped: `status`, `expires_at`. Expiry is DERIVED: expired ⇔ `day_date <
+today AND completed_at IS NULL` — never stored, never rendered as failure.
+Exception: `streak_saver` assignments stay live past their day until
+completed. The daily draw is computed deterministically client-side
+(hash(trip_id, day_date) over eligible templates, phase-filtered, minus the
+10-day repeat set) and inserted idempotently via the unique constraint.
 ### `points_ledger` — unchanged (values in `award_points` RPC)
 ### `achievement_templates` / `user_achievements` — unchanged (seeded 8:
 first_adventure, globetrotter, century, star_collector, shutterbug, storyteller
@@ -92,7 +109,14 @@ Checklist suggestions (5 categories, essentials flagged); bonus templates;
    bundled-assets-only + "Set as cover" later?
 3. EUR-only confirmed acceptable for launch market?
 
-## Resolved
+## Resolved (v4 additions first)
+
+- Bonus mechanic v2: daily tray (2/day, day-one 3 + starter), silent expiry,
+  opt-in stretch, streak-saver ✦2, milestones ✦5 — tables reshaped.
+- Weather template slots: post-MVP. No daily bonus-star cap in MVP.
+- Notifications: local-only (flutter_local_notifications), no push in MVP.
+
+## Resolved (earlier)
 
 - Redesign's variable quest stars → REJECTED (flat 1, no column).
 - Redesign's photo ✦1 → REJECTED (photo = 2).

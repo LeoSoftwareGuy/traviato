@@ -1,4 +1,4 @@
-# Trevy — Issue Backlog (MVP, v4 — post-redesign-handoff)
+# Trevy — Issue Backlog (MVP, v5)
 
 Design source: `docs/design/` handoff (13 screens). Numbering rule unchanged:
 real numbers at issue creation; working IDs until then.
@@ -74,10 +74,29 @@ present → M3-9.
 ### M3-6 Photo capture & upload
 As before; award ✦2; success toast; feeds Journal strips/tabs.
 
-### M3-7 Bonus tasks
-Handoff §10: haul card, urgency-coral countdowns, completed-with-day rows,
-popup sheet with reward/photo tiles, camera CTA → capture → completion.
-Entry: Home stars badge (wired in R-3).
+### M3-7a Migration: bonus tables reshape + template seed
+Amends M3-3 tables per data-model v4: templates gain code/phase/kind, drop
+duration_hours/trigger; assignments gain day_date, drop status/expires_at
+(+ unique constraint). Reseed ~30–35 templates (≥20 anytime+middle, 3–4
+arrival, 2–3 departure, 1 starter, 2–3 stretch, 3 milestone, 1 streak-saver).
+Update award RPC seam if it read dropped columns. RLS/grants; db reset.
+
+### M3-7b Bonus tasks feature (daily tray)
+Handoff §10 layout with intentional deviations (no countdowns/urgency).
+Deterministic 2-per-day draw (day-one 3 + starter), phase filter, 10-day
+no-repeat, idempotent assignment insert; slot filling from trip context;
+tray UI + earned state + opt-in stretch; streak-saver condition (2 quiet
+days); milestone days 7/14/21; completion via photo capture → RPC + toast;
+COMPLETED section with day. Entry: Home stars badge + Journal contexts.
+Tests: draw determinism/no-repeat/phase rules, day-one composition,
+streak-saver + milestone triggers, completion flow.
+
+### M3-7c Bonus notifications (local)
+flutter_local_notifications (justify dep). Morning 9:00 if yesterday had
+activity; evening 19:00 if undone AND app opened today; arrival-day from
+start_date; never after 21:00; skip when tray complete; mute after 3
+ignored (approximation documented). Permission prompt UX; scheduling on
+app lifecycle events; tests for the rule matrix (time-injectable).
 
 ### M3-8 Photo detail + tagging — NEW (handoff §13)
 Full-bleed pager, place row (+coords), people chips (free-text tag/untag),

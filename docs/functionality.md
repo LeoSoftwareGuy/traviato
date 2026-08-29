@@ -1,9 +1,9 @@
-# Trevy — MVP Functionality (v4, redesign handoff)
+# Trevy — MVP Functionality (v5)
 
 > One-liner: the place where your travel life lives — plan your memory, log it as you
 > go, and it becomes a beautiful journal you keep forever.
 
-Source of truth for screens: the **redesign handoff** (`docs/design/` — 13-screen
+v5: bonus-task mechanic v2 (daily tray). Source of truth for screens: the **redesign handoff** (`docs/design/` — 13-screen
 design reference `Wander - Travel Memory Journal.dc.html` + README with tokens,
 interactions, motion). Supersedes the "Leo's team library" Figma file. A Figma copy
 can be made via `traviato-figma-import.html` (html.to.design).
@@ -117,14 +117,44 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   ("X cost €N more overall, but Y ran €N/day higher…").
 - "Done comparing" clears. All values derived client-side — no schema impact.
 
-## 12. Bonus tasks ✅ — redesigned
+## 12. Bonus tasks ✅ — mechanic v2 (daily tray)
 
-- Per-memory list: haul card (stars earned / possible + bar), task rows with tint
-  icon tiles, star value, expiry countdown (**coral when < 24h**), COMPLETED
-  section with day earned.
-- Task popup sheet: reward + photo-needed tiles, "Open camera" CTA → capture →
-  completion + stars, "Maybe later".
-- Entry: stars badge on Home header (+ journal contexts).
+> Principle: a quest is your plan; a bonus task is the app's invitation.
+> It must never feel like homework.
+
+- **Daily tray:** 2 tasks per day of an active memory, valid until end of day
+  (local time). No countdown clocks — "today" framing. **Day one: 3 tasks**,
+  one of them a trivially easy starter ("Snap anything at all").
+- **Source:** a seeded pool of ~30–35 task *templates* (shapes with slots
+  filled from vibe/destination/day), each tagged with a **phase**
+  (arrival / middle / departure / anytime) and a **kind** (regular / starter /
+  stretch / milestone / streak_saver). Weather slots: post-MVP.
+- **Draw:** deterministic per (memory, day) — reopening the app never
+  reshuffles. Phase-filtered (arrival only on day 1, departure only on the
+  last day). **No template repeats within 10 days** per memory.
+- **Unfinished tasks vanish silently** at day end. No failed state, no red,
+  nothing accumulates. This is the load-bearing rule.
+- **Both done:** calm earned state ("Both done · ✦N today. New ones
+  tomorrow"), no refill; unlocks one **opt-in stretch task** (✦3).
+- **Streak-saver:** if nothing logged for 2 straight days, one ✦2 task
+  appears and persists until acted on (max one active).
+- **Milestones:** days 7 / 14 / 21 of long memories each add one ✦5
+  reflective task.
+- Completion = photo capture → stars via RPC + award toast.
+- **Design deviation from handoff §10 (intentional):** no hard countdowns or
+  coral urgency; a 2-slot tray with an earned state instead. Completed
+  section keeps "COMPLETED · DAY N" rows.
+- **Star economy note:** no daily bonus cap in MVP (stars aren't spendable);
+  revisit when redemption exists.
+
+### Notifications (local, no push infrastructure)
+
+- Morning ~9:00 local: "Two little dares today ✦" — only if yesterday had
+  activity. Evening ~19:00: only if a task is undone AND the app was opened
+  today. Arrival-day notification triggered by the memory's start date.
+- Silence rules: never after 21:00, none when both tasks are done, hard mute
+  after 3 consecutively ignored (ignored = approximated client-side:
+  scheduled but app not opened).
 
 ## 13. Stars ✅
 
