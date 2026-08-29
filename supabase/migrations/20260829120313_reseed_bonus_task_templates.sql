@@ -14,7 +14,7 @@ insert into public.bonus_task_templates (code, title, detail, points, phase, kin
 values
   -- Anytime (regular)
   ('worst_photo_of_day', 'The worst photo of the day', 'Not your best angle. Not your best moment. That''s the point.', 2, 'anytime', 'regular'),
-  ('something_free', 'Find something free', 'A view, a smell, a street performance — snap whatever cost you nothing today.', 1, 'anytime', 'regular'),
+  ('something_free', 'Find something free', 'A view, a smile, a street performance — snap whatever cost you nothing today.', 1, 'anytime', 'regular'),
   ('local_snack', 'Try a snack you can''t get at home', 'Bonus points if you can''t pronounce it.', 2, 'anytime', 'regular'),
   ('menu_mystery', 'Order something you can''t translate', 'Point at the menu and commit.', 2, 'anytime', 'regular'),
   ('stranger_kindness', 'Capture a small kindness from a stranger', 'A wave, a smile, directions when you were lost.', 2, 'anytime', 'regular'),
@@ -49,6 +49,7 @@ values
 
   -- Starter
   ('snap_anything', 'Snap anything at all', 'Seriously. Anything. This one''s just to get you started.', 1, 'arrival', 'starter'),
+  ('snap_suitecase', 'Snap your packing process', 'Document the chaos of getting ready for your trip.', 1, 'arrival', 'starter'),
 
   -- Stretch
   ('stranger_portrait', 'Ask a stranger if you can take their photo', 'Bonus vulnerability points. They''ll probably say yes.', 3, 'anytime', 'stretch'),
