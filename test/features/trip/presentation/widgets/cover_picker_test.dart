@@ -76,5 +76,21 @@ void main() {
     expect(image.image, isA<MemoryImage>());
     expect((image.image as MemoryImage).bytes, _onePixelPng);
     expect(find.text('YOUR COVER'), findsOneWidget);
+    // High filter quality on the upscaled preview (issue #82).
+    expect(image.filterQuality, FilterQuality.high);
+  });
+
+  testWidgets('bundled thumbnails render at high filter quality', (
+    tester,
+  ) async {
+    await _pump(tester);
+
+    final thumbnail = tester.widget<Image>(
+      find.descendant(
+        of: find.byKey(const Key('cover-thumbnail-hero')),
+        matching: find.byType(Image),
+      ),
+    );
+    expect(thumbnail.filterQuality, FilterQuality.high);
   });
 }

@@ -114,10 +114,15 @@ class _CoverSlot extends StatelessWidget {
     final coverId = selectedCoverId;
     if (customBytes != null || coverId != null) {
       final image = customBytes != null
-          ? Image.memory(customBytes, fit: BoxFit.cover)
+          ? Image.memory(
+              customBytes,
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
+            )
           : Image.asset(
               kCoverOptions.firstWhere((o) => o.id == coverId).assetPath,
               fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
             );
       return Container(
         height: 150,
@@ -231,7 +236,11 @@ class _Thumbnail extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(option.assetPath, fit: BoxFit.cover),
+            Image.asset(
+              option.assetPath,
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
+            ),
             if (selected)
               Container(
                 color: AppColors.tint(AppColors.primary, .28),

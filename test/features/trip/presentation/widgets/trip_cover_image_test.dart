@@ -40,6 +40,8 @@ void main() {
     expect(find.byType(Image), findsOneWidget);
     final image = tester.widget<Image>(find.byType(Image));
     expect(image.image, isA<AssetImage>());
+    // High filter quality on the upscaled cover (issue #82).
+    expect(image.filterQuality, FilterQuality.high);
   });
 
   testWidgets('null shows the placeholder, no network', (tester) async {

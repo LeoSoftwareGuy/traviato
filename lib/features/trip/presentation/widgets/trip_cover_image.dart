@@ -21,7 +21,11 @@ class TripCoverImage extends ConsumerWidget {
 
     final assetPath = resolveAssetCoverPath(path);
     if (assetPath != null) {
-      return Image.asset(assetPath, fit: BoxFit.cover);
+      return Image.asset(
+        assetPath,
+        fit: BoxFit.cover,
+        filterQuality: FilterQuality.high,
+      );
     }
 
     final signedUrl = ref.watch(coverImageUrlProvider(path));
@@ -31,6 +35,7 @@ class TripCoverImage extends ConsumerWidget {
       data: (url) => CachedNetworkImage(
         imageUrl: url,
         fit: BoxFit.cover,
+        filterQuality: FilterQuality.high,
         placeholder: (context, url) =>
             const ColoredBox(color: AppColors.surface),
         errorWidget: (context, url, error) => const _BrokenCover(),

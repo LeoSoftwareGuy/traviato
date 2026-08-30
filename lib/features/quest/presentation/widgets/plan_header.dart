@@ -97,7 +97,11 @@ class PlanHeader extends StatelessWidget {
             border: Border.all(color: AppColors.surfaceBorder),
           ),
           child: PhotoScrim(
-            image: Image.asset(PlanImages.banner, fit: BoxFit.cover),
+            image: Image.asset(
+              PlanImages.banner,
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
+            ),
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Stack(
