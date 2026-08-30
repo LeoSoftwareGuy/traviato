@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/core/errors/exceptions.dart';
 import 'package:traviato/core/errors/failures.dart';
@@ -104,6 +106,33 @@ class _FakeTripRemoteDataSource implements TripRemoteDataSource {
       createdAt: DateTime(2026, 1, 1),
       updatedAt: DateTime(2026, 1, 1),
     );
+  }
+
+  String? lastUploadCoverTripId;
+  Uint8List? lastUploadCoverBytes;
+  String? lastDeleteCoverTripId;
+
+  @override
+  Future<String> uploadCoverImage({
+    required String tripId,
+    required Uint8List bytes,
+  }) async {
+    if (exception != null) throw exception!;
+    lastUploadCoverTripId = tripId;
+    lastUploadCoverBytes = bytes;
+    return 'u1/$tripId/cover.jpg';
+  }
+
+  @override
+  Future<void> deleteCoverImage(String tripId) async {
+    if (exception != null) throw exception!;
+    lastDeleteCoverTripId = tripId;
+  }
+
+  @override
+  Future<String> getCoverImageUrl(String storagePath) async {
+    if (exception != null) throw exception!;
+    return 'https://signed.example/$storagePath';
   }
 }
 
@@ -237,6 +266,83 @@ void main() {
         ),
       );
       final result = await repo.deleteTrip('t1');
+      result.fold(
+        (failure) =>
+            expect(failure, const AuthenticationFailure(message: 'no session')),
+        (_) => fail('expected Left'),
+      );
+    });
+  });
+
+  group('TripRepositoryImpl.uploadCoverImage', () {
+    test('returns Right(storagePath) on success', () async {
+      final remote = _FakeTripRemoteDataSource();
+      final repo = TripRepositoryImpl(remote: remote);
+      final bytes = Uint8List.fromList([1, 2, 3]);
+      final result = await repo.uploadCoverImage(tripId: 't1', bytes: bytes);
+      result.fold(
+        (failure) => fail('expected Right, got Left($failure)'),
+        (path) => expect(path, 'u1/t1/cover.jpg'),
+      );
+      expect(remote.lastUploadCoverTripId, 't1');
+      expect(remote.lastUploadCoverBytes, bytes);
+    });
+
+    test('maps NetworkException to NetworkFailure', () async {
+      final repo = TripRepositoryImpl(
+        remote: _FakeTripRemoteDataSource(exception: const NetworkException()),
+      );
+      final result = await repo.uploadCoverImage(
+        tripId: 't1',
+        bytes: Uint8List(0),
+      );
+      result.fold(
+        (failure) => expect(failure, const NetworkFailure()),
+        (_) => fail('expected Left'),
+      );
+    });
+  });
+
+  group('TripRepositoryImpl.deleteCoverImage', () {
+    test('returns Right(null) on success', () async {
+      final remote = _FakeTripRemoteDataSource();
+      final repo = TripRepositoryImpl(remote: remote);
+      final result = await repo.deleteCoverImage('t1');
+      expect(result.isRight(), isTrue);
+      expect(remote.lastDeleteCoverTripId, 't1');
+    });
+
+    test('maps other AppExceptions to UnknownFailure', () async {
+      final repo = TripRepositoryImpl(
+        remote: _FakeTripRemoteDataSource(
+          exception: const UnknownException(message: 'boom'),
+        ),
+      );
+      final result = await repo.deleteCoverImage('t1');
+      result.fold(
+        (failure) => expect(failure, const UnknownFailure(message: 'boom')),
+        (_) => fail('expected Left'),
+      );
+    });
+  });
+
+  group('TripRepositoryImpl.getCoverImageUrl', () {
+    test('returns Right(signedUrl) on success', () async {
+      final repo = TripRepositoryImpl(remote: _FakeTripRemoteDataSource());
+      final result = await repo.getCoverImageUrl('u1/t1/cover.jpg');
+      result.fold(
+        (failure) => fail('expected Right, got Left($failure)'),
+        (url) => expect(url, 'https://signed.example/u1/t1/cover.jpg'),
+      );
+    });
+
+    test('maps AuthenticationException to AuthenticationFailure', () async {
+      final repo = TripRepositoryImpl(
+        remote: _FakeTripRemoteDataSource(
+          exception: const AuthenticationException(message: 'no session'),
+        ),
+      );
+      final result = await repo.getCoverImageUrl('u1/t1/cover.jpg');
       result.fold(
         (failure) =>
             expect(failure, const AuthenticationFailure(message: 'no session')),

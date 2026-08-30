@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:fpdart/fpdart.dart';
 import 'package:uuid/uuid.dart';
 
@@ -103,6 +105,51 @@ class TripRepositoryImpl implements TripRepository {
       return Right(
         await _remote.shiftTripDates(id: id, deltaDays: deltaDays),
       );
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> uploadCoverImage({
+    required String tripId,
+    required Uint8List bytes,
+  }) async {
+    try {
+      return Right(
+        await _remote.uploadCoverImage(tripId: tripId, bytes: bytes),
+      );
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteCoverImage(String tripId) async {
+    try {
+      await _remote.deleteCoverImage(tripId);
+      return const Right(null);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> getCoverImageUrl(String storagePath) async {
+    try {
+      return Right(await _remote.getCoverImageUrl(storagePath));
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
     } on NetworkException {

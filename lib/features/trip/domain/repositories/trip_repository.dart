@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/errors/failures.dart';
@@ -36,4 +38,27 @@ abstract interface class TripRepository {
     required String id,
     required int deltaDays,
   });
+
+  /// Uploads [bytes] as [tripId]'s custom cover at a stable
+  /// `{user_id}/{trip_id}/cover.jpg` path in the `trip-photos` bucket —
+  /// not a `photos` row (issue #81). Best-effort deletes any object
+  /// already at that path first (a plain re-upload, not a storage
+  /// `upsert` — the bucket's RLS only grants insert/select/delete, no
+  /// update). Returns the raw storage path to persist via [updateTrip];
+  /// does not update the trip row itself.
+  Future<Either<Failure, String>> uploadCoverImage({
+    required String tripId,
+    required Uint8List bytes,
+  });
+
+  /// Deletes [tripId]'s custom-cover object at the stable path, if one
+  /// exists (a no-op otherwise). Call only when the trip's *previous*
+  /// cover was a custom upload (never for a bundled `asset:` cover) and
+  /// the trip is switching away from it — [uploadCoverImage] already
+  /// handles the replace-with-another-upload case by overwriting in place.
+  Future<Either<Failure, void>> deleteCoverImage(String tripId);
+
+  /// Signs a stored cover path (as persisted by [uploadCoverImage]) into a
+  /// short-lived URL the UI can load — `trip-photos` is a private bucket.
+  Future<Either<Failure, String>> getCoverImageUrl(String storagePath);
 }
