@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,6 +28,33 @@ class _Harness extends ConsumerWidget {
           onPressed: () async {
             try {
               await runCreateMemory(ref: ref, name: 'Summer in Tokyo');
+            } catch (_) {
+              // Surfaced via the mutation's MutationError state instead.
+            }
+          },
+          child: const Text('Create'),
+        ),
+      ),
+    );
+  }
+}
+
+class _CreateWithCoverHarness extends ConsumerWidget {
+  const _CreateWithCoverHarness();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp(
+      home: Scaffold(
+        body: ElevatedButton(
+          onPressed: () async {
+            try {
+              await runCreateMemory(
+                ref: ref,
+                name: 'Summer in Tokyo',
+                coverImagePath: 'asset:hero',
+                coverImageBytes: Uint8List.fromList([1, 2, 3]),
+              );
             } catch (_) {
               // Surfaced via the mutation's MutationError state instead.
             }
@@ -158,4 +187,58 @@ void main() {
     expect(events.single, isA<TripDeletedDispatched>());
     expect((events.single as TripDeletedDispatched).tripId, 't1');
   });
+
+  testWidgets(
+    'a custom cover upload overrides the bundled fallback on success',
+    (tester) async {
+      final tripRepo = FakeTripRepository()
+        ..tripsResult = const Right([])
+        ..uploadCoverImageResult = const Right('u1/t1/cover.jpg');
+
+      await _pumpHarness(
+        tester,
+        tripRepo,
+        harness: () => const _CreateWithCoverHarness(),
+      );
+      await tester.tap(find.text('Create'));
+      await tester.pumpAndSettle();
+
+      expect(tripRepo.createTripCallCount, 1);
+      expect(tripRepo.uploadCoverImageCallCount, 1);
+      expect(tripRepo.lastUpdateCoverImagePath, 'u1/t1/cover.jpg');
+    },
+  );
+
+  testWidgets(
+    'a failed cover upload still creates the trip, keeping the bundled '
+    'fallback (quiet degrade — see issue #81)',
+    (tester) async {
+      final tripRepo = FakeTripRepository()
+        ..tripsResult = const Right([])
+        ..uploadCoverImageResult = const Left(NetworkFailure());
+      final bus = GlobalEventBus();
+      addTearDown(bus.dispose);
+      final events = <GlobalEvent>[];
+      final sub = bus.stream.listen(events.add);
+      addTearDown(sub.cancel);
+
+      await _pumpHarness(
+        tester,
+        tripRepo,
+        bus: bus,
+        harness: () => const _CreateWithCoverHarness(),
+      );
+      await tester.tap(find.text('Create'));
+      await tester.pumpAndSettle();
+
+      // Created despite the upload failure — no error surfaced, and
+      // updateTrip is never even called since there was no path to set.
+      expect(tripRepo.createTripCallCount, 1);
+      expect(tripRepo.uploadCoverImageCallCount, 1);
+      expect(tripRepo.updateTripCallCount, 0);
+      expect(events, hasLength(1));
+      final dispatched = events.single as TripCreatedDispatched;
+      expect(dispatched.trip.coverImagePath, 'asset:hero');
+    },
+  );
 }

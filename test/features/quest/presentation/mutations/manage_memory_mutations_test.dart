@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -70,6 +72,20 @@ class _Harness extends ConsumerWidget {
                 }
               },
               child: const Text('Cover'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  await runUploadCover(
+                    ref: ref,
+                    tripId: tripId,
+                    bytes: Uint8List.fromList([1, 2, 3]),
+                  );
+                } catch (_) {
+                  // Surfaced via the mutation's MutationError state instead.
+                }
+              },
+              child: const Text('Upload'),
             ),
           ],
         ),
@@ -204,6 +220,91 @@ void main() {
     expect(
       container.read(planControllerProvider('t1')).value?.trip.coverImagePath,
       'asset:hero',
+    );
+  });
+
+  testWidgets(
+    'runChangeCover deletes a previous custom cover when switching to a '
+    'bundled one',
+    (tester) async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(id: 't1', coverImagePath: 'u1/t1/cover.jpg'),
+        )
+        ..updateTripResult = Right(
+          buildTripEntity(id: 't1', coverImagePath: 'asset:hero'),
+        );
+      final questRepo = FakeQuestRepository();
+
+      await _pumpHarness(
+        tester,
+        tripRepo: tripRepo,
+        questRepo: questRepo,
+        tripId: 't1',
+      );
+
+      await tester.tap(find.text('Cover'));
+      await tester.pumpAndSettle();
+
+      expect(tripRepo.deleteCoverImageCallCount, 1);
+      expect(tripRepo.lastDeleteCoverTripId, 't1');
+    },
+  );
+
+  testWidgets(
+    'runChangeCover does not delete anything when switching between two '
+    'bundled covers',
+    (tester) async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(id: 't1', coverImagePath: 'asset:solo_getaway'),
+        )
+        ..updateTripResult = Right(
+          buildTripEntity(id: 't1', coverImagePath: 'asset:hero'),
+        );
+      final questRepo = FakeQuestRepository();
+
+      await _pumpHarness(
+        tester,
+        tripRepo: tripRepo,
+        questRepo: questRepo,
+        tripId: 't1',
+      );
+
+      await tester.tap(find.text('Cover'));
+      await tester.pumpAndSettle();
+
+      expect(tripRepo.deleteCoverImageCallCount, 0);
+    },
+  );
+
+  testWidgets('runUploadCover uploads bytes and updates the cover path', (
+    tester,
+  ) async {
+    final tripRepo = FakeTripRepository()
+      ..tripCardResult = Right(buildTripCard(id: 't1'))
+      ..uploadCoverImageResult = const Right('u1/t1/cover.jpg')
+      ..updateTripResult = Right(
+        buildTripEntity(id: 't1', coverImagePath: 'u1/t1/cover.jpg'),
+      );
+    final questRepo = FakeQuestRepository();
+
+    final container = await _pumpHarness(
+      tester,
+      tripRepo: tripRepo,
+      questRepo: questRepo,
+      tripId: 't1',
+    );
+
+    await tester.tap(find.text('Upload'));
+    await tester.pumpAndSettle();
+
+    expect(tripRepo.uploadCoverImageCallCount, 1);
+    expect(tripRepo.lastUploadCoverTripId, 't1');
+    expect(tripRepo.lastUpdateCoverImagePath, 'u1/t1/cover.jpg');
+    expect(
+      container.read(planControllerProvider('t1')).value?.trip.coverImagePath,
+      'u1/t1/cover.jpg',
     );
   });
 }

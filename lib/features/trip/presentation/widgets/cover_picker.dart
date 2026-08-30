@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
@@ -10,6 +11,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/dashed_rrect_border.dart';
 import '../../../../core/widgets/photo_scrim.dart';
 import 'cover_options.dart';
+import 'cover_upload_tile.dart';
 
 /// The New memory cover picker: a 150px slot (empty/chosen state) above an
 /// 8-thumbnail strip. `docs/design/README.md` § 4.
@@ -18,12 +20,19 @@ class CoverPicker extends StatelessWidget {
     required this.selectedCoverId,
     required this.selectedVibes,
     required this.onSelect,
+    this.customCoverBytes,
+    this.onUploadCustom,
     super.key,
   });
 
   final String? selectedCoverId;
   final Set<String> selectedVibes;
   final ValueChanged<String> onSelect;
+
+  /// Locally-picked bytes pending upload (issue #81) — takes priority over
+  /// [selectedCoverId] for the preview slot when set.
+  final Uint8List? customCoverBytes;
+  final Future<void> Function(Uint8List bytes)? onUploadCustom;
 
   @override
   Widget build(BuildContext context) {
@@ -33,11 +42,13 @@ class CoverPicker extends StatelessWidget {
         _CoverSlot(
           selectedCoverId: selectedCoverId,
           selectedVibes: selectedVibes,
+          customCoverBytes: customCoverBytes,
         ),
         const SizedBox(height: AppSpacing.sm),
         CoverThumbnailStrip(
           selectedCoverId: selectedCoverId,
           onSelect: onSelect,
+          onUploadCustom: onUploadCustom,
         ),
       ],
     );
@@ -50,22 +61,31 @@ class CoverThumbnailStrip extends StatelessWidget {
   const CoverThumbnailStrip({
     required this.selectedCoverId,
     required this.onSelect,
+    this.onUploadCustom,
     super.key,
   });
 
   final String? selectedCoverId;
   final ValueChanged<String> onSelect;
 
+  /// When given, a leading "Upload photo" tile opens a camera/gallery
+  /// picker and hands the compressed bytes here (issue #81).
+  final Future<void> Function(Uint8List bytes)? onUploadCustom;
+
   @override
   Widget build(BuildContext context) {
+    final onUpload = onUploadCustom;
     return SizedBox(
       height: 46,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: kCoverOptions.length,
+        itemCount: kCoverOptions.length + (onUpload == null ? 0 : 1),
         separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
         itemBuilder: (context, index) {
-          final option = kCoverOptions[index];
+          if (onUpload != null && index == 0) {
+            return CoverUploadTile(onPicked: onUpload);
+          }
+          final option = kCoverOptions[index - (onUpload == null ? 0 : 1)];
           return _Thumbnail(
             option: option,
             selected: option.id == selectedCoverId,
@@ -81,18 +101,24 @@ class _CoverSlot extends StatelessWidget {
   const _CoverSlot({
     required this.selectedCoverId,
     required this.selectedVibes,
+    this.customCoverBytes,
   });
 
   final String? selectedCoverId;
   final Set<String> selectedVibes;
+  final Uint8List? customCoverBytes;
 
   @override
   Widget build(BuildContext context) {
+    final customBytes = customCoverBytes;
     final coverId = selectedCoverId;
-    if (coverId != null) {
-      final assetPath = kCoverOptions
-          .firstWhere((o) => o.id == coverId)
-          .assetPath;
+    if (customBytes != null || coverId != null) {
+      final image = customBytes != null
+          ? Image.memory(customBytes, fit: BoxFit.cover)
+          : Image.asset(
+              kCoverOptions.firstWhere((o) => o.id == coverId).assetPath,
+              fit: BoxFit.cover,
+            );
       return Container(
         height: 150,
         clipBehavior: Clip.antiAlias,
@@ -101,7 +127,7 @@ class _CoverSlot extends StatelessWidget {
           border: Border.all(color: AppColors.tint(AppColors.primary, .4)),
         ),
         child: PhotoScrim(
-          image: Image.asset(assetPath, fit: BoxFit.cover),
+          image: image,
           child: const Padding(
             padding: EdgeInsets.all(AppSpacing.md),
             child: Align(

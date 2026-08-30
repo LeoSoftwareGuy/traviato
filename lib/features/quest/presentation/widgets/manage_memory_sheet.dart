@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -113,6 +115,14 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
     }
   }
 
+  Future<void> _uploadCover(Uint8List bytes) async {
+    try {
+      await runUploadCover(ref: ref, tripId: widget.tripId, bytes: bytes);
+    } catch (_) {
+      // Surfaced via the mutation error listener below.
+    }
+  }
+
   Future<void> _tapDelete() async {
     if (!_deleteArmed) {
       setState(() => _deleteArmed = true);
@@ -219,6 +229,7 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
           CoverThumbnailStrip(
             selectedCoverId: coverIdFromPath(trip?.coverImagePath),
             onSelect: _changeCover,
+            onUploadCustom: _uploadCover,
           ),
           const SizedBox(height: AppSpacing.xl),
           SizedBox(
