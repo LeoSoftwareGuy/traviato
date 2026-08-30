@@ -74,6 +74,9 @@ class BonusNotificationsLifecycleController
         unawaited(
           ref.read(bonusNotificationRepositoryProvider).cancelArrival(tripId),
         );
+      case StarsAwardedDispatched():
+      // Not relevant to the notification schedule directly — the next
+      // resume/pause evaluation re-derives everything it needs itself.
     }
   }
 

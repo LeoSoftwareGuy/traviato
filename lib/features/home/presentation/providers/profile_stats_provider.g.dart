@@ -8,51 +8,100 @@ part of 'profile_stats_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Stubbed until `profile_stats_view` lands (data-model.md, milestone 3).
-/// This is the single place that will swap to a real repository call.
 
-@ProviderFor(profileStats)
-final profileStatsProvider = ProfileStatsProvider._();
+@ProviderFor(profileStatsRemoteDataSource)
+final profileStatsRemoteDataSourceProvider =
+    ProfileStatsRemoteDataSourceProvider._();
 
-/// Stubbed until `profile_stats_view` lands (data-model.md, milestone 3).
-/// This is the single place that will swap to a real repository call.
-
-final class ProfileStatsProvider
-    extends $FunctionalProvider<ProfileStats, ProfileStats, ProfileStats>
-    with $Provider<ProfileStats> {
-  /// Stubbed until `profile_stats_view` lands (data-model.md, milestone 3).
-  /// This is the single place that will swap to a real repository call.
-  ProfileStatsProvider._()
+final class ProfileStatsRemoteDataSourceProvider
+    extends
+        $FunctionalProvider<
+          ProfileStatsRemoteDataSource,
+          ProfileStatsRemoteDataSource,
+          ProfileStatsRemoteDataSource
+        >
+    with $Provider<ProfileStatsRemoteDataSource> {
+  ProfileStatsRemoteDataSourceProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'profileStatsProvider',
+        name: r'profileStatsRemoteDataSourceProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$profileStatsHash();
+  String debugGetCreateSourceHash() => _$profileStatsRemoteDataSourceHash();
 
   @$internal
   @override
-  $ProviderElement<ProfileStats> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+  $ProviderElement<ProfileStatsRemoteDataSource> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
 
   @override
-  ProfileStats create(Ref ref) {
-    return profileStats(ref);
+  ProfileStatsRemoteDataSource create(Ref ref) {
+    return profileStatsRemoteDataSource(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ProfileStats value) {
+  Override overrideWithValue(ProfileStatsRemoteDataSource value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<ProfileStats>(value),
+      providerOverride: $SyncValueProvider<ProfileStatsRemoteDataSource>(value),
     );
   }
 }
 
-String _$profileStatsHash() => r'b5e70d9062fa62ce903a2ffd9fbc651588753730';
+String _$profileStatsRemoteDataSourceHash() =>
+    r'2131357e2a040be4db133fd574585c06fb6fbf60';
+
+@ProviderFor(profileStatsRepository)
+final profileStatsRepositoryProvider = ProfileStatsRepositoryProvider._();
+
+final class ProfileStatsRepositoryProvider
+    extends
+        $FunctionalProvider<
+          ProfileStatsRepository,
+          ProfileStatsRepository,
+          ProfileStatsRepository
+        >
+    with $Provider<ProfileStatsRepository> {
+  ProfileStatsRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'profileStatsRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$profileStatsRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<ProfileStatsRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ProfileStatsRepository create(Ref ref) {
+    return profileStatsRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ProfileStatsRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ProfileStatsRepository>(value),
+    );
+  }
+}
+
+String _$profileStatsRepositoryHash() =>
+    r'326a14ae9bc1271652ee772b33ea44fffe93a554';

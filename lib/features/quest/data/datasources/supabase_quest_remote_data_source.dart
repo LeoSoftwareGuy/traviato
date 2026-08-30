@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/constants/supabase_constants.dart';
@@ -125,6 +126,7 @@ class SupabaseQuestRemoteDataSource implements QuestRemoteDataSource {
   @override
   Future<QuestModel> toggleCompleted({
     required String id,
+    required String tripId,
     required bool completed,
   }) async {
     _guardAuthenticated();
@@ -137,13 +139,41 @@ class SupabaseQuestRemoteDataSource implements QuestRemoteDataSource {
           .eq('id', id)
           .select()
           .single();
-      return QuestModel.fromJson(row);
+      final model = QuestModel.fromJson(row);
+
+      // Unchecking never removes stars (functionality.md §13) — only award
+      // on the transition to completed.
+      if (completed) {
+        await _awardPointsQuietly(sourceId: id, tripId: tripId);
+      }
+
+      return model;
     } on PostgrestException catch (e) {
       throw _mapPostgrestException(e);
     } on SocketException {
       throw const NetworkException();
     } catch (e) {
       throw UnknownException(message: e.toString());
+    }
+  }
+
+  /// Awards ✦1 for the completed quest. Never throws — a ledger hiccup
+  /// must not fail an already-checked-off quest (mirrors #64/#30's award).
+  Future<void> _awardPointsQuietly({
+    required String sourceId,
+    required String tripId,
+  }) async {
+    try {
+      await _client.rpc(
+        DBFunctions.awardPoints,
+        params: {
+          'p_source': 'quest',
+          'p_source_id': sourceId,
+          'p_trip_id': tripId,
+        },
+      );
+    } catch (e) {
+      debugPrint('award_points(quest, $sourceId) failed: $e');
     }
   }
 }

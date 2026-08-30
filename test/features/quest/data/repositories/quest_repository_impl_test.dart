@@ -11,6 +11,7 @@ class _FakeQuestRemoteDataSource implements QuestRemoteDataSource {
   Exception? exception;
   String? lastAddQuestId;
   bool? lastToggleCompleted;
+  String? lastToggleTripId;
   var deleteCallCount = 0;
 
   QuestModel _quest({String id = 'q1', bool completed = false}) => QuestModel(
@@ -66,10 +67,12 @@ class _FakeQuestRemoteDataSource implements QuestRemoteDataSource {
   @override
   Future<QuestModel> toggleCompleted({
     required String id,
+    required String tripId,
     required bool completed,
   }) async {
     if (exception != null) throw exception!;
     lastToggleCompleted = completed;
+    lastToggleTripId = tripId;
     return _quest(id: id, completed: completed);
   }
 }
@@ -167,8 +170,13 @@ void main() {
     test('passes the requested completed value through', () async {
       final remote = _FakeQuestRemoteDataSource();
       final repo = QuestRepositoryImpl(remote: remote);
-      final result = await repo.toggleCompleted(id: 'q1', completed: true);
+      final result = await repo.toggleCompleted(
+        id: 'q1',
+        tripId: 't1',
+        completed: true,
+      );
       expect(remote.lastToggleCompleted, isTrue);
+      expect(remote.lastToggleTripId, 't1');
       result.fold(
         (failure) => fail('expected Right, got Left($failure)'),
         (quest) => expect(quest.isCompleted, isTrue),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:traviato/core/events/global_event.dart';
+import 'package:traviato/core/events/global_event_bus.dart';
 import 'package:traviato/features/bonus/domain/entities/bonus_task_template_entity.dart';
 import 'package:traviato/features/bonus/presentation/controllers/bonus_tray_controller.dart';
 import 'package:traviato/features/bonus/presentation/mutations/bonus_task_mutations.dart';
@@ -68,6 +70,7 @@ Future<ProviderContainer> _pumpHarness(
   WidgetTester tester, {
   required FakeTripRepository tripRepo,
   required FakeBonusTaskRepository bonusRepo,
+  GlobalEventBus? bus,
 }) async {
   late final ProviderContainer container;
   await tester.pumpWidget(
@@ -78,6 +81,7 @@ Future<ProviderContainer> _pumpHarness(
         questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
         dayNoteRepositoryProvider.overrideWithValue(FakeDayNoteRepository()),
         photoRepositoryProvider.overrideWithValue(FakePhotoRepository()),
+        if (bus != null) globalEventBusProvider.overrideWithValue(bus),
       ],
       child: Builder(
         builder: (context) {
@@ -138,6 +142,41 @@ void main() {
       );
     },
   );
+
+  testWidgets('completing a bonus task fires StarsAwardedDispatched', (
+    tester,
+  ) async {
+    final tripRepo = _activeTripRepo();
+    final bonusRepo = FakeBonusTaskRepository()
+      ..templates = const [
+        BonusTaskTemplateEntity(
+          id: 1,
+          code: 'r1',
+          title: 'Regular one',
+          points: 1,
+          phase: BonusTaskPhase.anytime,
+          kind: BonusTaskKind.regular,
+        ),
+      ];
+    final bus = GlobalEventBus();
+    addTearDown(bus.dispose);
+    final events = <GlobalEvent>[];
+    final sub = bus.stream.listen(events.add);
+    addTearDown(sub.cancel);
+
+    await _pumpHarness(
+      tester,
+      tripRepo: tripRepo,
+      bonusRepo: bonusRepo,
+      bus: bus,
+    );
+
+    await tester.tap(find.text('Complete'));
+    await tester.pumpAndSettle();
+
+    expect(events, hasLength(1));
+    expect(events.single, isA<StarsAwardedDispatched>());
+  });
 
   testWidgets(
     'calling runCompleteBonusTask twice for the same assignment stays safe',

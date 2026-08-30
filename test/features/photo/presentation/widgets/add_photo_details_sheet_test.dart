@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/failures.dart';
+import 'package:traviato/core/events/global_event.dart';
+import 'package:traviato/core/events/global_event_bus.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/photo/data/services/photo_compressor.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
@@ -43,12 +45,17 @@ final _onePixelPng = Uint8List.fromList([
 /// Opens the sheet the same way real usage does — via `.show`, pushed as a
 /// modal route — rather than pumping it as a page body. `_save` pops its own
 /// route on success, which needs a real pushed route to pop.
-Future<void> _pump(WidgetTester tester, FakePhotoRepository photoRepo) async {
+Future<void> _pump(
+  WidgetTester tester,
+  FakePhotoRepository photoRepo, {
+  GlobalEventBus? bus,
+}) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         photoRepositoryProvider.overrideWithValue(photoRepo),
         photoCompressorProvider.overrideWithValue(const _IdentityCompressor()),
+        if (bus != null) globalEventBusProvider.overrideWithValue(bus),
       ],
       child: MaterialApp(
         theme: AppTheme.dark,
@@ -116,6 +123,21 @@ void main() {
     expect(find.text('✦ +2 stars · photo logged'), findsOneWidget);
 
     await tester.pumpAndSettle(); // let the toast's own timer finish cleanly
+  });
+
+  testWidgets('saving a photo fires StarsAwardedDispatched', (tester) async {
+    final bus = GlobalEventBus();
+    addTearDown(bus.dispose);
+    final events = <GlobalEvent>[];
+    final sub = bus.stream.listen(events.add);
+    addTearDown(sub.cancel);
+
+    await _pump(tester, FakePhotoRepository(), bus: bus);
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
+    await tester.pumpAndSettle();
+
+    expect(events, hasLength(1));
+    expect(events.single, isA<StarsAwardedDispatched>());
   });
 
   testWidgets('shows an error snackbar when the upload fails', (

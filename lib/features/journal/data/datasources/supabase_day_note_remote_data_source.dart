@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/constants/supabase_constants.dart';
@@ -80,27 +81,55 @@ class SupabaseDayNoteRemoteDataSource implements DayNoteRemoteDataSource {
           .eq('trip_id', tripId)
           .eq('day_date', _dateOnly(dayDate))
           .select();
+      final DayNoteModel model;
       if (updated.isNotEmpty) {
-        return DayNoteModel.fromJson(updated.first);
+        model = DayNoteModel.fromJson(updated.first);
+      } else {
+        final inserted = await _client
+            .from(Tables.dayNotes)
+            .insert({
+              'id': id,
+              'trip_id': tripId,
+              'day_date': _dateOnly(dayDate),
+              'content': content,
+            })
+            .select()
+            .single();
+        model = DayNoteModel.fromJson(inserted);
       }
 
-      final inserted = await _client
-          .from(Tables.dayNotes)
-          .insert({
-            'id': id,
-            'trip_id': tripId,
-            'day_date': _dateOnly(dayDate),
-            'content': content,
-          })
-          .select()
-          .single();
-      return DayNoteModel.fromJson(inserted);
+      // Idempotent via the ledger's unique (user_id, source, source_id)
+      // constraint — the note keeps its original id across edits, so only
+      // the first save actually inserts a row.
+      await _awardPointsQuietly(sourceId: model.id, tripId: tripId);
+
+      return model;
     } on PostgrestException catch (e) {
       throw _mapPostgrestException(e);
     } on SocketException {
       throw const NetworkException();
     } catch (e) {
       throw UnknownException(message: e.toString());
+    }
+  }
+
+  /// Awards ✦1 for the note. Never throws — a ledger hiccup must not fail
+  /// an already-saved note (mirrors #64/#30's award).
+  Future<void> _awardPointsQuietly({
+    required String sourceId,
+    required String tripId,
+  }) async {
+    try {
+      await _client.rpc(
+        DBFunctions.awardPoints,
+        params: {
+          'p_source': 'note',
+          'p_source_id': sourceId,
+          'p_trip_id': tripId,
+        },
+      );
+    } catch (e) {
+      debugPrint('award_points(note, $sourceId) failed: $e');
     }
   }
 }

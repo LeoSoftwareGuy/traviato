@@ -24,6 +24,7 @@ abstract class Tables {
 abstract class Views {
   static const tripCardView = 'trip_card_view';
   static const expenseSummaryView = 'expense_summary_view';
+  static const profileStatsView = 'profile_stats_view';
 }
 
 abstract class Storage {

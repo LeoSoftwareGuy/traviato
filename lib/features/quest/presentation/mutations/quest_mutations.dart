@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/presentation_failure_exception.dart';
+import '../../../../core/events/global_event.dart';
+import '../../../../core/events/global_event_bus.dart';
 import '../../domain/entities/quest_entity.dart';
 import '../controllers/plan_controller.dart';
 import '../providers/quest_providers.dart';
@@ -109,12 +111,14 @@ Future<QuestEntity> runToggleQuest({
   required String tripId,
   required QuestEntity quest,
 }) {
+  final isCompleting = !quest.isCompleted;
   return toggleQuestMutation(quest.id).run(ref, (tsx) async {
     final repo = tsx.get(questRepositoryProvider);
     final controller = tsx.get(planControllerProvider(tripId).notifier);
     final result = await repo.toggleCompleted(
       id: quest.id,
-      completed: !quest.isCompleted,
+      tripId: tripId,
+      completed: isCompleting,
     );
     return result.fold(
       (failure) => throw PresentationFailureException(failure),
@@ -122,6 +126,11 @@ Future<QuestEntity> runToggleQuest({
         updated,
       ) {
         controller.applyQuestUpserted(updated);
+        // Unchecking never removes stars, so only the checking-off
+        // transition needs to refresh the Home stars badge (issue #77).
+        if (isCompleting) {
+          tsx.get(globalEventBusProvider).add(const StarsAwardedDispatched());
+        }
         return updated;
       },
     );

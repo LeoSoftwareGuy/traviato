@@ -4,15 +4,14 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../providers/profile_stats_provider.dart';
+import '../../domain/entities/profile_stats_entity.dart';
 
 /// Memories / Places / Days totals — three plain cards, no icons.
-/// `docs/design/README.md` § 3. Stubbed via [ProfileStats] until the
-/// `profile_stats_view` migration lands.
+/// `docs/design/README.md` § 3. Backed by `profile_stats_view` (#27, #77).
 class HomeStatsBar extends StatelessWidget {
   const HomeStatsBar({required this.stats, super.key});
 
-  final ProfileStats stats;
+  final ProfileStatsEntity stats;
 
   @override
   Widget build(BuildContext context) {

@@ -100,10 +100,17 @@ class QuestRepositoryImpl implements QuestRepository {
   @override
   Future<Either<Failure, QuestEntity>> toggleCompleted({
     required String id,
+    required String tripId,
     required bool completed,
   }) async {
     try {
-      return Right(await _remote.toggleCompleted(id: id, completed: completed));
+      return Right(
+        await _remote.toggleCompleted(
+          id: id,
+          tripId: tripId,
+          completed: completed,
+        ),
+      );
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
     } on NetworkException {
