@@ -12,6 +12,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../../core/widgets/star_award_toast.dart';
+import '../../../notifications/presentation/widgets/notification_permission_prompt.dart';
 import '../../../photo/domain/entities/photo_entity.dart';
 import '../../../photo/presentation/widgets/add_photo_sheet.dart';
 import '../controllers/bonus_tray_controller.dart';
@@ -112,6 +113,9 @@ class _BonusTrayContent extends ConsumerWidget {
           context,
           '✦ +${task.template.points} stars · dare done',
         );
+        // First-completion moment for the notification rationale (#65 AC —
+        // "not at install"). No-ops after the first time it's shown.
+        await NotificationPermissionPrompt.maybeShow(context, ref);
       },
     );
   }

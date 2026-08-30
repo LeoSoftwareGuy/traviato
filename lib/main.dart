@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/notifications/presentation/controllers/bonus_notifications_lifecycle_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +24,9 @@ class TraviatoApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // keepAlive — instantiates the bonus-notification lifecycle loop once
+    // at launch (issue #65); it self-manages from here on.
+    ref.watch(bonusNotificationsLifecycleControllerProvider);
     return MaterialApp.router(
       title: 'Traviato',
       debugShowCheckedModeBanner: false,
