@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../models/trip_card_model.dart';
 import '../models/trip_model.dart';
 
@@ -28,4 +30,13 @@ abstract interface class TripRemoteDataSource {
     required String id,
     required int deltaDays,
   });
+
+  Future<String> uploadCoverImage({
+    required String tripId,
+    required Uint8List bytes,
+  });
+
+  Future<void> deleteCoverImage(String tripId);
+
+  Future<String> getCoverImageUrl(String storagePath);
 }

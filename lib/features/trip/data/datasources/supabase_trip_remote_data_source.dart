@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -7,6 +8,15 @@ import '../../../../core/errors/exceptions.dart';
 import '../models/trip_card_model.dart';
 import '../models/trip_model.dart';
 import 'trip_remote_data_source.dart';
+
+/// Signed URLs are valid for an hour — long enough for a single screen's
+/// worth of trip-card renders; callers re-sign on the next load.
+const _signedUrlTtlSeconds = 3600;
+
+/// Stable per-trip path — a re-upload replaces the same object rather than
+/// accumulating (see [SupabaseTripRemoteDataSource.uploadCoverImage]).
+String _coverStoragePath({required String userId, required String tripId}) =>
+    '$userId/$tripId/cover.jpg';
 
 class SupabaseTripRemoteDataSource implements TripRemoteDataSource {
   SupabaseTripRemoteDataSource({required SupabaseClient client})
@@ -179,6 +189,79 @@ class SupabaseTripRemoteDataSource implements TripRemoteDataSource {
         throw PermissionException(message: e.message);
       }
       throw DatabaseException(message: e.message);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<String> uploadCoverImage({
+    required String tripId,
+    required Uint8List bytes,
+  }) async {
+    final user = _client.auth.currentUser;
+    if (user == null) {
+      throw const AuthenticationException(
+        message: 'User is not authenticated',
+      );
+    }
+    final path = _coverStoragePath(userId: user.id, tripId: tripId);
+    try {
+      // Best-effort: nothing there yet on a first upload, or a transient
+      // hiccup — the upload below is what actually matters. This bucket
+      // has no update policy (see the trip-photos migration), so a
+      // replace is delete-then-insert rather than an upsert.
+      await _client.storage.from(Storage.tripPhotos).remove([path]);
+    } catch (_) {
+      // Ignored — see above.
+    }
+    try {
+      await _client.storage.from(Storage.tripPhotos).uploadBinary(path, bytes);
+      return path;
+    } on StorageException catch (e) {
+      throw StorageServerException(message: e.message);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<void> deleteCoverImage(String tripId) async {
+    final user = _client.auth.currentUser;
+    if (user == null) {
+      throw const AuthenticationException(
+        message: 'User is not authenticated',
+      );
+    }
+    final path = _coverStoragePath(userId: user.id, tripId: tripId);
+    try {
+      await _client.storage.from(Storage.tripPhotos).remove([path]);
+    } on StorageException catch (e) {
+      throw StorageServerException(message: e.message);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<String> getCoverImageUrl(String storagePath) async {
+    if (_client.auth.currentUser == null) {
+      throw const AuthenticationException(
+        message: 'User is not authenticated',
+      );
+    }
+    try {
+      return await _client.storage
+          .from(Storage.tripPhotos)
+          .createSignedUrl(storagePath, _signedUrlTtlSeconds);
+    } on StorageException catch (e) {
+      throw StorageServerException(message: e.message);
     } on SocketException {
       throw const NetworkException();
     } catch (e) {

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/features/trip/domain/entities/trip_card_entity.dart';
@@ -13,12 +15,18 @@ class FakeTripRepository implements TripRepository {
   Either<Failure, void>? deleteTripResult;
   Either<Failure, TripEntity>? updateTripResult;
   Either<Failure, TripEntity>? shiftTripDatesResult;
+  Either<Failure, String>? uploadCoverImageResult;
+  Either<Failure, void>? deleteCoverImageResult;
+  Either<Failure, String>? getCoverImageUrlResult;
   var callCount = 0;
   var getTripCardCallCount = 0;
   var createTripCallCount = 0;
   var deleteTripCallCount = 0;
   var updateTripCallCount = 0;
   var shiftTripDatesCallCount = 0;
+  var uploadCoverImageCallCount = 0;
+  var deleteCoverImageCallCount = 0;
+  var getCoverImageUrlCallCount = 0;
   String? lastDeletedTripId;
   String? lastCreateTripCoverImagePath;
   String? lastUpdateTripId;
@@ -26,7 +34,38 @@ class FakeTripRepository implements TripRepository {
   String? lastUpdateCoverImagePath;
   String? lastShiftTripId;
   int? lastShiftDeltaDays;
+  String? lastUploadCoverTripId;
+  Uint8List? lastUploadCoverBytes;
+  String? lastDeleteCoverTripId;
   Duration delay = Duration.zero;
+
+  @override
+  Future<Either<Failure, String>> uploadCoverImage({
+    required String tripId,
+    required Uint8List bytes,
+  }) async {
+    uploadCoverImageCallCount++;
+    lastUploadCoverTripId = tripId;
+    lastUploadCoverBytes = bytes;
+    if (delay > Duration.zero) await Future<void>.delayed(delay);
+    return uploadCoverImageResult ?? Right('u1/$tripId/cover.jpg');
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteCoverImage(String tripId) async {
+    deleteCoverImageCallCount++;
+    lastDeleteCoverTripId = tripId;
+    if (delay > Duration.zero) await Future<void>.delayed(delay);
+    return deleteCoverImageResult ?? const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, String>> getCoverImageUrl(String storagePath) async {
+    getCoverImageUrlCallCount++;
+    if (delay > Duration.zero) await Future<void>.delayed(delay);
+    return getCoverImageUrlResult ??
+        Right('https://signed.example/$storagePath');
+  }
 
   @override
   Future<Either<Failure, List<TripCardEntity>>> getTripCards() async {

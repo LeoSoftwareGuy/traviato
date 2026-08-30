@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,6 +37,7 @@ class _CreateMemoryPageState extends ConsumerState<CreateMemoryPage> {
   String? _dateError;
   final _vibes = <String>{};
   String? _selectedCoverId;
+  Uint8List? _customCoverBytes;
 
   @override
   void dispose() {
@@ -72,7 +75,11 @@ class _CreateMemoryPageState extends ConsumerState<CreateMemoryPage> {
         startDate: _startDate,
         endDate: _endDate,
         vibes: _vibes.toList(),
+        // Always a sensible bundled fallback, even when a custom cover is
+        // also given — runCreateMemory keeps it if the upload step fails,
+        // so trip creation itself is never blocked by that (issue #81).
         coverImagePath: assetCoverImagePath(coverId),
+        coverImageBytes: _customCoverBytes,
       );
     } catch (_) {
       // Surfaced to the user via the mutation's MutationError state below.
@@ -115,7 +122,14 @@ class _CreateMemoryPageState extends ConsumerState<CreateMemoryPage> {
                 CoverPicker(
                   selectedCoverId: _selectedCoverId,
                   selectedVibes: _vibes,
-                  onSelect: (id) => setState(() => _selectedCoverId = id),
+                  customCoverBytes: _customCoverBytes,
+                  onSelect: (id) => setState(() {
+                    _selectedCoverId = id;
+                    _customCoverBytes = null;
+                  }),
+                  onUploadCustom: (bytes) async {
+                    setState(() => _customCoverBytes = bytes);
+                  },
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 Text(
