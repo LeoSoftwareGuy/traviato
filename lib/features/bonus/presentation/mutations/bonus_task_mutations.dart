@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/presentation_failure_exception.dart';
+import '../../../../core/events/global_event.dart';
+import '../../../../core/events/global_event_bus.dart';
 import '../../domain/entities/bonus_task_assignment_entity.dart';
 import '../controllers/bonus_tray_controller.dart';
 import '../providers/bonus_task_providers.dart';
@@ -30,6 +32,7 @@ Future<BonusTaskAssignmentEntity> runCompleteBonusTask({
       (failure) => throw PresentationFailureException(failure),
       (assignment) {
         controller.applyAssignmentUpserted(assignment);
+        tsx.get(globalEventBusProvider).add(const StarsAwardedDispatched());
         return assignment;
       },
     );

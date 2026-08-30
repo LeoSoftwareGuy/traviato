@@ -15,9 +15,10 @@ import '../../../bonus/presentation/providers/bonus_badge_provider.dart';
 import '../../../expense/presentation/providers/expense_providers.dart';
 import '../../../expense/presentation/widgets/add_expense_sheet.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
+import '../../domain/entities/profile_stats_entity.dart';
 import '../controllers/home_controller.dart';
 import '../controllers/home_state.dart';
-import '../providers/profile_stats_provider.dart';
+import '../controllers/profile_stats_controller.dart';
 import '../widgets/coming_up_section.dart';
 import '../widgets/home_header.dart';
 import '../widgets/home_stats_bar.dart';
@@ -30,7 +31,11 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final username = ref.watch(authControllerProvider).user?.username;
-    final stats = ref.watch(profileStatsProvider);
+    // Transient: a stats-fetch failure shouldn't block the whole Home
+    // screen (guidelines doc 03) — falls back to zero until it resolves.
+    final stats =
+        ref.watch(profileStatsControllerProvider).value ??
+        const ProfileStatsEntity.zero();
     final homeAsync = ref.watch(homeControllerProvider);
 
     return Scaffold(
@@ -142,7 +147,7 @@ class _HomeContent extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.xl),
         HomeStatsBar(
-          stats: ProfileStats(
+          stats: ProfileStatsEntity(
             memories: memories,
             places: places,
             days: days,

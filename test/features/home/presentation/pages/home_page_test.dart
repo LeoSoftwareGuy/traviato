@@ -11,6 +11,7 @@ import 'package:traviato/features/auth/presentation/providers/auth_providers.dar
 import 'package:traviato/features/checklist/presentation/providers/checklist_providers.dart';
 import 'package:traviato/features/expense/presentation/providers/expense_providers.dart';
 import 'package:traviato/features/home/presentation/pages/home_page.dart';
+import 'package:traviato/features/home/presentation/providers/profile_stats_provider.dart';
 import 'package:traviato/features/home/presentation/widgets/upcoming_hero_card.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/trip/domain/entities/trip_card_entity.dart';
@@ -21,6 +22,7 @@ import '../../../checklist/fakes/fake_checklist_repository.dart';
 import '../../../expense/fakes/fake_expense_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
+import '../../fakes/fake_profile_stats_repository.dart';
 
 Future<void> _pump(
   WidgetTester tester, {
@@ -37,6 +39,9 @@ Future<void> _pump(
         questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
         checklistRepositoryProvider.overrideWithValue(
           FakeChecklistRepository(),
+        ),
+        profileStatsRepositoryProvider.overrideWithValue(
+          FakeProfileStatsRepository(),
         ),
       ],
       child: MaterialApp(theme: AppTheme.dark, home: const HomePage()),

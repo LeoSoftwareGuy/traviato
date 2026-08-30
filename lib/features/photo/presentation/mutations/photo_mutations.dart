@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/presentation_failure_exception.dart';
+import '../../../../core/events/global_event.dart';
+import '../../../../core/events/global_event_bus.dart';
 import '../../../journal/presentation/controllers/journal_controller.dart';
 import '../../domain/entities/photo_entity.dart';
 import '../providers/photo_providers.dart';
@@ -52,6 +54,7 @@ Future<PhotoEntity> runAddPhoto({
         photo,
       ) {
         controller.applyPhotoAdded(photo);
+        tsx.get(globalEventBusProvider).add(const StarsAwardedDispatched());
         return photo;
       },
     );

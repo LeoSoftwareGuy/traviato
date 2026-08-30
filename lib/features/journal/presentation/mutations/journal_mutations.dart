@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/presentation_failure_exception.dart';
+import '../../../../core/events/global_event.dart';
+import '../../../../core/events/global_event_bus.dart';
 import '../../domain/entities/day_note_entity.dart';
 import '../controllers/journal_controller.dart';
 import '../providers/day_note_providers.dart';
@@ -28,6 +30,7 @@ Future<DayNoteEntity> runUpsertNote({
         note,
       ) {
         controller.applyNoteUpserted(dayDate, note);
+        tsx.get(globalEventBusProvider).add(const StarsAwardedDispatched());
         return note;
       },
     );

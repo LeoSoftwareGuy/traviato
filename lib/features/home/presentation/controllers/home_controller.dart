@@ -45,6 +45,8 @@ class HomeController extends _$HomeController {
             ],
           ),
         );
+      case StarsAwardedDispatched():
+      // Not relevant to the trips list.
     }
   }
 }
