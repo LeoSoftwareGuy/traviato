@@ -57,7 +57,13 @@ class FlutterLocalNotificationsDataSource
       debugPrint('Falling back to UTC for bonus notifications: $e');
     }
 
-    const androidSettings = AndroidInitializationSettings('ic_launcher');
+    // Must be a `drawable`, not the `mipmap` launcher icon — the plugin
+    // looks up Resources.getIdentifier(name, "drawable", ...) and silently
+    // resolves to 0 otherwise, which crashes the whole app the moment a
+    // notification actually fires (issue #79).
+    const androidSettings = AndroidInitializationSettings(
+      'ic_stat_notification',
+    );
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
