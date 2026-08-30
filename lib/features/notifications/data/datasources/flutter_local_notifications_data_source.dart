@@ -16,6 +16,33 @@ const _androidChannelDescription = 'Daily nudges for your trip\'s bonus tasks.';
 const _morningId = 1001;
 const _eveningId = 1002;
 
+/// The `timezone` package's bundled data only carries canonical IANA zone
+/// names, not the legacy aliases some devices still report (e.g. Android's
+/// `getLocalTimezone()` returning the pre-2022 "Europe/Kiev" for what
+/// tzdata renamed to "Europe/Kyiv"). A handful of the aliases most likely
+/// to actually show up in the wild, tried before giving up to UTC.
+const _legacyZoneAliases = {
+  'Europe/Kiev': 'Europe/Kyiv',
+  'Asia/Calcutta': 'Asia/Kolkata',
+  'Asia/Saigon': 'Asia/Ho_Chi_Minh',
+  'Asia/Rangoon': 'Asia/Yangon',
+};
+
+/// Resolves [zoneName] against the loaded tzdata, retrying with a known
+/// legacy alias (see [_legacyZoneAliases]) before letting the lookup throw
+/// and the caller fall back to UTC. A standalone top-level function (rather
+/// than a private class method) so it's directly unit-testable, mirroring
+/// `BonusTrayDraw`'s pure-function shape (#64).
+tz.Location resolveTimezoneLocation(String zoneName) {
+  try {
+    return tz.getLocation(zoneName);
+  } catch (_) {
+    final alias = _legacyZoneAliases[zoneName];
+    if (alias == null) rethrow;
+    return tz.getLocation(alias);
+  }
+}
+
 class FlutterLocalNotificationsDataSource
     implements BonusNotificationLocalDataSource {
   final _plugin = FlutterLocalNotificationsPlugin();
@@ -25,7 +52,7 @@ class FlutterLocalNotificationsDataSource
     tz.initializeTimeZones();
     try {
       final localZone = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(localZone.identifier));
+      tz.setLocalLocation(resolveTimezoneLocation(localZone.identifier));
     } catch (e) {
       debugPrint('Falling back to UTC for bonus notifications: $e');
     }
