@@ -24,6 +24,7 @@ class HomeHeader extends StatelessWidget {
     required this.stars,
     required this.onAvatarTap,
     required this.onStarsTap,
+    this.hasOpenBonusTasks = false,
     super.key,
   });
 
@@ -31,6 +32,10 @@ class HomeHeader extends StatelessWidget {
   final int stars;
   final VoidCallback onAvatarTap;
   final VoidCallback onStarsTap;
+
+  /// Shows a small dot on the stars badge when the active trip's tray has
+  /// open tasks (issue #64 AC).
+  final bool hasOpenBonusTasks;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +68,11 @@ class HomeHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
-        _StarsBadge(stars: stars, onTap: onStarsTap),
+        _StarsBadge(
+          stars: stars,
+          onTap: onStarsTap,
+          showDot: hasOpenBonusTasks,
+        ),
         const SizedBox(width: AppSpacing.sm),
         _Avatar(username: username, onTap: onAvatarTap),
       ],
@@ -72,10 +81,15 @@ class HomeHeader extends StatelessWidget {
 }
 
 class _StarsBadge extends StatelessWidget {
-  const _StarsBadge({required this.stars, required this.onTap});
+  const _StarsBadge({
+    required this.stars,
+    required this.onTap,
+    required this.showDot,
+  });
 
   final int stars;
   final VoidCallback onTap;
+  final bool showDot;
 
   @override
   Widget build(BuildContext context) {
@@ -83,33 +97,54 @@ class _StarsBadge extends StatelessWidget {
       key: const Key('home-stars-badge'),
       onTap: onTap,
       borderRadius: AppRadius.pillRadius,
-      child: Container(
-        height: 38,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.tint(AppColors.primary, .15),
-          border: Border.all(color: AppColors.tint(AppColors.primary, .35)),
-          borderRadius: AppRadius.pillRadius,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '✦',
-              style: AppTypography.chipLabel.copyWith(
-                color: AppColors.primary,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            height: 38,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            decoration: BoxDecoration(
+              color: AppColors.tint(AppColors.primary, .15),
+              border: Border.all(
+                color: AppColors.tint(AppColors.primary, .35),
+              ),
+              borderRadius: AppRadius.pillRadius,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '✦',
+                  style: AppTypography.chipLabel.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  '$stars',
+                  style: AppTypography.chipLabel.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (showDot)
+            Positioned(
+              key: const Key('home-stars-badge-dot'),
+              top: -2,
+              right: -2,
+              child: Container(
+                width: 10,
+                height: 10,
+                decoration: const BoxDecoration(
+                  color: AppColors.accentCoral,
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
-            const SizedBox(width: AppSpacing.xs),
-            Text(
-              '$stars',
-              style: AppTypography.chipLabel.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
