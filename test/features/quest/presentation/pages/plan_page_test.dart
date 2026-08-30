@@ -266,6 +266,16 @@ void main() {
 
     expect(find.text('Cortina d\'Ampezzo'), findsOneWidget);
     expect(find.text('Day 1 of 5'), findsOneWidget);
+
+    // High filter quality on the upscaled banner asset (issue #82) — not a
+    // substitute for real resolution, but the best the renderer can do.
+    final banner = tester.widget<Image>(
+      find.byWidgetPredicate(
+        (w) => w is Image && w.image is AssetImage,
+      ),
+    );
+    expect((banner.image as AssetImage).assetName, PlanImages.banner);
+    expect(banner.filterQuality, FilterQuality.high);
   });
 
   testWidgets(
