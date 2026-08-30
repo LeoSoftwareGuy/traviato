@@ -79,6 +79,7 @@ class FakeQuestRepository implements QuestRepository {
   @override
   Future<Either<Failure, QuestEntity>> toggleCompleted({
     required String id,
+    required String tripId,
     required bool completed,
   }) async {
     toggleCallCount++;

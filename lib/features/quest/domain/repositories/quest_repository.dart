@@ -26,6 +26,7 @@ abstract interface class QuestRepository {
 
   Future<Either<Failure, QuestEntity>> toggleCompleted({
     required String id,
+    required String tripId,
     required bool completed,
   });
 }

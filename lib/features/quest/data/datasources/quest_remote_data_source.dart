@@ -24,6 +24,7 @@ abstract interface class QuestRemoteDataSource {
 
   Future<QuestModel> toggleCompleted({
     required String id,
+    required String tripId,
     required bool completed,
   });
 }
