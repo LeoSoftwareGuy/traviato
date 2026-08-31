@@ -53,6 +53,7 @@ class _AddChecklistItemInputState extends State<AddChecklistItemInput> {
             child: TextField(
               controller: _controller,
               style: AppTypography.bodyInput,
+              textInputAction: TextInputAction.done,
               onSubmitted: (_) => _submit(),
               decoration: InputDecoration(
                 hintText: 'Add something of your own...',
@@ -70,7 +71,20 @@ class _AddChecklistItemInputState extends State<AddChecklistItemInput> {
               ),
             ),
           ),
-          const SizedBox(width: AppSpacing.base),
+          InkWell(
+            key: const Key('checklist-add-item-submit'),
+            onTap: _submit,
+            borderRadius: BorderRadius.circular(14),
+            child: const Padding(
+              padding: EdgeInsets.all(AppSpacing.sm),
+              child: Icon(
+                Icons.arrow_upward_rounded,
+                size: 18,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
         ],
       ),
     );

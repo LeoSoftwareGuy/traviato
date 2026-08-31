@@ -125,20 +125,56 @@ void main() {
     expect(find.text('✦ Packed — nice'), findsNothing);
   });
 
-  testWidgets('submitting the add-item input adds to the selected category', (
-    tester,
-  ) async {
-    final repo = FakeChecklistRepository()
-      ..itemsResult = Right([buildChecklistItemEntity(id: 'i1')]);
-    await _pump(tester, repo: repo);
-    await tester.pumpAndSettle();
+  testWidgets(
+    'submitting the add-item input via the keyboard done action adds to '
+    'the selected category',
+    (tester) async {
+      final repo = FakeChecklistRepository()
+        ..itemsResult = Right([buildChecklistItemEntity(id: 'i1')]);
+      await _pump(tester, repo: repo);
+      await tester.pumpAndSettle();
 
-    await tester.enterText(find.byType(TextField), 'Sunglasses');
-    await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Sunglasses');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
 
-    expect(repo.addCustomItemCallCount, 1);
-  });
+      expect(repo.addCustomItemCallCount, 1);
+    },
+  );
+
+  testWidgets(
+    'tapping the visible submit button adds to the selected category and '
+    'clears the input',
+    (tester) async {
+      final repo = FakeChecklistRepository()
+        ..itemsResult = Right([buildChecklistItemEntity(id: 'i1')]);
+      await _pump(tester, repo: repo);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'Sunglasses');
+      await tester.tap(find.byKey(const Key('checklist-add-item-submit')));
+      await tester.pumpAndSettle();
+
+      expect(repo.addCustomItemCallCount, 1);
+      final field = tester.widget<TextField>(find.byType(TextField));
+      expect(field.controller?.text, isEmpty);
+    },
+  );
+
+  testWidgets(
+    'tapping the visible submit button with empty text is a no-op',
+    (tester) async {
+      final repo = FakeChecklistRepository()
+        ..itemsResult = Right([buildChecklistItemEntity(id: 'i1')]);
+      await _pump(tester, repo: repo);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('checklist-add-item-submit')));
+      await tester.pumpAndSettle();
+
+      expect(repo.addCustomItemCallCount, 0);
+    },
+  );
 
   testWidgets('shows the empty state for a category with no items', (
     tester,
