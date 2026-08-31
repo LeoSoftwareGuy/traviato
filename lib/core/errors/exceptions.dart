@@ -18,6 +18,15 @@ class AuthenticationException extends AppException {
   const AuthenticationException({required super.message});
 }
 
+/// The user dismissed a native social sign-in sheet (Apple/Google) without
+/// completing it — not an error, so the repository maps this to a silent
+/// no-op instead of a [Failure] (issue #84).
+class SignInCancelledException extends AppException {
+  const SignInCancelledException({
+    super.message = 'Sign-in was cancelled.',
+  });
+}
+
 class DatabaseException extends AppException {
   const DatabaseException({required super.message});
 }

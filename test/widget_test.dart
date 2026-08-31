@@ -29,6 +29,13 @@ class _FakeAuthRepository implements AuthRepository {
   }) => throw UnimplementedError();
 
   @override
+  Future<Either<Failure, void>> signInWithApple() => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, void>> signInWithGoogle() =>
+      throw UnimplementedError();
+
+  @override
   Future<Either<Failure, void>> logout() => throw UnimplementedError();
 }
 

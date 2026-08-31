@@ -79,6 +79,35 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, void>> signInWithApple() =>
+      _runSocialSignIn(_remote.signInWithApple);
+
+  @override
+  Future<Either<Failure, void>> signInWithGoogle() =>
+      _runSocialSignIn(_remote.signInWithGoogle);
+
+  // Shared by both social providers: a cancelled sheet resolves to
+  // Right(null) exactly like success (the router reacts to the auth-state
+  // stream either way, so the caller has nothing else to do) — only a real
+  // failure becomes Left.
+  Future<Either<Failure, void>> _runSocialSignIn(
+    Future<void> Function() signIn,
+  ) async {
+    try {
+      await signIn();
+      return const Right(null);
+    } on SignInCancelledException {
+      return const Right(null);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> logout() async {
     try {
       await _remote.logout();

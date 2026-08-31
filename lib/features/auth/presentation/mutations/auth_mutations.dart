@@ -6,6 +6,8 @@ import '../providers/auth_providers.dart';
 
 final loginMutation = Mutation<void>();
 final signupMutation = Mutation<void>();
+final signInWithAppleMutation = Mutation<void>();
+final signInWithGoogleMutation = Mutation<void>();
 final logoutMutation = Mutation<void>();
 
 Future<void> runLogin({
@@ -35,6 +37,26 @@ Future<void> runSignup({
       password: password,
       username: username,
     )).fold((failure) => throw PresentationFailureException(failure), (_) {});
+  });
+}
+
+Future<void> runSignInWithApple({required WidgetRef ref}) {
+  return signInWithAppleMutation.run(ref, (tsx) async {
+    final repo = tsx.get(authRepositoryProvider);
+    (await repo.signInWithApple()).fold(
+      (failure) => throw PresentationFailureException(failure),
+      (_) {},
+    );
+  });
+}
+
+Future<void> runSignInWithGoogle({required WidgetRef ref}) {
+  return signInWithGoogleMutation.run(ref, (tsx) async {
+    final repo = tsx.get(authRepositoryProvider);
+    (await repo.signInWithGoogle()).fold(
+      (failure) => throw PresentationFailureException(failure),
+      (_) {},
+    );
   });
 }
 
