@@ -256,48 +256,55 @@ void main() {
     expect(find.text('plan page t2'), findsOneWidget);
   });
 
-  testWidgets('a Kept-forever card navigates to the Wrap-up placeholder', (
-    tester,
-  ) async {
-    final finished = buildTripCard(
-      id: 't1',
-      name: 'Atlas high road',
-      startDate: DateTime(2025, 1, 1),
-      endDate: DateTime(2025, 1, 9),
-      status: TripStatus.finished,
-    );
-    final tripRepo = FakeTripRepository()..tripsResult = Right([finished]);
-    final router = GoRouter(
-      initialLocation: '/home',
-      routes: [
-        GoRoute(path: '/home', builder: (context, state) => const HomePage()),
-        GoRoute(
-          path: '/memory/:tripId/wrap-up',
-          name: RouteNames.tripWrapUp,
-          builder: (context, state) => const Scaffold(body: Text('Wrap-up')),
-        ),
-      ],
-    );
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
-          tripRepositoryProvider.overrideWithValue(tripRepo),
-          questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
-          checklistRepositoryProvider.overrideWithValue(
-            FakeChecklistRepository(),
+  testWidgets(
+    'a Kept-forever card navigates to Journal (Wrap-up not built yet, #91)',
+    (tester) async {
+      final finished = buildTripCard(
+        id: 't1',
+        name: 'Atlas high road',
+        startDate: DateTime(2025, 1, 1),
+        endDate: DateTime(2025, 1, 9),
+        status: TripStatus.finished,
+      );
+      final tripRepo = FakeTripRepository()..tripsResult = Right([finished]);
+      final router = GoRouter(
+        initialLocation: '/home',
+        routes: [
+          GoRoute(
+            path: '/home',
+            builder: (context, state) => const HomePage(),
+          ),
+          GoRoute(
+            path: '/memory/:tripId/journal',
+            name: RouteNames.tripJournal,
+            builder: (context, state) => const Scaffold(body: Text('Journal')),
           ),
         ],
-        child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+            tripRepositoryProvider.overrideWithValue(tripRepo),
+            questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
+            checklistRepositoryProvider.overrideWithValue(
+              FakeChecklistRepository(),
+            ),
+          ],
+          child: MaterialApp.router(
+            theme: AppTheme.dark,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Atlas high road'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Atlas high road'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('Wrap-up'), findsOneWidget);
-  });
+      expect(find.text('Journal'), findsOneWidget);
+    },
+  );
 
   testWidgets('the stars badge navigates to the Bonus tasks placeholder', (
     tester,
