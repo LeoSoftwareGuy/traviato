@@ -90,9 +90,12 @@ class _HomeContent extends ConsumerWidget {
         pathParameters: {'tripId': trip.id},
       );
 
-  void _openWrapUp(BuildContext context, TripCardEntity trip) =>
+  // Wrap-up (M4-2) doesn't exist yet, so a finished trip opens Journal
+  // instead of the placeholder — otherwise there's no way to log a past
+  // trip at all (#91). Swap back to a real wrap-up route once M4 ships.
+  void _openMemory(BuildContext context, TripCardEntity trip) =>
       context.pushNamed(
-        RouteNames.tripWrapUp,
+        RouteNames.tripJournal,
         pathParameters: {'tripId': trip.id},
       );
 
@@ -192,7 +195,7 @@ class _HomeContent extends ConsumerWidget {
           const SizedBox(height: AppSpacing.xl),
           MemoriesGridSection(
             trips: state.finishedTrips,
-            onTripTap: (trip) => _openWrapUp(context, trip),
+            onTripTap: (trip) => _openMemory(context, trip),
           ),
         ],
       ],
