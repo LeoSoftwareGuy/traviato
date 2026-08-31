@@ -35,12 +35,12 @@ const kCoverOptions = [
   ),
   CoverOption(
     id: 'solo_getaway',
-    assetPath: 'assets/images/guest/solo_getaway.png',
+    assetPath: 'assets/images/guest/solo_getaway.jpg',
     vibe: 'Cultural',
   ),
   CoverOption(
     id: 'family_adventure',
-    assetPath: 'assets/images/guest/family_adventure.png',
+    assetPath: 'assets/images/guest/newYork.jpg',
     vibe: 'Photography',
   ),
   CoverOption(
@@ -50,7 +50,7 @@ const kCoverOptions = [
   ),
   CoverOption(
     id: 'bucket_list_moment',
-    assetPath: 'assets/images/guest/bucket_list_moment.png',
+    assetPath: 'assets/images/guest/dolomites.jpg',
     vibe: 'Wildlife',
   ),
   CoverOption(
