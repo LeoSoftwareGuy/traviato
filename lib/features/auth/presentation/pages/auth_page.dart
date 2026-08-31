@@ -14,6 +14,7 @@ import '../../../../core/widgets/show_error_snackbar.dart';
 import '../mutations/auth_mutations.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/password_strength_meter.dart';
+import '../widgets/social_sign_in_buttons.dart';
 
 enum AuthMode { login, signup }
 
@@ -218,6 +219,8 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                   ],
                 ),
               ),
+              const SizedBox(height: AppSpacing.lg),
+              const SocialSignInButtons(),
               const SizedBox(height: AppSpacing.base),
               Center(
                 child: Text(

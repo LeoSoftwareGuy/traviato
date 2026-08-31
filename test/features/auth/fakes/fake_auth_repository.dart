@@ -14,10 +14,14 @@ class FakeAuthRepository implements AuthRepository {
   final _controller = StreamController<UserEntity?>.broadcast();
   final loginCalls = <String>[];
   final signupCalls = <String>[];
+  var signInWithAppleCallCount = 0;
+  var signInWithGoogleCallCount = 0;
   var logoutCalled = false;
 
   Either<Failure, UserEntity>? loginResult;
   Either<Failure, UserEntity>? signupResult;
+  Either<Failure, void>? signInWithAppleResult;
+  Either<Failure, void>? signInWithGoogleResult;
   Either<Failure, void>? logoutResult;
   Duration delay = Duration.zero;
 
@@ -51,6 +55,20 @@ class FakeAuthRepository implements AuthRepository {
     if (delay > Duration.zero) await Future<void>.delayed(delay);
     return signupResult ??
         Right(UserEntity(id: 'u1', email: email, username: username));
+  }
+
+  @override
+  Future<Either<Failure, void>> signInWithApple() async {
+    signInWithAppleCallCount++;
+    if (delay > Duration.zero) await Future<void>.delayed(delay);
+    return signInWithAppleResult ?? const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, void>> signInWithGoogle() async {
+    signInWithGoogleCallCount++;
+    if (delay > Duration.zero) await Future<void>.delayed(delay);
+    return signInWithGoogleResult ?? const Right(null);
   }
 
   @override

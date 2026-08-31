@@ -16,6 +16,11 @@ dependencies:
   supabase_flutter: ^2.12.4
   flutter_dotenv: ^6.0.1
 
+  # Social sign-in (#84)
+  sign_in_with_apple: ^8.2.0
+  google_sign_in: ^7.2.0
+  crypto: ^3.0.6
+
   # State Management
   flutter_riverpod: ^3.3.1
   riverpod_annotation: ^4.0.2

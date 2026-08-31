@@ -9,11 +9,15 @@ class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
   _FakeAuthRemoteDataSource({
     this.loginException,
     this.signupException,
+    this.signInWithAppleException,
+    this.signInWithGoogleException,
     this.logoutException,
   });
 
   Exception? loginException;
   Exception? signupException;
+  Exception? signInWithAppleException;
+  Exception? signInWithGoogleException;
   Exception? logoutException;
 
   static const _user = UserModel(
@@ -45,6 +49,16 @@ class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
   }) async {
     if (signupException != null) throw signupException!;
     return _user;
+  }
+
+  @override
+  Future<void> signInWithApple() async {
+    if (signInWithAppleException != null) throw signInWithAppleException!;
+  }
+
+  @override
+  Future<void> signInWithGoogle() async {
+    if (signInWithGoogleException != null) throw signInWithGoogleException!;
   }
 
   @override
@@ -147,6 +161,97 @@ void main() {
         (failure) => expect(
           failure,
           const AuthenticationFailure(message: 'email already registered'),
+        ),
+        (_) => fail('expected Left'),
+      );
+    });
+  });
+
+  group('AuthRepositoryImpl.signInWithApple', () {
+    test('returns Right(null) on success', () async {
+      final repo = AuthRepositoryImpl(remote: _FakeAuthRemoteDataSource());
+      final result = await repo.signInWithApple();
+      expect(result.isRight(), isTrue);
+    });
+
+    test(
+      'returns Right(null), not Left, when the user cancels the sheet',
+      () async {
+        final repo = AuthRepositoryImpl(
+          remote: _FakeAuthRemoteDataSource(
+            signInWithAppleException: const SignInCancelledException(),
+          ),
+        );
+        final result = await repo.signInWithApple();
+        expect(result.isRight(), isTrue);
+      },
+    );
+
+    test('maps AuthenticationException to AuthenticationFailure', () async {
+      final repo = AuthRepositoryImpl(
+        remote: _FakeAuthRemoteDataSource(
+          signInWithAppleException: const AuthenticationException(
+            message: 'apple auth failed',
+          ),
+        ),
+      );
+      final result = await repo.signInWithApple();
+      result.fold(
+        (failure) => expect(
+          failure,
+          const AuthenticationFailure(message: 'apple auth failed'),
+        ),
+        (_) => fail('expected Left'),
+      );
+    });
+
+    test('maps NetworkException to NetworkFailure', () async {
+      final repo = AuthRepositoryImpl(
+        remote: _FakeAuthRemoteDataSource(
+          signInWithAppleException: const NetworkException(),
+        ),
+      );
+      final result = await repo.signInWithApple();
+      result.fold(
+        (failure) => expect(failure, const NetworkFailure()),
+        (_) => fail('expected Left'),
+      );
+    });
+  });
+
+  group('AuthRepositoryImpl.signInWithGoogle', () {
+    test('returns Right(null) on success', () async {
+      final repo = AuthRepositoryImpl(remote: _FakeAuthRemoteDataSource());
+      final result = await repo.signInWithGoogle();
+      expect(result.isRight(), isTrue);
+    });
+
+    test(
+      'returns Right(null), not Left, when the user cancels the sheet',
+      () async {
+        final repo = AuthRepositoryImpl(
+          remote: _FakeAuthRemoteDataSource(
+            signInWithGoogleException: const SignInCancelledException(),
+          ),
+        );
+        final result = await repo.signInWithGoogle();
+        expect(result.isRight(), isTrue);
+      },
+    );
+
+    test('maps AuthenticationException to AuthenticationFailure', () async {
+      final repo = AuthRepositoryImpl(
+        remote: _FakeAuthRemoteDataSource(
+          signInWithGoogleException: const AuthenticationException(
+            message: 'google auth failed',
+          ),
+        ),
+      );
+      final result = await repo.signInWithGoogle();
+      result.fold(
+        (failure) => expect(
+          failure,
+          const AuthenticationFailure(message: 'google auth failed'),
         ),
         (_) => fail('expected Left'),
       );

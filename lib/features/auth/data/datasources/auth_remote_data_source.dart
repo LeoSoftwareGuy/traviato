@@ -13,5 +13,12 @@ abstract interface class AuthRemoteDataSource {
     required String username,
   });
 
+  /// Throws [SignInCancelledException] (from `core/errors/exceptions.dart`)
+  /// if the user dismisses the system sheet without completing sign-in.
+  Future<void> signInWithApple();
+
+  /// Same cancellation contract as [signInWithApple].
+  Future<void> signInWithGoogle();
+
   Future<void> logout();
 }
