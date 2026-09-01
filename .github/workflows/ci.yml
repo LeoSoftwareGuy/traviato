@@ -35,3 +35,48 @@ jobs:
 
       - name: Run tests
         run: flutter test
+
+  verify-edge-functions:
+    name: Edge functions (lint, type-check, test)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Lint
+        working-directory: supabase/functions/generate_wrap_up
+        run: deno lint
+
+      - name: Type-check
+        working-directory: supabase/functions/generate_wrap_up
+        run: deno check index.ts handler.ts gather.ts anthropic.ts screenplay.ts
+
+      - name: Run tests
+        working-directory: supabase/functions/generate_wrap_up
+        run: deno test --allow-net
+
+  deploy-functions:
+    name: Deploy edge functions
+    if: github.event_name == 'push'
+    needs: verify-edge-functions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy generate_wrap_up
+        working-directory: supabase
+        run: supabase functions deploy generate_wrap_up --project-ref "$SUPABASE_PROJECT_ID"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
