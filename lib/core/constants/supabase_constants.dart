@@ -19,6 +19,7 @@ abstract class Tables {
   static const pointsLedger = 'points_ledger';
   static const expenses = 'expenses';
   static const memories = 'memories';
+  static const wrapUps = 'wrap_ups';
 }
 
 abstract class Views {
@@ -36,6 +37,12 @@ abstract class DBFunctions {
   static const awardPoints = 'award_points';
   static const shiftTripDates = 'shift_trip_dates';
   static const checkAchievements = 'check_achievements';
+}
+
+/// Deno edge functions, invoked via `SupabaseClient.functions.invoke` rather
+/// than `.rpc` (Postgres RPCs above).
+abstract class EdgeFunctions {
+  static const generateWrapUp = 'generate_wrap_up';
 }
 
 /// Postgres / PostgREST error codes surfaced via `PostgrestException.code`.

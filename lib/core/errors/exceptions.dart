@@ -43,6 +43,14 @@ class StorageServerException extends AppException {
   const StorageServerException({required super.message});
 }
 
+/// An edge function ran but the underlying operation it performs failed
+/// (e.g. `generate_wrap_up`'s Anthropic call failing after its retry) —
+/// distinct from auth/permission/not-found, which map to their own
+/// exceptions. Maps to [ServerFailure].
+class ServerException extends AppException {
+  const ServerException({required super.message});
+}
+
 class NetworkException extends AppException {
   const NetworkException({
     super.message = 'Network connection failed. Check your internet.',

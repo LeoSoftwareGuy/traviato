@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/journal/presentation/pages/journal_page.dart';
 import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
@@ -37,6 +38,11 @@ Future<void> _pump(
       GoRoute(
         path: '/back',
         builder: (context, state) => const Scaffold(body: Text('back')),
+      ),
+      GoRoute(
+        path: '/memory/:tripId/wrap-up',
+        name: RouteNames.tripWrapUp,
+        builder: (context, state) => const Scaffold(body: Text('Wrap-up')),
       ),
     ],
   );
@@ -274,5 +280,33 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(questRepo.toggleCallCount, 1);
+  });
+
+  testWidgets('the View wrap-up button navigates to Wrap-up (#94)', (
+    tester,
+  ) async {
+    final tripRepo = FakeTripRepository()
+      ..tripCardResult = Right(
+        buildTripCard(id: 't1', startDate: _today, endDate: _today),
+      );
+    final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
+    final noteRepo = FakeDayNoteRepository();
+    await _pump(
+      tester,
+      tripRepo: tripRepo,
+      photoRepo: photoRepo,
+      noteRepo: noteRepo,
+    );
+    await tester.pumpAndSettle();
+
+    await tester.dragUntilVisible(
+      find.byKey(const Key('journal-view-wrap-up-action')),
+      find.byKey(const Key('journal-content-list')),
+      const Offset(0, -200),
+    );
+    await tester.tap(find.byKey(const Key('journal-view-wrap-up-action')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Wrap-up'), findsOneWidget);
   });
 }

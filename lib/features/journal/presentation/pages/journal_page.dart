@@ -177,6 +177,10 @@ class _JournalContent extends ConsumerWidget {
               tripId: tripId,
               dayDate: currentDay,
             ),
+            onViewWrapUpTap: () => context.pushNamed(
+              RouteNames.tripWrapUp,
+              pathParameters: {'tripId': tripId},
+            ),
           ),
         ],
       ],
