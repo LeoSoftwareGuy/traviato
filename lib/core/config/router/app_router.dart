@@ -18,7 +18,7 @@ import '../../../features/home/presentation/widgets/home_shell_scaffold.dart';
 import '../../../features/journal/presentation/pages/journal_page.dart';
 import '../../../features/quest/presentation/pages/plan_page.dart';
 import '../../../features/trip/presentation/pages/create_memory_page.dart';
-import '../../widgets/placeholder_page.dart';
+import '../../../features/wrap_up/presentation/pages/wrap_up_page.dart';
 import 'route_constants.dart';
 
 part 'app_router.g.dart';
@@ -145,7 +145,8 @@ GoRouter router(Ref ref) {
       GoRoute(
         path: RoutePaths.tripWrapUp,
         name: RouteNames.tripWrapUp,
-        builder: (context, state) => const PlaceholderPage(title: 'Wrap-up'),
+        builder: (context, state) =>
+            WrapUpPage(tripId: state.pathParameters['tripId']!),
       ),
     ],
     errorBuilder: (context, state) =>

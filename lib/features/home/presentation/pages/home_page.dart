@@ -90,12 +90,9 @@ class _HomeContent extends ConsumerWidget {
         pathParameters: {'tripId': trip.id},
       );
 
-  // Wrap-up (M4-2) doesn't exist yet, so a finished trip opens Journal
-  // instead of the placeholder — otherwise there's no way to log a past
-  // trip at all (#91). Swap back to a real wrap-up route once M4 ships.
   void _openMemory(BuildContext context, TripCardEntity trip) =>
       context.pushNamed(
-        RouteNames.tripJournal,
+        RouteNames.tripWrapUp,
         pathParameters: {'tripId': trip.id},
       );
 
