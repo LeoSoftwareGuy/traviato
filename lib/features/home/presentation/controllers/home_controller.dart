@@ -45,6 +45,18 @@ class HomeController extends _$HomeController {
             ],
           ),
         );
+      case WrapUpPublishedDispatched(:final tripId, :final publishedAt):
+        state = AsyncData(
+          current.copyWith(
+            trips: [
+              for (final t in current.trips)
+                if (t.id == tripId)
+                  t.copyWithWrapUpPublished(publishedAt)
+                else
+                  t,
+            ],
+          ),
+        );
       case StarsAwardedDispatched():
       // Not relevant to the trips list.
     }

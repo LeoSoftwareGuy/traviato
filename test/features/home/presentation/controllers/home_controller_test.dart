@@ -122,6 +122,38 @@ void main() {
     expect(state?.trips.single.name, 'New name');
   });
 
+  test(
+    'marks a trip kept-forever when its wrap-up is published elsewhere',
+    () async {
+      final existing = buildTripCard(id: 't1');
+      final fakeRepo = FakeTripRepository()..tripsResult = Right([existing]);
+      final bus = GlobalEventBus();
+      addTearDown(bus.dispose);
+      final container = ProviderContainer(
+        overrides: [
+          tripRepositoryProvider.overrideWithValue(fakeRepo),
+          globalEventBusProvider.overrideWithValue(bus),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.listen(homeControllerProvider, (_, _) {});
+
+      await container.read(homeControllerProvider.future);
+      expect(existing.isKeptForever, isFalse);
+
+      final publishedAt = DateTime(2026, 2, 1);
+      bus.add(
+        WrapUpPublishedDispatched(tripId: 't1', publishedAt: publishedAt),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      final state = container.read(homeControllerProvider).value;
+      final trip = state?.trips.single;
+      expect(trip?.isKeptForever, isTrue);
+      expect(trip?.wrapUpPublishedAt, publishedAt);
+    },
+  );
+
   test('removes a trip deleted elsewhere via the event bus', () async {
     final existing = buildTripCard(id: 't1');
     final fakeRepo = FakeTripRepository()..tripsResult = Right([existing]);

@@ -187,6 +187,7 @@ TripCardEntity buildTripCard({
   int photoCount = 0,
   int stars = 0,
   double expenseTotal = 0,
+  DateTime? wrapUpPublishedAt,
 }) {
   final now = DateTime(2026, 1, 1);
   return TripCardEntity(
@@ -205,5 +206,6 @@ TripCardEntity buildTripCard({
     photoCount: photoCount,
     stars: stars,
     expenseTotal: expenseTotal,
+    wrapUpPublishedAt: wrapUpPublishedAt,
   );
 }

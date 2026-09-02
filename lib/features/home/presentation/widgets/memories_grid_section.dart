@@ -79,9 +79,11 @@ class _MemoryGridCard extends StatelessWidget {
                 top: AppSpacing.sm,
                 left: AppSpacing.sm,
                 child: TripCardPill(
-                  color: AppColors.tint(AppColors.background, .62),
+                  color: trip.isKeptForever
+                      ? AppColors.tint(AppColors.primary, .62)
+                      : AppColors.tint(AppColors.background, .62),
                   child: Text(
-                    '▸ Recap',
+                    trip.isKeptForever ? '✦ Kept forever' : '▸ Recap',
                     style: AppTypography.caption.copyWith(
                       color: AppColors.textOnPhoto,
                       letterSpacing: 0,

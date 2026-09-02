@@ -47,3 +47,19 @@ final class TripUpdatedDispatched extends GlobalEvent {
 final class StarsAwardedDispatched extends GlobalEvent {
   const StarsAwardedDispatched();
 }
+
+/// Fired after "Keep forever" publishes a wrap-up (issue #95), so the Home
+/// "Kept forever" grid card reflects the new state without waiting for its
+/// next `trip_card_view` fetch.
+final class WrapUpPublishedDispatched extends GlobalEvent {
+  const WrapUpPublishedDispatched({
+    required this.tripId,
+    required this.publishedAt,
+  });
+
+  final String tripId;
+  final DateTime publishedAt;
+
+  @override
+  List<Object?> get props => [tripId, publishedAt];
+}

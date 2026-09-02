@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/presentation_failure_exception.dart';
+import '../../../../core/events/global_event.dart';
+import '../../../../core/events/global_event_bus.dart';
 import '../controllers/wrap_up_controller.dart';
 import '../providers/wrap_up_providers.dart';
 
@@ -17,9 +19,17 @@ Future<void> runPublishWrapUp({
     final repo = tsx.get(wrapUpRepositoryProvider);
     final controller = tsx.get(wrapUpControllerProvider(tripId).notifier);
     final result = await repo.publish(tripId);
-    result.fold(
-      (failure) => throw PresentationFailureException(failure),
-      (_) => controller.applyPublished(DateTime.now()),
-    );
+    result.fold((failure) => throw PresentationFailureException(failure), (_) {
+      final publishedAt = DateTime.now();
+      controller.applyPublished(publishedAt);
+      tsx
+          .get(globalEventBusProvider)
+          .add(
+            WrapUpPublishedDispatched(
+              tripId: tripId,
+              publishedAt: publishedAt,
+            ),
+          );
+    });
   });
 }

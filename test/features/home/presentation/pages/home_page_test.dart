@@ -299,6 +299,47 @@ void main() {
     expect(find.text('Wrap-up'), findsOneWidget);
   });
 
+  testWidgets(
+    'a kept-forever card shows the "Kept forever" badge, not "Recap" (#95)',
+    (tester) async {
+      final finished = buildTripCard(
+        id: 't1',
+        name: 'Atlas high road',
+        startDate: DateTime(2025, 1, 1),
+        endDate: DateTime(2025, 1, 9),
+        status: TripStatus.finished,
+        wrapUpPublishedAt: DateTime(2025, 1, 10),
+      );
+      final tripRepo = FakeTripRepository()..tripsResult = Right([finished]);
+      final router = GoRouter(
+        initialLocation: '/home',
+        routes: [
+          GoRoute(
+            path: '/home',
+            builder: (context, state) => const HomePage(),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+            tripRepositoryProvider.overrideWithValue(tripRepo),
+            questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
+            checklistRepositoryProvider.overrideWithValue(
+              FakeChecklistRepository(),
+            ),
+          ],
+          child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('✦ Kept forever'), findsOneWidget);
+      expect(find.text('▸ Recap'), findsNothing);
+    },
+  );
+
   testWidgets('the stars badge navigates to the Bonus tasks placeholder', (
     tester,
   ) async {
