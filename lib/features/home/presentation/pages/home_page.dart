@@ -90,9 +90,14 @@ class _HomeContent extends ConsumerWidget {
         pathParameters: {'tripId': trip.id},
       );
 
+  // Journal, not Wrap-up (issue #101) — Wrap-up generation is a network
+  // call to an edge function that calls Anthropic, and can fail (project
+  // paused, rate limit, transient outage). Being able to open a past
+  // memory to add photos/notes can't depend on that succeeding; Wrap-up
+  // stays one tap away via Journal's "View wrap-up ▸" button.
   void _openMemory(BuildContext context, TripCardEntity trip) =>
       context.pushNamed(
-        RouteNames.tripWrapUp,
+        RouteNames.tripJournal,
         pathParameters: {'tripId': trip.id},
       );
 

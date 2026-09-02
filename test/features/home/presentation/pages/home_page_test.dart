@@ -256,7 +256,7 @@ void main() {
     expect(find.text('plan page t2'), findsOneWidget);
   });
 
-  testWidgets('a Kept-forever card navigates to Wrap-up (#94)', (
+  testWidgets('a Kept-forever card navigates to Journal, not Wrap-up (#101)', (
     tester,
   ) async {
     final finished = buildTripCard(
@@ -272,9 +272,9 @@ void main() {
       routes: [
         GoRoute(path: '/home', builder: (context, state) => const HomePage()),
         GoRoute(
-          path: '/memory/:tripId/wrap-up',
-          name: RouteNames.tripWrapUp,
-          builder: (context, state) => const Scaffold(body: Text('Wrap-up')),
+          path: '/memory/:tripId/journal',
+          name: RouteNames.tripJournal,
+          builder: (context, state) => const Scaffold(body: Text('Journal')),
         ),
       ],
     );
@@ -296,7 +296,7 @@ void main() {
     await tester.tap(find.text('Atlas high road'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Wrap-up'), findsOneWidget);
+    expect(find.text('Journal'), findsOneWidget);
   });
 
   testWidgets(
