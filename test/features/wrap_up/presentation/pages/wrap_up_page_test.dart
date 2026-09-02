@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traviato/core/errors/failures.dart';
+import 'package:traviato/core/events/global_event.dart';
+import 'package:traviato/core/events/global_event_bus.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
@@ -21,6 +23,7 @@ Future<void> _pump(
   required FakeWrapUpRepository wrapUpRepo,
   FakeTripRepository? tripRepo,
   FakePhotoRepository? photoRepo,
+  GlobalEventBus? eventBus,
 }) async {
   final router = GoRouter(
     initialLocation: '/wrap-up',
@@ -54,6 +57,8 @@ Future<void> _pump(
         photoRepositoryProvider.overrideWithValue(
           photoRepo ?? (FakePhotoRepository()..photosResult = const Right([])),
         ),
+        if (eventBus != null)
+          globalEventBusProvider.overrideWithValue(eventBus),
       ],
       child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
     ),
@@ -162,6 +167,30 @@ void main() {
     expect(wrapUpRepo.publishCallCount, 1);
     expect(find.text('✦ Kept forever'), findsOneWidget);
   });
+
+  testWidgets(
+    'publishing echoes WrapUpPublishedDispatched so Home can update live',
+    (tester) async {
+      final wrapUpRepo = FakeWrapUpRepository();
+      final bus = GlobalEventBus();
+      addTearDown(bus.dispose);
+      final events = <GlobalEvent>[];
+      final sub = bus.stream.listen(events.add);
+      addTearDown(sub.cancel);
+
+      await _pump(tester, wrapUpRepo: wrapUpRepo, eventBus: bus);
+      await _settle(tester);
+
+      final keepForever = find.text('Keep forever');
+      await _scrollToVisible(tester, keepForever);
+      await tester.tap(keepForever);
+      await _settle(tester);
+
+      expect(events, hasLength(1));
+      final event = events.single as WrapUpPublishedDispatched;
+      expect(event.tripId, 't1');
+    },
+  );
 
   testWidgets('shows a retry scaffold on failure', (tester) async {
     final wrapUpRepo = FakeWrapUpRepository()

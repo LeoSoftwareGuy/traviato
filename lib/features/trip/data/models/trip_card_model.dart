@@ -22,6 +22,7 @@ class TripCardModel extends TripCardEntity {
     required super.photoCount,
     required super.stars,
     required super.expenseTotal,
+    super.wrapUpPublishedAt,
   });
 
   factory TripCardModel.fromJson(Map<String, dynamic> json) => TripCardModel(
@@ -41,6 +42,7 @@ class TripCardModel extends TripCardEntity {
     photoCount: (json['photo_count'] as num).toInt(),
     stars: (json['stars'] as num).toInt(),
     expenseTotal: (json['expense_total'] as num).toDouble(),
+    wrapUpPublishedAt: _parseDate(json['wrap_up_published_at']),
   );
 
   static DateTime? _parseDate(Object? value) =>

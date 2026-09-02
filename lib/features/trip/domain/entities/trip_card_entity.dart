@@ -22,6 +22,7 @@ class TripCardEntity extends Equatable {
     required this.photoCount,
     required this.stars,
     required this.expenseTotal,
+    this.wrapUpPublishedAt,
   });
 
   /// Synthesizes a card for a trip that was just created — no photos, stars
@@ -81,8 +82,33 @@ class TripCardEntity extends Equatable {
       photoCount: photoCount,
       stars: stars,
       expenseTotal: expenseTotal,
+      wrapUpPublishedAt: wrapUpPublishedAt,
     );
   }
+
+  /// Applied when [WrapUpPublishedDispatched] arrives (docs/08's event bus) —
+  /// the wrap-up page's own "Keep forever" tap, echoed here so the Home grid
+  /// card updates live instead of waiting for the next `trip_card_view` read.
+  TripCardEntity copyWithWrapUpPublished(DateTime publishedAt) =>
+      TripCardEntity(
+        id: id,
+        userId: userId,
+        name: name,
+        destination: destination,
+        countryCode: countryCode,
+        startDate: startDate,
+        endDate: endDate,
+        vibes: vibes,
+        coverImagePath: coverImagePath,
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+        status: status,
+        durationDays: durationDays,
+        photoCount: photoCount,
+        stars: stars,
+        expenseTotal: expenseTotal,
+        wrapUpPublishedAt: publishedAt,
+      );
 
   static (TripStatus, int?) _deriveStatusAndDuration(
     DateTime? start,
@@ -118,6 +144,10 @@ class TripCardEntity extends Equatable {
   final int photoCount;
   final int stars;
   final double expenseTotal;
+  final DateTime? wrapUpPublishedAt;
+
+  /// The trip's wrap-up has been "Kept forever" (M4-3).
+  bool get isKeptForever => wrapUpPublishedAt != null;
 
   @override
   List<Object?> get props => [
@@ -137,5 +167,6 @@ class TripCardEntity extends Equatable {
     photoCount,
     stars,
     expenseTotal,
+    wrapUpPublishedAt,
   ];
 }
