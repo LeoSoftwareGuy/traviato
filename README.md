@@ -6,7 +6,12 @@ and Supabase.
 
 ## Tech stack
 
-Flutter · Riverpod (code-gen) · go_router · Supabase · fpdart · json_serializable.
+Flutter
+Riverpod (code-gen)
+go_router
+Supabase
+fpdart
+json_serializable.
 See `docs/00-tech-stack-and-philosophy.md` and `docs/01-architecture-and-folder-structure.md`
 for the full architecture and folder conventions.
 
