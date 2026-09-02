@@ -22,7 +22,15 @@ void main() {
   test('fetches stats from the repository on build', () async {
     final repo = FakeProfileStatsRepository()
       ..statsResult = const Right(
-        ProfileStatsEntity(memories: 1, places: 2, days: 3, stars: 4),
+        ProfileStatsEntity(
+          memories: 1,
+          places: 2,
+          countries: 0,
+          days: 3,
+          stars: 4,
+          photos: 0,
+          notes: 0,
+        ),
       );
     final container = _buildContainer(repo);
     addTearDown(container.dispose);
@@ -41,8 +49,11 @@ void main() {
         ProfileStatsEntity(
           memories: 0,
           places: 0,
+          countries: 0,
           days: 0,
           stars: 4,
+          photos: 0,
+          notes: 0,
         ),
       );
     final container = ProviderContainer(
@@ -55,7 +66,15 @@ void main() {
     expect(repo.getStatsCallCount, 1);
 
     repo.statsResult = const Right(
-      ProfileStatsEntity(memories: 0, places: 0, days: 0, stars: 9),
+      ProfileStatsEntity(
+        memories: 0,
+        places: 0,
+        countries: 0,
+        days: 0,
+        stars: 9,
+        photos: 0,
+        notes: 0,
+      ),
     );
     container.read(globalEventBusProvider).add(const StarsAwardedDispatched());
     await Future<void>.delayed(Duration.zero);
