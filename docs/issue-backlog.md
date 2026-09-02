@@ -132,6 +132,52 @@ locked-state progress bars (our seeded 8); logout.
 
 ---
 
+
+## Milestone 5 — Monetization (post-MVP, not yet scoped into issues)
+
+Parked here so it isn't lost. Needs real product/pricing decisions before it
+becomes issues — each bullet below is a question to answer first, not a task.
+
+### Open decisions (answer before drafting M5 issues)
+1. **Price & tiers.** Confirmed direction so far: free tier capped at 3
+   memories + basics; paid tier unlocks unlimited memories + full features +
+   export. Still needed: actual price point(s), monthly vs. annual, and
+   whether there's more than one paid tier (e.g. a higher tier for the
+   future MP4 export once that exists).
+2. **Enforcement points** — where limits are actually checked:
+   - Memories per account (already noted app-side in data-model.md; needs
+     moving server-side — a client-only check is trivially bypassed)
+   - Photos per memory (NEW — not yet in data-model; needs a limit value
+     decided, e.g. free = N photos/memory, paid = unlimited or a much
+     higher cap)
+   - Possibly: wrap-up generations, since each one costs a real Anthropic
+     API call (a free-tier cap here directly protects your margin)
+3. **Billing platform.** In-app purchase / subscription via
+   RevenueCat (recommended — handles both App Store + Play Store receipt
+   validation and entitlement state in one place) vs. rolling your own
+   StoreKit/Play Billing integration. RevenueCat is the standard choice for
+   a solo/small team; flag if you want to evaluate alternatives.
+4. **Entitlement source of truth** — server-side, not client-side. A
+   `subscriptions` or `entitlements` table (or RevenueCat's own webhook
+   updating one) that RLS/RPCs check before allowing an over-limit action —
+   never trust the app's own "am I premium" flag for anything that gates a
+   write.
+
+### Anticipated issues (draft once the above is decided)
+- M5-1 Migration: subscription/entitlement tracking (table + RLS + a
+  `has_active_subscription()` or tier-check helper used by other RPCs)
+- M5-2 RevenueCat (or chosen platform) integration + purchase flow UI
+- M5-3 Server-side enforcement: memories-per-account limit moved from
+  app-side check to a DB-level guard (RPC or trigger)
+- M5-4 Photo-per-memory limit: schema + enforcement + UI (upload blocked/
+  upsell prompt at the cap)
+- M5-5 Paywall / upgrade screens (design not started)
+- M5-6 Restore purchases, subscription management entry point (links to
+  App Store/Play Store subscription settings — cannot be built custom,
+  platform policy)
+
+---
+
 ## Notes
 - Copy the handoff into the repo: `docs/design/` (README + dc.html + assets;
   incl. `journal/balloons_wide.png` into `assets/images/journal/`).
