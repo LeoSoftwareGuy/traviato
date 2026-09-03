@@ -10,11 +10,16 @@ void main() {
       'countries_count': 2,
       'days_logged': 7,
       'stars_total': 42,
+      'photos_count': 11,
+      'notes_count': 4,
     });
 
     expect(model.memories, 3);
     expect(model.places, 5);
+    expect(model.countries, 2);
     expect(model.days, 7);
     expect(model.stars, 42);
+    expect(model.photos, 11);
+    expect(model.notes, 4);
   });
 }

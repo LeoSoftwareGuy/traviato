@@ -20,6 +20,7 @@ class CreateMemoryField extends StatefulWidget {
     this.keyboardType,
     this.textInputAction,
     this.validator,
+    this.maxLines = 1,
     super.key,
   });
 
@@ -34,6 +35,10 @@ class CreateMemoryField extends StatefulWidget {
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final String? Function(String?)? validator;
+
+  /// A bio-style field passes >1 for a multiline value (issue #96); every
+  /// other caller keeps the single-line default.
+  final int maxLines;
 
   @override
   State<CreateMemoryField> createState() => _CreateMemoryFieldState();
@@ -91,6 +96,7 @@ class _CreateMemoryFieldState extends State<CreateMemoryField> {
                   keyboardType: widget.keyboardType,
                   textInputAction: widget.textInputAction,
                   validator: widget.validator,
+                  maxLines: widget.maxLines,
                   cursorColor: AppColors.primary,
                   style: widget.valueStyle ?? AppTypography.bodyInput,
                   decoration: InputDecoration(

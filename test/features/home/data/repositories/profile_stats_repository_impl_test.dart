@@ -14,7 +14,15 @@ class _FakeProfileStatsRemoteDataSource
   @override
   Future<ProfileStatsModel> getStats() async {
     if (exception != null) throw exception!;
-    return const ProfileStatsModel(memories: 2, places: 3, days: 4, stars: 5);
+    return const ProfileStatsModel(
+      memories: 2,
+      places: 3,
+      countries: 1,
+      days: 4,
+      stars: 5,
+      photos: 6,
+      notes: 7,
+    );
   }
 }
 

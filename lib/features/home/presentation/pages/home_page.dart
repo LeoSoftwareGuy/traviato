@@ -150,8 +150,13 @@ class _HomeContent extends ConsumerWidget {
           stats: ProfileStatsEntity(
             memories: memories,
             places: places,
+            // Home's stats bar doesn't show countries/photos/notes — only
+            // Profile's achievement progress math needs them (issue #96).
+            countries: 0,
             days: days,
             stars: stars,
+            photos: 0,
+            notes: 0,
           ),
         ),
         if (state.isEmpty) ...[
