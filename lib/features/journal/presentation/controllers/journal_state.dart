@@ -94,8 +94,18 @@ class JournalState extends Equatable {
     return !todayDate.isBefore(trip.endDate!);
   }
 
+  /// The generated wrap-up always covers the whole trip regardless of which
+  /// day tab is open (`generate_wrap_up` gathers by trip, not by day) — so
+  /// the CTA is scoped to the last day only, to avoid implying it covers
+  /// just "up to this day" (#107).
+  bool get _isViewingLastDay {
+    final day = currentDayDate;
+    final dates = dayDates;
+    return day != null && dates.isNotEmpty && _isSameDate(day, dates.last);
+  }
+
   WrapUpAvailability get wrapUpAvailability {
-    if (!_hasTripEnded) return WrapUpAvailability.hidden;
+    if (!_hasTripEnded || !_isViewingLastDay) return WrapUpAvailability.hidden;
     final hasEnoughPhotos = photos.length >= wrapUpMinPhotos;
     final hasEnoughNotes = notes.length >= wrapUpMinNoteDays;
     return hasEnoughPhotos && hasEnoughNotes
