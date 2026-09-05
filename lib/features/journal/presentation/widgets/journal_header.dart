@@ -5,9 +5,9 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
-/// Back, mono `JOURNAL` eyebrow, and a stars badge — stub `0` until the
-/// points migration lands (Figma "current trip - journal" doesn't show the
-/// badge in this frame, but the issue's acceptance criteria calls for it).
+/// Back, mono `JOURNAL` eyebrow, and a stars badge showing the account's
+/// real stars total (Figma "current trip - journal" doesn't show the badge
+/// in this frame, but the issue's acceptance criteria calls for it).
 /// Delete lives in Plan's manage-memory sheet (R-5), not here.
 class JournalHeader extends StatelessWidget {
   const JournalHeader({

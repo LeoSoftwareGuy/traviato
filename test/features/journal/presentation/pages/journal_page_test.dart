@@ -5,12 +5,15 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/theme/app_theme.dart';
+import 'package:traviato/features/home/domain/entities/profile_stats_entity.dart';
+import 'package:traviato/features/home/presentation/providers/profile_stats_provider.dart';
 import 'package:traviato/features/journal/presentation/pages/journal_page.dart';
 import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
+import '../../../home/fakes/fake_profile_stats_repository.dart';
 import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
@@ -27,6 +30,7 @@ Future<void> _pump(
   required FakePhotoRepository photoRepo,
   required FakeDayNoteRepository noteRepo,
   FakeQuestRepository? questRepo,
+  FakeProfileStatsRepository? profileStatsRepo,
 }) async {
   final router = GoRouter(
     initialLocation: '/journal',
@@ -54,6 +58,9 @@ Future<void> _pump(
         dayNoteRepositoryProvider.overrideWithValue(noteRepo),
         questRepositoryProvider.overrideWithValue(
           questRepo ?? FakeQuestRepository(),
+        ),
+        profileStatsRepositoryProvider.overrideWithValue(
+          profileStatsRepo ?? FakeProfileStatsRepository(),
         ),
       ],
       child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
@@ -393,6 +400,44 @@ void main() {
         find.text('Add 2 more photos and 1 more note to unlock your wrap-up'),
         findsOneWidget,
       );
+    },
+  );
+
+  testWidgets(
+    "the header's stars badge shows the account's real total, not 0 (#105)",
+    (tester) async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(
+            id: 't1',
+            startDate: _today.subtract(const Duration(days: 1)),
+            endDate: _today.add(const Duration(days: 1)),
+          ),
+        );
+      final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
+      final noteRepo = FakeDayNoteRepository();
+      final profileStatsRepo = FakeProfileStatsRepository()
+        ..statsResult = const Right(
+          ProfileStatsEntity(
+            memories: 1,
+            places: 0,
+            countries: 0,
+            days: 0,
+            stars: 42,
+            photos: 0,
+            notes: 0,
+          ),
+        );
+      await _pump(
+        tester,
+        tripRepo: tripRepo,
+        photoRepo: photoRepo,
+        noteRepo: noteRepo,
+        profileStatsRepo: profileStatsRepo,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('42'), findsOneWidget);
     },
   );
 }

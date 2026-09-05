@@ -12,6 +12,8 @@ import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../../core/widgets/star_award_toast.dart';
+import '../../../home/domain/entities/profile_stats_entity.dart';
+import '../../../home/presentation/controllers/profile_stats_controller.dart';
 import '../../../photo/presentation/widgets/add_photo_sheet.dart';
 import '../controllers/journal_controller.dart';
 import '../controllers/journal_state.dart';
@@ -41,6 +43,13 @@ class JournalPage extends ConsumerWidget {
     });
 
     final journalAsync = ref.watch(journalControllerProvider(tripId));
+    // Transient: a stats-fetch failure shouldn't block the whole Journal
+    // screen (guidelines doc 03) — falls back to zero until it resolves,
+    // same fallback Home's header uses (#77).
+    final stars =
+        (ref.watch(profileStatsControllerProvider).value ??
+                const ProfileStatsEntity.zero())
+            .stars;
 
     return Scaffold(
       extendBody: true,
@@ -54,6 +63,7 @@ class JournalPage extends ConsumerWidget {
           data: (state) => _JournalContent(
             tripId: tripId,
             state: state,
+            stars: stars,
             onBack: () => context.pop(),
           ),
         ),
@@ -83,11 +93,13 @@ class _JournalContent extends ConsumerWidget {
   const _JournalContent({
     required this.tripId,
     required this.state,
+    required this.stars,
     required this.onBack,
   });
 
   final String tripId;
   final JournalState state;
+  final int stars;
   final VoidCallback onBack;
 
   @override
@@ -106,7 +118,7 @@ class _JournalContent extends ConsumerWidget {
       ),
       children: [
         JournalHeader(
-          stars: 0,
+          stars: stars,
           onBack: onBack,
           onStarsTap: () => context.pushNamed(
             RouteNames.tripBonusTasks,
