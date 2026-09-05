@@ -6,10 +6,14 @@
 // deno-lint-ignore no-explicit-any
 type Row = Record<string, any>;
 
-export function fakeSupabaseClient(tables: Record<string, Row[]>) {
+export function fakeSupabaseClient(
+  tables: Record<string, Row[]>,
+  errors: Record<string, { message: string }> = {},
+) {
   return {
     from(table: string) {
       const rows = tables[table] ?? [];
+      const error = errors[table] ?? null;
       // deno-lint-ignore no-explicit-any
       const builder: any = {
         select() {
@@ -28,6 +32,7 @@ export function fakeSupabaseClient(tables: Record<string, Row[]>) {
           return builder;
         },
         single() {
+          if (error) return Promise.resolve({ data: null, error });
           const row = rows[0];
           return Promise.resolve({
             data: row ?? null,
@@ -35,12 +40,14 @@ export function fakeSupabaseClient(tables: Record<string, Row[]>) {
           });
         },
         maybeSingle() {
+          if (error) return Promise.resolve({ data: null, error });
           return Promise.resolve({ data: rows[0] ?? null, error: null });
         },
         upsert(_values: unknown) {
-          return Promise.resolve({ data: null, error: null });
+          return Promise.resolve({ data: null, error: error ?? null });
         },
-        then(resolve: (v: { data: Row[]; error: null }) => void) {
+        then(resolve: (v: { data: Row[] | null; error: unknown }) => void) {
+          if (error) return resolve({ data: null, error });
           resolve({ data: rows, error: null });
         },
       };

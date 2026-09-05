@@ -56,6 +56,45 @@ Deno.test("handleRequest returns 404 when the trip doesn't exist", async () => {
   assertEquals(res.status, 404);
 });
 
+// #109: a permission-denied error on the trip lookup must surface as a
+// distinct 500, never collapse into the same "not found" 404 a genuinely
+// missing trip returns — this exact confusion hid the service_role grants
+// bug in production/local testing.
+Deno.test("handleRequest returns 500 (not 404) when the trip lookup errors", async () => {
+  const deps = baseDeps({
+    serviceClient: fakeSupabaseClient(
+      { trips: [{ id: TRIP_ID, user_id: OWNER_ID }] },
+      { trips: { message: "permission denied for table trips" } },
+    ),
+  });
+  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
+  const json = await res.json();
+  assertEquals(res.status, 500);
+  assertEquals(json.error, "trip lookup failed: permission denied for table trips");
+});
+
+Deno.test("handleRequest returns 500 when the existing wrap_ups lookup errors", async () => {
+  const deps = baseDeps({
+    serviceClient: fakeSupabaseClient(
+      { trips: [{ id: TRIP_ID, user_id: OWNER_ID }] },
+      { wrap_ups: { message: "permission denied for table wrap_ups" } },
+    ),
+  });
+  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
+  assertEquals(res.status, 500);
+});
+
+Deno.test("handleRequest returns 500 when gathering trip data fails", async () => {
+  const deps = baseDeps({
+    serviceClient: fakeSupabaseClient(
+      { trips: [{ id: TRIP_ID, user_id: OWNER_ID }], wrap_ups: [] },
+      { quests: { message: "permission denied for table quests" } },
+    ),
+  });
+  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
+  assertEquals(res.status, 500);
+});
+
 Deno.test("handleRequest returns 403 when the caller doesn't own the trip", async () => {
   const deps = baseDeps({ authClient: fakeAuthClient({ id: "someone-else" }) });
   const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);

@@ -44,11 +44,14 @@ export async function handleRequest(req: Request, deps: Deps): Promise<Response>
     return json({ error: "invalid session" }, 401);
   }
 
-  const { data: trip } = await deps.serviceClient
+  const { data: trip, error: tripError } = await deps.serviceClient
     .from("trips")
     .select("id, user_id")
     .eq("id", tripId)
     .maybeSingle();
+  if (tripError) {
+    return json({ error: `trip lookup failed: ${tripError.message}` }, 500);
+  }
   if (!trip) {
     return json({ error: "trip not found" }, 404);
   }
@@ -56,16 +59,24 @@ export async function handleRequest(req: Request, deps: Deps): Promise<Response>
     return json({ error: "forbidden" }, 403);
   }
 
-  const { data: existing } = await deps.serviceClient
+  const { data: existing, error: existingError } = await deps.serviceClient
     .from("wrap_ups")
     .select("content, generated_at")
     .eq("trip_id", tripId)
     .maybeSingle();
+  if (existingError) {
+    return json({ error: `wrap-up lookup failed: ${existingError.message}` }, 500);
+  }
   if (existing?.content) {
     return json({ content: existing.content, generated_at: existing.generated_at }, 200);
   }
 
-  const tripData = await gatherTripData(deps.serviceClient, tripId);
+  let tripData: TripData;
+  try {
+    tripData = await gatherTripData(deps.serviceClient, tripId);
+  } catch (err) {
+    return json({ error: `failed to gather trip data: ${(err as Error).message}` }, 500);
+  }
 
   let screenplay: Screenplay;
   try {
