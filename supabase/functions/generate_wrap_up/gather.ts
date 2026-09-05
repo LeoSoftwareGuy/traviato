@@ -79,6 +79,19 @@ export async function gatherTripData(
       .limit(1),
   ]);
 
+  for (
+    const [label, res] of [
+      ["quests", questsRes],
+      ["day_notes", notesRes],
+      ["photos", photosRes],
+      ["user_achievements", achievementsRes],
+    ] as const
+  ) {
+    if (res.error) {
+      throw new Error(`failed to load ${label}: ${res.error.message}`);
+    }
+  }
+
   const latest = achievementsRes.data?.[0];
   const latestTemplate = latest?.achievement_templates;
 

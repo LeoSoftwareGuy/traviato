@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { assertEquals, assertRejects } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { gatherTripData } from "./gather.ts";
 import { fakeSupabaseClient } from "./test_fakes.ts";
 
@@ -80,4 +80,33 @@ Deno.test("gatherTripData throws when the trip doesn't exist", async () => {
     threw = true;
   }
   assertEquals(threw, true);
+});
+
+// #109: a permission error on any of the four parallel queries must throw
+// rather than silently default to an empty array — an empty array there
+// previously meant a wrap-up could be generated from missing data instead
+// of failing loudly.
+Deno.test("gatherTripData throws with a descriptive message when a query errors", async () => {
+  const client = fakeSupabaseClient(
+    {
+      trips: [
+        {
+          name: "Lisbon",
+          destination: null,
+          country_code: null,
+          start_date: null,
+          end_date: null,
+          vibes: [],
+          user_id: "user-1",
+        },
+      ],
+    },
+    { photos: { message: "permission denied for table photos" } },
+  );
+
+  await assertRejects(
+    () => gatherTripData(client, "trip-1"),
+    Error,
+    "failed to load photos: permission denied for table photos",
+  );
 });
