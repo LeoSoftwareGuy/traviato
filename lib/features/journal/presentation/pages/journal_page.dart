@@ -193,6 +193,8 @@ class _JournalContent extends ConsumerWidget {
               RouteNames.tripWrapUp,
               pathParameters: {'tripId': tripId},
             ),
+            wrapUpAvailability: state.wrapUpAvailability,
+            wrapUpLockedReason: state.wrapUpLockedReason,
           ),
         ],
       ],
