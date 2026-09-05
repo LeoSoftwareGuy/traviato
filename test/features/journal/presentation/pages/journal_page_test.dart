@@ -282,31 +282,117 @@ void main() {
     expect(questRepo.toggleCallCount, 1);
   });
 
-  testWidgets('the View wrap-up button navigates to Wrap-up (#94)', (
-    tester,
-  ) async {
-    final tripRepo = FakeTripRepository()
-      ..tripCardResult = Right(
-        buildTripCard(id: 't1', startDate: _today, endDate: _today),
+  testWidgets(
+    'the View wrap-up button navigates to Wrap-up once unlocked (#94, #103)',
+    (tester) async {
+      // Trip has ended and meets the wrap-up content minimum (>=3 photos,
+      // >=2 note-days) — see JournalState.wrapUpAvailability.
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(id: 't1', startDate: _today, endDate: _today),
+        );
+      final photoRepo = FakePhotoRepository()
+        ..photosResult = Right([
+          buildPhotoEntity(id: 'p1', dayDate: _today),
+          buildPhotoEntity(id: 'p2', dayDate: _today),
+          buildPhotoEntity(id: 'p3', dayDate: _today),
+        ]);
+      final noteRepo = FakeDayNoteRepository()
+        ..notesForTripResult = Right([
+          buildDayNoteEntity(id: 'n1', dayDate: _today),
+          buildDayNoteEntity(
+            id: 'n2',
+            dayDate: _today.subtract(const Duration(days: 1)),
+          ),
+        ]);
+      await _pump(
+        tester,
+        tripRepo: tripRepo,
+        photoRepo: photoRepo,
+        noteRepo: noteRepo,
       );
-    final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
-    final noteRepo = FakeDayNoteRepository();
-    await _pump(
-      tester,
-      tripRepo: tripRepo,
-      photoRepo: photoRepo,
-      noteRepo: noteRepo,
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-    await tester.dragUntilVisible(
-      find.byKey(const Key('journal-view-wrap-up-action')),
-      find.byKey(const Key('journal-content-list')),
-      const Offset(0, -200),
-    );
-    await tester.tap(find.byKey(const Key('journal-view-wrap-up-action')));
-    await tester.pumpAndSettle();
+      await tester.dragUntilVisible(
+        find.byKey(const Key('journal-view-wrap-up-action')),
+        find.byKey(const Key('journal-content-list')),
+        const Offset(0, -200),
+      );
+      await tester.tap(find.byKey(const Key('journal-view-wrap-up-action')));
+      await tester.pumpAndSettle();
 
-    expect(find.text('Wrap-up'), findsOneWidget);
-  });
+      expect(find.text('Wrap-up'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'View wrap-up is hidden while the trip has not ended yet (#103)',
+    (tester) async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(
+            id: 't1',
+            startDate: _today,
+            endDate: _today.add(const Duration(days: 2)),
+          ),
+        );
+      final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
+      final noteRepo = FakeDayNoteRepository();
+      await _pump(
+        tester,
+        tripRepo: tripRepo,
+        photoRepo: photoRepo,
+        noteRepo: noteRepo,
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('journal-view-wrap-up-action')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const Key('journal-view-wrap-up-locked')),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets(
+    'View wrap-up shows disabled with helper copy once ended but under '
+    'the content minimum (#103)',
+    (tester) async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(id: 't1', startDate: _today, endDate: _today),
+        );
+      final photoRepo = FakePhotoRepository()
+        ..photosResult = Right([buildPhotoEntity(id: 'p1', dayDate: _today)]);
+      final noteRepo = FakeDayNoteRepository()
+        ..notesForTripResult = Right([
+          buildDayNoteEntity(id: 'n1', dayDate: _today),
+        ]);
+      await _pump(
+        tester,
+        tripRepo: tripRepo,
+        photoRepo: photoRepo,
+        noteRepo: noteRepo,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.dragUntilVisible(
+        find.byKey(const Key('journal-view-wrap-up-locked')),
+        find.byKey(const Key('journal-content-list')),
+        const Offset(0, -200),
+      );
+
+      expect(
+        find.byKey(const Key('journal-view-wrap-up-action')),
+        findsNothing,
+      );
+      expect(
+        find.text('Add 2 more photos and 1 more note to unlock your wrap-up'),
+        findsOneWidget,
+      );
+    },
+  );
 }

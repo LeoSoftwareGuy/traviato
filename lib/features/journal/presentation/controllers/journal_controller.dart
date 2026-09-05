@@ -30,6 +30,14 @@ class JournalController extends _$JournalController {
       (p) => p,
     );
 
+    // All-trip notes, used only to gate wrap-up eligibility (#103) — kept
+    // separate from notesByDay's per-day, lazily-fetched cache below.
+    final notesResult = await noteRepo.getNotesForTrip(tripId);
+    final notes = notesResult.fold(
+      (failure) => throw PresentationFailureException(failure),
+      (n) => n,
+    );
+
     final initialDay = _initialDayDate(trip.startDate, trip.endDate);
 
     var notesByDay = const <DateTime, DayNoteEntity?>{};
@@ -50,6 +58,7 @@ class JournalController extends _$JournalController {
       currentDayDate: initialDay,
       notesByDay: notesByDay,
       photos: photos,
+      notes: notes,
     );
   }
 
@@ -80,7 +89,14 @@ class JournalController extends _$JournalController {
     if (current == null) return;
     final updated = Map<DateTime, DayNoteEntity?>.from(current.notesByDay)
       ..[day] = note;
-    state = AsyncData(current.copyWith(notesByDay: updated));
+    // Keep the all-trip notes list (wrap-up eligibility, #103) in sync too —
+    // replace an existing day's note or add a newly-created one.
+    final notes = [
+      for (final n in current.notes)
+        if (!_isSameDate(n.dayDate, day)) n,
+      note,
+    ];
+    state = AsyncData(current.copyWith(notesByDay: updated, notes: notes));
   }
 
   /// Called by the add-photo mutation after a successful upload.
@@ -99,3 +115,6 @@ DateTime? _initialDayDate(DateTime? startDate, DateTime? endDate) {
   if (todayDate.isAfter(endDate)) return endDate;
   return todayDate;
 }
+
+bool _isSameDate(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;
