@@ -10,14 +10,18 @@ DateTime get _today {
   return DateTime(now.year, now.month, now.day);
 }
 
+/// [currentDayDate] defaults to the trip's last day — the CTA is scoped to
+/// that day only (#107), so most tests here mean to be looking at it.
 JournalState _stateWith({
   required DateTime? startDate,
   required DateTime? endDate,
   int photoCount = 0,
   int noteDayCount = 0,
+  DateTime? currentDayDate,
 }) {
   return JournalState(
     trip: buildTripCard(id: 't1', startDate: startDate, endDate: endDate),
+    currentDayDate: currentDayDate ?? endDate,
     photos: [
       for (var i = 0; i < photoCount; i++) buildPhotoEntity(id: 'p$i'),
     ],
@@ -86,6 +90,23 @@ void main() {
       );
       expect(state.wrapUpAvailability, WrapUpAvailability.unlocked);
     });
+
+    test(
+      'is hidden on a non-last day even after the trip has ended and meets '
+      'the content minimum (#107)',
+      () {
+        final start = _today.subtract(const Duration(days: 5));
+        final end = _today.subtract(const Duration(days: 1));
+        final state = _stateWith(
+          startDate: start,
+          endDate: end,
+          photoCount: 3,
+          noteDayCount: 2,
+          currentDayDate: start, // first day, not the last
+        );
+        expect(state.wrapUpAvailability, WrapUpAvailability.hidden);
+      },
+    );
   });
 
   group('wrapUpLockedReason (#103)', () {
