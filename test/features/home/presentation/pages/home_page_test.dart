@@ -5,13 +5,16 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/errors/failures.dart';
+import 'package:traviato/core/theme/app_colors.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/auth/domain/entities/user_entity.dart';
 import 'package:traviato/features/auth/presentation/providers/auth_providers.dart';
+import 'package:traviato/features/checklist/domain/entities/checklist_item_entity.dart';
 import 'package:traviato/features/checklist/presentation/providers/checklist_providers.dart';
 import 'package:traviato/features/expense/presentation/providers/expense_providers.dart';
 import 'package:traviato/features/home/presentation/pages/home_page.dart';
 import 'package:traviato/features/home/presentation/providers/profile_stats_provider.dart';
+import 'package:traviato/features/home/presentation/widgets/home_stats_bar.dart';
 import 'package:traviato/features/home/presentation/widgets/upcoming_hero_card.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/trip/domain/entities/trip_card_entity.dart';
@@ -375,5 +378,179 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Bonus tasks'), findsOneWidget);
+  });
+
+  testWidgets(
+    'stats cards use the same fill as the Plan/Expenses buttons (#111)',
+    (tester) async {
+      final tripRepo = FakeTripRepository()..tripsResult = const Right([]);
+      await _pump(tester, tripRepo: tripRepo);
+      await tester.pumpAndSettle();
+
+      final container = tester.widget<Container>(
+        find
+            .descendant(
+              of: find.byType(HomeStatsBar),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      final decoration = container.decoration! as BoxDecoration;
+      expect(decoration.color, AppColors.surfaceDisabled);
+    },
+  );
+
+  testWidgets(
+    'hides the entire Coming-up section when only the hero trip exists '
+    '(#111)',
+    (tester) async {
+      final hero = buildTripCard(
+        id: 't1',
+        name: 'Solo hero trip',
+        startDate: DateTime.now().add(const Duration(days: 3)),
+        status: TripStatus.upcoming,
+      );
+      final tripRepo = FakeTripRepository()..tripsResult = Right([hero]);
+      await _pump(tester, tripRepo: tripRepo);
+      await tester.pumpAndSettle();
+
+      expect(find.text('COMING UP'), findsNothing);
+      expect(find.text('Capture a new memory'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'shows the Coming-up section with no add-card once a second upcoming '
+    'trip exists (#111)',
+    (tester) async {
+      final hero = buildTripCard(
+        id: 't1',
+        name: 'Hero trip',
+        startDate: DateTime.now().add(const Duration(days: 1)),
+        status: TripStatus.upcoming,
+      );
+      final second = buildTripCard(
+        id: 't2',
+        name: 'Second trip',
+        startDate: DateTime.now().add(const Duration(days: 10)),
+        status: TripStatus.upcoming,
+      );
+      final tripRepo = FakeTripRepository()
+        ..tripsResult = Right([hero, second]);
+      await _pump(tester, tripRepo: tripRepo);
+      await tester.pumpAndSettle();
+
+      expect(find.text('COMING UP'), findsOneWidget);
+      expect(find.text('Second trip'), findsOneWidget);
+      expect(find.text('Capture a new memory'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'the hero card no longer renders a trip-progress divider (#111)',
+    (tester) async {
+      final hero = buildTripCard(
+        id: 't1',
+        name: 'Hero trip',
+        startDate: DateTime.now().add(const Duration(days: 1)),
+        status: TripStatus.upcoming,
+      );
+      final tripRepo = FakeTripRepository()..tripsResult = Right([hero]);
+      await _pump(tester, tripRepo: tripRepo);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LinearProgressIndicator), findsNothing);
+    },
+  );
+
+  Future<void> pumpHeroWithChecklist(
+    WidgetTester tester,
+    List<ChecklistItemEntity> items,
+  ) async {
+    final hero = buildTripCard(
+      id: 't1',
+      name: 'Hero trip',
+      startDate: DateTime.now().add(const Duration(days: 1)),
+      status: TripStatus.upcoming,
+    );
+    final tripRepo = FakeTripRepository()..tripsResult = Right([hero]);
+    final checklistRepo = FakeChecklistRepository()
+      ..itemsResult = Right(
+        items,
+      );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+          tripRepositoryProvider.overrideWithValue(tripRepo),
+          questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
+          checklistRepositoryProvider.overrideWithValue(checklistRepo),
+        ],
+        child: MaterialApp(theme: AppTheme.dark, home: const HomePage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  double heroChecklistFillFraction(WidgetTester tester) {
+    return tester
+        .widget<FractionallySizedBox>(
+          find.descendant(
+            of: find.byType(UpcomingHeroCard),
+            matching: find.byType(FractionallySizedBox),
+          ),
+        )
+        .widthFactor!;
+  }
+
+  testWidgets('hero-card checklist fill is 0% when nothing is packed (#111)', (
+    tester,
+  ) async {
+    await pumpHeroWithChecklist(tester, [
+      buildChecklistItemEntity(id: 'i1'),
+      buildChecklistItemEntity(id: 'i2'),
+    ]);
+
+    expect(heroChecklistFillFraction(tester), 0.0);
+    expect(find.text('0 of 2 packed →'), findsOneWidget);
+  });
+
+  testWidgets(
+    'hero-card checklist fill is 50% when half the items are packed (#111)',
+    (tester) async {
+      await pumpHeroWithChecklist(tester, [
+        buildChecklistItemEntity(id: 'i1', isChecked: true),
+        buildChecklistItemEntity(id: 'i2', isChecked: true),
+        buildChecklistItemEntity(id: 'i3'),
+        buildChecklistItemEntity(id: 'i4'),
+      ]);
+
+      expect(heroChecklistFillFraction(tester), 0.5);
+      expect(find.text('2 of 4 packed →'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'hero-card checklist fill is 100% when everything is packed (#111)',
+    (tester) async {
+      await pumpHeroWithChecklist(tester, [
+        buildChecklistItemEntity(id: 'i1', isChecked: true),
+        buildChecklistItemEntity(id: 'i2', isChecked: true),
+      ]);
+
+      expect(heroChecklistFillFraction(tester), 1.0);
+      expect(find.text('2 of 2 packed →'), findsOneWidget);
+    },
+  );
+
+  testWidgets('uses a flat background color for the whole screen (#111)', (
+    tester,
+  ) async {
+    final tripRepo = FakeTripRepository()..tripsResult = const Right([]);
+    await _pump(tester, tripRepo: tripRepo);
+    await tester.pumpAndSettle();
+
+    final scaffold = tester.widget<Scaffold>(find.byType(Scaffold).first);
+    expect(scaffold.backgroundColor, AppColors.background);
   });
 }

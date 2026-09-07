@@ -47,7 +47,8 @@ class _StatCard extends StatelessWidget {
         vertical: AppSpacing.base,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        // Matches the Plan/Expenses button fill on the hero card (#111).
+        color: AppColors.surfaceDisabled,
         border: Border.all(color: AppColors.surfaceBorder),
         borderRadius: AppRadius.cardRadius,
       ),

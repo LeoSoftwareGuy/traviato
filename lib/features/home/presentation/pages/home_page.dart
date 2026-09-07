@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
@@ -39,27 +38,23 @@ class HomePage extends ConsumerWidget {
     final homeAsync = ref.watch(homeControllerProvider);
 
     return Scaffold(
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: AppGradients.screenGroundRadial(
-            AppGradients.groundTopHome,
+      // Flat theme color for the whole screen (#111) — cards keep their own
+      // distinct backgrounds.
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: homeAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => AsyncErrorRetryScaffold(
+            message: presentationFailureMessage(error),
+            onRetry: () => ref.invalidate(homeControllerProvider),
           ),
-        ),
-        child: SafeArea(
-          child: homeAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => AsyncErrorRetryScaffold(
-              message: presentationFailureMessage(error),
-              onRetry: () => ref.invalidate(homeControllerProvider),
-            ),
-            data: (state) => _HomeContent(
-              username: username ?? 'traveler',
-              stars: stats.stars,
-              memories: stats.memories,
-              places: stats.places,
-              days: stats.days,
-              state: state,
-            ),
+          data: (state) => _HomeContent(
+            username: username ?? 'traveler',
+            stars: stats.stars,
+            memories: stats.memories,
+            places: stats.places,
+            days: stats.days,
+            state: state,
           ),
         ),
       ),
@@ -193,12 +188,13 @@ class _HomeContent extends ConsumerWidget {
               onAddExpenseTap: () => _addExpense(context, ref, hero),
             ),
           ],
-          const SizedBox(height: AppSpacing.xl),
-          ComingUpSection(
-            trips: state.upcomingTrips,
-            onTripTap: (trip) => _openPlan(context, trip),
-            onCreateMemoryTap: () => context.pushNamed(RouteNames.createMemory),
-          ),
+          if (state.upcomingTrips.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.xl),
+            ComingUpSection(
+              trips: state.upcomingTrips,
+              onTripTap: (trip) => _openPlan(context, trip),
+            ),
+          ],
           const SizedBox(height: AppSpacing.xl),
           MemoriesGridSection(
             trips: state.finishedTrips,
