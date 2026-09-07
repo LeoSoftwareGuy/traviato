@@ -13,19 +13,18 @@ import 'trip_card_pill.dart';
 import 'trip_date_format.dart';
 
 /// "Coming up" horizontal row: remaining current/upcoming trips (the hero
-/// trip is shown separately) plus a trailing create-memory CTA card. The
-/// whole card taps into Plan for that memory. `docs/design/README.md` § 3.
+/// trip is shown separately). The whole card taps into Plan for that memory.
+/// `docs/design/README.md` § 3. Callers only render this when [trips] is
+/// non-empty (#111) — the nav bar's FAB is the only add affordance otherwise.
 class ComingUpSection extends StatelessWidget {
   const ComingUpSection({
     required this.trips,
     required this.onTripTap,
-    required this.onCreateMemoryTap,
     super.key,
   });
 
   final List<TripCardEntity> trips;
   final ValueChanged<TripCardEntity> onTripTap;
-  final VoidCallback onCreateMemoryTap;
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +40,10 @@ class ComingUpSection extends StatelessWidget {
           height: 150,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            itemCount: trips.length + 1,
+            itemCount: trips.length,
             separatorBuilder: (context, index) =>
                 const SizedBox(width: AppSpacing.sm),
             itemBuilder: (context, index) {
-              if (index == trips.length) {
-                return _CreateMemoryCard(onTap: onCreateMemoryTap);
-              }
               final trip = trips[index];
               return _UpcomingListCard(
                 trip: trip,
@@ -163,50 +159,6 @@ class _UpcomingListCard extends ConsumerWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CreateMemoryCard extends StatelessWidget {
-  const _CreateMemoryCard({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: AppRadius.mediaRadius,
-      child: Container(
-        width: 150,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceDisabled,
-          borderRadius: AppRadius.mediaRadius,
-          border: Border.all(color: AppColors.surfaceBorder),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              alignment: Alignment.center,
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.add, color: AppColors.background),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Capture a new memory',
-              textAlign: TextAlign.center,
-              style: AppTypography.screenTitle.copyWith(fontSize: 13),
-            ),
-          ],
         ),
       ),
     );
