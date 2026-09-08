@@ -87,6 +87,15 @@ class JournalState extends Equatable {
     return forDay.isEmpty ? null : forDay.first;
   }
 
+  /// A day is locked once the trip hasn't gotten there yet — past days and
+  /// today stay open, but a future day can't be opened ahead of time (#118).
+  bool isDayLocked(DateTime day) {
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final dayDate = DateTime(day.year, day.month, day.day);
+    return dayDate.isAfter(todayDate);
+  }
+
   bool get _hasTripEnded {
     if (!hasDateRange) return false;
     final today = DateTime.now();

@@ -12,12 +12,15 @@ final _dayLabelFormat = DateFormat('MMM d');
 /// Horizontally scrollable day pills — a small thumbnail is shown only for
 /// a day that already has a photo. Simplified from Figma's two-row
 /// hero-thumbnail treatment to the app's existing pill/tab visual language.
+/// A future day (`day_date` > today) shows a lock icon and isn't tappable;
+/// past days and today stay fully open (#118).
 class DayTabs extends StatelessWidget {
   const DayTabs({
     required this.days,
     required this.selectedDay,
     required this.thumbnailForDay,
     required this.onSelect,
+    required this.isDayLocked,
     super.key,
   });
 
@@ -25,6 +28,7 @@ class DayTabs extends StatelessWidget {
   final DateTime selectedDay;
   final PhotoEntity? Function(DateTime day) thumbnailForDay;
   final ValueChanged<DateTime> onSelect;
+  final bool Function(DateTime day) isDayLocked;
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +41,15 @@ class DayTabs extends StatelessWidget {
         itemBuilder: (context, index) {
           final day = days[index];
           final isSelected = _isSameDate(day, selectedDay);
+          final isLocked = isDayLocked(day);
           return _DayTab(
             key: Key('journal-day-tab-${day.toIso8601String()}'),
             day: day,
             isSelected: isSelected,
+            isLocked: isLocked,
             thumbnail: thumbnailForDay(day),
-            onTap: () => onSelect(day),
+            onTap: () =>
+                isLocked ? _showLockedDayMessage(context) : onSelect(day),
           );
         },
       ),
@@ -55,12 +62,14 @@ class _DayTab extends StatelessWidget {
     super.key,
     required this.day,
     required this.isSelected,
+    required this.isLocked,
     required this.thumbnail,
     required this.onTap,
   });
 
   final DateTime day;
   final bool isSelected;
+  final bool isLocked;
   final PhotoEntity? thumbnail;
   final VoidCallback onTap;
 
@@ -84,7 +93,14 @@ class _DayTab extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (thumbnail?.imageUrl != null) ...[
+            if (isLocked) ...[
+              const Icon(
+                Icons.lock_outline,
+                size: 12,
+                color: AppColors.textMuted,
+              ),
+              const SizedBox(width: AppSpacing.xs),
+            ] else if (thumbnail?.imageUrl != null) ...[
               ClipRRect(
                 borderRadius: BorderRadius.circular(999),
                 child: Image.network(
@@ -108,6 +124,14 @@ class _DayTab extends StatelessWidget {
       ),
     );
   }
+}
+
+void _showLockedDayMessage(BuildContext context) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      const SnackBar(content: Text("This day hasn't happened yet")),
+    );
 }
 
 bool _isSameDate(DateTime a, DateTime b) =>

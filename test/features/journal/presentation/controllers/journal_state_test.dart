@@ -158,4 +158,26 @@ void main() {
       );
     });
   });
+
+  group('isDayLocked (#118)', () {
+    final state = _stateWith(
+      startDate: _today.subtract(const Duration(days: 5)),
+      endDate: _today.add(const Duration(days: 5)),
+    );
+
+    test('is false for a past day', () {
+      expect(
+        state.isDayLocked(_today.subtract(const Duration(days: 1))),
+        isFalse,
+      );
+    });
+
+    test('is false for today', () {
+      expect(state.isDayLocked(_today), isFalse);
+    });
+
+    test('is true for a future day', () {
+      expect(state.isDayLocked(_today.add(const Duration(days: 1))), isTrue);
+    });
+  });
 }
