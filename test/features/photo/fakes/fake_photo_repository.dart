@@ -10,6 +10,12 @@ class FakePhotoRepository implements PhotoRepository {
   var getPhotosCallCount = 0;
 
   Either<Failure, PhotoEntity>? addPhotoResult;
+
+  /// Per-call results, consumed in call order — takes precedence over
+  /// [addPhotoResult] while entries remain, for tests exercising a batch
+  /// where different calls need different outcomes (e.g. a partial
+  /// failure among several uploads).
+  List<Either<Failure, PhotoEntity>>? addPhotoResultsQueue;
   var addPhotoCallCount = 0;
   Uint8List? lastAddedBytes;
   DateTime? lastAddedDayDate;
@@ -34,9 +40,12 @@ class FakePhotoRepository implements PhotoRepository {
     double? lng,
     DateTime? takenAt,
   }) async {
+    final callIndex = addPhotoCallCount;
     addPhotoCallCount++;
     lastAddedBytes = bytes;
     lastAddedDayDate = dayDate;
+    final queue = addPhotoResultsQueue;
+    if (queue != null && callIndex < queue.length) return queue[callIndex];
     return addPhotoResult ??
         Right(
           buildPhotoEntity(
