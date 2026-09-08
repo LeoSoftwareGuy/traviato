@@ -11,17 +11,19 @@ const _photoTileWidth = 88.0;
 const _photoTileHeight = 110.0;
 
 /// "Photos" section: count + a wrap of thumbnails, plus an "Add" tile.
-/// Photo capture is a separate issue, so Add is a stub — it doesn't route
-/// anywhere yet.
+/// Tapping a thumbnail opens the day-scoped swipeable viewer (#117) at that
+/// photo's index.
 class PhotosStrip extends StatelessWidget {
   const PhotosStrip({
     required this.photos,
     required this.onAddTap,
+    required this.onPhotoTap,
     super.key,
   });
 
   final List<PhotoEntity> photos;
   final VoidCallback onAddTap;
+  final ValueChanged<int> onPhotoTap;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +57,11 @@ class PhotosStrip extends StatelessWidget {
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
           children: [
-            for (final photo in photos) _PhotoTile(photo: photo),
+            for (final entry in photos.asMap().entries)
+              _PhotoTile(
+                photo: entry.value,
+                onTap: () => onPhotoTap(entry.key),
+              ),
             _AddPhotoTile(onTap: onAddTap),
           ],
         ),
@@ -65,20 +71,26 @@ class PhotosStrip extends StatelessWidget {
 }
 
 class _PhotoTile extends StatelessWidget {
-  const _PhotoTile({required this.photo});
+  const _PhotoTile({required this.photo, required this.onTap});
 
   final PhotoEntity photo;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
+    return InkWell(
+      key: Key('journal-photo-tile-${photo.id}'),
+      onTap: onTap,
       borderRadius: AppRadius.cardRadius,
-      child: SizedBox(
-        width: _photoTileWidth,
-        height: _photoTileHeight,
-        child: photo.imageUrl != null
-            ? Image.network(photo.imageUrl!, fit: BoxFit.cover)
-            : const ColoredBox(color: AppColors.surface),
+      child: ClipRRect(
+        borderRadius: AppRadius.cardRadius,
+        child: SizedBox(
+          width: _photoTileWidth,
+          height: _photoTileHeight,
+          child: photo.imageUrl != null
+              ? Image.network(photo.imageUrl!, fit: BoxFit.cover)
+              : const ColoredBox(color: AppColors.surface),
+        ),
       ),
     );
   }
