@@ -14,6 +14,7 @@ import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../../core/widgets/star_award_toast.dart';
 import '../../../home/domain/entities/profile_stats_entity.dart';
 import '../../../home/presentation/controllers/profile_stats_controller.dart';
+import '../../../photo/presentation/pages/photo_viewer_page.dart';
 import '../../../photo/presentation/widgets/add_photo_sheet.dart';
 import '../controllers/journal_controller.dart';
 import '../controllers/journal_state.dart';
@@ -182,6 +183,11 @@ class _JournalContent extends ConsumerWidget {
               context,
               tripId: tripId,
               dayDate: currentDay,
+            ),
+            onPhotoTap: (index) => PhotoViewerPage.show(
+              context,
+              photos: state.photosForCurrentDay,
+              initialIndex: index,
             ),
           ),
           const SizedBox(height: AppSpacing.xl),

@@ -222,6 +222,34 @@ void main() {
     expect(find.text('2 saved'), findsOneWidget);
   });
 
+  testWidgets(
+    'tapping a photo tile opens the day-scoped viewer at that index (#117)',
+    (tester) async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(id: 't1', startDate: _today, endDate: _today),
+        );
+      final photoRepo = FakePhotoRepository()
+        ..photosResult = Right([
+          buildPhotoEntity(id: 'p1', dayDate: _today),
+          buildPhotoEntity(id: 'p2', dayDate: _today),
+        ]);
+      final noteRepo = FakeDayNoteRepository();
+      await _pump(
+        tester,
+        tripRepo: tripRepo,
+        photoRepo: photoRepo,
+        noteRepo: noteRepo,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('journal-photo-tile-p2')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('2 / 2'), findsOneWidget);
+    },
+  );
+
   testWidgets('tapping the Add tile opens the photo capture entry sheet', (
     tester,
   ) async {
