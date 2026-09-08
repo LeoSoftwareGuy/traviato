@@ -12,8 +12,8 @@ final _dayLabelFormat = DateFormat('MMM d');
 /// Horizontally scrollable day pills — a small thumbnail is shown only for
 /// a day that already has a photo. Simplified from Figma's two-row
 /// hero-thumbnail treatment to the app's existing pill/tab visual language.
-/// A future day (`day_date` > today) is muted with a lock icon and not
-/// tappable; past days and today stay fully open (#118).
+/// A future day (`day_date` > today) shows a lock icon and isn't tappable;
+/// past days and today stay fully open (#118).
 class DayTabs extends StatelessWidget {
   const DayTabs({
     required this.days,
@@ -48,7 +48,8 @@ class DayTabs extends StatelessWidget {
             isSelected: isSelected,
             isLocked: isLocked,
             thumbnail: thumbnailForDay(day),
-            onTap: isLocked ? null : () => onSelect(day),
+            onTap: () =>
+                isLocked ? _showLockedDayMessage(context) : onSelect(day),
           );
         },
       ),
@@ -70,62 +71,67 @@ class _DayTab extends StatelessWidget {
   final bool isSelected;
   final bool isLocked;
   final PhotoEntity? thumbnail;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Opacity(
-      opacity: isLocked ? 0.5 : 1,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: AppRadius.pillRadius,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: AppRadius.pillRadius,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primaryTint : AppColors.surface,
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.surfaceBorder,
           ),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryTint : AppColors.surface,
-            border: Border.all(
-              color: isSelected ? AppColors.primary : AppColors.surfaceBorder,
-            ),
-            borderRadius: AppRadius.pillRadius,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (isLocked) ...[
-                const Icon(
-                  Icons.lock_outline,
-                  size: 12,
-                  color: AppColors.textMuted,
-                ),
-                const SizedBox(width: AppSpacing.xs),
-              ] else if (thumbnail?.imageUrl != null) ...[
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: Image.network(
-                    thumbnail!.imageUrl!,
-                    width: 18,
-                    height: 18,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.xs),
-              ],
-              Text(
-                _dayLabelFormat.format(day),
-                style: AppTypography.chipLabel.copyWith(
-                  color: isSelected ? AppColors.primary : AppColors.textMuted,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          borderRadius: AppRadius.pillRadius,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isLocked) ...[
+              const Icon(
+                Icons.lock_outline,
+                size: 12,
+                color: AppColors.textMuted,
+              ),
+              const SizedBox(width: AppSpacing.xs),
+            ] else if (thumbnail?.imageUrl != null) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: Image.network(
+                  thumbnail!.imageUrl!,
+                  width: 18,
+                  height: 18,
+                  fit: BoxFit.cover,
                 ),
               ),
+              const SizedBox(width: AppSpacing.xs),
             ],
-          ),
+            Text(
+              _dayLabelFormat.format(day),
+              style: AppTypography.chipLabel.copyWith(
+                color: isSelected ? AppColors.primary : AppColors.textMuted,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+}
+
+void _showLockedDayMessage(BuildContext context) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      const SnackBar(content: Text("This day hasn't happened yet")),
+    );
 }
 
 bool _isSameDate(DateTime a, DateTime b) =>

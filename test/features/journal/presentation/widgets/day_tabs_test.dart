@@ -44,26 +44,30 @@ void main() {
     expect(find.byIcon(Icons.lock_outline), findsOneWidget);
   });
 
-  testWidgets('tapping a future day does not invoke onSelect', (
-    tester,
-  ) async {
-    final future = today.add(const Duration(days: 2));
-    var tapped = false;
+  testWidgets(
+    'tapping a future day does not invoke onSelect and shows a locked '
+    'message instead',
+    (tester) async {
+      final future = today.add(const Duration(days: 2));
+      var tapped = false;
 
-    await pump(
-      tester,
-      days: [today, future],
-      selectedDay: today,
-      onSelect: (_) => tapped = true,
-    );
+      await pump(
+        tester,
+        days: [today, future],
+        selectedDay: today,
+        onSelect: (_) => tapped = true,
+      );
 
-    await tester.tap(
-      find.byKey(Key('journal-day-tab-${future.toIso8601String()}')),
-    );
-    await tester.pump();
+      await tester.tap(
+        find.byKey(Key('journal-day-tab-${future.toIso8601String()}')),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
-    expect(tapped, isFalse);
-  });
+      expect(tapped, isFalse);
+      expect(find.text("This day hasn't happened yet"), findsOneWidget);
+    },
+  );
 
   testWidgets('tapping a past day invokes onSelect', (tester) async {
     final past = today.subtract(const Duration(days: 1));

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -9,8 +11,10 @@ import 'journal_images.dart';
 /// aren't captured yet; see `PhotosStrip` for that data once it exists).
 /// The selected day's tile is larger with a golden ring + glow — a
 /// selection cue, independent of [isDayLocked]. A future day (`day_date` >
-/// today) is dimmed with a lock overlay and not tappable; past days and
-/// today stay fully open (#118).
+/// today) shows a genuinely blurred thumbnail with a lock icon and isn't
+/// tappable — deliberately a *blur*, not the opacity-dimming #113 removed,
+/// so the two don't read as the same bug; past days and today stay fully
+/// sharp and open (#118).
 class DayRangeHero extends StatelessWidget {
   const DayRangeHero({
     required this.days,
@@ -41,7 +45,8 @@ class DayRangeHero extends StatelessWidget {
             imagePath: JournalImages.forDayIndex(index),
             isSelected: _isSameDate(day, selectedDay),
             isLocked: isLocked,
-            onTap: isLocked ? null : () => onSelect(day),
+            onTap: () =>
+                isLocked ? _showLockedDayMessage(context) : onSelect(day),
           );
         },
       ),
@@ -61,7 +66,7 @@ class _DayTile extends StatelessWidget {
   final String imagePath;
   final bool isSelected;
   final bool isLocked;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -74,69 +79,75 @@ class _DayTile extends StatelessWidget {
         child: SizedBox(
           width: width,
           height: height,
-          child: Stack(
-            children: [
-              AnimatedOpacity(
-                opacity: isLocked ? 0.5 : 1,
-                duration: const Duration(milliseconds: 150),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: isSelected
-                          ? AppColors.primary
-                          : AppColors.surfaceBorder,
-                      width: isSelected ? 2 : 1,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.2),
-                              blurRadius: 15,
-                              offset: const Offset(0, 8),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  padding: const EdgeInsets.all(2),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: Image.asset(
-                      imagePath,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: isSelected ? AppColors.primary : AppColors.surfaceBorder,
+                width: isSelected ? 2 : 1,
               ),
-              // Rendered outside the AnimatedOpacity above so the tint and
-              // lock icon stay crisp instead of inheriting the fade.
-              if (isLocked)
-                Positioned.fill(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: DecoratedBox(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.2),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ]
+                  : null,
+            ),
+            padding: const EdgeInsets.all(2),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _thumbnail(),
+                  if (isLocked) ...[
+                    DecoratedBox(
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.2),
                       ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.lock_outline,
-                          color: AppColors.textOnPhoto,
-                          size: 18,
-                        ),
+                    ),
+                    const Center(
+                      child: Icon(
+                        Icons.lock_outline,
+                        color: AppColors.textOnPhoto,
+                        size: 18,
                       ),
                     ),
-                  ),
-                ),
-            ],
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
   }
+
+  Widget _thumbnail() {
+    final image = Image.asset(
+      imagePath,
+      width: double.infinity,
+      height: double.infinity,
+      fit: BoxFit.cover,
+    );
+    if (!isLocked) return image;
+    return ImageFiltered(
+      imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+      child: image,
+    );
+  }
+}
+
+void _showLockedDayMessage(BuildContext context) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      const SnackBar(content: Text("This day hasn't happened yet")),
+    );
 }
 
 bool _isSameDate(DateTime a, DateTime b) =>

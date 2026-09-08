@@ -33,7 +33,7 @@ void main() {
   }
 
   testWidgets(
-    'dims and shows a lock icon only for future days, not past or today',
+    'blurs and shows a lock icon only for future days, not past or today',
     (tester) async {
       final days = [
         today.subtract(const Duration(days: 2)), // past
@@ -43,21 +43,17 @@ void main() {
 
       await pump(tester, days: days, selectedDay: today);
 
-      // Exactly one future day is locked.
+      // Exactly one future day is locked — a real blur filter on its
+      // thumbnail, not opacity dimming (that was the earlier #113 bug).
       expect(find.byIcon(Icons.lock_outline), findsOneWidget);
-
-      final opacityWidgets = tester.widgetList<AnimatedOpacity>(
-        find.byType(AnimatedOpacity),
-      );
-      final opacities = opacityWidgets.map((w) => w.opacity).toList();
-      expect(opacities, containsAll(<double>[1, 0.5]));
-      expect(opacities.where((o) => o == 0.5), hasLength(1));
+      expect(find.byType(ImageFiltered), findsOneWidget);
+      expect(find.byType(AnimatedOpacity), findsNothing);
     },
   );
 
   testWidgets(
-    'renders all-past days (a finished, wrapped-up memory) at full '
-    'opacity with no lock icon',
+    'renders all-past days (a finished, wrapped-up memory) fully sharp '
+    'with no lock icon',
     (tester) async {
       final days = List.generate(
         4,
@@ -67,10 +63,7 @@ void main() {
       await pump(tester, days: days, selectedDay: days.first);
 
       expect(find.byIcon(Icons.lock_outline), findsNothing);
-      final opacityWidgets = tester.widgetList<AnimatedOpacity>(
-        find.byType(AnimatedOpacity),
-      );
-      expect(opacityWidgets.map((w) => w.opacity), everyElement(1.0));
+      expect(find.byType(ImageFiltered), findsNothing);
     },
   );
 
@@ -101,24 +94,28 @@ void main() {
     expect(borderWidths, containsAll(<double>[1, 2]));
   });
 
-  testWidgets('tapping a future day does not invoke onSelect', (
-    tester,
-  ) async {
-    final future = today.add(const Duration(days: 3));
-    var tapped = false;
+  testWidgets(
+    'tapping a future day does not invoke onSelect and shows a locked '
+    'message instead',
+    (tester) async {
+      final future = today.add(const Duration(days: 3));
+      var tapped = false;
 
-    await pump(
-      tester,
-      days: [today, future],
-      selectedDay: today,
-      onSelect: (_) => tapped = true,
-    );
+      await pump(
+        tester,
+        days: [today, future],
+        selectedDay: today,
+        onSelect: (_) => tapped = true,
+      );
 
-    await tester.tap(find.byIcon(Icons.lock_outline));
-    await tester.pump();
+      await tester.tap(find.byIcon(Icons.lock_outline));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
-    expect(tapped, isFalse);
-  });
+      expect(tapped, isFalse);
+      expect(find.text("This day hasn't happened yet"), findsOneWidget);
+    },
+  );
 
   testWidgets('tapping today invokes onSelect', (tester) async {
     final past = today.subtract(const Duration(days: 1));

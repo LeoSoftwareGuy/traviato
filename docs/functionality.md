@@ -87,7 +87,9 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   photos strip ("TODAY'S PHOTOS · N", **add tile awards ✦2** on successful photo,
   tiles → Photo detail); "To Do · N left" → Plan; **"View wrap-up ▸"** gradient
   button; achievement-nudge card with progress ring.
-- All days in range accessible (no locking).
+- Days where `day_date > today` are locked (no note/photo entry, blurred
+  balloon thumbnail); `day_date <= today` are open/bright. (Reinstated — see
+  issue #118.)
 
 ## 9. Photo detail + tagging ✅ — NEW, in MVP
 
