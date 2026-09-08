@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -17,6 +16,8 @@ import '../../../../core/widgets/star_award_toast.dart';
 import '../../../trip/presentation/widgets/create_memory_field.dart';
 import '../../domain/entities/photo_entity.dart';
 import '../mutations/photo_mutations.dart';
+import 'batch_add_photo_sheet.dart';
+import 'location_permission_prompt.dart';
 
 /// Entry point for issue #30 — the Journal "Add ✦2" tile and any future
 /// day-tab-context add affordance both call this. [dayDate] is whichever
@@ -70,6 +71,40 @@ class _SourcePicker extends StatelessWidget {
     );
   }
 
+  /// Gallery-only multi-select (#116) — camera naturally stays single-shot.
+  /// A caller that supplies [onSaved] (the bonus-task completion flow, #64)
+  /// needs exactly one resulting photo, so it keeps the single-pick path
+  /// unchanged rather than gaining a batch it has no way to consume.
+  Future<void> _pickGallery(BuildContext context) async {
+    if (onSaved != null) return _pick(context, ImageSource.gallery);
+
+    final files = await ImagePicker().pickMultiImage();
+    if (files.isEmpty || !context.mounted) return;
+
+    if (files.length == 1) {
+      final bytes = await files.single.readAsBytes();
+      if (!context.mounted) return;
+      Navigator.of(context).pop();
+      await AddPhotoDetailsSheet.show(
+        context,
+        tripId: tripId,
+        dayDate: dayDate,
+        bytes: bytes,
+      );
+      return;
+    }
+
+    final images = await Future.wait(files.map((f) => f.readAsBytes()));
+    if (!context.mounted) return;
+    Navigator.of(context).pop();
+    await BatchAddPhotoSheet.show(
+      context,
+      tripId: tripId,
+      dayDate: dayDate,
+      images: images,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -97,7 +132,7 @@ class _SourcePicker extends StatelessWidget {
           _SourceTile(
             icon: Icons.photo_library_outlined,
             label: 'Choose from gallery',
-            onTap: () => _pick(context, ImageSource.gallery),
+            onTap: () => _pickGallery(context),
           ),
         ],
       ),
@@ -199,7 +234,7 @@ class _AddPhotoDetailsSheetState extends ConsumerState<AddPhotoDetailsSheet> {
   }
 
   Future<void> _save() async {
-    final locationGranted = await _resolveLocationPermission(context);
+    final locationGranted = await resolveLocationPermission(context);
     if (!mounted) return;
 
     final PhotoEntity photo;
@@ -300,39 +335,4 @@ class _AddPhotoDetailsSheetState extends ConsumerState<AddPhotoDetailsSheet> {
       ),
     );
   }
-}
-
-/// Requests location permission with rationale copy, gating GPS on the
-/// saved photo. Denial (or a dismissed rationale) never blocks the save —
-/// it just means no lat/lng on this photo.
-Future<bool> _resolveLocationPermission(BuildContext context) async {
-  var status = await Permission.location.status;
-  if (status.isGranted) return true;
-  if (status.isPermanentlyDenied || status.isRestricted) return false;
-  if (!context.mounted) return false;
-
-  final shouldAsk = await showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Tag this photo with its location?'),
-      content: const Text(
-        'Trevy can save where a photo was taken so it shows up in your '
-        "journal and wrap-up. You can still add photos without this.",
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Not now'),
-        ),
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Allow'),
-        ),
-      ],
-    ),
-  );
-  if (shouldAsk != true) return false;
-
-  status = await Permission.location.request();
-  return status.isGranted;
 }
