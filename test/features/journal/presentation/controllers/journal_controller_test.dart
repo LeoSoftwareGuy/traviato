@@ -117,8 +117,9 @@ void main() {
 
   test('selectDay switches the day and lazily fetches its note', () async {
     // A wide range so "today" (the initial day) lands strictly between
-    // start and end — keeps this test's manual selectDay calls (to start
-    // and to end) independent of the initial fetch build() already did.
+    // start and end — keeps this test's manual selectDay call (to a past
+    // day, since future days are locked per #118) independent of the
+    // initial fetch build() already did.
     final today = DateTime.now();
     final start = DateTime(
       today.year,
@@ -149,16 +150,55 @@ void main() {
     final callsBeforeSwitch = noteRepo.getNoteCallCount;
 
     noteRepo.getNoteResult = Right(buildDayNoteEntity(content: 'Day two.'));
-    await notifier.selectDay(end);
+    await notifier.selectDay(start);
 
     final state = container.read(journalControllerProvider('t1')).value!;
-    expect(state.currentDayDate, end);
+    expect(state.currentDayDate, start);
     expect(state.currentNote?.content, 'Day two.');
     expect(noteRepo.getNoteCallCount, callsBeforeSwitch + 1);
 
-    // Switching back to the already-cached end day doesn't refetch.
-    await notifier.selectDay(end);
+    // Switching back to the already-cached day doesn't refetch.
+    await notifier.selectDay(start);
     expect(noteRepo.getNoteCallCount, callsBeforeSwitch + 1);
+  });
+
+  test('selectDay ignores a future day — locked per #118', () async {
+    final today = DateTime.now();
+    final start = DateTime(
+      today.year,
+      today.month,
+      today.day,
+    ).subtract(const Duration(days: 1));
+    final end = DateTime(
+      today.year,
+      today.month,
+      today.day,
+    ).add(const Duration(days: 10));
+    final tripRepo = FakeTripRepository()
+      ..tripCardResult = Right(
+        buildTripCard(id: 't1', startDate: start, endDate: end),
+      );
+    final photoRepo = FakePhotoRepository();
+    final noteRepo = FakeDayNoteRepository();
+    final container = _buildContainer(
+      tripRepo: tripRepo,
+      photoRepo: photoRepo,
+      noteRepo: noteRepo,
+    );
+    addTearDown(container.dispose);
+    container.listen(journalControllerProvider('t1'), (_, _) {});
+
+    final initial = await container.read(
+      journalControllerProvider('t1').future,
+    );
+    final notifier = container.read(journalControllerProvider('t1').notifier);
+    final callsBeforeSwitch = noteRepo.getNoteCallCount;
+
+    await notifier.selectDay(end);
+
+    final state = container.read(journalControllerProvider('t1')).value!;
+    expect(state.currentDayDate, initial.currentDayDate);
+    expect(noteRepo.getNoteCallCount, callsBeforeSwitch);
   });
 
   test('applyNoteUpserted updates the cached note for that day', () async {

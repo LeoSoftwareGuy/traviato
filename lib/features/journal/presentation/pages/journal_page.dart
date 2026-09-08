@@ -133,6 +133,7 @@ class _JournalContent extends ConsumerWidget {
             days: state.dayDates,
             selectedDay: currentDay,
             onSelect: notifier.selectDay,
+            isDayLocked: state.isDayLocked,
           ),
           const SizedBox(height: AppSpacing.base),
           DayTabs(
@@ -140,6 +141,7 @@ class _JournalContent extends ConsumerWidget {
             selectedDay: currentDay,
             thumbnailForDay: state.thumbnailForDay,
             onSelect: notifier.selectDay,
+            isDayLocked: state.isDayLocked,
           ),
           const SizedBox(height: AppSpacing.base),
           Text(

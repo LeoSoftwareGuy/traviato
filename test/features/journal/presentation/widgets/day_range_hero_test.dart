@@ -2,11 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/journal/presentation/widgets/day_range_hero.dart';
 
+DateTime get _today {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month, now.day);
+}
+
+bool _isFuture(DateTime day) => day.isAfter(_today);
+
 void main() {
+  final today = _today;
+
   Future<void> pump(
     WidgetTester tester, {
     required List<DateTime> days,
     required DateTime selectedDay,
+    ValueChanged<DateTime>? onSelect,
   }) {
     return tester.pumpWidget(
       MaterialApp(
@@ -14,7 +24,8 @@ void main() {
           body: DayRangeHero(
             days: days,
             selectedDay: selectedDay,
-            onSelect: (_) {},
+            onSelect: onSelect ?? (_) {},
+            isDayLocked: _isFuture,
           ),
         ),
       ),
@@ -22,10 +33,8 @@ void main() {
   }
 
   testWidgets(
-    'renders every day tile at full opacity with no lock icon, '
-    'for past, today and future days alike',
+    'dims and shows a lock icon only for future days, not past or today',
     (tester) async {
-      final today = DateTime.now();
       final days = [
         today.subtract(const Duration(days: 2)), // past
         today, // today (selected)
@@ -34,15 +43,15 @@ void main() {
 
       await pump(tester, days: days, selectedDay: today);
 
-      // No leftover "locked" affordance anywhere, regardless of date.
-      expect(find.byIcon(Icons.lock_outline), findsNothing);
+      // Exactly one future day is locked.
+      expect(find.byIcon(Icons.lock_outline), findsOneWidget);
 
-      // Every tile — including the two unselected, one past and one
-      // future — renders at full opacity (no date-driven dimming).
       final opacityWidgets = tester.widgetList<AnimatedOpacity>(
         find.byType(AnimatedOpacity),
       );
-      expect(opacityWidgets, isEmpty);
+      final opacities = opacityWidgets.map((w) => w.opacity).toList();
+      expect(opacities, containsAll(<double>[1, 0.5]));
+      expect(opacities.where((o) => o == 0.5), hasLength(1));
     },
   );
 
@@ -50,7 +59,6 @@ void main() {
     'renders all-past days (a finished, wrapped-up memory) at full '
     'opacity with no lock icon',
     (tester) async {
-      final today = DateTime.now();
       final days = List.generate(
         4,
         (i) => today.subtract(Duration(days: 10 - i)),
@@ -59,14 +67,16 @@ void main() {
       await pump(tester, days: days, selectedDay: days.first);
 
       expect(find.byIcon(Icons.lock_outline), findsNothing);
-      expect(find.byType(AnimatedOpacity), findsNothing);
+      final opacityWidgets = tester.widgetList<AnimatedOpacity>(
+        find.byType(AnimatedOpacity),
+      );
+      expect(opacityWidgets.map((w) => w.opacity), everyElement(1.0));
     },
   );
 
   testWidgets('only the selected tile gets the active border styling', (
     tester,
   ) async {
-    final today = DateTime.now();
     final selected = today;
     final unselected = today.subtract(const Duration(days: 1));
 
@@ -89,5 +99,43 @@ void main() {
     // other keeps the plain, non-active border — a selection distinction,
     // not a date-based one.
     expect(borderWidths, containsAll(<double>[1, 2]));
+  });
+
+  testWidgets('tapping a future day does not invoke onSelect', (
+    tester,
+  ) async {
+    final future = today.add(const Duration(days: 3));
+    var tapped = false;
+
+    await pump(
+      tester,
+      days: [today, future],
+      selectedDay: today,
+      onSelect: (_) => tapped = true,
+    );
+
+    await tester.tap(find.byIcon(Icons.lock_outline));
+    await tester.pump();
+
+    expect(tapped, isFalse);
+  });
+
+  testWidgets('tapping today invokes onSelect', (tester) async {
+    final past = today.subtract(const Duration(days: 1));
+    DateTime? selectedTapped;
+
+    await pump(
+      tester,
+      days: [past, today],
+      selectedDay: past,
+      onSelect: (day) => selectedTapped = day,
+    );
+
+    await tester.tap(
+      find.byKey(Key('journal-day-hero-${today.toIso8601String()}')),
+    );
+    await tester.pump();
+
+    expect(selectedTapped, today);
   });
 }

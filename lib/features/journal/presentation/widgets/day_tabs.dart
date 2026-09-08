@@ -12,12 +12,15 @@ final _dayLabelFormat = DateFormat('MMM d');
 /// Horizontally scrollable day pills — a small thumbnail is shown only for
 /// a day that already has a photo. Simplified from Figma's two-row
 /// hero-thumbnail treatment to the app's existing pill/tab visual language.
+/// A future day (`day_date` > today) is muted with a lock icon and not
+/// tappable; past days and today stay fully open (#118).
 class DayTabs extends StatelessWidget {
   const DayTabs({
     required this.days,
     required this.selectedDay,
     required this.thumbnailForDay,
     required this.onSelect,
+    required this.isDayLocked,
     super.key,
   });
 
@@ -25,6 +28,7 @@ class DayTabs extends StatelessWidget {
   final DateTime selectedDay;
   final PhotoEntity? Function(DateTime day) thumbnailForDay;
   final ValueChanged<DateTime> onSelect;
+  final bool Function(DateTime day) isDayLocked;
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +41,14 @@ class DayTabs extends StatelessWidget {
         itemBuilder: (context, index) {
           final day = days[index];
           final isSelected = _isSameDate(day, selectedDay);
+          final isLocked = isDayLocked(day);
           return _DayTab(
             key: Key('journal-day-tab-${day.toIso8601String()}'),
             day: day,
             isSelected: isSelected,
+            isLocked: isLocked,
             thumbnail: thumbnailForDay(day),
-            onTap: () => onSelect(day),
+            onTap: isLocked ? null : () => onSelect(day),
           );
         },
       ),
@@ -55,55 +61,67 @@ class _DayTab extends StatelessWidget {
     super.key,
     required this.day,
     required this.isSelected,
+    required this.isLocked,
     required this.thumbnail,
     required this.onTap,
   });
 
   final DateTime day;
   final bool isSelected;
+  final bool isLocked;
   final PhotoEntity? thumbnail;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: AppRadius.pillRadius,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryTint : AppColors.surface,
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.surfaceBorder,
+    return Opacity(
+      opacity: isLocked ? 0.5 : 1,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: AppRadius.pillRadius,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
           ),
-          borderRadius: AppRadius.pillRadius,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (thumbnail?.imageUrl != null) ...[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: Image.network(
-                  thumbnail!.imageUrl!,
-                  width: 18,
-                  height: 18,
-                  fit: BoxFit.cover,
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primaryTint : AppColors.surface,
+            border: Border.all(
+              color: isSelected ? AppColors.primary : AppColors.surfaceBorder,
+            ),
+            borderRadius: AppRadius.pillRadius,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isLocked) ...[
+                const Icon(
+                  Icons.lock_outline,
+                  size: 12,
+                  color: AppColors.textMuted,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+              ] else if (thumbnail?.imageUrl != null) ...[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: Image.network(
+                    thumbnail!.imageUrl!,
+                    width: 18,
+                    height: 18,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+              ],
+              Text(
+                _dayLabelFormat.format(day),
+                style: AppTypography.chipLabel.copyWith(
+                  color: isSelected ? AppColors.primary : AppColors.textMuted,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 ),
               ),
-              const SizedBox(width: AppSpacing.xs),
             ],
-            Text(
-              _dayLabelFormat.format(day),
-              style: AppTypography.chipLabel.copyWith(
-                color: isSelected ? AppColors.primary : AppColors.textMuted,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

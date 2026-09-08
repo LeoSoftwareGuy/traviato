@@ -64,7 +64,7 @@ class JournalController extends _$JournalController {
 
   Future<void> selectDay(DateTime day) async {
     final current = state.value;
-    if (current == null) return;
+    if (current == null || current.isDayLocked(day)) return;
     state = AsyncData(current.copyWith(currentDayDate: () => day));
 
     if (current.notesByDay.containsKey(day)) return;
