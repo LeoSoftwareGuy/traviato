@@ -22,6 +22,7 @@ class UpcomingHeroCard extends ConsumerWidget {
     required this.onChecklistTap,
     required this.onJournalTap,
     required this.onAddExpenseTap,
+    required this.onLongPress,
     super.key,
   });
 
@@ -30,92 +31,103 @@ class UpcomingHeroCard extends ConsumerWidget {
   final VoidCallback onChecklistTap;
   final VoidCallback onJournalTap;
   final VoidCallback onAddExpenseTap;
+  // Opens the Manage-memory sheet (issue #115) — the card has no tap
+  // navigation of its own, only a long-press one, so this doesn't compete
+  // with the action buttons' or checklist row's own taps in the gesture
+  // arena.
+  final VoidCallback onLongPress;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final progress = ref.watch(checklistProgressForTripProvider(trip.id)).value;
 
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: AppRadius.mediaRadius,
-        border: Border.all(color: AppColors.tint(AppColors.primary, .28)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.tint(Colors.black, .45),
-            blurRadius: 46,
-            offset: const Offset(0, 20),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            height: 206,
-            width: double.infinity,
-            child: PhotoScrim(
-              warm: true,
-              image: TripCoverImage(imagePath: trip.coverImagePath),
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.base),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _TopBadgeRow(trip: trip),
-                    const Spacer(),
-                    Text(
-                      trip.name,
-                      style: AppTypography.screenTitle.copyWith(
-                        fontSize: 26,
-                        height: 1.12,
-                        color: AppColors.textOnPhoto,
+    return GestureDetector(
+      onLongPress: () {
+        Feedback.forLongPress(context);
+        onLongPress();
+      },
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: AppRadius.mediaRadius,
+          border: Border.all(color: AppColors.tint(AppColors.primary, .28)),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.tint(Colors.black, .45),
+              blurRadius: 46,
+              offset: const Offset(0, 20),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 206,
+              width: double.infinity,
+              child: PhotoScrim(
+                warm: true,
+                image: TripCoverImage(imagePath: trip.coverImagePath),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.base),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _TopBadgeRow(trip: trip),
+                      const Spacer(),
+                      Text(
+                        trip.name,
+                        style: AppTypography.screenTitle.copyWith(
+                          fontSize: 26,
+                          height: 1.12,
+                          color: AppColors.textOnPhoto,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    _SubtitleRow(trip: trip),
-                  ],
+                      const SizedBox(height: AppSpacing.xs),
+                      _SubtitleRow(trip: trip),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.base),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: _ActionButton(label: 'Plan', onTap: onPlanTap),
-                    ),
-                    const SizedBox(width: 7),
-                    Expanded(
-                      child: _ActionButton(
-                        label: 'Expenses',
-                        onTap: onAddExpenseTap,
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.base),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _ActionButton(label: 'Plan', onTap: onPlanTap),
                       ),
-                    ),
-                    const SizedBox(width: 7),
-                    Expanded(
-                      child: _ActionButton(
-                        label: 'Journal',
-                        onTap: onJournalTap,
-                        primary: true,
+                      const SizedBox(width: 7),
+                      Expanded(
+                        child: _ActionButton(
+                          label: 'Expenses',
+                          onTap: onAddExpenseTap,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                _ChecklistRow(
-                  packed: progress?.packed ?? 0,
-                  total: progress?.total ?? 0,
-                  onTap: onChecklistTap,
-                ),
-              ],
+                      const SizedBox(width: 7),
+                      Expanded(
+                        child: _ActionButton(
+                          label: 'Journal',
+                          onTap: onJournalTap,
+                          primary: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  _ChecklistRow(
+                    packed: progress?.packed ?? 0,
+                    total: progress?.total ?? 0,
+                    onTap: onChecklistTap,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
