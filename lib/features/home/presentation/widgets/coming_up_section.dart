@@ -20,11 +20,14 @@ class ComingUpSection extends StatelessWidget {
   const ComingUpSection({
     required this.trips,
     required this.onTripTap,
+    required this.onTripLongPress,
     super.key,
   });
 
   final List<TripCardEntity> trips;
   final ValueChanged<TripCardEntity> onTripTap;
+  // Opens the Manage-memory sheet for that trip (issue #115).
+  final ValueChanged<TripCardEntity> onTripLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +51,7 @@ class ComingUpSection extends StatelessWidget {
               return _UpcomingListCard(
                 trip: trip,
                 onTap: () => onTripTap(trip),
+                onLongPress: () => onTripLongPress(trip),
               );
             },
           ),
@@ -58,10 +62,15 @@ class ComingUpSection extends StatelessWidget {
 }
 
 class _UpcomingListCard extends ConsumerWidget {
-  const _UpcomingListCard({required this.trip, required this.onTap});
+  const _UpcomingListCard({
+    required this.trip,
+    required this.onTap,
+    required this.onLongPress,
+  });
 
   final TripCardEntity trip;
   final VoidCallback onTap;
+  final VoidCallback onLongPress;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -69,6 +78,7 @@ class _UpcomingListCard extends ConsumerWidget {
 
     return InkWell(
       onTap: onTap,
+      onLongPress: onLongPress,
       borderRadius: AppRadius.mediaRadius,
       child: Container(
         width: 150,

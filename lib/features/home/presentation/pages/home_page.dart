@@ -13,7 +13,9 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../bonus/presentation/providers/bonus_badge_provider.dart';
 import '../../../expense/presentation/providers/expense_providers.dart';
 import '../../../expense/presentation/widgets/add_expense_sheet.dart';
+import '../../../quest/presentation/widgets/manage_memory_sheet.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
+import '../../../trip/presentation/widgets/delete_memory_sheet.dart';
 import '../../domain/entities/profile_stats_entity.dart';
 import '../controllers/home_controller.dart';
 import '../controllers/home_state.dart';
@@ -95,6 +97,18 @@ class _HomeContent extends ConsumerWidget {
         RouteNames.tripJournal,
         pathParameters: {'tripId': trip.id},
       );
+
+  // Long-press on a current/upcoming card (issue #115) — same sheet Plan's
+  // ⋯/Edit button opens. HomeController already updates live off the
+  // rename/date-shift/cover-change/delete mutations' event dispatches, so
+  // there's nothing to do here after the sheet closes.
+  Future<void> _openManageSheet(BuildContext context, TripCardEntity trip) =>
+      ManageMemorySheet.show(context, tripId: trip.id);
+
+  // Long-press on a Kept-forever card (issue #115) — delete-only, since a
+  // finished trip's name/dates/cover aren't editable from Home.
+  Future<void> _openDeleteSheet(BuildContext context, TripCardEntity trip) =>
+      DeleteMemorySheet.show(context, tripId: trip.id, tripName: trip.name);
 
   Future<void> _addExpense(
     BuildContext context,
@@ -186,6 +200,7 @@ class _HomeContent extends ConsumerWidget {
                 pathParameters: {'tripId': hero.id},
               ),
               onAddExpenseTap: () => _addExpense(context, ref, hero),
+              onLongPress: () => _openManageSheet(context, hero),
             ),
           ],
           if (state.upcomingTrips.isNotEmpty) ...[
@@ -193,12 +208,14 @@ class _HomeContent extends ConsumerWidget {
             ComingUpSection(
               trips: state.upcomingTrips,
               onTripTap: (trip) => _openPlan(context, trip),
+              onTripLongPress: (trip) => _openManageSheet(context, trip),
             ),
           ],
           const SizedBox(height: AppSpacing.xl),
           MemoriesGridSection(
             trips: state.finishedTrips,
             onTripTap: (trip) => _openMemory(context, trip),
+            onTripLongPress: (trip) => _openDeleteSheet(context, trip),
           ),
         ],
       ],

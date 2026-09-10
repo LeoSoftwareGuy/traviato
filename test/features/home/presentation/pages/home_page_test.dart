@@ -16,6 +16,8 @@ import 'package:traviato/features/home/presentation/pages/home_page.dart';
 import 'package:traviato/features/home/presentation/providers/profile_stats_provider.dart';
 import 'package:traviato/features/home/presentation/widgets/home_stats_bar.dart';
 import 'package:traviato/features/home/presentation/widgets/upcoming_hero_card.dart';
+import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/trip/domain/entities/trip_card_entity.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
@@ -23,6 +25,8 @@ import 'package:traviato/features/trip/presentation/providers/trip_providers.dar
 import '../../../auth/fakes/fake_auth_repository.dart';
 import '../../../checklist/fakes/fake_checklist_repository.dart';
 import '../../../expense/fakes/fake_expense_repository.dart';
+import '../../../journal/fakes/fake_day_note_repository.dart';
+import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
 import '../../fakes/fake_profile_stats_repository.dart';
@@ -46,6 +50,10 @@ Future<void> _pump(
         profileStatsRepositoryProvider.overrideWithValue(
           FakeProfileStatsRepository(),
         ),
+        // The Manage/Delete sheets (issue #115's long-press entry point)
+        // fetch photo/note counts for the delete-confirmation copy.
+        photoRepositoryProvider.overrideWithValue(FakePhotoRepository()),
+        dayNoteRepositoryProvider.overrideWithValue(FakeDayNoteRepository()),
       ],
       child: MaterialApp(theme: AppTheme.dark, home: const HomePage()),
     ),
@@ -552,5 +560,102 @@ void main() {
 
     final scaffold = tester.widget<Scaffold>(find.byType(Scaffold).first);
     expect(scaffold.backgroundColor, AppColors.background);
+  });
+
+  group('long-press to manage/delete (#115)', () {
+    testWidgets(
+      'long-press on the Happening-now hero card opens the full Manage '
+      'sheet',
+      (tester) async {
+        final trip = buildTripCard(
+          id: 't1',
+          name: 'Mountain cabin retreat',
+          startDate: DateTime.now().add(const Duration(days: 5)),
+          status: TripStatus.upcoming,
+        );
+        final tripRepo = FakeTripRepository()..tripsResult = Right([trip]);
+        await _pump(tester, tripRepo: tripRepo);
+        await tester.pumpAndSettle();
+
+        await tester.longPress(find.text('Mountain cabin retreat'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Edit this memory'), findsOneWidget);
+      },
+    );
+
+    testWidgets('long-press on a Coming-up card opens the full Manage sheet', (
+      tester,
+    ) async {
+      final hero = buildTripCard(
+        id: 't1',
+        name: 'Mountain cabin retreat',
+        startDate: DateTime.now().add(const Duration(days: 1)),
+        status: TripStatus.upcoming,
+      );
+      final comingUp = buildTripCard(
+        id: 't2',
+        name: 'Lisbon winter',
+        startDate: DateTime.now().add(const Duration(days: 20)),
+        status: TripStatus.upcoming,
+      );
+      final tripRepo = FakeTripRepository()
+        ..tripsResult = Right([hero, comingUp]);
+      await _pump(tester, tripRepo: tripRepo);
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Lisbon winter'));
+      await tester.pumpAndSettle();
+      await tester.longPress(find.text('Lisbon winter'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edit this memory'), findsOneWidget);
+    });
+
+    testWidgets(
+      'long-press on a Kept-forever card opens the delete-only sheet, not '
+      'the full Manage sheet',
+      (tester) async {
+        final finished = buildTripCard(
+          id: 't1',
+          name: 'Atlas high road',
+          startDate: DateTime(2025, 1, 1),
+          endDate: DateTime(2025, 1, 9),
+          status: TripStatus.finished,
+        );
+        final tripRepo = FakeTripRepository()..tripsResult = Right([finished]);
+        await _pump(tester, tripRepo: tripRepo);
+        await tester.pumpAndSettle();
+
+        await tester.longPress(find.text('Atlas high road'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Delete this memory'), findsWidgets); // title+button
+        expect(find.text('Edit this memory'), findsNothing);
+        expect(find.text('Rename'), findsNothing);
+      },
+    );
+
+    testWidgets('a scroll gesture over the hero card does not open a sheet', (
+      tester,
+    ) async {
+      final trip = buildTripCard(
+        id: 't1',
+        name: 'Mountain cabin retreat',
+        startDate: DateTime.now().add(const Duration(days: 5)),
+        status: TripStatus.upcoming,
+      );
+      final tripRepo = FakeTripRepository()..tripsResult = Right([trip]);
+      await _pump(tester, tripRepo: tripRepo);
+      await tester.pumpAndSettle();
+
+      await tester.drag(
+        find.text('Mountain cabin retreat'),
+        const Offset(0, -200),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edit this memory'), findsNothing);
+    });
   });
 }

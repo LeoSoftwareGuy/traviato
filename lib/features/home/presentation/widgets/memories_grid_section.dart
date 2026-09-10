@@ -17,11 +17,14 @@ class MemoriesGridSection extends StatelessWidget {
   const MemoriesGridSection({
     required this.trips,
     required this.onTripTap,
+    required this.onTripLongPress,
     super.key,
   });
 
   final List<TripCardEntity> trips;
   final ValueChanged<TripCardEntity> onTripTap;
+  // Opens the delete-only sheet for that trip (issue #115).
+  final ValueChanged<TripCardEntity> onTripLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +49,11 @@ class MemoriesGridSection extends StatelessWidget {
             runSpacing: AppSpacing.md,
             children: [
               for (final trip in trips)
-                _MemoryGridCard(trip: trip, onTap: () => onTripTap(trip)),
+                _MemoryGridCard(
+                  trip: trip,
+                  onTap: () => onTripTap(trip),
+                  onLongPress: () => onTripLongPress(trip),
+                ),
             ],
           ),
       ],
@@ -55,15 +62,21 @@ class MemoriesGridSection extends StatelessWidget {
 }
 
 class _MemoryGridCard extends StatelessWidget {
-  const _MemoryGridCard({required this.trip, required this.onTap});
+  const _MemoryGridCard({
+    required this.trip,
+    required this.onTap,
+    required this.onLongPress,
+  });
 
   final TripCardEntity trip;
   final VoidCallback onTap;
+  final VoidCallback onLongPress;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      onLongPress: onLongPress,
       borderRadius: AppRadius.mediaRadius,
       child: Container(
         width: 161.5,
