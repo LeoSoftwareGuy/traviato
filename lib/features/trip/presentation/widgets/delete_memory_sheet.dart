@@ -121,7 +121,7 @@ class _DeleteMemorySheetState extends ConsumerState<DeleteMemorySheet> {
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Done'),
+                child: const Text('Cancel'),
               ),
             ],
           ),

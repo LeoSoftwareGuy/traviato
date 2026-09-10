@@ -111,11 +111,11 @@ void main() {
     expect(find.text('Delete this memory'), findsNothing);
   });
 
-  testWidgets('Done closes the sheet without deleting', (tester) async {
+  testWidgets('Cancel closes the sheet without deleting', (tester) async {
     final tripRepo = FakeTripRepository();
     await _pump(tester, tripRepo: tripRepo);
 
-    await tester.tap(find.text('Done'));
+    await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
 
     expect(tripRepo.deleteTripCallCount, 0);
