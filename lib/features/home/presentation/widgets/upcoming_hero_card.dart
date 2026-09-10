@@ -6,7 +6,6 @@ import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/dashed_rrect_border.dart';
 import '../../../../core/widgets/photo_scrim.dart';
 import '../../../checklist/presentation/providers/checklist_providers.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
@@ -88,16 +87,11 @@ class UpcomingHeroCard extends ConsumerWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: _ActionButton(
-                        icon: Icons.map_outlined,
-                        label: 'Plan',
-                        onTap: onPlanTap,
-                      ),
+                      child: _ActionButton(label: 'Plan', onTap: onPlanTap),
                     ),
                     const SizedBox(width: 7),
                     Expanded(
                       child: _ActionButton(
-                        icon: Icons.receipt_long_outlined,
                         label: 'Expenses',
                         onTap: onAddExpenseTap,
                       ),
@@ -105,7 +99,6 @@ class UpcomingHeroCard extends ConsumerWidget {
                     const SizedBox(width: 7),
                     Expanded(
                       child: _ActionButton(
-                        icon: Icons.menu_book_outlined,
                         label: 'Journal',
                         onTap: onJournalTap,
                         primary: true,
@@ -198,13 +191,11 @@ class _SubtitleRow extends StatelessWidget {
 
 class _ActionButton extends StatelessWidget {
   const _ActionButton({
-    required this.icon,
     required this.label,
     required this.onTap,
     this.primary = false,
   });
 
-  final IconData icon;
   final String label;
   final VoidCallback onTap;
   final bool primary;
@@ -221,19 +212,14 @@ class _ActionButton extends StatelessWidget {
           color: primary ? AppColors.primary : AppColors.surfaceDisabled,
           borderRadius: AppRadius.badgeRadius,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: fg, size: 18),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              label,
-              style: AppTypography.caption.copyWith(
-                color: fg,
-                letterSpacing: 0,
-              ),
+        child: Center(
+          child: Text(
+            label,
+            style: AppTypography.caption.copyWith(
+              color: fg,
+              letterSpacing: 0,
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -259,62 +245,58 @@ class _ChecklistRow extends StatelessWidget {
       borderRadius: AppRadius.badgeRadius,
       splashColor: AppColors.tint(AppColors.primary, .18),
       highlightColor: AppColors.tint(AppColors.primary, .1),
-      child: DashedRRectBorder(
-        color: AppColors.tint(AppColors.textSecondary, .24),
+      child: ClipRRect(
         borderRadius: AppRadius.badgeRadius,
-        child: ClipRRect(
-          borderRadius: AppRadius.badgeRadius,
-          child: Stack(
-            children: [
-              // Unfilled remainder — the button's current resting fill.
-              Positioned.fill(
-                child: ColoredBox(
-                  color: AppColors.tint(AppColors.surfaceBorder, .4),
-                ),
+        child: Stack(
+          children: [
+            // Unfilled remainder — the button's current resting fill.
+            Positioned.fill(
+              child: ColoredBox(
+                color: AppColors.tint(AppColors.surfaceBorder, .4),
               ),
-              // Packed portion — same gradient as the Checklist screen's
-              // progress bar (#111).
-              Positioned.fill(
-                child: FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: fraction,
-                  child: const DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: AppGradients.primaryCta,
-                    ),
+            ),
+            // Packed portion — same gradient as the Checklist screen's
+            // progress bar (#111).
+            Positioned.fill(
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: fraction,
+                child: const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: AppGradients.primaryCta,
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.base,
-                  vertical: AppSpacing.md,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Checklist',
-                      style: AppTypography.bodyEmphasis.copyWith(
-                        color: AppColors.textOnPhoto,
-                      ),
-                    ),
-                    Text(
-                      '$packed of $total packed →',
-                      // White rather than the accent color (#111) — the
-                      // gradient fill can sit under either end of this text
-                      // depending on progress, and white stays legible
-                      // against both the fill and the resting background.
-                      style: AppTypography.chipLabel.copyWith(
-                        color: AppColors.textOnPhoto,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.base,
+                vertical: AppSpacing.md,
               ),
-            ],
-          ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Checklist',
+                    style: AppTypography.bodyEmphasis.copyWith(
+                      color: AppColors.textOnPhoto,
+                    ),
+                  ),
+                  Text(
+                    '$packed of $total packed →',
+                    // White rather than the accent color (#111) — the
+                    // gradient fill can sit under either end of this text
+                    // depending on progress, and white stays legible
+                    // against both the fill and the resting background.
+                    style: AppTypography.chipLabel.copyWith(
+                      color: AppColors.textOnPhoto,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
