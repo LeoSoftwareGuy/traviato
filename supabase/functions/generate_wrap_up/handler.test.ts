@@ -1,7 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { handleRequest, type Deps } from "./handler.ts";
+import { type Deps, handleRequest } from "./handler.ts";
 import { fakeAuthClient, fakeSupabaseClient } from "./test_fakes.ts";
-import { validScreenplay } from "./test_fixtures.ts";
+import { validAiFields, validWrapUpContent } from "./test_fixtures.ts";
 
 const TRIP_ID = "trip-1";
 const OWNER_ID = "user-1";
@@ -19,21 +19,31 @@ function request(body: unknown, authHeader: string | null = "Bearer token") {
 function baseDeps(overrides: Partial<Deps> = {}): Deps {
   return {
     serviceClient: fakeSupabaseClient({
-      trips: [{ id: TRIP_ID, user_id: OWNER_ID }],
+      trips: [{
+        id: TRIP_ID,
+        user_id: OWNER_ID,
+        name: "Untitled Trip",
+        cover_image_path: null,
+        vibes: [],
+      }],
       wrap_ups: [],
-      quests: [],
       day_notes: [],
       photos: [],
+      bonus_task_assignments: [],
+      points_ledger: [],
       user_achievements: [],
     }),
     authClient: fakeAuthClient({ id: OWNER_ID }),
-    generateScreenplay: () => Promise.resolve(validScreenplay),
+    generateAiFields: () => Promise.resolve(validAiFields),
     ...overrides,
   };
 }
 
 Deno.test("handleRequest returns 401 without an Authorization header", async () => {
-  const res = await handleRequest(request({ trip_id: TRIP_ID }, null), baseDeps());
+  const res = await handleRequest(
+    request({ trip_id: TRIP_ID }, null),
+    baseDeps(),
+  );
   assertEquals(res.status, 401);
 });
 
@@ -70,7 +80,10 @@ Deno.test("handleRequest returns 500 (not 404) when the trip lookup errors", asy
   const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
   const json = await res.json();
   assertEquals(res.status, 500);
-  assertEquals(json.error, "trip lookup failed: permission denied for table trips");
+  assertEquals(
+    json.error,
+    "trip lookup failed: permission denied for table trips",
+  );
 });
 
 Deno.test("handleRequest returns 500 when the existing wrap_ups lookup errors", async () => {
@@ -88,7 +101,7 @@ Deno.test("handleRequest returns 500 when gathering trip data fails", async () =
   const deps = baseDeps({
     serviceClient: fakeSupabaseClient(
       { trips: [{ id: TRIP_ID, user_id: OWNER_ID }], wrap_ups: [] },
-      { quests: { message: "permission denied for table quests" } },
+      { photos: { message: "permission denied for table photos" } },
     ),
   });
   const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
@@ -101,16 +114,19 @@ Deno.test("handleRequest returns 403 when the caller doesn't own the trip", asyn
   assertEquals(res.status, 403);
 });
 
-Deno.test("handleRequest short-circuits on existing content without calling generateScreenplay", async () => {
+Deno.test("handleRequest short-circuits on existing content without calling generateAiFields", async () => {
   let generateCalled = false;
   const deps = baseDeps({
     serviceClient: fakeSupabaseClient({
       trips: [{ id: TRIP_ID, user_id: OWNER_ID }],
-      wrap_ups: [{ content: validScreenplay, generated_at: "2026-06-06T00:00:00Z" }],
+      wrap_ups: [{
+        content: validWrapUpContent,
+        generated_at: "2026-06-06T00:00:00Z",
+      }],
     }),
-    generateScreenplay: () => {
+    generateAiFields: () => {
       generateCalled = true;
-      return Promise.resolve(validScreenplay);
+      return Promise.resolve(validAiFields);
     },
   });
 
@@ -118,21 +134,28 @@ Deno.test("handleRequest short-circuits on existing content without calling gene
   const json = await res.json();
 
   assertEquals(res.status, 200);
-  assertEquals(json.content, validScreenplay);
+  assertEquals(json.content, validWrapUpContent);
   assertEquals(generateCalled, false);
 });
 
-Deno.test("handleRequest generates, saves and returns a new screenplay", async () => {
+Deno.test("handleRequest generates, assembles, saves and returns new content", async () => {
   const res = await handleRequest(request({ trip_id: TRIP_ID }), baseDeps());
   const json = await res.json();
 
   assertEquals(res.status, 200);
-  assertEquals(json.content, validScreenplay);
+  assertEquals(json.content.invitation.line2, validAiFields.invitation_line2);
+  assertEquals(json.content.bridges, validAiFields.bridges);
+  assertEquals(
+    json.content.keepsake.closing_quote,
+    validAiFields.keepsake_closing_quote,
+  );
+  assertEquals(json.content.moments, []); // no photos in this fixture's trip
+  assertEquals(json.content.footnote.photo_count, 0);
 });
 
 Deno.test("handleRequest returns 502 when generation fails", async () => {
   const deps = baseDeps({
-    generateScreenplay: () => Promise.reject(new Error("model refused")),
+    generateAiFields: () => Promise.reject(new Error("model refused")),
   });
   const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
   assertEquals(res.status, 502);

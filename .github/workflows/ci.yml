@@ -54,7 +54,7 @@ jobs:
 
       - name: Type-check
         working-directory: supabase/functions/generate_wrap_up
-        run: deno check index.ts handler.ts gather.ts anthropic.ts screenplay.ts
+        run: deno check index.ts handler.ts gather.ts anthropic.ts content.ts ai_fields.ts assemble.ts
 
       - name: Run tests
         working-directory: supabase/functions/generate_wrap_up

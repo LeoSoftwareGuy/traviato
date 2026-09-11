@@ -5,7 +5,8 @@
 // any Anthropic call).
 
 import { gatherTripData, type TripData } from "./gather.ts";
-import type { Screenplay } from "./screenplay.ts";
+import { assembleWrapUpContent } from "./assemble.ts";
+import type { AiGeneratedFields } from "./ai_fields.ts";
 
 // deno-lint-ignore no-explicit-any
 type SupabaseClient = any;
@@ -13,7 +14,7 @@ type SupabaseClient = any;
 export interface Deps {
   serviceClient: SupabaseClient;
   authClient: (authHeader: string) => SupabaseClient;
-  generateScreenplay: (tripData: TripData) => Promise<Screenplay>;
+  generateAiFields: (tripData: TripData) => Promise<AiGeneratedFields>;
 }
 
 function json(body: unknown, status: number): Response {
@@ -23,7 +24,10 @@ function json(body: unknown, status: number): Response {
   });
 }
 
-export async function handleRequest(req: Request, deps: Deps): Promise<Response> {
+export async function handleRequest(
+  req: Request,
+  deps: Deps,
+): Promise<Response> {
   if (req.method !== "POST") {
     return json({ error: "method not allowed" }, 405);
   }
@@ -39,7 +43,8 @@ export async function handleRequest(req: Request, deps: Deps): Promise<Response>
     return json({ error: "trip_id is required" }, 400);
   }
 
-  const { data: userData, error: userError } = await deps.authClient(authHeader).auth.getUser();
+  const { data: userData, error: userError } = await deps.authClient(authHeader)
+    .auth.getUser();
   if (userError || !userData?.user) {
     return json({ error: "invalid session" }, 401);
   }
@@ -65,33 +70,48 @@ export async function handleRequest(req: Request, deps: Deps): Promise<Response>
     .eq("trip_id", tripId)
     .maybeSingle();
   if (existingError) {
-    return json({ error: `wrap-up lookup failed: ${existingError.message}` }, 500);
+    return json(
+      { error: `wrap-up lookup failed: ${existingError.message}` },
+      500,
+    );
   }
   if (existing?.content) {
-    return json({ content: existing.content, generated_at: existing.generated_at }, 200);
+    return json({
+      content: existing.content,
+      generated_at: existing.generated_at,
+    }, 200);
   }
 
   let tripData: TripData;
   try {
     tripData = await gatherTripData(deps.serviceClient, tripId);
   } catch (err) {
-    return json({ error: `failed to gather trip data: ${(err as Error).message}` }, 500);
+    return json({
+      error: `failed to gather trip data: ${(err as Error).message}`,
+    }, 500);
   }
 
-  let screenplay: Screenplay;
+  let aiFields: AiGeneratedFields;
   try {
-    screenplay = await deps.generateScreenplay(tripData);
+    aiFields = await deps.generateAiFields(tripData);
   } catch (err) {
-    return json({ error: `wrap-up generation failed: ${(err as Error).message}` }, 502);
+    return json({
+      error: `wrap-up generation failed: ${(err as Error).message}`,
+    }, 502);
   }
+
+  const content = assembleWrapUpContent(tripData, aiFields);
 
   const generatedAt = new Date().toISOString();
   const { error: upsertError } = await deps.serviceClient
     .from("wrap_ups")
-    .upsert({ trip_id: tripId, content: screenplay, generated_at: generatedAt });
+    .upsert({ trip_id: tripId, content, generated_at: generatedAt });
   if (upsertError) {
-    return json({ error: `failed to save wrap-up: ${upsertError.message}` }, 500);
+    return json(
+      { error: `failed to save wrap-up: ${upsertError.message}` },
+      500,
+    );
   }
 
-  return json({ content: screenplay, generated_at: generatedAt }, 200);
+  return json({ content, generated_at: generatedAt }, 200);
 }

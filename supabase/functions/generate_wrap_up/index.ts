@@ -22,6 +22,6 @@ Deno.serve((req) => {
   return handleRequest(req, {
     serviceClient,
     authClient,
-    generateScreenplay: (tripData) => callAnthropic(tripData, anthropicApiKey),
+    generateAiFields: (tripData) => callAnthropic(tripData, anthropicApiKey),
   });
 });
