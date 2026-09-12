@@ -25,6 +25,9 @@ export function fakeSupabaseClient(
         gte() {
           return builder;
         },
+        not() {
+          return builder;
+        },
         order() {
           return builder;
         },
