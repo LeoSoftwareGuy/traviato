@@ -2,64 +2,83 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/wrap_up/data/models/wrap_up_model.dart';
 
 Map<String, dynamic> _validContent() => {
-  'hero': {
-    'title': 'Dolomites, slowly',
-    'subtitle': 'Five days of thin air.',
-    'cover_photo_id': 'p1',
+  'dates': {
+    'start_date': '2026-06-01',
+    'end_date': '2026-06-05',
+    'formatted': '1–5 June 2026',
   },
-  'route_chapter': {
-    'intro': 'You started in Venice and let the trams carry you.',
-    'stops': [
-      {
-        'place_text': 'Venice',
-        'day_date': '2026-06-01',
-        'lat': 45.4,
-        'lng': 12.3,
-      },
-      {
-        'place_text': 'Cortina',
-        'day_date': '2026-06-03',
-        'lat': 46.5,
-        'lng': 12.1,
-      },
-    ],
-    'stats': {'total_km': 312, 'stop_count': 2},
-  },
-  'photo_beats': [
-    {'photo_id': 'p1', 'day_date': '2026-06-01', 'narrative': 'Golden hour.'},
+  'cover_photo': {'image_path': 'asset:hero'},
+  'invitation': {'line1': 'Five days.', 'line2': 'One long road.'},
+  'bridges': ['The first stretch.', 'The middle of it.', 'The last light.'],
+  'moments': [
+    {
+      'photo_id': 'p1',
+      'storage_path': 'u/t/p1.jpg',
+      'day_date': '2026-06-01',
+      'note': 'Golden hour',
+      'badge': 'Dare · Snap anything at all · ✦1',
+    },
+    {
+      'photo_id': 'p2',
+      'storage_path': 'u/t/p2.jpg',
+      'day_date': '2026-06-02',
+      'note': null,
+      'badge': null,
+    },
   ],
-  'stat_chapter': {
-    'stats': [
-      {'label': 'Days', 'value': '5'},
+  'flurry_leftovers': {
+    'photos': [
+      {
+        'photo_id': 'p3',
+        'storage_path': 'u/t/p3.jpg',
+        'day_date': '2026-06-03',
+      },
     ],
+    'total_remaining_label': null,
   },
-  'achievement_moment': {
+  'footnote': {'photo_count': 10, 'bonus_completed_count': 2, 'stars': 14},
+  'unlock': {
     'code': 'first_adventure',
-    'title': 'First Adventure',
-    'description': 'Logged your first trip.',
+    'name': 'First Adventure',
+    'reason': 'You logged every single day of this one.',
   },
-  'close': {'line': "This one you'll keep."},
+  'keepsake': {
+    'title_line1': 'Lisbon',
+    'title_line2': 'Getaway',
+    'closing_quote': "This one's yours to keep.",
+  },
 };
 
 void main() {
   group('WrapUpModel.fromRow', () {
-    test('parses every block from a well-formed row', () {
+    test('parses every field from a well-formed row', () {
       final model = WrapUpModel.fromRow({
         'content': _validContent(),
         'generated_at': '2026-06-06T00:00:00Z',
         'published_at': null,
       });
 
-      expect(model.hero?.title, 'Dolomites, slowly');
-      expect(model.hero?.coverPhotoId, 'p1');
-      expect(model.routeChapter?.stops.length, 2);
-      expect(model.routeChapter?.stops.first.placeText, 'Venice');
-      expect(model.routeChapter?.totalKm, 312.0);
-      expect(model.routeChapter?.stopCount, 2);
-      expect(model.photoBeats.single.narrative, 'Golden hour.');
-      expect(model.statChapter?.stats.single.label, 'Days');
-      expect(model.achievementMoment?.code, 'first_adventure');
-      expect(model.close?.line, "This one you'll keep.");
+      expect(model.dates.formatted, '1–5 June 2026');
+      expect(model.dates.startDate, DateTime.parse('2026-06-01'));
+      expect(model.coverPhoto.imagePath, 'asset:hero');
+      expect(model.invitation.line1, 'Five days.');
+      expect(model.invitation.line2, 'One long road.');
+      expect(model.bridges, [
+        'The first stretch.',
+        'The middle of it.',
+        'The last light.',
+      ]);
+      expect(model.moments, hasLength(2));
+      expect(model.moments.first.photoId, 'p1');
+      expect(model.moments.first.badge, 'Dare · Snap anything at all · ✦1');
+      expect(model.moments.last.note, isNull);
+      expect(model.flurryLeftovers.photos.single.photoId, 'p3');
+      expect(model.footnote.photoCount, 10);
+      expect(model.footnote.bonusCompletedCount, 2);
+      expect(model.footnote.stars, 14);
+      expect(model.unlock?.code, 'first_adventure');
+      expect(model.keepsake.titleLine1, 'Lisbon');
+      expect(model.keepsake.titleLine2, 'Getaway');
       expect(model.generatedAt, DateTime.parse('2026-06-06T00:00:00Z'));
       expect(model.publishedAt, isNull);
     });
@@ -75,44 +94,46 @@ void main() {
       expect(model.isPublished, isTrue);
     });
 
-    test('a missing content column degrades to every block null/empty', () {
-      final model = WrapUpModel.fromRow({
-        'content': null,
-        'generated_at': '2026-06-06T00:00:00Z',
-        'published_at': null,
-      });
-
-      expect(model.hero, isNull);
-      expect(model.routeChapter, isNull);
-      expect(model.photoBeats, isEmpty);
-      expect(model.statChapter, isNull);
-      expect(model.achievementMoment, isNull);
-      expect(model.close, isNull);
-    });
-
     test(
-      'a malformed hero (wrong type) degrades to null, other blocks unaffected',
+      'a missing content column degrades every field to a neutral default',
       () {
-        final content = _validContent();
-        content['hero'] = {'title': 42}; // title must be a String
-
         final model = WrapUpModel.fromRow({
-          'content': content,
+          'content': null,
           'generated_at': '2026-06-06T00:00:00Z',
           'published_at': null,
         });
 
-        expect(model.hero, isNull);
-        expect(model.close?.line, "This one you'll keep."); // rest still parses
+        expect(model.dates.formatted, '');
+        expect(model.coverPhoto.imagePath, isNull);
+        expect(model.invitation.line1, '');
+        expect(model.bridges, ['', '', '']);
+        expect(model.moments, isEmpty);
+        expect(model.flurryLeftovers.photos, isEmpty);
+        expect(model.footnote.photoCount, 0);
+        expect(model.unlock, isNull);
+        expect(model.keepsake.titleLine1, '');
       },
     );
 
-    test('a malformed photo_beats entry is skipped, valid ones kept', () {
+    test('a malformed dates block degrades to an empty formatted string', () {
       final content = _validContent();
-      content['photo_beats'] = [
-        {'photo_id': 'p1', 'narrative': 'Kept.'},
-        {'photo_id': 'p2'}, // missing narrative -> skipped
-        {'narrative': 'No id.'}, // missing photo_id -> skipped
+      content['dates'] = {'start_date': 42}; // wrong type
+
+      final model = WrapUpModel.fromRow({
+        'content': content,
+        'generated_at': '2026-06-06T00:00:00Z',
+        'published_at': null,
+      });
+
+      expect(model.dates.formatted, '');
+      expect(model.keepsake.titleLine1, 'Lisbon'); // rest still parses
+    });
+
+    test('a malformed moments entry is skipped, valid ones kept', () {
+      final content = _validContent();
+      content['moments'] = [
+        {'photo_id': 'p1', 'note': 'Kept.'},
+        {'note': 'No id.'}, // missing photo_id -> skipped
       ];
 
       final model = WrapUpModel.fromRow({
@@ -121,47 +142,15 @@ void main() {
         'published_at': null,
       });
 
-      expect(model.photoBeats.length, 1);
-      expect(model.photoBeats.single.photoId, 'p1');
-    });
-
-    test('an empty stat_chapter.stats degrades the whole block to null', () {
-      final content = _validContent();
-      content['stat_chapter'] = {'stats': <Map<String, dynamic>>[]};
-
-      final model = WrapUpModel.fromRow({
-        'content': content,
-        'generated_at': '2026-06-06T00:00:00Z',
-        'published_at': null,
-      });
-
-      expect(model.statChapter, isNull);
-    });
-
-    test('a route stop missing day_date is dropped from the stops list', () {
-      final content = _validContent();
-      content['route_chapter']['stops'] = [
-        {'place_text': 'Venice', 'lat': 45.4, 'lng': 12.3},
-      ];
-
-      final model = WrapUpModel.fromRow({
-        'content': content,
-        'generated_at': '2026-06-06T00:00:00Z',
-        'published_at': null,
-      });
-
-      expect(model.routeChapter?.stops, isEmpty);
+      expect(model.moments, hasLength(1));
+      expect(model.moments.single.photoId, 'p1');
     });
 
     test(
-      'no location data at all still parses a route chapter with zero stops',
+      'bridges shorter than 3 are padded with empty strings, never dropped',
       () {
         final content = _validContent();
-        content['route_chapter'] = {
-          'intro': 'You never left the lake.',
-          'stops': <Map<String, dynamic>>[],
-          'stats': {'total_km': null, 'stop_count': 0},
-        };
+        content['bridges'] = ['Only one.'];
 
         final model = WrapUpModel.fromRow({
           'content': content,
@@ -169,10 +158,39 @@ void main() {
           'published_at': null,
         });
 
-        expect(model.routeChapter?.stops, isEmpty);
-        expect(model.routeChapter?.stopCount, 0);
-        expect(model.routeChapter?.totalKm, isNull);
+        expect(model.bridges, ['Only one.', '', '']);
       },
     );
+
+    test('a malformed unlock block degrades to null', () {
+      final content = _validContent();
+      content['unlock'] = {'code': 'first_adventure'}; // missing name/reason
+
+      final model = WrapUpModel.fromRow({
+        'content': content,
+        'generated_at': '2026-06-06T00:00:00Z',
+        'published_at': null,
+      });
+
+      expect(model.unlock, isNull);
+    });
+
+    test('zero photos and zero leftovers still parse without error', () {
+      final content = _validContent();
+      content['moments'] = <Map<String, dynamic>>[];
+      content['flurry_leftovers'] = {
+        'photos': <Map<String, dynamic>>[],
+        'total_remaining_label': null,
+      };
+
+      final model = WrapUpModel.fromRow({
+        'content': content,
+        'generated_at': '2026-06-06T00:00:00Z',
+        'published_at': null,
+      });
+
+      expect(model.moments, isEmpty);
+      expect(model.flurryLeftovers.photos, isEmpty);
+    });
   });
 }
