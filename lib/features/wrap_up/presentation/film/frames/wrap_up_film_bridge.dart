@@ -10,26 +10,38 @@ import '../wrap_up_film_tokens.dart';
 class WrapUpFilmBridge extends StatelessWidget {
   const WrapUpFilmBridge({
     required this.t,
+    required this.scenes,
     required this.index,
     required this.line,
     super.key,
   });
 
   final double t;
+  final WrapUpFilmScenes scenes;
   final int index;
   final String line;
 
-  static const _starts = [
-    WrapUpFilmScenes.bridge1Start,
-    WrapUpFilmScenes.bridge2Start,
-    WrapUpFilmScenes.bridge3Start,
+  static const _durs = [
+    WrapUpFilmScenes.bridge1Dur,
+    WrapUpFilmScenes.bridge2Dur,
+    WrapUpFilmScenes.bridge3Dur,
   ];
 
   @override
   Widget build(BuildContext context) {
-    final a = _starts[index];
+    final starts = [
+      scenes.bridge1Start,
+      scenes.bridge2Start,
+      scenes.bridge3Start,
+    ];
+    final a = starts[index];
+    final dur = _durs[index];
     final solid = index == 1;
-    final grp = band(t, a + 0.2, 1.1, a + 2.3, 1.0);
+    // Fade-out tracks this bridge's own duration (ending 1.0s before its
+    // slot closes) rather than a fixed offset from `a` — otherwise
+    // lengthening the schedule slot alone just adds dead air after the text
+    // has already faded, not more time to read it.
+    final grp = band(t, a + 0.2, 1.1, a + dur - 1.0, 1.0);
     if (grp <= 0.004) return const SizedBox.shrink();
 
     final plateOpacity = (grp * (solid ? 1.0 : 0.88)).clamp(0.0, 1.0);

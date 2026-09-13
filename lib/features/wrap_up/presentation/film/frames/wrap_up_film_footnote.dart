@@ -11,16 +11,18 @@ import '../wrap_up_film_tokens.dart';
 class WrapUpFilmFootnote extends StatelessWidget {
   const WrapUpFilmFootnote({
     required this.t,
+    required this.scenes,
     required this.footnote,
     super.key,
   });
 
   final double t;
+  final WrapUpFilmScenes scenes;
   final WrapUpFootnote footnote;
 
   @override
   Widget build(BuildContext context) {
-    const a = WrapUpFilmScenes.footnoteStart;
+    final a = scenes.footnoteStart;
     final grp = band(t, a + 0.3, 1.2, a + 3.0, 1.0);
     if (grp <= 0.004) return const SizedBox.shrink();
 

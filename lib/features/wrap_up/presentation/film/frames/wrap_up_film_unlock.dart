@@ -9,9 +9,15 @@ import '../wrap_up_film_tokens.dart';
 /// § Unlock). `null` skips the whole frame — the player's call, per the #126
 /// plan comment.
 class WrapUpFilmUnlock extends StatelessWidget {
-  const WrapUpFilmUnlock({required this.t, required this.unlock, super.key});
+  const WrapUpFilmUnlock({
+    required this.t,
+    required this.scenes,
+    required this.unlock,
+    super.key,
+  });
 
   final double t;
+  final WrapUpFilmScenes scenes;
   final WrapUpUnlock? unlock;
 
   @override
@@ -19,7 +25,7 @@ class WrapUpFilmUnlock extends StatelessWidget {
     final unlock = this.unlock;
     if (unlock == null) return const SizedBox.shrink();
 
-    const a = WrapUpFilmScenes.unlockStart;
+    final a = scenes.unlockStart;
     final grp = band(t, a + 0.2, 1.0, a + 3.8, 0.9);
     if (grp <= 0.004) return const SizedBox.shrink();
 

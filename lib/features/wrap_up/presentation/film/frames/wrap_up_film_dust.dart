@@ -9,11 +9,13 @@ import '../wrap_up_film_tokens.dart';
 class WrapUpFilmDust extends StatelessWidget {
   const WrapUpFilmDust({
     required this.t,
+    required this.scenes,
     required this.datesFormatted,
     super.key,
   });
 
   final double t;
+  final WrapUpFilmScenes scenes;
   final String datesFormatted;
 
   static const _specks = [
@@ -77,9 +79,8 @@ class WrapUpFilmDust extends StatelessWidget {
   List<Widget> _speck(int i) {
     final (left, top, radius, phase) = _specks[i];
     final diameter = radius * 2.6;
-    final opacity =
-        (band(t, phase, 1.4, WrapUpFilmScenes.keepsakeStart - 1.4, 1.8) * 0.7)
-            .clamp(0.0, 1.0);
+    final opacity = (band(t, phase, 1.4, scenes.keepsakeStart - 1.4, 1.8) * 0.7)
+        .clamp(0.0, 1.0);
     return [
       Positioned(
         left: left,

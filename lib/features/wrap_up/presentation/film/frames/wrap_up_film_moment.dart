@@ -13,6 +13,7 @@ import 'wrap_up_film_plate.dart';
 class WrapUpFilmMoment extends StatelessWidget {
   const WrapUpFilmMoment({
     required this.t,
+    required this.scenes,
     required this.index,
     required this.moment,
     required this.imageUrl,
@@ -21,22 +22,22 @@ class WrapUpFilmMoment extends StatelessWidget {
   });
 
   final double t;
+  final WrapUpFilmScenes scenes;
   final int index;
   final WrapUpMoment moment;
   final String? imageUrl;
   final double pileFade;
 
-  double get _at => WrapUpFilmScenes.momentStarts[index];
   double get _dur => WrapUpFilmScenes.momentDurations[index];
 
   @override
   Widget build(BuildContext context) {
-    final at = _at;
+    final at = scenes.momentStarts[index];
     final inAt = at - 0.45;
     final to = at + _dur;
     final goAt = to - 0.85;
 
-    if (t < inAt || t > WrapUpFilmScenes.footnoteStart + 0.2) {
+    if (t < inAt || t > scenes.footnoteStart + 0.2) {
       return const SizedBox.shrink();
     }
 

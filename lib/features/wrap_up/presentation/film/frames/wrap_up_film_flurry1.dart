@@ -14,11 +14,13 @@ import 'wrap_up_film_small_print.dart';
 class WrapUpFilmFlurry1 extends StatelessWidget {
   const WrapUpFilmFlurry1({
     required this.t,
+    required this.scenes,
     required this.photoUrls,
     super.key,
   });
 
   final double t;
+  final WrapUpFilmScenes scenes;
   final List<String?> photoUrls;
 
   static const _cols = 3;
@@ -33,8 +35,8 @@ class WrapUpFilmFlurry1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const a = WrapUpFilmScenes.flurry1Start;
-    const next = WrapUpFilmScenes.bridge2Start;
+    final a = scenes.flurry1Start;
+    final next = scenes.bridge2Start;
     final grp = band(t, a + 0.05, 0.5, next - 1.0, 0.8);
     if (grp <= 0.004 || photoUrls.isEmpty) return const SizedBox.shrink();
 
