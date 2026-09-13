@@ -112,6 +112,7 @@ void main() {
             updatedAt: DateTime(2026),
             status: TripStatus.upcoming,
             photoCount: 0,
+            questCount: 0,
             stars: 0,
             expenseTotal: 0,
           ),

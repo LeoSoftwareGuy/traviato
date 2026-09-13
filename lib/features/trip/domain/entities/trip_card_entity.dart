@@ -20,6 +20,7 @@ class TripCardEntity extends Equatable {
     required this.status,
     this.durationDays,
     required this.photoCount,
+    required this.questCount,
     required this.stars,
     required this.expenseTotal,
     this.wrapUpPublishedAt,
@@ -50,6 +51,7 @@ class TripCardEntity extends Equatable {
       status: status,
       durationDays: durationDays,
       photoCount: 0,
+      questCount: 0,
       stars: 0,
       expenseTotal: 0,
     );
@@ -80,6 +82,7 @@ class TripCardEntity extends Equatable {
       status: status,
       durationDays: durationDays,
       photoCount: photoCount,
+      questCount: questCount,
       stars: stars,
       expenseTotal: expenseTotal,
       wrapUpPublishedAt: wrapUpPublishedAt,
@@ -105,6 +108,7 @@ class TripCardEntity extends Equatable {
         status: status,
         durationDays: durationDays,
         photoCount: photoCount,
+        questCount: questCount,
         stars: stars,
         expenseTotal: expenseTotal,
         wrapUpPublishedAt: publishedAt,
@@ -142,6 +146,7 @@ class TripCardEntity extends Equatable {
   final TripStatus status;
   final int? durationDays;
   final int photoCount;
+  final int questCount;
   final int stars;
   final double expenseTotal;
   final DateTime? wrapUpPublishedAt;
@@ -165,6 +170,7 @@ class TripCardEntity extends Equatable {
     status,
     durationDays,
     photoCount,
+    questCount,
     stars,
     expenseTotal,
     wrapUpPublishedAt,

@@ -103,6 +103,10 @@ Table trips {
   cover_image_path varchar [note: "asset:<id> (bundled) OR trip-photos:{user_id}/{trip_id}/cover.jpg (custom upload, signed URL)"]
   created_at timestamp
   updated_at timestamp [note: 'auto-set via trigger']
+
+  indexes {
+    user_id [name: 'trips_user_id_idx']
+  }
 }
 
 Table quests {
@@ -278,8 +282,9 @@ Table trip_card_view {
   stars integer [note: 'SUM(points_ledger.points)']
   expense_total decimal(10,2) [note: 'SUM(expenses.amount)']
   wrap_up_published_at timestamp
+  quest_count integer [note: 'COUNT(quests) — appended last (#131); replaced a per-card N+1 provider']
 
-  Note: 'VIEW — derived from trips + photos + points_ledger + expenses + wrap_ups.'
+  Note: 'VIEW — derived from trips + photos + points_ledger + expenses + wrap_ups + quests.'
 }
 
 Table profile_stats_view {
