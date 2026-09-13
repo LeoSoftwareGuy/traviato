@@ -112,6 +112,13 @@ class _PlateFront extends StatelessWidget {
               : CachedNetworkImage(
                   imageUrl: imageUrl!,
                   fit: BoxFit.cover,
+                  // The film precaches every moment photo before playback
+                  // starts specifically so it's already decoded by the time
+                  // the print flips face-up — the package's default 500ms
+                  // fade-in would otherwise undo that anticipation and make
+                  // the photo appear to lag the turn.
+                  fadeInDuration: Duration.zero,
+                  fadeOutDuration: Duration.zero,
                   placeholder: (context, url) =>
                       const ColoredBox(color: Color(0xFFD9D3C4)),
                   errorWidget: (context, url, error) =>
