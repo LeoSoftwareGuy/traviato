@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/photo_scrim.dart';
-import '../../../quest/presentation/providers/quest_providers.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
 import '../../../trip/presentation/widgets/trip_cover_image.dart';
 import 'trip_card_pill.dart';
@@ -61,7 +59,7 @@ class ComingUpSection extends StatelessWidget {
   }
 }
 
-class _UpcomingListCard extends ConsumerWidget {
+class _UpcomingListCard extends StatelessWidget {
   const _UpcomingListCard({
     required this.trip,
     required this.onTap,
@@ -73,8 +71,8 @@ class _UpcomingListCard extends ConsumerWidget {
   final VoidCallback onLongPress;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final questCount = ref.watch(questCountForTripProvider(trip.id)).value;
+  Widget build(BuildContext context) {
+    final questCount = trip.questCount;
 
     return InkWell(
       onTap: onTap,
@@ -138,15 +136,13 @@ class _UpcomingListCard extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              questCount == null
-                                  ? ''
-                                  : questCount > 0
+                              questCount > 0
                                   ? '$questCount quests planned'
                                   : 'Nothing planned yet',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTypography.chipLabel.copyWith(
-                                color: (questCount ?? 0) > 0
+                                color: questCount > 0
                                     ? AppColors.primary
                                     : AppColors.textOnPhotoMuted,
                                 fontWeight: FontWeight.w600,

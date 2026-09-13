@@ -20,6 +20,7 @@ void main() {
         'status': 'current',
         'duration_days': 5,
         'photo_count': 3,
+        'quest_count': 6,
         'stars': 7,
         'expense_total': 120.5,
       });
@@ -29,6 +30,7 @@ void main() {
       expect(model.startDate, DateTime.parse('2026-08-18'));
       expect(model.vibes, ['Adventure', 'Chill']);
       expect(model.durationDays, 5);
+      expect(model.questCount, 6);
       expect(model.expenseTotal, 120.5);
     });
 
@@ -48,6 +50,7 @@ void main() {
         'status': 'undated',
         'duration_days': null,
         'photo_count': 0,
+        'quest_count': 0,
         'stars': 0,
         'expense_total': 0,
       });

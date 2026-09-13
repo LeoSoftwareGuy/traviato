@@ -25,6 +25,7 @@ class _FakeTripRemoteDataSource implements TripRemoteDataSource {
       updatedAt: DateTime(2026, 1, 1),
       status: TripStatus.upcoming,
       photoCount: 0,
+      questCount: 0,
       stars: 0,
       expenseTotal: 0,
     ),
