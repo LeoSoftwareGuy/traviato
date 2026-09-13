@@ -46,6 +46,10 @@ abstract class AppColors {
 
   // Modal barrier scrim — #07091A @ 72%.
   static const Color scrim = Color(0xB807091A);
+  // Wrap-Up Film's own background (docs/design/wrap-film-spec.md `bg`) —
+  // deliberately distinct from `background`; it's the opaque form of
+  // `scrim`'s base color, used pervasively across the film's chrome.
+  static const Color filmBackground = Color(0xFF07091A);
 
   /// Tints an accent [color] to the given [opacity] (0–1) for icon-chip
   /// fills, card washes and borders — the 10–18% alpha fills used throughout

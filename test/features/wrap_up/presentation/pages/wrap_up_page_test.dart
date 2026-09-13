@@ -3,25 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/core/events/global_event.dart';
 import 'package:traviato/core/events/global_event_bus.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
-import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
-import 'package:traviato/features/wrap_up/domain/entities/wrap_up_route_chapter.dart';
-import 'package:traviato/features/wrap_up/domain/entities/wrap_up_route_stop.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_cover_photo.dart';
+import 'package:traviato/features/wrap_up/presentation/film/wrap_up_film_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/pages/wrap_up_page.dart';
 import 'package:traviato/features/wrap_up/presentation/providers/wrap_up_providers.dart';
 
 import '../../../photo/fakes/fake_photo_repository.dart';
-import '../../../trip/fakes/fake_trip_repository.dart';
 import '../../fakes/fake_wrap_up_repository.dart';
 
 Future<void> _pump(
   WidgetTester tester, {
   required FakeWrapUpRepository wrapUpRepo,
-  FakeTripRepository? tripRepo,
   FakePhotoRepository? photoRepo,
   GlobalEventBus? eventBus,
 }) async {
@@ -34,10 +32,12 @@ Future<void> _pump(
       ),
       GoRoute(
         path: '/home',
+        name: RouteNames.home,
         builder: (context, state) => const Scaffold(body: Text('Home')),
       ),
       GoRoute(
         path: '/memory/:tripId/journal',
+        name: RouteNames.tripJournal,
         builder: (context, state) => const Scaffold(body: Text('Journal')),
       ),
     ],
@@ -49,11 +49,6 @@ Future<void> _pump(
       retry: (_, _) => null,
       overrides: [
         wrapUpRepositoryProvider.overrideWithValue(wrapUpRepo),
-        tripRepositoryProvider.overrideWithValue(
-          tripRepo ??
-              (FakeTripRepository()
-                ..tripCardResult = Right(buildTripCard(id: 't1'))),
-        ),
         photoRepositoryProvider.overrideWithValue(
           photoRepo ?? (FakePhotoRepository()..photosResult = const Right([])),
         ),
@@ -65,30 +60,19 @@ Future<void> _pump(
   );
 }
 
-/// The hero/photo-beat blocks run an infinite `kenburns` ticker, so
-/// `pumpAndSettle` (which waits for *no* scheduled frames) hangs forever once
-/// they're in the tree. Pump a bounded number of frames instead — enough to
-/// flush the fakes' async chain without waiting on an animation that never
-/// stops.
-Future<void> _settle(WidgetTester tester) async {
-  for (var i = 0; i < 6; i++) {
-    await tester.pump();
+/// The HUD (close/Open journal/Keep forever) renders as soon as the wrap-up
+/// data loads — independent of the film canvas's own asset-prep future —
+/// so a bounded pump loop is enough for it. Never `pumpAndSettle`: once the
+/// canvas mounts it runs an infinite looping `AnimationController`, which
+/// `pumpAndSettle` (waits for *no* scheduled frames) would hang on forever.
+Future<void> _settle(WidgetTester tester, {int iterations = 10}) async {
+  for (var i = 0; i < iterations; i++) {
+    await tester.pump(const Duration(milliseconds: 50));
   }
 }
 
-/// Content past the ~640px hero is below the default test viewport and
-/// isn't laid out (so plain `find.text` treats it as offstage) until
-/// scrolled into view — same pattern as journal_page_test.dart.
-Future<void> _scrollToVisible(WidgetTester tester, Finder finder) {
-  return tester.dragUntilVisible(
-    finder,
-    find.byType(Scrollable),
-    const Offset(0, -400),
-  );
-}
-
 void main() {
-  testWidgets('shows the generating view while loading, then the content', (
+  testWidgets('shows the generating view while loading, then the HUD', (
     tester,
   ) async {
     final wrapUpRepo = FakeWrapUpRepository()
@@ -100,53 +84,34 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 500));
     await _settle(tester);
-    expect(find.text('Dolomites, slowly'), findsOneWidget);
-  });
-
-  testWidgets('renders only the blocks present, skipping the rest', (
-    tester,
-  ) async {
-    final wrapUpRepo = FakeWrapUpRepository()
-      ..getOrGenerateResult = Right(buildWrapUpEntity());
-    await _pump(tester, wrapUpRepo: wrapUpRepo);
-    await _settle(tester);
-
-    expect(find.text('Dolomites, slowly'), findsOneWidget);
-    expect(find.textContaining('CHAPTER ONE'), findsNothing);
-    expect(find.textContaining('CHAPTER THREE'), findsNothing);
-
-    final closeLine = find.text("This one you'll keep.");
-    await _scrollToVisible(tester, closeLine);
-    expect(closeLine, findsOneWidget);
+    expect(find.text('Keep forever'), findsOneWidget);
   });
 
   testWidgets(
-    'a single-stop route chapter (a trip that never left one place) '
-    'renders without error',
+    'the film canvas receives the loaded wrap-up content once assets prep',
     (tester) async {
+      // No cover path and no photo urls means asset prep has nothing to
+      // precache but the grain tile, so it resolves within a normal
+      // fake-async pump loop.
       final wrapUpRepo = FakeWrapUpRepository()
         ..getOrGenerateResult = Right(
-          buildWrapUpEntity(
-            routeChapter: WrapUpRouteChapter(
-              intro: 'You never left the lake.',
-              stops: [
-                WrapUpRouteStop(
-                  placeText: 'Loch Ness',
-                  dayDate: DateTime(2026, 6, 1),
-                ),
-              ],
-              stopCount: 1,
-            ),
-          ),
+          buildWrapUpEntity(coverPhoto: const WrapUpCoverPhoto()),
         );
       await _pump(tester, wrapUpRepo: wrapUpRepo);
       await _settle(tester);
+      // `WrapUpFilmGrain.generate()`'s `decodeImageFromPixels` callback is a
+      // real engine completion that fake-async `pump()` never drives on its
+      // own (same category as real network/asset IO) — let real time pass
+      // once to flush it, then pump to apply the resulting rebuild.
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)),
+      );
+      await _settle(tester);
 
-      final placeLabel = find.textContaining('LOCH NESS');
-      await _scrollToVisible(tester, placeLabel);
-
-      expect(tester.takeException(), isNull);
-      expect(placeLabel, findsOneWidget);
+      final canvas = tester.widget<WrapUpFilmCanvas>(
+        find.byType(WrapUpFilmCanvas),
+      );
+      expect(canvas.wrapUp.invitation.line1, 'Five days.');
     },
   );
 
@@ -158,7 +123,6 @@ void main() {
     await _settle(tester);
 
     final keepForever = find.text('Keep forever');
-    await _scrollToVisible(tester, keepForever);
     expect(keepForever, findsOneWidget);
 
     await tester.tap(keepForever);
@@ -181,9 +145,7 @@ void main() {
       await _pump(tester, wrapUpRepo: wrapUpRepo, eventBus: bus);
       await _settle(tester);
 
-      final keepForever = find.text('Keep forever');
-      await _scrollToVisible(tester, keepForever);
-      await tester.tap(keepForever);
+      await tester.tap(find.text('Keep forever'));
       await _settle(tester);
 
       expect(events, hasLength(1));
@@ -191,6 +153,19 @@ void main() {
       expect(event.tripId, 't1');
     },
   );
+
+  testWidgets('tapping Open journal navigates to the trip journal', (
+    tester,
+  ) async {
+    final wrapUpRepo = FakeWrapUpRepository();
+    await _pump(tester, wrapUpRepo: wrapUpRepo);
+    await _settle(tester);
+
+    await tester.tap(find.text('Open journal'));
+    await _settle(tester);
+
+    expect(find.text('Journal'), findsOneWidget);
+  });
 
   testWidgets('shows a retry scaffold on failure', (tester) async {
     final wrapUpRepo = FakeWrapUpRepository()

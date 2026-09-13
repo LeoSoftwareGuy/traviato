@@ -1,25 +1,30 @@
-import '../../domain/entities/wrap_up_achievement_moment.dart';
-import '../../domain/entities/wrap_up_close.dart';
+import '../../domain/entities/wrap_up_cover_photo.dart';
+import '../../domain/entities/wrap_up_dates.dart';
 import '../../domain/entities/wrap_up_entity.dart';
-import '../../domain/entities/wrap_up_hero.dart';
-import '../../domain/entities/wrap_up_photo_beat.dart';
-import '../../domain/entities/wrap_up_route_chapter.dart';
-import '../../domain/entities/wrap_up_route_stop.dart';
-import '../../domain/entities/wrap_up_stat_card.dart';
-import '../../domain/entities/wrap_up_stat_chapter.dart';
+import '../../domain/entities/wrap_up_flurry_leftovers.dart';
+import '../../domain/entities/wrap_up_footnote.dart';
+import '../../domain/entities/wrap_up_invitation.dart';
+import '../../domain/entities/wrap_up_keepsake.dart';
+import '../../domain/entities/wrap_up_moment.dart';
+import '../../domain/entities/wrap_up_photo_ref.dart';
+import '../../domain/entities/wrap_up_unlock.dart';
 
 /// Hand-parsed rather than `@JsonSerializable`-generated: `content` is
-/// arbitrary AI-generated JSONB (#93's screenplay schema), and every block
-/// must degrade to `null`/an empty list on a shape mismatch instead of
-/// throwing (issue #94 AC) — logic the generator doesn't express well.
+/// function-generated JSONB (#125's data contract), and every field must
+/// degrade to a neutral default on a shape mismatch instead of throwing, so
+/// the film can still play (possibly with a gap) instead of crashing (#126
+/// AC).
 class WrapUpModel extends WrapUpEntity {
   const WrapUpModel({
-    super.hero,
-    super.routeChapter,
-    super.photoBeats,
-    super.statChapter,
-    super.achievementMoment,
-    super.close,
+    required super.dates,
+    required super.coverPhoto,
+    required super.invitation,
+    super.bridges,
+    super.moments,
+    super.flurryLeftovers,
+    required super.footnote,
+    super.unlock,
+    required super.keepsake,
     required super.generatedAt,
     super.publishedAt,
   });
@@ -33,132 +38,148 @@ class WrapUpModel extends WrapUpEntity {
         : const <String, dynamic>{};
 
     return WrapUpModel(
-      hero: _parseHero(contentMap['hero']),
-      routeChapter: _parseRouteChapter(contentMap['route_chapter']),
-      photoBeats: _parsePhotoBeats(contentMap['photo_beats']),
-      statChapter: _parseStatChapter(contentMap['stat_chapter']),
-      achievementMoment: _parseAchievementMoment(
-        contentMap['achievement_moment'],
-      ),
-      close: _parseClose(contentMap['close']),
+      dates: _parseDates(contentMap['dates']),
+      coverPhoto: _parseCoverPhoto(contentMap['cover_photo']),
+      invitation: _parseInvitation(contentMap['invitation']),
+      bridges: _parseBridges(contentMap['bridges']),
+      moments: _parseMoments(contentMap['moments']),
+      flurryLeftovers: _parseFlurryLeftovers(contentMap['flurry_leftovers']),
+      footnote: _parseFootnote(contentMap['footnote']),
+      unlock: _parseUnlock(contentMap['unlock']),
+      keepsake: _parseKeepsake(contentMap['keepsake']),
       generatedAt: _parseDateTime(row['generated_at']) ?? DateTime.now(),
       publishedAt: _parseDateTime(row['published_at']),
     );
   }
 }
 
-WrapUpHero? _parseHero(dynamic json) {
-  if (json is! Map) return null;
-  final title = json['title'];
-  if (title is! String) return null;
-  return WrapUpHero(
-    title: title,
-    subtitle: json['subtitle'] is String ? json['subtitle'] as String : null,
-    coverPhotoId: json['cover_photo_id'] is String
-        ? json['cover_photo_id'] as String
-        : null,
+WrapUpDates _parseDates(dynamic json) {
+  if (json is! Map) return const WrapUpDates(formatted: '');
+  return WrapUpDates(
+    startDate: _parseDate(json['start_date']),
+    endDate: _parseDate(json['end_date']),
+    formatted: json['formatted'] is String ? json['formatted'] as String : '',
   );
 }
 
-WrapUpRouteChapter? _parseRouteChapter(dynamic json) {
-  if (json is! Map) return null;
-  final intro = json['intro'];
-  if (intro is! String) return null;
+WrapUpCoverPhoto _parseCoverPhoto(dynamic json) {
+  if (json is! Map) return const WrapUpCoverPhoto();
+  final path = json['image_path'];
+  return WrapUpCoverPhoto(imagePath: path is String ? path : null);
+}
 
-  final stops = <WrapUpRouteStop>[];
-  final rawStops = json['stops'];
-  if (rawStops is List) {
-    for (final rawStop in rawStops) {
-      final stop = _parseRouteStop(rawStop);
-      if (stop != null) stops.add(stop);
-    }
-  }
-
-  final stats = json['stats'];
-  final statsMap = stats is Map
-      ? stats.cast<String, dynamic>()
-      : const <String, dynamic>{};
-  final totalKm = statsMap['total_km'];
-  final stopCount = statsMap['stop_count'];
-
-  return WrapUpRouteChapter(
-    intro: intro,
-    stops: stops,
-    totalKm: totalKm is num ? totalKm.toDouble() : null,
-    stopCount: stopCount is num ? stopCount.toInt() : stops.length,
+WrapUpInvitation _parseInvitation(dynamic json) {
+  if (json is! Map) return const WrapUpInvitation(line1: '', line2: '');
+  final line1 = json['line1'];
+  final line2 = json['line2'];
+  return WrapUpInvitation(
+    line1: line1 is String ? line1 : '',
+    line2: line2 is String ? line2 : '',
   );
 }
 
-WrapUpRouteStop? _parseRouteStop(dynamic json) {
-  if (json is! Map) return null;
-  final placeText = json['place_text'];
-  final dayDate = _parseDate(json['day_date']);
-  if (placeText is! String || dayDate == null) return null;
-  final lat = json['lat'];
-  final lng = json['lng'];
-  return WrapUpRouteStop(
-    placeText: placeText,
-    dayDate: dayDate,
-    lat: lat is num ? lat.toDouble() : null,
-    lng: lng is num ? lng.toDouble() : null,
+/// Always returns exactly 3 entries — an empty string for any slot that
+/// isn't a valid string, rather than dropping the whole block, so the
+/// Bridge scenes stay on their fixed timing regardless.
+List<String> _parseBridges(dynamic json) {
+  if (json is! List) return const ['', '', ''];
+  return List.generate(
+    3,
+    (i) => i < json.length && json[i] is String ? json[i] as String : '',
   );
 }
 
-List<WrapUpPhotoBeat> _parsePhotoBeats(dynamic json) {
+List<WrapUpMoment> _parseMoments(dynamic json) {
   if (json is! List) return const [];
-  final beats = <WrapUpPhotoBeat>[];
+  final moments = <WrapUpMoment>[];
   for (final raw in json) {
     if (raw is! Map) continue;
     final photoId = raw['photo_id'];
-    final narrative = raw['narrative'];
-    if (photoId is! String || narrative is! String) continue;
-    beats.add(
-      WrapUpPhotoBeat(
+    if (photoId is! String) continue;
+    moments.add(
+      WrapUpMoment(
         photoId: photoId,
         dayDate: _parseDate(raw['day_date']),
-        narrative: narrative,
+        note: raw['note'] is String ? raw['note'] as String : null,
+        badge: raw['badge'] is String ? raw['badge'] as String : null,
       ),
     );
   }
-  return beats;
+  return moments;
 }
 
-WrapUpStatChapter? _parseStatChapter(dynamic json) {
+WrapUpPhotoRef? _parsePhotoRef(dynamic json) {
   if (json is! Map) return null;
-  final rawStats = json['stats'];
-  if (rawStats is! List) return null;
-  final stats = <WrapUpStatCard>[];
-  for (final raw in rawStats) {
-    if (raw is! Map) continue;
-    final label = raw['label'];
-    final value = raw['value'];
-    if (label is! String || value is! String) continue;
-    stats.add(WrapUpStatCard(label: label, value: value));
-  }
-  if (stats.isEmpty) return null;
-  return WrapUpStatChapter(stats: stats);
-}
-
-WrapUpAchievementMoment? _parseAchievementMoment(dynamic json) {
-  if (json is! Map) return null;
-  final code = json['code'];
-  final title = json['title'];
-  final description = json['description'];
-  if (code is! String || title is! String || description is! String) {
-    return null;
-  }
-  return WrapUpAchievementMoment(
-    code: code,
-    title: title,
-    description: description,
+  final photoId = json['photo_id'];
+  if (photoId is! String) return null;
+  return WrapUpPhotoRef(
+    photoId: photoId,
+    dayDate: _parseDate(json['day_date']),
   );
 }
 
-WrapUpClose? _parseClose(dynamic json) {
+WrapUpFlurryLeftovers _parseFlurryLeftovers(dynamic json) {
+  if (json is! Map) return const WrapUpFlurryLeftovers();
+  final rawPhotos = json['photos'];
+  final photos = <WrapUpPhotoRef>[];
+  if (rawPhotos is List) {
+    for (final raw in rawPhotos) {
+      final ref = _parsePhotoRef(raw);
+      if (ref != null) photos.add(ref);
+    }
+  }
+  final label = json['total_remaining_label'];
+  return WrapUpFlurryLeftovers(
+    photos: photos,
+    totalRemainingLabel: label is String ? label : null,
+  );
+}
+
+WrapUpFootnote _parseFootnote(dynamic json) {
+  if (json is! Map) {
+    return const WrapUpFootnote(
+      photoCount: 0,
+      bonusCompletedCount: 0,
+      stars: 0,
+    );
+  }
+  return WrapUpFootnote(
+    photoCount: _parseInt(json['photo_count']),
+    bonusCompletedCount: _parseInt(json['bonus_completed_count']),
+    stars: _parseInt(json['stars']),
+  );
+}
+
+WrapUpUnlock? _parseUnlock(dynamic json) {
   if (json is! Map) return null;
-  final line = json['line'];
-  if (line is! String) return null;
-  return WrapUpClose(line: line);
+  final code = json['code'];
+  final name = json['name'];
+  final reason = json['reason'];
+  if (code is! String || name is! String || reason is! String) return null;
+  return WrapUpUnlock(code: code, name: name, reason: reason);
+}
+
+WrapUpKeepsake _parseKeepsake(dynamic json) {
+  if (json is! Map) {
+    return const WrapUpKeepsake(
+      titleLine1: '',
+      titleLine2: '',
+      closingQuote: '',
+    );
+  }
+  final line1 = json['title_line1'];
+  final line2 = json['title_line2'];
+  final quote = json['closing_quote'];
+  return WrapUpKeepsake(
+    titleLine1: line1 is String ? line1 : '',
+    titleLine2: line2 is String ? line2 : '',
+    closingQuote: quote is String ? quote : '',
+  );
+}
+
+int _parseInt(dynamic value) {
+  if (value is num) return value.toInt();
+  return 0;
 }
 
 DateTime? _parseDateTime(dynamic value) {

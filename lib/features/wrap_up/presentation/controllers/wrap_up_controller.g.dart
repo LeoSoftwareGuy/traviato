@@ -50,7 +50,7 @@ final class WrapUpControllerProvider
   }
 }
 
-String _$wrapUpControllerHash() => r'54d489289496a8d682f6e1601af70f9ffe88403e';
+String _$wrapUpControllerHash() => r'83a46d99427ad1a180e6c05ce8a30ab2908507f1';
 
 final class WrapUpControllerFamily extends $Family
     with
