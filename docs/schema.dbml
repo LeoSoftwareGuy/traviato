@@ -1,0 +1,324 @@
+// Trevy — full schema, dbdiagram.io / DBML format
+// Paste this whole file into dbdiagram.io (or import as .dbml).
+// Source of truth: supabase/migrations/*.sql (see docs/db-reference.md for prose).
+
+//////////////////////
+// Storage buckets (Supabase Storage — not Postgres tables, not modeled
+// below; informational only)
+//////////////////////
+// trip-photos (private) — owner-only via storage.foldername(name)[1] = auth.uid()
+//   - {user_id}/{trip_id}/{photo_id}.{ext}  -> a journal photo
+//   - {user_id}/{trip_id}/cover.jpg         -> custom-uploaded trip cover
+//                                              (fixed filename, delete+reupload
+//                                              to replace, read via signed URL)
+// avatars (private) — {user_id}/avatar.jpg, same owner-folder + replace pattern
+//////////////////////
+
+//////////////////////
+// Enums
+//////////////////////
+
+enum checklist_category {
+  travel_essentials
+  clothing_shoes
+  toiletries_health
+  gadgets_tech
+  nice_to_haves
+}
+
+enum expense_category {
+  food_drinks
+  transport
+  accommodation
+  activities
+  shopping
+  other
+}
+
+enum points_source {
+  note
+  photo
+  quest
+  bonus_task
+}
+
+enum bonus_phase {
+  arrival
+  middle
+  departure
+  anytime
+}
+
+enum bonus_kind {
+  regular
+  starter
+  stretch
+  milestone
+  streak_saver
+}
+
+enum achievement_metric {
+  trips
+  countries
+  days_logged
+  stars
+  photos
+  notes
+}
+
+//////////////////////
+// External (Supabase-managed, not our migrations)
+//////////////////////
+
+Table auth_users {
+  id uuid [pk]
+  email varchar
+
+  Note: 'Managed by Supabase Auth — not in our migrations. profiles.id references this.'
+}
+
+//////////////////////
+// Core tables
+//////////////////////
+
+Table profiles {
+  id uuid [pk]
+  username varchar
+  bio text
+  avatar_url varchar
+  created_at timestamp
+
+  Note: 'Created only via handle_new_user() trigger on auth.users insert.'
+}
+
+Table trips {
+  id uuid [pk, note: 'client-generated']
+  user_id uuid [not null]
+  name varchar [not null]
+  destination varchar
+  country_code varchar(2) [note: 'ISO-3166-1 alpha-2']
+  start_date date
+  end_date date [note: 'check: end_date >= start_date']
+  vibes "text[]" [not null, default: '{}']
+  cover_image_path varchar [note: "asset:<id> (bundled) OR trip-photos:{user_id}/{trip_id}/cover.jpg (custom upload, signed URL)"]
+  created_at timestamp
+  updated_at timestamp [note: 'auto-set via trigger']
+}
+
+Table quests {
+  id uuid [pk]
+  trip_id uuid [not null]
+  day_date date [not null]
+  time time
+  title varchar [not null]
+  place_text varchar
+  position integer [not null]
+  completed_at timestamp
+  created_at timestamp
+
+  indexes {
+    (trip_id, day_date)
+  }
+
+  Note: 'No per-quest points column — stars are flat (1) via award_points RPC.'
+}
+
+Table checklist_items {
+  id uuid [pk]
+  trip_id uuid [not null]
+  title varchar [not null]
+  category checklist_category [not null]
+  is_essential boolean [default: false]
+  is_checked boolean [default: false]
+  position integer
+}
+
+Table checklist_suggestions {
+  id bigint [pk, increment]
+  title varchar
+  category checklist_category
+  is_essential boolean
+
+  Note: 'Global catalog, seeded (35 rows). Select-only for clients.'
+}
+
+Table day_notes {
+  id uuid [pk]
+  trip_id uuid [not null]
+  day_date date [not null]
+  content text [not null]
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (trip_id, day_date) [unique]
+  }
+
+  Note: 'unique(trip_id, day_date) — one note per day.'
+}
+
+Table photos {
+  id uuid [pk, note: 'client-generated, drives storage path']
+  trip_id uuid [not null]
+  day_date date
+  storage_path varchar [not null]
+  caption text
+  lat double
+  lng double
+  place_text varchar
+  people_tags "text[]" [default: '{}']
+  taken_at timestamp
+  created_at timestamp
+
+  indexes {
+    (trip_id, day_date)
+  }
+
+  Note: 'No use_in_wrap_up column — that idea was abandoned, never built.'
+}
+
+Table expenses {
+  id uuid [pk]
+  trip_id uuid [not null]
+  title varchar [not null]
+  amount decimal(10,2) [not null, note: '> 0, EUR-only']
+  category expense_category [not null]
+  spent_on date [not null]
+  created_at timestamp
+}
+
+Table points_ledger {
+  id bigint [pk, increment]
+  user_id uuid [not null]
+  trip_id uuid [note: 'ON DELETE SET NULL']
+  source points_source [not null]
+  source_id uuid [not null]
+  points integer [not null, note: '> 0']
+  created_at timestamp
+
+  indexes {
+    (user_id, source, source_id) [unique]
+  }
+
+  Note: 'No client write grant at all — writable only via award_points() RPC.'
+}
+
+Table bonus_task_templates {
+  id bigint [pk, increment]
+  code varchar [not null, unique]
+  title varchar [not null]
+  detail text
+  points integer [not null]
+  phase bonus_phase [not null]
+  kind bonus_kind [not null]
+
+  Note: 'Global catalog, seeded (35 templates). Reshaped 2026-08-29 (dropped duration_hours, trigger).'
+}
+
+Table bonus_task_assignments {
+  id uuid [pk]
+  trip_id uuid [not null]
+  template_id bigint [not null]
+  day_date date [not null]
+  photo_id uuid [note: 'ON DELETE SET NULL']
+  completed_at timestamp
+  created_at timestamp
+
+  indexes {
+    (trip_id, template_id, day_date) [unique]
+  }
+
+  Note: 'Expiry is derived (day_date < today AND completed_at IS NULL), never stored. Reshaped 2026-08-29.'
+}
+
+Table achievement_templates {
+  id bigint [pk, increment]
+  code varchar [unique, not null]
+  title varchar
+  description text
+  metric achievement_metric [not null]
+  target integer [not null]
+  position integer
+
+  Note: 'Global catalog, seeded — all 8: first_adventure, globetrotter, century, star_collector, shutterbug, storyteller, jetsetter, legend.'
+}
+
+Table user_achievements {
+  user_id uuid [not null]
+  template_id bigint [not null]
+  earned_at timestamp
+
+  indexes {
+    (user_id, template_id) [pk]
+  }
+
+  Note: 'Written only via check_achievements() RPC.'
+}
+
+Table wrap_ups {
+  trip_id uuid [pk]
+  content jsonb
+  generated_at timestamp
+  published_at timestamp
+
+  Note: 'Clients may only write published_at. content/generated_at are edge-function/service-role only.'
+}
+
+//////////////////////
+// Views (read-only, security_invoker — not real tables, shown for completeness)
+//////////////////////
+
+Table trip_card_view {
+  id uuid [pk]
+  user_id uuid
+  name varchar
+  status varchar [note: "computed: undated/upcoming/current/finished"]
+  duration_days integer
+  photo_count integer
+  stars integer [note: 'SUM(points_ledger.points)']
+  expense_total decimal(10,2) [note: 'SUM(expenses.amount)']
+  wrap_up_published_at timestamp
+
+  Note: 'VIEW — derived from trips + photos + points_ledger + expenses + wrap_ups.'
+}
+
+Table profile_stats_view {
+  user_id uuid [pk]
+  memories_count integer
+  places_count integer [note: 'distinct place_text across quests ∪ photos']
+  countries_count integer
+  days_logged integer [note: 'distinct day_date across day_notes ∪ photos']
+  stars_total integer
+  photos_count integer
+  notes_count integer
+
+  Note: 'VIEW — derived from trips, quests, photos, day_notes, points_ledger.'
+}
+
+Table expense_summary_view {
+  trip_id uuid [pk]
+  total_amount decimal(10,2)
+  item_count integer
+
+  Note: 'VIEW — derived from expenses, grouped by trip.'
+}
+
+//////////////////////
+// Relationships
+//////////////////////
+
+Ref: profiles.id > auth_users.id
+Ref: trips.user_id > profiles.id
+Ref: quests.trip_id > trips.id
+Ref: checklist_items.trip_id > trips.id
+Ref: day_notes.trip_id > trips.id
+Ref: photos.trip_id > trips.id
+Ref: expenses.trip_id > trips.id
+Ref: points_ledger.user_id > profiles.id
+Ref: points_ledger.trip_id > trips.id
+Ref: bonus_task_assignments.trip_id > trips.id
+Ref: bonus_task_assignments.template_id > bonus_task_templates.id
+Ref: bonus_task_assignments.photo_id > photos.id
+Ref: user_achievements.user_id > profiles.id
+Ref: user_achievements.template_id > achievement_templates.id
+Ref: wrap_ups.trip_id - trips.id
