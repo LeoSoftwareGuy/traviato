@@ -48,15 +48,30 @@ class WrapUpFilmCanvas extends StatefulWidget {
 class _WrapUpFilmCanvasState extends State<WrapUpFilmCanvas>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  late final WrapUpFilmScenes _scenes;
+  late final List<String?> _flurry1Urls;
+  late final List<String?> _flurry2Urls;
 
   @override
   void initState() {
     super.initState();
+
+    final leftovers = widget.wrapUp.flurryLeftovers.photos;
+    _flurry1Urls = leftovers.take(15).map((p) => _urlFor(p.photoId)).toList();
+    _flurry2Urls = leftovers
+        .skip(15)
+        .take(15)
+        .map((p) => _urlFor(p.photoId))
+        .toList();
+
+    _scenes = WrapUpFilmScenes(
+      hasFlurry2: _flurry2Urls.isNotEmpty,
+      hasUnlock: widget.wrapUp.unlock != null,
+    );
+
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(
-        milliseconds: (WrapUpFilmScenes.total * 1000).round(),
-      ),
+      duration: Duration(milliseconds: (_scenes.total * 1000).round()),
     )..repeat();
   }
 
@@ -77,7 +92,7 @@ class _WrapUpFilmCanvasState extends State<WrapUpFilmCanvas>
           return AnimatedBuilder(
             animation: _controller,
             builder: (context, _) {
-              final t = _controller.value * WrapUpFilmScenes.total;
+              final t = _controller.value * _scenes.total;
               return FittedBox(
                 fit: BoxFit.contain,
                 child: SizedBox(
@@ -95,54 +110,62 @@ class _WrapUpFilmCanvasState extends State<WrapUpFilmCanvas>
 
   Widget _buildLayers(double t) {
     final wrapUp = widget.wrapUp;
-    final leftovers = wrapUp.flurryLeftovers.photos;
-    final flurry1Urls = leftovers
-        .take(15)
-        .map((p) => _urlFor(p.photoId))
-        .toList();
-    final flurry2Urls = leftovers
-        .skip(15)
-        .take(15)
-        .map((p) => _urlFor(p.photoId))
-        .toList();
 
     final pileFade = band(
       t,
-      WrapUpFilmScenes.bridge1Start,
+      _scenes.bridge1Start,
       0.8,
-      WrapUpFilmScenes.footnoteStart - 0.9,
+      _scenes.footnoteStart - 0.9,
       1.0,
     );
 
     return Stack(
       clipBehavior: Clip.hardEdge,
       children: [
-        WrapUpFilmCoverWash(t: t, coverImage: widget.coverImage),
-        WrapUpFilmDust(t: t, datesFormatted: wrapUp.dates.formatted),
+        WrapUpFilmCoverWash(
+          t: t,
+          scenes: _scenes,
+          coverImage: widget.coverImage,
+        ),
+        WrapUpFilmDust(
+          t: t,
+          scenes: _scenes,
+          datesFormatted: wrapUp.dates.formatted,
+        ),
         WrapUpFilmInvitation(
           t: t,
+          scenes: _scenes,
           line1: wrapUp.invitation.line1,
           line2: wrapUp.invitation.line2,
         ),
         for (var i = 0; i < wrapUp.moments.length; i++)
           WrapUpFilmMoment(
             t: t,
+            scenes: _scenes,
             index: i,
             moment: wrapUp.moments[i],
             imageUrl: _urlFor(wrapUp.moments[i].photoId),
             pileFade: pileFade,
           ),
         for (var i = 0; i < wrapUp.bridges.length && i < 3; i++)
-          WrapUpFilmBridge(t: t, index: i, line: wrapUp.bridges[i]),
-        WrapUpFilmFlurry1(t: t, photoUrls: flurry1Urls),
-        WrapUpFilmFlurry2(
-          t: t,
-          photoUrls: flurry2Urls,
-          remainingLabel: wrapUp.flurryLeftovers.totalRemainingLabel,
-        ),
-        WrapUpFilmFootnote(t: t, footnote: wrapUp.footnote),
-        WrapUpFilmUnlock(t: t, unlock: wrapUp.unlock),
-        WrapUpFilmKeepsake(t: t, keepsake: wrapUp.keepsake),
+          WrapUpFilmBridge(
+            t: t,
+            scenes: _scenes,
+            index: i,
+            line: wrapUp.bridges[i],
+          ),
+        WrapUpFilmFlurry1(t: t, scenes: _scenes, photoUrls: _flurry1Urls),
+        if (_scenes.hasFlurry2)
+          WrapUpFilmFlurry2(
+            t: t,
+            scenes: _scenes,
+            photoUrls: _flurry2Urls,
+            remainingLabel: wrapUp.flurryLeftovers.totalRemainingLabel,
+          ),
+        WrapUpFilmFootnote(t: t, scenes: _scenes, footnote: wrapUp.footnote),
+        if (_scenes.hasUnlock)
+          WrapUpFilmUnlock(t: t, scenes: _scenes, unlock: wrapUp.unlock!),
+        WrapUpFilmKeepsake(t: t, scenes: _scenes, keepsake: wrapUp.keepsake),
         const WrapUpFilmVignette(),
         WrapUpFilmGrain(t: t, image: widget.grainImage),
         WrapUpFilmLetterbox(t: t),

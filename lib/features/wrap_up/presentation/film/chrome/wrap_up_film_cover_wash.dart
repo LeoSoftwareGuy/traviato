@@ -11,11 +11,13 @@ import '../wrap_up_film_scenes.dart';
 class WrapUpFilmCoverWash extends StatelessWidget {
   const WrapUpFilmCoverWash({
     required this.t,
+    required this.scenes,
     required this.coverImage,
     super.key,
   });
 
   final double t;
+  final WrapUpFilmScenes scenes;
   final ImageProvider? coverImage;
 
   @override
@@ -25,30 +27,30 @@ class WrapUpFilmCoverWash extends StatelessWidget {
 
     final coverEarly = band(
       t,
-      WrapUpFilmScenes.invitationStart - 0.2,
+      scenes.invitationStart - 0.2,
       2.0,
-      WrapUpFilmScenes.bridge1Start - 0.3,
+      scenes.bridge1Start - 0.3,
       1.5,
     );
     final routeWash = band(
       t,
-      WrapUpFilmScenes.invitationStart + 1.4,
+      scenes.invitationStart + 1.4,
       1.3,
-      WrapUpFilmScenes.bridge1Start - 0.2,
+      scenes.bridge1Start - 0.2,
       1.1,
     );
     final roomTone = band(
       t,
-      WrapUpFilmScenes.bridge1Start - 0.4,
+      scenes.bridge1Start - 0.4,
       1.6,
-      WrapUpFilmScenes.footnoteStart - 0.6,
+      scenes.footnoteStart - 0.6,
       1.4,
     );
     final coverLate = band(
       t,
-      WrapUpFilmScenes.keepsakeStart - 0.6,
+      scenes.keepsakeStart - 0.6,
       2.3,
-      WrapUpFilmScenes.keepsakeStart + 5.3,
+      scenes.keepsakeStart + 5.3,
       1.3,
     );
 
@@ -56,13 +58,7 @@ class WrapUpFilmCoverWash extends StatelessWidget {
         .clamp(0.0, 1.0);
     final earlyScale = swell(t, 3.0, 40.0, 1.04, 1.28);
     final lateOpacity = coverLate.clamp(0.0, 1.0);
-    final lateScale = swell(
-      t,
-      WrapUpFilmScenes.keepsakeStart - 1.0,
-      9.0,
-      1.02,
-      1.16,
-    );
+    final lateScale = swell(t, scenes.keepsakeStart - 1.0, 9.0, 1.02, 1.16);
 
     return Stack(
       children: [

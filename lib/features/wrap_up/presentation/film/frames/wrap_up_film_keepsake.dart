@@ -13,16 +13,18 @@ import '../wrap_up_film_tokens.dart';
 class WrapUpFilmKeepsake extends StatelessWidget {
   const WrapUpFilmKeepsake({
     required this.t,
+    required this.scenes,
     required this.keepsake,
     super.key,
   });
 
   final double t;
+  final WrapUpFilmScenes scenes;
   final WrapUpKeepsake keepsake;
 
   @override
   Widget build(BuildContext context) {
-    const a = WrapUpFilmScenes.keepsakeStart;
+    final a = scenes.keepsakeStart;
     final titleRise1 = rise(t, a + 0.6, 1.9, lift: 46);
     final titleRise2 = rise(t, a + 1.4, 1.9, lift: 46);
     final quoteRise = rise(t, a + 2.6, 2.0, lift: 34);

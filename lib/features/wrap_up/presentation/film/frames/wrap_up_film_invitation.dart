@@ -9,18 +9,20 @@ import '../wrap_up_film_tokens.dart';
 class WrapUpFilmInvitation extends StatelessWidget {
   const WrapUpFilmInvitation({
     required this.t,
+    required this.scenes,
     required this.line1,
     required this.line2,
     super.key,
   });
 
   final double t;
+  final WrapUpFilmScenes scenes;
   final String line1;
   final String line2;
 
   @override
   Widget build(BuildContext context) {
-    const a = WrapUpFilmScenes.invitationStart;
+    final a = scenes.invitationStart;
     final rise1 = rise(t, a + 0.4, 1.8, lift: 46);
     final rise2 = rise(t, a + 1.6, 1.8, lift: 46);
     final out = fade(t, a + 3.2, 1.0, 1, 0).clamp(0.0, 1.0);
