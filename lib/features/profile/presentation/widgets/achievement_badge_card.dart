@@ -5,10 +5,12 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/achievement_entity.dart';
+import 'achievement_icons.dart';
 
 /// One achievement tile — filled/earned or dimmed/locked-with-progress
-/// (`docs/design/README.md` § 11). No per-badge icon in the data model, so
-/// every tile uses the same trophy glyph, tinted by state.
+/// (`docs/design/README.md` § 11). Icon per badge comes from
+/// [achievementIconFor] (client-side map, no data-model column), tinted by
+/// state.
 class AchievementBadgeCard extends StatelessWidget {
   const AchievementBadgeCard({required this.achievement, super.key});
 
@@ -45,7 +47,7 @@ class AchievementBadgeCard extends StatelessWidget {
               borderRadius: AppRadius.badgeRadius,
             ),
             child: Icon(
-              Icons.emoji_events_outlined,
+              achievementIconFor(achievement.code),
               size: 20,
               color: earned ? AppColors.primary : AppColors.textTertiary,
             ),

@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/router/route_constants.dart';
+import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/show_error_snackbar.dart';
 import '../mutations/wrap_up_mutations.dart';
 
 /// The film itself is an ambient, non-interactive loop (docs/design/
@@ -24,8 +26,27 @@ class WrapUpFilmHud extends ConsumerWidget {
   final String tripId;
   final bool isPublished;
 
+  Future<void> _tapKeepForever(BuildContext context, WidgetRef ref) async {
+    try {
+      await runPublishWrapUp(ref: ref, tripId: tripId);
+    } catch (_) {
+      // Surfaced to the user via the mutation's MutationError state below.
+      return;
+    }
+    if (!context.mounted) return;
+    context.goNamed(RouteNames.home);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<MutationState<void>>(publishWrapUpMutation, (previous, next) {
+      if (next is MutationError) {
+        showErrorSnackbar(
+          context,
+          message: presentationFailureMessage(next.error),
+        );
+      }
+    });
     final isPublishing = ref.watch(publishWrapUpMutation) is MutationPending;
 
     return SafeArea(
@@ -74,8 +95,7 @@ class WrapUpFilmHud extends ConsumerWidget {
                       : ElevatedButton(
                           onPressed: isPublishing
                               ? null
-                              : () =>
-                                    runPublishWrapUp(ref: ref, tripId: tripId),
+                              : () => _tapKeepForever(context, ref),
                           child: isPublishing
                               ? const SizedBox(
                                   height: 18,
