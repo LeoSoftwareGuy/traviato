@@ -70,7 +70,10 @@ abstract class AppTheme {
           foregroundColor: AppColors.background,
           disabledBackgroundColor: AppColors.surfaceDisabled,
           disabledForegroundColor: AppColors.textTertiary,
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.base),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xl,
+            vertical: AppSpacing.base,
+          ),
           shape: const RoundedRectangleBorder(
             borderRadius: AppRadius.cardRadius,
           ),
