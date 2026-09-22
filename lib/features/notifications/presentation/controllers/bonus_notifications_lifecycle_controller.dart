@@ -76,6 +76,7 @@ class BonusNotificationsLifecycleController
         );
       case StarsAwardedDispatched():
       case WrapUpPublishedDispatched():
+      case EntitlementUpdatedDispatched():
       // Not relevant to the notification schedule directly — the next
       // resume/pause evaluation re-derives everything it needs itself.
     }
