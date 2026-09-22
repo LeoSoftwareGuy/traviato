@@ -5,13 +5,12 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/bottom_sheet_chrome.dart';
-import '../../../../core/widgets/show_error_snackbar.dart';
+import '../../../../core/widgets/show_failure_snackbar.dart';
 import '../../../../core/widgets/star_award_toast.dart';
 import '../../../trip/presentation/widgets/create_memory_field.dart';
 import '../../domain/entities/photo_entity.dart';
@@ -267,10 +266,7 @@ class _AddPhotoDetailsSheetState extends ConsumerState<AddPhotoDetailsSheet> {
   Widget build(BuildContext context) {
     ref.listen<MutationState<dynamic>>(addPhotoMutation, (previous, next) {
       if (next is MutationError) {
-        showErrorSnackbar(
-          context,
-          message: presentationFailureMessage(next.error),
-        );
+        showFailureSnackbar(context, next.error);
       }
     });
     final isSaving = ref.watch(addPhotoMutation) is MutationPending;

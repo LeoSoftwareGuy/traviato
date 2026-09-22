@@ -48,7 +48,19 @@ class UnknownFailure extends Failure {
 class FreeTierLimitFailure extends Failure {
   const FreeTierLimitFailure({
     super.message =
-        "You've reached the 3-memory limit on the free plan. Upgrade to "
-        'add more.',
+        'Free plan is limited to 3 memories. Upgrade to Pro for unlimited '
+        'memories.',
+  });
+}
+
+/// Server-side counterpart is TRV02 (#139) — a free user at the 40-photo
+/// cap for one memory. Deliberately distinct from [FreeTierLimitFailure] so
+/// the UI can tell which cap was hit even though both point at the same
+/// upgrade prompt.
+class PhotoLimitFailure extends Failure {
+  const PhotoLimitFailure({
+    super.message =
+        'Free plan is limited to 40 photos per memory. Upgrade to Pro for '
+        'unlimited photos.',
   });
 }

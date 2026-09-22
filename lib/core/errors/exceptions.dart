@@ -47,6 +47,22 @@ class NotFoundException extends DatabaseException {
   const NotFoundException({required super.message});
 }
 
+/// The free-tier memory cap (TRV01) or photo-per-memory cap (TRV02) was
+/// rejected server-side (#139) — maps to [FreeTierLimitFailure]/
+/// [PhotoLimitFailure] rather than a generic [DatabaseException] so the UI
+/// can point at the paywall instead of a dead-end error. The 2,000/memory
+/// hard ceiling (TRV03) deliberately does NOT get its own exception type —
+/// it falls through to the generic [DatabaseException] mapping, since it's
+/// never framed as an upsell and the DB's own message is already the right
+/// generic copy to show as-is.
+class MemoryLimitException extends DatabaseException {
+  const MemoryLimitException({required super.message});
+}
+
+class PhotoLimitException extends DatabaseException {
+  const PhotoLimitException({required super.message});
+}
+
 class StorageServerException extends AppException {
   const StorageServerException({required super.message});
 }

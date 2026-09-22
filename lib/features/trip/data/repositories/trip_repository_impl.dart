@@ -66,6 +66,8 @@ class TripRepositoryImpl implements TripRepository {
       );
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
+    } on MemoryLimitException catch (e) {
+      return Left(FreeTierLimitFailure(message: e.message));
     } on NetworkException {
       return const Left(NetworkFailure());
     } on AppException catch (e) {

@@ -134,5 +134,33 @@ void main() {
         (_) => fail('expected Left'),
       );
     });
+
+    test(
+      'maps PhotoLimitException (server-side TRV02, #139) to '
+      'PhotoLimitFailure',
+      () async {
+        final repo = PhotoRepositoryImpl(
+          remote: _FakePhotoRemoteDataSource(
+            exception: const PhotoLimitException(
+              message: 'Free plan is limited to 40 photos per memory.',
+            ),
+          ),
+        );
+        final result = await repo.addPhoto(
+          tripId: 't1',
+          bytes: Uint8List.fromList([1, 2, 3]),
+          fileExtension: 'jpg',
+        );
+        result.fold(
+          (failure) => expect(
+            failure,
+            const PhotoLimitFailure(
+              message: 'Free plan is limited to 40 photos per memory.',
+            ),
+          ),
+          (_) => fail('expected Left'),
+        );
+      },
+    );
   });
 }

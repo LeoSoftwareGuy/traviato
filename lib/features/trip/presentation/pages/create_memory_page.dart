@@ -5,13 +5,12 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/show_error_snackbar.dart';
+import '../../../../core/widgets/show_failure_snackbar.dart';
 import '../mutations/trip_mutations.dart';
 import '../widgets/cover_options.dart';
 import '../widgets/cover_picker.dart';
@@ -93,10 +92,7 @@ class _CreateMemoryPageState extends ConsumerState<CreateMemoryPage> {
   Widget build(BuildContext context) {
     ref.listen<MutationState<dynamic>>(createMemoryMutation, (previous, next) {
       if (next is MutationError) {
-        showErrorSnackbar(
-          context,
-          message: presentationFailureMessage(next.error),
-        );
+        showFailureSnackbar(context, next.error);
       }
     });
     final isLoading = ref.watch(createMemoryMutation) is MutationPending;

@@ -249,6 +249,30 @@ void main() {
         (_) => fail('expected Left'),
       );
     });
+
+    test(
+      'maps MemoryLimitException (server-side TRV01, #139) to '
+      'FreeTierLimitFailure',
+      () async {
+        final repo = TripRepositoryImpl(
+          remote: _FakeTripRemoteDataSource(
+            exception: const MemoryLimitException(
+              message: 'Free plan is limited to 3 memories.',
+            ),
+          ),
+        );
+        final result = await repo.createTrip(name: 'Summer in Tokyo');
+        result.fold(
+          (failure) => expect(
+            failure,
+            const FreeTierLimitFailure(
+              message: 'Free plan is limited to 3 memories.',
+            ),
+          ),
+          (_) => fail('expected Left'),
+        );
+      },
+    );
   });
 
   group('TripRepositoryImpl.deleteTrip', () {

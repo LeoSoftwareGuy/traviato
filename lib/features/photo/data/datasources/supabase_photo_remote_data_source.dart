@@ -151,6 +151,12 @@ AppException _mapPostgrestException(PostgrestException e) {
   if (e.code == PostgresErrors.moreThanOneOrNoItemsReturned) {
     return NotFoundException(message: e.message);
   }
+  if (e.code == PostgresErrors.freeTierPhotoLimit) {
+    return PhotoLimitException(message: e.message);
+  }
+  // TRV03 (2,000/memory hard ceiling) deliberately falls through to the
+  // generic DatabaseException — see exceptions.dart's note on
+  // MemoryLimitException/PhotoLimitException.
   return DatabaseException(message: e.message);
 }
 
