@@ -6,32 +6,33 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../controllers/journal_state.dart';
+import 'wrap_up_explainer_card.dart';
 
 /// "To Do" (opens the day's quests) and "View wrap-up" (the gradient CTA,
 /// docs/design/README.md § 8 — re-added now that M4-2 ships a real Wrap-up
 /// screen; a #26 commit had previously removed it as a designer
 /// miscommunication, before the wrap-up feature existed to link to).
 ///
-/// The wrap-up CTA is gated by [wrapUpAvailability] (#103): hidden while
-/// the trip hasn't ended, disabled with [wrapUpLockedReason] once it's
-/// ended but under the content minimum, and the active gradient CTA once
-/// both conditions are met.
+/// The wrap-up CTA is gated by [wrapUpAvailability]: hidden while the trip
+/// hasn't ended (#103), replaced by the inert locked variant + explainer
+/// card once it's ended but under the content minimum
+/// (docs/design/M6_MONETIZATION_SPEC.md §6, #140), and the active gradient
+/// CTA once both conditions are met.
 class JournalActionButtons extends StatelessWidget {
   const JournalActionButtons({
     required this.onToDoTap,
     required this.onViewWrapUpTap,
-    required this.wrapUpAvailability,
-    this.wrapUpLockedReason,
+    required this.state,
     super.key,
   });
 
   final VoidCallback onToDoTap;
   final VoidCallback onViewWrapUpTap;
-  final WrapUpAvailability wrapUpAvailability;
-  final String? wrapUpLockedReason;
+  final JournalState state;
 
   @override
   Widget build(BuildContext context) {
+    final availability = state.wrapUpAvailability;
     return Column(
       children: [
         OutlinedButton.icon(
@@ -45,20 +46,14 @@ class JournalActionButtons extends StatelessWidget {
             side: const BorderSide(color: AppColors.surfaceBorder),
           ),
         ),
-        if (wrapUpAvailability == WrapUpAvailability.unlocked) ...[
+        if (availability == WrapUpAvailability.unlocked) ...[
           const SizedBox(height: AppSpacing.sm),
           _WrapUpCta(onTap: onViewWrapUpTap),
-        ] else if (wrapUpAvailability == WrapUpAvailability.locked) ...[
+        ] else if (availability == WrapUpAvailability.locked) ...[
           const SizedBox(height: AppSpacing.sm),
-          const _WrapUpCtaLocked(),
-          if (wrapUpLockedReason != null) ...[
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              wrapUpLockedReason!,
-              textAlign: TextAlign.center,
-              style: AppTypography.caption,
-            ),
-          ],
+          _WrapUpCtaLocked(askLine: state.wrapUpAskLine),
+          const SizedBox(height: 11),
+          WrapUpExplainerCard(state: state),
         ],
       ],
     );
@@ -100,25 +95,56 @@ class _WrapUpCta extends StatelessWidget {
 }
 
 class _WrapUpCtaLocked extends StatelessWidget {
-  const _WrapUpCtaLocked();
+  const _WrapUpCtaLocked({required this.askLine});
+
+  /// Shown as a tap-feedback toast (spec §6: "surfaces the requirement
+  /// toast") — the explainer card beneath is already always visible, so
+  /// there's nothing new to reveal; this is just acknowledgement.
+  final String? askLine;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      key: const Key('journal-view-wrap-up-locked'),
-      width: double.infinity,
-      height: 48,
-      alignment: Alignment.center,
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceDisabled,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: const Key('journal-view-wrap-up-locked'),
         borderRadius: AppRadius.badgeRadius,
-      ),
-      child: Text(
-        'View wrap-up ▸',
-        style: AppTypography.buttonLabel.copyWith(
-          color: AppColors.textTertiary,
+        onTap: askLine == null ? null : () => _showToast(context, askLine!),
+        child: Container(
+          width: double.infinity,
+          height: 48,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: AppColors.surfaceDisabled,
+            border: Border.all(color: AppColors.surfaceBorder),
+            borderRadius: AppRadius.badgeRadius,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.lock_outline,
+                size: 11,
+                color: AppColors.textTertiary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'View wrap-up',
+                style: AppTypography.buttonLabel.copyWith(
+                  fontSize: 12.5,
+                  color: AppColors.textTertiary,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  void _showToast(BuildContext context, String askLine) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(askLine)));
   }
 }

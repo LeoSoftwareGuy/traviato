@@ -17,6 +17,7 @@ void main() {
     required List<DateTime> days,
     required DateTime selectedDay,
     ValueChanged<DateTime>? onSelect,
+    bool Function(DateTime)? isDayEmpty,
   }) {
     return tester.pumpWidget(
       MaterialApp(
@@ -27,6 +28,7 @@ void main() {
             thumbnailForDay: (_) => null,
             onSelect: onSelect ?? (_) {},
             isDayLocked: _isFuture,
+            isDayEmpty: isDayEmpty,
           ),
         ),
       ),
@@ -87,4 +89,37 @@ void main() {
 
     expect(selectedTapped, past);
   });
+
+  testWidgets(
+    'shows the empty-day dot only for a day isDayEmpty reports true (#140)',
+    (tester) async {
+      final past = today.subtract(const Duration(days: 1));
+      await pump(
+        tester,
+        days: [past, today],
+        selectedDay: today,
+        isDayEmpty: (day) => day == past,
+      );
+
+      expect(find.byKey(const Key('empty-day-dot')), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'never shows the empty-day dot on a locked (future) day, even if '
+    'reported empty',
+    (tester) async {
+      final future = today.add(const Duration(days: 2));
+      await pump(
+        tester,
+        days: [today, future],
+        selectedDay: today,
+        isDayEmpty: (_) => true,
+      );
+
+      expect(find.byKey(const Key('empty-day-dot')), findsOneWidget); // today
+      // The future tab shows its lock icon instead — never the dot.
+      expect(find.byIcon(Icons.lock_outline), findsOneWidget);
+    },
+  );
 }

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../photo/domain/entities/photo_entity.dart';
+import '../../../quest/domain/entities/quest_entity.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
 import '../../domain/entities/day_note_entity.dart';
 
@@ -26,14 +27,14 @@ class JournalState extends Equatable {
     this.notesByDay = const {},
     this.photos = const [],
     this.notes = const [],
+    this.quests = const [],
   });
 
   /// Minimum content required before wrap-up generation is offered — see
-  /// [wrapUpAvailability]. Kept low: the goal is only to avoid an Anthropic
-  /// call on a genuinely empty trip, not to gate the feature behind a high
-  /// bar (#103).
-  static const wrapUpMinPhotos = 3;
-  static const wrapUpMinNoteDays = 2;
+  /// [wrapReady]/[wrapUpAvailability].
+  /// docs/design/M6_MONETIZATION_SPEC.md §3's `wrapReady` formula (#140).
+  static const wrapUpMinPhotos = 5;
+  static const wrapUpMinNotes = 1;
 
   final TripCardEntity trip;
   final DateTime? currentDayDate;
@@ -44,9 +45,15 @@ class JournalState extends Equatable {
   final List<PhotoEntity> photos;
 
   /// Every day-note across the whole trip (one row per day, per the data
-  /// model's unique constraint) — used only to gate wrap-up eligibility,
-  /// distinct from [notesByDay]'s per-day cache used for editing.
+  /// model's unique constraint) — used only to gate wrap-up eligibility and
+  /// empty-day detection, distinct from [notesByDay]'s per-day cache used
+  /// for editing.
   final List<DayNoteEntity> notes;
+
+  /// Every quest across the whole trip — fetched only for the empty-day
+  /// nudge's "N quests done" subtitle (#140); the "To Do" sheet fetches its
+  /// own day-scoped copy lazily and doesn't read this.
+  final List<QuestEntity> quests;
 
   bool get hasDateRange => trip.startDate != null && trip.endDate != null;
 
@@ -87,6 +94,18 @@ class JournalState extends Equatable {
     return forDay.isEmpty ? null : forDay.first;
   }
 
+  bool _hasNoteForDay(DateTime day) =>
+      notes.any((n) => _isSameDate(n.dayDate, day));
+
+  /// A day with zero photos AND zero notes — the empty-day nudge's trigger
+  /// (#140/M6-4b). Both lists are already loaded for the whole trip, so this
+  /// works for every day in the strip, not just the one currently open.
+  bool isDayEmpty(DateTime day) =>
+      photosForDay(day).isEmpty && !_hasNoteForDay(day);
+
+  int completedQuestCountForDay(DateTime day) =>
+      quests.where((q) => _isSameDate(q.dayDate, day) && q.isCompleted).length;
+
   /// A day is locked once the trip hasn't gotten there yet — past days and
   /// today stay open, but a future day can't be opened ahead of time (#118).
   bool isDayLocked(DateTime day) {
@@ -113,26 +132,41 @@ class JournalState extends Equatable {
     return day != null && dates.isNotEmpty && _isSameDate(day, dates.last);
   }
 
+  /// Single source of truth for content sufficiency
+  /// (docs/design/M6_MONETIZATION_SPEC.md §3, #140) — identical for free and
+  /// Pro users. Paying never bypasses this: deliberately no `isPro` check
+  /// here, unlike the M6-3 plan-limit triggers.
+  bool get wrapReady =>
+      photos.length >= wrapUpMinPhotos && notes.length >= wrapUpMinNotes;
+
   WrapUpAvailability get wrapUpAvailability {
     if (!_hasTripEnded || !_isViewingLastDay) return WrapUpAvailability.hidden;
-    final hasEnoughPhotos = photos.length >= wrapUpMinPhotos;
-    final hasEnoughNotes = notes.length >= wrapUpMinNoteDays;
-    return hasEnoughPhotos && hasEnoughNotes
-        ? WrapUpAvailability.unlocked
-        : WrapUpAvailability.locked;
+    return wrapReady ? WrapUpAvailability.unlocked : WrapUpAvailability.locked;
   }
 
-  /// Helper copy for the [WrapUpAvailability.locked] state — `null` in any
-  /// other state.
-  String? get wrapUpLockedReason {
+  bool get wrapUpPhotosMet => photos.length >= wrapUpMinPhotos;
+  bool get wrapUpNotesMet => notes.length >= wrapUpMinNotes;
+
+  /// Clamped so the checklist counter never shows a count above the
+  /// requirement (spec §6: "never show ... a count above the requirement").
+  int get wrapUpPhotosHave => photos.length.clamp(0, wrapUpMinPhotos);
+  int get wrapUpNotesHave => notes.length.clamp(0, wrapUpMinNotes);
+
+  /// The explainer card's lead-line `{ask}` (spec §6's three variants) —
+  /// `null` unless the wrap-up is actually locked.
+  String? get wrapUpAskLine {
     if (wrapUpAvailability != WrapUpAvailability.locked) return null;
     final missingPhotos = wrapUpMinPhotos - photos.length;
-    final missingNotes = wrapUpMinNoteDays - notes.length;
-    final parts = [
-      if (missingPhotos > 0) '$missingPhotos more photo${_s(missingPhotos)}',
-      if (missingNotes > 0) '$missingNotes more note${_s(missingNotes)}',
-    ];
-    return 'Add ${parts.join(' and ')} to unlock your wrap-up';
+    final missingNotes = wrapUpMinNotes - notes.length;
+    if (missingPhotos > 0 && missingNotes > 0) {
+      return 'Add $missingPhotos more photo${_s(missingPhotos)} and one '
+          'note to unlock it.';
+    }
+    if (missingPhotos > 0) {
+      return 'Add $missingPhotos more photo${_s(missingPhotos)} to unlock '
+          'it.';
+    }
+    return 'Write one note to unlock it.';
   }
 
   JournalState copyWith({
@@ -140,6 +174,7 @@ class JournalState extends Equatable {
     Map<DateTime, DayNoteEntity?>? notesByDay,
     List<PhotoEntity>? photos,
     List<DayNoteEntity>? notes,
+    List<QuestEntity>? quests,
   }) => JournalState(
     trip: trip,
     currentDayDate: currentDayDate != null
@@ -148,6 +183,7 @@ class JournalState extends Equatable {
     notesByDay: notesByDay ?? this.notesByDay,
     photos: photos ?? this.photos,
     notes: notes ?? this.notes,
+    quests: quests ?? this.quests,
   );
 
   @override
@@ -157,6 +193,7 @@ class JournalState extends Equatable {
     notesByDay,
     photos,
     notes,
+    quests,
   ];
 }
 

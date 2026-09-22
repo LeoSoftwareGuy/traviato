@@ -21,6 +21,7 @@ class DayTabs extends StatelessWidget {
     required this.thumbnailForDay,
     required this.onSelect,
     required this.isDayLocked,
+    this.isDayEmpty,
     super.key,
   });
 
@@ -29,6 +30,10 @@ class DayTabs extends StatelessWidget {
   final PhotoEntity? Function(DateTime day) thumbnailForDay;
   final ValueChanged<DateTime> onSelect;
   final bool Function(DateTime day) isDayLocked;
+
+  /// Drives the empty-day dot indicator (#140/M6-4b) — optional so callers
+  /// that don't have this data yet aren't forced to supply it.
+  final bool Function(DateTime day)? isDayEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +52,7 @@ class DayTabs extends StatelessWidget {
             day: day,
             isSelected: isSelected,
             isLocked: isLocked,
+            isEmpty: !isLocked && (isDayEmpty?.call(day) ?? false),
             thumbnail: thumbnailForDay(day),
             onTap: () =>
                 isLocked ? _showLockedDayMessage(context) : onSelect(day),
@@ -63,6 +69,7 @@ class _DayTab extends StatelessWidget {
     required this.day,
     required this.isSelected,
     required this.isLocked,
+    required this.isEmpty,
     required this.thumbnail,
     required this.onTap,
   });
@@ -70,6 +77,7 @@ class _DayTab extends StatelessWidget {
   final DateTime day;
   final bool isSelected;
   final bool isLocked;
+  final bool isEmpty;
   final PhotoEntity? thumbnail;
   final VoidCallback onTap;
 
@@ -101,15 +109,10 @@ class _DayTab extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.xs),
             ] else if (thumbnail?.imageUrl != null) ...[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: Image.network(
-                  thumbnail!.imageUrl!,
-                  width: 18,
-                  height: 18,
-                  fit: BoxFit.cover,
-                ),
-              ),
+              _Thumbnail(url: thumbnail!.imageUrl!, isEmpty: isEmpty),
+              const SizedBox(width: AppSpacing.xs),
+            ] else if (isEmpty) ...[
+              const _EmptyDayDot(),
               const SizedBox(width: AppSpacing.xs),
             ],
             Text(
@@ -120,6 +123,61 @@ class _DayTab extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Day-tab thumbnail with the empty-day dot indicator pinned to its
+/// top-right corner (spec §7: 5px `fg3` dot, 2px dark ring so it reads
+/// against any photo).
+class _Thumbnail extends StatelessWidget {
+  const _Thumbnail({required this.url, required this.isEmpty});
+
+  final String url;
+  final bool isEmpty;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 18,
+      height: 18,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: Image.network(
+              url,
+              width: 18,
+              height: 18,
+              fit: BoxFit.cover,
+            ),
+          ),
+          if (isEmpty)
+            const Positioned(top: -1, right: -1, child: _EmptyDayDot()),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyDayDot extends StatelessWidget {
+  const _EmptyDayDot();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('empty-day-dot'),
+      width: 5,
+      height: 5,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.textTertiary,
+        border: Border.all(
+          color: AppColors.tint(AppColors.background, 0.8),
+          width: 2,
         ),
       ),
     );
