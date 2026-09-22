@@ -52,6 +52,11 @@ abstract class EdgeFunctions {
 abstract class PostgresErrors {
   static const insufficientPrivilege = '42501';
   static const moreThanOneOrNoItemsReturned = 'PGRST116';
+
+  /// Custom SQLSTATEs raised by the free-tier/hard-ceiling triggers (#139).
+  static const freeTierMemoryLimit = 'TRV01';
+  static const freeTierPhotoLimit = 'TRV02';
+  static const photoCeiling = 'TRV03';
 }
 
 abstract class Roles {

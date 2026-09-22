@@ -126,6 +126,9 @@ class SupabaseTripRemoteDataSource implements TripRemoteDataSource {
       if (e.code == PostgresErrors.moreThanOneOrNoItemsReturned) {
         throw NotFoundException(message: e.message);
       }
+      if (e.code == PostgresErrors.freeTierMemoryLimit) {
+        throw MemoryLimitException(message: e.message);
+      }
       throw DatabaseException(message: e.message);
     } on SocketException {
       throw const NetworkException();

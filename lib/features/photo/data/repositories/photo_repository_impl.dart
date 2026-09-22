@@ -59,6 +59,8 @@ class PhotoRepositoryImpl implements PhotoRepository {
       );
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
+    } on PhotoLimitException catch (e) {
+      return Left(PhotoLimitFailure(message: e.message));
     } on NetworkException {
       return const Left(NetworkFailure());
     } on AppException catch (e) {

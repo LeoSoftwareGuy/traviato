@@ -3,12 +3,16 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/presentation_failure_exception.dart';
 import '../../../../core/events/global_event.dart';
 import '../../../../core/events/global_event_bus.dart';
 import '../../../journal/presentation/controllers/journal_controller.dart';
+import '../../../subscription/presentation/controllers/entitlement_controller.dart';
 import '../../domain/entities/photo_entity.dart';
 import '../providers/photo_providers.dart';
+
+const _freeTierPhotoLimit = 40;
 
 final addPhotoMutation = Mutation<PhotoEntity>();
 
@@ -33,6 +37,17 @@ Future<PhotoEntity> runAddPhoto({
     final compressor = tsx.get(photoCompressorProvider);
     final exifReader = tsx.get(photoExifReaderProvider);
     final controller = tsx.get(journalControllerProvider(tripId).notifier);
+
+    // App-side pre-check (server-side enforcement is the real guard, #139)
+    // — reuses the already-loaded journal state's photo count, no extra
+    // query. A not-yet-loaded/errored entitlement conservatively reads as
+    // free rather than blocking the network round-trip on it.
+    final isPro = tsx.get(entitlementControllerProvider).value?.isPro ?? false;
+    final currentPhotoCount =
+        tsx.get(journalControllerProvider(tripId)).value?.photos.length ?? 0;
+    if (!isPro && currentPhotoCount >= _freeTierPhotoLimit) {
+      throw PresentationFailureException(const PhotoLimitFailure());
+    }
 
     final exif = await exifReader.read(rawBytes);
     final compressed = await compressor.compress(rawBytes);

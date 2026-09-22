@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/trip/presentation/pages/create_memory_page.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
@@ -236,4 +237,92 @@ void main() {
     expect(tripRepo.createTripCallCount, 1);
     expect(find.byType(CreateMemoryPage), findsNothing);
   });
+
+  testWidgets(
+    'hitting the free-tier memory limit shows an Upgrade action, not a '
+    'dead-end error (#139)',
+    (tester) async {
+      final tripRepo = FakeTripRepository()
+        ..tripsResult = Right([
+          buildTripCard(id: 't1'),
+          buildTripCard(id: 't2'),
+          buildTripCard(id: 't3'),
+        ]);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [tripRepositoryProvider.overrideWithValue(tripRepo)],
+          child: MaterialApp(
+            theme: AppTheme.dark,
+            home: const CreateMemoryPage(),
+          ),
+        ),
+      );
+
+      await tester.enterText(
+        find.byType(TextFormField).first,
+        'One too many',
+      );
+      final submitButton = find.widgetWithText(
+        ElevatedButton,
+        'Create memory',
+      );
+      await tester.ensureVisible(submitButton);
+      await tester.tap(submitButton);
+      await tester.pumpAndSettle();
+
+      expect(tripRepo.createTripCallCount, 0); // blocked before the network
+      expect(find.widgetWithText(SnackBarAction, 'Upgrade'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'tapping the Upgrade action on the limit snackbar opens the offerings '
+    'screen',
+    (tester) async {
+      final tripRepo = FakeTripRepository()
+        ..tripsResult = Right([
+          buildTripCard(id: 't1'),
+          buildTripCard(id: 't2'),
+          buildTripCard(id: 't3'),
+        ]);
+      final router = GoRouter(
+        initialLocation: RoutePaths.createMemory,
+        routes: [
+          GoRoute(
+            path: RoutePaths.createMemory,
+            builder: (context, state) => const CreateMemoryPage(),
+          ),
+          GoRoute(
+            path: RoutePaths.subscriptionOfferings,
+            name: RouteNames.subscriptionOfferings,
+            builder: (context, state) =>
+                const Scaffold(body: Text('Offerings screen')),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [tripRepositoryProvider.overrideWithValue(tripRepo)],
+          child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
+        ),
+      );
+
+      await tester.enterText(
+        find.byType(TextFormField).first,
+        'One too many',
+      );
+      final submitButton = find.widgetWithText(
+        ElevatedButton,
+        'Create memory',
+      );
+      await tester.ensureVisible(submitButton);
+      await tester.tap(submitButton);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(SnackBarAction, 'Upgrade'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Offerings screen'), findsOneWidget);
+    },
+  );
 }
