@@ -22,6 +22,7 @@ abstract class Tables {
   static const wrapUps = 'wrap_ups';
   static const achievementTemplates = 'achievement_templates';
   static const userAchievements = 'user_achievements';
+  static const entitlements = 'entitlements';
 }
 
 abstract class Views {

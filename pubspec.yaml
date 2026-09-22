@@ -51,6 +51,10 @@ dependencies:
   flutter_timezone: ^5.1.0
   shared_preferences: ^2.5.5
 
+  # Monetization (#138) — RevenueCat's official Flutter SDK; wraps StoreKit/
+  # Play Billing behind one API and syncs entitlement state via its webhook.
+  purchases_flutter: ^10.13.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

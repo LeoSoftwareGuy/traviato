@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:go_router/go_router.dart';
+import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/auth/presentation/providers/auth_providers.dart';
@@ -10,9 +12,12 @@ import 'package:traviato/features/home/presentation/providers/profile_stats_prov
 import 'package:traviato/features/profile/domain/entities/achievement_entity.dart';
 import 'package:traviato/features/profile/presentation/pages/profile_page.dart';
 import 'package:traviato/features/profile/presentation/providers/profile_providers.dart';
+import 'package:traviato/features/subscription/domain/entities/entitlement_entity.dart';
+import 'package:traviato/features/subscription/presentation/providers/subscription_providers.dart';
 
 import '../../../auth/fakes/fake_auth_repository.dart';
 import '../../../home/fakes/fake_profile_stats_repository.dart';
+import '../../../subscription/fakes/fake_subscription_repository.dart';
 import '../../fakes/fake_profile_repository.dart';
 
 const _stats = ProfileStatsEntity(
@@ -30,6 +35,7 @@ Future<void> _pump(
   required FakeProfileRepository profileRepo,
   FakeAuthRepository? authRepo,
   FakeProfileStatsRepository? statsRepo,
+  FakeSubscriptionRepository? subscriptionRepo,
 }) async {
   final resolvedAuthRepo = authRepo ?? FakeAuthRepository();
   addTearDown(resolvedAuthRepo.dispose);
@@ -43,8 +49,54 @@ Future<void> _pump(
           statsRepo ??
               (FakeProfileStatsRepository()..statsResult = const Right(_stats)),
         ),
+        subscriptionRepositoryProvider.overrideWithValue(
+          subscriptionRepo ?? FakeSubscriptionRepository(),
+        ),
       ],
       child: MaterialApp(theme: AppTheme.dark, home: const ProfilePage()),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+/// Only the "Upgrade to Pro" navigation test needs a real router — every
+/// other test above uses the plain `MaterialApp(home:)` harness.
+Future<void> _pumpWithRouter(
+  WidgetTester tester, {
+  required FakeProfileRepository profileRepo,
+}) async {
+  final authRepo = FakeAuthRepository();
+  addTearDown(authRepo.dispose);
+  final router = GoRouter(
+    initialLocation: RoutePaths.profile,
+    routes: [
+      GoRoute(
+        path: RoutePaths.profile,
+        name: RouteNames.profile,
+        builder: (context, state) => const ProfilePage(),
+      ),
+      GoRoute(
+        path: RoutePaths.subscriptionOfferings,
+        name: RouteNames.subscriptionOfferings,
+        builder: (context, state) =>
+            const Scaffold(body: Text('Offerings screen')),
+      ),
+    ],
+  );
+  await tester.pumpWidget(
+    ProviderScope(
+      retry: (_, _) => null,
+      overrides: [
+        profileRepositoryProvider.overrideWithValue(profileRepo),
+        authRepositoryProvider.overrideWithValue(authRepo),
+        profileStatsRepositoryProvider.overrideWithValue(
+          FakeProfileStatsRepository()..statsResult = const Right(_stats),
+        ),
+        subscriptionRepositoryProvider.overrideWithValue(
+          FakeSubscriptionRepository(),
+        ),
+      ],
+      child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
     ),
   );
   await tester.pumpAndSettle();
@@ -171,4 +223,51 @@ void main() {
 
     expect(find.text('boom'), findsOneWidget);
   });
+
+  testWidgets('tapping Upgrade to Pro navigates to the offerings screen', (
+    tester,
+  ) async {
+    await _pumpWithRouter(tester, profileRepo: FakeProfileRepository());
+
+    await tester.tap(find.text('Upgrade to Pro'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Offerings screen'), findsOneWidget);
+  });
+
+  testWidgets('tapping Restore purchases calls repository.restore()', (
+    tester,
+  ) async {
+    final subscriptionRepo = FakeSubscriptionRepository()
+      ..restoreResult = const Right(EntitlementEntity.free);
+    await _pump(
+      tester,
+      profileRepo: FakeProfileRepository(),
+      subscriptionRepo: subscriptionRepo,
+    );
+
+    await tester.tap(find.text('Restore purchases'));
+    await tester.pumpAndSettle();
+
+    expect(subscriptionRepo.restoreCallCount, 1);
+    expect(find.text('Purchases restored'), findsOneWidget);
+  });
+
+  testWidgets(
+    'shows an error snackbar when restoring purchases fails',
+    (tester) async {
+      final subscriptionRepo = FakeSubscriptionRepository()
+        ..restoreResult = const Left(UnknownFailure(message: 'restore boom'));
+      await _pump(
+        tester,
+        profileRepo: FakeProfileRepository(),
+        subscriptionRepo: subscriptionRepo,
+      );
+
+      await tester.tap(find.text('Restore purchases'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('restore boom'), findsOneWidget);
+    },
+  );
 }

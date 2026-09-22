@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../features/subscription/domain/entities/entitlement_entity.dart';
 import '../../features/trip/domain/entities/trip_card_entity.dart';
 
 /// Cross-feature signals (guidelines doc 08). Each subclass describes a fact
@@ -62,4 +63,16 @@ final class WrapUpPublishedDispatched extends GlobalEvent {
 
   @override
   List<Object?> get props => [tripId, publishedAt];
+}
+
+/// Fired after a purchase/restore resolves the user's tier (issue #138), so
+/// any screen gating on Pro status (paywall, locked wrap-up entry, usage
+/// meters) updates without re-fetching `entitlements` itself.
+final class EntitlementUpdatedDispatched extends GlobalEvent {
+  const EntitlementUpdatedDispatched({required this.entitlement});
+
+  final EntitlementEntity entitlement;
+
+  @override
+  List<Object?> get props => [entitlement];
 }

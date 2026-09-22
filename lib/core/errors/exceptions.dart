@@ -27,6 +27,14 @@ class SignInCancelledException extends AppException {
   });
 }
 
+/// The user dismissed the native store purchase/restore sheet without
+/// completing it — not an error, mirrors [SignInCancelledException] (#138).
+class PurchaseCancelledException extends AppException {
+  const PurchaseCancelledException({
+    super.message = 'Purchase was cancelled.',
+  });
+}
+
 class DatabaseException extends AppException {
   const DatabaseException({required super.message});
 }
