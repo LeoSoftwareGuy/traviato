@@ -48,16 +48,28 @@ jobs:
         with:
           deno-version: v2.x
 
-      - name: Lint
+      - name: Lint (generate_wrap_up)
         working-directory: supabase/functions/generate_wrap_up
         run: deno lint
 
-      - name: Type-check
+      - name: Type-check (generate_wrap_up)
         working-directory: supabase/functions/generate_wrap_up
         run: deno check index.ts handler.ts gather.ts anthropic.ts content.ts ai_fields.ts assemble.ts
 
-      - name: Run tests
+      - name: Run tests (generate_wrap_up)
         working-directory: supabase/functions/generate_wrap_up
+        run: deno test --allow-net
+
+      - name: Lint (revenuecat_webhook)
+        working-directory: supabase/functions/revenuecat_webhook
+        run: deno lint
+
+      - name: Type-check (revenuecat_webhook)
+        working-directory: supabase/functions/revenuecat_webhook
+        run: deno check index.ts handler.ts
+
+      - name: Run tests (revenuecat_webhook)
+        working-directory: supabase/functions/revenuecat_webhook
         run: deno test --allow-net
 
   deploy-functions:
@@ -77,6 +89,13 @@ jobs:
       - name: Deploy generate_wrap_up
         working-directory: supabase
         run: supabase functions deploy generate_wrap_up --project-ref "$SUPABASE_PROJECT_ID"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+      - name: Deploy revenuecat_webhook
+        working-directory: supabase
+        run: supabase functions deploy revenuecat_webhook --project-ref "$SUPABASE_PROJECT_ID"
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
