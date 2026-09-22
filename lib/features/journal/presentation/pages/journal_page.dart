@@ -22,6 +22,7 @@ import '../mutations/journal_mutations.dart';
 import '../widgets/day_note_card.dart';
 import '../widgets/day_range_hero.dart';
 import '../widgets/day_tabs.dart';
+import '../widgets/empty_day_nudge.dart';
 import '../widgets/journal_action_buttons.dart';
 import '../widgets/journal_header.dart';
 import '../widgets/photos_strip.dart';
@@ -90,7 +91,7 @@ class JournalPage extends ConsumerWidget {
   }
 }
 
-class _JournalContent extends ConsumerWidget {
+class _JournalContent extends ConsumerStatefulWidget {
   const _JournalContent({
     required this.tripId,
     required this.state,
@@ -104,10 +105,27 @@ class _JournalContent extends ConsumerWidget {
   final VoidCallback onBack;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_JournalContent> createState() => _JournalContentState();
+}
+
+class _JournalContentState extends ConsumerState<_JournalContent> {
+  // Set by the empty-day nudge's "Write a note" action so the normal note
+  // editor shows in place of the nudge (#140) — reset whenever the day
+  // changes, so switching days doesn't carry the override along.
+  DateTime? _revealNoteEditorForDay;
+
+  @override
+  Widget build(BuildContext context) {
+    final tripId = widget.tripId;
+    final state = widget.state;
     final notifier = ref.read(journalControllerProvider(tripId).notifier);
     final isSavingNote = ref.watch(upsertNoteMutation) is MutationPending;
     final currentDay = state.currentDayDate;
+    final isEmptyDay =
+        currentDay != null &&
+        !state.isDayLocked(currentDay) &&
+        state.isDayEmpty(currentDay) &&
+        !_isSameDate(_revealNoteEditorForDay, currentDay);
 
     return ListView(
       key: const Key('journal-content-list'),
@@ -119,8 +137,8 @@ class _JournalContent extends ConsumerWidget {
       ),
       children: [
         JournalHeader(
-          stars: stars,
-          onBack: onBack,
+          stars: widget.stars,
+          onBack: widget.onBack,
           onStarsTap: () => context.pushNamed(
             RouteNames.tripBonusTasks,
             pathParameters: {'tripId': tripId},
@@ -143,53 +161,80 @@ class _JournalContent extends ConsumerWidget {
             thumbnailForDay: state.thumbnailForDay,
             onSelect: notifier.selectDay,
             isDayLocked: state.isDayLocked,
+            isDayEmpty: state.isDayEmpty,
           ),
           const SizedBox(height: AppSpacing.base),
-          Text(
-            'Day ${state.currentDayNumber} — ${state.trip.name}',
-            style: AppTypography.screenTitle.copyWith(fontSize: 26),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          if (!state.isCurrentDayNoteCached)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(AppSpacing.lg),
-                child: CircularProgressIndicator(),
+          if (isEmptyDay) ...[
+            Text(
+              'Day ${state.currentDayNumber} — a quiet one',
+              style: AppTypography.screenTitle.copyWith(fontSize: 26),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'No photos, no notes yet · '
+              '${state.completedQuestCountForDay(currentDay)} quests done',
+              style: AppTypography.chipLabel.copyWith(
+                color: AppColors.textMuted,
               ),
-            )
-          else
-            DayNoteCard(
-              key: ValueKey(currentDay),
-              content: state.currentNote?.content ?? '',
-              updatedAt: state.currentNote?.updatedAt,
-              isSaving: isSavingNote,
-              onSave: (content) {
-                final isFirstNote = state.currentNote == null;
-                runUpsertNote(
-                  ref: ref,
-                  tripId: tripId,
-                  dayDate: currentDay,
-                  content: content,
-                );
-                if (isFirstNote && content.trim().isNotEmpty) {
-                  showStarToast(context, '✦ +1 star · note logged');
-                }
-              },
             ),
-          const SizedBox(height: AppSpacing.xl),
-          PhotosStrip(
-            photos: state.photosForCurrentDay,
-            onAddTap: () => AddPhotoSheet.show(
-              context,
-              tripId: tripId,
-              dayDate: currentDay,
+            const SizedBox(height: AppSpacing.lg),
+            EmptyDayNudge(
+              dayNumber: state.currentDayNumber ?? 0,
+              onAddPhoto: () => AddPhotoSheet.show(
+                context,
+                tripId: tripId,
+                dayDate: currentDay,
+              ),
+              onWriteNote: () =>
+                  setState(() => _revealNoteEditorForDay = currentDay),
             ),
-            onPhotoTap: (index) => PhotoViewerPage.show(
-              context,
+          ] else ...[
+            Text(
+              'Day ${state.currentDayNumber} — ${state.trip.name}',
+              style: AppTypography.screenTitle.copyWith(fontSize: 26),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            if (!state.isCurrentDayNoteCached)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(AppSpacing.lg),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else
+              DayNoteCard(
+                key: ValueKey(currentDay),
+                content: state.currentNote?.content ?? '',
+                updatedAt: state.currentNote?.updatedAt,
+                isSaving: isSavingNote,
+                onSave: (content) {
+                  final isFirstNote = state.currentNote == null;
+                  runUpsertNote(
+                    ref: ref,
+                    tripId: tripId,
+                    dayDate: currentDay,
+                    content: content,
+                  );
+                  if (isFirstNote && content.trim().isNotEmpty) {
+                    showStarToast(context, '✦ +1 star · note logged');
+                  }
+                },
+              ),
+            const SizedBox(height: AppSpacing.xl),
+            PhotosStrip(
               photos: state.photosForCurrentDay,
-              initialIndex: index,
+              onAddTap: () => AddPhotoSheet.show(
+                context,
+                tripId: tripId,
+                dayDate: currentDay,
+              ),
+              onPhotoTap: (index) => PhotoViewerPage.show(
+                context,
+                photos: state.photosForCurrentDay,
+                initialIndex: index,
+              ),
             ),
-          ),
+          ],
           const SizedBox(height: AppSpacing.xl),
           JournalActionButtons(
             onToDoTap: () => ToDoSheet.show(
@@ -201,13 +246,17 @@ class _JournalContent extends ConsumerWidget {
               RouteNames.tripWrapUp,
               pathParameters: {'tripId': tripId},
             ),
-            wrapUpAvailability: state.wrapUpAvailability,
-            wrapUpLockedReason: state.wrapUpLockedReason,
+            state: state,
           ),
         ],
       ],
     );
   }
+}
+
+bool _isSameDate(DateTime? a, DateTime? b) {
+  if (a == null || b == null) return false;
+  return a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
 class _NoDatesYet extends StatelessWidget {

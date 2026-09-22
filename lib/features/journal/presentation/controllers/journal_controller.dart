@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/errors/presentation_failure_exception.dart';
 import '../../../photo/domain/entities/photo_entity.dart';
 import '../../../photo/presentation/providers/photo_providers.dart';
+import '../../../quest/presentation/providers/quest_providers.dart';
 import '../../../trip/presentation/providers/trip_providers.dart';
 import '../../domain/entities/day_note_entity.dart';
 import '../providers/day_note_providers.dart';
@@ -17,6 +18,7 @@ class JournalController extends _$JournalController {
     final tripRepo = ref.watch(tripRepositoryProvider);
     final photoRepo = ref.watch(photoRepositoryProvider);
     final noteRepo = ref.watch(dayNoteRepositoryProvider);
+    final questRepo = ref.watch(questRepositoryProvider);
 
     final tripResult = await tripRepo.getTripCard(tripId);
     final trip = tripResult.fold(
@@ -30,12 +32,21 @@ class JournalController extends _$JournalController {
       (p) => p,
     );
 
-    // All-trip notes, used only to gate wrap-up eligibility (#103) — kept
-    // separate from notesByDay's per-day, lazily-fetched cache below.
+    // All-trip notes, used to gate wrap-up eligibility (#103) and detect
+    // empty days (#140) — kept separate from notesByDay's per-day,
+    // lazily-fetched cache below.
     final notesResult = await noteRepo.getNotesForTrip(tripId);
     final notes = notesResult.fold(
       (failure) => throw PresentationFailureException(failure),
       (n) => n,
+    );
+
+    // Used only for the empty-day nudge's "N quests done" subtitle (#140) —
+    // the "To Do" sheet fetches its own day-scoped copy lazily.
+    final questsResult = await questRepo.getQuestsForTrip(tripId);
+    final quests = questsResult.fold(
+      (failure) => throw PresentationFailureException(failure),
+      (q) => q,
     );
 
     final initialDay = _initialDayDate(trip.startDate, trip.endDate);
@@ -59,6 +70,7 @@ class JournalController extends _$JournalController {
       notesByDay: notesByDay,
       photos: photos,
       notes: notes,
+      quests: quests,
     );
   }
 

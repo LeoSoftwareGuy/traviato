@@ -5,9 +5,11 @@ import 'package:traviato/features/journal/presentation/controllers/journal_contr
 import 'package:traviato/features/journal/presentation/controllers/journal_state.dart';
 import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
+import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
 import '../../../photo/fakes/fake_photo_repository.dart';
+import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
 import '../../fakes/fake_day_note_repository.dart';
 
@@ -15,6 +17,7 @@ ProviderContainer _buildContainer({
   required FakeTripRepository tripRepo,
   required FakePhotoRepository photoRepo,
   required FakeDayNoteRepository noteRepo,
+  FakeQuestRepository? questRepo,
 }) {
   return ProviderContainer(
     retry: (_, _) => null,
@@ -22,6 +25,9 @@ ProviderContainer _buildContainer({
       tripRepositoryProvider.overrideWithValue(tripRepo),
       photoRepositoryProvider.overrideWithValue(photoRepo),
       dayNoteRepositoryProvider.overrideWithValue(noteRepo),
+      questRepositoryProvider.overrideWithValue(
+        questRepo ?? FakeQuestRepository(),
+      ),
     ],
   );
 }
@@ -58,12 +64,13 @@ void main() {
 
   test(
     'applyNoteUpserted keeps the all-trip notes count in sync for wrap-up '
-    'eligibility (#103)',
+    'eligibility (#103/#140)',
     () async {
       final today = DateTime.now();
       final todayDate = DateTime(today.year, today.month, today.day);
-      // Trip has already ended, with enough photos but only one note-day —
-      // starts locked.
+      // Trip has already ended, with enough photos (>= the 5-photo
+      // wrapReady minimum, #140) but zero notes yet — starts locked on the
+      // notes requirement alone.
       final tripRepo = FakeTripRepository()
         ..tripCardResult = Right(
           buildTripCard(
@@ -74,17 +81,9 @@ void main() {
         );
       final photoRepo = FakePhotoRepository()
         ..photosResult = Right([
-          buildPhotoEntity(id: 'p1'),
-          buildPhotoEntity(id: 'p2'),
-          buildPhotoEntity(id: 'p3'),
+          for (var i = 0; i < 5; i++) buildPhotoEntity(id: 'p$i'),
         ]);
-      final noteRepo = FakeDayNoteRepository()
-        ..notesForTripResult = Right([
-          buildDayNoteEntity(
-            id: 'n1',
-            dayDate: todayDate.subtract(const Duration(days: 2)),
-          ),
-        ]);
+      final noteRepo = FakeDayNoteRepository();
       final container = _buildContainer(
         tripRepo: tripRepo,
         photoRepo: photoRepo,
@@ -99,18 +98,18 @@ void main() {
       var state = container.read(journalControllerProvider('t1')).value!;
       expect(state.wrapUpAvailability, WrapUpAvailability.locked);
 
-      // Saving a second day's note — as if it happened before the trip
-      // ended — should unlock wrap-up without needing a full reload.
+      // Saving a note — as if it happened before the trip ended — should
+      // unlock wrap-up without needing a full reload.
       notifier.applyNoteUpserted(
         todayDate.subtract(const Duration(days: 1)),
         buildDayNoteEntity(
-          id: 'n2',
+          id: 'n1',
           dayDate: todayDate.subtract(const Duration(days: 1)),
         ),
       );
 
       state = container.read(journalControllerProvider('t1')).value!;
-      expect(state.notes, hasLength(2));
+      expect(state.notes, hasLength(1));
       expect(state.wrapUpAvailability, WrapUpAvailability.unlocked);
     },
   );
