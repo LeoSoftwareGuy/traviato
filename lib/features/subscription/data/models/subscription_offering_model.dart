@@ -10,6 +10,8 @@ class SubscriptionOfferingModel extends SubscriptionOfferingEntity {
     required super.identifier,
     required super.period,
     required super.priceString,
+    required super.priceAmount,
+    required super.currencyCode,
   });
 
   /// `null` for any package type other than monthly/annual — the only two
@@ -25,6 +27,8 @@ class SubscriptionOfferingModel extends SubscriptionOfferingEntity {
       identifier: package.identifier,
       period: period,
       priceString: package.storeProduct.priceString,
+      priceAmount: package.storeProduct.price,
+      currencyCode: package.storeProduct.currencyCode,
     );
   }
 }

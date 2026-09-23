@@ -15,23 +15,28 @@ import '../theme/app_colors.dart';
 /// subtype of its own and falls through to the plain message below.
 void showFailureSnackbar(BuildContext context, Object error) {
   final failure = error is PresentationFailureException ? error.failure : null;
-  final upsellMessage = switch (failure) {
-    FreeTierLimitFailure(:final message) => message,
-    PhotoLimitFailure(:final message) => message,
+  // String literals rather than `PaywallEntryPoint.name` — core/widgets
+  // doesn't depend on a feature package (guidelines doc 08). Must stay in
+  // sync with the enum in paywall_page.dart.
+  final upsellEntry = switch (failure) {
+    FreeTierLimitFailure() => 'memoryCap',
+    PhotoLimitFailure() => 'photoCap',
     _ => null,
   };
-  if (upsellMessage != null) {
+  if (upsellEntry != null) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(upsellMessage),
+          content: Text(presentationFailureMessage(error)),
           backgroundColor: AppColors.accentCoral,
           action: SnackBarAction(
             label: 'Upgrade',
             textColor: AppColors.textPrimary,
-            onPressed: () =>
-                context.pushNamed(RouteNames.subscriptionOfferings),
+            onPressed: () => context.pushNamed(
+              RouteNames.subscriptionOfferings,
+              queryParameters: {'entry': upsellEntry},
+            ),
           ),
         ),
       );

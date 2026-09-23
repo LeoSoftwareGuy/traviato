@@ -104,8 +104,10 @@ class _ProfileContent extends ConsumerWidget {
         SizedBox(
           width: double.infinity,
           child: FilledButton(
-            onPressed: () =>
-                context.pushNamed(RouteNames.subscriptionOfferings),
+            onPressed: () => context.pushNamed(
+              RouteNames.subscriptionOfferings,
+              queryParameters: const {'entry': 'profile'},
+            ),
             child: const Text('Upgrade to Pro'),
           ),
         ),
