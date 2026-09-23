@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
+import '../../domain/entities/active_subscription_entity.dart';
 import '../../domain/entities/entitlement_entity.dart';
 import '../../domain/entities/subscription_offering_entity.dart';
 import '../../domain/repositories/subscription_repository.dart';
@@ -86,6 +87,16 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     try {
       final optimistic = await _purchases.restore();
       return Right(await _reconcile(optimistic));
+    } on AppException catch (e) {
+      return Left(_mapException(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ActiveSubscriptionEntity>>
+  getActiveSubscriptionDetails() async {
+    try {
+      return Right(await _purchases.getActiveSubscriptionDetails());
     } on AppException catch (e) {
       return Left(_mapException(e));
     }

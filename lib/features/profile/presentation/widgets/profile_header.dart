@@ -5,8 +5,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../subscription/domain/entities/entitlement_entity.dart';
 import '../../domain/entities/profile_entity.dart';
 import 'profile_avatar.dart';
+import 'tier_pill.dart';
 
 final _joinedFormat = DateFormat('MMMM yyyy');
 
@@ -20,12 +22,18 @@ class ProfileHeader extends StatelessWidget {
     required this.profile,
     required this.stars,
     required this.onEdit,
+    required this.entitlement,
+    this.periodLabel,
     super.key,
   });
 
   final ProfileEntity profile;
   final int stars;
   final VoidCallback onEdit;
+  final EntitlementEntity entitlement;
+
+  /// e.g. "ANNUAL" — see [TierPill].
+  final String? periodLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +73,8 @@ class ProfileHeader extends StatelessWidget {
             style: AppTypography.mono.copyWith(color: AppColors.primary),
           ),
         ],
+        const SizedBox(height: AppSpacing.sm),
+        TierPill(isPro: entitlement.isPro, periodLabel: periodLabel),
         if (bio != null && bio.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.sm),
           ConstrainedBox(
