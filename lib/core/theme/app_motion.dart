@@ -42,7 +42,8 @@ abstract class AppMotion {
   static const floatYMaxDuration = Duration(seconds: 7);
   static const floatYCurve = Curves.easeInOut;
 
-  /// Landing CTA only.
+  /// Landing CTA; paywall's "Start 7-day free trial" (the only glowing
+  /// element on that screen).
   static const pulseGlowDuration = Duration(milliseconds: 3600);
   static const pulseGlowCurve = Curves.easeInOut;
 }

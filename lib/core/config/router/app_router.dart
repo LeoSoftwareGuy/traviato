@@ -17,7 +17,7 @@ import '../../../features/home/presentation/widgets/home_shell_scaffold.dart';
 import '../../../features/journal/presentation/pages/journal_page.dart';
 import '../../../features/profile/presentation/pages/profile_page.dart';
 import '../../../features/quest/presentation/pages/plan_page.dart';
-import '../../../features/subscription/presentation/pages/subscription_offerings_page.dart';
+import '../../../features/subscription/presentation/pages/paywall_page.dart';
 import '../../../features/trip/presentation/pages/create_memory_page.dart';
 import '../../../features/wrap_up/presentation/pages/wrap_up_page.dart';
 import 'route_constants.dart';
@@ -152,7 +152,11 @@ GoRouter router(Ref ref) {
       GoRoute(
         path: RoutePaths.subscriptionOfferings,
         name: RouteNames.subscriptionOfferings,
-        builder: (context, state) => const SubscriptionOfferingsPage(),
+        builder: (context, state) => PaywallPage(
+          entryPoint: PaywallEntryPoint.fromQueryParam(
+            state.uri.queryParameters['entry'],
+          ),
+        ),
       ),
     ],
     errorBuilder: (context, state) =>

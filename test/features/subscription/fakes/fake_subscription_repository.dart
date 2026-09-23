@@ -71,8 +71,12 @@ SubscriptionOfferingEntity buildOffering({
   String identifier = r'$rc_annual',
   SubscriptionPeriod period = SubscriptionPeriod.annual,
   String priceString = r'$44.99',
+  double priceAmount = 44.99,
+  String currencyCode = 'USD',
 }) => SubscriptionOfferingEntity(
   identifier: identifier,
   period: period,
   priceString: priceString,
+  priceAmount: priceAmount,
+  currencyCode: currencyCode,
 );
