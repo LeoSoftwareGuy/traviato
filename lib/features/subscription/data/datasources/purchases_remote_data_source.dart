@@ -1,3 +1,4 @@
+import '../models/active_subscription_model.dart';
 import '../models/entitlement_model.dart';
 import '../models/subscription_offering_model.dart';
 
@@ -18,4 +19,10 @@ abstract interface class PurchasesRemoteDataSource {
   Future<EntitlementModel?> purchase(String offeringIdentifier);
 
   Future<EntitlementModel> restore();
+
+  /// A live read of the caller's active subscription (period + the
+  /// store's management URL) — only meaningful when Pro (#142). Unlike
+  /// [restore]/[purchase], this never falls back to a cached/optimistic
+  /// value: Profile needs the real current plan, not the last purchase.
+  Future<ActiveSubscriptionModel> getActiveSubscriptionDetails();
 }

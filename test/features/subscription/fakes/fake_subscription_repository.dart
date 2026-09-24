@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/failures.dart';
+import 'package:traviato/features/subscription/domain/entities/active_subscription_entity.dart';
 import 'package:traviato/features/subscription/domain/entities/entitlement_entity.dart';
 import 'package:traviato/features/subscription/domain/entities/subscription_offering_entity.dart';
 import 'package:traviato/features/subscription/domain/repositories/subscription_repository.dart';
@@ -12,12 +13,14 @@ class FakeSubscriptionRepository implements SubscriptionRepository {
   Either<Failure, List<SubscriptionOfferingEntity>>? offeringsResult;
   Either<Failure, EntitlementEntity?>? purchaseResult;
   Either<Failure, EntitlementEntity>? restoreResult;
+  Either<Failure, ActiveSubscriptionEntity>? activeSubscriptionResult;
 
   var getEntitlementCallCount = 0;
   var getOfferingsCallCount = 0;
   var purchaseCallCount = 0;
   var restoreCallCount = 0;
   var syncIdentityCallCount = 0;
+  var getActiveSubscriptionDetailsCallCount = 0;
   String? lastPurchasedOfferingIdentifier;
   String? lastSyncedUserId;
   var lastSyncCalledWithNull = false;
@@ -56,7 +59,25 @@ class FakeSubscriptionRepository implements SubscriptionRepository {
     restoreCallCount++;
     return restoreResult ?? const Right(EntitlementEntity.free);
   }
+
+  @override
+  Future<Either<Failure, ActiveSubscriptionEntity>>
+  getActiveSubscriptionDetails() async {
+    getActiveSubscriptionDetailsCallCount++;
+    return activeSubscriptionResult ??
+        const Right(
+          ActiveSubscriptionEntity(
+            period: SubscriptionPeriod.annual,
+            managementUrl: 'https://apps.apple.com/account/subscriptions',
+          ),
+        );
+  }
 }
+
+ActiveSubscriptionEntity buildActiveSubscription({
+  SubscriptionPeriod period = SubscriptionPeriod.annual,
+  String? managementUrl = 'https://apps.apple.com/account/subscriptions',
+}) => ActiveSubscriptionEntity(period: period, managementUrl: managementUrl);
 
 EntitlementEntity buildProEntitlement({
   DateTime? expiresAt,

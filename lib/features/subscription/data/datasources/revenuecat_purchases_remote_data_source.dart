@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../../../../core/errors/exceptions.dart';
+import '../models/active_subscription_model.dart';
 import '../models/entitlement_model.dart';
 import '../models/subscription_offering_model.dart';
 import 'purchases_remote_data_source.dart';
@@ -83,6 +84,18 @@ class RevenueCatPurchasesRemoteDataSource implements PurchasesRemoteDataSource {
     try {
       final info = await Purchases.restorePurchases();
       return EntitlementModel.fromCustomerInfo(info);
+    } on PlatformException catch (e) {
+      throw _mapPlatformException(e);
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<ActiveSubscriptionModel> getActiveSubscriptionDetails() async {
+    try {
+      final info = await Purchases.getCustomerInfo();
+      return ActiveSubscriptionModel.fromCustomerInfo(info);
     } on PlatformException catch (e) {
       throw _mapPlatformException(e);
     } catch (e) {

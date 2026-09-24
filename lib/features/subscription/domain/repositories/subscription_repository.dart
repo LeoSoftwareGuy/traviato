@@ -1,6 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/errors/failures.dart';
+import '../entities/active_subscription_entity.dart';
 import '../entities/entitlement_entity.dart';
 import '../entities/subscription_offering_entity.dart';
 
@@ -30,4 +31,9 @@ abstract interface class SubscriptionRepository {
   /// Always resolves to the caller's post-restore entitlement — a restore
   /// that finds nothing to restore is not a failure, just a free result.
   Future<Either<Failure, EntitlementEntity>> restore();
+
+  /// Live period + management-URL for the caller's active Pro subscription
+  /// (#142) — call only when already known to be Pro.
+  Future<Either<Failure, ActiveSubscriptionEntity>>
+  getActiveSubscriptionDetails();
 }

@@ -54,6 +54,9 @@ dependencies:
   # Monetization (#138) — RevenueCat's official Flutter SDK; wraps StoreKit/
   # Play Billing behind one API and syncs entitlement state via its webhook.
   purchases_flutter: ^10.13.1
+  # Opens the platform-correct store subscription-management page (#142) —
+  # the Flutter team's own package for launching an external URL/app.
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +66,9 @@ dev_dependencies:
   build_runner: ^2.15.0
   riverpod_generator: ^4.0.3
   json_serializable: ^6.9.0
+  # Faking UrlLauncherPlatform.instance in the manage-subscription test (#142).
+  url_launcher_platform_interface: ^2.3.2
+  plugin_platform_interface: ^2.1.8
 
 flutter:
   uses-material-design: true

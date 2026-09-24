@@ -2,9 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/exceptions.dart';
 import 'package:traviato/core/errors/failures.dart';
+import 'package:traviato/features/subscription/data/models/active_subscription_model.dart';
 import 'package:traviato/features/subscription/data/models/entitlement_model.dart';
 import 'package:traviato/features/subscription/data/repositories/subscription_repository_impl.dart';
+import 'package:traviato/features/subscription/domain/entities/active_subscription_entity.dart';
 import 'package:traviato/features/subscription/domain/entities/entitlement_entity.dart';
+import 'package:traviato/features/subscription/domain/entities/subscription_offering_entity.dart';
 
 import '../../fakes/fake_entitlements_remote_data_source.dart';
 import '../../fakes/fake_purchases_remote_data_source.dart';
@@ -131,6 +134,50 @@ void main() {
       expect(
         result,
         Right<Failure, EntitlementEntity>(EntitlementModel.free()),
+      );
+    });
+  });
+
+  group('getActiveSubscriptionDetails', () {
+    test('returns the live period + management URL', () async {
+      final purchases = FakePurchasesRemoteDataSource()
+        ..activeSubscriptionResult = const ActiveSubscriptionModel(
+          period: SubscriptionPeriod.monthly,
+          managementUrl: 'https://play.google.com/store/account/subscriptions',
+        );
+      final repo = _buildRepo(
+        purchases: purchases,
+        entitlements: FakeEntitlementsRemoteDataSource(),
+      );
+
+      final result = await repo.getActiveSubscriptionDetails();
+
+      expect(
+        result,
+        const Right<Failure, ActiveSubscriptionEntity>(
+          ActiveSubscriptionModel(
+            period: SubscriptionPeriod.monthly,
+            managementUrl:
+                'https://play.google.com/store/account/subscriptions',
+          ),
+        ),
+      );
+      expect(purchases.getActiveSubscriptionDetailsCallCount, 1);
+    });
+
+    test('maps a network exception to NetworkFailure', () async {
+      final purchases = FakePurchasesRemoteDataSource()
+        ..activeSubscriptionError = const NetworkException();
+      final repo = _buildRepo(
+        purchases: purchases,
+        entitlements: FakeEntitlementsRemoteDataSource(),
+      );
+
+      final result = await repo.getActiveSubscriptionDetails();
+
+      expect(
+        result,
+        const Left<Failure, ActiveSubscriptionEntity>(NetworkFailure()),
       );
     });
   });
