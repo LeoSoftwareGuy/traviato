@@ -16,6 +16,12 @@ abstract class WrapUpFilmColors {
   static const Color accent = AppColors.primary;
   static const Color amber = AppColors.primaryLight;
   static const Color dare = AppColors.accentBlue;
+
+  // Collage paper stock (docs/design/WRAP_UP_FILM_COLLAGE_SPEC.md §3, §5) —
+  // film-only, like the print's card-stock colours: never UI chrome, so
+  // deliberately not promoted to `AppColors` (#151 plan).
+  static const Color paper = Color(0xFFEFECE4);
+  static const Color paperRim = Color(0xFFF6F4EE);
 }
 
 /// Text builders for the film's fixed 1080×1920 canvas — sizes are literal

@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/wrap_up/data/models/wrap_up_model.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_collage_layout.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_film_cut.dart';
 
 Map<String, dynamic> _validContent() => {
   'dates': {
@@ -191,6 +193,84 @@ void main() {
 
       expect(model.moments, isEmpty);
       expect(model.flurryLeftovers.photos, isEmpty);
+    });
+  });
+
+  group('WrapUpModel.fromRow — film cuts (#151)', () {
+    WrapUpModel parse(Map<String, dynamic> content) => WrapUpModel.fromRow({
+      'content': content,
+      'generated_at': '2026-06-06T00:00:00Z',
+      'published_at': null,
+    });
+
+    Map<String, dynamic> ref(String id) => {
+      'photo_id': id,
+      'storage_path': 'u/t/$id.jpg',
+      'day_date': '2026-06-02',
+    };
+
+    test('parses the cut, collage layouts/extras and both flurry lists', () {
+      final content = _validContent();
+      content['cut'] = 'compact';
+      final moments = List<dynamic>.of(content['moments'] as List);
+      moments[1] = {
+        ...moments[1] as Map,
+        'layout': 'stack3',
+        'collage_extras': [ref('x1'), ref('x2')],
+      };
+      content['moments'] = moments;
+      content['flurry_leftovers'] = {
+        'photos': [ref('f1'), ref('f2')],
+        'flurry1': [ref('f1')],
+        'flurry2': <Map<String, dynamic>>[],
+        'total_remaining_label': null,
+      };
+
+      final model = parse(content);
+
+      expect(model.cut, WrapUpFilmCut.compact);
+      expect(model.moments[0].layout, isNull);
+      expect(model.moments[1].layout, WrapUpCollageLayout.stack3);
+      expect(model.moments[1].collageExtras.map((r) => r.photoId), [
+        'x1',
+        'x2',
+      ]);
+      expect(model.flurry1Photos.map((r) => r.photoId), ['f1']);
+      expect(model.flurry2Photos, isEmpty);
+    });
+
+    test('a pre-#151 row has no cut and keeps the 15 + 15 flurry split', () {
+      final content = _validContent();
+      content['flurry_leftovers'] = {
+        'photos': [for (var i = 0; i < 20; i++) ref('l$i')],
+        'total_remaining_label': null,
+      };
+
+      final model = parse(content);
+
+      expect(model.cut, isNull);
+      expect(model.moments.every((m) => m.layout == null), isTrue);
+      expect(model.flurry1Photos, hasLength(15));
+      expect(model.flurry2Photos.map((r) => r.photoId), [
+        'l15',
+        'l16',
+        'l17',
+        'l18',
+        'l19',
+      ]);
+    });
+
+    test('an unknown cut or layout degrades to legacy / card flip', () {
+      final content = _validContent();
+      content['cut'] = 'epic';
+      final moments = List<dynamic>.of(content['moments'] as List);
+      moments[0] = {...moments[0] as Map, 'layout': 'grid9'};
+      content['moments'] = moments;
+
+      final model = parse(content);
+
+      expect(model.cut, isNull);
+      expect(model.moments[0].layout, isNull);
     });
   });
 }
