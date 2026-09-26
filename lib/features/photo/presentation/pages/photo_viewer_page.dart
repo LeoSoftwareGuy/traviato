@@ -1,30 +1,54 @@
+import 'dart:math' as math;
+import 'dart:ui';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/photo_entity.dart';
 
 final _takenAtFormat = DateFormat('MMM d, h:mm a');
 
-/// How many full cycles of the day's photos are laid out on each side of the
-/// tapped one, so wrap-around (#117) is a plain modulo over a very large but
-/// finite page count rather than a truly unbounded `PageView` or hand-rolled
-/// pointer math — nobody swipes this many times in one sitting.
-const _wrapWindowCycles = 5000;
+const _fadeInDuration = Duration(milliseconds: 350);
+const _snapDuration = Duration(milliseconds: 300);
+const _snapCurve = Cubic(.22, 1, .36, 1);
 
-/// Real photo-list index a fake-infinite page number maps to.
+/// A release past this many pixels commits to the neighbouring photo;
+/// anything shorter springs back (#149).
+const _commitDistance = 60.0;
+
+/// A quick flick commits even when shorter than [_commitDistance].
+const _commitVelocity = 600.0;
+
+/// Horizontal room around each slide's image, so the neighbouring photo
+/// peeks in from the clipped edge while dragging.
+const _slidePadding = 40.0;
+
+/// How far the close button hangs outside the track's top-right corner.
+const _closeOverhangTop = 16.0;
+const _closeOverhangRight = 12.0;
+
+/// Real photo-list index an unbounded track page maps to — the track keeps
+/// counting past either end and the photo is picked by modulo, which is
+/// what makes wrap-around a plain one-step slide.
 int wrappedPhotoIndex(int page, int photoCount) =>
     photoCount <= 1 ? 0 : page % photoCount;
 
-/// Full-bleed, day-scoped photo pager opened from the Journal's photo strip
-/// (#117). `PageView`'s own physics supply drag-follow, neighbor peek (via
-/// `viewportFraction` under 1.0) and spring-back release for free.
+/// Full-screen, day-scoped photo swiper opened from the Journal's photo
+/// strip (#117, reworked in #149).
+///
+/// A blurred overlay rather than a pushed page. The track follows the
+/// finger 1:1 while dragging (no animation), then snaps with a soft
+/// cubic on release — past [_commitDistance] (or a fast flick) to the
+/// neighbour, otherwise back to centre. Paging wraps at both ends.
 ///
 /// Deliberately minimal: no place row, people tagging, caption editing, or
-/// Set-as-cover/Use-in-wrap-up actions — those belong to the not-yet-built
-/// M3-8 detail screen this issue does not require.
+/// Set-as-cover/Use-in-wrap-up actions — those belong to the M3-8 detail
+/// screen.
 class PhotoViewerPage extends StatefulWidget {
   const PhotoViewerPage({
     required this.photos,
@@ -40,10 +64,17 @@ class PhotoViewerPage extends StatefulWidget {
     required List<PhotoEntity> photos,
     required int initialIndex,
   }) {
-    return Navigator.of(context).push<void>(
-      MaterialPageRoute(
-        builder: (_) =>
-            PhotoViewerPage(photos: photos, initialIndex: initialIndex),
+    return showGeneralDialog<void>(
+      context: context,
+      // The viewer paints its own blurred backdrop and handles
+      // tap-to-close itself, so the route's barrier stays invisible/inert.
+      barrierColor: Colors.transparent,
+      transitionDuration: _fadeInDuration,
+      pageBuilder: (_, _, _) =>
+          PhotoViewerPage(photos: photos, initialIndex: initialIndex),
+      transitionBuilder: (_, animation, _, child) => FadeTransition(
+        opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+        child: child,
       ),
     );
   }
@@ -52,292 +83,392 @@ class PhotoViewerPage extends StatefulWidget {
   State<PhotoViewerPage> createState() => _PhotoViewerPageState();
 }
 
-class _PhotoViewerPageState extends State<PhotoViewerPage> {
-  late final PageController _controller;
-  late int _currentIndex = widget.initialIndex.clamp(
-    0,
-    widget.photos.length - 1,
-  );
+class _PhotoViewerPageState extends State<PhotoViewerPage>
+    with SingleTickerProviderStateMixin {
+  /// Track position in (unbounded) page units: the committed [_page] at
+  /// rest, fractional while dragging or snapping.
+  late final AnimationController _track;
 
-  bool get _hasMultiple => widget.photos.length > 1;
+  /// The committed page — unbounded, mapped onto the photo list by
+  /// [wrappedPhotoIndex].
+  late int _page;
 
-  int get _itemCount =>
-      _hasMultiple ? widget.photos.length * _wrapWindowCycles * 2 : 1;
+  double _dragStartValue = 0;
+  double _dragDx = 0;
+  double _trackWidth = 1;
 
-  int get _initialPage => _hasMultiple
-      ? widget.photos.length * _wrapWindowCycles + _currentIndex
-      : 0;
+  int get _count => widget.photos.length;
+  bool get _hasMultiple => _count > 1;
+  int get _currentIndex => wrappedPhotoIndex(_page, _count);
 
   @override
   void initState() {
     super.initState();
-    _controller = PageController(
-      initialPage: _initialPage,
-      viewportFraction: 0.92,
+    _page = widget.initialIndex.clamp(0, _count - 1);
+    _track = AnimationController.unbounded(
+      vsync: this,
+      value: _page.toDouble(),
     );
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _track.dispose();
     super.dispose();
   }
 
-  void _onPageChanged(int page) {
-    setState(
-      () => _currentIndex = wrappedPhotoIndex(page, widget.photos.length),
+  void _goTo(int page) {
+    setState(() => _page = page);
+    _track.animateTo(
+      page.toDouble(),
+      duration: _snapDuration,
+      curve: _snapCurve,
     );
+  }
+
+  void _goPrev() => _goTo(_page - 1);
+  void _goNext() => _goTo(_page + 1);
+
+  void _onDragStart(DragStartDetails _) {
+    // Grab the track where it is, even mid-snap, so it never jumps under
+    // the finger.
+    _track.stop();
+    _dragStartValue = _track.value;
+    _dragDx = 0;
+  }
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    _dragDx += details.delta.dx;
+    _track.value = _dragStartValue - _dragDx / _trackWidth;
+  }
+
+  void _onDragEnd(DragEndDetails details) {
+    final velocity = details.primaryVelocity ?? 0;
+    if (_dragDx > _commitDistance || velocity > _commitVelocity) {
+      _goPrev();
+    } else if (_dragDx < -_commitDistance || velocity < -_commitVelocity) {
+      _goNext();
+    } else {
+      _goTo(_page);
+    }
+    _dragDx = 0;
   }
 
   void _close() => Navigator.of(context).pop();
 
   @override
   Widget build(BuildContext context) {
-    final photo = widget.photos[_currentIndex];
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _TopBar(onClose: _close),
-            Expanded(
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  PageView.builder(
-                    key: const Key('photo-viewer-pager'),
-                    controller: _controller,
-                    itemCount: _itemCount,
-                    onPageChanged: _onPageChanged,
-                    itemBuilder: (context, page) {
-                      final p =
-                          widget.photos[wrappedPhotoIndex(
-                            page,
-                            widget.photos.length,
-                          )];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.xs,
-                        ),
-                        child: _PhotoImage(photo: p),
-                      );
-                    },
-                  ),
-                  if (_hasMultiple) ...[
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.sm,
-                        ),
-                        child: _ArrowButton(
-                          key: const Key('photo-viewer-prev'),
-                          icon: Icons.chevron_left,
-                          onTap: () => _controller.previousPage(
-                            duration: const Duration(milliseconds: 250),
-                            curve: Curves.easeOut,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.sm,
-                        ),
-                        child: _ArrowButton(
-                          key: const Key('photo-viewer-next'),
-                          icon: Icons.chevron_right,
-                          onTap: () => _controller.nextPage(
-                            duration: const Duration(milliseconds: 250),
-                            curve: Curves.easeOut,
-                          ),
-                        ),
-                      ),
+    // A general-dialog route has no Material of its own — this supplies the
+    // default text style and the ink surface for the buttons.
+    return Material(
+      type: MaterialType.transparency,
+      child: _buildOverlay(),
+    );
+  }
+
+  Widget _buildOverlay() {
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: GestureDetector(
+            key: const Key('photo-viewer-backdrop'),
+            behavior: HitTestBehavior.opaque,
+            onTap: _close,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+              child: ColoredBox(
+                color: AppColors.tint(AppColors.background50, .9),
+              ),
+            ),
+          ),
+        ),
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl - _closeOverhangRight,
+              AppSpacing.xl - _closeOverhangTop,
+              AppSpacing.xl - _closeOverhangRight,
+              AppSpacing.xl,
+            ),
+            child: Center(
+              // Swallows taps on the content (the Flutter equivalent of
+              // stopPropagation) so only the bare backdrop closes; drags
+              // are claimed by the track's own recognizer before any tap
+              // could resolve.
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {},
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(child: _buildTrackArea()),
+                    _PhotoInfo(
+                      photo: widget.photos[_currentIndex],
+                      index: _currentIndex,
+                      total: _count,
                     ),
                   ],
-                ],
+                ),
               ),
             ),
-            if (_hasMultiple)
-              _BottomInfo(
-                photo: photo,
-                index: _currentIndex,
-                total: widget.photos.length,
-                onClose: _close,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTrackArea() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxImageHeight = MediaQuery.sizeOf(context).height * .8;
+        final height = math.min(
+          constraints.maxHeight,
+          maxImageHeight + _closeOverhangTop,
+        );
+        return SizedBox(
+          width: constraints.maxWidth,
+          height: height,
+          // The close button sits in this padding band, outside the clipped
+          // track, so the clip never cuts it and it stays hit-testable.
+          child: Stack(
+            children: [
+              Positioned.fill(
+                top: _closeOverhangTop,
+                left: _closeOverhangRight,
+                right: _closeOverhangRight,
+                child: _buildTrack(maxImageHeight),
               ),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: _RoundIconButton(
+                  key: const Key('photo-viewer-close'),
+                  icon: Icons.close,
+                  diameter: 32,
+                  iconSize: 16,
+                  onTap: _close,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTrack(double maxImageHeight) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        _trackWidth = constraints.maxWidth;
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: GestureDetector(
+                key: const Key('photo-viewer-pager'),
+                behavior: HitTestBehavior.opaque,
+                // Count the slop distance too, so the photo lines up with
+                // the finger from the moment the drag is recognized.
+                dragStartBehavior: DragStartBehavior.down,
+                onHorizontalDragStart: _hasMultiple ? _onDragStart : null,
+                onHorizontalDragUpdate: _hasMultiple ? _onDragUpdate : null,
+                onHorizontalDragEnd: _hasMultiple ? _onDragEnd : null,
+                onHorizontalDragCancel: _hasMultiple
+                    ? () => _goTo(_page)
+                    : null,
+                child: ClipRect(
+                  child: AnimatedBuilder(
+                    animation: _track,
+                    builder: (context, _) => _buildSlides(maxImageHeight),
+                  ),
+                ),
+              ),
+            ),
+            if (_hasMultiple) ...[
+              Positioned(
+                left: AppSpacing.sm,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: _RoundIconButton(
+                    key: const Key('photo-viewer-prev'),
+                    icon: Icons.chevron_left,
+                    diameter: 40,
+                    iconSize: 20,
+                    onTap: _goPrev,
+                  ),
+                ),
+              ),
+              Positioned(
+                right: AppSpacing.sm,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: _RoundIconButton(
+                    key: const Key('photo-viewer-next'),
+                    icon: Icons.chevron_right,
+                    diameter: 40,
+                    iconSize: 20,
+                    onTap: _goNext,
+                  ),
+                ),
+              ),
+            ],
           ],
-        ),
-      ),
+        );
+      },
     );
   }
-}
 
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.onClose});
-
-  final VoidCallback onClose;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 56,
-      child: Row(
-        children: [
-          // A separate sibling from the close button below — not an
-          // overlapping GestureDetector behind it — so a tap can never be
-          // ambiguous between "close via backdrop" and "close via button".
-          Expanded(
-            child: GestureDetector(
-              key: const Key('photo-viewer-backdrop-top'),
-              behavior: HitTestBehavior.opaque,
-              onTap: onClose,
+  /// Lays out only the slides that can be on screen: each unbounded page
+  /// `k` sits at `(k - position) * width`, showing photo `k mod count`.
+  Widget _buildSlides(double maxImageHeight) {
+    final position = _hasMultiple ? _track.value : 0.0;
+    final first = _hasMultiple ? position.floor() - 1 : 0;
+    final last = _hasMultiple ? position.ceil() + 1 : 0;
+    return Stack(
+      children: [
+        for (var page = first; page <= last; page++)
+          Positioned(
+            key: ValueKey(page),
+            left: (page - position) * _trackWidth,
+            top: 0,
+            bottom: 0,
+            width: _trackWidth,
+            child: _Slide(
+              photo: widget.photos[wrappedPhotoIndex(page, _count)],
+              maxImageHeight: maxImageHeight,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.base),
-            child: _CloseButton(onTap: onClose),
-          ),
-        ],
-      ),
+      ],
     );
   }
 }
 
-class _CloseButton extends StatelessWidget {
-  const _CloseButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipOval(
-      child: Material(
-        color: AppColors.tint(AppColors.background, .55),
-        child: InkWell(
-          key: const Key('photo-viewer-close'),
-          onTap: onTap,
-          child: const Padding(
-            padding: EdgeInsets.all(AppSpacing.sm),
-            child: Icon(Icons.close, color: AppColors.textOnPhoto, size: 22),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ArrowButton extends StatelessWidget {
-  const _ArrowButton({
-    super.key,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipOval(
-      child: Material(
-        color: AppColors.tint(AppColors.background, .55),
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xs),
-            child: Icon(icon, color: AppColors.textOnPhoto, size: 28),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PhotoImage extends StatelessWidget {
-  const _PhotoImage({required this.photo});
+class _Slide extends StatelessWidget {
+  const _Slide({required this.photo, required this.maxImageHeight});
 
   final PhotoEntity photo;
+  final double maxImageHeight;
 
   @override
   Widget build(BuildContext context) {
     final url = photo.imageUrl;
-    if (url == null) {
-      return const ColoredBox(
-        color: AppColors.surface,
-        child: Center(
-          child: Icon(
-            Icons.photo_outlined,
-            color: AppColors.textMuted,
-            size: 40,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: _slidePadding),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxImageHeight),
+          // Under loose constraints the image sizes itself to its own
+          // aspect ratio, so the rounded clip hugs the photo, not the slide.
+          child: ClipRRect(
+            borderRadius: AppRadius.cardRadius,
+            child: url == null
+                ? const SizedBox.square(
+                    dimension: 160,
+                    child: ColoredBox(
+                      color: AppColors.surface,
+                      child: Icon(
+                        Icons.photo_outlined,
+                        color: AppColors.textMuted,
+                        size: 40,
+                      ),
+                    ),
+                  )
+                : Image.network(
+                    url,
+                    fit: BoxFit.contain,
+                    gaplessPlayback: true,
+                  ),
           ),
         ),
-      );
-    }
-    return Image.network(url, fit: BoxFit.contain);
+      ),
+    );
   }
 }
 
-/// Caption/timestamp + "N / total" counter, below the image — only ever
-/// shown when the day has more than one photo (#117). Wrapping this whole
-/// block in one tap handler is safe (unlike the top bar) since it contains
-/// no nested button of its own to conflict with.
-class _BottomInfo extends StatelessWidget {
-  const _BottomInfo({
+class _RoundIconButton extends StatelessWidget {
+  const _RoundIconButton({
+    super.key,
+    required this.icon,
+    required this.diameter,
+    required this.iconSize,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final double diameter;
+  final double iconSize;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.tint(AppColors.surfaceElevated, .9),
+      shape: const CircleBorder(
+        side: BorderSide(color: AppColors.surfaceBorder),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox.square(
+          dimension: diameter,
+          child: Icon(icon, color: AppColors.textPrimary, size: iconSize),
+        ),
+      ),
+    );
+  }
+}
+
+/// Caption, timestamp and "i / n" counter below the image. The counter only
+/// renders when the day has more than one photo.
+class _PhotoInfo extends StatelessWidget {
+  const _PhotoInfo({
     required this.photo,
     required this.index,
     required this.total,
-    required this.onClose,
   });
 
   final PhotoEntity photo;
   final int index;
   final int total;
-  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
     final caption = photo.caption?.trim();
     final takenAt = photo.takenAt;
-    return GestureDetector(
-      key: const Key('photo-viewer-backdrop-bottom'),
-      behavior: HitTestBehavior.opaque,
-      onTap: onClose,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.xl,
-          vertical: AppSpacing.base,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (caption != null && caption.isNotEmpty) ...[
-              Text(
+    final smallStyle = AppTypography.caption.copyWith(
+      fontSize: 11,
+      letterSpacing: 0,
+    );
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.base),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (caption != null && caption.isNotEmpty)
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 280),
+              child: Text(
                 caption,
                 textAlign: TextAlign.center,
-                style: AppTypography.bodyInput.copyWith(
-                  color: AppColors.textOnPhoto,
+                style: AppTypography.fieldLabel.copyWith(
+                  color: AppColors.textPrimary,
                 ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-            ] else if (takenAt != null) ...[
-              Text(
-                _takenAtFormat.format(takenAt),
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.textOnPhotoMuted,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-            ],
-            Text(
-              '${index + 1} / $total',
-              style: AppTypography.mono.copyWith(
-                color: AppColors.textOnPhotoMuted,
               ),
             ),
+          if (takenAt != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(_takenAtFormat.format(takenAt), style: smallStyle),
           ],
-        ),
+          if (total > 1) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              '${index + 1} / $total',
+              key: const Key('photo-viewer-counter'),
+              style: smallStyle,
+            ),
+          ],
+        ],
       ),
     );
   }
