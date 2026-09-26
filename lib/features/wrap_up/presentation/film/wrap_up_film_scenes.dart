@@ -1,4 +1,4 @@
-/// The Wrap-Up Film's scene timeline (docs/design/wrap-film-spec.md §1).
+/// The Wrap-Up Film's scene timeline (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §1).
 ///
 /// Computed per wrap-up rather than fixed: Flurry2 (fewer than 15 leftover
 /// photos to show) and Unlock (no achievement earned) are cut from the
@@ -75,7 +75,7 @@ class WrapUpFilmScenes {
     required this.keepsakeStart,
   });
 
-  // Fixed durations (docs/design/wrap-film-spec.md §1), same for every
+  // Fixed durations (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §1), same for every
   // wrap-up. Bridges run +4.0s over the spec's original 3.4/3.2/4.2 —
   // twice-revised after watching real playback: pure-text interludes need
   // real time to read, and (see WrapUpFilmBridge) the fade-out is tied to

@@ -5,7 +5,7 @@ import '../wrap_up_film_scenes.dart';
 import '../wrap_up_film_tokens.dart';
 
 /// "Five days. / One long road." — line 1 computed, line 2 AI-written
-/// (docs/design/wrap-film-spec.md § Invitation).
+/// (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md § Invitation).
 class WrapUpFilmInvitation extends StatelessWidget {
   const WrapUpFilmInvitation({
     required this.t,

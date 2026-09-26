@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Always-on radial vignette (docs/design/wrap-film-spec.md §6) — darkens
+/// Always-on radial vignette (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §6) — darkens
 /// the edges of the canvas so photos and text read consistently regardless
 /// of what's behind them.
 class WrapUpFilmVignette extends StatelessWidget {

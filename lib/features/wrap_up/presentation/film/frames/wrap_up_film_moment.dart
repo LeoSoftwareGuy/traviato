@@ -8,7 +8,7 @@ import 'wrap_up_film_plate.dart';
 
 /// One Moment: thrown in, held centre-frame while its caption is read, then
 /// it slides down into the pile and stays there for the rest of the middle
-/// section (docs/design/wrap-film-spec.md § Moments). Index 0..7 maps to
+/// section (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md § Moments). Index 0..7 maps to
 /// scenes M1..M8 via [WrapUpFilmScenes.momentStarts].
 class WrapUpFilmMoment extends StatelessWidget {
   const WrapUpFilmMoment({

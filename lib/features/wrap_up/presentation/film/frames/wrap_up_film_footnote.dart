@@ -7,7 +7,7 @@ import '../wrap_up_film_tokens.dart';
 
 /// The numbers, demoted to one breath: photographs taken, bonus tasks
 /// completed, stars earned — no distance, no step count
-/// (docs/design/wrap-film-spec.md § Footnote).
+/// (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md § Footnote).
 class WrapUpFilmFootnote extends StatelessWidget {
   const WrapUpFilmFootnote({
     required this.t,

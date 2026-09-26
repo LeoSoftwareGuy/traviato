@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../wrap_up_film_motion.dart';
 
 /// Black bars top and bottom, growing in shortly after the Dust frame opens
-/// (docs/design/wrap-film-spec.md §6) — drawn above everything else.
+/// (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §6) — drawn above everything else.
 class WrapUpFilmLetterbox extends StatelessWidget {
   const WrapUpFilmLetterbox({required this.t, super.key});
 

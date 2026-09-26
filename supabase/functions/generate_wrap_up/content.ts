@@ -1,5 +1,5 @@
 // wrap_ups.content shape for the Wrap-Up Film player (#125).
-// docs/design/wrap-film-spec.md §4 (data contract) is the source of truth.
+// docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §4 (data contract) is the source of truth.
 // Supersedes the old hero/route_chapter/photo_beats screenplay from #93 —
 // the film has no route chapter (no Mapbox, ever — see memory from #94).
 //

@@ -21,7 +21,7 @@ import 'wrap_up_film_scenes.dart';
 import 'wrap_up_film_tokens.dart';
 
 /// One continuous 1080×1920 composition, driven by a single looping
-/// `AnimationController` (docs/design/wrap-film-spec.md §1, §7). Every child
+/// `AnimationController` (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §1, §7). Every child
 /// reads the same `T` and computes its own opacity/transform — no per-scene
 /// widgets, no per-element tickers.
 class WrapUpFilmCanvas extends StatefulWidget {

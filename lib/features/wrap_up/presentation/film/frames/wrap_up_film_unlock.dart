@@ -5,7 +5,7 @@ import '../wrap_up_film_motion.dart';
 import '../wrap_up_film_scenes.dart';
 import '../wrap_up_film_tokens.dart';
 
-/// The achievement earned by this trip, if any (docs/design/wrap-film-spec.md
+/// The achievement earned by this trip, if any (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md
 /// § Unlock). `null` skips the whole frame — the player's call, per the #126
 /// plan comment.
 class WrapUpFilmUnlock extends StatelessWidget {

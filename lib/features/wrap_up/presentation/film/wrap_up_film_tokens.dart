@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 
 /// Color/font token reconciliation for the Wrap-Up Film
-/// (docs/design/wrap-film-spec.md §2) against this app's actual theme —
+/// (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §2) against this app's actual theme —
 /// every spec token below maps to an existing `AppColors` value except
 /// [bg], which was genuinely missing (`AppColors.filmBackground`, #126 plan
 /// comment).

@@ -5,7 +5,7 @@ import '../wrap_up_film_scenes.dart';
 import '../wrap_up_film_tokens.dart';
 
 /// Opening frame: five star specks, a growing hairline, and the trip's
-/// dates — no photograph, no copy (docs/design/wrap-film-spec.md § Dust).
+/// dates — no photograph, no copy (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md § Dust).
 class WrapUpFilmDust extends StatelessWidget {
   const WrapUpFilmDust({
     required this.t,

@@ -7,7 +7,7 @@ import '../wrap_up_film_scenes.dart';
 import '../wrap_up_film_tokens.dart';
 
 /// The closing card: trip title, AI closing line, app mark
-/// (docs/design/wrap-film-spec.md § Keepsake). The reference prototype's
+/// (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md § Keepsake). The reference prototype's
 /// wordmark reads "Traviato" (its codename); the app-facing product name is
 /// **Trevy** (CLAUDE.md's product-language rule), used here instead.
 class WrapUpFilmKeepsake extends StatelessWidget {

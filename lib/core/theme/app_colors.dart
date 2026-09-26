@@ -46,7 +46,7 @@ abstract class AppColors {
 
   // Modal barrier scrim — #07091A @ 72%.
   static const Color scrim = Color(0xB807091A);
-  // Wrap-Up Film's own background (docs/design/wrap-film-spec.md `bg`) —
+  // Wrap-Up Film's own background (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md `bg`) —
   // deliberately distinct from `background`; it's the opaque form of
   // `scrim`'s base color, used pervasively across the film's chrome.
   static const Color filmBackground = Color(0xFF07091A);

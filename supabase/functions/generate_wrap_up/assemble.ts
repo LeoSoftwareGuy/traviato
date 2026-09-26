@@ -7,7 +7,7 @@ import type { TripData } from "./gather.ts";
 import type { AiGeneratedFields } from "./ai_fields.ts";
 import type { Moment, PhotoRef, WrapUpContent } from "./content.ts";
 
-// Player shows up to 15 in Flurry1 + 15 in Flurry2 (wrap-film-spec.md §4).
+// Player shows up to 15 in Flurry1 + 15 in Flurry2 (WRAP_UP_FILM_FLUTTER_SPEC.md §4).
 const FLURRY_DISPLAY_CAP = 30;
 // Below this many true leftovers beyond the cap, the "and N more" label is
 // suppressed rather than announcing a single-digit remainder.
@@ -37,7 +37,7 @@ const NUMBER_WORDS = [
   "Twenty",
 ];
 
-// Fixed slot plan for the 8 moment frames (wrap-film-spec.md §4): bonus-task
+// Fixed slot plan for the 8 moment frames (WRAP_UP_FILM_FLUTTER_SPEC.md §4): bonus-task
 // completion photos badge slots 1, 3 and 4; the rest are plain journal
 // photos. A slot short of its preferred queue borrows from the other queue
 // instead of being skipped — a badge slot degrades to a plain photo, and (the

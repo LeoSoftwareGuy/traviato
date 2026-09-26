@@ -7,7 +7,7 @@ void main() {
         'with no gaps or overlaps', () {
       final scenes = WrapUpFilmScenes(hasFlurry2: true, hasUnlock: true);
 
-      // docs/design/wrap-film-spec.md's scene table, in absolute-start order.
+      // docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md's scene table, in absolute-start order.
       final entries = <(String, double, double)>[
         ('Dust', scenes.dustStart, WrapUpFilmScenes.dustDur),
         ('Invitation', scenes.invitationStart, WrapUpFilmScenes.invitationDur),
