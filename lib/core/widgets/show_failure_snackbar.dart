@@ -5,7 +5,7 @@ import '../config/router/route_constants.dart';
 import '../errors/failure_message.dart';
 import '../errors/failures.dart';
 import '../errors/presentation_failure_exception.dart';
-import '../theme/app_colors.dart';
+import 'app_snackbar.dart';
 
 /// Shows a `MutationError`/`AsyncError` as a one-shot snackbar, routing a
 /// plan-limit failure ([FreeTierLimitFailure]/[PhotoLimitFailure]) to an
@@ -23,31 +23,18 @@ void showFailureSnackbar(BuildContext context, Object error) {
     PhotoLimitFailure() => 'photoCap',
     _ => null,
   };
-  if (upsellEntry != null) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(presentationFailureMessage(error)),
-          backgroundColor: AppColors.accentCoral,
-          action: SnackBarAction(
-            label: 'Upgrade',
-            textColor: AppColors.textPrimary,
-            onPressed: () => context.pushNamed(
-              RouteNames.subscriptionOfferings,
-              queryParameters: {'entry': upsellEntry},
-            ),
-          ),
-        ),
-      );
-    return;
-  }
-  ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(
-        content: Text(presentationFailureMessage(error)),
-        backgroundColor: AppColors.accentCoral,
-      ),
-    );
+  // The Upgrade action no longer pins the snackbar on screen (#153) — it
+  // auto-dismisses like every other message; see `showAppSnackbar`.
+  showAppSnackbar(
+    context,
+    presentationFailureMessage(error),
+    kind: AppSnackbarKind.error,
+    actionLabel: upsellEntry != null ? 'Upgrade' : null,
+    onAction: upsellEntry != null
+        ? () => context.pushNamed(
+            RouteNames.subscriptionOfferings,
+            queryParameters: {'entry': upsellEntry},
+          )
+        : null,
+  );
 }

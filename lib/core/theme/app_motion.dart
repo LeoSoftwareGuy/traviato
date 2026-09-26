@@ -16,6 +16,24 @@ abstract class AppMotion {
   static const awardPopDuration = Duration(milliseconds: 1650);
   static const awardPopCurve = Curves.easeOut;
 
+  // --- Notification display times (#153) -------------------------------
+  // The one rule every snackbar follows (via `showAppSnackbar`); nothing
+  // stays on screen until tapped. Calibrated against Android's built-in
+  // lengths (1.5s / 2.75s), Material 3's 4–10s snackbar guidance, and how
+  // long short confirmations stay up in apps like Instagram and Spotify.
+  // The star toast above is its own celebratory 1.65s motion.
+
+  /// Info / confirmation — a glance is enough.
+  static const snackbarInfoDuration = Duration(seconds: 3);
+
+  /// Errors — slightly longer, they need reading.
+  static const snackbarErrorDuration = Duration(seconds: 4);
+
+  /// Anything with an action button (Upgrade, Retry) — time to reach it.
+  /// Still auto-dismisses, except under a screen reader (see
+  /// `showAppSnackbar`).
+  static const snackbarActionDuration = Duration(seconds: 5);
+
   /// Wrap-up stat bars.
   static const barFillDuration = Duration(milliseconds: 1600);
   static const barFillCurve = Curves.easeOut;

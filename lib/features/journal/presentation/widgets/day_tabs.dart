@@ -6,6 +6,7 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../photo/domain/entities/photo_entity.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 
 final _dayLabelFormat = DateFormat('MMM d');
 
@@ -185,11 +186,7 @@ class _EmptyDayDot extends StatelessWidget {
 }
 
 void _showLockedDayMessage(BuildContext context) {
-  ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      const SnackBar(content: Text("This day hasn't happened yet")),
-    );
+  showAppSnackbar(context, "This day hasn't happened yet");
 }
 
 bool _isSameDate(DateTime a, DateTime b) =>
