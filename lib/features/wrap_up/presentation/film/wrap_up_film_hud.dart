@@ -12,7 +12,7 @@ import '../../../../core/widgets/show_error_snackbar.dart';
 import '../mutations/wrap_up_mutations.dart';
 
 /// The film itself is an ambient, non-interactive loop (docs/design/
-/// wrap-film-spec.md has no CTAs at all) — this is a persistent overlay
+/// WRAP_UP_FILM_FLUTTER_SPEC.md has no CTAs at all) — this is a persistent overlay
 /// outside the 1080×1920 canvas carrying the two things the app still needs
 /// reachable: leaving the film, and "Keep forever" (`published_at`, M4-3).
 /// Same copy/behaviour as the pre-#126 close section, repositioned.

@@ -1,17 +1,28 @@
-/// The Wrap-Up Film's scene timeline (docs/design/wrap-film-spec.md §1).
+import '../../domain/entities/wrap_up_entity.dart';
+
+/// The Wrap-Up Film's scene timeline (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §1).
 ///
-/// Computed per wrap-up rather than fixed: Flurry2 (fewer than 15 leftover
-/// photos to show) and Unlock (no achievement earned) are cut from the
-/// schedule entirely when they'd have nothing to show — their slot's
-/// duration is skipped, and every later scene shifts back to fill the gap —
-/// instead of playing an empty frame for their full allotted time. Every
-/// other duration is fixed regardless of trip/library size: a 20-photo trip
-/// and a 200-photo trip run at the same pace, just different densities.
+/// Computed per wrap-up rather than fixed: a scene with nothing to show is
+/// cut from the schedule entirely — its slot's duration is skipped and
+/// every later scene shifts back to fill the gap — instead of playing an
+/// empty frame for its full allotted time. Every scene that does play
+/// keeps its fixed duration regardless of trip/library size: a 20-photo
+/// trip and a 200-photo trip run at the same pace, just different
+/// densities.
+///
+/// Persistent chrome (specks, washes, vignette, grain, letterbox) is
+/// anchored to scene starts, not absolute times, so it follows whatever
+/// schedule this produces.
 class WrapUpFilmScenes {
   factory WrapUpFilmScenes({
     required bool hasFlurry2,
     required bool hasUnlock,
+    bool hasFlurry1 = true,
+    int momentCount = 8,
+    bool hasBridge2 = true,
+    bool hasBridge3 = true,
   }) {
+    assert(momentCount >= 0 && momentCount <= 8, 'at most 8 moments');
     var cursor = 0.0;
     double take(double duration) {
       final start = cursor;
@@ -19,35 +30,44 @@ class WrapUpFilmScenes {
       return start;
     }
 
+    double takeIf(bool plays, double duration) {
+      final start = cursor;
+      if (plays) cursor += duration;
+      return start;
+    }
+
+    final momentStarts = <double>[];
+    void takeMoments(int from, int to) {
+      for (var i = from; i < to && i < momentCount; i++) {
+        momentStarts.add(take(momentDurations[i]));
+      }
+    }
+
     final dustStart = take(dustDur);
     final invitationStart = take(invitationDur);
     final bridge1Start = take(bridge1Dur);
-    final m1 = take(momentDurations[0]);
-    final m2 = take(momentDurations[1]);
-    final m3 = take(momentDurations[2]);
-    final flurry1Start = take(flurry1Dur);
-    final bridge2Start = take(bridge2Dur);
-    final m4 = take(momentDurations[3]);
-    final m5 = take(momentDurations[4]);
-    final m6 = take(momentDurations[5]);
-    final flurry2Start = cursor;
-    if (hasFlurry2) cursor += flurry2Dur;
-    final bridge3Start = take(bridge3Dur);
-    final m7 = take(momentDurations[6]);
-    final m8 = take(momentDurations[7]);
+    takeMoments(0, 3);
+    final flurry1Start = takeIf(hasFlurry1, flurry1Dur);
+    final bridge2Start = takeIf(hasBridge2, bridge2Dur);
+    takeMoments(3, 6);
+    final flurry2Start = takeIf(hasFlurry2, flurry2Dur);
+    final bridge3Start = takeIf(hasBridge3, bridge3Dur);
+    takeMoments(6, 8);
     final footnoteStart = take(footnoteDur);
-    final unlockStart = cursor;
-    if (hasUnlock) cursor += unlockDur;
+    final unlockStart = takeIf(hasUnlock, unlockDur);
     final keepsakeStart = take(keepsakeDur);
 
     return WrapUpFilmScenes._(
       total: cursor,
+      hasFlurry1: hasFlurry1,
       hasFlurry2: hasFlurry2,
+      hasBridge2: hasBridge2,
+      hasBridge3: hasBridge3,
       hasUnlock: hasUnlock,
       dustStart: dustStart,
       invitationStart: invitationStart,
       bridge1Start: bridge1Start,
-      momentStarts: [m1, m2, m3, m4, m5, m6, m7, m8],
+      momentStarts: List.unmodifiable(momentStarts),
       flurry1Start: flurry1Start,
       bridge2Start: bridge2Start,
       flurry2Start: flurry2Start,
@@ -58,9 +78,34 @@ class WrapUpFilmScenes {
     );
   }
 
+  /// The schedule for [wrapUp]'s resolved plan (#151): one slot per moment
+  /// that exists, a Flurry only when it has photos, and Bridge2/Bridge3
+  /// only when moments follow them (M4 / M7). A pre-#151 wrap-up
+  /// (`cut == null`) keeps the original schedule: 8 moment slots, Flurry1
+  /// always, all three bridges.
+  factory WrapUpFilmScenes.forWrapUp(WrapUpEntity wrapUp) {
+    final hasUnlock = wrapUp.unlock != null;
+    final hasFlurry2 = wrapUp.flurry2Photos.isNotEmpty;
+    if (wrapUp.cut == null) {
+      return WrapUpFilmScenes(hasFlurry2: hasFlurry2, hasUnlock: hasUnlock);
+    }
+    final momentCount = wrapUp.moments.length.clamp(0, 8);
+    return WrapUpFilmScenes(
+      hasFlurry1: wrapUp.flurry1Photos.isNotEmpty,
+      hasFlurry2: hasFlurry2,
+      hasUnlock: hasUnlock,
+      momentCount: momentCount,
+      hasBridge2: momentCount > 3,
+      hasBridge3: momentCount > 6,
+    );
+  }
+
   const WrapUpFilmScenes._({
     required this.total,
+    required this.hasFlurry1,
     required this.hasFlurry2,
+    required this.hasBridge2,
+    required this.hasBridge3,
     required this.hasUnlock,
     required this.dustStart,
     required this.invitationStart,
@@ -75,7 +120,7 @@ class WrapUpFilmScenes {
     required this.keepsakeStart,
   });
 
-  // Fixed durations (docs/design/wrap-film-spec.md §1), same for every
+  // Fixed durations (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §1), same for every
   // wrap-up. Bridges run +4.0s over the spec's original 3.4/3.2/4.2 —
   // twice-revised after watching real playback: pure-text interludes need
   // real time to read, and (see WrapUpFilmBridge) the fade-out is tied to
@@ -88,7 +133,8 @@ class WrapUpFilmScenes {
   static const double bridge3Dur = 8.2;
 
   /// M1–M8 durations, in order — `momentDurations[i]` is the on-screen
-  /// duration for `content.moments[i]`. Unaffected by hasFlurry2/hasUnlock.
+  /// duration for `content.moments[i]`. Never compressed: a moment needs
+  /// its full length for the flip and a readable caption (#151).
   static const List<double> momentDurations = [
     5.5, // M1
     5.2, // M2
@@ -107,25 +153,28 @@ class WrapUpFilmScenes {
   static const double keepsakeDur = 6.8;
 
   /// Total film length in seconds — the loop's `AnimationController` duration.
-  /// Shrinks by [flurry2Dur]/[unlockDur] when those scenes are cut.
+  /// Shrinks by each cut scene's duration.
   final double total;
 
-  /// Whether Flurry2 has any leftover photos to show. `false` means its
-  /// scene contributes 0 seconds to the schedule — [flurry2Start] is still a
-  /// valid instant (where it *would* have started), just with nothing after
-  /// it before Bridge3 begins.
+  /// Whether each optional scene plays. `false` means that scene
+  /// contributes 0 seconds to the schedule — its start is still a valid
+  /// instant (where it *would* have started), just with the next scene
+  /// beginning at that same instant.
+  final bool hasFlurry1;
   final bool hasFlurry2;
+  final bool hasBridge2;
+  final bool hasBridge3;
 
-  /// Whether this trip earned an achievement. `false` means Unlock
-  /// contributes 0 seconds to the schedule, same as [hasFlurry2] above.
+  /// Whether this trip earned an achievement — cut the same way as above.
   final bool hasUnlock;
 
   final double dustStart;
   final double invitationStart;
   final double bridge1Start;
 
-  /// M1–M8 start times, in order — `momentStarts[i]` is the `at` for
-  /// `content.moments[i]`.
+  /// Start times for the moments that play, in order — `momentStarts[i]`
+  /// is the `at` for `content.moments[i]`. Up to 8; a pre-#151 wrap-up
+  /// always gets all 8 slots.
   final List<double> momentStarts;
 
   final double flurry1Start;

@@ -5,7 +5,7 @@ import '../wrap_up_film_scenes.dart';
 import '../wrap_up_film_tokens.dart';
 
 /// One AI-written bridge line between chapters — never a photograph
-/// (docs/design/wrap-film-spec.md § Bridges). Bridge2 (index 1) is fully
+/// (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md § Bridges). Bridge2 (index 1) is fully
 /// opaque; the others let the persistent chrome show through underneath.
 class WrapUpFilmBridge extends StatelessWidget {
   const WrapUpFilmBridge({

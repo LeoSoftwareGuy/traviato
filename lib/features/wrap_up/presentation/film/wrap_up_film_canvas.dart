@@ -8,6 +8,7 @@ import 'chrome/wrap_up_film_grain.dart';
 import 'chrome/wrap_up_film_letterbox.dart';
 import 'chrome/wrap_up_film_vignette.dart';
 import 'frames/wrap_up_film_bridge.dart';
+import 'frames/wrap_up_film_collage.dart';
 import 'frames/wrap_up_film_dust.dart';
 import 'frames/wrap_up_film_flurry1.dart';
 import 'frames/wrap_up_film_flurry2.dart';
@@ -21,7 +22,7 @@ import 'wrap_up_film_scenes.dart';
 import 'wrap_up_film_tokens.dart';
 
 /// One continuous 1080×1920 composition, driven by a single looping
-/// `AnimationController` (docs/design/wrap-film-spec.md §1, §7). Every child
+/// `AnimationController` (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §1, §7). Every child
 /// reads the same `T` and computes its own opacity/transform — no per-scene
 /// widgets, no per-element tickers.
 class WrapUpFilmCanvas extends StatefulWidget {
@@ -30,6 +31,7 @@ class WrapUpFilmCanvas extends StatefulWidget {
     required this.photoUrlById,
     required this.coverImage,
     required this.grainImage,
+    this.collages = true,
     super.key,
   });
 
@@ -40,6 +42,12 @@ class WrapUpFilmCanvas extends StatefulWidget {
   final Map<String, String> photoUrlById;
   final ImageProvider? coverImage;
   final ui.Image? grainImage;
+
+  /// Feature flag (docs/design/WRAP_UP_FILM_COLLAGE_SPEC.md §1). `false`
+  /// plays every moment as a card flip, exactly as before collages
+  /// existed — a collage's extra tiles are then simply not shown, so
+  /// nothing ever repeats.
+  final bool collages;
 
   @override
   State<WrapUpFilmCanvas> createState() => _WrapUpFilmCanvasState();
@@ -56,18 +64,10 @@ class _WrapUpFilmCanvasState extends State<WrapUpFilmCanvas>
   void initState() {
     super.initState();
 
-    final leftovers = widget.wrapUp.flurryLeftovers.photos;
-    _flurry1Urls = leftovers.take(15).map((p) => _urlFor(p.photoId)).toList();
-    _flurry2Urls = leftovers
-        .skip(15)
-        .take(15)
-        .map((p) => _urlFor(p.photoId))
-        .toList();
-
-    _scenes = WrapUpFilmScenes(
-      hasFlurry2: _flurry2Urls.isNotEmpty,
-      hasUnlock: widget.wrapUp.unlock != null,
-    );
+    final wrapUp = widget.wrapUp;
+    _flurry1Urls = wrapUp.flurry1Photos.map((p) => _urlFor(p.photoId)).toList();
+    _flurry2Urls = wrapUp.flurry2Photos.map((p) => _urlFor(p.photoId)).toList();
+    _scenes = WrapUpFilmScenes.forWrapUp(wrapUp);
 
     _controller = AnimationController(
       vsync: this,
@@ -138,23 +138,22 @@ class _WrapUpFilmCanvasState extends State<WrapUpFilmCanvas>
           line1: wrapUp.invitation.line1,
           line2: wrapUp.invitation.line2,
         ),
-        for (var i = 0; i < wrapUp.moments.length; i++)
-          WrapUpFilmMoment(
-            t: t,
-            scenes: _scenes,
-            index: i,
-            moment: wrapUp.moments[i],
-            imageUrl: _urlFor(wrapUp.moments[i].photoId),
-            pileFade: pileFade,
-          ),
+        for (
+          var i = 0;
+          i < wrapUp.moments.length && i < _scenes.momentStarts.length;
+          i++
+        )
+          _buildMoment(t, i, pileFade),
         for (var i = 0; i < wrapUp.bridges.length && i < 3; i++)
-          WrapUpFilmBridge(
-            t: t,
-            scenes: _scenes,
-            index: i,
-            line: wrapUp.bridges[i],
-          ),
-        WrapUpFilmFlurry1(t: t, scenes: _scenes, photoUrls: _flurry1Urls),
+          if (_bridgePlays(i))
+            WrapUpFilmBridge(
+              t: t,
+              scenes: _scenes,
+              index: i,
+              line: wrapUp.bridges[i],
+            ),
+        if (_scenes.hasFlurry1)
+          WrapUpFilmFlurry1(t: t, scenes: _scenes, photoUrls: _flurry1Urls),
         if (_scenes.hasFlurry2)
           WrapUpFilmFlurry2(
             t: t,
@@ -170,6 +169,41 @@ class _WrapUpFilmCanvasState extends State<WrapUpFilmCanvas>
         WrapUpFilmGrain(t: t, image: widget.grainImage),
         WrapUpFilmLetterbox(t: t),
       ],
+    );
+  }
+
+  bool _bridgePlays(int index) => switch (index) {
+    1 => _scenes.hasBridge2,
+    2 => _scenes.hasBridge3,
+    _ => true,
+  };
+
+  /// A collage when the plan made this moment one (and the flag allows
+  /// it), otherwise the card flip — collages never enter the card pile.
+  Widget _buildMoment(double t, int index, double pileFade) {
+    final moment = widget.wrapUp.moments[index];
+    final layout = moment.layout;
+    if (widget.collages && layout != null && widget.wrapUp.cut != null) {
+      final at = _scenes.momentStarts[index];
+      return WrapUpFilmCollage(
+        t: t,
+        at: at,
+        to: at + WrapUpFilmScenes.momentDurations[index],
+        layout: layout,
+        imageUrls: [
+          for (final ref in moment.allPhotoRefs.take(layout.tileCount))
+            _urlFor(ref.photoId),
+        ],
+        note: moment.note,
+      );
+    }
+    return WrapUpFilmMoment(
+      t: t,
+      scenes: _scenes,
+      index: index,
+      moment: moment,
+      imageUrl: _urlFor(moment.photoId),
+      pileFade: pileFade,
     );
   }
 }

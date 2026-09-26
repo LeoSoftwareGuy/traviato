@@ -9,7 +9,7 @@ import 'wrap_up_film_small_print.dart';
 
 /// The rest of what remains: face-up prints crossing the frame, unhurried —
 /// the first couple run corner to corner, later ones bend and exit through
-/// the top centre (docs/design/wrap-film-spec.md § Flurry2). [photoUrls]
+/// the top centre (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md § Flurry2). [photoUrls]
 /// holds up to 15 entries (the player's own display cap), already sliced
 /// from whatever Flurry1 didn't show.
 class WrapUpFilmFlurry2 extends StatelessWidget {

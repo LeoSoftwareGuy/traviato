@@ -1,6 +1,8 @@
+import '../../domain/entities/wrap_up_collage_layout.dart';
 import '../../domain/entities/wrap_up_cover_photo.dart';
 import '../../domain/entities/wrap_up_dates.dart';
 import '../../domain/entities/wrap_up_entity.dart';
+import '../../domain/entities/wrap_up_film_cut.dart';
 import '../../domain/entities/wrap_up_flurry_leftovers.dart';
 import '../../domain/entities/wrap_up_footnote.dart';
 import '../../domain/entities/wrap_up_invitation.dart';
@@ -16,6 +18,7 @@ import '../../domain/entities/wrap_up_unlock.dart';
 /// AC).
 class WrapUpModel extends WrapUpEntity {
   const WrapUpModel({
+    super.cut,
     required super.dates,
     required super.coverPhoto,
     required super.invitation,
@@ -38,6 +41,7 @@ class WrapUpModel extends WrapUpEntity {
         : const <String, dynamic>{};
 
     return WrapUpModel(
+      cut: _parseEnum(WrapUpFilmCut.values, contentMap['cut']),
       dates: _parseDates(contentMap['dates']),
       coverPhoto: _parseCoverPhoto(contentMap['cover_photo']),
       invitation: _parseInvitation(contentMap['invitation']),
@@ -102,6 +106,8 @@ List<WrapUpMoment> _parseMoments(dynamic json) {
         dayDate: _parseDate(raw['day_date']),
         note: raw['note'] is String ? raw['note'] as String : null,
         badge: raw['badge'] is String ? raw['badge'] as String : null,
+        layout: _parseEnum(WrapUpCollageLayout.values, raw['layout']),
+        collageExtras: _parsePhotoRefs(raw['collage_extras']),
       ),
     );
   }
@@ -118,19 +124,23 @@ WrapUpPhotoRef? _parsePhotoRef(dynamic json) {
   );
 }
 
+List<WrapUpPhotoRef> _parsePhotoRefs(dynamic json) {
+  if (json is! List) return const [];
+  final refs = <WrapUpPhotoRef>[];
+  for (final raw in json) {
+    final ref = _parsePhotoRef(raw);
+    if (ref != null) refs.add(ref);
+  }
+  return refs;
+}
+
 WrapUpFlurryLeftovers _parseFlurryLeftovers(dynamic json) {
   if (json is! Map) return const WrapUpFlurryLeftovers();
-  final rawPhotos = json['photos'];
-  final photos = <WrapUpPhotoRef>[];
-  if (rawPhotos is List) {
-    for (final raw in rawPhotos) {
-      final ref = _parsePhotoRef(raw);
-      if (ref != null) photos.add(ref);
-    }
-  }
   final label = json['total_remaining_label'];
   return WrapUpFlurryLeftovers(
-    photos: photos,
+    photos: _parsePhotoRefs(json['photos']),
+    flurry1: _parsePhotoRefs(json['flurry1']),
+    flurry2: _parsePhotoRefs(json['flurry2']),
     totalRemainingLabel: label is String ? label : null,
   );
 }
@@ -175,6 +185,16 @@ WrapUpKeepsake _parseKeepsake(dynamic json) {
     titleLine2: line2 is String ? line2 : '',
     closingQuote: quote is String ? quote : '',
   );
+}
+
+/// An unknown or missing value parses to `null` — for `cut` that means
+/// legacy playback, for a moment's `layout` a plain card flip.
+T? _parseEnum<T extends Enum>(List<T> values, dynamic value) {
+  if (value is! String) return null;
+  for (final candidate in values) {
+    if (candidate.name == value) return candidate;
+  }
+  return null;
 }
 
 int _parseInt(dynamic value) {

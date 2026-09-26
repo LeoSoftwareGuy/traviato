@@ -111,15 +111,15 @@ class _WrapUpFilmReadyState extends ConsumerState<_WrapUpFilmReady> {
       }
     }
 
-    // Only what the film can ever show: the ≤8 moment photos and the first
-    // 30 flurry leftovers (15 + 15, the player's own display cap) — bounded
-    // regardless of trip size.
+    // Only what the film can ever show: the ≤8 moment photos with their
+    // collage tiles (≤6 per moment) and the two Flurries' photos (≤15
+    // each) — bounded regardless of trip size.
     final urls = <String>{};
-    for (final moment in wrapUp.moments) {
-      final url = widget.state.imageUrlForPhoto(moment.photoId);
-      if (url != null) urls.add(url);
-    }
-    for (final photoRef in wrapUp.flurryLeftovers.photos.take(30)) {
+    for (final photoRef in [
+      for (final moment in wrapUp.moments) ...moment.allPhotoRefs,
+      ...wrapUp.flurry1Photos,
+      ...wrapUp.flurry2Photos,
+    ]) {
       final url = widget.state.imageUrlForPhoto(photoRef.photoId);
       if (url != null) urls.add(url);
     }

@@ -1,4 +1,4 @@
-// The Wrap-Up Film's five motion primitives (docs/design/wrap-film-spec.md
+// The Wrap-Up Film's five motion primitives (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md
 // §3), ported 1:1 from the reference prototype (`docs/design/wrap-film.jsx`)
 // as pure functions of the film's single clock `T` (seconds). Every frame
 // widget reads these instead of running its own `AnimationController` — the

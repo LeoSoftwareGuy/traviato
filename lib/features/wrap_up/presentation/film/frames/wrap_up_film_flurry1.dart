@@ -8,7 +8,7 @@ import 'wrap_up_film_small_print.dart';
 
 /// Everything the film didn't stop on, dropped onto a table: a 3×5 grid,
 /// bottom row landing first so a short trip never leaves a hole at the
-/// bottom (docs/design/wrap-film-spec.md § Flurry1). [photoUrls] holds up to
+/// bottom (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md § Flurry1). [photoUrls] holds up to
 /// 15 entries (the player's own display cap) already sliced from the
 /// content's chronological leftover list.
 class WrapUpFilmFlurry1 extends StatelessWidget {

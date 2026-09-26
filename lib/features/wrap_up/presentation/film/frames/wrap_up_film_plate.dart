@@ -7,7 +7,7 @@ import '../wrap_up_film_tokens.dart';
 
 /// The reusable Moment print — a Polaroid-shaped card with a real white
 /// border that lands face-down, holds, then turns over to reveal the photo
-/// (docs/design/wrap-film-spec.md § Moments — "the print" and "the flip").
+/// (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md § Moments — "the print" and "the flip").
 ///
 /// [flip] runs 0 (back) → 1 (front). Flutter has no CSS `backface-visibility`,
 /// so rather than stacking both faces we render whichever face is toward the

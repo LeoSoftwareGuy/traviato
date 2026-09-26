@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../wrap_up_film_motion.dart';
 import '../wrap_up_film_scenes.dart';
 
-/// The persistent background photo washes (docs/design/wrap-film-spec.md §6)
+/// The persistent background photo washes (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §6)
 /// — the cover image, blurred and drifting behind the opening/middle
 /// sections, then returning sharp and full-bleed for the Keepsake close.
 class WrapUpFilmCoverWash extends StatelessWidget {

@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 
 /// Color/font token reconciliation for the Wrap-Up Film
-/// (docs/design/wrap-film-spec.md §2) against this app's actual theme —
+/// (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §2) against this app's actual theme —
 /// every spec token below maps to an existing `AppColors` value except
 /// [bg], which was genuinely missing (`AppColors.filmBackground`, #126 plan
 /// comment).
@@ -16,6 +16,12 @@ abstract class WrapUpFilmColors {
   static const Color accent = AppColors.primary;
   static const Color amber = AppColors.primaryLight;
   static const Color dare = AppColors.accentBlue;
+
+  // Collage paper stock (docs/design/WRAP_UP_FILM_COLLAGE_SPEC.md §3, §5) —
+  // film-only, like the print's card-stock colours: never UI chrome, so
+  // deliberately not promoted to `AppColors` (#151 plan).
+  static const Color paper = Color(0xFFEFECE4);
+  static const Color paperRim = Color(0xFFF6F4EE);
 }
 
 /// Text builders for the film's fixed 1080×1920 canvas — sizes are literal

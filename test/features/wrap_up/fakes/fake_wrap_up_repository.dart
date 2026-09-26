@@ -3,6 +3,7 @@ import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_cover_photo.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_dates.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_entity.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_film_cut.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_flurry_leftovers.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_footnote.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_invitation.dart';
@@ -35,6 +36,7 @@ class FakeWrapUpRepository implements WrapUpRepository {
 }
 
 WrapUpEntity buildWrapUpEntity({
+  WrapUpFilmCut? cut,
   WrapUpDates? dates,
   WrapUpCoverPhoto? coverPhoto,
   WrapUpInvitation? invitation,
@@ -48,6 +50,7 @@ WrapUpEntity buildWrapUpEntity({
   DateTime? publishedAt,
 }) {
   return WrapUpEntity(
+    cut: cut,
     dates: dates ?? const WrapUpDates(formatted: '1–5 June 2026'),
     coverPhoto: coverPhoto ?? const WrapUpCoverPhoto(imagePath: 'asset:hero'),
     invitation:
