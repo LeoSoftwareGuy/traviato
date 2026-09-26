@@ -19,6 +19,7 @@ import '../../../subscription/domain/entities/entitlement_entity.dart';
 import '../../../subscription/domain/entities/subscription_offering_entity.dart';
 import '../../../subscription/presentation/mutations/subscription_mutations.dart';
 import 'tier_pill.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 
 // Mirrors trip_mutations.dart's `_freeTierMemoryLimit` and
 // photo_mutations.dart's `_freeTierPhotoLimit` — this section only displays
@@ -68,13 +69,7 @@ class SubscriptionSection extends ConsumerWidget {
         if (restored.isPro) {
           showStarToast(context, 'Purchases restored');
         } else {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(
-                content: Text('Nothing to restore on this account'),
-              ),
-            );
+          showAppSnackbar(context, 'Nothing to restore on this account');
         }
       }
     });
@@ -428,8 +423,6 @@ class _ManageSubscriptionButtonState extends State<_ManageSubscriptionButton> {
   }
 
   void _showSnackbar(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+    showAppSnackbar(context, message, kind: AppSnackbarKind.error);
   }
 }

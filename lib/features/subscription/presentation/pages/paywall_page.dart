@@ -18,6 +18,7 @@ import '../../domain/entities/entitlement_entity.dart';
 import '../../domain/entities/subscription_offering_entity.dart';
 import '../controllers/offerings_controller.dart';
 import '../mutations/subscription_mutations.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 
 /// Which flow sent the user to the paywall — picks the contextual sub-copy
 /// under the headline (docs/design/M6_MONETIZATION_SPEC.md §4). An
@@ -91,13 +92,7 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
         if (entitlement.isPro) {
           showStarToast(context, 'Purchases restored');
         } else {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(
-                content: Text('Nothing to restore on this account'),
-              ),
-            );
+          showAppSnackbar(context, 'Nothing to restore on this account');
         }
       }
     });

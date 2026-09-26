@@ -7,6 +7,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../controllers/journal_state.dart';
 import 'wrap_up_explainer_card.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 
 /// "To Do" (opens the day's quests) and "View wrap-up" (the gradient CTA,
 /// docs/design/README.md § 8 — re-added now that M4-2 ships a real Wrap-up
@@ -143,8 +144,6 @@ class _WrapUpCtaLocked extends StatelessWidget {
   }
 
   void _showToast(BuildContext context, String askLine) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(askLine)));
+    showAppSnackbar(context, askLine);
   }
 }

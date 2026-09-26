@@ -11,6 +11,7 @@ import '../../../quest/domain/entities/quest_entity.dart';
 import '../../../quest/presentation/mutations/quest_mutations.dart';
 import '../../../quest/presentation/providers/quest_providers.dart';
 import '../../../quest/presentation/widgets/quest_timeline.dart';
+import '../../../../core/widgets/show_error_snackbar.dart';
 
 /// Bottom sheet with the day's quests, reusing `QuestTimeline`/`QuestTile`.
 /// Check-off toggles `completed_at` via the existing quest mutation; adding
@@ -85,8 +86,9 @@ class _ToDoSheetState extends ConsumerState<ToDoSheet> {
   Widget build(BuildContext context) {
     ref.listen<MutationState<dynamic>>(toggleQuestMutation, (previous, next) {
       if (next is MutationError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(presentationFailureMessage(next.error))),
+        showErrorSnackbar(
+          context,
+          message: presentationFailureMessage(next.error),
         );
       }
     });
