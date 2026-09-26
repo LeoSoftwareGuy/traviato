@@ -132,6 +132,7 @@ export const validTripData: TripData = {
 };
 
 export const validWrapUpContent: WrapUpContent = {
+  cut: "highlight",
   dates: {
     start_date: "2026-06-01",
     end_date: "2026-06-05",
@@ -151,6 +152,8 @@ export const validWrapUpContent: WrapUpContent = {
       day_date: "2026-06-01",
       note: "Golden hour",
       badge: "Dare · Snap anything at all · ✦1",
+      layout: null,
+      collage_extras: [],
     },
     {
       photo_id: "p2",
@@ -158,6 +161,8 @@ export const validWrapUpContent: WrapUpContent = {
       day_date: "2026-06-01",
       note: null,
       badge: null,
+      layout: null,
+      collage_extras: [],
     },
     {
       photo_id: "p3",
@@ -165,6 +170,8 @@ export const validWrapUpContent: WrapUpContent = {
       day_date: "2026-06-02",
       note: "Best pastry of the trip",
       badge: "Dare · Try the local specialty · ✦2",
+      layout: null,
+      collage_extras: [],
     },
     {
       photo_id: "p4",
@@ -172,6 +179,8 @@ export const validWrapUpContent: WrapUpContent = {
       day_date: "2026-06-02",
       note: "Miradouro views",
       badge: null,
+      layout: null,
+      collage_extras: [],
     },
     {
       photo_id: "p5",
@@ -179,6 +188,8 @@ export const validWrapUpContent: WrapUpContent = {
       day_date: "2026-06-03",
       note: "Fresh catch",
       badge: null,
+      layout: null,
+      collage_extras: [],
     },
     {
       photo_id: "p6",
@@ -186,6 +197,8 @@ export const validWrapUpContent: WrapUpContent = {
       day_date: "2026-06-03",
       note: null,
       badge: null,
+      layout: null,
+      collage_extras: [],
     },
     {
       photo_id: "p7",
@@ -193,6 +206,8 @@ export const validWrapUpContent: WrapUpContent = {
       day_date: "2026-06-04",
       note: "Sunset walk",
       badge: null,
+      layout: null,
+      collage_extras: [],
     },
     {
       photo_id: "p8",
@@ -200,6 +215,8 @@ export const validWrapUpContent: WrapUpContent = {
       day_date: "2026-06-04",
       note: "Late night gelato",
       badge: null,
+      layout: null,
+      collage_extras: [],
     },
   ],
   flurry_leftovers: {
@@ -207,6 +224,8 @@ export const validWrapUpContent: WrapUpContent = {
       { photo_id: "p9", storage_path: "u/t/p9.jpg", day_date: "2026-06-05" },
       { photo_id: "p10", storage_path: "u/t/p10.jpg", day_date: "2026-06-05" },
     ],
+    flurry1: [],
+    flurry2: [],
     total_remaining_label: null,
   },
   footnote: { photo_count: 10, bonus_completed_count: 2, stars: 14 },
