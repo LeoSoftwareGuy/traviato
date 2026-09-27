@@ -80,19 +80,27 @@ class _AuthPageState extends ConsumerState<AuthPage> {
   Future<void> _submit() async {
     setState(() => _autovalidate = AutovalidateMode.always);
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    if (_isSignup) {
-      await runSignup(
-        ref: ref,
-        email: _email.text.trim(),
-        password: _password.text,
-        username: _name.text.trim(),
-      );
-    } else {
-      await runLogin(
-        ref: ref,
-        email: _email.text.trim(),
-        password: _password.text,
-      );
+    // The mutation's own error state (via ref.listen in build) already
+    // surfaces a failure as a snackbar — this just stops the mutation's
+    // rethrow from also reaching the zone as an unhandled Future error
+    // (guidelines doc 06, #155). Same pattern as ProfilePage._logout.
+    try {
+      if (_isSignup) {
+        await runSignup(
+          ref: ref,
+          email: _email.text.trim(),
+          password: _password.text,
+          username: _name.text.trim(),
+        );
+      } else {
+        await runLogin(
+          ref: ref,
+          email: _email.text.trim(),
+          password: _password.text,
+        );
+      }
+    } catch (_) {
+      return;
     }
   }
 
