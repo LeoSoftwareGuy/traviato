@@ -10,9 +10,17 @@ import '../../domain/repositories/subscription_repository.dart';
 
 part 'subscription_providers.g.dart';
 
+/// Whether `Purchases.configure` ran this session. `main.dart` overrides this
+/// with the real result; the default is the safe answer — never call into an
+/// unconfigured RevenueCat SDK (#156).
+@Riverpod(keepAlive: true)
+bool revenueCatConfigured(Ref ref) => false;
+
 @riverpod
 PurchasesRemoteDataSource purchasesRemoteDataSource(Ref ref) =>
-    RevenueCatPurchasesRemoteDataSource();
+    RevenueCatPurchasesRemoteDataSource(
+      isConfigured: ref.watch(revenueCatConfiguredProvider),
+    );
 
 @riverpod
 EntitlementsRemoteDataSource entitlementsRemoteDataSource(Ref ref) =>

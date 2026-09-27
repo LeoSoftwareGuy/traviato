@@ -8,7 +8,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/notifications/presentation/controllers/bonus_notifications_lifecycle_controller.dart';
+import 'features/subscription/data/datasources/revenuecat_api_key.dart';
 import 'features/subscription/presentation/controllers/subscription_identity_lifecycle_controller.dart';
+import 'features/subscription/presentation/providers/subscription_providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,29 +19,41 @@ Future<void> main() async {
     url: dotenv.env['SUPABASE_URL']!,
     publishableKey: dotenv.env['SUPABASE_PUBLISHABLE_KEY']!,
   );
-  await _configureRevenueCat();
+  final revenueCatConfigured = await _configureRevenueCat();
   // Disable Riverpod's silent auto-retry; retries are handled explicitly with
   // Retry buttons (guidelines doc 02).
-  runApp(ProviderScope(retry: (_, _) => null, child: const TraviatoApp()));
+  runApp(
+    ProviderScope(
+      retry: (_, _) => null,
+      overrides: [
+        revenueCatConfiguredProvider.overrideWithValue(revenueCatConfigured),
+      ],
+      child: const TraviatoApp(),
+    ),
+  );
 }
 
 /// RevenueCat is configured anonymously here; `SubscriptionIdentityLifecycleController`
 /// calls `Purchases.logIn`/`logOut` once the Supabase auth state is known
 /// (issue #138). Missing keys degrade to a debug log rather than a crash —
-/// the app is still usable free-tier without a configured store.
-Future<void> _configureRevenueCat() async {
-  final apiKey = defaultTargetPlatform == TargetPlatform.iOS
-      ? dotenv.env['REVENUECAT_IOS_API_KEY']
-      : dotenv.env['REVENUECAT_ANDROID_API_KEY'];
-  if (apiKey == null || apiKey.isEmpty) {
+/// the app is still usable free-tier without a configured store. Returns
+/// whether RevenueCat was configured; that flag guards every SDK call for
+/// the rest of the session (#156).
+Future<bool> _configureRevenueCat() async {
+  final apiKey = revenueCatApiKey(
+    platform: defaultTargetPlatform,
+    env: dotenv.env,
+  );
+  if (apiKey == null) {
     debugPrint(
       'RevenueCat not configured (REVENUECAT_IOS_API_KEY/'
       'REVENUECAT_ANDROID_API_KEY missing from .env) — Pro purchases are '
       'unavailable this session.',
     );
-    return;
+    return false;
   }
   await Purchases.configure(PurchasesConfiguration(apiKey));
+  return true;
 }
 
 class TraviatoApp extends ConsumerWidget {
