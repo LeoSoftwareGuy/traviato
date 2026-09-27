@@ -32,13 +32,21 @@ class AuthenticationFailure extends Failure {
 /// Too many auth attempts in a short time (#155). The message says how long
 /// to wait when Supabase told us, so the user stops re-tapping — every
 /// extra attempt only extends the lockout.
+///
+/// The email quota ([isEmailQuota]) resets on an hourly window, so it gets
+/// its own wording instead of implying a few seconds' wait.
 class RateLimitedFailure extends Failure {
-  RateLimitedFailure({this.retryAfterSeconds})
-    : super(message: _messageFor(retryAfterSeconds));
+  RateLimitedFailure({this.retryAfterSeconds, this.isEmailQuota = false})
+    : super(message: _messageFor(retryAfterSeconds, isEmailQuota));
 
   final int? retryAfterSeconds;
+  final bool isEmailQuota;
 
-  static String _messageFor(int? seconds) {
+  static String _messageFor(int? seconds, bool isEmailQuota) {
+    if (isEmailQuota) {
+      return "We've sent too many emails for now. Please try again in a "
+          'little while.';
+    }
     if (seconds == null || seconds <= 0) {
       return 'Too many attempts. Please wait a bit and try again.';
     }

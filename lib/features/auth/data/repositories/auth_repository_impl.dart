@@ -47,7 +47,12 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       return Right(await _remote.login(email: email, password: password));
     } on RateLimitedException catch (e) {
-      return Left(RateLimitedFailure(retryAfterSeconds: e.retryAfterSeconds));
+      return Left(
+        RateLimitedFailure(
+          retryAfterSeconds: e.retryAfterSeconds,
+          isEmailQuota: e.isEmailQuota,
+        ),
+      );
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
     } on NetworkException {
@@ -72,7 +77,12 @@ class AuthRepositoryImpl implements AuthRepository {
         ),
       );
     } on RateLimitedException catch (e) {
-      return Left(RateLimitedFailure(retryAfterSeconds: e.retryAfterSeconds));
+      return Left(
+        RateLimitedFailure(
+          retryAfterSeconds: e.retryAfterSeconds,
+          isEmailQuota: e.isEmailQuota,
+        ),
+      );
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
     } on NetworkException {
@@ -103,7 +113,12 @@ class AuthRepositoryImpl implements AuthRepository {
     } on SignInCancelledException {
       return const Right(null);
     } on RateLimitedException catch (e) {
-      return Left(RateLimitedFailure(retryAfterSeconds: e.retryAfterSeconds));
+      return Left(
+        RateLimitedFailure(
+          retryAfterSeconds: e.retryAfterSeconds,
+          isEmailQuota: e.isEmailQuota,
+        ),
+      );
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
     } on NetworkException {
@@ -119,7 +134,12 @@ class AuthRepositoryImpl implements AuthRepository {
       await _remote.logout();
       return const Right(null);
     } on RateLimitedException catch (e) {
-      return Left(RateLimitedFailure(retryAfterSeconds: e.retryAfterSeconds));
+      return Left(
+        RateLimitedFailure(
+          retryAfterSeconds: e.retryAfterSeconds,
+          isEmailQuota: e.isEmailQuota,
+        ),
+      );
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
     } on NetworkException {
