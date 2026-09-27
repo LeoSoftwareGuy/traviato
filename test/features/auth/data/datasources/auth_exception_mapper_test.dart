@@ -45,7 +45,24 @@ void main() {
           isNull,
           reason: 'no "after N seconds" in the message',
         );
+        expect(
+          mapped.isEmailQuota,
+          code == 'over_email_send_rate_limit',
+          reason: 'only the email quota is flagged: $code',
+        );
       }
+    });
+
+    test('the per-request limiter is not the email quota', () {
+      final mapped = mapAuthException(
+        const AuthException(
+          'For security purposes, you can only request this after 43 '
+          'seconds.',
+          statusCode: '429',
+          code: 'over_request_rate_limit',
+        ),
+      );
+      expect((mapped as RateLimitedException).isEmailQuota, isFalse);
     });
 
     test('any other auth error stays an AuthenticationException', () {
@@ -70,6 +87,14 @@ void main() {
       expect(
         RateLimitedFailure(retryAfterSeconds: 1).message,
         'Too many attempts. Please wait 1 second and try again.',
+      );
+    });
+
+    test('the email quota gets its own, longer-wait wording', () {
+      expect(
+        RateLimitedFailure(isEmailQuota: true).message,
+        "We've sent too many emails for now. Please try again in a "
+        'little while.',
       );
     });
 

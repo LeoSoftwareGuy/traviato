@@ -182,6 +182,27 @@ void main() {
       );
     });
 
+    test('keeps the email-quota flag through to the Failure (#158)', () async {
+      final repo = AuthRepositoryImpl(
+        remote: _FakeAuthRemoteDataSource(
+          signupException: const RateLimitedException(isEmailQuota: true),
+        ),
+      );
+      final result = await repo.signup(
+        email: 'ada@example.com',
+        password: 'secret1',
+        username: 'ada',
+      );
+      result.fold(
+        (failure) => expect(
+          failure.message,
+          "We've sent too many emails for now. Please try again in a "
+          'little while.',
+        ),
+        (_) => fail('expected Left'),
+      );
+    });
+
     test(
       'maps a rate limit to RateLimitedFailure, not a raw throw (#155)',
       () async {

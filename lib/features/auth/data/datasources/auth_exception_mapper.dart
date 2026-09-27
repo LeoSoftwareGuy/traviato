@@ -22,6 +22,7 @@ AppException mapAuthException(AuthException e) {
     final seconds = _retryAfterPattern.firstMatch(e.message)?.group(1);
     return RateLimitedException(
       retryAfterSeconds: seconds == null ? null : int.parse(seconds),
+      isEmailQuota: e.code == 'over_email_send_rate_limit',
       message: e.message,
     );
   }
