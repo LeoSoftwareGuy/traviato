@@ -29,6 +29,24 @@ class AuthenticationFailure extends Failure {
   const AuthenticationFailure({required super.message});
 }
 
+/// Too many auth attempts in a short time (#155). The message says how long
+/// to wait when Supabase told us, so the user stops re-tapping — every
+/// extra attempt only extends the lockout.
+class RateLimitedFailure extends Failure {
+  RateLimitedFailure({this.retryAfterSeconds})
+    : super(message: _messageFor(retryAfterSeconds));
+
+  final int? retryAfterSeconds;
+
+  static String _messageFor(int? seconds) {
+    if (seconds == null || seconds <= 0) {
+      return 'Too many attempts. Please wait a bit and try again.';
+    }
+    final unit = seconds == 1 ? 'second' : 'seconds';
+    return 'Too many attempts. Please wait $seconds $unit and try again.';
+  }
+}
+
 class PermissionFailure extends Failure {
   const PermissionFailure({super.message = 'You do not have permission.'});
 }

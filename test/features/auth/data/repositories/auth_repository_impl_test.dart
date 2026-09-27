@@ -100,6 +100,22 @@ void main() {
       );
     });
 
+    test('maps a rate limit to RateLimitedFailure (#155)', () async {
+      final repo = AuthRepositoryImpl(
+        remote: _FakeAuthRemoteDataSource(
+          loginException: const RateLimitedException(),
+        ),
+      );
+      final result = await repo.login(
+        email: 'ada@example.com',
+        password: 'secret1',
+      );
+      result.fold(
+        (failure) => expect(failure, isA<RateLimitedFailure>()),
+        (_) => fail('expected Left'),
+      );
+    });
+
     test('maps NetworkException to NetworkFailure', () async {
       final repo = AuthRepositoryImpl(
         remote: _FakeAuthRemoteDataSource(
@@ -165,6 +181,27 @@ void main() {
         (_) => fail('expected Left'),
       );
     });
+
+    test(
+      'maps a rate limit to RateLimitedFailure, not a raw throw (#155)',
+      () async {
+        final repo = AuthRepositoryImpl(
+          remote: _FakeAuthRemoteDataSource(
+            signupException: const RateLimitedException(retryAfterSeconds: 43),
+          ),
+        );
+        final result = await repo.signup(
+          email: 'ada@example.com',
+          password: 'secret1',
+          username: 'ada',
+        );
+        result.fold(
+          (failure) =>
+              expect(failure, RateLimitedFailure(retryAfterSeconds: 43)),
+          (_) => fail('expected Left'),
+        );
+      },
+    );
   });
 
   group('AuthRepositoryImpl.signInWithApple', () {

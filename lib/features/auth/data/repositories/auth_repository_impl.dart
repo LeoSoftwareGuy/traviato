@@ -46,6 +46,8 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     try {
       return Right(await _remote.login(email: email, password: password));
+    } on RateLimitedException catch (e) {
+      return Left(RateLimitedFailure(retryAfterSeconds: e.retryAfterSeconds));
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
     } on NetworkException {
@@ -69,6 +71,8 @@ class AuthRepositoryImpl implements AuthRepository {
           username: username,
         ),
       );
+    } on RateLimitedException catch (e) {
+      return Left(RateLimitedFailure(retryAfterSeconds: e.retryAfterSeconds));
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
     } on NetworkException {
@@ -98,6 +102,8 @@ class AuthRepositoryImpl implements AuthRepository {
       return const Right(null);
     } on SignInCancelledException {
       return const Right(null);
+    } on RateLimitedException catch (e) {
+      return Left(RateLimitedFailure(retryAfterSeconds: e.retryAfterSeconds));
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
     } on NetworkException {
@@ -112,6 +118,8 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _remote.logout();
       return const Right(null);
+    } on RateLimitedException catch (e) {
+      return Left(RateLimitedFailure(retryAfterSeconds: e.retryAfterSeconds));
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
     } on NetworkException {
