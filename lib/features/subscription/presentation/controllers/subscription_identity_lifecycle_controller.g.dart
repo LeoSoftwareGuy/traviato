@@ -57,7 +57,7 @@ final class SubscriptionIdentityLifecycleControllerProvider
 }
 
 String _$subscriptionIdentityLifecycleControllerHash() =>
-    r'fd00a099e3286ae16b297cd8e23209ec0f598ad0';
+    r'daea7d2e4087a2eedbbe1304d5cf8d6b61a9cb3f';
 
 /// Keeps RevenueCat's app-user-id in step with the signed-in Supabase user
 /// (issue #138) — mirrors `BonusNotificationsLifecycleController`'s shape.
