@@ -23,14 +23,18 @@ class AuthenticationException extends AppException {
 /// seconds") — #155. A sibling of [AuthenticationException] rather than a
 /// subtype, so an existing `on AuthenticationException` clause can't
 /// swallow it into a generic auth error. [retryAfterSeconds] is `null` when
-/// Supabase didn't say how long to wait.
+/// Supabase didn't say how long to wait. [isEmailQuota] marks the project's
+/// hourly auth-email quota (`over_email_send_rate_limit`) — a much longer
+/// wait than the per-request limiter, so the UI words it differently.
 class RateLimitedException extends AppException {
   const RateLimitedException({
     this.retryAfterSeconds,
+    this.isEmailQuota = false,
     super.message = 'Too many requests.',
   });
 
   final int? retryAfterSeconds;
+  final bool isEmailQuota;
 }
 
 /// The user dismissed a native social sign-in sheet (Apple/Google) without
