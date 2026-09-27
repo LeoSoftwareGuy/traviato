@@ -10,6 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/supabase_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../models/user_model.dart';
+import 'auth_exception_mapper.dart';
 import 'auth_remote_data_source.dart';
 
 class SupabaseAuthRemoteDataSource implements AuthRemoteDataSource {
@@ -51,7 +52,7 @@ class SupabaseAuthRemoteDataSource implements AuthRemoteDataSource {
     } on AuthenticationException {
       rethrow;
     } on AuthException catch (e) {
-      throw AuthenticationException(message: e.message);
+      throw mapAuthException(e);
     } on PostgrestException catch (e) {
       if (e.code == PostgresErrors.insufficientPrivilege) {
         throw PermissionException(message: e.message);
@@ -89,7 +90,7 @@ class SupabaseAuthRemoteDataSource implements AuthRemoteDataSource {
     } on AuthenticationException {
       rethrow;
     } on AuthException catch (e) {
-      throw AuthenticationException(message: e.message);
+      throw mapAuthException(e);
     } on PostgrestException catch (e) {
       if (e.code == PostgresErrors.insufficientPrivilege) {
         throw PermissionException(message: e.message);
@@ -136,7 +137,7 @@ class SupabaseAuthRemoteDataSource implements AuthRemoteDataSource {
     } on AuthenticationException {
       rethrow;
     } on AuthException catch (e) {
-      throw AuthenticationException(message: e.message);
+      throw mapAuthException(e);
     } on SocketException {
       throw const NetworkException();
     } catch (e) {
@@ -192,7 +193,7 @@ class SupabaseAuthRemoteDataSource implements AuthRemoteDataSource {
     } on UnknownException {
       rethrow;
     } on AuthException catch (e) {
-      throw AuthenticationException(message: e.message);
+      throw mapAuthException(e);
     } on SocketException {
       throw const NetworkException();
     } catch (e) {
@@ -212,7 +213,7 @@ class SupabaseAuthRemoteDataSource implements AuthRemoteDataSource {
     } on AuthenticationException {
       rethrow;
     } on AuthException catch (e) {
-      throw AuthenticationException(message: e.message);
+      throw mapAuthException(e);
     } on SocketException {
       throw const NetworkException();
     } catch (e) {

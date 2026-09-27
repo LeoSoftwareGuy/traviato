@@ -18,6 +18,21 @@ class AuthenticationException extends AppException {
   const AuthenticationException({required super.message});
 }
 
+/// Supabase Auth refused the request because of its rate limiter (HTTP 429,
+/// e.g. "For security purposes, you can only request this after 43
+/// seconds") — #155. A sibling of [AuthenticationException] rather than a
+/// subtype, so an existing `on AuthenticationException` clause can't
+/// swallow it into a generic auth error. [retryAfterSeconds] is `null` when
+/// Supabase didn't say how long to wait.
+class RateLimitedException extends AppException {
+  const RateLimitedException({
+    this.retryAfterSeconds,
+    super.message = 'Too many requests.',
+  });
+
+  final int? retryAfterSeconds;
+}
+
 /// The user dismissed a native social sign-in sheet (Apple/Google) without
 /// completing it — not an error, so the repository maps this to a silent
 /// no-op instead of a [Failure] (issue #84).
