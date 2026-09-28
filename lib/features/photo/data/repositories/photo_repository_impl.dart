@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:uuid/uuid.dart';
 
@@ -66,5 +65,29 @@ class PhotoRepositoryImpl implements PhotoRepository {
     } on AppException catch (e) {
       return Left(UnknownFailure(message: e.message));
     }
+  }
+
+  @override
+  Future<Either<Failure, void>> deletePhoto(PhotoEntity photo) async {
+    // Row first: if the file went first and the row delete then failed, the
+    // Journal would show a broken photo. This way round, the worst case is
+    // an orphaned file nobody can see.
+    try {
+      await _remote.deletePhotoRow(photo.id);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on PermissionException catch (e) {
+      return Left(PermissionFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+    try {
+      await _remote.removePhotoFile(photo.storagePath);
+    } on AppException catch (e) {
+      debugPrint('Orphaned photo file ${photo.storagePath}: ${e.message}');
+    }
+    return const Right(null);
   }
 }

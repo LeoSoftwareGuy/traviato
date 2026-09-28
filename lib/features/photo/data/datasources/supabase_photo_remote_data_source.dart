@@ -111,6 +111,34 @@ class SupabasePhotoRemoteDataSource implements PhotoRemoteDataSource {
     }
   }
 
+  @override
+  Future<void> deletePhotoRow(String id) async {
+    _guardAuthenticated();
+    try {
+      await _client.from(Tables.photos).delete().eq('id', id);
+    } on PostgrestException catch (e) {
+      throw _mapPostgrestException(e);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<void> removePhotoFile(String storagePath) async {
+    _guardAuthenticated();
+    try {
+      await _client.storage.from(Storage.tripPhotos).remove([storagePath]);
+    } on StorageException catch (e) {
+      throw StorageServerException(message: e.message);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
   /// Awards ✦2 for the new photo. Never throws — a ledger hiccup must not
   /// fail an already-uploaded photo (issue #30 AC).
   Future<void> _awardPointsQuietly({
