@@ -487,4 +487,42 @@ void main() {
       expect(find.text('Yes — delete it forever'), findsNothing);
     });
   });
+
+  group('past-created memory (#164)', () {
+    testWidgets('offers no add-quest row', (tester) async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(
+            id: 't1',
+            startDate: _today.subtract(const Duration(days: 20)),
+            endDate: _today.subtract(const Duration(days: 15)),
+            createdAt: _today.subtract(const Duration(days: 2)),
+          ),
+        );
+      final questRepo = FakeQuestRepository()..questsResult = const Right([]);
+      await _pump(tester, tripRepo: tripRepo, questRepo: questRepo);
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('+ Add a quest'), findsNothing);
+    });
+
+    testWidgets('a memory created mid-trip still offers the add-quest row', (
+      tester,
+    ) async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(
+            id: 't1',
+            startDate: _today.subtract(const Duration(days: 2)),
+            endDate: _today.add(const Duration(days: 2)),
+            createdAt: _today,
+          ),
+        );
+      final questRepo = FakeQuestRepository()..questsResult = const Right([]);
+      await _pump(tester, tripRepo: tripRepo, questRepo: questRepo);
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('+ Add a quest'), findsOneWidget);
+    });
+  });
 }

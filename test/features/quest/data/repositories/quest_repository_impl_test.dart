@@ -133,6 +133,25 @@ void main() {
         (_) => fail('expected Left'),
       );
     });
+
+    test('maps QuestPlanningClosedException (TRV04) to '
+        'QuestPlanningClosedFailure (#164)', () async {
+      final repo = QuestRepositoryImpl(
+        remote: _FakeQuestRemoteDataSource(
+          exception: const QuestPlanningClosedException(message: 'TRV04'),
+        ),
+      );
+      final result = await repo.addQuest(
+        tripId: 't1',
+        dayDate: DateTime(2026, 8, 18),
+        title: 'Pack the car',
+        position: 0,
+      );
+      result.fold(
+        (failure) => expect(failure, const QuestPlanningClosedFailure()),
+        (_) => fail('expected Left'),
+      );
+    });
   });
 
   group('QuestRepositoryImpl.updateQuest', () {

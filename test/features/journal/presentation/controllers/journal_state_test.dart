@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/journal/presentation/controllers/journal_state.dart';
 
 import '../../../photo/fakes/fake_photo_repository.dart';
+import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
 import '../../fakes/fake_day_note_repository.dart';
 
@@ -228,6 +229,49 @@ void main() {
 
     test('is true for a future day', () {
       expect(state.isDayLocked(_today.add(const Duration(days: 1))), isTrue);
+    });
+  });
+
+  group('showsToDo (#164)', () {
+    final created = DateTime(2026, 9, 10, 12);
+    final pastCreatedTrip = buildTripCard(
+      startDate: DateTime(2026, 8, 1),
+      endDate: DateTime(2026, 8, 5),
+      createdAt: created,
+    );
+
+    test('is false for a past-created memory with no quests', () {
+      expect(JournalState(trip: pastCreatedTrip).showsToDo, isFalse);
+    });
+
+    test('stays true for a past-created memory that already has quests', () {
+      final state = JournalState(
+        trip: pastCreatedTrip,
+        quests: [buildQuestEntity(dayDate: DateTime(2026, 8, 2))],
+      );
+      expect(state.showsToDo, isTrue);
+    });
+
+    test('is true for a memory created mid-trip, even with no quests', () {
+      final state = JournalState(
+        trip: buildTripCard(
+          startDate: DateTime(2026, 9, 8),
+          endDate: DateTime(2026, 9, 12),
+          createdAt: created,
+        ),
+      );
+      expect(state.showsToDo, isTrue);
+    });
+
+    test('is true for an upcoming memory', () {
+      final state = JournalState(
+        trip: buildTripCard(
+          startDate: DateTime(2026, 10, 1),
+          endDate: DateTime(2026, 10, 5),
+          createdAt: created,
+        ),
+      );
+      expect(state.showsToDo, isTrue);
     });
   });
 }
