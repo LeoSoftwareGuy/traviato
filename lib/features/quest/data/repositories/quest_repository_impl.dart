@@ -49,6 +49,8 @@ class QuestRepositoryImpl implements QuestRepository {
           position: position,
         ),
       );
+    } on QuestPlanningClosedException {
+      return const Left(QuestPlanningClosedFailure());
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
     } on NetworkException {

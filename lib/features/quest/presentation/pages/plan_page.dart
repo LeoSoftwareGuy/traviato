@@ -170,15 +170,17 @@ class _PlanContent extends ConsumerWidget {
               quest: quest,
             ),
           ),
-          if (currentDay.isNotEmpty) const SizedBox(height: AppSpacing.sm),
-          AddQuestRow(
-            dayNumber: state.currentDayNumber!,
-            onTap: () => AddEditQuestSheet.show(
-              context,
-              tripId: tripId,
-              dayDate: state.currentDayDate!,
+          if (state.canAddQuests) ...[
+            if (currentDay.isNotEmpty) const SizedBox(height: AppSpacing.sm),
+            AddQuestRow(
+              dayNumber: state.currentDayNumber!,
+              onTap: () => AddEditQuestSheet.show(
+                context,
+                tripId: tripId,
+                dayDate: state.currentDayDate!,
+              ),
             ),
-          ),
+          ],
         ],
       ],
     );

@@ -93,4 +93,35 @@ void main() {
       );
     });
   });
+
+  group('PlanState.canAddQuests (#164)', () {
+    final created = DateTime(2026, 9, 10, 12);
+
+    test('is false for a memory logged after its trip ended', () {
+      final trip = buildTripCard(
+        startDate: DateTime(2026, 8, 1),
+        endDate: DateTime(2026, 8, 5),
+        createdAt: created,
+      );
+      expect(PlanState(trip: trip, quests: const []).canAddQuests, isFalse);
+    });
+
+    test('is true for a memory created mid-trip', () {
+      final trip = buildTripCard(
+        startDate: DateTime(2026, 9, 8),
+        endDate: DateTime(2026, 9, 12),
+        createdAt: created,
+      );
+      expect(PlanState(trip: trip, quests: const []).canAddQuests, isTrue);
+    });
+
+    test('is true for an upcoming memory', () {
+      final trip = buildTripCard(
+        startDate: DateTime(2026, 10, 1),
+        endDate: DateTime(2026, 10, 5),
+        createdAt: created,
+      );
+      expect(PlanState(trip: trip, quests: const []).canAddQuests, isTrue);
+    });
+  });
 }

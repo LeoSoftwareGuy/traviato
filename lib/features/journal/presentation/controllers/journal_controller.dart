@@ -41,8 +41,9 @@ class JournalController extends _$JournalController {
       (n) => n,
     );
 
-    // Used only for the empty-day nudge's "N quests done" subtitle (#140) —
-    // the "To Do" sheet fetches its own day-scoped copy lazily.
+    // Used for the empty-day nudge's "N quests done" subtitle (#140) and to
+    // decide whether "To Do" is offered at all (#164) — the sheet itself
+    // fetches its own day-scoped copy lazily.
     final questsResult = await questRepo.getQuestsForTrip(tripId);
     final quests = questsResult.fold(
       (failure) => throw PresentationFailureException(failure),

@@ -22,6 +22,11 @@ class PlanState extends Equatable {
 
   int get totalQuestsPlanned => quests.length;
 
+  /// New quests can't be added to a memory logged after its trip ended
+  /// (#164) — Home never links here for one, but a deep link could. Existing
+  /// quests stay checkable/editable.
+  bool get canAddQuests => !trip.isPastCreated;
+
   int? get currentDayNumber {
     final day = currentDayDate;
     if (!hasDateRange || day == null) return null;

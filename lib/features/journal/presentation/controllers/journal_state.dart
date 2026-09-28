@@ -50,10 +50,16 @@ class JournalState extends Equatable {
   /// for editing.
   final List<DayNoteEntity> notes;
 
-  /// Every quest across the whole trip — fetched only for the empty-day
-  /// nudge's "N quests done" subtitle (#140); the "To Do" sheet fetches its
-  /// own day-scoped copy lazily and doesn't read this.
+  /// Every quest across the whole trip — fetched for the empty-day nudge's
+  /// "N quests done" subtitle (#140) and [showsToDo]; the "To Do" sheet
+  /// fetches its own day-scoped copy lazily and doesn't read this.
   final List<QuestEntity> quests;
+
+  /// "To Do" is hidden for a memory logged after its trip ended (#164) —
+  /// it never had a planning phase. If it already has quests (added before
+  /// that rule existed) they stay reachable: the sheet has no add row, so
+  /// it's read-only either way.
+  bool get showsToDo => !trip.isPastCreated || quests.isNotEmpty;
 
   bool get hasDateRange => trip.startDate != null && trip.endDate != null;
 
