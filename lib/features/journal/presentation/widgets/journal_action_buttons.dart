@@ -9,7 +9,8 @@ import '../controllers/journal_state.dart';
 import 'wrap_up_explainer_card.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 
-/// "To Do" (opens the day's quests) and "View wrap-up" (the gradient CTA,
+/// "To Do" (opens the day's quests — hidden per [JournalState.showsToDo],
+/// #164) and "View wrap-up" (the gradient CTA,
 /// docs/design/README.md § 8 — re-added now that M4-2 ships a real Wrap-up
 /// screen; a #26 commit had previously removed it as a designer
 /// miscommunication, before the wrap-up feature existed to link to).
@@ -34,24 +35,26 @@ class JournalActionButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final availability = state.wrapUpAvailability;
+    final showsToDo = state.showsToDo;
     return Column(
       children: [
-        OutlinedButton.icon(
-          key: const Key('journal-to-do-action'),
-          onPressed: onToDoTap,
-          icon: const Icon(Icons.calendar_today_outlined, size: 16),
-          label: const Text('To Do'),
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size.fromHeight(48),
-            foregroundColor: AppColors.textSecondary,
-            side: const BorderSide(color: AppColors.surfaceBorder),
+        if (showsToDo)
+          OutlinedButton.icon(
+            key: const Key('journal-to-do-action'),
+            onPressed: onToDoTap,
+            icon: const Icon(Icons.calendar_today_outlined, size: 16),
+            label: const Text('To Do'),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+              foregroundColor: AppColors.textSecondary,
+              side: const BorderSide(color: AppColors.surfaceBorder),
+            ),
           ),
-        ),
         if (availability == WrapUpAvailability.unlocked) ...[
-          const SizedBox(height: AppSpacing.sm),
+          if (showsToDo) const SizedBox(height: AppSpacing.sm),
           _WrapUpCta(onTap: onViewWrapUpTap),
         ] else if (availability == WrapUpAvailability.locked) ...[
-          const SizedBox(height: AppSpacing.sm),
+          if (showsToDo) const SizedBox(height: AppSpacing.sm),
           _WrapUpCtaLocked(askLine: state.wrapUpAskLine),
           const SizedBox(height: 11),
           WrapUpExplainerCard(state: state),
