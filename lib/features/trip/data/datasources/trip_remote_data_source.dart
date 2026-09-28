@@ -20,6 +20,11 @@ abstract interface class TripRemoteDataSource {
 
   Future<void> deleteTrip(String id);
 
+  /// Removes every file under the trip's `trip-photos` folder
+  /// (`{user_id}/{trip_id}/` — journal photos and a custom cover). The row
+  /// cascade can't do this: Postgres can't delete storage objects (#170).
+  Future<void> removeTripFiles(String tripId);
+
   Future<TripModel> updateTrip({
     required String id,
     String? name,

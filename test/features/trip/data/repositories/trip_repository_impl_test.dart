@@ -10,11 +10,30 @@ import 'package:traviato/features/trip/data/repositories/trip_repository_impl.da
 import 'package:traviato/features/trip/domain/entities/trip_card_entity.dart';
 
 class _FakeTripRemoteDataSource implements TripRemoteDataSource {
-  _FakeTripRemoteDataSource({this.exception});
+  _FakeTripRemoteDataSource({this.exception, this.removeFilesException});
 
   Exception? exception;
+  Exception? removeFilesException;
   String? lastCreateTripId;
   String? lastDeletedTripId;
+
+  /// Storage objects, as the `trip-photos` bucket would hold them.
+  final files = <String>{
+    'u1/t1/p1.jpg',
+    'u1/t1/p2.jpg',
+    'u1/t1/cover.jpg',
+    'u1/t2/p3.jpg',
+  };
+
+  /// Delete calls, in order — `row:<id>` / `files:<id>`.
+  final calls = <String>[];
+
+  @override
+  Future<void> removeTripFiles(String tripId) async {
+    calls.add('files:$tripId');
+    if (removeFilesException != null) throw removeFilesException!;
+    files.removeWhere((path) => path.startsWith('u1/$tripId/'));
+  }
 
   static final _trips = [
     TripCardModel(
@@ -71,6 +90,7 @@ class _FakeTripRemoteDataSource implements TripRemoteDataSource {
 
   @override
   Future<void> deleteTrip(String id) async {
+    calls.add('row:$id');
     if (exception != null) throw exception!;
     lastDeletedTripId = id;
   }
@@ -282,6 +302,36 @@ void main() {
       final result = await repo.deleteTrip('t1');
       expect(result.isRight(), isTrue);
       expect(remote.lastDeletedTripId, 't1');
+    });
+
+    test("removes all of the trip's storage files — photos and cover — "
+        'after the row, leaving other trips alone (#170)', () async {
+      final remote = _FakeTripRemoteDataSource();
+      await TripRepositoryImpl(remote: remote).deleteTrip('t1');
+
+      expect(remote.calls, ['row:t1', 'files:t1']);
+      expect(remote.files, {'u1/t2/p3.jpg'});
+    });
+
+    test('a failed row delete fails and keeps the files', () async {
+      final remote = _FakeTripRemoteDataSource(
+        exception: const NetworkException(),
+      );
+      final result = await TripRepositoryImpl(remote: remote).deleteTrip('t1');
+
+      expect(result.isLeft(), isTrue);
+      expect(remote.calls, ['row:t1']);
+      expect(remote.files, hasLength(4));
+    });
+
+    test('a failed file cleanup still succeeds — the memory is gone for '
+        'the user once its row is', () async {
+      final remote = _FakeTripRemoteDataSource(
+        removeFilesException: const StorageServerException(message: 'down'),
+      );
+      final result = await TripRepositoryImpl(remote: remote).deleteTrip('t1');
+
+      expect(result.isRight(), isTrue);
     });
 
     test('maps AuthenticationException to AuthenticationFailure', () async {
