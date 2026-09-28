@@ -15,6 +15,7 @@ import '../providers/photo_providers.dart';
 const _freeTierPhotoLimit = 40;
 
 final addPhotoMutation = Mutation<PhotoEntity>();
+final deletePhotoMutation = Mutation<void>();
 
 /// Reads EXIF, compresses, uploads, inserts the row, and awards ✦2.
 ///
@@ -73,5 +74,27 @@ Future<PhotoEntity> runAddPhoto({
         return photo;
       },
     );
+  });
+}
+
+/// Deletes a photo optimistically (#165): the Journal's strip, day-tab
+/// thumbnail and counts drop it at once — no confirmation, so deleting
+/// several in a row stays one tap each — and it's put back where it was if
+/// the delete fails. Earned stars are kept.
+Future<void> runDeletePhoto({
+  required WidgetRef ref,
+  required String tripId,
+  required PhotoEntity photo,
+}) {
+  return deletePhotoMutation.run(ref, (tsx) async {
+    final repo = tsx.get(photoRepositoryProvider);
+    final controller = tsx.get(journalControllerProvider(tripId).notifier);
+
+    final index = controller.applyPhotoDeleted(photo.id);
+    final result = await repo.deletePhoto(photo);
+    result.fold((failure) {
+      if (index != -1) controller.applyPhotoRestored(photo, index);
+      throw PresentationFailureException(failure);
+    }, (_) {});
   });
 }

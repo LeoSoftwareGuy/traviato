@@ -117,6 +117,31 @@ class JournalController extends _$JournalController {
     if (current == null) return;
     state = AsyncData(current.copyWith(photos: [...current.photos, photo]));
   }
+
+  /// Optimistically drops a photo (#165) and returns its position so a
+  /// failed delete can put it back exactly where it was; `-1` when it
+  /// wasn't there (or the journal isn't loaded).
+  int applyPhotoDeleted(String photoId) {
+    final current = state.value;
+    if (current == null) return -1;
+    final index = current.photos.indexWhere((p) => p.id == photoId);
+    if (index == -1) return -1;
+    state = AsyncData(
+      current.copyWith(photos: [...current.photos]..removeAt(index)),
+    );
+    return index;
+  }
+
+  /// Rolls back [applyPhotoDeleted] after a failed delete.
+  void applyPhotoRestored(PhotoEntity photo, int index) {
+    final current = state.value;
+    if (current == null || current.photos.any((p) => p.id == photo.id)) {
+      return;
+    }
+    final photos = [...current.photos]
+      ..insert(index.clamp(0, current.photos.length), photo);
+    state = AsyncData(current.copyWith(photos: photos));
+  }
 }
 
 DateTime? _initialDayDate(DateTime? startDate, DateTime? endDate) {
