@@ -82,6 +82,13 @@ class PhotoLimitException extends DatabaseException {
   const PhotoLimitException({required super.message});
 }
 
+/// A quest insert was rejected server-side (TRV04, #164) because the memory
+/// was created after its trip had already ended — there's no planning
+/// phase to add quests to. Maps to [QuestPlanningClosedFailure].
+class QuestPlanningClosedException extends DatabaseException {
+  const QuestPlanningClosedException({required super.message});
+}
+
 class StorageServerException extends AppException {
   const StorageServerException({required super.message});
 }
