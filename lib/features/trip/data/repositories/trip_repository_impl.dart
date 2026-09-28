@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:uuid/uuid.dart';
 
@@ -163,9 +162,13 @@ class TripRepositoryImpl implements TripRepository {
 
   @override
   Future<Either<Failure, void>> deleteTrip(String id) async {
+    // Row first (its cascade takes photos, notes, quests, ...), then the
+    // trip's storage files (#170). Files first would leave a memory with
+    // broken photos if the row delete then failed; this way round the
+    // worst case is orphaned files nobody can see, so a failed cleanup is
+    // logged rather than failing a delete the user already sees as done.
     try {
       await _remote.deleteTrip(id);
-      return const Right(null);
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
     } on NetworkException {
@@ -173,5 +176,11 @@ class TripRepositoryImpl implements TripRepository {
     } on AppException catch (e) {
       return Left(UnknownFailure(message: e.message));
     }
+    try {
+      await _remote.removeTripFiles(id);
+    } on AppException catch (e) {
+      debugPrint('Orphaned storage files for trip $id: ${e.message}');
+    }
+    return const Right(null);
   }
 }
