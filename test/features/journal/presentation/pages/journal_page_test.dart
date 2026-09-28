@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traviato/core/config/router/route_constants.dart';
+import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/home/domain/entities/profile_stats_entity.dart';
 import 'package:traviato/features/home/presentation/providers/profile_stats_provider.dart';
@@ -630,4 +631,71 @@ void main() {
       expect(find.text('Add notes about today'), findsOneWidget);
     },
   );
+
+  group('deleting a photo (#165)', () {
+    Future<FakePhotoRepository> openViewerOnFirstPhoto(
+      WidgetTester tester, {
+      Either<Failure, void>? deleteResult,
+    }) async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(id: 't1', startDate: _today, endDate: _today),
+        );
+      final photoRepo = FakePhotoRepository()
+        ..photosResult = Right([
+          buildPhotoEntity(id: 'p1', dayDate: _today),
+          buildPhotoEntity(id: 'p2', dayDate: _today),
+        ])
+        ..deletePhotoResult = deleteResult;
+      await _pump(
+        tester,
+        tripRepo: tripRepo,
+        photoRepo: photoRepo,
+        noteRepo: FakeDayNoteRepository(),
+      );
+      await tester.pumpAndSettle();
+      await tester.dragUntilVisible(
+        find.byKey(const Key('journal-photo-tile-p1')),
+        find.byKey(const Key('journal-content-list')),
+        const Offset(0, -200),
+      );
+      await tester.tap(find.byKey(const Key('journal-photo-tile-p1')));
+      await tester.pumpAndSettle();
+      return photoRepo;
+    }
+
+    Future<void> closeViewer(WidgetTester tester) async {
+      await tester.tap(find.byKey(const Key('photo-viewer-close')));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('removes it from the strip and the count immediately', (
+      tester,
+    ) async {
+      final photoRepo = await openViewerOnFirstPhoto(tester);
+
+      await tester.tap(find.byKey(const Key('photo-viewer-delete')));
+      await tester.pumpAndSettle();
+      await closeViewer(tester);
+
+      expect(photoRepo.deletedPhotoIds, ['p1']);
+      expect(find.byKey(const Key('journal-photo-tile-p1')), findsNothing);
+      expect(find.byKey(const Key('journal-photo-tile-p2')), findsOneWidget);
+      expect(find.text('1 saved'), findsOneWidget);
+    });
+
+    testWidgets('a failed delete puts it back in the strip', (tester) async {
+      await openViewerOnFirstPhoto(
+        tester,
+        deleteResult: const Left(NetworkFailure()),
+      );
+
+      await tester.tap(find.byKey(const Key('photo-viewer-delete')));
+      await tester.pumpAndSettle();
+      await closeViewer(tester);
+
+      expect(find.byKey(const Key('journal-photo-tile-p1')), findsOneWidget);
+      expect(find.text('2 saved'), findsOneWidget);
+    });
+  });
 }
