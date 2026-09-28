@@ -225,4 +225,59 @@ void main() {
     final state = container.read(journalControllerProvider('t1')).value!;
     expect(state.currentNote?.content, 'Updated.');
   });
+
+  group('photo delete/restore (#165)', () {
+    Future<ProviderContainer> loaded() async {
+      final today = DateTime.now();
+      final container = _buildContainer(
+        tripRepo: FakeTripRepository()
+          ..tripCardResult = Right(
+            buildTripCard(
+              id: 't1',
+              startDate: today.subtract(const Duration(days: 1)),
+              endDate: today.add(const Duration(days: 1)),
+            ),
+          ),
+        photoRepo: FakePhotoRepository()
+          ..photosResult = Right([
+            buildPhotoEntity(id: 'p1'),
+            buildPhotoEntity(id: 'p2'),
+            buildPhotoEntity(id: 'p3'),
+          ]),
+        noteRepo: FakeDayNoteRepository(),
+      );
+      await container.read(journalControllerProvider('t1').future);
+      return container;
+    }
+
+    List<String> ids(ProviderContainer c) => [
+      for (final p in c.read(journalControllerProvider('t1')).value!.photos)
+        p.id,
+    ];
+
+    test('applyPhotoDeleted drops the photo and returns its index', () async {
+      final container = await loaded();
+      addTearDown(container.dispose);
+      final controller = container.read(
+        journalControllerProvider('t1').notifier,
+      );
+
+      expect(controller.applyPhotoDeleted('p2'), 1);
+      expect(ids(container), ['p1', 'p3']);
+      expect(controller.applyPhotoDeleted('missing'), -1);
+    });
+
+    test('applyPhotoRestored puts it back where it was', () async {
+      final container = await loaded();
+      addTearDown(container.dispose);
+      final controller = container.read(
+        journalControllerProvider('t1').notifier,
+      );
+
+      final index = controller.applyPhotoDeleted('p2');
+      controller.applyPhotoRestored(buildPhotoEntity(id: 'p2'), index);
+
+      expect(ids(container), ['p1', 'p2', 'p3']);
+    });
+  });
 }

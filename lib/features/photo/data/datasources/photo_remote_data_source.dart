@@ -17,4 +17,12 @@ abstract interface class PhotoRemoteDataSource {
     double? lng,
     DateTime? takenAt,
   });
+
+  /// Deletes the `photos` row via the `delete_photo` RPC, which also takes
+  /// back the photo's ✦2 — unless it completed a bonus task, whose stars
+  /// all stay (#165).
+  Future<void> deletePhotoRow(String id);
+
+  /// Removes the photo's file from the `trip-photos` bucket.
+  Future<void> removePhotoFile(String storagePath);
 }

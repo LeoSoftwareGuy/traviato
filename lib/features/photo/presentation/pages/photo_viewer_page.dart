@@ -5,10 +5,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../domain/entities/photo_entity.dart';
 
 final _takenAtFormat = DateFormat('MMM d, h:mm a');
@@ -46,23 +48,33 @@ int wrappedPhotoIndex(int page, int photoCount) =>
 /// cubic on release — past [_commitDistance] (or a fast flick) to the
 /// neighbour, otherwise back to centre. Paging wraps at both ends.
 ///
-/// Deliberately minimal: no place row, people tagging, caption editing, or
-/// Set-as-cover/Use-in-wrap-up actions — those belong to the M3-8 detail
-/// screen.
+/// When [onDelete] is given, a trash button (top-left, mirroring close)
+/// deletes the current photo at once — no confirmation (#165), so clearing
+/// several photos stays one tap each. The viewer moves on to the next photo,
+/// closes once none are left, and puts the photo back if [onDelete] throws.
+///
+/// Otherwise deliberately minimal: no place row, people tagging, caption
+/// editing, or Set-as-cover/Use-in-wrap-up actions — those belong to the
+/// M3-8 detail screen.
 class PhotoViewerPage extends StatefulWidget {
   const PhotoViewerPage({
     required this.photos,
     required this.initialIndex,
+    this.onDelete,
     super.key,
   }) : assert(photos.length > 0, 'PhotoViewerPage needs at least one photo');
 
   final List<PhotoEntity> photos;
   final int initialIndex;
 
+  /// Deletes a photo; throws on failure. `null` hides the trash button.
+  final Future<void> Function(PhotoEntity photo)? onDelete;
+
   static Future<void> show(
     BuildContext context, {
     required List<PhotoEntity> photos,
     required int initialIndex,
+    Future<void> Function(PhotoEntity photo)? onDelete,
   }) {
     return showGeneralDialog<void>(
       context: context,
@@ -70,8 +82,11 @@ class PhotoViewerPage extends StatefulWidget {
       // tap-to-close itself, so the route's barrier stays invisible/inert.
       barrierColor: Colors.transparent,
       transitionDuration: _fadeInDuration,
-      pageBuilder: (_, _, _) =>
-          PhotoViewerPage(photos: photos, initialIndex: initialIndex),
+      pageBuilder: (_, _, _) => PhotoViewerPage(
+        photos: photos,
+        initialIndex: initialIndex,
+        onDelete: onDelete,
+      ),
       transitionBuilder: (_, animation, _, child) => FadeTransition(
         opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
         child: child,
@@ -93,11 +108,19 @@ class _PhotoViewerPageState extends State<PhotoViewerPage>
   /// [wrappedPhotoIndex].
   late int _page;
 
+  /// The viewer's own copy, so a delete can drop a photo without waiting on
+  /// the Journal to rebuild the route.
+  late final List<PhotoEntity> _photos = [...widget.photos];
+
+  /// Context under the viewer's own [ScaffoldMessenger] — the Journal's
+  /// messenger sits behind this overlay, so its snackbars wouldn't show.
+  late BuildContext _overlayContext;
+
   double _dragStartValue = 0;
   double _dragDx = 0;
   double _trackWidth = 1;
 
-  int get _count => widget.photos.length;
+  int get _count => _photos.length;
   bool get _hasMultiple => _count > 1;
   int get _currentIndex => wrappedPhotoIndex(_page, _count);
 
@@ -156,13 +179,62 @@ class _PhotoViewerPageState extends State<PhotoViewerPage>
 
   void _close() => Navigator.of(context).pop();
 
+  /// Jumps (no slide) to [index] — used when the list itself changes.
+  void _showIndex(int index) {
+    _page = index;
+    _track.value = index.toDouble();
+  }
+
+  Future<void> _deleteCurrent() async {
+    final onDelete = widget.onDelete;
+    if (onDelete == null) return;
+    final index = _currentIndex;
+    final photo = _photos[index];
+    if (_count == 1) {
+      _close();
+    } else {
+      setState(() {
+        _photos.removeAt(index);
+        // The same slot now holds the next photo; past the end, wrap to
+        // the first — the same direction "next" pages.
+        _showIndex(index < _count ? index : 0);
+      });
+    }
+
+    try {
+      await onDelete(photo);
+    } catch (error) {
+      // Closed already (it was the last photo): the Journal shows the
+      // error and its strip gets the photo back.
+      if (!mounted) return;
+      // Show the photo that came back, so the error reads against it.
+      setState(() {
+        final at = index.clamp(0, _count);
+        _photos.insert(at, photo);
+        _showIndex(at);
+      });
+      showErrorSnackbar(
+        _overlayContext,
+        message: presentationFailureMessage(error),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // A general-dialog route has no Material of its own — this supplies the
-    // default text style and the ink surface for the buttons.
-    return Material(
-      type: MaterialType.transparency,
-      child: _buildOverlay(),
+    // A general-dialog route has no Material of its own — the transparent
+    // Scaffold supplies the default text style and ink surface, and its
+    // messenger lets a failed delete's snackbar show above the overlay.
+    return ScaffoldMessenger(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Builder(
+          builder: (context) {
+            _overlayContext = context;
+            return _buildOverlay();
+          },
+        ),
+      ),
     );
   }
 
@@ -203,7 +275,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage>
                   children: [
                     Flexible(child: _buildTrackArea()),
                     _PhotoInfo(
-                      photo: widget.photos[_currentIndex],
+                      photo: _photos[_currentIndex],
                       index: _currentIndex,
                       total: _count,
                     ),
@@ -249,6 +321,19 @@ class _PhotoViewerPageState extends State<PhotoViewerPage>
                   onTap: _close,
                 ),
               ),
+              if (widget.onDelete != null)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  child: _RoundIconButton(
+                    key: const Key('photo-viewer-delete'),
+                    icon: Icons.delete_outline,
+                    semanticLabel: 'Delete photo',
+                    diameter: 32,
+                    iconSize: 16,
+                    onTap: _deleteCurrent,
+                  ),
+                ),
             ],
           ),
         );
@@ -335,7 +420,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage>
             bottom: 0,
             width: _trackWidth,
             child: _Slide(
-              photo: widget.photos[wrappedPhotoIndex(page, _count)],
+              photo: _photos[wrappedPhotoIndex(page, _count)],
               maxImageHeight: maxImageHeight,
             ),
           ),
@@ -393,9 +478,11 @@ class _RoundIconButton extends StatelessWidget {
     required this.diameter,
     required this.iconSize,
     required this.onTap,
+    this.semanticLabel,
   });
 
   final IconData icon;
+  final String? semanticLabel;
   final double diameter;
   final double iconSize;
   final VoidCallback onTap;
@@ -412,7 +499,12 @@ class _RoundIconButton extends StatelessWidget {
         onTap: onTap,
         child: SizedBox.square(
           dimension: diameter,
-          child: Icon(icon, color: AppColors.textPrimary, size: iconSize),
+          child: Icon(
+            icon,
+            color: AppColors.textPrimary,
+            size: iconSize,
+            semanticLabel: semanticLabel,
+          ),
         ),
       ),
     );

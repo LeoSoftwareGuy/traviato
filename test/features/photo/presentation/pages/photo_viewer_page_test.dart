@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
 import 'package:traviato/features/photo/presentation/pages/photo_viewer_page.dart';
 
@@ -9,6 +10,7 @@ Future<void> _openViewer(
   WidgetTester tester, {
   required List<PhotoEntity> photos,
   required int initialIndex,
+  Future<void> Function(PhotoEntity photo)? onDelete,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -20,6 +22,7 @@ Future<void> _openViewer(
                 context,
                 photos: photos,
                 initialIndex: initialIndex,
+                onDelete: onDelete,
               ),
               child: const Text('Open'),
             ),
@@ -214,6 +217,95 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(PhotoViewerPage), findsOneWidget);
+    });
+  });
+
+  group('delete (#165)', () {
+    final delete = find.byKey(const Key('photo-viewer-delete'));
+
+    List<PhotoEntity> captioned(int count) => [
+      for (var i = 1; i <= count; i++)
+        buildPhotoEntity(id: 'p$i', caption: 'Photo $i'),
+    ];
+
+    testWidgets('has no trash button without onDelete', (tester) async {
+      await _openViewer(tester, photos: _photos(2), initialIndex: 0);
+      expect(delete, findsNothing);
+    });
+
+    testWidgets('deletes at once — no confirmation — and shows the next '
+        'photo', (tester) async {
+      final deleted = <String>[];
+      await _openViewer(
+        tester,
+        photos: captioned(3),
+        initialIndex: 1,
+        onDelete: (photo) async => deleted.add(photo.id),
+      );
+
+      await tester.tap(delete);
+      await tester.pumpAndSettle();
+
+      expect(deleted, ['p2']);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.text('Photo 3'), findsOneWidget);
+      expect(find.text('2 / 2'), findsOneWidget);
+    });
+
+    testWidgets('deleting the last photo in the list wraps to the first', (
+      tester,
+    ) async {
+      await _openViewer(
+        tester,
+        photos: captioned(3),
+        initialIndex: 2,
+        onDelete: (_) async {},
+      );
+
+      await tester.tap(delete);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Photo 1'), findsOneWidget);
+      expect(find.text('1 / 2'), findsOneWidget);
+    });
+
+    testWidgets('tapping repeatedly clears the day and closes the viewer', (
+      tester,
+    ) async {
+      final deleted = <String>[];
+      await _openViewer(
+        tester,
+        photos: captioned(3),
+        initialIndex: 0,
+        onDelete: (photo) async => deleted.add(photo.id),
+      );
+
+      for (var i = 0; i < 3; i++) {
+        await tester.tap(delete);
+        await tester.pumpAndSettle();
+      }
+
+      expect(deleted, ['p1', 'p2', 'p3']);
+      expect(_pager, findsNothing);
+      expect(find.text('Open'), findsOneWidget);
+    });
+
+    testWidgets('a failed delete puts the photo back and shows the error', (
+      tester,
+    ) async {
+      await _openViewer(
+        tester,
+        photos: captioned(2),
+        initialIndex: 0,
+        onDelete: (_) async => throw const NetworkFailure(),
+      );
+
+      await tester.tap(delete);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Photo 1'), findsOneWidget);
+      expect(find.text('1 / 2'), findsOneWidget);
+      expect(find.text(const NetworkFailure().message), findsOneWidget);
     });
   });
 }

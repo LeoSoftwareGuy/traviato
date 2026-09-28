@@ -41,8 +41,9 @@ final class TripUpdatedDispatched extends GlobalEvent {
   List<Object?> get props => [trip];
 }
 
-/// Fired after any action that awards stars — quest check-off, day-note
-/// save, photo add, bonus-task completion (issue #77). No payload: the
+/// Fired after any action that changes the star total — quest check-off,
+/// day-note save, photo add, bonus-task completion (issue #77), and a photo
+/// delete taking its ✦2 back (#165). No payload: the
 /// only subscriber is the Home stars/stats badge, which just refetches the
 /// aggregate `profile_stats_view` rather than reconciling an amount.
 final class StarsAwardedDispatched extends GlobalEvent {

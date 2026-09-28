@@ -1,17 +1,47 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/exceptions.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/features/photo/data/datasources/photo_remote_data_source.dart';
 import 'package:traviato/features/photo/data/models/photo_model.dart';
 import 'package:traviato/features/photo/data/repositories/photo_repository_impl.dart';
 
+import '../../fakes/fake_photo_repository.dart';
+
 class _FakePhotoRemoteDataSource implements PhotoRemoteDataSource {
-  _FakePhotoRemoteDataSource({this.exception});
+  _FakePhotoRemoteDataSource({
+    this.exception,
+    this.deleteRowException,
+    this.removeFileException,
+  });
 
   Exception? exception;
+  Exception? deleteRowException;
+  Exception? removeFileException;
   String? lastAddedId;
+
+  /// Rows and storage objects, as a real backend would hold them.
+  final rows = <String>{'p1'};
+  final files = <String>{'u1/t1/p1.jpg'};
+
+  /// Every delete call, in order — `row:<id>` / `file:<path>`.
+  final calls = <String>[];
+
+  @override
+  Future<void> deletePhotoRow(String id) async {
+    calls.add('row:$id');
+    if (deleteRowException != null) throw deleteRowException!;
+    rows.remove(id);
+  }
+
+  @override
+  Future<void> removePhotoFile(String storagePath) async {
+    calls.add('file:$storagePath');
+    if (removeFileException != null) throw removeFileException!;
+    files.remove(storagePath);
+  }
 
   @override
   Future<List<PhotoModel>> getPhotosForTrip(String tripId) async {
@@ -162,5 +192,61 @@ void main() {
         );
       },
     );
+  });
+
+  group('PhotoRepositoryImpl.deletePhoto (#165)', () {
+    final photo = buildPhotoEntity(id: 'p1', storagePath: 'u1/t1/p1.jpg');
+
+    test('removes both the row and the storage object, row first', () async {
+      final remote = _FakePhotoRemoteDataSource();
+      final result = await PhotoRepositoryImpl(
+        remote: remote,
+      ).deletePhoto(photo);
+
+      expect(result.isRight(), isTrue);
+      expect(remote.rows, isEmpty);
+      expect(remote.files, isEmpty);
+      expect(remote.calls, ['row:p1', 'file:u1/t1/p1.jpg']);
+    });
+
+    test('a failed row delete fails and leaves the file alone', () async {
+      final remote = _FakePhotoRemoteDataSource(
+        deleteRowException: const NetworkException(),
+      );
+      final result = await PhotoRepositoryImpl(
+        remote: remote,
+      ).deletePhoto(photo);
+
+      expect(result, const Left<Failure, void>(NetworkFailure()));
+      expect(remote.files, contains('u1/t1/p1.jpg'));
+      expect(remote.calls, ['row:p1']);
+    });
+
+    test('maps PermissionException to PermissionFailure', () async {
+      final remote = _FakePhotoRemoteDataSource(
+        deleteRowException: const PermissionException(message: 'rls'),
+      );
+      final result = await PhotoRepositoryImpl(
+        remote: remote,
+      ).deletePhoto(photo);
+
+      expect(
+        result,
+        const Left<Failure, void>(PermissionFailure(message: 'rls')),
+      );
+    });
+
+    test('a failed file removal still succeeds — the photo is gone for the '
+        'user once its row is', () async {
+      final remote = _FakePhotoRemoteDataSource(
+        removeFileException: const StorageServerException(message: 'down'),
+      );
+      final result = await PhotoRepositoryImpl(
+        remote: remote,
+      ).deletePhoto(photo);
+
+      expect(result.isRight(), isTrue);
+      expect(remote.rows, isEmpty);
+    });
   });
 }

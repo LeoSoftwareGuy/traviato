@@ -20,6 +20,9 @@ class FakePhotoRepository implements PhotoRepository {
   Uint8List? lastAddedBytes;
   DateTime? lastAddedDayDate;
 
+  Either<Failure, void>? deletePhotoResult;
+  final deletedPhotoIds = <String>[];
+
   @override
   Future<Either<Failure, List<PhotoEntity>>> getPhotosForTrip(
     String tripId,
@@ -58,6 +61,12 @@ class FakePhotoRepository implements PhotoRepository {
             takenAt: takenAt,
           ),
         );
+  }
+
+  @override
+  Future<Either<Failure, void>> deletePhoto(PhotoEntity photo) async {
+    deletedPhotoIds.add(photo.id);
+    return deletePhotoResult ?? const Right(null);
   }
 }
 

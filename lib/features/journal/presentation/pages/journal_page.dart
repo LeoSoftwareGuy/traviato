@@ -14,6 +14,7 @@ import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../../core/widgets/star_award_toast.dart';
 import '../../../home/domain/entities/profile_stats_entity.dart';
 import '../../../home/presentation/controllers/profile_stats_controller.dart';
+import '../../../photo/presentation/mutations/photo_mutations.dart';
 import '../../../photo/presentation/pages/photo_viewer_page.dart';
 import '../../../photo/presentation/widgets/add_photo_sheet.dart';
 import '../controllers/journal_controller.dart';
@@ -36,6 +37,16 @@ class JournalPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen<MutationState<dynamic>>(upsertNoteMutation, (previous, next) {
+      if (next is MutationError) {
+        showErrorSnackbar(
+          context,
+          message: presentationFailureMessage(next.error),
+        );
+      }
+    });
+    // Covers a failed delete of a day's last photo — the viewer has already
+    // closed by then, so it can't show the error itself (#165).
+    ref.listen<MutationState<void>>(deletePhotoMutation, (previous, next) {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
@@ -232,6 +243,8 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
                 context,
                 photos: state.photosForCurrentDay,
                 initialIndex: index,
+                onDelete: (photo) =>
+                    runDeletePhoto(ref: ref, tripId: tripId, photo: photo),
               ),
             ),
           ],
