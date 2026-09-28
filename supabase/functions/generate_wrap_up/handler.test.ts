@@ -1,5 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { type Deps, handleRequest } from "./handler.ts";
+import { LOG_PREFIX, WrapUpGenerationError } from "./anthropic.ts";
 import { fakeAuthClient, fakeSupabaseClient } from "./test_fakes.ts";
 import { validAiFields, validWrapUpContent } from "./test_fixtures.ts";
 
@@ -156,7 +157,39 @@ Deno.test("handleRequest generates, assembles, saves and returns new content", a
 Deno.test("handleRequest returns 502 when generation fails", async () => {
   const deps = baseDeps({
     generateAiFields: () => Promise.reject(new Error("model refused")),
+    log: () => {},
   });
   const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
   assertEquals(res.status, 502);
+});
+
+// #166: the 502 body says which upstream failure it was, and one summary
+// line with the trip id is logged for the dashboard.
+Deno.test("handleRequest's 502 carries the generation error's code and detail, and logs it", async () => {
+  const lines: string[] = [];
+  const deps = baseDeps({
+    generateAiFields: () =>
+      Promise.reject(
+        new WrapUpGenerationError(
+          "ai_upstream_error",
+          "Anthropic API error: 529",
+        ),
+      ),
+    log: (line) => lines.push(line),
+  });
+  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
+  assertEquals(res.status, 502);
+  assertEquals(await res.json(), {
+    error: "wrap-up generation failed: Anthropic API error: 529",
+    code: "ai_upstream_error",
+    detail: "Anthropic API error: 529",
+  });
+  assertEquals(lines.length, 1);
+  const logged = JSON.parse(lines[0].slice(LOG_PREFIX.length + 1));
+  assertEquals(logged, {
+    event: "generation_failed",
+    trip_id: TRIP_ID,
+    code: "ai_upstream_error",
+    detail: "Anthropic API error: 529",
+  });
 });
