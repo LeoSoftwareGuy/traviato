@@ -7,6 +7,7 @@
 import { gatherTripData, type TripData } from "./gather.ts";
 import { assembleWrapUpContent } from "./assemble.ts";
 import type { AiGeneratedFields } from "./ai_fields.ts";
+import { logEvent, type LogLike, WrapUpGenerationError } from "./anthropic.ts";
 
 // deno-lint-ignore no-explicit-any
 type SupabaseClient = any;
@@ -15,6 +16,9 @@ export interface Deps {
   serviceClient: SupabaseClient;
   authClient: (authHeader: string) => SupabaseClient;
   generateAiFields: (tripData: TripData) => Promise<AiGeneratedFields>;
+  // Defaults to `console.error` — see anthropic.ts's `[generate_wrap_up]`
+  // log lines (#166).
+  log?: LogLike;
 }
 
 function json(body: unknown, status: number): Response {
@@ -95,8 +99,22 @@ export async function handleRequest(
   try {
     aiFields = await deps.generateAiFields(tripData);
   } catch (err) {
+    // `error` keeps its old shape (the Dart client reads it as the
+    // message); `code` + `detail` say which of the three upstream failures
+    // this was (#166) — all 502, distinct from 401/403/404/500.
+    const code = err instanceof WrapUpGenerationError
+      ? err.code
+      : "ai_output_invalid";
+    const detail = (err as Error).message;
+    logEvent(deps.log ?? console.error, "generation_failed", {
+      trip_id: tripId,
+      code,
+      detail,
+    });
     return json({
-      error: `wrap-up generation failed: ${(err as Error).message}`,
+      error: `wrap-up generation failed: ${detail}`,
+      code,
+      detail,
     }, 502);
   }
 

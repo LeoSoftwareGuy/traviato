@@ -11,11 +11,17 @@
 // Model is claude-sonnet-5 — wrap-up playback is the app's headline feature,
 // so narrative quality wins over the lower cost of a smaller model here
 // (unchanged from #93's decision; the prompt got smaller, not the model).
+//
+// Every failed attempt logs one `[generate_wrap_up]` JSON line (#166) — the
+// status/body of an HTTP error, or the stop_reason, block types, raw tool
+// input and per-field problems of an invalid response — so a failure is
+// debuggable from the dashboard's function logs. The API key and the prompt
+// (the user's day notes) are never logged; raw payloads are truncated.
 
 import {
   type AiGeneratedFields,
   aiGeneratedFieldsToolSchema,
-  validateAiGeneratedFields,
+  describeAiFieldsProblems,
 } from "./ai_fields.ts";
 import type { TripData } from "./gather.ts";
 import { inclusiveDayCount } from "./assemble.ts";
@@ -26,7 +32,53 @@ const MODEL = "claude-sonnet-5";
 const MAX_TOKENS = 1024;
 const MAX_ATTEMPTS = 2;
 
+// Raw payloads in logs are cut to this many characters.
+const MAX_LOGGED_CHARS = 4000;
+
 export type FetchLike = typeof fetch;
+
+// Where failure lines go — `console.error` in production, a capturing
+// stub in tests.
+export type LogLike = (line: string) => void;
+
+export const LOG_PREFIX = "[generate_wrap_up]";
+
+export function logEvent(
+  log: LogLike,
+  event: string,
+  fields: Record<string, unknown>,
+): void {
+  log(`${LOG_PREFIX} ${JSON.stringify({ event, ...fields })}`);
+}
+
+export function truncate(text: string): string {
+  return text.length <= MAX_LOGGED_CHARS
+    ? text
+    : `${text.slice(0, MAX_LOGGED_CHARS)}… [${
+      text.length - MAX_LOGGED_CHARS
+    } more chars]`;
+}
+
+// Why generation failed, as the 502 body's `code` (#166):
+// - `ai_output_invalid`: Anthropic answered, but the tool input didn't
+//   match the schema (e.g. truncated at max_tokens, a missing field).
+// - `ai_upstream_error`: Anthropic returned a non-2xx status.
+// - `ai_unreachable`: the request never got a response.
+// When attempts fail differently, the last attempt's reason wins.
+export type WrapUpGenerationErrorCode =
+  | "ai_output_invalid"
+  | "ai_upstream_error"
+  | "ai_unreachable";
+
+export class WrapUpGenerationError extends Error {
+  constructor(
+    readonly code: WrapUpGenerationErrorCode,
+    readonly detail: string,
+  ) {
+    super(detail);
+    this.name = "WrapUpGenerationError";
+  }
+}
 
 function buildPrompt(tripData: TripData): string {
   const { trip, notes, latestAchievement } = tripData;
@@ -58,45 +110,115 @@ function buildPrompt(tripData: TripData): string {
   ].join("");
 }
 
+interface ContentBlock {
+  type: string;
+  input?: unknown;
+  text?: string;
+}
+
 export async function callAnthropic(
   tripData: TripData,
   apiKey: string,
   fetchImpl: FetchLike = fetch,
+  log: LogLike = console.error,
 ): Promise<AiGeneratedFields> {
-  let lastError = "Anthropic call failed";
+  let lastError = new WrapUpGenerationError(
+    "ai_unreachable",
+    "Anthropic call failed",
+  );
 
-  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-    const response = await fetchImpl(ANTHROPIC_API_URL, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": ANTHROPIC_VERSION,
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: MAX_TOKENS,
-        messages: [{ role: "user", content: buildPrompt(tripData) }],
-        tools: [aiGeneratedFieldsToolSchema],
-        tool_choice: { type: "tool", name: aiGeneratedFieldsToolSchema.name },
-      }),
-    });
-
-    if (!response.ok) {
-      lastError = `Anthropic API error: ${response.status} ${await response
-        .text()}`;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    let response: Response;
+    try {
+      response = await fetchImpl(ANTHROPIC_API_URL, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": ANTHROPIC_VERSION,
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: MAX_TOKENS,
+          messages: [{ role: "user", content: buildPrompt(tripData) }],
+          tools: [aiGeneratedFieldsToolSchema],
+          tool_choice: {
+            type: "tool",
+            name: aiGeneratedFieldsToolSchema.name,
+          },
+        }),
+      });
+    } catch (err) {
+      const message = (err as Error).message;
+      logEvent(log, "fetch_failed", { attempt, error: message });
+      lastError = new WrapUpGenerationError(
+        "ai_unreachable",
+        `Anthropic request failed: ${message}`,
+      );
       continue;
     }
 
-    const body = await response.json();
-    const toolUse = (body.content ?? []).find(
-      (block: { type: string }) => block.type === "tool_use",
-    );
-    if (toolUse && validateAiGeneratedFields(toolUse.input)) {
-      return toolUse.input;
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      logEvent(log, "http_error", {
+        attempt,
+        status: response.status,
+        body: truncate(text),
+      });
+      lastError = new WrapUpGenerationError(
+        "ai_upstream_error",
+        `Anthropic API error: ${response.status}`,
+      );
+      continue;
     }
-    lastError = "Anthropic response failed generated-fields validation";
+
+    const rawText = await response.text();
+    let body: { content?: ContentBlock[]; stop_reason?: string };
+    try {
+      body = JSON.parse(rawText);
+    } catch {
+      logEvent(log, "invalid_ai_output", {
+        attempt,
+        problems: ["response body is not JSON"],
+        raw_body: truncate(rawText),
+      });
+      lastError = new WrapUpGenerationError(
+        "ai_output_invalid",
+        "Anthropic response body is not JSON",
+      );
+      continue;
+    }
+
+    const blocks = body.content ?? [];
+    const toolUse = blocks.find((block) => block.type === "tool_use");
+    const problems = toolUse
+      ? describeAiFieldsProblems(toolUse.input)
+      : ["no tool_use block in the response"];
+    if (problems.length === 0) {
+      return toolUse!.input as AiGeneratedFields;
+    }
+
+    const text = blocks
+      .filter((block) => block.type === "text")
+      .map((block) => block.text ?? "")
+      .join("\n");
+    logEvent(log, "invalid_ai_output", {
+      attempt,
+      stop_reason: body.stop_reason ?? null,
+      block_types: blocks.map((block) => block.type),
+      problems,
+      raw_tool_input: toolUse
+        ? truncate(JSON.stringify(toolUse.input) ?? "undefined")
+        : null,
+      raw_text: text ? truncate(text) : null,
+    });
+    lastError = new WrapUpGenerationError(
+      "ai_output_invalid",
+      `Anthropic response failed generated-fields validation (stop_reason: ${
+        body.stop_reason ?? "unknown"
+      }; ${problems.join("; ")})`,
+    );
   }
 
-  throw new Error(lastError);
+  throw lastError;
 }
