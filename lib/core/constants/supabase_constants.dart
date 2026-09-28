@@ -58,6 +58,9 @@ abstract class PostgresErrors {
   static const freeTierMemoryLimit = 'TRV01';
   static const freeTierPhotoLimit = 'TRV02';
   static const photoCeiling = 'TRV03';
+
+  /// Quest insert on a memory created after its trip had ended (#164).
+  static const questPlanningClosed = 'TRV04';
 }
 
 abstract class Roles {

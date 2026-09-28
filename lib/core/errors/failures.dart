@@ -90,3 +90,14 @@ class PhotoLimitFailure extends Failure {
         'unlimited photos.',
   });
 }
+
+/// Server-side counterpart is TRV04 (#164) — quests can't be added to a
+/// memory that was logged after its trip had already ended. The UI never
+/// offers it, so this only surfaces on a stale screen or a direct call.
+class QuestPlanningClosedFailure extends Failure {
+  const QuestPlanningClosedFailure({
+    super.message =
+        "This memory was logged after the trip ended, so there's nothing "
+        'to plan.',
+  });
+}

@@ -185,6 +185,9 @@ AppException _mapPostgrestException(PostgrestException e) {
   if (e.code == PostgresErrors.moreThanOneOrNoItemsReturned) {
     return NotFoundException(message: e.message);
   }
+  if (e.code == PostgresErrors.questPlanningClosed) {
+    return QuestPlanningClosedException(message: e.message);
+  }
   return DatabaseException(message: e.message);
 }
 

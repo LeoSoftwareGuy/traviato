@@ -18,6 +18,15 @@ const _signedUrlTtlSeconds = 3600;
 String _coverStoragePath({required String userId, required String tripId}) =>
     '$userId/$tripId/cover.jpg';
 
+/// Files listed (and removed) per round in [SupabaseTripRemoteDataSource
+/// .removeTripFiles].
+const _removeBatchSize = 1000;
+
+/// Upper bound on list-and-remove rounds — comfortably above the 2,000
+/// photos/memory ceiling (TRV03) plus a cover, so a listing that somehow
+/// never empties can't spin forever.
+const _maxRemoveRounds = 5;
+
 class SupabaseTripRemoteDataSource implements TripRemoteDataSource {
   SupabaseTripRemoteDataSource({required SupabaseClient client})
     : _client = client;
@@ -263,6 +272,37 @@ class SupabaseTripRemoteDataSource implements TripRemoteDataSource {
       return await _client.storage
           .from(Storage.tripPhotos)
           .createSignedUrl(storagePath, _signedUrlTtlSeconds);
+    } on StorageException catch (e) {
+      throw StorageServerException(message: e.message);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<void> removeTripFiles(String tripId) async {
+    final user = _client.auth.currentUser;
+    if (user == null) {
+      throw const AuthenticationException(
+        message: 'User is not authenticated',
+      );
+    }
+    final folder = '${user.id}/$tripId';
+    final bucket = _client.storage.from(Storage.tripPhotos);
+    try {
+      // Always re-list from the start: each round removes what it saw, so
+      // the next listing only holds whatever is left.
+      for (var round = 0; round < _maxRemoveRounds; round++) {
+        final files = await bucket.list(
+          path: folder,
+          searchOptions: const SearchOptions(limit: _removeBatchSize),
+        );
+        if (files.isEmpty) return;
+        await bucket.remove([for (final f in files) '$folder/${f.name}']);
+        if (files.length < _removeBatchSize) return;
+      }
     } on StorageException catch (e) {
       throw StorageServerException(message: e.message);
     } on SocketException {

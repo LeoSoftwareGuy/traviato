@@ -11,6 +11,7 @@ import 'package:traviato/features/home/presentation/providers/profile_stats_prov
 import 'package:traviato/features/journal/presentation/pages/journal_page.dart';
 import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
+import 'package:traviato/features/quest/domain/entities/quest_entity.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/subscription/presentation/providers/subscription_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
@@ -710,6 +711,87 @@ void main() {
 
       expect(find.byKey(const Key('journal-photo-tile-p1')), findsOneWidget);
       expect(find.text('2 saved'), findsOneWidget);
+    });
+  });
+
+  group('To Do visibility (#164)', () {
+    Future<void> pumpWith(
+      WidgetTester tester, {
+      required DateTime startDate,
+      required DateTime endDate,
+      required DateTime createdAt,
+      List<QuestEntity> quests = const [],
+    }) async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(
+            id: 't1',
+            startDate: startDate,
+            endDate: endDate,
+            createdAt: createdAt,
+          ),
+        );
+      await _pump(
+        tester,
+        tripRepo: tripRepo,
+        photoRepo: FakePhotoRepository(),
+        noteRepo: FakeDayNoteRepository(),
+        questRepo: FakeQuestRepository()..questsResult = Right(quests),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    final toDo = find.byKey(
+      const Key('journal-to-do-action'),
+      skipOffstage: false,
+    );
+
+    testWidgets('is hidden for a memory logged after its trip ended', (
+      tester,
+    ) async {
+      await pumpWith(
+        tester,
+        startDate: _today.subtract(const Duration(days: 20)),
+        endDate: _today.subtract(const Duration(days: 15)),
+        createdAt: _today.subtract(const Duration(days: 2)),
+      );
+      expect(toDo, findsNothing);
+    });
+
+    testWidgets('stays for a past-created memory that already has quests', (
+      tester,
+    ) async {
+      final start = _today.subtract(const Duration(days: 20));
+      await pumpWith(
+        tester,
+        startDate: start,
+        endDate: _today.subtract(const Duration(days: 15)),
+        createdAt: _today.subtract(const Duration(days: 2)),
+        quests: [buildQuestEntity(dayDate: start)],
+      );
+      expect(toDo, findsOneWidget);
+    });
+
+    testWidgets('is shown for a memory created mid-trip (regression)', (
+      tester,
+    ) async {
+      await pumpWith(
+        tester,
+        startDate: _today.subtract(const Duration(days: 2)),
+        endDate: _today.add(const Duration(days: 2)),
+        createdAt: _today,
+      );
+      expect(toDo, findsOneWidget);
+    });
+
+    testWidgets('is shown for an upcoming memory (regression)', (tester) async {
+      await pumpWith(
+        tester,
+        startDate: _today.add(const Duration(days: 5)),
+        endDate: _today.add(const Duration(days: 9)),
+        createdAt: _today,
+      );
+      expect(toDo, findsOneWidget);
     });
   });
 }

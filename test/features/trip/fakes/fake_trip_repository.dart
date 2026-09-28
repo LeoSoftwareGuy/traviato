@@ -189,6 +189,7 @@ TripCardEntity buildTripCard({
   int stars = 0,
   double expenseTotal = 0,
   DateTime? wrapUpPublishedAt,
+  DateTime? createdAt,
 }) {
   final now = DateTime(2026, 1, 1);
   return TripCardEntity(
@@ -200,7 +201,7 @@ TripCardEntity buildTripCard({
     endDate: endDate,
     vibes: vibes,
     coverImagePath: coverImagePath,
-    createdAt: now,
+    createdAt: createdAt ?? now,
     updatedAt: now,
     status: status,
     durationDays: durationDays,
