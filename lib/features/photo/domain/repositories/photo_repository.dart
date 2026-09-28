@@ -22,8 +22,9 @@ abstract interface class PhotoRepository {
     DateTime? takenAt,
   });
 
-  /// Deletes the photo's row, then its storage file (#165). Earned stars
-  /// are kept. Only a failed row delete is a [Failure] — once the row is
+  /// Deletes the photo's row, then its storage file (#165). The photo's ✦2
+  /// is taken back, unless it completed a bonus task — then all its stars
+  /// stay. Only a failed row delete is a [Failure] — once the row is
   /// gone the photo is gone for the user, so a failed file removal is
   /// logged rather than surfaced.
   Future<Either<Failure, void>> deletePhoto(PhotoEntity photo);

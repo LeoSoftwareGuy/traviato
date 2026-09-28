@@ -18,8 +18,9 @@ abstract interface class PhotoRemoteDataSource {
     DateTime? takenAt,
   });
 
-  /// Deletes the `photos` row. Stars already awarded for it stay — the
-  /// ledger's `source_id` has no FK to `photos` (#165).
+  /// Deletes the `photos` row via the `delete_photo` RPC, which also takes
+  /// back the photo's ✦2 — unless it completed a bonus task, whose stars
+  /// all stay (#165).
   Future<void> deletePhotoRow(String id);
 
   /// Removes the photo's file from the `trip-photos` bucket.

@@ -115,7 +115,7 @@ class SupabasePhotoRemoteDataSource implements PhotoRemoteDataSource {
   Future<void> deletePhotoRow(String id) async {
     _guardAuthenticated();
     try {
-      await _client.from(Tables.photos).delete().eq('id', id);
+      await _client.rpc(DBFunctions.deletePhoto, params: {'p_photo_id': id});
     } on PostgrestException catch (e) {
       throw _mapPostgrestException(e);
     } on SocketException {

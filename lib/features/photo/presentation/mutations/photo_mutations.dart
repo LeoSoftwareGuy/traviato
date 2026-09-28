@@ -80,7 +80,8 @@ Future<PhotoEntity> runAddPhoto({
 /// Deletes a photo optimistically (#165): the Journal's strip, day-tab
 /// thumbnail and counts drop it at once — no confirmation, so deleting
 /// several in a row stays one tap each — and it's put back where it was if
-/// the delete fails. Earned stars are kept.
+/// the delete fails. The server takes back the photo's ✦2 (kept for a
+/// bonus-task photo), so the star badges refetch on success.
 Future<void> runDeletePhoto({
   required WidgetRef ref,
   required String tripId,
@@ -92,9 +93,13 @@ Future<void> runDeletePhoto({
 
     final index = controller.applyPhotoDeleted(photo.id);
     final result = await repo.deletePhoto(photo);
-    result.fold((failure) {
-      if (index != -1) controller.applyPhotoRestored(photo, index);
-      throw PresentationFailureException(failure);
-    }, (_) {});
+    result.fold(
+      (failure) {
+        if (index != -1) controller.applyPhotoRestored(photo, index);
+        throw PresentationFailureException(failure);
+      },
+      (_) =>
+          tsx.get(globalEventBusProvider).add(const StarsAwardedDispatched()),
+    );
   });
 }

@@ -636,6 +636,7 @@ void main() {
     Future<FakePhotoRepository> openViewerOnFirstPhoto(
       WidgetTester tester, {
       Either<Failure, void>? deleteResult,
+      FakeProfileStatsRepository? profileStatsRepo,
     }) async {
       final tripRepo = FakeTripRepository()
         ..tripCardResult = Right(
@@ -652,6 +653,7 @@ void main() {
         tripRepo: tripRepo,
         photoRepo: photoRepo,
         noteRepo: FakeDayNoteRepository(),
+        profileStatsRepo: profileStatsRepo,
       );
       await tester.pumpAndSettle();
       await tester.dragUntilVisible(
@@ -682,6 +684,18 @@ void main() {
       expect(find.byKey(const Key('journal-photo-tile-p1')), findsNothing);
       expect(find.byKey(const Key('journal-photo-tile-p2')), findsOneWidget);
       expect(find.text('1 saved'), findsOneWidget);
+    });
+
+    testWidgets('refetches the star total, since the photo ✦2 is taken '
+        'back', (tester) async {
+      final statsRepo = FakeProfileStatsRepository();
+      await openViewerOnFirstPhoto(tester, profileStatsRepo: statsRepo);
+      final before = statsRepo.getStatsCallCount;
+
+      await tester.tap(find.byKey(const Key('photo-viewer-delete')));
+      await tester.pumpAndSettle();
+
+      expect(statsRepo.getStatsCallCount, greaterThan(before));
     });
 
     testWidgets('a failed delete puts it back in the strip', (tester) async {
