@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_date_picker_sheet.dart';
 
 final _dateFormat = DateFormat('d MMM y');
 
@@ -27,12 +28,14 @@ class MemoryDateRangeField extends StatelessWidget {
 
   Future<void> _pickDate(
     BuildContext context,
+    String label,
     DateTime? initial,
     ValueChanged<DateTime?> onChanged,
   ) async {
     final now = DateTime.now();
-    final picked = await showDatePicker(
+    final picked = await showAppDatePicker(
       context: context,
+      label: label,
       initialDate: initial ?? now,
       firstDate: DateTime(now.year - 5),
       lastDate: DateTime(now.year + 5),
@@ -51,7 +54,8 @@ class MemoryDateRangeField extends StatelessWidget {
               child: _DateCard(
                 label: 'Starts',
                 date: startDate,
-                onTap: () => _pickDate(context, startDate, onStartDateChanged),
+                onTap: () =>
+                    _pickDate(context, 'Starts', startDate, onStartDateChanged),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -59,7 +63,8 @@ class MemoryDateRangeField extends StatelessWidget {
               child: _DateCard(
                 label: 'Ends',
                 date: endDate,
-                onTap: () => _pickDate(context, endDate, onEndDateChanged),
+                onTap: () =>
+                    _pickDate(context, 'Ends', endDate, onEndDateChanged),
               ),
             ),
           ],

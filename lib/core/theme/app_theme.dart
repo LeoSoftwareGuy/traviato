@@ -97,6 +97,64 @@ abstract class AppTheme {
           side: BorderSide(color: AppColors.surfaceBorder),
         ),
       ),
+      datePickerTheme: datePicker,
+    );
+  }
+
+  /// Calendar skin shared by `AppDatePickerSheet` and any stray
+  /// `showDatePicker` (#163) — tokens only, so both platforms match.
+  static DatePickerThemeData get datePicker {
+    WidgetStateProperty<Color?> selectable({
+      required Color selected,
+      required Color idle,
+    }) => WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.disabled)) return AppColors.textTertiary;
+      if (states.contains(WidgetState.selected)) return selected;
+      return idle;
+    });
+
+    final selectedFill = WidgetStateProperty.resolveWith<Color?>(
+      (states) =>
+          states.contains(WidgetState.selected) ? AppColors.primary : null,
+    );
+
+    return DatePickerThemeData(
+      backgroundColor: AppColors.background,
+      surfaceTintColor: Colors.transparent,
+      headerBackgroundColor: AppColors.background,
+      headerForegroundColor: AppColors.textPrimary,
+      headerHeadlineStyle: AppTypography.displaySerif,
+      headerHelpStyle: AppTypography.mono,
+      shape: const RoundedRectangleBorder(borderRadius: AppRadius.mediaRadius),
+      weekdayStyle: AppTypography.mono.copyWith(color: AppColors.textTertiary),
+      dayStyle: AppTypography.bodyInput,
+      dayForegroundColor: selectable(
+        selected: AppColors.background,
+        idle: AppColors.textPrimary,
+      ),
+      dayBackgroundColor: selectedFill,
+      dayOverlayColor: WidgetStatePropertyAll(
+        AppColors.tint(AppColors.primary, .12),
+      ),
+      todayForegroundColor: selectable(
+        selected: AppColors.background,
+        idle: AppColors.primary,
+      ),
+      todayBackgroundColor: selectedFill,
+      todayBorder: const BorderSide(color: AppColors.primary),
+      yearStyle: AppTypography.bodyInput,
+      yearForegroundColor: selectable(
+        selected: AppColors.background,
+        idle: AppColors.textPrimary,
+      ),
+      yearBackgroundColor: selectedFill,
+      dividerColor: AppColors.surfaceBorder,
+      cancelButtonStyle: TextButton.styleFrom(
+        foregroundColor: AppColors.textSecondary,
+      ),
+      confirmButtonStyle: TextButton.styleFrom(
+        foregroundColor: AppColors.primary,
+      ),
     );
   }
 }

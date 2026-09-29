@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/core/theme/app_theme.dart';
+import 'package:traviato/core/widgets/app_date_picker_sheet.dart';
 import 'package:traviato/features/expense/domain/entities/expense_category.dart';
 import 'package:traviato/features/expense/presentation/providers/expense_providers.dart';
 import 'package:traviato/features/expense/presentation/widgets/add_expense_sheet.dart';
@@ -101,11 +102,11 @@ void main() {
     );
     await tester.enterText(find.widgetWithText(TextFormField, '0'), '55');
 
-    // Change the pre-filled (today's) date via the platform date picker.
+    // Confirm the pre-filled (today's) date via the app date picker (#163).
     await tester.ensureVisible(find.textContaining('Today ·'));
     await tester.tap(find.textContaining('Today ·'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('OK'));
+    await tester.tap(find.text('Done'));
     await tester.pumpAndSettle();
 
     await tester.ensureVisible(find.text('Save expense'));
@@ -137,5 +138,19 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Please check your connection.'), findsOneWidget);
+  });
+
+  testWidgets('the date row opens the app date picker sheet (#163)', (
+    tester,
+  ) async {
+    await _pump(tester, repo: FakeExpenseRepository());
+
+    await tester.ensureVisible(find.textContaining('Today ·'));
+    await tester.tap(find.textContaining('Today ·'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AppDatePickerSheet), findsOneWidget);
+    expect(find.byType(DatePickerDialog), findsNothing);
+    expect(find.text('SPENT ON'), findsOneWidget);
   });
 }

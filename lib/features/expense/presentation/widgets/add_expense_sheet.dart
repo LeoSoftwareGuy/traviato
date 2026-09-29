@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_date_picker_sheet.dart';
 import '../../../../core/widgets/bottom_sheet_chrome.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../domain/entities/expense_category.dart';
@@ -87,8 +88,9 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
-    final picked = await showDatePicker(
+    final picked = await showAppDatePicker(
       context: context,
+      label: 'Spent on',
       initialDate: _spentOn,
       firstDate: DateTime(now.year - 5),
       lastDate: DateTime(now.year + 5),
