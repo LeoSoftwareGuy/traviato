@@ -7,6 +7,7 @@ import '../../../quest/presentation/providers/quest_providers.dart';
 import '../../../trip/presentation/providers/trip_providers.dart';
 import '../../domain/entities/day_note_entity.dart';
 import '../providers/day_note_providers.dart';
+import 'initial_journal_day.dart';
 import 'journal_state.dart';
 
 part 'journal_controller.g.dart';
@@ -50,7 +51,11 @@ class JournalController extends _$JournalController {
       (q) => q,
     );
 
-    final initialDay = _initialDayDate(trip.startDate, trip.endDate);
+    final initialDay = initialJournalDay(
+      startDate: trip.startDate,
+      endDate: trip.endDate,
+      today: DateTime.now(),
+    );
 
     var notesByDay = const <DateTime, DayNoteEntity?>{};
     if (initialDay != null) {
@@ -143,15 +148,6 @@ class JournalController extends _$JournalController {
       ..insert(index.clamp(0, current.photos.length), photo);
     state = AsyncData(current.copyWith(photos: photos));
   }
-}
-
-DateTime? _initialDayDate(DateTime? startDate, DateTime? endDate) {
-  if (startDate == null || endDate == null) return null;
-  final today = DateTime.now();
-  final todayDate = DateTime(today.year, today.month, today.day);
-  if (todayDate.isBefore(startDate)) return startDate;
-  if (todayDate.isAfter(endDate)) return endDate;
-  return todayDate;
 }
 
 bool _isSameDate(DateTime a, DateTime b) =>

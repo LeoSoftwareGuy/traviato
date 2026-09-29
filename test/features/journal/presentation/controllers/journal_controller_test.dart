@@ -62,6 +62,30 @@ void main() {
     expect(noteRepo.getNotesForTripCallCount, 1);
   });
 
+  test('a finished memory opens on Day 1, not the last day (#163)', () async {
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final start = todayDate.subtract(const Duration(days: 10));
+    final tripRepo = FakeTripRepository()
+      ..tripCardResult = Right(
+        buildTripCard(
+          id: 't1',
+          startDate: start,
+          endDate: todayDate.subtract(const Duration(days: 6)),
+        ),
+      );
+    final container = _buildContainer(
+      tripRepo: tripRepo,
+      photoRepo: FakePhotoRepository(),
+      noteRepo: FakeDayNoteRepository(),
+    );
+    addTearDown(container.dispose);
+
+    final state = await container.read(journalControllerProvider('t1').future);
+
+    expect(state.currentDayDate, start);
+  });
+
   test(
     'applyNoteUpserted keeps the all-trip notes count in sync for wrap-up '
     'eligibility (#103/#140)',
@@ -94,6 +118,9 @@ void main() {
 
       await container.read(journalControllerProvider('t1').future);
       final notifier = container.read(journalControllerProvider('t1').notifier);
+      // A finished memory opens on Day 1 (#163); the wrap-up CTA lives on
+      // the last day (#107).
+      await notifier.selectDay(todayDate.subtract(const Duration(days: 1)));
 
       var state = container.read(journalControllerProvider('t1')).value!;
       expect(state.wrapUpAvailability, WrapUpAvailability.locked);
