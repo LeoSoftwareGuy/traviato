@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../core/config/router/route_constants.dart';
 
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_gradients.dart';
@@ -15,6 +18,7 @@ import '../widgets/achievements_grid.dart';
 import '../widgets/profile_edit_sheet.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_stats_row.dart';
+import '../widgets/profile_top_bar.dart';
 import '../widgets/subscription_section.dart';
 
 /// The full Profile screen (issue #96), replacing the auth feature's
@@ -43,17 +47,43 @@ class ProfilePage extends ConsumerWidget {
           ),
         ),
         child: SafeArea(
-          child: profileAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => AsyncErrorRetryScaffold(
-              message: presentationFailureMessage(error),
-              onRetry: () => ref.invalidate(profileControllerProvider),
-            ),
-            data: (state) => _ProfileContent(state: state),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.xl,
+                  AppSpacing.sm,
+                  AppSpacing.xl,
+                  0,
+                ),
+                child: ProfileTopBar(onBack: () => _goBack(context)),
+              ),
+              Expanded(
+                child: profileAsync.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, _) => AsyncErrorRetryScaffold(
+                    message: presentationFailureMessage(error),
+                    onRetry: () => ref.invalidate(profileControllerProvider),
+                  ),
+                  data: (state) => _ProfileContent(state: state),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
+  }
+
+  /// Profile is pushed from Home's avatar, so this is normally a plain pop.
+  /// Falls back to Home if Profile is the root (e.g. opened by deep link).
+  void _goBack(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.goNamed(RouteNames.home);
+    }
   }
 }
 
