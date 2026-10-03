@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -77,11 +79,14 @@ Future<void> _pump(
   await tester.pumpAndSettle();
 }
 
-/// Only the "Upgrade to Pro" navigation test needs a real router — every
-/// other test above uses the plain `MaterialApp(home:)` harness.
+/// Navigation tests (Upgrade to Pro, back) need a real router — every other
+/// test uses the plain `MaterialApp(home:)` harness. With [pushedFromHome],
+/// Profile is pushed on top of Home, as Home's avatar tap does; otherwise
+/// Profile is the router's root.
 Future<void> _pumpWithRouter(
   WidgetTester tester, {
   required FakeProfileRepository profileRepo,
+  bool pushedFromHome = false,
 }) async {
   final authRepo = FakeAuthRepository();
   addTearDown(authRepo.dispose);
@@ -90,8 +95,13 @@ Future<void> _pumpWithRouter(
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
   final router = GoRouter(
-    initialLocation: RoutePaths.profile,
+    initialLocation: pushedFromHome ? RoutePaths.home : RoutePaths.profile,
     routes: [
+      GoRoute(
+        path: RoutePaths.home,
+        name: RouteNames.home,
+        builder: (context, state) => const Scaffold(body: Text('Home screen')),
+      ),
       GoRoute(
         path: RoutePaths.profile,
         name: RouteNames.profile,
@@ -123,6 +133,10 @@ Future<void> _pumpWithRouter(
     ),
   );
   await tester.pumpAndSettle();
+  if (pushedFromHome) {
+    unawaited(router.pushNamed(RouteNames.profile));
+    await tester.pumpAndSettle();
+  }
 }
 
 void main() {
@@ -245,6 +259,58 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('boom'), findsOneWidget);
+  });
+
+  group('back navigation (#176)', () {
+    testWidgets('renders a back button with the PROFILE eyebrow', (
+      tester,
+    ) async {
+      await _pump(tester, profileRepo: FakeProfileRepository());
+
+      expect(find.byKey(const Key('profile-back-button')), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+      expect(find.text('PROFILE'), findsOneWidget);
+    });
+
+    testWidgets('back button is still there when the profile fails to load', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        profileRepo: FakeProfileRepository()
+          ..profileResult = const Left(UnknownFailure(message: 'boom')),
+      );
+
+      expect(find.byKey(const Key('profile-back-button')), findsOneWidget);
+    });
+
+    testWidgets('tapping back pops to Home when opened from Home', (
+      tester,
+    ) async {
+      await _pumpWithRouter(
+        tester,
+        profileRepo: FakeProfileRepository(),
+        pushedFromHome: true,
+      );
+      expect(find.text('PROFILE'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('profile-back-button')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home screen'), findsOneWidget);
+      expect(find.text('PROFILE'), findsNothing);
+    });
+
+    testWidgets('tapping back goes to Home when Profile is the root', (
+      tester,
+    ) async {
+      await _pumpWithRouter(tester, profileRepo: FakeProfileRepository());
+
+      await tester.tap(find.byKey(const Key('profile-back-button')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home screen'), findsOneWidget);
+    });
   });
 
   testWidgets('tapping Upgrade to Pro navigates to the offerings screen', (
