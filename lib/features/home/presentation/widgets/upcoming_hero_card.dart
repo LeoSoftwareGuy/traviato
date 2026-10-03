@@ -109,10 +109,14 @@ class UpcomingHeroCard extends ConsumerWidget {
                       ),
                       const SizedBox(width: 7),
                       Expanded(
+                        // Primary only while the memory is happening —
+                        // that's when the journal is the day's main action
+                        // (functionality.md § 3). An upcoming memory shows
+                        // all three at rest alike (#177).
                         child: _ActionButton(
                           label: 'Journal',
                           onTap: onJournalTap,
-                          primary: true,
+                          primary: trip.status == TripStatus.current,
                         ),
                       ),
                     ],
@@ -215,21 +219,28 @@ class _ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fg = primary ? AppColors.background : AppColors.textPrimary;
-    return InkWell(
-      onTap: onTap,
+    // The fill lives on the Material, not a Container under the InkWell —
+    // an opaque Container painted over the ink and hid every tap (#177).
+    // Pressed tints match the Checklist row's below; on the primary fill an
+    // accent tint wouldn't show, so it darkens instead.
+    final pressTint = primary ? AppColors.background : AppColors.primary;
+    return Material(
+      color: primary ? AppColors.primary : AppColors.surfaceDisabled,
       borderRadius: AppRadius.badgeRadius,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: primary ? AppColors.primary : AppColors.surfaceDisabled,
-          borderRadius: AppRadius.badgeRadius,
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: AppTypography.caption.copyWith(
-              color: fg,
-              letterSpacing: 0,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        splashColor: AppColors.tint(pressTint, .18),
+        highlightColor: AppColors.tint(pressTint, .1),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          child: Center(
+            child: Text(
+              label,
+              style: AppTypography.caption.copyWith(
+                color: fg,
+                letterSpacing: 0,
+              ),
             ),
           ),
         ),
