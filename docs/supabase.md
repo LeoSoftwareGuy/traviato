@@ -21,6 +21,8 @@ Not allowed:
 - One migration per logical change; include the corresponding `down`/revert notes in a comment when practical.
 - Test locally with `supabase db reset` before opening the PR.
 - Migration files are immutable once merged — fix mistakes with a new migration.
+- Every RPC in `DBFunctions` (`lib/core/constants/supabase_constants.dart`) must be created by a migration — `test/core/constants/supabase_constants_test.dart` enforces this.
+- After pulling new migrations, apply them locally with `supabase migration up --local` (or `supabase db reset`, which wipes local data). If the app still reports `PGRST202` / "Could not find the function … in the schema cache" while `supabase migration list --local` shows the migration applied, PostgREST's schema cache is stale: run `notify pgrst, 'reload schema';` in SQL or restart the stack (`supabase stop && supabase start`).
 ## Row Level Security (RLS)
  
 - **RLS is enabled on every table. No exceptions.** A migration creating a table must enable RLS and define policies in the same file.
