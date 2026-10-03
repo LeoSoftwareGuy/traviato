@@ -14,6 +14,8 @@ import '../controllers/wrap_up_state.dart';
 import '../film/chrome/wrap_up_film_grain.dart';
 import '../film/wrap_up_film_canvas.dart';
 import '../film/wrap_up_film_hud.dart';
+import '../film/wrap_up_film_photo.dart';
+import '../film/wrap_up_film_photo_pins.dart';
 import '../widgets/wrap_up_generating_view.dart';
 
 class WrapUpPage extends ConsumerWidget {
@@ -76,11 +78,18 @@ class _WrapUpFilmReady extends ConsumerStatefulWidget {
 
 class _WrapUpFilmReadyState extends ConsumerState<_WrapUpFilmReady> {
   late final Future<_ResolvedFilmAssets> _assetsFuture;
+  final _photoPins = WrapUpFilmPhotoPins();
 
   @override
   void initState() {
     super.initState();
     _assetsFuture = _prepareAssets();
+  }
+
+  @override
+  void dispose() {
+    _photoPins.dispose();
+    super.dispose();
   }
 
   Future<void> _safePrecache(ImageProvider provider) async {
@@ -114,6 +123,15 @@ class _WrapUpFilmReadyState extends ConsumerState<_WrapUpFilmReady> {
     // Only what the film can ever show: the ≤8 moment photos with their
     // collage tiles (≤6 per moment) and the two Flurries' photos (≤15
     // each) — bounded regardless of trip size.
+    //
+    // Each Moment's own photo is the one a print flips face-up onto, so
+    // those are pinned live for the whole film — the rest (≤ 8×5 collage
+    // extras + ≤ 30 Flurry prints) are best-effort in the LRU image cache,
+    // where pinning them all could cost hundreds of MB on a big memory.
+    final pinnedUrls = <String>{
+      for (final moment in wrapUp.moments)
+        ?widget.state.imageUrlForPhoto(moment.photoId),
+    };
     final urls = <String>{};
     for (final photoRef in [
       for (final moment in wrapUp.moments) ...moment.allPhotoRefs,
@@ -121,17 +139,23 @@ class _WrapUpFilmReadyState extends ConsumerState<_WrapUpFilmReady> {
       ...wrapUp.flurry2Photos,
     ]) {
       final url = widget.state.imageUrlForPhoto(photoRef.photoId);
-      if (url != null) urls.add(url);
+      if (url != null && !pinnedUrls.contains(url)) urls.add(url);
     }
 
     final grainFuture = WrapUpFilmGrain.generate();
+
+    // Closed during the cover-URL await: pins taken now would outlive
+    // dispose() and never be released.
+    if (!mounted) return const _ResolvedFilmAssets();
 
     // A single slow/unreachable photo must not hold up the whole film
     // indefinitely — precaching is best-effort within a bounded wait, not a
     // hard prerequisite (the frame widgets already degrade gracefully when
     // an image is still loading or missing).
     await Future.wait([
-      for (final url in urls) _safePrecache(CachedNetworkImageProvider(url)),
+      for (final url in pinnedUrls)
+        _photoPins.pin(WrapUpFilmPhoto.providerFor(url)),
+      for (final url in urls) _safePrecache(WrapUpFilmPhoto.providerFor(url)),
       if (coverImage != null) _safePrecache(coverImage),
     ]).timeout(const Duration(seconds: 6), onTimeout: () => const []);
 

@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../domain/entities/wrap_up_collage_layout.dart';
 import '../wrap_up_film_motion.dart';
+import '../wrap_up_film_photo.dart';
 import '../wrap_up_film_tokens.dart';
 import 'wrap_up_film_collage_layouts.dart';
 
@@ -307,13 +307,9 @@ class _TilePhoto extends StatelessWidget {
   Widget build(BuildContext context) {
     const blank = ColoredBox(color: WrapUpFilmColors.paper);
     if (imageUrl == null) return blank;
-    return CachedNetworkImage(
+    return WrapUpFilmPhoto(
       imageUrl: imageUrl!,
-      fit: BoxFit.cover,
-      fadeInDuration: const Duration(milliseconds: 220),
-      fadeOutDuration: Duration.zero,
-      placeholder: (context, url) => blank,
-      errorWidget: (context, url, error) => blank,
+      placeholderColor: WrapUpFilmColors.paper,
     );
   }
 }
