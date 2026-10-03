@@ -1,6 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../wrap_up_film_photo.dart';
 import '../wrap_up_film_tokens.dart';
 
 /// The small polaroid-style print used by both flurries — a plain white
@@ -47,13 +47,11 @@ class WrapUpFilmSmallPrint extends StatelessWidget {
           height: height,
           child: imageUrl == null
               ? const ColoredBox(color: Color(0xFFD9D3C4))
-              : CachedNetworkImage(
+              : WrapUpFilmPhoto(
                   imageUrl: imageUrl!,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) =>
-                      const ColoredBox(color: Color(0xFFD9D3C4)),
-                  errorWidget: (context, url, error) =>
-                      const ColoredBox(color: Color(0xFFD9D3C4)),
+                  placeholderColor: const Color(0xFFD9D3C4),
+                  // CachedNetworkImage's default, kept from before #178.
+                  fadeInDuration: const Duration(milliseconds: 500),
                 ),
         ),
       ),
