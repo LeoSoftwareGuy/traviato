@@ -21,31 +21,33 @@ class JournalController extends _$JournalController {
     final noteRepo = ref.watch(dayNoteRepositoryProvider);
     final questRepo = ref.watch(questRepositoryProvider);
 
-    final tripResult = await tripRepo.getTripCard(tripId);
+    // Independent reads, fetched together: run back to back they were four
+    // sequential round trips before the Journal could render (#179).
+    final (tripResult, photosResult, notesResult, questsResult) = await (
+      tripRepo.getTripCard(tripId),
+      photoRepo.getPhotosForTrip(tripId),
+      // All-trip notes, used to gate wrap-up eligibility (#103) and detect
+      // empty days (#140) — kept separate from notesByDay's per-day,
+      // lazily-fetched cache below.
+      noteRepo.getNotesForTrip(tripId),
+      // Used for the empty-day nudge's "N quests done" subtitle (#140) and
+      // to decide whether "To Do" is offered at all (#164) — the sheet
+      // itself fetches its own day-scoped copy lazily.
+      questRepo.getQuestsForTrip(tripId),
+    ).wait;
+
     final trip = tripResult.fold(
       (failure) => throw PresentationFailureException(failure),
       (t) => t,
     );
-
-    final photosResult = await photoRepo.getPhotosForTrip(tripId);
     final photos = photosResult.fold(
       (failure) => throw PresentationFailureException(failure),
       (p) => p,
     );
-
-    // All-trip notes, used to gate wrap-up eligibility (#103) and detect
-    // empty days (#140) — kept separate from notesByDay's per-day,
-    // lazily-fetched cache below.
-    final notesResult = await noteRepo.getNotesForTrip(tripId);
     final notes = notesResult.fold(
       (failure) => throw PresentationFailureException(failure),
       (n) => n,
     );
-
-    // Used for the empty-day nudge's "N quests done" subtitle (#140) and to
-    // decide whether "To Do" is offered at all (#164) — the sheet itself
-    // fetches its own day-scoped copy lazily.
-    final questsResult = await questRepo.getQuestsForTrip(tripId);
     final quests = questsResult.fold(
       (failure) => throw PresentationFailureException(failure),
       (q) => q,
