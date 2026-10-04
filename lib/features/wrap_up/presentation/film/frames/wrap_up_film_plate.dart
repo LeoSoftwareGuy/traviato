@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../wrap_up_film_photo.dart';
 import '../wrap_up_film_tokens.dart';
 
 /// The reusable Moment print — a Polaroid-shaped card with a real white
@@ -109,20 +109,13 @@ class _PlateFront extends StatelessWidget {
           height: WrapUpFilmPlate.photoHeight,
           child: imageUrl == null
               ? const ColoredBox(color: Color(0xFFD9D3C4))
-              : CachedNetworkImage(
+              // WrapUpPage pins every Moment photo decoded before playback,
+              // so this paints in the very frame the print turns face-up
+              // (#178). The fade only covers a photo that failed to load in
+              // the precache window.
+              : WrapUpFilmPhoto(
                   imageUrl: imageUrl!,
-                  fit: BoxFit.cover,
-                  // Precaching (see WrapUpPage) usually has the photo decoded
-                  // before the print flips face-up, but on a slow device or
-                  // network it can still lag — the flip itself already
-                  // carries the suspense, so a short fade here just makes a
-                  // late arrival look intentional instead of a hard pop-in.
-                  fadeInDuration: const Duration(milliseconds: 220),
-                  fadeOutDuration: Duration.zero,
-                  placeholder: (context, url) =>
-                      const ColoredBox(color: Color(0xFFD9D3C4)),
-                  errorWidget: (context, url, error) =>
-                      const ColoredBox(color: Color(0xFFD9D3C4)),
+                  placeholderColor: const Color(0xFFD9D3C4),
                 ),
         ),
       ),
