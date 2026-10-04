@@ -9,6 +9,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/dashed_rrect_border.dart';
 import '../../../photo/domain/entities/photo_entity.dart';
+import '../../../photo/presentation/widgets/storage_photo_image.dart';
 
 const _photoTileWidth = 80.0;
 const _photoTileHeight = 100.0;
@@ -162,7 +163,11 @@ class _PhotoTile extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               if (photo.imageUrl != null)
-                Image.network(photo.imageUrl!, fit: BoxFit.cover)
+                StoragePhotoImage(
+                  url: photo.imageUrl!,
+                  storagePath: photo.storagePath,
+                  decodeSize: const Size(_photoTileWidth, _photoTileHeight),
+                )
               else
                 const ColoredBox(color: AppColors.surface),
               if (takenAt != null)

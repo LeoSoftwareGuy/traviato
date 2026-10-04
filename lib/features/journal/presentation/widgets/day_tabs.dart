@@ -6,6 +6,7 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../photo/domain/entities/photo_entity.dart';
+import '../../../photo/presentation/widgets/storage_photo_image.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 
 final _dayLabelFormat = DateFormat('MMM d');
@@ -110,7 +111,7 @@ class _DayTab extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.xs),
             ] else if (thumbnail?.imageUrl != null) ...[
-              _Thumbnail(url: thumbnail!.imageUrl!, isEmpty: isEmpty),
+              _Thumbnail(photo: thumbnail!, isEmpty: isEmpty),
               const SizedBox(width: AppSpacing.xs),
             ] else if (isEmpty) ...[
               const _EmptyDayDot(),
@@ -134,26 +135,30 @@ class _DayTab extends StatelessWidget {
 /// top-right corner (spec §7: 5px `fg3` dot, 2px dark ring so it reads
 /// against any photo).
 class _Thumbnail extends StatelessWidget {
-  const _Thumbnail({required this.url, required this.isEmpty});
+  const _Thumbnail({required this.photo, required this.isEmpty});
 
-  final String url;
+  /// Only built when [PhotoEntity.imageUrl] is non-null.
+  final PhotoEntity photo;
   final bool isEmpty;
+
+  static const _size = 18.0;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 18,
-      height: 18,
+      width: _size,
+      height: _size,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(999),
-            child: Image.network(
-              url,
-              width: 18,
-              height: 18,
-              fit: BoxFit.cover,
+            child: StoragePhotoImage(
+              url: photo.imageUrl!,
+              storagePath: photo.storagePath,
+              width: _size,
+              height: _size,
+              decodeSize: const Size.square(_size),
             ),
           ),
           if (isEmpty)

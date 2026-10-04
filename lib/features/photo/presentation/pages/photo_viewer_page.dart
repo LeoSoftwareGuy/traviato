@@ -12,6 +12,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../domain/entities/photo_entity.dart';
+import '../widgets/storage_photo_image.dart';
 
 final _takenAtFormat = DateFormat('MMM d, h:mm a');
 
@@ -459,8 +460,9 @@ class _Slide extends StatelessWidget {
                       ),
                     ),
                   )
-                : Image.network(
-                    url,
+                : StoragePhotoImage(
+                    url: url,
+                    storagePath: photo.storagePath,
                     fit: BoxFit.contain,
                     gaplessPlayback: true,
                   ),
