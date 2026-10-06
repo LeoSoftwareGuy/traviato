@@ -1,3 +1,4 @@
+import '../../../../core/utils/pluralize.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -19,21 +20,30 @@ class ProfileStatsRow extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: _StatTile(value: stats.memories, label: 'MEMORIES'),
+          child: _StatTile(
+            value: stats.memories,
+            label: pluralize(stats.memories, 'MEMORY', 'MEMORIES'),
+          ),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
-          child: _StatTile(value: stats.countries, label: 'COUNTRIES'),
+          child: _StatTile(
+            value: stats.countries,
+            label: pluralize(stats.countries, 'COUNTRY', 'COUNTRIES'),
+          ),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
-          child: _StatTile(value: stats.days, label: 'DAYS'),
+          child: _StatTile(
+            value: stats.days,
+            label: pluralize(stats.days, 'DAY', 'DAYS'),
+          ),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: _StatTile(
             value: stats.stars,
-            label: 'STARS',
+            label: pluralize(stats.stars, 'STAR', 'STARS'),
             valueColor: AppColors.primary,
           ),
         ),

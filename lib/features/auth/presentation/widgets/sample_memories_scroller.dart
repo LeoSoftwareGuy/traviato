@@ -1,3 +1,4 @@
+import '../../../../core/utils/pluralize.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -127,7 +128,8 @@ class _MomentCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            '${moment.days} DAYS · ${moment.photos} PHOTOS',
+            '${moment.days} ${pluralize(moment.days, 'DAY', 'DAYS')} · '
+            '${moment.photos} ${pluralize(moment.photos, 'PHOTO', 'PHOTOS')}',
             style: AppTypography.mono,
           ),
         ],
