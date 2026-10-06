@@ -129,7 +129,8 @@ class PlanHeader extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (currentDayNumber != null)
+                  // "Day 1 of 1" says nothing for a single-day memory (#186).
+                  if (currentDayNumber != null && totalDays > 1)
                     Align(
                       alignment: Alignment.bottomRight,
                       child: Container(

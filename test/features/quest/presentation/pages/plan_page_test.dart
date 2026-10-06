@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
@@ -246,6 +247,27 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('checklist page'), findsOneWidget);
+  });
+
+  testWidgets('a single-day memory drops the Day 1 framing (#186)', (
+    tester,
+  ) async {
+    final tripRepo = FakeTripRepository()
+      ..tripCardResult = Right(
+        buildTripCard(id: 't1', startDate: _today, endDate: _today),
+      );
+    final questRepo = FakeQuestRepository()..questsResult = const Right([]);
+    await _pump(tester, tripRepo: tripRepo, questRepo: questRepo);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Day 1 of 1'), findsNothing);
+    expect(find.text('Day 1'), findsNothing);
+    expect(find.text('0 quests planned · 1 day total'), findsOneWidget);
+    expect(
+      find.text(DateFormat('EEEE, d MMM').format(_today)),
+      findsOneWidget,
+    );
+    expect(find.text('+ Add a quest'), findsOneWidget);
   });
 
   testWidgets('renders the cover banner with dates, place, and the day pill', (

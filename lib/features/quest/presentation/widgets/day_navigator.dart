@@ -7,6 +7,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
 final _dayFormat = DateFormat('d MMM');
+final _fullDayFormat = DateFormat('EEEE, d MMM');
 
 /// Prev/next day arrows, "Day N" + a mono done-count sub-line, and tappable
 /// segment dots for every day. `docs/design/README.md` § 5.
@@ -50,13 +51,19 @@ class DayNavigator extends StatelessWidget {
             ),
             Column(
               children: [
+                // A single-day memory has no "Day 1" to speak of — the date
+                // becomes the title instead (#186).
                 Text(
-                  'Day $dayNumber',
+                  totalDays == 1
+                      ? _fullDayFormat.format(currentDate)
+                      : 'Day $dayNumber',
                   style: AppTypography.screenTitle.copyWith(fontSize: 19),
                 ),
                 Text(
-                  '${_dayFormat.format(currentDate)} · $doneCount of '
-                  '$totalForDay done',
+                  totalDays == 1
+                      ? '$doneCount of $totalForDay done'
+                      : '${_dayFormat.format(currentDate)} · $doneCount of '
+                            '$totalForDay done',
                   style: AppTypography.mono.copyWith(
                     color: AppColors.textTertiary,
                   ),

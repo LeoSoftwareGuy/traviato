@@ -8,9 +8,10 @@ import '../../../../core/widgets/dashed_rrect_border.dart';
 
 /// Dashed "+ Add a quest to Day N" footer. `docs/design/README.md` § 5.
 class AddQuestRow extends StatelessWidget {
-  const AddQuestRow({required this.dayNumber, required this.onTap, super.key});
+  const AddQuestRow({this.dayNumber, required this.onTap, super.key});
 
-  final int dayNumber;
+  /// `null` for a single-day memory — just "+ Add a quest" (#186).
+  final int? dayNumber;
   final VoidCallback onTap;
 
   @override
@@ -26,7 +27,9 @@ class AddQuestRow extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
           alignment: Alignment.center,
           child: Text(
-            '+ Add a quest to Day $dayNumber',
+            dayNumber == null
+                ? '+ Add a quest'
+                : '+ Add a quest to Day $dayNumber',
             style: AppTypography.chipLabel.copyWith(
               color: AppColors.textMuted,
             ),
