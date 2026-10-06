@@ -8,6 +8,7 @@ import '../../domain/entities/wrap_up_dates.dart';
 import '../../domain/entities/wrap_up_entity.dart';
 import '../../domain/entities/wrap_up_invitation.dart';
 import '../../domain/wrap_up_date_labels.dart';
+import '../../domain/wrap_up_photo_pruning.dart';
 import '../providers/wrap_up_providers.dart';
 import 'wrap_up_state.dart';
 
@@ -47,16 +48,24 @@ class WrapUpController extends _$WrapUpController {
       return null;
     }, (t) => t);
 
+    final photoUrlById = {
+      for (final photo in photos)
+        if (photo.imageUrl != null) photo.id: photo.imageUrl!,
+    };
+
     return WrapUpState(
-      wrapUp: _withLiveDates(
-        wrapUp,
-        start: trip?.startDate ?? wrapUp.dates.startDate,
-        end: trip?.endDate ?? wrapUp.dates.endDate,
+      // A kept-forever wrap-up is frozen server-side, so a photo deleted
+      // after publishing is still referenced — pruned here so the film
+      // never plays an empty frame for it (#187).
+      wrapUp: pruneMissingPhotos(
+        _withLiveDates(
+          wrapUp,
+          start: trip?.startDate ?? wrapUp.dates.startDate,
+          end: trip?.endDate ?? wrapUp.dates.endDate,
+        ),
+        photoUrlById.keys.toSet(),
       ),
-      photoUrlById: {
-        for (final photo in photos)
-          if (photo.imageUrl != null) photo.id: photo.imageUrl!,
-      },
+      photoUrlById: photoUrlById,
     );
   }
 
