@@ -9,18 +9,21 @@ import 'package:traviato/core/events/global_event.dart';
 import 'package:traviato/core/events/global_event_bus.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
+import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_cover_photo.dart';
 import 'package:traviato/features/wrap_up/presentation/film/wrap_up_film_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/pages/wrap_up_page.dart';
 import 'package:traviato/features/wrap_up/presentation/providers/wrap_up_providers.dart';
 
 import '../../../photo/fakes/fake_photo_repository.dart';
+import '../../../trip/fakes/fake_trip_repository.dart';
 import '../../fakes/fake_wrap_up_repository.dart';
 
 Future<void> _pump(
   WidgetTester tester, {
   required FakeWrapUpRepository wrapUpRepo,
   FakePhotoRepository? photoRepo,
+  FakeTripRepository? tripRepo,
   GlobalEventBus? eventBus,
 }) async {
   final router = GoRouter(
@@ -51,6 +54,9 @@ Future<void> _pump(
         wrapUpRepositoryProvider.overrideWithValue(wrapUpRepo),
         photoRepositoryProvider.overrideWithValue(
           photoRepo ?? (FakePhotoRepository()..photosResult = const Right([])),
+        ),
+        tripRepositoryProvider.overrideWithValue(
+          tripRepo ?? FakeTripRepository(),
         ),
         if (eventBus != null)
           globalEventBusProvider.overrideWithValue(eventBus),

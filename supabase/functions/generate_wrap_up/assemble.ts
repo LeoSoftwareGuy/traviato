@@ -79,7 +79,10 @@ function parseDateParts(
   };
 }
 
-function formatDateRange(start: string | null, end: string | null): string {
+export function formatDateRange(
+  start: string | null,
+  end: string | null,
+): string {
   if (!start && !end) return "";
   if (start && !end) {
     const s = parseDateParts(start);
@@ -91,6 +94,7 @@ function formatDateRange(start: string | null, end: string | null): string {
   }
   const s = parseDateParts(start!);
   const e = parseDateParts(end!);
+  if (start === end) return `${s.day} ${s.month} ${s.year}`;
   if (s.year === e.year && s.month === e.month) {
     return `${s.day}–${e.day} ${s.month} ${s.year}`;
   }

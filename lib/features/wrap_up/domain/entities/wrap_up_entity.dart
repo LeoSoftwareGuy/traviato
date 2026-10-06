@@ -65,11 +65,15 @@ class WrapUpEntity extends Equatable {
       ? flurryLeftovers.photos.skip(15).take(15).toList()
       : flurryLeftovers.flurry2;
 
-  WrapUpEntity copyWith({DateTime? Function()? publishedAt}) => WrapUpEntity(
+  WrapUpEntity copyWith({
+    WrapUpDates? dates,
+    WrapUpInvitation? invitation,
+    DateTime? Function()? publishedAt,
+  }) => WrapUpEntity(
     cut: cut,
-    dates: dates,
+    dates: dates ?? this.dates,
     coverPhoto: coverPhoto,
-    invitation: invitation,
+    invitation: invitation ?? this.invitation,
     bridges: bridges,
     moments: moments,
     flurryLeftovers: flurryLeftovers,
