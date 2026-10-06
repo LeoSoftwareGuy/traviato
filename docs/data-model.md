@@ -86,8 +86,20 @@ completed. The daily draw is computed deterministically client-side
 first_adventure, globetrotter, century, star_collector, shutterbug, storyteller
 + 2 per design; `check_achievements` RPC)
 
-### `wrap_ups` — unchanged
-`trip_id PK/FK cascade, content jsonb (screenplay), generated_at, published_at?`.
+### `wrap_ups` — draft vs frozen (#187)
+`trip_id PK/FK cascade, content jsonb (assembled film), generated_at,
+published_at?, ai_fields jsonb? (the 4 AI-written fields), ai_input_hash?,
+ai_generation_count int default 0`.
+- `published_at IS NULL` = **draft**: `generate_wrap_up` rebuilds `content`
+  from current photos/notes on every open (no AI cost). Anthropic is called
+  only when `ai_input_hash` (name, destination, vibes, day notes, earned
+  achievement) changes — at most **4 calls per memory** (1 initial + 3
+  regenerations, free and Pro alike); after the cap the last `ai_fields` are
+  reused. The row is updated in place, never deleted (that would reset the
+  counter).
+- `published_at` set = **frozen**: returned as stored, never rebuilt. The
+  client prunes references to since-deleted photos at playback. Clients can
+  only set `published_at` (column grant), and never back to NULL.
 Post-MVP: `video_path`, `video_status`.
 
 ## Views — unchanged
