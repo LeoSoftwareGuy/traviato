@@ -1,6 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
   assembleWrapUpContent,
+  formatDateRange,
   invitationLine1,
   selectCut,
   splitKeepsakeTitle,
@@ -301,6 +302,22 @@ Deno.test("invitationLine1 handles missing dates without crashing", () => {
   assertEquals(invitationLine1(null, null), "Your trip.");
   assertEquals(invitationLine1("2026-06-01", "2026-06-01"), "One day.");
   assertEquals(invitationLine1("2026-06-01", "2026-06-05"), "Five days.");
+});
+
+Deno.test("formatDateRange: single day, same month, cross-month, cross-year", () => {
+  assertEquals(formatDateRange("2026-08-12", "2026-08-12"), "12 August 2026");
+  assertEquals(
+    formatDateRange("2026-08-12", "2026-08-16"),
+    "12–16 August 2026",
+  );
+  assertEquals(
+    formatDateRange("2026-02-25", "2026-03-01"),
+    "25 February – 1 March 2026",
+  );
+  assertEquals(
+    formatDateRange("2026-12-30", "2027-01-02"),
+    "30 December 2026 – 2 January 2027",
+  );
 });
 
 Deno.test("splitKeepsakeTitle splits multi-word names and leaves single words alone", () => {

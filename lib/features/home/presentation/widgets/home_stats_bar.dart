@@ -1,3 +1,4 @@
+import '../../../../core/utils/pluralize.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -18,15 +19,24 @@ class HomeStatsBar extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: _StatCard(value: stats.memories, label: 'MEMORIES'),
+          child: _StatCard(
+            value: stats.memories,
+            label: pluralize(stats.memories, 'MEMORY', 'MEMORIES'),
+          ),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
-          child: _StatCard(value: stats.places, label: 'PLACES'),
+          child: _StatCard(
+            value: stats.places,
+            label: pluralize(stats.places, 'PLACE', 'PLACES'),
+          ),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
-          child: _StatCard(value: stats.days, label: 'DAYS'),
+          child: _StatCard(
+            value: stats.days,
+            label: pluralize(stats.days, 'DAY', 'DAYS'),
+          ),
         ),
       ],
     );

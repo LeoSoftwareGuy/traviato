@@ -12,13 +12,14 @@ import '../../../../core/widgets/dashed_rrect_border.dart';
 /// own test matrix) looks identical for free and Pro users — no upsell here.
 class EmptyDayNudge extends StatelessWidget {
   const EmptyDayNudge({
-    required this.dayNumber,
+    this.dayNumber,
     required this.onAddPhoto,
     required this.onWriteNote,
     super.key,
   });
 
-  final int dayNumber;
+  /// `null` for a single-day memory, where "Day 1" would be redundant (#186).
+  final int? dayNumber;
   final VoidCallback onAddPhoto;
   final VoidCallback onWriteNote;
 
@@ -51,7 +52,9 @@ class EmptyDayNudge extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Nothing from Day $dayNumber yet',
+              dayNumber == null
+                  ? 'Nothing here yet'
+                  : 'Nothing from Day $dayNumber yet',
               style: AppTypography.headlineSerif.copyWith(fontSize: 17),
             ),
             const SizedBox(height: AppSpacing.xs),

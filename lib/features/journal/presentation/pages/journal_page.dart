@@ -177,7 +177,9 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
           const SizedBox(height: AppSpacing.base),
           if (isEmptyDay) ...[
             Text(
-              'Day ${state.currentDayNumber} — a quiet one',
+              state.isSingleDay
+                  ? 'A quiet one'
+                  : 'Day ${state.currentDayNumber} — a quiet one',
               style: AppTypography.screenTitle.copyWith(fontSize: 26),
             ),
             const SizedBox(height: AppSpacing.xs),
@@ -190,7 +192,7 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
             ),
             const SizedBox(height: AppSpacing.lg),
             EmptyDayNudge(
-              dayNumber: state.currentDayNumber ?? 0,
+              dayNumber: state.isSingleDay ? null : state.currentDayNumber,
               onAddPhoto: () => AddPhotoSheet.show(
                 context,
                 tripId: tripId,
@@ -201,7 +203,9 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
             ),
           ] else ...[
             Text(
-              'Day ${state.currentDayNumber} — ${state.trip.name}',
+              state.isSingleDay
+                  ? state.trip.name
+                  : 'Day ${state.currentDayNumber} — ${state.trip.name}',
               style: AppTypography.screenTitle.copyWith(fontSize: 26),
             ),
             const SizedBox(height: AppSpacing.lg),

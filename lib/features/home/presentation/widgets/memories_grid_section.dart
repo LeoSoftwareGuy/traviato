@@ -1,3 +1,4 @@
+import '../../../../core/utils/pluralize.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -127,7 +128,10 @@ class _MemoryGridCard extends StatelessWidget {
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        '${trip.durationDays ?? 0} DAYS · ${trip.photoCount} PHOTOS',
+                        '${trip.durationDays ?? 0} '
+                        '${pluralize(trip.durationDays ?? 0, 'DAY', 'DAYS')} · '
+                        '${trip.photoCount} '
+                        '${pluralize(trip.photoCount, 'PHOTO', 'PHOTOS')}',
                         style: AppTypography.mono.copyWith(
                           color: AppColors.textOnPhotoMuted,
                         ),

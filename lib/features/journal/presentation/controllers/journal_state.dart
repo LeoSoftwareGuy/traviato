@@ -66,6 +66,9 @@ class JournalState extends Equatable {
   int get totalDays =>
       hasDateRange ? trip.endDate!.difference(trip.startDate!).inDays + 1 : 0;
 
+  /// Start and end on the same date — the "Day N" framing is dropped (#186).
+  bool get isSingleDay => totalDays == 1;
+
   int? get currentDayNumber {
     final day = currentDayDate;
     if (!hasDateRange || day == null) return null;

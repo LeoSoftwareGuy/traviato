@@ -1,3 +1,4 @@
+import '../../../../core/utils/pluralize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -234,6 +235,7 @@ class _SelectedMemoryDetail extends ConsumerWidget {
     final label = selected.place == null
         ? selected.tripName.toUpperCase()
         : '${selected.tripName} · ${selected.place}'.toUpperCase();
+    final dayCount = _distinctDayCount(state.selectedTripExpenses);
 
     return DecoratedBox(
       decoration: const BoxDecoration(
@@ -280,8 +282,9 @@ class _SelectedMemoryDetail extends ConsumerWidget {
                 children: [
                   Text('ALL EXPENSES', style: AppTypography.mono),
                   Text(
-                    '${selected.itemCount} ITEMS · '
-                    '${_distinctDayCount(state.selectedTripExpenses)} DAYS',
+                    '${selected.itemCount} '
+                    '${pluralize(selected.itemCount, 'ITEM', 'ITEMS')} · '
+                    '$dayCount ${pluralize(dayCount, 'DAY', 'DAYS')}',
                     style: AppTypography.mono,
                   ),
                 ],

@@ -11,6 +11,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
+import '../../../../core/utils/pluralize.dart';
 import '../../../../core/widgets/star_award_toast.dart';
 import '../controllers/plan_controller.dart';
 import '../controllers/plan_state.dart';
@@ -131,7 +132,8 @@ class _PlanContent extends ConsumerWidget {
         else ...[
           Text(
             '${state.totalQuestsPlanned} quests planned · '
-            '${state.totalDays} days total',
+            '${state.totalDays} '
+            '${pluralize(state.totalDays, 'day', 'days')} total',
             style: AppTypography.chipLabel.copyWith(color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -173,7 +175,7 @@ class _PlanContent extends ConsumerWidget {
           if (state.canAddQuests) ...[
             if (currentDay.isNotEmpty) const SizedBox(height: AppSpacing.sm),
             AddQuestRow(
-              dayNumber: state.currentDayNumber!,
+              dayNumber: state.totalDays == 1 ? null : state.currentDayNumber,
               onTap: () => AddEditQuestSheet.show(
                 context,
                 tripId: tripId,
