@@ -123,18 +123,28 @@ class _StarToastState extends State<_StarToast>
               child: Transform.scale(scale: _scale.value, child: child),
             ),
           ),
+          // The root overlay sits above every Scaffold, so without a Material
+          // ancestor the Text falls back to the debug DefaultTextStyle (yellow
+          // double underline). A transparency Material supplies the theme's
+          // text style without painting anything.
           child: Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
-              decoration: BoxDecoration(
-                color: AppColors.tint(AppColors.primary, .94),
-                borderRadius: AppRadius.pillRadius,
-              ),
-              child: Text(
-                widget.text,
-                style: AppTypography.buttonLabel.copyWith(
-                  fontSize: 13,
-                  color: AppColors.background,
+            child: Material(
+              type: MaterialType.transparency,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 11,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.tint(AppColors.primary, .94),
+                  borderRadius: AppRadius.pillRadius,
+                ),
+                child: Text(
+                  widget.text,
+                  style: AppTypography.buttonLabel.copyWith(
+                    fontSize: 13,
+                    color: AppColors.background,
+                  ),
                 ),
               ),
             ),
