@@ -1,7 +1,10 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { type Deps, handleRequest } from "./handler.ts";
+import { type Deps, handleRequest, MAX_AI_GENERATIONS } from "./handler.ts";
 import { LOG_PREFIX, WrapUpGenerationError } from "./anthropic.ts";
 import { fakeAuthClient, fakeSupabaseClient } from "./test_fakes.ts";
+import { gatherTripData } from "./gather.ts";
+import { computeAiInputHash } from "./ai_input_hash.ts";
+import type { AiGeneratedFields } from "./ai_fields.ts";
 import { validAiFields, validWrapUpContent } from "./test_fixtures.ts";
 
 const TRIP_ID = "trip-1";
@@ -115,16 +118,25 @@ Deno.test("handleRequest returns 403 when the caller doesn't own the trip", asyn
   assertEquals(res.status, 403);
 });
 
-Deno.test("handleRequest short-circuits on existing content without calling generateAiFields", async () => {
+Deno.test("a published wrap-up is frozen: returned as stored, nothing read or generated", async () => {
   let generateCalled = false;
-  const deps = baseDeps({
-    serviceClient: fakeSupabaseClient({
+  const client = fakeSupabaseClient(
+    {
       trips: [{ id: TRIP_ID, user_id: OWNER_ID }],
       wrap_ups: [{
         content: validWrapUpContent,
         generated_at: "2026-06-06T00:00:00Z",
+        published_at: "2026-06-07T00:00:00Z",
+        ai_fields: validAiFields,
+        ai_input_hash: "old",
+        ai_generation_count: 1,
       }],
-    }),
+    },
+    // Gathering would fail loudly — proves a frozen wrap-up never reads it.
+    { photos: { message: "must not be read" } },
+  );
+  const deps = baseDeps({
+    serviceClient: client,
     generateAiFields: () => {
       generateCalled = true;
       return Promise.resolve(validAiFields);
@@ -137,6 +149,7 @@ Deno.test("handleRequest short-circuits on existing content without calling gene
   assertEquals(res.status, 200);
   assertEquals(json.content, validWrapUpContent);
   assertEquals(generateCalled, false);
+  assertEquals(client.writes, []);
 });
 
 Deno.test("handleRequest generates, assembles, saves and returns new content", async () => {
@@ -192,4 +205,201 @@ Deno.test("handleRequest's 502 carries the generation error's code and detail, a
     code: "ai_upstream_error",
     detail: "Anthropic API error: 529",
   });
+});
+
+// ---- Drafts (#187) ---------------------------------------------------------
+
+const DRAFT_TABLES = {
+  trips: [{
+    id: TRIP_ID,
+    user_id: OWNER_ID,
+    name: "Lisbon",
+    destination: "Lisbon",
+    start_date: "2026-06-01",
+    end_date: "2026-06-03",
+    cover_image_path: null,
+    vibes: ["Foodie"],
+  }],
+  day_notes: [{ day_date: "2026-06-01", content: "Tram 28." }],
+  photos: [
+    {
+      id: "p-new",
+      day_date: "2026-06-02",
+      created_at: "2026-06-02T10:00:00Z",
+      storage_path: "u/t/p-new.jpg",
+      caption: null,
+    },
+  ],
+  bonus_task_assignments: [],
+  points_ledger: [],
+  user_achievements: [],
+};
+
+const OLD_FIELDS: AiGeneratedFields = {
+  ...validAiFields,
+  invitation_line2: "The old line.",
+};
+
+// The hash of DRAFT_TABLES' AI inputs, as the handler will compute it.
+async function currentHash(): Promise<string> {
+  return computeAiInputHash(
+    await gatherTripData(fakeSupabaseClient(DRAFT_TABLES), TRIP_ID),
+  );
+}
+
+function draftClient(row: Record<string, unknown>) {
+  return fakeSupabaseClient({
+    ...DRAFT_TABLES,
+    wrap_ups: [{
+      content: validWrapUpContent, // stale: references photos since deleted
+      generated_at: "2026-06-06T00:00:00Z",
+      published_at: null,
+      ...row,
+    }],
+  });
+}
+
+function countingDeps(
+  client: ReturnType<typeof fakeSupabaseClient>,
+  result: () => Promise<AiGeneratedFields> = () =>
+    Promise.resolve(validAiFields),
+) {
+  const calls = { n: 0 };
+  const deps = baseDeps({
+    serviceClient: client,
+    generateAiFields: () => {
+      calls.n++;
+      return result();
+    },
+    log: () => {},
+  });
+  return { deps, calls };
+}
+
+Deno.test("draft with unchanged AI inputs: rebuilt from current photos, no AI call", async () => {
+  const client = draftClient({
+    ai_fields: OLD_FIELDS,
+    ai_input_hash: await currentHash(),
+    ai_generation_count: 1,
+  });
+  const { deps, calls } = countingDeps(client);
+
+  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
+  const json = await res.json();
+
+  assertEquals(res.status, 200);
+  assertEquals(calls.n, 0);
+  assertEquals(
+    json.content.moments.map((m: { photo_id: string }) => m.photo_id),
+    ["p-new"],
+  );
+  assertEquals(json.content.invitation.line2, "The old line.");
+  const [write] = client.writes;
+  assertEquals(write.op, "update");
+  assertEquals(write.values.ai_generation_count, 1);
+  assertEquals(write.filters, [
+    ["eq", "trip_id", TRIP_ID],
+    ["is", "published_at", null],
+  ]);
+});
+
+Deno.test("draft whose notes changed: regenerates and counts the call", async () => {
+  const client = draftClient({
+    ai_fields: OLD_FIELDS,
+    ai_input_hash: "hash-of-older-notes",
+    ai_generation_count: 2,
+  });
+  const { deps, calls } = countingDeps(client);
+
+  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
+  const json = await res.json();
+
+  assertEquals(calls.n, 1);
+  assertEquals(json.content.invitation.line2, validAiFields.invitation_line2);
+  assertEquals(client.writes[0].values.ai_generation_count, 3);
+  assertEquals(client.writes[0].values.ai_input_hash, await currentHash());
+  assertEquals(client.writes[0].values.ai_fields, validAiFields);
+});
+
+Deno.test("draft at the AI cap: no call, last AI text reused, film still rebuilt", async () => {
+  const client = draftClient({
+    ai_fields: OLD_FIELDS,
+    ai_input_hash: "hash-of-older-notes",
+    ai_generation_count: MAX_AI_GENERATIONS,
+  });
+  const { deps, calls } = countingDeps(client);
+
+  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
+  const json = await res.json();
+
+  assertEquals(res.status, 200);
+  assertEquals(calls.n, 0);
+  assertEquals(json.content.invitation.line2, "The old line.");
+  assertEquals(json.content.moments.length, 1);
+  assertEquals(
+    client.writes[0].values.ai_generation_count,
+    MAX_AI_GENERATIONS,
+  );
+});
+
+Deno.test("backfilled draft (NULL hash): adopts the current hash without an AI call", async () => {
+  const client = draftClient({
+    ai_fields: OLD_FIELDS,
+    ai_input_hash: null,
+    ai_generation_count: 1,
+  });
+  const { deps, calls } = countingDeps(client);
+
+  await handleRequest(request({ trip_id: TRIP_ID }), deps);
+
+  assertEquals(calls.n, 0);
+  assertEquals(client.writes[0].values.ai_input_hash, await currentHash());
+  assertEquals(client.writes[0].values.ai_generation_count, 1);
+});
+
+Deno.test("a failed regeneration reuses the last text, keeps the old hash, still counts", async () => {
+  const client = draftClient({
+    ai_fields: OLD_FIELDS,
+    ai_input_hash: "hash-of-older-notes",
+    ai_generation_count: 1,
+  });
+  const { deps, calls } = countingDeps(
+    client,
+    () => Promise.reject(new Error("overloaded")),
+  );
+
+  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
+  const json = await res.json();
+
+  assertEquals(res.status, 200);
+  assertEquals(calls.n, 1);
+  assertEquals(json.content.invitation.line2, "The old line.");
+  assertEquals(client.writes[0].values.ai_input_hash, "hash-of-older-notes");
+  assertEquals(client.writes[0].values.ai_generation_count, 2);
+});
+
+Deno.test("first generation inserts a row counting one call", async () => {
+  const client = fakeSupabaseClient({ ...DRAFT_TABLES, wrap_ups: [] });
+  const { deps } = countingDeps(client);
+
+  await handleRequest(request({ trip_id: TRIP_ID }), deps);
+
+  const [write] = client.writes;
+  assertEquals(write.op, "insert");
+  assertEquals(write.values.trip_id, TRIP_ID);
+  assertEquals(write.values.ai_generation_count, 1);
+  assertEquals(write.values.ai_input_hash, await currentHash());
+});
+
+Deno.test("a failed first generation returns 502 and saves nothing", async () => {
+  const client = fakeSupabaseClient({ ...DRAFT_TABLES, wrap_ups: [] });
+  const { deps } = countingDeps(
+    client,
+    () => Promise.reject(new Error("overloaded")),
+  );
+
+  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
+
+  assertEquals(res.status, 502);
+  assertEquals(client.writes, []);
 });
