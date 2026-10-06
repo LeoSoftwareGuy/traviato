@@ -61,4 +61,29 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('✦ Packed — nice'), findsNothing);
   });
+
+  testWidgets('toast text sits under a Material and is not underlined', (
+    tester,
+  ) async {
+    await tester.pumpWidget(harness());
+    await tester.tap(find.text('award'));
+    await tester.pump();
+
+    final toastText = find.text('✦ +2 stars · photo logged');
+    expect(
+      find.ancestor(of: toastText, matching: find.byType(Material)),
+      findsWidgets,
+    );
+
+    final richText = tester.widget<RichText>(
+      find.descendant(of: toastText, matching: find.byType(RichText)),
+    );
+    final decoration = richText.text.style?.decoration;
+    expect(decoration == null || decoration == TextDecoration.none, isTrue);
+
+    await tester.pump(
+      AppMotion.awardPopDuration + const Duration(milliseconds: 50),
+    );
+    await tester.pumpAndSettle();
+  });
 }
