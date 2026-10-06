@@ -537,6 +537,54 @@ void main() {
     },
   );
 
+  group('day title (#186)', () {
+    Future<void> pumpWithPhoto(
+      WidgetTester tester, {
+      required DateTime start,
+      required DateTime end,
+    }) async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(
+            id: 't1',
+            name: 'Cabin 2026',
+            startDate: start,
+            endDate: end,
+          ),
+        );
+      final photoRepo = FakePhotoRepository()
+        ..photosResult = Right([buildPhotoEntity(id: 'p1', dayDate: _today)]);
+      await _pump(
+        tester,
+        tripRepo: tripRepo,
+        photoRepo: photoRepo,
+        noteRepo: FakeDayNoteRepository(),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('a single-day memory shows the name with no "Day 1 —"', (
+      tester,
+    ) async {
+      await pumpWithPhoto(tester, start: _today, end: _today);
+
+      expect(find.text('Cabin 2026'), findsOneWidget);
+      expect(find.textContaining('Day 1 —'), findsNothing);
+    });
+
+    testWidgets('a multi-day memory keeps the "Day N —" prefix', (
+      tester,
+    ) async {
+      await pumpWithPhoto(
+        tester,
+        start: _today.subtract(const Duration(days: 1)),
+        end: _today.add(const Duration(days: 1)),
+      );
+
+      expect(find.text('Day 2 — Cabin 2026'), findsOneWidget);
+    });
+  });
+
   testWidgets(
     'an empty day shows the nudge card and no photo grid or note card',
     (tester) async {
@@ -555,7 +603,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('empty-day-nudge')), findsOneWidget);
-      expect(find.textContaining('a quiet one'), findsOneWidget);
+      // Single-day memory — no redundant "Day 1 —" prefix (#186).
+      expect(find.text('A quiet one'), findsOneWidget);
+      expect(find.text('Nothing here yet'), findsOneWidget);
       expect(find.textContaining('No photos, no notes yet'), findsOneWidget);
       expect(find.byKey(const Key('journal-add-photo')), findsNothing);
       expect(find.byKey(const Key('journal-note-add-prompt')), findsNothing);
