@@ -30,7 +30,10 @@ class SupabaseWrapUpRemoteDataSource implements WrapUpRemoteDataSource {
           .select('content, generated_at, published_at')
           .eq('trip_id', tripId)
           .maybeSingle();
-      if (existing != null && existing['content'] != null) {
+      // Kept forever → frozen, read as stored. A draft always goes through
+      // the function, which rebuilds it from current photos/notes (and only
+      // calls the AI when its inputs changed) so it never goes stale (#187).
+      if (existing != null && isFrozenWrapUpRow(existing)) {
         return WrapUpModel.fromRow(existing);
       }
 
@@ -77,6 +80,11 @@ class SupabaseWrapUpRemoteDataSource implements WrapUpRemoteDataSource {
     }
   }
 }
+
+/// A kept-forever wrap-up with stored content — played exactly as stored.
+/// Anything else (a draft, or no film yet) goes through `generate_wrap_up`.
+bool isFrozenWrapUpRow(Map<String, dynamic> row) =>
+    row['content'] != null && row['published_at'] != null;
 
 AppException _mapPostgrestException(PostgrestException e) {
   if (e.code == PostgresErrors.insufficientPrivilege) {

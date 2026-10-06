@@ -2,6 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/failures.dart';
+import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_entity.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_moment.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_dates.dart';
@@ -28,15 +31,20 @@ void main() {
     ),
   );
 
-  ProviderContainer container(FakeTripRepository tripRepo) {
+  ProviderContainer container(
+    FakeTripRepository tripRepo, {
+    WrapUpEntity? wrapUp,
+    List<PhotoEntity> photos = const [],
+  }) {
     final c = ProviderContainer(
       retry: (_, _) => null,
       overrides: [
         wrapUpRepositoryProvider.overrideWithValue(
-          FakeWrapUpRepository()..getOrGenerateResult = Right(staleWrapUp),
+          FakeWrapUpRepository()
+            ..getOrGenerateResult = Right(wrapUp ?? staleWrapUp),
         ),
         photoRepositoryProvider.overrideWithValue(
-          FakePhotoRepository()..photosResult = const Right([]),
+          FakePhotoRepository()..photosResult = Right(photos),
         ),
         tripRepositoryProvider.overrideWithValue(tripRepo),
       ],
@@ -76,5 +84,24 @@ void main() {
 
     expect(state.wrapUp.dates.formatted, '12 August 2026');
     expect(state.wrapUp.invitation.line1, 'One day.');
+  });
+
+  test('never plays a photo that no longer exists (#187)', () async {
+    // A kept-forever wrap-up still references a photo deleted since.
+    final published = buildWrapUpEntity(
+      publishedAt: DateTime(2026, 6, 7),
+      moments: const [
+        WrapUpMoment(photoId: 'kept'),
+        WrapUpMoment(photoId: 'deleted'),
+      ],
+    );
+
+    final state = await container(
+      FakeTripRepository(),
+      wrapUp: published,
+      photos: [buildPhotoEntity(id: 'kept', imageUrl: 'https://x/kept.jpg')],
+    ).read(wrapUpControllerProvider('t1').future);
+
+    expect(state.wrapUp.moments.map((m) => m.photoId), ['kept']);
   });
 }
