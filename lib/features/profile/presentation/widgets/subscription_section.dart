@@ -1,3 +1,4 @@
+import '../../../../core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -113,7 +114,7 @@ class SubscriptionSection extends ConsumerWidget {
                         TierPill(isPro: isPro, periodLabel: periodLabel),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
-                          isPro ? 'Traviato Pro' : 'Free plan',
+                          isPro ? '${AppConstants.appName} Pro' : 'Free plan',
                           style: AppTypography.displaySerif.copyWith(
                             fontSize: 21,
                           ),

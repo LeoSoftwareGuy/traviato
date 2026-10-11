@@ -2,7 +2,8 @@
  
 ## Project
  
-Trevy — a mobile app built with Flutter (Dart) and Supabase.
+Storyni — a mobile app built with Flutter (Dart) and Supabase.
+Product name: **Storyni** (one word, capital S only). `traviato` is the codename — it stays in the repo, package/bundle ids and code identifiers.
 One-line description: the place where your travel life lives — plan your trip, log it as you go, and it becomes a beautiful journal you keep forever.
  
 ## Golden rules (non-negotiable)

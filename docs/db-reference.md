@@ -1,4 +1,4 @@
-# Trevy — Database & Backend Reference
+# Storyni — Database & Backend Reference
 
 Generated from the actual migrations in `supabase/migrations/` and the
 `supabase/functions/generate_wrap_up/` edge function (source of truth), not

@@ -12,7 +12,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Trevy'), findsOneWidget);
+    expect(find.text('Storyni'), findsOneWidget);
     expect(find.text('Log in'), findsOneWidget);
     expect(find.text('Every memory,'), findsOneWidget);
     expect(find.text('beautifully captured'), findsOneWidget);

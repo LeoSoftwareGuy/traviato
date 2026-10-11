@@ -1,3 +1,4 @@
+import '../../../../core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -360,7 +361,7 @@ class _Header extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              'TRAVIATO PRO',
+              '${AppConstants.appName.toUpperCase()} PRO',
               style: AppTypography.mono.copyWith(
                 fontSize: 9.5,
                 color: AppColors.primary,
