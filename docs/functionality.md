@@ -1,4 +1,4 @@
-# Trevy — MVP Functionality (v5)
+# Storyni — MVP Functionality (v5)
 
 > One-liner: the place where your travel life lives — plan your memory, log it as you
 > go, and it becomes a beautiful journal you keep forever.
@@ -16,8 +16,10 @@ set. Mockup copy showing other numbers is adjusted at implementation.
 ## Product language (ALL UI copy)
 
 - Trip = **memory** · points = **stars ✦** · generated recap = **wrap-up**.
-- App name: **Trevy** (design files say "Traviato"/"Wander" — implement as Trevy;
-  repo/codename stays `traviato`).
+- App name: **Storyni** (decided 2026-10-11, #191; pronounced "sto-REE-nee"). Always
+  one word, capital S only. It replaces the working name "Trevy" and the design files'
+  "Traviato"/"Wander". `traviato` is the **codename** — repo, Dart package, bundle /
+  application id, DB and code identifiers keep it. In code, use `AppConstants.appName`.
 
 ## 1. Guest landing ✅
 

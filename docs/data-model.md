@@ -1,4 +1,4 @@
-# Trevy — Data Model (MVP, v4)
+# Storyni — Data Model (MVP, v4)
 
 Derived from `functionality.md` v4. Postgres (Supabase) — migrations only, RLS on
 every table, explicit grants (auto-expose disabled). DB keeps `trips` (UI:

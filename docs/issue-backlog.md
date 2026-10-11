@@ -1,4 +1,4 @@
-# Trevy — Issue Backlog (MVP, v5)
+# Storyni — Issue Backlog (MVP, v5)
 
 Design source: `docs/design/` handoff (13 screens). Numbering rule unchanged:
 real numbers at issue creation; working IDs until then.
@@ -24,7 +24,7 @@ helper; motion constants. Tests for toast + nav.
 
 ### R-2 Guest landing + auth restyle
 Handoff §1–2: polaroid hero, occasion chips, how-it-works, testimonial, pulsing
-CTA; auth segmented toggle, focus states, reward-tease card. Copy says Trevy.
+CTA; auth segmented toggle, focus states, reward-tease card. Copy says Storyni.
 
 ### R-3 Home restyle
 Handoff §3: mono eyebrow header, tappable stars badge → Bonus, hero card with

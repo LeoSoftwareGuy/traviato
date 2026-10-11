@@ -1,4 +1,7 @@
-# Traviato
+# Storyni
+
+> `traviato` is the codename (repo, Dart package, bundle ids); **Storyni** is the
+> product name users see.
 
 The place where your travel life lives — plan your trip, log it as you go, and it
 becomes a beautiful journal you keep forever. A mobile app built with Flutter (Dart)

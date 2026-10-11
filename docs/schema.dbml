@@ -1,4 +1,4 @@
-// Trevy — full schema, dbdiagram.io / DBML format
+// Storyni — full schema, dbdiagram.io / DBML format
 // Paste this whole file into dbdiagram.io (or import as .dbml).
 // Source of truth: supabase/migrations/*.sql (see docs/db-reference.md for prose).
 
