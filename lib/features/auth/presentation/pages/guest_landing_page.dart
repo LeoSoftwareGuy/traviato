@@ -1,3 +1,4 @@
+import '../../../../core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -105,7 +106,7 @@ class _GuestLandingNavBar extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            Text('Trevy', style: AppTypography.headlineSerif),
+            Text(AppConstants.appName, style: AppTypography.headlineSerif),
           ],
         ),
         InkWell(

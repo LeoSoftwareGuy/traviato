@@ -170,7 +170,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                     AuthTextField(
                       label: 'Email',
                       controller: _email,
-                      hintText: 'ada@wanderlog.app',
+                      hintText: 'ada@example.com',
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       validator: _validateEmail,

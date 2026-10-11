@@ -1,3 +1,4 @@
+import '../../../../../core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_colors.dart';
@@ -9,7 +10,7 @@ import '../wrap_up_film_tokens.dart';
 /// The closing card: trip title, AI closing line, app mark
 /// (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md § Keepsake). The reference prototype's
 /// wordmark reads "Traviato" (its codename); the app-facing product name is
-/// **Trevy** (CLAUDE.md's product-language rule), used here instead.
+/// [AppConstants.appName] (Storyni, #191), used here instead.
 class WrapUpFilmKeepsake extends StatelessWidget {
   const WrapUpFilmKeepsake({
     required this.t,
@@ -117,7 +118,7 @@ class WrapUpFilmKeepsake extends StatelessWidget {
                     ),
                     const SizedBox(width: 18),
                     Text(
-                      'Trevy',
+                      AppConstants.appName,
                       style: WrapUpFilmText.serif(
                         size: 40,
                         height: 1.0,

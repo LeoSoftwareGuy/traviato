@@ -1,3 +1,4 @@
+import 'core/constants/app_constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -68,7 +69,7 @@ class TraviatoApp extends ConsumerWidget {
     // signed-in Supabase account for the whole session (issue #138).
     ref.watch(subscriptionIdentityLifecycleControllerProvider);
     return MaterialApp.router(
-      title: 'Traviato',
+      title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
       routerConfig: ref.watch(routerProvider),

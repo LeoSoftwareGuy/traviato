@@ -1,3 +1,4 @@
+import '../../../../core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -16,7 +17,7 @@ Future<bool> resolveLocationPermission(BuildContext context) async {
     builder: (context) => AlertDialog(
       title: const Text('Tag this photo with its location?'),
       content: const Text(
-        'Trevy can save where a photo was taken so it shows up in your '
+        '${AppConstants.appName} can save where a photo was taken so it shows up in your '
         "journal and wrap-up. You can still add photos without this.",
       ),
       actions: [

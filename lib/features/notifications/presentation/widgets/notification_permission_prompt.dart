@@ -1,3 +1,4 @@
+import '../../../../core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -32,7 +33,7 @@ class NotificationPermissionPrompt {
       builder: (context) => AlertDialog(
         title: const Text('Get a gentle nudge for your daily dares?'),
         content: const Text(
-          'Trevy can remind you once in the morning and once in the '
+          '${AppConstants.appName} can remind you once in the morning and once in the '
           "evening when a bonus task is still open — never more than that, "
           'and easy to turn off later.',
         ),
