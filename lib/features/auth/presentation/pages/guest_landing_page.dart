@@ -13,7 +13,6 @@ import '../widgets/guest_hero.dart';
 import '../widgets/how_it_works_section.dart';
 import '../widgets/sample_memories_scroller.dart';
 import '../widgets/star_specks.dart';
-import '../widgets/testimonial_card.dart';
 
 class GuestLandingPage extends StatelessWidget {
   const GuestLandingPage({super.key});
@@ -64,8 +63,6 @@ class GuestLandingPage extends StatelessWidget {
                     const HowItWorksSection(),
                     const SizedBox(height: AppSpacing.xxl),
                     const SampleMemoriesScroller(),
-                    const SizedBox(height: AppSpacing.xxl),
-                    const TestimonialCard(),
                   ],
                 ),
               ),
@@ -148,7 +145,7 @@ class _ValueBlock extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         Text('Every memory,', style: AppTypography.heroHeadline),
         Text(
-          'beautifully captured',
+          'beautifully captured.',
           style: AppTypography.heroHeadline.copyWith(
             fontStyle: FontStyle.italic,
             color: AppColors.primaryLight,
@@ -156,8 +153,10 @@ class _ValueBlock extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.md),
         Text(
-          'No more messy folders. Weddings, trips, birthday weekends — '
-          'your moments deserve more than a desktop dump.',
+          'From big celebrations to spontaneous little adventures, some '
+          'moments are just too good to forget. Plan them, live them, and let '
+          "us turn the best bits into stories you'll want to revisit again and "
+          'again.',
           style: AppTypography.chipLabel.copyWith(
             fontSize: 13.5,
             height: 1.65,
