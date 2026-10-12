@@ -41,6 +41,7 @@ Future<void> _pump(
   WidgetTester tester, {
   required FakeSubscriptionRepository repo,
   PaywallEntryPoint entryPoint = PaywallEntryPoint.profile,
+  bool reduceMotion = false,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
@@ -48,6 +49,12 @@ Future<void> _pump(
       overrides: [subscriptionRepositoryProvider.overrideWithValue(repo)],
       child: MaterialApp(
         theme: AppTheme.dark,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(disableAnimations: reduceMotion),
+          child: child!,
+        ),
         home: PaywallPage(entryPoint: entryPoint),
       ),
     ),
@@ -321,5 +328,28 @@ void main() {
 
       expect(find.text('open paywall'), findsOneWidget);
     });
+  });
+
+  testWidgets('with reduce motion (#198) the CTA has no glow and the page '
+      'goes still', (tester) async {
+    final repo = FakeSubscriptionRepository()..offeringsResult = _bothOfferings;
+    await _pump(tester, repo: repo, reduceMotion: true);
+    await _scrollToVisible(tester, find.text('Start 7-day free trial'));
+
+    // Settles only because neither the specks nor the CTA glow loop now.
+    await tester.pumpAndSettle();
+    final glow = tester
+        .widgetList<DecoratedBox>(
+          find.ancestor(
+            of: find.text('Start 7-day free trial'),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .map((box) => box.decoration)
+        .whereType<BoxDecoration>()
+        .firstWhere((d) => d.boxShadow != null)
+        .boxShadow!
+        .single;
+    expect(glow.blurRadius, 0);
   });
 }
