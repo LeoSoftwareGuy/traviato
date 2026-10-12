@@ -27,9 +27,14 @@ Future<void> _pump(
   Uint8List? customCoverBytes,
   ValueChanged<String>? onSelect,
   Future<void> Function(Uint8List)? onUploadCustom,
+  bool reduceMotion = false,
 }) {
   return tester.pumpWidget(
     MaterialApp(
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(disableAnimations: reduceMotion),
+        child: child!,
+      ),
       home: Scaffold(
         body: CoverPicker(
           selectedCoverId: selectedCoverId,
@@ -142,5 +147,29 @@ void main() {
       ),
     );
     expect(thumbnail.filterQuality, FilterQuality.high);
+  });
+
+  group('empty-state star float', () {
+    double starDy(WidgetTester tester) => tester
+        .widget<Transform>(
+          find
+              .ancestor(of: find.text('✦'), matching: find.byType(Transform))
+              .first,
+        )
+        .transform
+        .getTranslation()
+        .y;
+
+    testWidgets('floats up once when motion is allowed', (tester) async {
+      await _pump(tester);
+      await tester.pumpAndSettle();
+      expect(starDy(tester), lessThan(0));
+    });
+
+    testWidgets('stays put with reduce motion (#198)', (tester) async {
+      await _pump(tester, reduceMotion: true);
+      await tester.pumpAndSettle();
+      expect(starDy(tester), 0);
+    });
   });
 }

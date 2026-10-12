@@ -368,13 +368,22 @@ class _FloatingStarState extends State<_FloatingStar>
   Timer? _startTimer;
 
   @override
-  void initState() {
-    super.initState();
-    // One-shot, not repeat(): this slot is on-screen the whole time the
-    // Create memory form is open, and a repeating animation would never
-    // let a pumpAndSettle() in this page's own tests (needed for the
-    // async create-mutation flow) settle.
-    _startTimer = Timer(Duration.zero, () => _controller.forward());
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reduce motion (#198): no float, the star stays where it is.
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _startTimer?.cancel();
+      _startTimer = null;
+      _controller
+        ..stop()
+        ..value = 0;
+    } else if (_controller.isDismissed && _startTimer == null) {
+      // One-shot, not repeat(): this slot is on-screen the whole time the
+      // Create memory form is open, and a repeating animation would never
+      // let a pumpAndSettle() in this page's own tests (needed for the
+      // async create-mutation flow) settle.
+      _startTimer = Timer(Duration.zero, () => _controller.forward());
+    }
   }
 
   @override

@@ -215,11 +215,26 @@ class _StickyStartNowBarState extends State<_StickyStartNowBar>
   late final _controller = AnimationController(
     vsync: this,
     duration: AppMotion.pulseGlowDuration,
-  )..repeat(reverse: true);
+  );
   late final _glow = CurvedAnimation(
     parent: _controller,
     curve: AppMotion.pulseGlowCurve,
   );
+
+  // Reduce motion (#198) rests the glow at 0 — no halo, the button as-is.
+  // Re-checked on every dependency change so flipping the OS setting while
+  // the screen is open takes effect either way.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _controller
+        ..stop()
+        ..value = 0;
+    } else if (!_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    }
+  }
 
   @override
   void dispose() {
