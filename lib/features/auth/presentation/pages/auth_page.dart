@@ -13,6 +13,7 @@ import '../../../../core/widgets/dashed_rrect_border.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../mutations/auth_mutations.dart';
 import '../widgets/auth_text_field.dart';
+import '../widgets/confirm_email_card.dart';
 import '../widgets/password_strength_meter.dart';
 import '../widgets/social_sign_in_buttons.dart';
 
@@ -38,6 +39,11 @@ class _AuthPageState extends ConsumerState<AuthPage> {
   final _confirmPassword = TextEditingController();
   var _autovalidate = AutovalidateMode.disabled;
   late var _mode = widget.initialMode;
+
+  /// Set after a signup that still needs email confirmation (#162); while
+  /// set, the "Check your inbox" card replaces the toggle, form and social
+  /// buttons.
+  String? _pendingConfirmationEmail;
 
   @override
   void dispose() {
@@ -86,12 +92,18 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     // (guidelines doc 06, #155). Same pattern as ProfilePage._logout.
     try {
       if (_isSignup) {
-        await runSignup(
+        final email = _email.text.trim();
+        final result = await runSignup(
           ref: ref,
-          email: _email.text.trim(),
+          email: email,
           password: _password.text,
           username: _name.text.trim(),
         );
+        // With a session the router takes over; without one nothing else
+        // would change on screen, so show the confirmation state (#162).
+        if (mounted && result.needsEmailConfirmation) {
+          setState(() => _pendingConfirmationEmail = email);
+        }
       } else {
         await runLogin(
           ref: ref,
@@ -104,8 +116,22 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     }
   }
 
+  void _backToLogin() {
+    // The email field keeps its text, so log-in arrives prefilled.
+    _password.clear();
+    _confirmPassword.clear();
+    setState(() {
+      _pendingConfirmationEmail = null;
+      _mode = AuthMode.login;
+      _autovalidate = AutovalidateMode.disabled;
+    });
+  }
+
+  void _useDifferentEmail() => setState(() => _pendingConfirmationEmail = null);
+
   @override
   Widget build(BuildContext context) {
+    final pendingEmail = _pendingConfirmationEmail;
     final mutation = _isSignup ? signupMutation : loginMutation;
     ref.listen<MutationState<void>>(mutation, (previous, next) {
       if (next is MutationError) {
@@ -146,89 +172,97 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              _ModeToggle(
-                mode: _mode,
-                onChanged: (mode) => setState(() => _mode = mode),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Form(
-                key: _formKey,
-                autovalidateMode: _autovalidate,
-                child: Column(
-                  children: [
-                    if (_isSignup) ...[
+              if (pendingEmail != null)
+                ConfirmEmailCard(
+                  email: pendingEmail,
+                  onBackToLogin: _backToLogin,
+                  onUseDifferentEmail: _useDifferentEmail,
+                )
+              else ...[
+                _ModeToggle(
+                  mode: _mode,
+                  onChanged: (mode) => setState(() => _mode = mode),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Form(
+                  key: _formKey,
+                  autovalidateMode: _autovalidate,
+                  child: Column(
+                    children: [
+                      if (_isSignup) ...[
+                        AuthTextField(
+                          label: 'Name',
+                          controller: _name,
+                          hintText: 'Ada Wong',
+                          textCapitalization: TextCapitalization.words,
+                          textInputAction: TextInputAction.next,
+                          validator: _validateName,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                      ],
                       AuthTextField(
-                        label: 'Name',
-                        controller: _name,
-                        hintText: 'Ada Wong',
-                        textCapitalization: TextCapitalization.words,
+                        label: 'Email',
+                        controller: _email,
+                        hintText: 'ada@example.com',
+                        keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
-                        validator: _validateName,
+                        validator: _validateEmail,
                       ),
-                      const SizedBox(height: AppSpacing.md),
-                    ],
-                    AuthTextField(
-                      label: 'Email',
-                      controller: _email,
-                      hintText: 'ada@example.com',
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      validator: _validateEmail,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    AuthTextField(
-                      label: 'Password',
-                      controller: _password,
-                      obscureText: true,
-                      showObscureToggle: true,
-                      textInputAction: _isSignup
-                          ? TextInputAction.next
-                          : TextInputAction.done,
-                      validator: _validatePassword,
-                    ),
-                    if (_isSignup)
-                      ListenableBuilder(
-                        listenable: _password,
-                        builder: (context, _) =>
-                            PasswordStrengthMeter(password: _password.text),
-                      ),
-                    if (_isSignup) ...[
                       const SizedBox(height: AppSpacing.md),
                       AuthTextField(
-                        label: 'Confirm password',
-                        controller: _confirmPassword,
+                        label: 'Password',
+                        controller: _password,
                         obscureText: true,
                         showObscureToggle: true,
-                        textInputAction: TextInputAction.done,
-                        validator: _validateConfirmPassword,
+                        textInputAction: _isSignup
+                            ? TextInputAction.next
+                            : TextInputAction.done,
+                        validator: _validatePassword,
+                      ),
+                      if (_isSignup)
+                        ListenableBuilder(
+                          listenable: _password,
+                          builder: (context, _) =>
+                              PasswordStrengthMeter(password: _password.text),
+                        ),
+                      if (_isSignup) ...[
+                        const SizedBox(height: AppSpacing.md),
+                        AuthTextField(
+                          label: 'Confirm password',
+                          controller: _confirmPassword,
+                          obscureText: true,
+                          showObscureToggle: true,
+                          textInputAction: TextInputAction.done,
+                          validator: _validateConfirmPassword,
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.lg),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: isLoading ? null : _submit,
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(48),
+                          ),
+                          child: isLoading
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  _isSignup ? 'Create my account' : 'Log in',
+                                ),
+                        ),
                       ),
                     ],
-                    const SizedBox(height: AppSpacing.lg),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: isLoading ? null : _submit,
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(48),
-                        ),
-                        child: isLoading
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(
-                                _isSignup ? 'Create my account' : 'Log in',
-                              ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              const SocialSignInButtons(),
+                const SizedBox(height: AppSpacing.lg),
+                const SocialSignInButtons(),
+              ],
               const SizedBox(height: AppSpacing.base),
               Center(
                 child: Text(

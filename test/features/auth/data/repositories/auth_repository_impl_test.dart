@@ -1,17 +1,21 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/exceptions.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:traviato/features/auth/data/models/user_model.dart';
 import 'package:traviato/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:traviato/features/auth/domain/entities/signup_result.dart';
 
 class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
   _FakeAuthRemoteDataSource({
     this.authStateStream = const Stream.empty(),
     this.loginException,
     this.signupException,
+    this.signupNeedsConfirmation = false,
+    this.resendException,
     this.signInWithAppleException,
     this.signInWithGoogleException,
     this.logoutException,
@@ -20,6 +24,9 @@ class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
   final Stream<UserModel?> authStateStream;
   Exception? loginException;
   Exception? signupException;
+  bool signupNeedsConfirmation;
+  Exception? resendException;
+  final resendCalls = <String>[];
   Exception? signInWithAppleException;
   Exception? signInWithGoogleException;
   Exception? logoutException;
@@ -46,13 +53,22 @@ class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> signup({
+  Future<SignupResult> signup({
     required String email,
     required String password,
     required String username,
   }) async {
     if (signupException != null) throw signupException!;
-    return _user;
+    return SignupResult(
+      user: _user,
+      needsEmailConfirmation: signupNeedsConfirmation,
+    );
+  }
+
+  @override
+  Future<void> resendSignupConfirmation({required String email}) async {
+    resendCalls.add(email);
+    if (resendException != null) throw resendException!;
   }
 
   @override
@@ -196,6 +212,26 @@ void main() {
   });
 
   group('AuthRepositoryImpl.signup', () {
+    test('passes through whether the account awaits email confirmation '
+        '(#162)', () async {
+      for (final needsConfirmation in [true, false]) {
+        final repo = AuthRepositoryImpl(
+          remote: _FakeAuthRemoteDataSource(
+            signupNeedsConfirmation: needsConfirmation,
+          ),
+        );
+        final result = await repo.signup(
+          email: 'ada@example.com',
+          password: 'secret1',
+          username: 'ada',
+        );
+        result.fold(
+          (failure) => fail('expected Right, got Left($failure)'),
+          (signup) => expect(signup.needsEmailConfirmation, needsConfirmation),
+        );
+      }
+    });
+
     test('returns Right(user) on success', () async {
       final repo = AuthRepositoryImpl(remote: _FakeAuthRemoteDataSource());
       final result = await repo.signup(
@@ -383,6 +419,58 @@ void main() {
             expect(failure, const AuthenticationFailure(message: 'no session')),
         (_) => fail('expected Left'),
       );
+    });
+  });
+
+  group('AuthRepositoryImpl.resendSignupConfirmation (#162)', () {
+    test('returns Right on success and resends to the given email', () async {
+      final remote = _FakeAuthRemoteDataSource();
+      final repo = AuthRepositoryImpl(remote: remote);
+
+      final result = await repo.resendSignupConfirmation(
+        email: 'ada@example.com',
+      );
+
+      expect(result.isRight(), isTrue);
+      expect(remote.resendCalls, ['ada@example.com']);
+    });
+
+    test('maps the email quota to the #158 RateLimitedFailure copy', () async {
+      final repo = AuthRepositoryImpl(
+        remote: _FakeAuthRemoteDataSource(
+          resendException: const RateLimitedException(isEmailQuota: true),
+        ),
+      );
+
+      final result = await repo.resendSignupConfirmation(
+        email: 'ada@example.com',
+      );
+
+      result.fold(
+        (failure) => expect(
+          failure,
+          isA<RateLimitedFailure>().having(
+            (f) => f.isEmailQuota,
+            'isEmailQuota',
+            isTrue,
+          ),
+        ),
+        (_) => fail('expected Left'),
+      );
+    });
+
+    test('maps NetworkException to NetworkFailure', () async {
+      final repo = AuthRepositoryImpl(
+        remote: _FakeAuthRemoteDataSource(
+          resendException: const NetworkException(),
+        ),
+      );
+
+      final result = await repo.resendSignupConfirmation(
+        email: 'ada@example.com',
+      );
+
+      expect(result, const Left<Failure, void>(NetworkFailure()));
     });
   });
 }

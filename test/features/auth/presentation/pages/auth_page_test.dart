@@ -5,8 +5,11 @@ import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/core/theme/app_colors.dart';
 import 'package:traviato/core/theme/app_theme.dart';
+import 'package:traviato/features/auth/domain/entities/signup_result.dart';
+import 'package:traviato/features/auth/domain/entities/user_entity.dart';
 import 'package:traviato/features/auth/presentation/pages/auth_page.dart';
 import 'package:traviato/features/auth/presentation/providers/auth_providers.dart';
+import 'package:traviato/features/auth/presentation/widgets/confirm_email_card.dart';
 
 import '../../fakes/fake_auth_repository.dart';
 
@@ -243,6 +246,154 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('Invalid login credentials'), findsOneWidget);
+    });
+  });
+
+  group('signup awaiting email confirmation (#162)', () {
+    const cardKey = Key('confirm-email-card');
+
+    FakeAuthRepository pendingRepo() =>
+        FakeAuthRepository()
+          ..signupResult = const Right(
+            SignupResult(
+              user: UserEntity(id: 'u1', email: 'ada@example.com'),
+              needsEmailConfirmation: true,
+            ),
+          );
+
+    Future<void> signUp(WidgetTester tester) async {
+      await tester.enterText(find.byType(TextFormField).at(0), 'Ada Wong');
+      await tester.enterText(
+        find.byType(TextFormField).at(1),
+        'ada@example.com',
+      );
+      await tester.enterText(find.byType(TextFormField).at(2), 'secret1');
+      await tester.enterText(find.byType(TextFormField).at(3), 'secret1');
+      await tester.tap(find.text('Create my account'));
+      await tester.pump();
+      await tester.pump();
+    }
+
+    testWidgets('replaces the form with the confirmation card — not an '
+        'error snackbar', (tester) async {
+      final repo = pendingRepo();
+      addTearDown(repo.dispose);
+      await tester.pumpWidget(_wrap(repo, AuthMode.signup));
+
+      await signUp(tester);
+
+      expect(find.byKey(cardKey), findsOneWidget);
+      expect(find.text('Check your inbox'), findsOneWidget);
+      expect(
+        find.textContaining('ada@example.com', findRichText: true),
+        findsOneWidget,
+      );
+      expect(find.byType(TextFormField), findsNothing);
+      expect(find.text('Create my account'), findsNothing);
+      expect(find.byType(SnackBar), findsNothing);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+    });
+
+    testWidgets('a signup that returned a session shows no card', (
+      tester,
+    ) async {
+      final repo = FakeAuthRepository();
+      addTearDown(repo.dispose);
+      await tester.pumpWidget(_wrap(repo, AuthMode.signup));
+
+      await signUp(tester);
+
+      expect(find.byKey(cardKey), findsNothing);
+      expect(find.byType(TextFormField), findsWidgets);
+    });
+
+    testWidgets('"Back to log in" switches to log-in with the email '
+        'prefilled and the password cleared', (tester) async {
+      final repo = pendingRepo();
+      addTearDown(repo.dispose);
+      await tester.pumpWidget(_wrap(repo, AuthMode.signup));
+      await signUp(tester);
+
+      await tester.tap(find.text('Back to log in'));
+      await tester.pump();
+
+      expect(find.byKey(cardKey), findsNothing);
+      expect(find.text('NAME'), findsNothing);
+      final fields = tester
+          .widgetList<TextFormField>(find.byType(TextFormField))
+          .toList();
+      expect(fields, hasLength(2));
+      expect(fields[0].controller!.text, 'ada@example.com');
+      expect(fields[1].controller!.text, isEmpty);
+    });
+
+    testWidgets('"Use a different email" returns to the signup form with '
+        'its fields kept', (tester) async {
+      final repo = pendingRepo();
+      addTearDown(repo.dispose);
+      await tester.pumpWidget(_wrap(repo, AuthMode.signup));
+      await signUp(tester);
+
+      await tester.tap(find.text('Use a different email'));
+      await tester.pump();
+
+      expect(find.byKey(cardKey), findsNothing);
+      expect(find.text('NAME'), findsOneWidget);
+      final email = tester.widget<TextFormField>(
+        find.byType(TextFormField).at(1),
+      );
+      expect(email.controller!.text, 'ada@example.com');
+    });
+
+    testWidgets('resend is held back by a cooldown, then resends and '
+        'restarts it', (tester) async {
+      final repo = pendingRepo();
+      addTearDown(repo.dispose);
+      await tester.pumpWidget(_wrap(repo, AuthMode.signup));
+      await signUp(tester);
+
+      final seconds = ConfirmEmailCard.resendCooldown.inSeconds;
+      expect(find.text('Resend in ${seconds}s'), findsOneWidget);
+      await tester.tap(find.text('Resend in ${seconds}s'));
+      await tester.pump();
+      expect(repo.resendCalls, isEmpty);
+
+      await tester.pump(const Duration(seconds: 18));
+      expect(find.text('Resend in ${seconds - 18}s'), findsOneWidget);
+
+      await tester.pump(ConfirmEmailCard.resendCooldown);
+      await tester.tap(find.text('Resend email'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(repo.resendCalls, ['ada@example.com']);
+      expect(find.text('Sent again ✓'), findsOneWidget);
+      expect(find.text('Resend in ${seconds}s'), findsOneWidget);
+    });
+
+    testWidgets('a failed resend shows the rate-limit message and leaves '
+        'the card up', (tester) async {
+      final repo = pendingRepo()
+        ..resendResult = Left(RateLimitedFailure(isEmailQuota: true));
+      addTearDown(repo.dispose);
+      await tester.pumpWidget(_wrap(repo, AuthMode.signup));
+      await signUp(tester);
+
+      await tester.pump(ConfirmEmailCard.resendCooldown);
+      await tester.tap(find.text('Resend email'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(tester.takeException(), isNull);
+      expect(
+        find.text(
+          "We've sent too many emails for now. Please try again in a "
+          'little while.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Sent again ✓'), findsNothing);
+      expect(find.byKey(cardKey), findsOneWidget);
     });
   });
 }

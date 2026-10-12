@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/failures.dart';
+import 'package:traviato/features/auth/domain/entities/signup_result.dart';
 import 'package:traviato/features/auth/domain/entities/user_entity.dart';
 import 'package:traviato/features/auth/domain/repositories/auth_repository.dart';
 
@@ -15,12 +16,16 @@ class FakeAuthRepository implements AuthRepository {
   final _linkFailures = StreamController<AuthLinkFailure>.broadcast();
   final loginCalls = <String>[];
   final signupCalls = <String>[];
+  final resendCalls = <String>[];
   var signInWithAppleCallCount = 0;
   var signInWithGoogleCallCount = 0;
   var logoutCalled = false;
 
   Either<Failure, UserEntity>? loginResult;
-  Either<Failure, UserEntity>? signupResult;
+
+  /// Defaults to a signup that returned a session (confirmation off).
+  Either<Failure, SignupResult>? signupResult;
+  Either<Failure, void>? resendResult;
   Either<Failure, void>? signInWithAppleResult;
   Either<Failure, void>? signInWithGoogleResult;
   Either<Failure, void>? logoutResult;
@@ -55,7 +60,7 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> signup({
+  Future<Either<Failure, SignupResult>> signup({
     required String email,
     required String password,
     required String username,
@@ -63,7 +68,21 @@ class FakeAuthRepository implements AuthRepository {
     signupCalls.add(email);
     if (delay > Duration.zero) await Future<void>.delayed(delay);
     return signupResult ??
-        Right(UserEntity(id: 'u1', email: email, username: username));
+        Right(
+          SignupResult(
+            user: UserEntity(id: 'u1', email: email, username: username),
+            needsEmailConfirmation: false,
+          ),
+        );
+  }
+
+  @override
+  Future<Either<Failure, void>> resendSignupConfirmation({
+    required String email,
+  }) async {
+    resendCalls.add(email);
+    if (delay > Duration.zero) await Future<void>.delayed(delay);
+    return resendResult ?? const Right(null);
   }
 
   @override
