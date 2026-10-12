@@ -55,14 +55,14 @@ void main() {
     test('returns the option whose vibe matches the selected vibe', () {
       expect(suggestedCover({'Romantic'}).id, 'romantic');
       expect(suggestedCover({'Nightlife'}).id, 'nightlife');
-      expect(suggestedCover({'Chill'}).id, 'rainy_cabin');
+      expect(suggestedCover({'Chill'}).id, 'autumn_woods');
     });
 
     test('returns the first matching option in list order when multiple '
         'vibes are selected', () {
       // 'Road trip' (a travel cover) comes before 'Romantic' (an occasion
       // cover) in kCoverOptions, so it wins.
-      expect(suggestedCover({'Romantic', 'Road trip'}).id, 'road_trip');
+      expect(suggestedCover({'Romantic', 'Road trip'}).id, 'departure');
     });
 
     test('falls back to the first option when no vibe matches', () {
