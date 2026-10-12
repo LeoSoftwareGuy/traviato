@@ -60,6 +60,13 @@ abstract class AppMotion {
   static const floatYMaxDuration = Duration(seconds: 7);
   static const floatYCurve = Curves.easeInOut;
 
+  /// Landing hero polaroids (#195): float + sway around each photo's resting
+  /// tilt. Two durations so the pair never moves in lockstep.
+  static const polaroidDriftDuration = Duration(milliseconds: 6000);
+  static const polaroidDriftSlowDuration = Duration(milliseconds: 7400);
+  static const polaroidDriftFloat = 7.0;
+  static const polaroidDriftSwayDegrees = 2.0;
+
   /// Landing CTA; paywall's "Start 7-day free trial" (the only glowing
   /// element on that screen).
   static const pulseGlowDuration = Duration(milliseconds: 3600);
