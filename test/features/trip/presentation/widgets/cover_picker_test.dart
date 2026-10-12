@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:traviato/features/trip/presentation/widgets/cover_options.dart';
 import 'package:traviato/features/trip/presentation/widgets/cover_picker.dart';
 import 'package:traviato/features/trip/presentation/widgets/cover_upload_tile.dart';
 
@@ -43,14 +44,63 @@ Future<void> _pump(
 }
 
 void main() {
-  testWidgets('the upload tile only appears when onUploadCustom is given', (
+  testWidgets('the strip has no upload tile: the slot is the entry point', (
+    tester,
+  ) async {
+    await _pump(tester, onUploadCustom: (_) async {});
+    expect(find.byType(CoverUploadTile), findsNothing);
+    expect(find.byKey(const Key('cover-slot')), findsOneWidget);
+  });
+
+  testWidgets('the slot is not tappable without onUploadCustom', (
     tester,
   ) async {
     await _pump(tester);
-    expect(find.byType(CoverUploadTile), findsNothing);
+    expect(find.byKey(const Key('cover-slot')), findsNothing);
+  });
 
+  testWidgets('tapping the empty slot opens the upload source sheet', (
+    tester,
+  ) async {
     await _pump(tester, onUploadCustom: (_) async {});
-    expect(find.byType(CoverUploadTile), findsOneWidget);
+    expect(find.bySemanticsLabel('Choose a cover'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('cover-slot')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Upload a cover photo'), findsOneWidget);
+    expect(find.text('Take a photo'), findsOneWidget);
+    expect(find.text('Choose from gallery'), findsOneWidget);
+  });
+
+  testWidgets('tapping a chosen cover opens the same sheet to change it', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      selectedCoverId: 'wedding',
+      onUploadCustom: (_) async {},
+    );
+    expect(find.text('YOUR COVER'), findsOneWidget);
+    expect(find.bySemanticsLabel('Change cover'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('cover-slot')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Upload a cover photo'), findsOneWidget);
+  });
+
+  testWidgets('every bundled cover is in the strip, occasions included', (
+    tester,
+  ) async {
+    await _pump(tester);
+    // The occasion covers are at the far end — scroll there.
+    await tester.drag(find.byType(ListView), const Offset(-5000, 0));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(Key('cover-thumbnail-${kCoverOptions.last.id}')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('tapping a bundled thumbnail calls onSelect with its id', (
