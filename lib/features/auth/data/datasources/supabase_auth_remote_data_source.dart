@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/supabase_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../models/user_model.dart';
@@ -21,10 +22,22 @@ class SupabaseAuthRemoteDataSource implements AuthRemoteDataSource {
   final _googleSignIn = GoogleSignIn.instance;
   bool _googleSignInInitialized = false;
 
+  // A failed email confirmation link (#157) arrives as a stream error; it is
+  // re-typed as [AuthLinkException] so the repository can tell it apart from
+  // an unexpected stream failure.
   @override
   Stream<UserModel?> get onAuthStateChanged => _client.auth.onAuthStateChange
       .map((data) => data.session?.user)
-      .map((user) => user == null ? null : UserModel.fromSupabaseUser(user));
+      .map((user) => user == null ? null : UserModel.fromSupabaseUser(user))
+      .handleError(
+        (Object error, StackTrace st) {
+          Error.throwWithStackTrace(
+            AuthLinkException(message: (error as AuthException).message),
+            st,
+          );
+        },
+        test: (Object? error) => error != null && isAuthLinkError(error),
+      );
 
   @override
   UserModel? get currentUser {
@@ -79,6 +92,9 @@ class SupabaseAuthRemoteDataSource implements AuthRemoteDataSource {
         email: email,
         password: password,
         data: {'username': username},
+        // The confirmation email links back into the app, not a browser
+        // (#157); supabase_flutter exchanges the PKCE code on arrival.
+        emailRedirectTo: AppConstants.authRedirectUrl,
       );
       final user = res.user;
       if (user == null) {

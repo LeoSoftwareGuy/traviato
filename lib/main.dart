@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/auth/presentation/widgets/auth_link_failure_listener.dart';
 import 'features/notifications/presentation/controllers/bonus_notifications_lifecycle_controller.dart';
 import 'features/subscription/data/datasources/revenuecat_api_key.dart';
 import 'features/subscription/presentation/controllers/subscription_identity_lifecycle_controller.dart';
@@ -19,6 +20,12 @@ Future<void> main() async {
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL']!,
     publishableKey: dotenv.env['SUPABASE_PUBLISHABLE_KEY']!,
+    // PKCE is already the default; spelled out because the email
+    // confirmation deep link (#157) depends on it — the SDK exchanges the
+    // link's `?code=` for a session on cold and warm starts alike.
+    authOptions: const FlutterAuthClientOptions(
+      authFlowType: AuthFlowType.pkce,
+    ),
   );
   final revenueCatConfigured = await _configureRevenueCat();
   // Disable Riverpod's silent auto-retry; retries are handled explicitly with
@@ -73,6 +80,8 @@ class TraviatoApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
       routerConfig: ref.watch(routerProvider),
+      builder: (context, child) =>
+          AuthLinkFailureListener(child: child ?? const SizedBox.shrink()),
     );
   }
 }

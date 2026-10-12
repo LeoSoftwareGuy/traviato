@@ -55,6 +55,17 @@ class RateLimitedFailure extends Failure {
   }
 }
 
+/// An email confirmation link that couldn't sign the user in (#157). The
+/// email may still be confirmed server-side (link opened on another device),
+/// so the copy steers to "log in" rather than "sign up again" first.
+class AuthLinkFailure extends Failure {
+  const AuthLinkFailure({
+    super.message =
+        "That link has expired or was already used. If you've already "
+        'confirmed your email, just log in.',
+  });
+}
+
 class PermissionFailure extends Failure {
   const PermissionFailure({super.message = 'You do not have permission.'});
 }

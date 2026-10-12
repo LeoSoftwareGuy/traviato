@@ -24,6 +24,25 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<!-- Email confirmation deep link (#157); keep in sync with
+			     AppConstants.authRedirectScheme. -->
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>com.leo.storyni.auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.leo.storyni</string>
+			</array>
+		</dict>
+	</array>
+	<!-- supabase_flutter (via app_links) handles incoming links; stop Flutter
+	     also pushing them to go_router as routes (#157). -->
+	<key>FlutterDeepLinkingEnabled</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>

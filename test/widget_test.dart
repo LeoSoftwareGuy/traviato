@@ -13,6 +13,9 @@ class _FakeAuthRepository implements AuthRepository {
   Stream<UserEntity?> get onAuthStateChanged => const Stream.empty();
 
   @override
+  Stream<AuthLinkFailure> get onAuthLinkFailure => const Stream.empty();
+
+  @override
   UserEntity? get currentUser => null;
 
   @override
