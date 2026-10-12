@@ -67,4 +67,49 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  group('reduce motion (#198)', () {
+    Widget landing({required bool reduceMotion}) => MaterialApp(
+      theme: AppTheme.dark,
+      home: MediaQuery(
+        data: MediaQueryData(disableAnimations: reduceMotion),
+        child: const GuestLandingPage(),
+      ),
+    );
+
+    double ctaGlowBlur(WidgetTester tester) => tester
+        .widgetList<DecoratedBox>(
+          find.ancestor(
+            of: find.text('Start capturing your moments'),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .map((box) => box.decoration)
+        .whereType<BoxDecoration>()
+        .firstWhere((d) => d.boxShadow != null)
+        .boxShadow!
+        .single
+        .blurRadius;
+
+    testWidgets('the CTA glow pulses when motion is allowed', (tester) async {
+      await tester.pumpWidget(landing(reduceMotion: false));
+      await tester.pump();
+      final start = ctaGlowBlur(tester);
+
+      await tester.pump(const Duration(milliseconds: 600));
+
+      expect(ctaGlowBlur(tester), isNot(start));
+    });
+
+    testWidgets('the CTA rests with no glow and the whole page goes still', (
+      tester,
+    ) async {
+      await tester.pumpWidget(landing(reduceMotion: true));
+
+      // pumpAndSettle only returns once nothing is requesting frames —
+      // polaroids, star specks and the CTA glow all at rest.
+      await tester.pumpAndSettle();
+      expect(ctaGlowBlur(tester), 0);
+    });
+  });
 }

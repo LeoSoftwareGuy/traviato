@@ -7,7 +7,9 @@ import '../theme/app_motion.dart';
 /// A single twinkling dot — the star-speck animation shared by guest
 /// landing's [StarSpecks]-style scatters and the paywall's background
 /// specks. Fades/scales up from a resting state after [delayMs], then loops.
-/// `docs/design/README.md` § Motion (`twinkle`).
+/// With reduce motion on it holds still at the loop's midpoint (#198) — the
+/// value-0 rest is close to invisible, and a still sky should still read as
+/// starry. `docs/design/README.md` § Motion (`twinkle`).
 class TwinkleDot extends StatefulWidget {
   const TwinkleDot({
     required this.size,
@@ -49,13 +51,24 @@ class _TwinkleDotState extends State<TwinkleDot>
 
   Timer? _startTimer;
 
+  static const _reducedMotionValue = .5;
+
   @override
-  void initState() {
-    super.initState();
-    _startTimer = Timer(
-      Duration(milliseconds: widget.delayMs),
-      () => _controller.repeat(reverse: true),
-    );
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _startTimer?.cancel();
+      _startTimer = null;
+      _controller
+        ..stop()
+        ..value = _reducedMotionValue;
+    } else if (!_controller.isAnimating && _startTimer == null) {
+      _controller.value = 0;
+      _startTimer = Timer(
+        Duration(milliseconds: widget.delayMs),
+        () => _controller.repeat(reverse: true),
+      );
+    }
   }
 
   @override
