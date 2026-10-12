@@ -36,13 +36,13 @@ const _moments = [
     photos: 96,
   ),
   _Moment(
-    imagePath: GuestImages.honeymoonEscape,
-    title: 'Honeymoon',
-    days: 11,
-    photos: 348,
+    imagePath: GuestImages.anniversary,
+    title: 'Our anniversary',
+    days: 3,
+    photos: 86,
   ),
   _Moment(
-    imagePath: GuestImages.epicMilestone,
+    imagePath: GuestImages.graduation,
     title: 'Graduation',
     days: 1,
     photos: 42,

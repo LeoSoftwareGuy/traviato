@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -9,8 +8,8 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/widgets/photo_scrim.dart';
 import 'guest_images.dart';
 
-/// Guest landing hero: 286px photo with the scrim, plus two floating
-/// polaroids overhanging the bottom edge. `docs/design/README.md` § 1.
+/// Guest landing hero: 286px photo with the scrim, plus two drifting
+/// polaroids overhanging the bottom edge. `docs/design/README.md` § 1, #195.
 class GuestHero extends StatelessWidget {
   const GuestHero({super.key});
 
@@ -26,35 +25,37 @@ class GuestHero extends StatelessWidget {
             image: Image.asset(
               GuestImages.hero,
               fit: BoxFit.cover,
-              alignment: const Alignment(0, -0.44),
+              alignment: const Alignment(0, -0.5),
             ),
             borderRadius: AppRadius.mediaRadius,
           ),
         ),
-        Positioned(
+        const Positioned(
           left: 24,
           bottom: -36,
-          child: Transform.rotate(
-            angle: -8 * math.pi / 180,
-            child: const _Polaroid(
-              image: GuestImages.honeymoonEscape,
-              width: 104,
-              height: 124,
-              delayMs: 0,
-            ),
+          child: _Polaroid(
+            key: Key('guest-polaroid-wedding'),
+            image: GuestImages.wedding,
+            width: 104,
+            height: 124,
+            tiltDegrees: -6,
+            duration: AppMotion.polaroidDriftDuration,
+            phase: 0,
           ),
         ),
-        Positioned(
+        // Starts half a cycle in (a negative delay), so it rises while the
+        // wedding photo dips; the different duration keeps them de-synced.
+        const Positioned(
           right: 24,
           bottom: -28,
-          child: Transform.rotate(
-            angle: 7 * math.pi / 180,
-            child: const _Polaroid(
-              image: GuestImages.soloGetaway,
-              width: 96,
-              height: 114,
-              delayMs: 1400,
-            ),
+          child: _Polaroid(
+            key: Key('guest-polaroid-birthday'),
+            image: GuestImages.birthday,
+            width: 96,
+            height: 114,
+            tiltDegrees: 6,
+            duration: AppMotion.polaroidDriftSlowDuration,
+            phase: .5,
           ),
         ),
       ],
@@ -62,18 +63,27 @@ class GuestHero extends StatelessWidget {
   }
 }
 
+/// A polaroid that floats and sways around its resting [tiltDegrees], or
+/// rests still at that tilt when the OS asks for reduced motion.
 class _Polaroid extends StatefulWidget {
   const _Polaroid({
+    super.key,
     required this.image,
     required this.width,
     required this.height,
-    required this.delayMs,
+    required this.tiltDegrees,
+    required this.duration,
+    required this.phase,
   });
 
   final String image;
   final double width;
   final double height;
-  final int delayMs;
+  final double tiltDegrees;
+  final Duration duration;
+
+  /// Where in the loop (0–1) the drift starts.
+  final double phase;
 
   @override
   State<_Polaroid> createState() => _PolaroidState();
@@ -83,27 +93,25 @@ class _PolaroidState extends State<_Polaroid>
     with SingleTickerProviderStateMixin {
   late final _controller = AnimationController(
     vsync: this,
-    duration: AppMotion.floatYMinDuration,
+    duration: widget.duration,
+    value: widget.phase,
   );
-  late final _translateY = Tween<double>(
-    begin: 0,
-    end: -7,
-  ).animate(CurvedAnimation(parent: _controller, curve: AppMotion.floatYCurve));
-
-  Timer? _startTimer;
 
   @override
-  void initState() {
-    super.initState();
-    _startTimer = Timer(
-      Duration(milliseconds: widget.delayMs),
-      () => _controller.repeat(reverse: true),
-    );
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _controller
+        ..stop()
+        ..value = 0;
+    } else if (!_controller.isAnimating) {
+      if (_controller.value == 0) _controller.value = widget.phase;
+      _controller.repeat();
+    }
   }
 
   @override
   void dispose() {
-    _startTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -112,10 +120,20 @@ class _PolaroidState extends State<_Polaroid>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (context, child) => Transform.translate(
-        offset: Offset(0, _translateY.value),
-        child: child,
-      ),
+      builder: (context, child) {
+        // One sine cycle per loop: smooth ease-in-out, no seam at the wrap.
+        final cycle = _controller.value * 2 * math.pi;
+        final dy = -AppMotion.polaroidDriftFloat * (1 - math.cos(cycle)) / 2;
+        final degrees =
+            widget.tiltDegrees +
+            AppMotion.polaroidDriftSwayDegrees * math.sin(cycle);
+        return Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.translationValues(0, dy, 0)
+            ..rotateZ(degrees * math.pi / 180),
+          child: child,
+        );
+      },
       child: Container(
         width: widget.width,
         height: widget.height,

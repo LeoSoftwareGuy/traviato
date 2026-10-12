@@ -6,34 +6,44 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
 class _Step {
-  const _Step({required this.title, required this.description});
+  const _Step({
+    required this.eyebrow,
+    required this.title,
+    required this.description,
+  });
 
+  final String eyebrow;
   final String title;
   final String description;
 }
 
 const _steps = [
   _Step(
-    title: 'Capture the moment',
+    eyebrow: 'THE BEFORE',
+    title: "Plan the fun. We'll handle the details.",
     description:
-        'Photos, notes, and highlights — drop them in as you go. Works for '
-        'a wedding weekend, a birthday trip, or just a really good Tuesday.',
+        'Big weekend? Little adventure? Just a Tuesday worth remembering? '
+        'Map out your plans, make your lists, and keep everything in one '
+        'happy place.',
   ),
   _Step(
-    title: 'Stay organized, effortlessly',
+    eyebrow: 'THE DURING',
+    title: 'Live it up. Jot it down.',
     description:
-        'For multi-day events, we\'ll keep each day tidy with prompts and '
-        'structure. For single moments, jump right in — no folders needed.',
+        'Snap photos, drop little notes, and take on surprise challenges '
+        "along the way. The best memories aren't always the ones you planned.",
   ),
   _Step(
-    title: 'Relive it all',
+    eyebrow: 'THE AFTER',
+    title: 'Good times deserve a replay.',
     description:
-        'At the end, watch your entire memory line replay on a beautiful '
-        'timeline — every photo, every note, every moment, in order.',
+        'When the adventure ends, watch your moments come together in a '
+        'personal highlight film. Relive the magic and keep the memories.',
   ),
 ];
 
-/// `docs/design/README.md` § 1 "How it works" — card 3 warm-highlighted.
+/// "How it works" (#193): before / during / after cards, card 3
+/// warm-highlighted as in `docs/design/README.md` § 1.
 class HowItWorksSection extends StatelessWidget {
   const HowItWorksSection({super.key});
 
@@ -43,13 +53,12 @@ class HowItWorksSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'How it works',
-          style: AppTypography.screenTitle.copyWith(fontSize: 22),
+          'Make plans. Make memories. Make them last.',
+          style: AppTypography.screenTitle.copyWith(fontSize: 22, height: 1.25),
         ),
         const SizedBox(height: AppSpacing.base),
         for (var i = 0; i < _steps.length; i++) ...[
           _HowItWorksCard(
-            number: i + 1,
             step: _steps[i],
             highlighted: i == _steps.length - 1,
           ),
@@ -61,19 +70,15 @@ class HowItWorksSection extends StatelessWidget {
 }
 
 class _HowItWorksCard extends StatelessWidget {
-  const _HowItWorksCard({
-    required this.number,
-    required this.step,
-    required this.highlighted,
-  });
+  const _HowItWorksCard({required this.step, required this.highlighted});
 
-  final int number;
   final _Step step;
   final bool highlighted;
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: highlighted
@@ -86,47 +91,28 @@ class _HowItWorksCard extends StatelessWidget {
               : AppColors.surfaceBorder,
         ),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 26,
-            height: 26,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: AppColors.primaryTint,
-              borderRadius: AppRadius.badgeRadius,
-            ),
-            child: Text(
-              '$number',
-              style: AppTypography.buttonLabel.copyWith(
-                fontSize: 12,
-                color: AppColors.primary,
-              ),
+          Text(
+            step.eyebrow,
+            style: AppTypography.mono.copyWith(color: AppColors.primary),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            step.title,
+            style: AppTypography.screenTitle.copyWith(
+              fontSize: 17,
+              height: 1.2,
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  step.title,
-                  style: AppTypography.screenTitle.copyWith(
-                    fontSize: 17,
-                    height: 1.2,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  step.description,
-                  style: AppTypography.chipLabel.copyWith(
-                    fontSize: 12,
-                    height: 1.6,
-                    color: AppColors.textMuted,
-                  ),
-                ),
-              ],
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            step.description,
+            style: AppTypography.chipLabel.copyWith(
+              fontSize: 12,
+              height: 1.6,
+              color: AppColors.textMuted,
             ),
           ),
         ],
