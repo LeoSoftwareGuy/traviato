@@ -26,7 +26,7 @@ class GuestHero extends StatelessWidget {
             image: Image.asset(
               GuestImages.hero,
               fit: BoxFit.cover,
-              alignment: const Alignment(0, -0.44),
+              alignment: const Alignment(0, -0.5),
             ),
             borderRadius: AppRadius.mediaRadius,
           ),
@@ -37,7 +37,7 @@ class GuestHero extends StatelessWidget {
           child: Transform.rotate(
             angle: -8 * math.pi / 180,
             child: const _Polaroid(
-              image: GuestImages.honeymoonEscape,
+              image: GuestImages.wedding,
               width: 104,
               height: 124,
               delayMs: 0,
@@ -50,7 +50,7 @@ class GuestHero extends StatelessWidget {
           child: Transform.rotate(
             angle: 7 * math.pi / 180,
             child: const _Polaroid(
-              image: GuestImages.soloGetaway,
+              image: GuestImages.birthday,
               width: 96,
               height: 114,
               delayMs: 1400,
