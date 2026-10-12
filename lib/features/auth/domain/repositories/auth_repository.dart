@@ -1,6 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/errors/failures.dart';
+import '../entities/signup_result.dart';
 import '../entities/user_entity.dart';
 
 abstract interface class AuthRepository {
@@ -19,10 +20,16 @@ abstract interface class AuthRepository {
     required String password,
   });
 
-  Future<Either<Failure, UserEntity>> signup({
+  Future<Either<Failure, SignupResult>> signup({
     required String email,
     required String password,
     required String username,
+  });
+
+  /// Re-sends the signup confirmation email (#162). Rate limits surface as
+  /// [RateLimitedFailure], the hourly email quota included.
+  Future<Either<Failure, void>> resendSignupConfirmation({
+    required String email,
   });
 
   /// Native Sign in with Apple. Resolves to `Right(null)` both on success

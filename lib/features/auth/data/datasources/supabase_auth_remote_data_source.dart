@@ -10,6 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/supabase_constants.dart';
 import '../../../../core/errors/exceptions.dart';
+import '../../domain/entities/signup_result.dart';
 import '../models/user_model.dart';
 import 'auth_exception_mapper.dart';
 import 'auth_remote_data_source.dart';
@@ -82,7 +83,7 @@ class SupabaseAuthRemoteDataSource implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> signup({
+  Future<SignupResult> signup({
     required String email,
     required String password,
     required String username,
@@ -102,7 +103,13 @@ class SupabaseAuthRemoteDataSource implements AuthRemoteDataSource {
           message: 'Signup succeeded but no user returned.',
         );
       }
-      return UserModel.fromSupabaseUser(user);
+      // No session = the account waits on the confirmation email (#162).
+      // Also the case for an already-registered email, where Supabase
+      // returns an obfuscated user so signup doesn't leak which emails exist.
+      return SignupResult(
+        user: UserModel.fromSupabaseUser(user),
+        needsEmailConfirmation: res.session == null,
+      );
     } on AuthenticationException {
       rethrow;
     } on AuthException catch (e) {
@@ -115,6 +122,23 @@ class SupabaseAuthRemoteDataSource implements AuthRemoteDataSource {
         throw NotFoundException(message: e.message);
       }
       throw DatabaseException(message: e.message);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<void> resendSignupConfirmation({required String email}) async {
+    try {
+      await _client.auth.resend(
+        type: OtpType.signup,
+        email: email,
+        emailRedirectTo: AppConstants.authRedirectUrl,
+      );
+    } on AuthException catch (e) {
+      throw mapAuthException(e);
     } on SocketException {
       throw const NetworkException();
     } catch (e) {

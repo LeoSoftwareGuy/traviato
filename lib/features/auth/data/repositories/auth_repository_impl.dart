@@ -5,6 +5,7 @@ import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
+import '../../domain/entities/signup_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
@@ -86,7 +87,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> signup({
+  Future<Either<Failure, SignupResult>> signup({
     required String email,
     required String password,
     required String username,
@@ -99,6 +100,29 @@ class AuthRepositoryImpl implements AuthRepository {
           username: username,
         ),
       );
+    } on RateLimitedException catch (e) {
+      return Left(
+        RateLimitedFailure(
+          retryAfterSeconds: e.retryAfterSeconds,
+          isEmailQuota: e.isEmailQuota,
+        ),
+      );
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> resendSignupConfirmation({
+    required String email,
+  }) async {
+    try {
+      await _remote.resendSignupConfirmation(email: email);
+      return const Right(null);
     } on RateLimitedException catch (e) {
       return Left(
         RateLimitedFailure(

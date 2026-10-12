@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/failures.dart';
+import 'package:traviato/features/auth/domain/entities/signup_result.dart';
 import 'package:traviato/features/auth/domain/entities/user_entity.dart';
 import 'package:traviato/features/auth/domain/repositories/auth_repository.dart';
 import 'package:traviato/features/auth/presentation/providers/auth_providers.dart';
@@ -25,10 +26,15 @@ class _FakeAuthRepository implements AuthRepository {
   }) => throw UnimplementedError();
 
   @override
-  Future<Either<Failure, UserEntity>> signup({
+  Future<Either<Failure, SignupResult>> signup({
     required String email,
     required String password,
     required String username,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, void>> resendSignupConfirmation({
+    required String email,
   }) => throw UnimplementedError();
 
   @override
