@@ -105,4 +105,56 @@ void main() {
       );
     });
   });
+
+  group('isAuthLinkError (#157)', () {
+    test('error params carried back in the link count as a link error', () {
+      expect(
+        isAuthLinkError(
+          const AuthException(
+            'Email link is invalid or has expired',
+            statusCode: 'otp_expired',
+            code: 'access_denied',
+          ),
+        ),
+        isTrue,
+      );
+    });
+
+    test('a missing PKCE code verifier counts as a link error', () {
+      expect(
+        isAuthLinkError(
+          const AuthException(
+            'Code verifier could not be found in local storage.',
+          ),
+        ),
+        isTrue,
+      );
+      expect(
+        isAuthLinkError(
+          const AuthPKCEGrantCodeExchangeError('No code detected.'),
+        ),
+        isTrue,
+      );
+    });
+
+    test('a retryable token refresh failure is not a link error', () {
+      expect(
+        isAuthLinkError(AuthRetryableFetchException(message: 'offline')),
+        isFalse,
+      );
+    });
+
+    test('a session-restore error at startup is not a link error', () {
+      expect(
+        isAuthLinkError(
+          const AuthException('Session expired.', code: 'session_expired'),
+        ),
+        isFalse,
+      );
+    });
+
+    test('a non-auth error is not a link error', () {
+      expect(isAuthLinkError(StateError('boom')), isFalse);
+    });
+  });
 }

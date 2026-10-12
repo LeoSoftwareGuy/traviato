@@ -6,12 +6,13 @@ import 'package:traviato/features/auth/domain/entities/user_entity.dart';
 import 'package:traviato/features/auth/domain/repositories/auth_repository.dart';
 
 /// Test double for [AuthRepository]. The auth-state stream is driven
-/// manually via [emit]; `login`/`signup`/`logout` return whatever result is
+/// manually via [emit], failed confirmation links via [emitLinkFailure]; `login`/`signup`/`logout` return whatever result is
 /// configured (defaulting to success) and record their calls.
 class FakeAuthRepository implements AuthRepository {
   FakeAuthRepository();
 
   final _controller = StreamController<UserEntity?>.broadcast();
+  final _linkFailures = StreamController<AuthLinkFailure>.broadcast();
   final loginCalls = <String>[];
   final signupCalls = <String>[];
   var signInWithAppleCallCount = 0;
@@ -27,10 +28,18 @@ class FakeAuthRepository implements AuthRepository {
 
   void emit(UserEntity? user) => _controller.add(user);
 
-  Future<void> dispose() => _controller.close();
+  void emitLinkFailure() => _linkFailures.add(const AuthLinkFailure());
+
+  Future<void> dispose() async {
+    await _controller.close();
+    await _linkFailures.close();
+  }
 
   @override
   Stream<UserEntity?> get onAuthStateChanged => _controller.stream;
+
+  @override
+  Stream<AuthLinkFailure> get onAuthLinkFailure => _linkFailures.stream;
 
   @override
   UserEntity? get currentUser => null;

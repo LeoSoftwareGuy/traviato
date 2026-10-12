@@ -28,3 +28,19 @@ AppException mapAuthException(AuthException e) {
   }
   return AuthenticationException(message: e.message);
 }
+
+/// Session-restore error codes gotrue reports on the auth-state stream at
+/// startup — not caused by a link, so they must not read as one.
+const _sessionRestoreCodes = {'session_expired', 'session_not_found'};
+
+/// Whether an error on `onAuthStateChange` came from handling an incoming
+/// auth deep link (#157). supabase_flutter funnels every failed
+/// `getSessionFromUrl` — error params in the link (`otp_expired`,
+/// `access_denied`), a missing PKCE code verifier, a rejected code exchange —
+/// into the stream as an [AuthException]. The only other errors on that
+/// stream are retryable token-refresh failures and session-restore errors,
+/// which are excluded here.
+bool isAuthLinkError(Object error) =>
+    error is AuthException &&
+    error is! AuthRetryableFetchException &&
+    !_sessionRestoreCodes.contains(error.code);

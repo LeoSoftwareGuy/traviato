@@ -46,6 +46,14 @@ class SignInCancelledException extends AppException {
   });
 }
 
+/// An email confirmation deep link (#157) couldn't be turned into a
+/// session — expired, already used, or opened on a different device/install
+/// than the one that signed up (PKCE keeps the code verifier locally).
+/// Carried on the auth-state stream as an error, not thrown from a call.
+class AuthLinkException extends AppException {
+  const AuthLinkException({required super.message});
+}
+
 /// The user dismissed the native store purchase/restore sheet without
 /// completing it — not an error, mirrors [SignInCancelledException] (#138).
 class PurchaseCancelledException extends AppException {

@@ -6,6 +6,12 @@ import '../entities/user_entity.dart';
 abstract interface class AuthRepository {
   Stream<UserEntity?> get onAuthStateChanged;
 
+  /// Emits an [AuthLinkFailure] each time an incoming email confirmation
+  /// link fails to produce a session (#157) — expired, already used, or
+  /// opened on another device. Such failures never touch
+  /// [onAuthStateChanged]: a stale link doesn't sign anyone out.
+  Stream<AuthLinkFailure> get onAuthLinkFailure;
+
   UserEntity? get currentUser;
 
   Future<Either<Failure, UserEntity>> login({

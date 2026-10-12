@@ -16,7 +16,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
   // Wraps the data-source stream so an unexpected error logs and emits a
   // safe `null` fallback (signed-out) instead of terminating the stream —
-  // the router redirect depends on this stream never dying (doc 03).
+  // the router redirect depends on this stream never dying (doc 03). A
+  // failed confirmation link is skipped here (it's surfaced through
+  // [onAuthLinkFailure]) so it can't sign out a user who is signed in.
   @override
   Stream<UserEntity?> get onAuthStateChanged {
     StreamSubscription<UserEntity?>? subscription;
@@ -26,8 +28,29 @@ class AuthRepositoryImpl implements AuthRepository {
         subscription = _remote.onAuthStateChanged.listen(
           controller.add,
           onError: (Object error, StackTrace st) {
+            if (error is AuthLinkException) return;
             debugPrint('Auth state stream error: $error\n$st');
             controller.add(null);
+          },
+        );
+      },
+      onCancel: () => subscription?.cancel(),
+    );
+    return controller.stream;
+  }
+
+  @override
+  Stream<AuthLinkFailure> get onAuthLinkFailure {
+    StreamSubscription<UserEntity?>? subscription;
+    late final StreamController<AuthLinkFailure> controller;
+    controller = StreamController<AuthLinkFailure>.broadcast(
+      onListen: () {
+        subscription = _remote.onAuthStateChanged.listen(
+          null,
+          onError: (Object error, StackTrace st) {
+            if (error is! AuthLinkException) return;
+            debugPrint('Auth link failed: ${error.message}');
+            controller.add(const AuthLinkFailure());
           },
         );
       },

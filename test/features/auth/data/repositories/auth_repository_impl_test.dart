@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/core/errors/exceptions.dart';
 import 'package:traviato/core/errors/failures.dart';
@@ -7,6 +9,7 @@ import 'package:traviato/features/auth/data/repositories/auth_repository_impl.da
 
 class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
   _FakeAuthRemoteDataSource({
+    this.authStateStream = const Stream.empty(),
     this.loginException,
     this.signupException,
     this.signInWithAppleException,
@@ -14,6 +17,7 @@ class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
     this.logoutException,
   });
 
+  final Stream<UserModel?> authStateStream;
   Exception? loginException;
   Exception? signupException;
   Exception? signInWithAppleException;
@@ -27,7 +31,7 @@ class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
   );
 
   @override
-  Stream<UserModel?> get onAuthStateChanged => const Stream.empty();
+  Stream<UserModel?> get onAuthStateChanged => authStateStream;
 
   @override
   UserModel? get currentUser => null;
@@ -68,6 +72,48 @@ class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
 }
 
 void main() {
+  group('AuthRepositoryImpl auth link failures (#157)', () {
+    test('a failed confirmation link surfaces as AuthLinkFailure and does not '
+        'sign the user out', () async {
+      final source = StreamController<UserModel?>.broadcast();
+      addTearDown(source.close);
+      final repo = AuthRepositoryImpl(
+        remote: _FakeAuthRemoteDataSource(authStateStream: source.stream),
+      );
+      final states = <Object?>[];
+      final failures = <Object>[];
+      repo.onAuthStateChanged.listen(states.add);
+      repo.onAuthLinkFailure.listen(failures.add);
+
+      source
+        ..add(_FakeAuthRemoteDataSource._user)
+        ..addError(const AuthLinkException(message: 'Email link expired'));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(states, [_FakeAuthRemoteDataSource._user]);
+      expect(failures, [const AuthLinkFailure()]);
+    });
+
+    test('an unexpected stream error still falls back to signed-out and is '
+        'not reported as a link failure', () async {
+      final source = StreamController<UserModel?>.broadcast();
+      addTearDown(source.close);
+      final repo = AuthRepositoryImpl(
+        remote: _FakeAuthRemoteDataSource(authStateStream: source.stream),
+      );
+      final states = <Object?>[];
+      final failures = <Object>[];
+      repo.onAuthStateChanged.listen(states.add);
+      repo.onAuthLinkFailure.listen(failures.add);
+
+      source.addError(StateError('boom'));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(states, [null]);
+      expect(failures, isEmpty);
+    });
+  });
+
   group('AuthRepositoryImpl.login', () {
     test('returns Right(user) on success', () async {
       final repo = AuthRepositoryImpl(remote: _FakeAuthRemoteDataSource());
