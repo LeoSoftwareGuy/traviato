@@ -2,67 +2,74 @@ import 'trip_images.dart';
 
 /// One bundled cover choice in the New memory cover picker.
 class CoverOption {
-  const CoverOption({
-    required this.id,
-    required this.assetPath,
-    required this.vibe,
-  });
+  const CoverOption({required this.id, required this.assetPath, this.vibe});
+
+  /// A cover from `assets/images/covers/`, named after its [id] (#194).
+  const CoverOption.bundled(this.id, {this.vibe})
+    : assetPath = 'assets/images/covers/$id.jpg';
 
   /// Persisted as `trips.cover_image_path = 'asset:<id>'`
-  /// (data-model.md's bundled-asset convention).
+  /// (data-model.md's bundled-asset convention). Never rename one: existing
+  /// memories store it.
   final String id;
   final String assetPath;
 
-  /// The vibe this cover auto-suggests for, per the New memory spec.
-  final String vibe;
+  /// The vibe this cover auto-suggests for, or null for a pick-only cover.
+  /// Each of the 10 canonical vibes maps to exactly one cover.
+  final String? vibe;
 }
 
-/// The 8 bundled covers. Picked for visual variety across our own asset
-/// library (not the handoff's sample images) and mapped to whichever of
-/// our 10 canonical vibes each one actually reads as — see the plan
-/// comment on issue #40 for how each was chosen. Chill and Nightlife have
-/// no direct cover and fall back to the first option.
+/// Every bundled cover, travel first, then occasions (#194). The first 8
+/// are the original set (#40) and keep their ids and assets; since #194
+/// each vibe suggests the new cover drawn for it instead.
 const kCoverOptions = [
-  CoverOption(
-    id: 'hero',
-    assetPath: 'assets/images/guest/hero.png',
-    vibe: 'Wellness',
-  ),
+  CoverOption(id: 'hero', assetPath: 'assets/images/guest/hero.png'),
   CoverOption(
     id: 'honeymoon_escape',
     assetPath: 'assets/images/guest/honeymoon_escape.png',
-    vibe: 'Romantic',
   ),
   CoverOption(
     id: 'solo_getaway',
     assetPath: 'assets/images/guest/solo_getaway.jpg',
-    vibe: 'Cultural',
   ),
   CoverOption(
     id: 'family_adventure',
     assetPath: 'assets/images/guest/newYork.jpg',
-    vibe: 'Photography',
   ),
   CoverOption(
     id: 'food_lovers_weekend',
     assetPath: 'assets/images/guest/food_lovers_weekend.png',
-    vibe: 'Foodie',
   ),
   CoverOption(
     id: 'bucket_list_moment',
     assetPath: 'assets/images/guest/dolomites.jpg',
-    vibe: 'Wildlife',
   ),
   CoverOption(
     id: 'epic_milestone',
     assetPath: 'assets/images/guest/epic_milestone.png',
-    vibe: 'Adventure',
   ),
-  CoverOption(
-    id: 'new_memory',
-    assetPath: TripImages.newMemory,
-    vibe: 'Road trip',
-  ),
+  CoverOption(id: 'new_memory', assetPath: TripImages.newMemory),
+  CoverOption.bundled('maui'),
+  CoverOption.bundled('cime_mountains', vibe: 'Adventure'),
+  CoverOption.bundled('lago_di_braies'),
+  CoverOption.bundled('sunset_peaks', vibe: 'Photography'),
+  CoverOption.bundled('summit_lookout'),
+  CoverOption.bundled('forest_waterfall', vibe: 'Wildlife'),
+  CoverOption.bundled('canoe'),
+  CoverOption.bundled('a_frame_cabin'),
+  CoverOption.bundled('autumn_woods', vibe: 'Chill'),
+  CoverOption.bundled('mountain_town'),
+  CoverOption.bundled('picnic_on_the_edge'),
+  CoverOption.bundled('departure', vibe: 'Road trip'),
+  CoverOption.bundled('cultural', vibe: 'Cultural'),
+  // Occasions — weddings, birthdays, nights out: not just travel.
+  CoverOption.bundled('wedding'),
+  CoverOption.bundled('birthday'),
+  CoverOption.bundled('rooftop_gathering'),
+  CoverOption.bundled('romantic', vibe: 'Romantic'),
+  CoverOption.bundled('foodie', vibe: 'Foodie'),
+  CoverOption.bundled('nightlife', vibe: 'Nightlife'),
+  CoverOption.bundled('wellness', vibe: 'Wellness'),
 ];
 
 const _assetPrefix = 'asset:';

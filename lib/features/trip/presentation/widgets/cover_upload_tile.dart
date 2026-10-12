@@ -10,11 +10,39 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/bottom_sheet_chrome.dart';
 import '../../../photo/data/services/photo_compressor.dart';
 
-/// The cover strip's "Upload photo" entry (issue #81) — same 60×46 slot as
-/// a bundled [_Thumbnail], reusing the M3-6 pick + compress pipeline
-/// (camera or gallery). [onPicked] receives the compressed JPEG bytes and
-/// is awaited for the tile's own loading state, so it covers the caller's
-/// upload too (not just the local pick/compress step).
+/// Camera/gallery cover upload (issue #81), shared by [CoverUploadTile]
+/// and the Create memory cover slot (#194): opens the source sheet, then
+/// runs the M3-6 pick + compress pipeline. [isPickingCover] stays true
+/// until the caller's `onPicked` finishes, so it covers their upload too.
+mixin CoverPhotoPicker<T extends StatefulWidget> on State<T> {
+  var isPickingCover = false;
+
+  Future<void> pickCover(
+    Future<void> Function(Uint8List bytes) onPicked,
+  ) async {
+    final source = await showAppBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => _CoverSourcePicker(),
+    );
+    if (source == null || !mounted) return;
+
+    final file = await ImagePicker().pickImage(source: source);
+    if (file == null || !mounted) return;
+
+    setState(() => isPickingCover = true);
+    try {
+      final rawBytes = await file.readAsBytes();
+      final compressed = await const PhotoCompressor().compress(rawBytes);
+      await onPicked(compressed);
+    } finally {
+      if (mounted) setState(() => isPickingCover = false);
+    }
+  }
+}
+
+/// The manage sheet's "Upload photo" strip entry (issue #81) — same 60×46
+/// slot as a bundled thumbnail. [onPicked] receives the compressed JPEG
+/// bytes and is awaited for the tile's own loading state.
 class CoverUploadTile extends StatefulWidget {
   const CoverUploadTile({required this.onPicked, super.key});
 
@@ -24,37 +52,13 @@ class CoverUploadTile extends StatefulWidget {
   State<CoverUploadTile> createState() => _CoverUploadTileState();
 }
 
-class _CoverUploadTileState extends State<CoverUploadTile> {
-  var _isBusy = false;
-
-  Future<void> _pick(ImageSource source) async {
-    final file = await ImagePicker().pickImage(source: source);
-    if (file == null || !mounted) return;
-
-    setState(() => _isBusy = true);
-    try {
-      final rawBytes = await file.readAsBytes();
-      final compressed = await const PhotoCompressor().compress(rawBytes);
-      await widget.onPicked(compressed);
-    } finally {
-      if (mounted) setState(() => _isBusy = false);
-    }
-  }
-
-  Future<void> _openSourcePicker() async {
-    final source = await showAppBottomSheet<ImageSource>(
-      context: context,
-      builder: (context) => _CoverSourcePicker(),
-    );
-    if (source == null || !mounted) return;
-    await _pick(source);
-  }
-
+class _CoverUploadTileState extends State<CoverUploadTile>
+    with CoverPhotoPicker {
   @override
   Widget build(BuildContext context) {
     return InkWell(
       key: const Key('cover-upload-tile'),
-      onTap: _isBusy ? null : _openSourcePicker,
+      onTap: isPickingCover ? null : () => pickCover(widget.onPicked),
       borderRadius: AppRadius.badgeRadius,
       child: Container(
         width: 60,
@@ -65,7 +69,7 @@ class _CoverUploadTileState extends State<CoverUploadTile> {
           borderRadius: AppRadius.badgeRadius,
           border: Border.all(color: AppColors.tint(AppColors.primary, .35)),
         ),
-        child: _isBusy
+        child: isPickingCover
             ? const SizedBox(
                 width: 16,
                 height: 16,

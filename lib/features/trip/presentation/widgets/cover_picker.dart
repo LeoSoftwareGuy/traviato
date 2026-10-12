@@ -13,8 +13,10 @@ import '../../../../core/widgets/photo_scrim.dart';
 import 'cover_options.dart';
 import 'cover_upload_tile.dart';
 
-/// The New memory cover picker: a 150px slot (empty/chosen state) above an
-/// 8-thumbnail strip. `docs/design/README.md` § 4.
+/// The New memory cover picker: a 150px slot (empty/chosen state) above
+/// the bundled-cover strip. `docs/design/README.md` § 4. The slot itself is
+/// the upload entry point (#194): tapping it, empty or chosen, opens the
+/// camera/gallery sheet.
 class CoverPicker extends StatelessWidget {
   const CoverPicker({
     required this.selectedCoverId,
@@ -43,19 +45,19 @@ class CoverPicker extends StatelessWidget {
           selectedCoverId: selectedCoverId,
           selectedVibes: selectedVibes,
           customCoverBytes: customCoverBytes,
+          onUploadCustom: onUploadCustom,
         ),
         const SizedBox(height: AppSpacing.sm),
         CoverThumbnailStrip(
           selectedCoverId: selectedCoverId,
           onSelect: onSelect,
-          onUploadCustom: onUploadCustom,
         ),
       ],
     );
   }
 }
 
-/// The 8-thumbnail strip on its own — reused by the manage-memory sheet's
+/// The bundled-cover strip on its own — reused by the manage-memory sheet's
 /// cover-change section, which doesn't need the empty/chosen slot above it.
 class CoverThumbnailStrip extends StatelessWidget {
   const CoverThumbnailStrip({
@@ -97,8 +99,72 @@ class CoverThumbnailStrip extends StatelessWidget {
   }
 }
 
-class _CoverSlot extends StatelessWidget {
+class _CoverSlot extends StatefulWidget {
   const _CoverSlot({
+    required this.selectedCoverId,
+    required this.selectedVibes,
+    this.customCoverBytes,
+    this.onUploadCustom,
+  });
+
+  final String? selectedCoverId;
+  final Set<String> selectedVibes;
+  final Uint8List? customCoverBytes;
+  final Future<void> Function(Uint8List bytes)? onUploadCustom;
+
+  @override
+  State<_CoverSlot> createState() => _CoverSlotState();
+}
+
+class _CoverSlotState extends State<_CoverSlot> with CoverPhotoPicker {
+  @override
+  Widget build(BuildContext context) {
+    final onUpload = widget.onUploadCustom;
+    final hasCover =
+        widget.customCoverBytes != null || widget.selectedCoverId != null;
+    final content = _CoverSlotContent(
+      selectedCoverId: widget.selectedCoverId,
+      selectedVibes: widget.selectedVibes,
+      customCoverBytes: widget.customCoverBytes,
+    );
+    if (onUpload == null) return content;
+
+    return Semantics(
+      button: true,
+      label: hasCover ? 'Change cover' : 'Choose a cover',
+      excludeSemantics: true,
+      child: Stack(
+        children: [
+          content,
+          Positioned.fill(
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                key: const Key('cover-slot'),
+                onTap: isPickingCover ? null : () => pickCover(onUpload),
+                borderRadius: AppRadius.mediaRadius,
+                splashColor: AppColors.tint(AppColors.primary, .18),
+                highlightColor: AppColors.tint(AppColors.primary, .12),
+                child: isPickingCover
+                    ? const Center(
+                        child: SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : null,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CoverSlotContent extends StatelessWidget {
+  const _CoverSlotContent({
     required this.selectedCoverId,
     required this.selectedVibes,
     this.customCoverBytes,
@@ -189,12 +255,12 @@ class _CoverSlot extends StatelessWidget {
                   ],
                 ),
               ),
-              if (suggestion != null)
+              if (suggestion?.vibe case final vibe?)
                 Positioned(
                   left: 0,
                   bottom: 0,
                   child: _MonoTag(
-                    'SUGGESTED: ${suggestion.vibe.toUpperCase()}',
+                    'SUGGESTED: ${vibe.toUpperCase()}',
                   ),
                 ),
             ],

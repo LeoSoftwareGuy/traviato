@@ -172,7 +172,7 @@ void main() {
 
         expect(
           tripRepo.lastCreateTripCoverImagePath,
-          'asset:honeymoon_escape',
+          'asset:romantic',
         );
       },
     );
