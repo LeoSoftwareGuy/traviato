@@ -176,6 +176,21 @@ abstract class AppTypography {
   static TextStyle get noteDockCounter =>
       mono.copyWith(fontSize: 10, color: AppColors.paperInkMuted);
 
+  /// "LISTENING · 0:07" above the dock while dictating — Mono 10, .12em.
+  static TextStyle get noteListening => mono.copyWith(
+    fontSize: 10,
+    letterSpacing: 1.2,
+    color: AppColors.paperListenInk,
+  );
+
+  /// Inline "Microphone is off…" notice under the dock.
+  static TextStyle get noteNotice => GoogleFonts.roboto(
+    fontSize: 12,
+    height: 1.4,
+    fontWeight: FontWeight.w500,
+    color: AppColors.paperInkMuted,
+  );
+
   /// Title-page stamp — Mono 10, .2em.
   static TextStyle get titlePageStamp => mono.copyWith(
     fontSize: 10,

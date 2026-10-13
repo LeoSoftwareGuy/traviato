@@ -2,11 +2,15 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../photo/domain/entities/photo_entity.dart';
 import '../../domain/note_text.dart';
+import '../providers/dictation_providers.dart';
+import '../widgets/note_page/note_dictation_controller.dart';
+import '../widgets/note_page/note_draft_controller.dart';
 import '../widgets/note_page/note_page_chrome.dart';
 import '../widgets/note_page/note_title_page.dart';
 import '../widgets/note_page/note_writing_page.dart';
@@ -43,7 +47,7 @@ const _refHeight = 874.0;
 
 enum _Phase { opening, open, closing }
 
-class NotePage extends StatefulWidget {
+class NotePage extends ConsumerStatefulWidget {
   const NotePage({
     required this.stamp,
     required this.title,
@@ -63,10 +67,11 @@ class NotePage extends StatefulWidget {
   final PhotoEntity? photo;
 
   @override
-  State<NotePage> createState() => _NotePageState();
+  ConsumerState<NotePage> createState() => _NotePageState();
 }
 
-class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
+class _NotePageState extends ConsumerState<NotePage>
+    with TickerProviderStateMixin {
   late final _backdrop = AnimationController(
     vsync: this,
     duration: AppMotion.noteBackdropFadeDuration,
@@ -76,8 +81,12 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
     curve: Curves.easeOut,
   );
   late final _turn = AnimationController(vsync: this);
-  final _text = TextEditingController();
+  final _text = NoteDraftController();
   final _focus = FocusNode();
+  late final _dictation = NoteDictationController(
+    service: ref.read(dictationServiceProvider),
+    draft: _text,
+  );
 
   var _phase = _Phase.opening;
   var _reducedMotion = false;
@@ -115,6 +124,7 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
     _backdropOpacity.dispose();
     _backdrop.dispose();
     _turn.dispose();
+    _dictation.dispose();
     _text.dispose();
     _focus.dispose();
     super.dispose();
@@ -141,10 +151,18 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
     if (mounted) Navigator.of(context).pop(result);
   }
 
-  void _done() => _close(_text.text.trim());
+  /// Closing the book stops the recording first (§3), so whatever was
+  /// heard is in the draft before it's read.
+  Future<void> _done() async {
+    if (_phase != _Phase.open) return;
+    await _dictation.stop();
+    await _close(_text.text.trim());
+  }
 
   Future<void> _cancel() async {
     if (_phase != _Phase.open) return;
+    await _dictation.stop();
+    if (!mounted) return;
     if (_text.text.trim().isNotEmpty) {
       final discard = await showDialog<bool>(
         context: context,
@@ -166,12 +184,26 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
       );
       if (discard != true || !mounted) return;
     }
+    // Don't hold the book open on the platform recogniser.
+    unawaited(_dictation.cancel());
     await _close(null);
   }
 
+  /// **Aa**: stop listening if needed, then type at the end of the draft.
   void _focusAtEnd() {
+    unawaited(_dictation.stop());
     _focus.requestFocus();
     _text.selection = TextSelection.collapsed(offset: _text.text.length);
+  }
+
+  /// Mic: from typing, dismiss the keyboard first; otherwise toggle.
+  void _onMicTap() {
+    if (!_dictation.isListening) _focus.unfocus();
+    unawaited(_dictation.toggle());
+  }
+
+  void _onFieldTap() {
+    if (_dictation.isListening) unawaited(_dictation.stop());
   }
 
   PageTurnFrame get _frame {
@@ -220,6 +252,9 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
         onCancel: _cancel,
         onDone: _done,
         onAaTap: _focusAtEnd,
+        dictation: _dictation,
+        onMicTap: _onMicTap,
+        onFieldTap: _onFieldTap,
       ),
     );
 

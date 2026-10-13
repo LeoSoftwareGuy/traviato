@@ -71,6 +71,10 @@ abstract class AppColors {
   // "Done" — 4.5:1 on `paper`.
   static const Color paperDoneInk = Color(0xFFB4600A);
   static const Color paperDockLabel = Color(0xFF4A4566);
+  // Voice dictation (#206): waveform bars and the "LISTENING · 0:07" line.
+  // The recording mic itself is `accentCoral`.
+  static const Color paperWave = Color(0xFFE2525F);
+  static const Color paperListenInk = Color(0xFFA2343F);
   static const Color polaroid = Color(0xFFFFFFFF);
   // Drop shadow under the turning page — black @ 25%.
   static const Color paperDropShadow = Color(0x40000000);

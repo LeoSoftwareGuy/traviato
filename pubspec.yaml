@@ -57,6 +57,10 @@ dependencies:
   # Opens the platform-correct store subscription-management page (#142) —
   # the Flutter team's own package for launching an external URL/app.
   url_launcher: ^6.3.2
+  # Voice dictation on the Journal note page (#206) — the most widely used
+  # Flutter speech-recognition plugin; wraps Apple Speech (iOS) and the
+  # system RecognitionService (Android) with partial results and mic level.
+  speech_to_text: ^7.5.0
   # Renders the hand-drawn balloon doodles on the Journal note page's title
   # page (#205) from the design's exported SVGs.
   flutter_svg: ^2.3.0
@@ -66,6 +70,9 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^6.0.0
+  # Drives the dictation timer in tests (#206); already shipped with
+  # flutter_test, declared so it can be imported directly.
+  fake_async: any
   build_runner: ^2.15.0
   riverpod_generator: ^4.0.3
   json_serializable: ^6.9.0

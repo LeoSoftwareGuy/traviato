@@ -49,8 +49,12 @@
 	<string>Storyni uses the camera so you can take photos for your memories.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Storyni saves where a photo was taken so it shows up in your journal and wrap-up.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Storyni uses the microphone so you can speak your journal notes instead of typing them.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Storyni lets you add photos from your library to your memories.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Storyni turns what you say into text for your journal notes. Your device may use Apple's speech service to do this.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
