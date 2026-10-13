@@ -71,4 +71,35 @@ abstract class AppMotion {
   /// element on that screen).
   static const pulseGlowDuration = Duration(milliseconds: 3600);
   static const pulseGlowCurve = Curves.easeInOut;
+
+  // --- Journal note page-turn (docs/design/JOURNAL_NOTE_PAGETURN_SPEC.md
+  // §3, #205) -----------------------------------------------------------
+
+  /// Backdrop fade-in when the note page is pushed.
+  static const noteBackdropFadeDuration = Duration(milliseconds: 250);
+
+  /// Wait after the push before the turn starts, so the closed page paints
+  /// its first frame.
+  static const pageTurnStartDelay = Duration(milliseconds: 60);
+
+  /// Whole open timeline (hold + sweep): 120ms hold, then the 1050ms
+  /// sweep. With [pageTurnStartDelay] the page is writable at ~1.23s.
+  static const pageTurnOpenDuration = Duration(milliseconds: 1170);
+  static const pageTurnOpenHold = Duration(milliseconds: 120);
+  static const pageTurnOpenSweep = Duration(milliseconds: 1050);
+
+  /// Writing-page shade lifts (1 → 0) and the turning page's front darkens
+  /// (0 → 1) during the open sweep.
+  static const pageTurnWritingShadeFade = Duration(milliseconds: 950);
+  static const pageTurnFrontShadeFade = Duration(milliseconds: 900);
+
+  /// Close: 850ms sweep back, no hold; the route pops at 880ms.
+  static const pageTurnCloseDuration = Duration(milliseconds: 880);
+  static const pageTurnCloseSweep = Duration(milliseconds: 850);
+
+  /// Slow lift, fast sweep, soft land.
+  static const pageTurnCurve = Cubic(.55, .06, .24, 1);
+
+  /// Reduced motion: crossfade instead of the turn.
+  static const pageTurnReducedMotionFade = Duration(milliseconds: 200);
 }

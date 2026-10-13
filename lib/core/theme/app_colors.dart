@@ -51,6 +51,35 @@ abstract class AppColors {
   // `scrim`'s base color, used pervasively across the film's chrome.
   static const Color filmBackground = Color(0xFF07091A);
 
+  // --- Paper (Journal note page, docs/design/JOURNAL_NOTE_PAGETURN_SPEC.md
+  // §2, #205) ------------------------------------------------------------
+  // The notebook is a light island in the dark app; the full-screen
+  // backdrop behind it is `filmBackground`.
+  static const Color paper = Color(0xFFF3EDE0);
+  static const Color paperDock = Color(0xFFECE5D5);
+  // Stacked page edges peeking out behind the writing page (front → back).
+  static const Color paperEdge = Color(0xFFE1D8C4);
+  static const Color paperEdgeBack = Color(0xFFCFC5B0);
+  // Light end of the turned page's back-face gradient.
+  static const Color paperBackLight = Color(0xFFEAE2D0);
+  static const Color paperInk = Color(0xFF1E1B3A);
+  // Existing (read-only) entry text — faded ink.
+  static const Color paperInkOld = Color(0xFF625D7A);
+  static const Color paperInkMuted = Color(0xFF6B6680);
+  // Ruled lines and the dock divider — ink @ 10%.
+  static const Color paperRule = Color(0x1A1E1B3A);
+  // "Done" — 4.5:1 on `paper`.
+  static const Color paperDoneInk = Color(0xFFB4600A);
+  static const Color paperDockLabel = Color(0xFF4A4566);
+  // Hand-drawn title-page balloons: outline + per-balloon band colours.
+  static const Color paperSketch = Color(0xFF2A2547);
+  static const Color paperBandOrange = Color(0xFFD9821A);
+  static const Color paperBandCoral = Color(0xFFD9525E);
+  static const Color paperBandPurple = Color(0xFF7C58B5);
+  static const Color polaroid = Color(0xFFFFFFFF);
+  // Drop shadow under the turning page — black @ 25%.
+  static const Color paperDropShadow = Color(0x40000000);
+
   /// Tints an accent [color] to the given [opacity] (0–1) for icon-chip
   /// fills, card washes and borders — the 10–18% alpha fills used throughout
   /// the redesign (e.g. `AppColors.tint(AppColors.primary, .16)`).
