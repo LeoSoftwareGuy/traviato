@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/core/theme/app_theme.dart';
+import 'package:traviato/features/journal/domain/dictation/dictation_service.dart';
 import 'package:traviato/features/journal/presentation/pages/note_page.dart';
+import 'package:traviato/features/journal/presentation/providers/dictation_providers.dart';
+
+import '../../fakes/fake_dictation_service.dart';
 
 const _existing = 'Woke early. Walked the lake.';
 
@@ -48,15 +53,25 @@ Future<void> _pumpHost(
   WidgetTester tester, {
   String existingText = _existing,
   bool reducedMotion = false,
+  FakeDictationService? dictation,
 }) async {
   await tester.pumpWidget(
-    MaterialApp(
-      theme: AppTheme.dark,
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(disableAnimations: reducedMotion),
-        child: child!,
+    ProviderScope(
+      overrides: [
+        dictationServiceProvider.overrideWithValue(
+          dictation ?? FakeDictationService(),
+        ),
+      ],
+      child: MaterialApp(
+        theme: AppTheme.dark,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(disableAnimations: reducedMotion),
+          child: child!,
+        ),
+        home: _Host(existingText: existingText),
       ),
-      home: _Host(existingText: existingText),
     ),
   );
   await tester.tap(find.text('open'));
@@ -235,5 +250,163 @@ void main() {
     expect(existing.height % 30, closeTo(0, .01));
     expect(existing.height, greaterThanOrEqualTo(60));
     expect((field - top) % 30, closeTo(0, .01));
+  });
+
+  group('voice dictation (#206)', () {
+    final mic = find.byKey(const Key('note-page-mic'));
+
+    TextField field(WidgetTester tester) => tester.widget<TextField>(_field);
+
+    Future<FakeDictationService> openListening(WidgetTester tester) async {
+      final service = FakeDictationService();
+      await _pumpHost(tester, dictation: service);
+      await tester.pumpAndSettle();
+      await tester.tap(mic);
+      await tester.pump();
+      return service;
+    }
+
+    testWidgets('idle: "Tap to talk", no waveform', (tester) async {
+      await _pumpHost(tester);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Tap to talk'), findsOneWidget);
+      expect(find.byKey(const Key('note-page-waveform')), findsNothing);
+    });
+
+    testWidgets('mic → waveform + timer; words appear live; tap again → '
+        'stops and the text stays', (tester) async {
+      final service = await openListening(tester);
+
+      expect(find.byKey(const Key('note-page-waveform')), findsOneWidget);
+      expect(find.byKey(const Key('note-page-mic-stop')), findsOneWidget);
+      expect(find.text('Tap to stop'), findsOneWidget);
+      expect(find.text('LISTENING · 0:00'), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 7));
+      expect(find.text('LISTENING · 0:07'), findsOneWidget);
+
+      service.partial('the water was');
+      await tester.pump();
+      expect(field(tester).controller!.text, 'the water was');
+      service.partial('the water was so still');
+      await tester.pump();
+      expect(field(tester).controller!.text, 'the water was so still');
+      expect(find.text('+5 words'), findsOneWidget);
+
+      await tester.tap(mic);
+      await tester.pump();
+      expect(service.stopCallCount, 1);
+      expect(find.byKey(const Key('note-page-waveform')), findsNothing);
+      expect(find.text('Tap to talk'), findsOneWidget);
+      expect(field(tester).controller!.text, 'the water was so still');
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('Aa while listening stops, focuses the field, caret at end', (
+      tester,
+    ) async {
+      final service = await openListening(tester);
+      service.partial('the lake');
+      await tester.pump();
+
+      await tester.tap(find.byKey(const Key('note-page-aa')));
+      await tester.pump();
+
+      expect(service.stopCallCount, 1);
+      expect(find.text('Tap to talk'), findsOneWidget);
+      expect(field(tester).focusNode!.hasFocus, isTrue);
+      expect(tester.testTextInput.isVisible, isTrue);
+      expect(field(tester).controller!.selection.baseOffset, 'the lake'.length);
+    });
+
+    testWidgets('mic while typing dismisses the keyboard, then listens', (
+      tester,
+    ) async {
+      final service = FakeDictationService();
+      await _pumpHost(tester, dictation: service);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('note-page-aa')));
+      await tester.pump();
+      expect(field(tester).focusNode!.hasFocus, isTrue);
+
+      await tester.tap(mic);
+      await tester.pump();
+
+      expect(field(tester).focusNode!.hasFocus, isFalse);
+      expect(service.listenCallCount, 1);
+      expect(find.text('Tap to stop'), findsOneWidget);
+      await tester.tap(mic); // stop, so the ticker is gone
+      await tester.pump();
+    });
+
+    testWidgets('permission denied: inline message, typing still works', (
+      tester,
+    ) async {
+      final service = FakeDictationService()
+        ..readiness = DictationReadiness.permissionDenied;
+      await _pumpHost(tester, dictation: service);
+      await tester.pumpAndSettle();
+
+      await tester.tap(mic);
+      await tester.pump();
+
+      expect(
+        find.text('Microphone is off. Turn it on in Settings, or just type.'),
+        findsOneWidget,
+      );
+      expect(find.text('Tap to talk'), findsOneWidget);
+      await tester.enterText(_field, 'Typed instead.');
+      await tester.pump();
+      expect(find.text('+2 words'), findsOneWidget);
+
+      // The mic stays tappable and asks again.
+      await tester.tap(mic);
+      await tester.pump();
+      expect(service.prepareCallCount, 2);
+    });
+
+    testWidgets('an unavailable recogniser says typing works', (tester) async {
+      final service = FakeDictationService()
+        ..readiness = DictationReadiness.unavailable;
+      await _pumpHost(tester, dictation: service);
+      await tester.pumpAndSettle();
+      await tester.tap(mic);
+      await tester.pump();
+
+      expect(
+        find.text("Voice isn't available right now — typing works."),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('Done while listening stops first and saves what was heard', (
+      tester,
+    ) async {
+      final service = await openListening(tester);
+      service.partial('the lake at dawn');
+      await tester.pump();
+
+      await tester.tap(find.byKey(const Key('note-page-done')));
+      await tester.pumpAndSettle();
+
+      expect(service.stopCallCount, 1);
+      expect(_host(tester).result, 'the lake at dawn');
+    });
+
+    testWidgets('Discard while listening cancels the session', (tester) async {
+      final service = await openListening(tester);
+      service.partial('never mind');
+      await tester.pump();
+
+      await tester.tap(find.byKey(const Key('note-page-cancel')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('note-page-discard')));
+      await tester.pumpAndSettle();
+
+      expect(_host(tester).popped, isTrue);
+      expect(_host(tester).result, isNull);
+      expect(service.cancelCallCount, 1);
+    });
   });
 }

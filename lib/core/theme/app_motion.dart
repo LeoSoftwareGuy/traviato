@@ -102,4 +102,12 @@ abstract class AppMotion {
 
   /// Reduced motion: crossfade instead of the turn.
   static const pageTurnReducedMotionFade = Duration(milliseconds: 200);
+
+  /// Note-page mic while listening: the ring pulses outward (0 → 13px).
+  static const micPulseDuration = Duration(milliseconds: 1400);
+  static const micPulseSpread = 13.0;
+
+  /// Waveform fallback when the mic reports no usable level: each bar
+  /// loops .3 ↔ 1, staggered.
+  static const waveformLoopDuration = Duration(milliseconds: 900);
 }
