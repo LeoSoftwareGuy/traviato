@@ -71,11 +71,6 @@ abstract class AppColors {
   // "Done" — 4.5:1 on `paper`.
   static const Color paperDoneInk = Color(0xFFB4600A);
   static const Color paperDockLabel = Color(0xFF4A4566);
-  // Hand-drawn title-page balloons: outline + per-balloon band colours.
-  static const Color paperSketch = Color(0xFF2A2547);
-  static const Color paperBandOrange = Color(0xFFD9821A);
-  static const Color paperBandCoral = Color(0xFFD9525E);
-  static const Color paperBandPurple = Color(0xFF7C58B5);
   static const Color polaroid = Color(0xFFFFFFFF);
   // Drop shadow under the turning page — black @ 25%.
   static const Color paperDropShadow = Color(0x40000000);

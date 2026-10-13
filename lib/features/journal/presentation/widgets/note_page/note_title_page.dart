@@ -49,37 +49,46 @@ class NoteTitlePage extends StatelessWidget {
         borderRadius: notePageRadius,
         child: Stack(
           children: [
-            const Positioned.fill(
-              child: CustomPaint(painter: TitlePageDoodlesPainter()),
+            // Trail runs from the small balloon up to the large one; the
+            // spec gives no position for it or the cloud.
+            const Positioned(
+              top: 74,
+              left: 86,
+              child: JournalDoodle(
+                asset: JournalDoodleAssets.flightTrail,
+                width: 190,
+              ),
             ),
-            Positioned(
+            const Positioned(
+              top: 168,
+              right: 30,
+              child: JournalDoodle(asset: JournalDoodleAssets.cloud, width: 46),
+            ),
+            const Positioned(
               top: 46,
               right: 34,
               child: HandDrawnBalloon(
+                asset: JournalDoodleAssets.balloonLarge,
                 width: 70,
                 rotationDegrees: 7,
-                wash: AppColors.tint(AppColors.primary, .28),
-                band: AppColors.paperBandOrange,
               ),
             ),
-            Positioned(
+            const Positioned(
               top: 128,
               left: 48,
               child: HandDrawnBalloon(
+                asset: JournalDoodleAssets.balloonSmall,
                 width: 36,
                 rotationDegrees: -9,
-                wash: AppColors.tint(AppColors.accentCoral, .24),
-                band: AppColors.paperBandCoral,
               ),
             ),
-            Positioned(
+            const Positioned(
               bottom: 78,
               right: 70,
               child: HandDrawnBalloon(
+                asset: JournalDoodleAssets.balloonTiny,
                 width: 28,
                 rotationDegrees: 4,
-                wash: AppColors.tint(AppColors.accentPurple, .24),
-                band: AppColors.paperBandPurple,
               ),
             ),
             Center(
