@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
@@ -17,6 +20,8 @@ import '../../../home/presentation/controllers/profile_stats_controller.dart';
 import '../../../photo/presentation/mutations/photo_mutations.dart';
 import '../../../photo/presentation/pages/photo_viewer_page.dart';
 import '../../../photo/presentation/widgets/add_photo_sheet.dart';
+import '../../../photo/presentation/widgets/storage_photo_image.dart';
+import '../../domain/note_text.dart';
 import '../controllers/journal_controller.dart';
 import '../controllers/journal_state.dart';
 import '../mutations/journal_mutations.dart';
@@ -26,8 +31,12 @@ import '../widgets/day_tabs.dart';
 import '../widgets/empty_day_nudge.dart';
 import '../widgets/journal_action_buttons.dart';
 import '../widgets/journal_header.dart';
+import '../widgets/note_page/note_title_page.dart';
 import '../widgets/photos_strip.dart';
 import '../widgets/to_do_sheet.dart';
+import 'note_page.dart';
+
+final _stampDateFormat = DateFormat('d MMM');
 
 class JournalPage extends ConsumerWidget {
   const JournalPage({required this.tripId, super.key});
@@ -102,7 +111,7 @@ class JournalPage extends ConsumerWidget {
   }
 }
 
-class _JournalContent extends ConsumerStatefulWidget {
+class _JournalContent extends ConsumerWidget {
   const _JournalContent({
     required this.tripId,
     required this.state,
@@ -116,27 +125,14 @@ class _JournalContent extends ConsumerStatefulWidget {
   final VoidCallback onBack;
 
   @override
-  ConsumerState<_JournalContent> createState() => _JournalContentState();
-}
-
-class _JournalContentState extends ConsumerState<_JournalContent> {
-  // Set by the empty-day nudge's "Write a note" action so the normal note
-  // editor shows in place of the nudge (#140) — reset whenever the day
-  // changes, so switching days doesn't carry the override along.
-  DateTime? _revealNoteEditorForDay;
-
-  @override
-  Widget build(BuildContext context) {
-    final tripId = widget.tripId;
-    final state = widget.state;
+  Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(journalControllerProvider(tripId).notifier);
     final isSavingNote = ref.watch(upsertNoteMutation) is MutationPending;
     final currentDay = state.currentDayDate;
     final isEmptyDay =
         currentDay != null &&
         !state.isDayLocked(currentDay) &&
-        state.isDayEmpty(currentDay) &&
-        !_isSameDate(_revealNoteEditorForDay, currentDay);
+        state.isDayEmpty(currentDay);
 
     return ListView(
       key: const Key('journal-content-list'),
@@ -148,8 +144,8 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
       ),
       children: [
         JournalHeader(
-          stars: widget.stars,
-          onBack: widget.onBack,
+          stars: stars,
+          onBack: onBack,
           onStarsTap: () => context.pushNamed(
             RouteNames.tripBonusTasks,
             pathParameters: {'tripId': tripId},
@@ -198,8 +194,7 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
                 tripId: tripId,
                 dayDate: currentDay,
               ),
-              onWriteNote: () =>
-                  setState(() => _revealNoteEditorForDay = currentDay),
+              onWriteNote: () => _openNotePage(context, ref, currentDay),
             ),
           ] else ...[
             Text(
@@ -222,18 +217,7 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
                 content: state.currentNote?.content ?? '',
                 updatedAt: state.currentNote?.updatedAt,
                 isSaving: isSavingNote,
-                onSave: (content) {
-                  final isFirstNote = state.currentNote == null;
-                  runUpsertNote(
-                    ref: ref,
-                    tripId: tripId,
-                    dayDate: currentDay,
-                    content: content,
-                  );
-                  if (isFirstNote && content.trim().isNotEmpty) {
-                    showStarToast(context, '✦ +1 star · note logged');
-                  }
-                },
+                onOpenNotePage: () => _openNotePage(context, ref, currentDay),
               ),
             const SizedBox(height: AppSpacing.xl),
             PhotosStrip(
@@ -269,11 +253,64 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
       ],
     );
   }
-}
 
-bool _isSameDate(DateTime? a, DateTime? b) {
-  if (a == null || b == null) return false;
-  return a.year == b.year && a.month == b.month && a.day == b.day;
+  /// Opens the full-screen note page (docs/design/JOURNAL_NOTE_PAGETURN_SPEC.md
+  /// §1) and, once the book has closed, appends whatever was added to the
+  /// day's entry. Star behaviour is unchanged for now: the day's first note
+  /// earns the star, shown as a toast on the Journal after the close (§5).
+  Future<void> _openNotePage(
+    BuildContext context,
+    WidgetRef ref,
+    DateTime day,
+  ) async {
+    final photos = state.photosForCurrentDay;
+    final firstPhoto = photos.isEmpty ? null : photos.first;
+    final url = firstPhoto?.imageUrl;
+    if (url != null) {
+      // Best effort: the polaroid is usually already cached from the strip;
+      // never hold the page back for a slow download.
+      await precacheImage(
+        StoragePhotoImage.providerFor(
+          url: url,
+          storagePath: firstPhoto!.storagePath,
+          maxDecodeDimension: StoragePhotoImage.maxDecodeDimensionFor(
+            notePolaroidPhotoSize,
+            MediaQuery.devicePixelRatioOf(context),
+          ),
+        ),
+        context,
+      ).timeout(const Duration(milliseconds: 300), onTimeout: () {});
+      if (!context.mounted) return;
+    }
+
+    final existing = state.currentNote?.content ?? '';
+    final dateLabel = _stampDateFormat.format(day);
+    final draft = await Navigator.of(context).push(
+      NotePageRoute(
+        stamp: state.isSingleDay
+            ? dateLabel
+            : 'Day ${state.currentDayNumber} · $dateLabel',
+        title: state.trip.name,
+        existingText: existing,
+        photoCount: photos.length,
+        photo: firstPhoto,
+      ),
+    );
+    if (draft == null || draft.isEmpty || !context.mounted) return;
+
+    final isFirstNote = existing.trim().isEmpty;
+    // Fire-and-forget: failures surface via the upsertNoteMutation listener
+    // in JournalPage, and the toast lands while the save is in flight.
+    unawaited(
+      runUpsertNote(
+        ref: ref,
+        tripId: tripId,
+        dayDate: day,
+        content: appendNoteText(existing, draft),
+      ),
+    );
+    if (isFirstNote) showStarToast(context, '✦ +1 star · note saved');
+  }
 }
 
 class _NoDatesYet extends StatelessWidget {

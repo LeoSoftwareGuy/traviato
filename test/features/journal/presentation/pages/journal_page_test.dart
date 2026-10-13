@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/core/theme/app_theme.dart';
@@ -10,6 +11,7 @@ import 'package:traviato/features/home/domain/entities/profile_stats_entity.dart
 import 'package:traviato/features/home/presentation/providers/profile_stats_provider.dart';
 import 'package:traviato/features/journal/presentation/pages/journal_page.dart';
 import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/domain/entities/quest_entity.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
@@ -130,89 +132,200 @@ void main() {
     );
   });
 
-  testWidgets('tapping the add prompt, typing, and saving persists the note', (
-    tester,
-  ) async {
-    final tripRepo = FakeTripRepository()
-      ..tripCardResult = Right(
-        buildTripCard(
-          id: 't1',
-          startDate: _today.subtract(const Duration(days: 1)),
-          endDate: _today.add(const Duration(days: 1)),
-        ),
+  group('note page (#205)', () {
+    final dayWithPhoto = Right<Failure, List<PhotoEntity>>([
+      buildPhotoEntity(id: 'p1', dayDate: _today),
+    ]);
+
+    FakeTripRepository threeDayTrip() =>
+        FakeTripRepository()
+          ..tripCardResult = Right(
+            buildTripCard(
+              id: 't1',
+              startDate: _today.subtract(const Duration(days: 1)),
+              endDate: _today.add(const Duration(days: 1)),
+            ),
+          );
+
+    Future<void> openAndType(
+      WidgetTester tester,
+      Key entry,
+      String text,
+    ) async {
+      await tester.tap(find.byKey(entry));
+      await tester.pumpAndSettle(); // the full turn
+      await tester.enterText(find.byKey(const Key('note-page-field')), text);
+      await tester.pump();
+    }
+
+    testWidgets('the Journal has no inline note field; the add prompt opens '
+        'the note page', (tester) async {
+      final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
+      await _pump(
+        tester,
+        tripRepo: threeDayTrip(),
+        photoRepo: photoRepo,
+        noteRepo: FakeDayNoteRepository(),
       );
-    // At least one photo, so the day isn't "empty" (#140) and the normal
-    // note-prompt flow under test actually renders instead of the nudge.
-    final photoRepo = FakePhotoRepository()
-      ..photosResult = Right([buildPhotoEntity(id: 'p1', dayDate: _today)]);
-    final noteRepo = FakeDayNoteRepository();
-    await _pump(
-      tester,
-      tripRepo: tripRepo,
-      photoRepo: photoRepo,
-      noteRepo: noteRepo,
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-    expect(find.text('Add notes about today'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('journal-note-add-prompt')));
-    await tester.pumpAndSettle();
+      expect(find.byType(TextField), findsNothing);
+      await tester.tap(find.byKey(const Key('journal-note-add-prompt')));
+      await tester.pumpAndSettle();
 
-    await tester.enterText(
-      find.byKey(const Key('journal-note-field')),
-      'What a trip.',
-    );
-    await tester.tap(find.byKey(const Key('journal-note-save')));
-    await tester.pump(); // one frame: view-mode flip + toast are synchronous
+      expect(find.byKey(const Key('note-page-field')), findsOneWidget);
+      final date = DateFormat('d MMM').format(_today).toUpperCase();
+      expect(find.text('DAY 2 · $date'), findsOneWidget);
+    });
 
-    expect(noteRepo.upsertNoteCallCount, 1);
-    expect(noteRepo.lastUpsertedContent, 'What a trip.');
-    // Back to view mode, showing the just-saved content.
-    expect(find.byType(TextField), findsNothing);
-    expect(find.text('What a trip.'), findsOneWidget);
-    expect(find.text('✦ +1 star · note logged'), findsOneWidget);
-
-    await tester.pumpAndSettle(); // let the toast's own timer finish cleanly
-  });
-
-  testWidgets('cancelling an edit discards it and keeps the old content', (
-    tester,
-  ) async {
-    final tripRepo = FakeTripRepository()
-      ..tripCardResult = Right(
-        buildTripCard(
-          id: 't1',
-          startDate: _today.subtract(const Duration(days: 1)),
-          endDate: _today.add(const Duration(days: 1)),
-        ),
+    testWidgets('Done with text saves it and shows the star toast only after '
+        'the book closes', (tester) async {
+      final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
+      final noteRepo = FakeDayNoteRepository();
+      await _pump(
+        tester,
+        tripRepo: threeDayTrip(),
+        photoRepo: photoRepo,
+        noteRepo: noteRepo,
       );
-    final photoRepo = FakePhotoRepository()
-      ..photosResult = Right([buildPhotoEntity(id: 'p1', dayDate: _today)]);
-    final noteRepo = FakeDayNoteRepository()
-      ..getNoteResult = Right(buildDayNoteEntity(content: 'Great day.'))
-      ..notesForTripResult = Right([
-        buildDayNoteEntity(dayDate: _today, content: 'Great day.'),
-      ]);
-    await _pump(
+      await tester.pumpAndSettle();
+
+      await openAndType(
+        tester,
+        const Key('journal-note-add-prompt'),
+        '  What a trip.  ',
+      );
+      await tester.tap(find.byKey(const Key('note-page-done')));
+      await tester.pump(); // the close starts ticking
+      await tester.pump(const Duration(milliseconds: 400)); // mid-close
+
+      expect(noteRepo.upsertNoteCallCount, 0);
+      expect(find.text('✦ +1 star · note saved'), findsNothing);
+
+      await tester.pump(const Duration(milliseconds: 600)); // route popped
+      await tester.pump();
+
+      expect(find.byKey(const Key('note-page-field')), findsNothing);
+      expect(noteRepo.upsertNoteCallCount, 1);
+      expect(noteRepo.lastUpsertedContent, 'What a trip.');
+      expect(find.text('✦ +1 star · note saved'), findsOneWidget);
+
+      await tester.pumpAndSettle(); // let the toast's own timer finish
+      expect(find.text('What a trip.'), findsOneWidget);
+      expect(find.textContaining('3 WORDS'), findsOneWidget);
+    });
+
+    testWidgets('Continue entry appends to the existing note, with no star', (
       tester,
-      tripRepo: tripRepo,
-      photoRepo: photoRepo,
-      noteRepo: noteRepo,
-    );
-    await tester.pumpAndSettle();
+    ) async {
+      final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
+      final noteRepo = FakeDayNoteRepository()
+        ..getNoteResult = Right(buildDayNoteEntity(content: 'Great day.'))
+        ..notesForTripResult = Right([
+          buildDayNoteEntity(dayDate: _today, content: 'Great day.'),
+        ]);
+      await _pump(
+        tester,
+        tripRepo: threeDayTrip(),
+        photoRepo: photoRepo,
+        noteRepo: noteRepo,
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('journal-note-view')));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byKey(const Key('journal-note-field')),
-      'Scribbled over it.',
-    );
-    await tester.tap(find.byKey(const Key('journal-note-cancel')));
-    await tester.pumpAndSettle();
+      await openAndType(
+        tester,
+        const Key('journal-note-continue'),
+        'Then the lake.',
+      );
+      // The existing entry is shown read-only above the field.
+      expect(find.byKey(const Key('note-page-existing')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('note-page-done')));
+      await tester.pumpAndSettle();
 
-    expect(noteRepo.upsertNoteCallCount, 0);
-    expect(find.text('Great day.'), findsOneWidget);
-    expect(find.text('Scribbled over it.'), findsNothing);
+      expect(noteRepo.lastUpsertedContent, 'Great day. Then the lake.');
+      expect(find.textContaining('✦ +1 star'), findsNothing);
+      expect(find.text('Great day. Then the lake.'), findsOneWidget);
+    });
+
+    testWidgets('Done with an empty draft writes nothing and shows no toast', (
+      tester,
+    ) async {
+      final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
+      final noteRepo = FakeDayNoteRepository();
+      await _pump(
+        tester,
+        tripRepo: threeDayTrip(),
+        photoRepo: photoRepo,
+        noteRepo: noteRepo,
+      );
+      await tester.pumpAndSettle();
+
+      await openAndType(tester, const Key('journal-note-add-prompt'), '   ');
+      await tester.tap(find.byKey(const Key('note-page-done')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('note-page-field')), findsNothing);
+      expect(noteRepo.upsertNoteCallCount, 0);
+      expect(find.textContaining('✦ +1 star'), findsNothing);
+    });
+
+    testWidgets('Cancel with text asks first; Discard saves nothing', (
+      tester,
+    ) async {
+      final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
+      final noteRepo = FakeDayNoteRepository();
+      await _pump(
+        tester,
+        tripRepo: threeDayTrip(),
+        photoRepo: photoRepo,
+        noteRepo: noteRepo,
+      );
+      await tester.pumpAndSettle();
+
+      await openAndType(
+        tester,
+        const Key('journal-note-add-prompt'),
+        'Scribbled.',
+      );
+      await tester.tap(find.byKey(const Key('note-page-cancel')));
+      await tester.pumpAndSettle();
+      expect(find.text('Discard what you added?'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('note-page-keep-writing')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('note-page-field')), findsOneWidget);
+      expect(find.text('Scribbled.'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('note-page-cancel')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('note-page-discard')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('note-page-field')), findsNothing);
+      expect(noteRepo.upsertNoteCallCount, 0);
+    });
+
+    testWidgets('system back with an empty draft closes without asking', (
+      tester,
+    ) async {
+      final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
+      await _pump(
+        tester,
+        tripRepo: threeDayTrip(),
+        photoRepo: photoRepo,
+        noteRepo: FakeDayNoteRepository(),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('journal-note-add-prompt')));
+      await tester.pumpAndSettle();
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Discard what you added?'), findsNothing);
+      expect(find.byKey(const Key('note-page-field')), findsNothing);
+      expect(find.byKey(const Key('journal-note-add-prompt')), findsOneWidget);
+    });
   });
 
   testWidgets('shows saved photos for the current day', (tester) async {
@@ -658,8 +771,7 @@ void main() {
   });
 
   testWidgets(
-    'the empty-day nudge\'s Write a note action reveals the normal note '
-    'editor',
+    'the empty-day nudge\'s Write a note action opens the note page (#205)',
     (tester) async {
       final tripRepo = FakeTripRepository()
         ..tripCardResult = Right(
@@ -678,8 +790,12 @@ void main() {
       await tester.tap(find.byKey(const Key('empty-day-nudge-write-note')));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('empty-day-nudge')), findsNothing);
-      expect(find.text('Add notes about today'), findsOneWidget);
+      expect(find.byKey(const Key('note-page-field')), findsOneWidget);
+      // Single-day memory: the stamp is just the date.
+      expect(
+        find.text(DateFormat('d MMM').format(_today).toUpperCase()),
+        findsOneWidget,
+      );
     },
   );
 

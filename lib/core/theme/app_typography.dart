@@ -111,4 +111,92 @@ abstract class AppTypography {
     letterSpacing: 0.25,
     color: AppColors.textMuted,
   );
+
+  // --- Journal note page (docs/design/JOURNAL_NOTE_PAGETURN_SPEC.md §2–4,
+  // #205) ----------------------------------------------------------------
+
+  /// Line height of the note body — the ruled lines are drawn on this grid.
+  static const double noteLineHeight = 30;
+
+  /// Forces every body line (old entry + new field) onto the
+  /// [noteLineHeight] grid, so the text keeps sitting on the rules whatever
+  /// the font's own metrics are.
+  static const StrutStyle noteBodyStrut = StrutStyle(
+    fontSize: 15,
+    height: noteLineHeight / 15,
+    forceStrutHeight: true,
+  );
+
+  /// Note body, old and new: Fraunces italic 15 on a 30px line.
+  static TextStyle get noteBody => GoogleFonts.fraunces(
+    fontSize: 15,
+    height: noteLineHeight / 15,
+    fontWeight: FontWeight.w400,
+    fontStyle: FontStyle.italic,
+    color: AppColors.paperInk,
+  );
+
+  /// Writing-page title.
+  static TextStyle get noteTitle => GoogleFonts.fraunces(
+    fontSize: 23,
+    height: 1.2,
+    fontWeight: FontWeight.w400,
+    color: AppColors.paperInk,
+  );
+
+  /// "DAY 2 · 13 AUG" on the writing page (uppercase by caller).
+  static TextStyle get noteStamp =>
+      mono.copyWith(fontSize: 9.5, color: AppColors.paperInkMuted);
+
+  /// Cancel / Done in the writing-page header.
+  static TextStyle get noteHeaderAction => GoogleFonts.roboto(
+    fontSize: 14,
+    height: 1.2,
+    fontWeight: FontWeight.w600,
+    color: AppColors.paperInkMuted,
+  );
+
+  /// The dock's "Aa" button glyph.
+  static TextStyle get noteDockAa => GoogleFonts.fraunces(
+    fontSize: 15,
+    height: 1,
+    fontWeight: FontWeight.w600,
+    color: AppColors.paperInk,
+  );
+
+  /// Label under the mic button.
+  static TextStyle get noteDockLabel => GoogleFonts.roboto(
+    fontSize: 11,
+    height: 1.3,
+    fontWeight: FontWeight.w600,
+    color: AppColors.paperDockLabel,
+  );
+
+  /// "+12 words" draft counter.
+  static TextStyle get noteDockCounter =>
+      mono.copyWith(fontSize: 10, color: AppColors.paperInkMuted);
+
+  /// Title-page stamp — Mono 10, .2em.
+  static TextStyle get titlePageStamp => mono.copyWith(
+    fontSize: 10,
+    letterSpacing: 2,
+    color: AppColors.paperInkMuted,
+  );
+
+  /// Title-page title — Fraunces 32/1.15, centred by caller.
+  static TextStyle get titlePageTitle => GoogleFonts.fraunces(
+    fontSize: 32,
+    height: 1.15,
+    fontWeight: FontWeight.w400,
+    color: AppColors.paperInk,
+  );
+
+  /// "128 words · 5 photos" under the polaroid.
+  static TextStyle get titlePageMeta => GoogleFonts.fraunces(
+    fontSize: 13,
+    height: 1.4,
+    fontWeight: FontWeight.w400,
+    fontStyle: FontStyle.italic,
+    color: AppColors.paperInkMuted,
+  );
 }

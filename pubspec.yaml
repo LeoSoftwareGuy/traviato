@@ -57,6 +57,9 @@ dependencies:
   # Opens the platform-correct store subscription-management page (#142) —
   # the Flutter team's own package for launching an external URL/app.
   url_launcher: ^6.3.2
+  # Renders the hand-drawn balloon doodles on the Journal note page's title
+  # page (#205) from the design's exported SVGs.
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -79,3 +82,4 @@ flutter:
     - assets/images/covers/
     - assets/images/trip/
     - assets/images/journal/
+    - assets/images/journal/balloons/
