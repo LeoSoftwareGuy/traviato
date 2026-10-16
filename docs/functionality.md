@@ -19,9 +19,8 @@ set. Mockup copy showing other numbers is adjusted at implementation.
 - App name: **Storyni** (decided 2026-10-11, #191; pronounced "sto-REE-nee"). Always
   one word, capital S only. It replaces the working name "Trevy" and the design files'
   "Traviato"/"Wander". `traviato` is the **codename** — repo, Dart package, DB and
-  code identifiers keep it. The iOS bundle id is `com.leo.storyni` (#200); the Android
-  application id is still `com.example.traviato` until it is renamed. In code, use
-  `AppConstants.appName`.
+  code identifiers keep it. The iOS bundle id and Android application id are
+  `com.leo.storyni` (#200, #210). In code, use `AppConstants.appName`.
 
 ## 1. Guest landing ✅
 
