@@ -3,7 +3,7 @@
 ## Project
  
 Storyni — a mobile app built with Flutter (Dart) and Supabase.
-Product name: **Storyni** (one word, capital S only). `traviato` is the codename — it stays in the repo, package/bundle ids and code identifiers.
+Product name: **Storyni** (one word, capital S only). `traviato` is the codename — it stays in the repo, Dart package, DB and code identifiers. The iOS bundle id is `com.leo.storyni` (#200); the Android application id is still `com.example.traviato` until it is renamed.
 One-line description: the place where your travel life lives — plan your trip, log it as you go, and it becomes a beautiful journal you keep forever.
  
 ## Golden rules (non-negotiable)
