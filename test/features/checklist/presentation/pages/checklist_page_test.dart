@@ -81,6 +81,21 @@ void main() {
     expect(repo.toggleCallCount, 1);
   });
 
+  testWidgets('tapping the item title toggles the item', (tester) async {
+    final repo = FakeChecklistRepository()
+      ..itemsResult = Right([
+        buildChecklistItemEntity(id: 'i1', title: 'Passport'),
+      ]);
+    await _pump(tester, repo: repo);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Passport'));
+    await tester.pumpAndSettle();
+
+    expect(repo.toggleCallCount, 1);
+    expect(find.text('1 of 1 packed'), findsOneWidget);
+  });
+
   testWidgets('checking an item updates the packed progress label', (
     tester,
   ) async {
