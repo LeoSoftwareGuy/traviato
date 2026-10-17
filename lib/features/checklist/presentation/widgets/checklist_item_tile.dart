@@ -20,49 +20,64 @@ class ChecklistItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.base,
-        vertical: AppSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        color: item.isChecked
-            ? AppColors.tint(AppColors.primary, .09)
-            : AppColors.surface,
-        border: Border.all(
-          color: item.isChecked
-              ? AppColors.tint(AppColors.primary, .4)
-              : AppColors.surfaceBorder,
-        ),
-        borderRadius: AppRadius.cardRadius,
-      ),
-      child: Row(
-        children: [
-          _Checkbox(
-            key: Key('checklist-item-check-${item.id}'),
-            isChecked: item.isChecked,
-            isToggling: isToggling,
-            onTap: onToggle,
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Text(
-              item.title,
-              style: AppTypography.bodyInput.copyWith(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w500,
-                decoration: item.isChecked ? TextDecoration.lineThrough : null,
+    // The whole card is the tap target (#217); the checkbox is only the
+    // indicator. Material + Ink keep the ripple inside the rounded card.
+    return Semantics(
+      checked: item.isChecked,
+      enabled: !isToggling,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: Key('checklist-item-row-${item.id}'),
+          onTap: isToggling ? null : onToggle,
+          borderRadius: AppRadius.cardRadius,
+          child: Ink(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.base,
+              vertical: AppSpacing.md,
+            ),
+            decoration: BoxDecoration(
+              color: item.isChecked
+                  ? AppColors.tint(AppColors.primary, .09)
+                  : AppColors.surface,
+              border: Border.all(
                 color: item.isChecked
-                    ? AppColors.textMuted
-                    : AppColors.textPrimary,
+                    ? AppColors.tint(AppColors.primary, .4)
+                    : AppColors.surfaceBorder,
               ),
+              borderRadius: AppRadius.cardRadius,
+            ),
+            child: Row(
+              children: [
+                _Checkbox(
+                  key: Key('checklist-item-check-${item.id}'),
+                  isChecked: item.isChecked,
+                  isToggling: isToggling,
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    item.title,
+                    style: AppTypography.bodyInput.copyWith(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w500,
+                      decoration: item.isChecked
+                          ? TextDecoration.lineThrough
+                          : null,
+                      color: item.isChecked
+                          ? AppColors.textMuted
+                          : AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                if (item.isEssential) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  const _EssentialBadge(),
+                ],
+              ],
             ),
           ),
-          if (item.isEssential) ...[
-            const SizedBox(width: AppSpacing.sm),
-            const _EssentialBadge(),
-          ],
-        ],
+        ),
       ),
     );
   }
@@ -73,43 +88,37 @@ class _Checkbox extends StatelessWidget {
     super.key,
     required this.isChecked,
     required this.isToggling,
-    required this.onTap,
   });
 
   final bool isChecked;
   final bool isToggling;
-  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: isToggling ? null : onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: Container(
-        width: 20,
-        height: 20,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: isChecked ? AppColors.primary : Colors.transparent,
-          border: Border.all(
-            color: isChecked ? AppColors.primary : AppColors.surfaceBorder,
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(6),
+    return Container(
+      width: 20,
+      height: 20,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: isChecked ? AppColors.primary : Colors.transparent,
+        border: Border.all(
+          color: isChecked ? AppColors.primary : AppColors.surfaceBorder,
+          width: 2,
         ),
-        child: isToggling
-            ? const SizedBox(
-                width: 10,
-                height: 10,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.primary,
-                ),
-              )
-            : isChecked
-            ? const Icon(Icons.check, size: 14, color: AppColors.background)
-            : null,
+        borderRadius: BorderRadius.circular(6),
       ),
+      child: isToggling
+          ? const SizedBox(
+              width: 10,
+              height: 10,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.primary,
+              ),
+            )
+          : isChecked
+          ? const Icon(Icons.check, size: 14, color: AppColors.background)
+          : null,
     );
   }
 }
