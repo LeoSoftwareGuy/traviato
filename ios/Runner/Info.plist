@@ -38,6 +38,16 @@
 				<string>com.leo.storyni</string>
 			</array>
 		</dict>
+		<dict>
+			<!-- Google sign-in callback (#209): the reversed iOS OAuth client ID.
+			     Keep in sync with GOOGLE_IOS_CLIENT_ID in .env. -->
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.779167181222-dajkdlo4l22l2psbubn3noksd17hkmp9</string>
+			</array>
+		</dict>
 	</array>
 	<!-- supabase_flutter (via app_links) handles incoming links; stop Flutter
 	     also pushing them to go_router as routes (#157). -->
