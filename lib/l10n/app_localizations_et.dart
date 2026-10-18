@@ -957,4 +957,225 @@ class AppLocalizationsEt extends AppLocalizations {
 
   @override
   String get photo_deleteSemantics => 'Kustuta foto';
+
+  @override
+  String get expense_eyebrow => 'Kulud';
+
+  @override
+  String get expense_compareLink => 'Võrdle';
+
+  @override
+  String get expense_searchHint => 'Otsi mälestusi';
+
+  @override
+  String get expense_sortLatest => 'Uuemad enne';
+
+  @override
+  String get expense_sortBiggest => 'Suurimad kulud';
+
+  @override
+  String get expense_memoriesHeader => 'Mälestused';
+
+  @override
+  String expense_visibleOf(int visible, int total) {
+    return '$visible/$total';
+  }
+
+  @override
+  String get expense_noSearchMatch => 'Otsingule ei vasta ükski mälestus.';
+
+  @override
+  String get expense_loadThreeMore => 'Näita veel 3';
+
+  @override
+  String expense_loadMoreRemaining(int count) {
+    return 'Näita veel ($count)';
+  }
+
+  @override
+  String get expense_addExpense => 'Lisa kulu';
+
+  @override
+  String get expense_emptyTitle => 'Kulusid veel pole';
+
+  @override
+  String get expense_emptyBody =>
+      'Loo esmalt mälestus ja hakka siis kulusid jälgima.';
+
+  @override
+  String get expense_byCategory => 'Kategooriate kaupa';
+
+  @override
+  String get expense_allExpenses => 'Kõik kulud';
+
+  @override
+  String expense_itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kirjet',
+      one: '$count kirje',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String expense_durationShort(int days) {
+    return '$days p';
+  }
+
+  @override
+  String get expense_totalSpent => 'Kokku kulutatud';
+
+  @override
+  String get expense_perDayAvg => 'Keskmiselt päevas';
+
+  @override
+  String get expense_biggestCategory => 'Suurim kategooria';
+
+  @override
+  String get expense_pickMemoryTitle => 'Vali ülalt mälestus';
+
+  @override
+  String get expense_pickMemoryBody =>
+      'Näed kogusummat, kuhu raha läks, ja iga kulu nii, nagu selle kirja panid.';
+
+  @override
+  String get expense_newExpense => 'Uus kulu';
+
+  @override
+  String get expense_memoryLabel => 'Mälestus';
+
+  @override
+  String get expense_memoryRequired =>
+      'Vali, millise mälestuse juurde see kuulub.';
+
+  @override
+  String get expense_descriptionLabel => 'Kirjeldus';
+
+  @override
+  String get expense_descriptionHint => 'Õhtusöök päikeseloojangul';
+
+  @override
+  String get expense_descriptionRequired => 'Mille eest?';
+
+  @override
+  String get expense_amountLabel => 'Summa';
+
+  @override
+  String get expense_amountInvalid => 'Sisesta summa, mis on suurem kui 0.';
+
+  @override
+  String get expense_categoryHeader => 'Kategooria';
+
+  @override
+  String get expense_spentOn => 'Kuupäev';
+
+  @override
+  String expense_todayDate(String date) {
+    return 'Täna · $date';
+  }
+
+  @override
+  String get expense_saveExpense => 'Salvesta kulu';
+
+  @override
+  String get expense_catFoodDrinks => 'Söök ja jook';
+
+  @override
+  String get expense_catTransport => 'Transport';
+
+  @override
+  String get expense_catAccommodation => 'Majutus';
+
+  @override
+  String get expense_catActivities => 'Tegevused';
+
+  @override
+  String get expense_catShopping => 'Ostlemine';
+
+  @override
+  String get expense_catOther => 'Muu';
+
+  @override
+  String get compare_eyebrow => 'Võrdlus';
+
+  @override
+  String get compare_titleLead => 'Milline reis läks';
+
+  @override
+  String get compare_titleEmphasis => 'tegelikult maksma?';
+
+  @override
+  String get compare_hintPickTwo =>
+      'Vali kaks mälestust, et nende kulusid võrrelda.';
+
+  @override
+  String get compare_hintPickSecond => 'Nüüd vali teine.';
+
+  @override
+  String compare_hintReady(String a, String b) {
+    return '$a vs $b — puuduta kumbagi, et see vahetada.';
+  }
+
+  @override
+  String get compare_needTwo =>
+      'Loo vähemalt kaks mälestust, et kulusid võrrelda.';
+
+  @override
+  String get compare_doneComparing => '✕ Lõpeta võrdlus';
+
+  @override
+  String get compare_pickTwo => 'Vali kaks';
+
+  @override
+  String get compare_tableHeader => 'Kulude võrdlus';
+
+  @override
+  String get compare_total => 'Kokku';
+
+  @override
+  String get compare_perDay => 'Päevas';
+
+  @override
+  String compare_verdictSame(String a, String b) {
+    return '$a ja $b läksid kokku umbes sama palju maksma.';
+  }
+
+  @override
+  String compare_verdictSameButPerDay(
+    String a,
+    String b,
+    String higher,
+    String perDay,
+    String cheaper,
+  ) {
+    return '$a ja $b läksid kokku umbes sama palju maksma, kuid $higher puhul kulus päevas $perDay rohkem. $cheaper oli päeva kohta odavam.';
+  }
+
+  @override
+  String compare_verdictMore(String bigger, String total, String smaller) {
+    return '$bigger läks $total rohkem maksma kui $smaller.';
+  }
+
+  @override
+  String compare_verdictMoreAndPerDay(
+    String bigger,
+    String total,
+    String perDay,
+    String cheaper,
+  ) {
+    return '$bigger läks $total rohkem maksma ja kulus ka päevas $perDay rohkem. $cheaper oli päeva kohta odavam.';
+  }
+
+  @override
+  String compare_verdictMoreButPerDay(
+    String bigger,
+    String total,
+    String higher,
+    String perDay,
+    String cheaper,
+  ) {
+    return '$bigger läks $total rohkem maksma, kuid $higher puhul kulus päevas $perDay rohkem. $cheaper oli päeva kohta odavam.';
+  }
 }

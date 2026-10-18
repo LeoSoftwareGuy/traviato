@@ -981,4 +981,227 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get photo_deleteSemantics => 'Удалить фото';
+
+  @override
+  String get expense_eyebrow => 'Расходы';
+
+  @override
+  String get expense_compareLink => 'Сравнить';
+
+  @override
+  String get expense_searchHint => 'Поиск воспоминаний';
+
+  @override
+  String get expense_sortLatest => 'Сначала новые';
+
+  @override
+  String get expense_sortBiggest => 'Самые затратные';
+
+  @override
+  String get expense_memoriesHeader => 'Воспоминания';
+
+  @override
+  String expense_visibleOf(int visible, int total) {
+    return '$visible из $total';
+  }
+
+  @override
+  String get expense_noSearchMatch => 'Ничего не найдено.';
+
+  @override
+  String get expense_loadThreeMore => 'Показать ещё 3';
+
+  @override
+  String expense_loadMoreRemaining(int count) {
+    return 'Показать ещё ($count)';
+  }
+
+  @override
+  String get expense_addExpense => 'Добавить расход';
+
+  @override
+  String get expense_emptyTitle => 'Пока нет расходов';
+
+  @override
+  String get expense_emptyBody =>
+      'Сначала создайте воспоминание, а потом отмечайте, сколько тратите.';
+
+  @override
+  String get expense_byCategory => 'По категориям';
+
+  @override
+  String get expense_allExpenses => 'Все расходы';
+
+  @override
+  String expense_itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count записи',
+      many: '$count записей',
+      few: '$count записи',
+      one: '$count запись',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String expense_durationShort(int days) {
+    return '$days дн.';
+  }
+
+  @override
+  String get expense_totalSpent => 'Всего потрачено';
+
+  @override
+  String get expense_perDayAvg => 'В среднем в день';
+
+  @override
+  String get expense_biggestCategory => 'Главная статья';
+
+  @override
+  String get expense_pickMemoryTitle => 'Выберите воспоминание выше';
+
+  @override
+  String get expense_pickMemoryBody =>
+      'Вы увидите итог, на что ушли деньги, и каждый расход так, как вы его записали.';
+
+  @override
+  String get expense_newExpense => 'Новый расход';
+
+  @override
+  String get expense_memoryLabel => 'Воспоминание';
+
+  @override
+  String get expense_memoryRequired =>
+      'Выберите, к какому воспоминанию это относится.';
+
+  @override
+  String get expense_descriptionLabel => 'Описание';
+
+  @override
+  String get expense_descriptionHint => 'Ужин на закате';
+
+  @override
+  String get expense_descriptionRequired => 'На что потратили?';
+
+  @override
+  String get expense_amountLabel => 'Сумма';
+
+  @override
+  String get expense_amountInvalid => 'Введите сумму больше 0.';
+
+  @override
+  String get expense_categoryHeader => 'Категория';
+
+  @override
+  String get expense_spentOn => 'Дата';
+
+  @override
+  String expense_todayDate(String date) {
+    return 'Сегодня · $date';
+  }
+
+  @override
+  String get expense_saveExpense => 'Сохранить расход';
+
+  @override
+  String get expense_catFoodDrinks => 'Еда и напитки';
+
+  @override
+  String get expense_catTransport => 'Транспорт';
+
+  @override
+  String get expense_catAccommodation => 'Жильё';
+
+  @override
+  String get expense_catActivities => 'Развлечения';
+
+  @override
+  String get expense_catShopping => 'Покупки';
+
+  @override
+  String get expense_catOther => 'Другое';
+
+  @override
+  String get compare_eyebrow => 'Сравнение';
+
+  @override
+  String get compare_titleLead => 'Какая поездка обошлась';
+
+  @override
+  String get compare_titleEmphasis => 'дороже на самом деле?';
+
+  @override
+  String get compare_hintPickTwo =>
+      'Выберите два воспоминания, чтобы сравнить расходы.';
+
+  @override
+  String get compare_hintPickSecond => 'Теперь выберите второе.';
+
+  @override
+  String compare_hintReady(String a, String b) {
+    return '«$a» и «$b» — нажмите на любое, чтобы заменить.';
+  }
+
+  @override
+  String get compare_needTwo =>
+      'Создайте хотя бы два воспоминания, чтобы сравнить расходы.';
+
+  @override
+  String get compare_doneComparing => '✕ Закончить';
+
+  @override
+  String get compare_pickTwo => 'Выберите два';
+
+  @override
+  String get compare_tableHeader => 'Сравнение расходов';
+
+  @override
+  String get compare_total => 'Итого';
+
+  @override
+  String get compare_perDay => 'В день';
+
+  @override
+  String compare_verdictSame(String a, String b) {
+    return 'Поездки «$a» и «$b» обошлись примерно одинаково.';
+  }
+
+  @override
+  String compare_verdictSameButPerDay(
+    String a,
+    String b,
+    String higher,
+    String perDay,
+    String cheaper,
+  ) {
+    return 'Поездки «$a» и «$b» обошлись примерно одинаково, но в «$higher» в день уходило на $perDay больше. «$cheaper» — дешевле в пересчёте на день.';
+  }
+
+  @override
+  String compare_verdictMore(String bigger, String total, String smaller) {
+    return 'Поездка «$bigger» обошлась на $total дороже, чем «$smaller».';
+  }
+
+  @override
+  String compare_verdictMoreAndPerDay(
+    String bigger,
+    String total,
+    String perDay,
+    String cheaper,
+  ) {
+    return 'Поездка «$bigger» обошлась на $total дороже, и в день тоже уходило на $perDay больше. «$cheaper» — дешевле в пересчёте на день.';
+  }
+
+  @override
+  String compare_verdictMoreButPerDay(
+    String bigger,
+    String total,
+    String higher,
+    String perDay,
+    String cheaper,
+  ) {
+    return 'Поездка «$bigger» обошлась на $total дороже, но в «$higher» в день уходило на $perDay больше. «$cheaper» — дешевле в пересчёте на день.';
+  }
 }

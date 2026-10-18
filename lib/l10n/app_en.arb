@@ -747,5 +747,230 @@
   "photo_deleteSemantics": "Delete photo",
   "@photo_deleteSemantics": {
     "description": "Screen-reader label."
+  },
+  "expense_eyebrow": "Expenses",
+  "@expense_eyebrow": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "expense_compareLink": "Compare",
+  "expense_searchHint": "Search memories",
+  "expense_sortLatest": "Latest first",
+  "@expense_sortLatest": {
+    "description": "Sort toggle."
+  },
+  "expense_sortBiggest": "Biggest spender",
+  "@expense_sortBiggest": {
+    "description": "Sort toggle."
+  },
+  "expense_memoriesHeader": "Memories",
+  "@expense_memoriesHeader": {
+    "description": "Mono header, uppercased in code."
+  },
+  "expense_visibleOf": "{visible} of {total}",
+  "@expense_visibleOf": {
+    "description": "Mono counter, uppercased in code.",
+    "placeholders": {
+      "visible": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "expense_noSearchMatch": "No memories match your search.",
+  "expense_loadThreeMore": "Load 3 more",
+  "expense_loadMoreRemaining": "Load more ({count} more)",
+  "@expense_loadMoreRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expense_addExpense": "Add expense",
+  "expense_emptyTitle": "No expenses yet",
+  "expense_emptyBody": "Add a memory first, then start tracking what you spend on it.",
+  "expense_byCategory": "By category",
+  "@expense_byCategory": {
+    "description": "Mono header, uppercased in code."
+  },
+  "expense_allExpenses": "All expenses",
+  "@expense_allExpenses": {
+    "description": "Mono header, uppercased in code."
+  },
+  "expense_itemCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "@expense_itemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expense_durationShort": "{days}d",
+  "@expense_durationShort": {
+    "description": "Compact trip length on a summary row.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "expense_totalSpent": "Total spent",
+  "@expense_totalSpent": {
+    "description": "Mono label, uppercased in code."
+  },
+  "expense_perDayAvg": "Per day avg",
+  "@expense_perDayAvg": {
+    "description": "Mono label, uppercased in code."
+  },
+  "expense_biggestCategory": "Biggest category",
+  "@expense_biggestCategory": {
+    "description": "Mono label, uppercased in code."
+  },
+  "expense_pickMemoryTitle": "Pick a memory above",
+  "expense_pickMemoryBody": "You'll see the total, where it went, and every expense as you logged it.",
+  "expense_newExpense": "New expense",
+  "expense_memoryLabel": "Memory",
+  "expense_memoryRequired": "Pick which memory this belongs to.",
+  "expense_descriptionLabel": "Description",
+  "expense_descriptionHint": "Sunset dinner",
+  "expense_descriptionRequired": "What was it?",
+  "expense_amountLabel": "Amount",
+  "expense_amountInvalid": "Enter an amount greater than 0.",
+  "expense_categoryHeader": "Category",
+  "@expense_categoryHeader": {
+    "description": "Mono header, uppercased in code."
+  },
+  "expense_spentOn": "Spent on",
+  "@expense_spentOn": {
+    "description": "Date picker eyebrow."
+  },
+  "expense_todayDate": "Today · {date}",
+  "@expense_todayDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "expense_saveExpense": "Save expense",
+  "expense_catFoodDrinks": "Food & Drinks",
+  "expense_catTransport": "Transport",
+  "expense_catAccommodation": "Accommodation",
+  "expense_catActivities": "Activities",
+  "expense_catShopping": "Shopping",
+  "expense_catOther": "Other",
+  "compare_eyebrow": "Compare",
+  "@compare_eyebrow": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "compare_titleLead": "Which trip cost",
+  "compare_titleEmphasis": "what, really?",
+  "compare_hintPickTwo": "Pick two memories to put their spending side by side.",
+  "compare_hintPickSecond": "Now pick a second one.",
+  "compare_hintReady": "{a} vs {b} — tap either to swap it out.",
+  "@compare_hintReady": {
+    "description": "{a}/{b} are memory names (user content).",
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "compare_needTwo": "Create at least two memories to compare their spending.",
+  "compare_doneComparing": "✕ Done comparing",
+  "compare_pickTwo": "Pick two",
+  "compare_tableHeader": "Financial comparison",
+  "@compare_tableHeader": {
+    "description": "Mono header, uppercased in code."
+  },
+  "compare_total": "Total",
+  "compare_perDay": "Per day",
+  "compare_verdictSame": "{a} and {b} cost about the same overall.",
+  "@compare_verdictSame": {
+    "description": "All names are memory names; amounts come pre-formatted.",
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "compare_verdictSameButPerDay": "{a} and {b} cost about the same overall, but {higher} ran {perDay}/day higher. {cheaper} was the cheaper trip per day.",
+  "@compare_verdictSameButPerDay": {
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      },
+      "higher": {
+        "type": "String"
+      },
+      "perDay": {
+        "type": "String"
+      },
+      "cheaper": {
+        "type": "String"
+      }
+    }
+  },
+  "compare_verdictMore": "{bigger} cost {total} more overall than {smaller}.",
+  "@compare_verdictMore": {
+    "placeholders": {
+      "bigger": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "smaller": {
+        "type": "String"
+      }
+    }
+  },
+  "compare_verdictMoreAndPerDay": "{bigger} cost {total} more overall and ran {perDay}/day higher too. {cheaper} was the cheaper trip per day.",
+  "@compare_verdictMoreAndPerDay": {
+    "placeholders": {
+      "bigger": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "perDay": {
+        "type": "String"
+      },
+      "cheaper": {
+        "type": "String"
+      }
+    }
+  },
+  "compare_verdictMoreButPerDay": "{bigger} cost {total} more overall, but {higher} ran {perDay}/day higher. {cheaper} was the cheaper trip per day.",
+  "@compare_verdictMoreButPerDay": {
+    "placeholders": {
+      "bigger": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "higher": {
+        "type": "String"
+      },
+      "perDay": {
+        "type": "String"
+      },
+      "cheaper": {
+        "type": "String"
+      }
+    }
   }
 }

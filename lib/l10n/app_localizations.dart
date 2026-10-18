@@ -1587,6 +1587,365 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete photo'**
   String get photo_deleteSemantics;
+
+  /// Mono eyebrow, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get expense_eyebrow;
+
+  /// No description provided for @expense_compareLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get expense_compareLink;
+
+  /// No description provided for @expense_searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search memories'**
+  String get expense_searchHint;
+
+  /// Sort toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest first'**
+  String get expense_sortLatest;
+
+  /// Sort toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Biggest spender'**
+  String get expense_sortBiggest;
+
+  /// Mono header, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Memories'**
+  String get expense_memoriesHeader;
+
+  /// Mono counter, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'{visible} of {total}'**
+  String expense_visibleOf(int visible, int total);
+
+  /// No description provided for @expense_noSearchMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No memories match your search.'**
+  String get expense_noSearchMatch;
+
+  /// No description provided for @expense_loadThreeMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load 3 more'**
+  String get expense_loadThreeMore;
+
+  /// No description provided for @expense_loadMoreRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more ({count} more)'**
+  String expense_loadMoreRemaining(int count);
+
+  /// No description provided for @expense_addExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add expense'**
+  String get expense_addExpense;
+
+  /// No description provided for @expense_emptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses yet'**
+  String get expense_emptyTitle;
+
+  /// No description provided for @expense_emptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a memory first, then start tracking what you spend on it.'**
+  String get expense_emptyBody;
+
+  /// Mono header, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'By category'**
+  String get expense_byCategory;
+
+  /// Mono header, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'All expenses'**
+  String get expense_allExpenses;
+
+  /// No description provided for @expense_itemCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}}'**
+  String expense_itemCount(int count);
+
+  /// Compact trip length on a summary row.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d'**
+  String expense_durationShort(int days);
+
+  /// Mono label, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Total spent'**
+  String get expense_totalSpent;
+
+  /// Mono label, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Per day avg'**
+  String get expense_perDayAvg;
+
+  /// Mono label, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Biggest category'**
+  String get expense_biggestCategory;
+
+  /// No description provided for @expense_pickMemoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a memory above'**
+  String get expense_pickMemoryTitle;
+
+  /// No description provided for @expense_pickMemoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll see the total, where it went, and every expense as you logged it.'**
+  String get expense_pickMemoryBody;
+
+  /// No description provided for @expense_newExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'New expense'**
+  String get expense_newExpense;
+
+  /// No description provided for @expense_memoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory'**
+  String get expense_memoryLabel;
+
+  /// No description provided for @expense_memoryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick which memory this belongs to.'**
+  String get expense_memoryRequired;
+
+  /// No description provided for @expense_descriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get expense_descriptionLabel;
+
+  /// No description provided for @expense_descriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunset dinner'**
+  String get expense_descriptionHint;
+
+  /// No description provided for @expense_descriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'What was it?'**
+  String get expense_descriptionRequired;
+
+  /// No description provided for @expense_amountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get expense_amountLabel;
+
+  /// No description provided for @expense_amountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount greater than 0.'**
+  String get expense_amountInvalid;
+
+  /// Mono header, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get expense_categoryHeader;
+
+  /// Date picker eyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent on'**
+  String get expense_spentOn;
+
+  /// No description provided for @expense_todayDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Today · {date}'**
+  String expense_todayDate(String date);
+
+  /// No description provided for @expense_saveExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Save expense'**
+  String get expense_saveExpense;
+
+  /// No description provided for @expense_catFoodDrinks.
+  ///
+  /// In en, this message translates to:
+  /// **'Food & Drinks'**
+  String get expense_catFoodDrinks;
+
+  /// No description provided for @expense_catTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport'**
+  String get expense_catTransport;
+
+  /// No description provided for @expense_catAccommodation.
+  ///
+  /// In en, this message translates to:
+  /// **'Accommodation'**
+  String get expense_catAccommodation;
+
+  /// No description provided for @expense_catActivities.
+  ///
+  /// In en, this message translates to:
+  /// **'Activities'**
+  String get expense_catActivities;
+
+  /// No description provided for @expense_catShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get expense_catShopping;
+
+  /// No description provided for @expense_catOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get expense_catOther;
+
+  /// Mono eyebrow, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get compare_eyebrow;
+
+  /// No description provided for @compare_titleLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Which trip cost'**
+  String get compare_titleLead;
+
+  /// No description provided for @compare_titleEmphasis.
+  ///
+  /// In en, this message translates to:
+  /// **'what, really?'**
+  String get compare_titleEmphasis;
+
+  /// No description provided for @compare_hintPickTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick two memories to put their spending side by side.'**
+  String get compare_hintPickTwo;
+
+  /// No description provided for @compare_hintPickSecond.
+  ///
+  /// In en, this message translates to:
+  /// **'Now pick a second one.'**
+  String get compare_hintPickSecond;
+
+  /// {a}/{b} are memory names (user content).
+  ///
+  /// In en, this message translates to:
+  /// **'{a} vs {b} — tap either to swap it out.'**
+  String compare_hintReady(String a, String b);
+
+  /// No description provided for @compare_needTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Create at least two memories to compare their spending.'**
+  String get compare_needTwo;
+
+  /// No description provided for @compare_doneComparing.
+  ///
+  /// In en, this message translates to:
+  /// **'✕ Done comparing'**
+  String get compare_doneComparing;
+
+  /// No description provided for @compare_pickTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick two'**
+  String get compare_pickTwo;
+
+  /// Mono header, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial comparison'**
+  String get compare_tableHeader;
+
+  /// No description provided for @compare_total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get compare_total;
+
+  /// No description provided for @compare_perDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Per day'**
+  String get compare_perDay;
+
+  /// All names are memory names; amounts come pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} and {b} cost about the same overall.'**
+  String compare_verdictSame(String a, String b);
+
+  /// No description provided for @compare_verdictSameButPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} and {b} cost about the same overall, but {higher} ran {perDay}/day higher. {cheaper} was the cheaper trip per day.'**
+  String compare_verdictSameButPerDay(
+    String a,
+    String b,
+    String higher,
+    String perDay,
+    String cheaper,
+  );
+
+  /// No description provided for @compare_verdictMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{bigger} cost {total} more overall than {smaller}.'**
+  String compare_verdictMore(String bigger, String total, String smaller);
+
+  /// No description provided for @compare_verdictMoreAndPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{bigger} cost {total} more overall and ran {perDay}/day higher too. {cheaper} was the cheaper trip per day.'**
+  String compare_verdictMoreAndPerDay(
+    String bigger,
+    String total,
+    String perDay,
+    String cheaper,
+  );
+
+  /// No description provided for @compare_verdictMoreButPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{bigger} cost {total} more overall, but {higher} ran {perDay}/day higher. {cheaper} was the cheaper trip per day.'**
+  String compare_verdictMoreButPerDay(
+    String bigger,
+    String total,
+    String higher,
+    String perDay,
+    String cheaper,
+  );
 }
 
 class _AppLocalizationsDelegate
