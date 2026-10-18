@@ -1,8 +1,6 @@
-import '../../../../core/constants/app_constants.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-
 import '../../../../core/config/router/route_constants.dart';
+import '../../../../core/constants/app_constants.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_motion.dart';
@@ -13,6 +11,8 @@ import '../widgets/guest_hero.dart';
 import '../widgets/how_it_works_section.dart';
 import '../widgets/sample_memories_scroller.dart';
 import '../widgets/star_specks.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class GuestLandingPage extends StatelessWidget {
   const GuestLandingPage({super.key});
@@ -106,19 +106,24 @@ class _GuestLandingNavBar extends StatelessWidget {
             Text(AppConstants.appName, style: AppTypography.headlineSerif),
           ],
         ),
-        InkWell(
-          onTap: onLogin,
-          borderRadius: AppRadius.badgeRadius,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.xs,
-            ),
-            child: Text(
-              'Log in',
-              style: AppTypography.chipLabel.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
+        // Flexible so a longer label (ET "Logi sisse") wraps instead of
+        // overflowing; UI labels never truncate (#220).
+        Flexible(
+          child: InkWell(
+            onTap: onLogin,
+            borderRadius: AppRadius.badgeRadius,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.xs,
+              ),
+              child: Text(
+                context.l10n.auth_logIn,
+                textAlign: TextAlign.end,
+                style: AppTypography.chipLabel.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -128,35 +133,42 @@ class _GuestLandingNavBar extends StatelessWidget {
   }
 }
 
-const _occasions = ['Weddings', 'Trips', 'Birthdays', 'Milestones'];
-
 class _ValueBlock extends StatelessWidget {
   const _ValueBlock();
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    // RU runs one size smaller so "воспоминание" fits a 360pt line
+    // (localization spec Phase 5: 34 vs 36, scaled to our 40).
+    final headline = l10n.localeName == 'ru'
+        ? AppTypography.heroHeadline.copyWith(fontSize: 38)
+        : AppTypography.heroHeadline;
+    final occasions = [
+      l10n.guest_occasionWeddings,
+      l10n.guest_occasionTrips,
+      l10n.guest_occasionBirthdays,
+      l10n.guest_occasionMilestones,
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'YOUR MEMORY COMPANION',
+          l10n.guest_eyebrow.toUpperCase(),
           style: AppTypography.mono.copyWith(color: AppColors.primary),
         ),
         const SizedBox(height: AppSpacing.sm),
-        Text('Every memory,', style: AppTypography.heroHeadline),
+        Text(l10n.guest_headlineLead, style: headline),
         Text(
-          'beautifully captured.',
-          style: AppTypography.heroHeadline.copyWith(
+          l10n.guest_headlineEmphasis,
+          style: headline.copyWith(
             fontStyle: FontStyle.italic,
             color: AppColors.primaryLight,
           ),
         ),
         const SizedBox(height: AppSpacing.md),
         Text(
-          'From big celebrations to spontaneous little adventures, some '
-          'moments are just too good to forget. Plan them, live them, and let '
-          "us turn the best bits into stories you'll want to revisit again and "
-          'again.',
+          l10n.guest_body,
           style: AppTypography.chipLabel.copyWith(
             fontSize: 13.5,
             height: 1.65,
@@ -168,7 +180,7 @@ class _ValueBlock extends StatelessWidget {
           spacing: 7,
           runSpacing: 7,
           children: [
-            for (final occasion in _occasions) _OccasionChip(label: occasion),
+            for (final occasion in occasions) _OccasionChip(label: occasion),
           ],
         ),
       ],
@@ -285,7 +297,7 @@ class _StickyStartNowBarState extends State<_StickyStartNowBar>
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
               ),
-              child: const Text('Start capturing your moments'),
+              child: Text(context.l10n.guest_cta),
             ),
           ),
         ),

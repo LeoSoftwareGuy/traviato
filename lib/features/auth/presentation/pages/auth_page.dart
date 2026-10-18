@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
+import '../../../../core/l10n/inline_placeholder.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -16,7 +18,6 @@ import '../widgets/auth_text_field.dart';
 import '../widgets/confirm_email_card.dart';
 import '../widgets/password_strength_meter.dart';
 import '../widgets/social_sign_in_buttons.dart';
-import '../../../../core/l10n/context_l10n.dart';
 
 enum AuthMode { login, signup }
 
@@ -58,29 +59,31 @@ class _AuthPageState extends ConsumerState<AuthPage> {
   bool get _isSignup => _mode == AuthMode.signup;
 
   String? _validateName(String? value) {
-    if ((value ?? '').trim().isEmpty) return 'Enter your name.';
+    if ((value ?? '').trim().isEmpty) return context.l10n.auth_nameRequired;
     return null;
   }
 
   String? _validateEmail(String? value) {
     final email = value?.trim() ?? '';
-    if (email.isEmpty) return 'Enter your email.';
-    if (!email.contains('@')) return 'Enter a valid email.';
+    if (email.isEmpty) return context.l10n.auth_emailRequired;
+    if (!email.contains('@')) return context.l10n.auth_emailInvalid;
     return null;
   }
 
   String? _validatePassword(String? value) {
     final password = value ?? '';
     if (password.isEmpty) {
-      return _isSignup ? 'Enter a password.' : 'Enter your password.';
+      return _isSignup
+          ? context.l10n.auth_passwordRequiredSignup
+          : context.l10n.auth_passwordRequiredLogin;
     }
-    if (password.length < 6) return 'At least 6 characters.';
+    if (password.length < 6) return context.l10n.auth_passwordTooShort;
     return null;
   }
 
   String? _validateConfirmPassword(String? value) {
     if (!_isSignup) return null;
-    if (value != _password.text) return 'Passwords do not match.';
+    if (value != _password.text) return context.l10n.auth_passwordsMismatch;
     return null;
   }
 
@@ -157,14 +160,14 @@ class _AuthPageState extends ConsumerState<AuthPage> {
               ),
               const SizedBox(height: AppSpacing.xl),
               Text(
-                'Begin your',
+                context.l10n.auth_titleLead,
                 style: AppTypography.screenTitle.copyWith(
                   fontSize: 32,
                   height: 1.15,
                 ),
               ),
               Text(
-                'collection.',
+                context.l10n.auth_titleEmphasis,
                 style: AppTypography.screenTitle.copyWith(
                   fontSize: 32,
                   height: 1.15,
@@ -192,9 +195,9 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                     children: [
                       if (_isSignup) ...[
                         AuthTextField(
-                          label: 'Name',
+                          label: context.l10n.auth_nameLabel,
                           controller: _name,
-                          hintText: 'Ada Wong',
+                          hintText: context.l10n.auth_nameHint,
                           textCapitalization: TextCapitalization.words,
                           textInputAction: TextInputAction.next,
                           validator: _validateName,
@@ -202,16 +205,16 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                         const SizedBox(height: AppSpacing.md),
                       ],
                       AuthTextField(
-                        label: 'Email',
+                        label: context.l10n.auth_emailLabel,
                         controller: _email,
-                        hintText: 'ada@example.com',
+                        hintText: context.l10n.auth_emailHint,
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         validator: _validateEmail,
                       ),
                       const SizedBox(height: AppSpacing.md),
                       AuthTextField(
-                        label: 'Password',
+                        label: context.l10n.auth_passwordLabel,
                         controller: _password,
                         obscureText: true,
                         showObscureToggle: true,
@@ -229,7 +232,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       if (_isSignup) ...[
                         const SizedBox(height: AppSpacing.md),
                         AuthTextField(
-                          label: 'Confirm password',
+                          label: context.l10n.auth_confirmPasswordLabel,
                           controller: _confirmPassword,
                           obscureText: true,
                           showObscureToggle: true,
@@ -254,7 +257,9 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                                   ),
                                 )
                               : Text(
-                                  _isSignup ? 'Create my account' : 'Log in',
+                                  _isSignup
+                                      ? context.l10n.auth_createMyAccount
+                                      : context.l10n.auth_logIn,
                                 ),
                         ),
                       ),
@@ -267,7 +272,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
               const SizedBox(height: AppSpacing.base),
               Center(
                 child: Text(
-                  'Your memories stay yours — nothing is ever published.',
+                  context.l10n.auth_privacyNote,
                   textAlign: TextAlign.center,
                   style: AppTypography.caption.copyWith(letterSpacing: 0),
                 ),
@@ -304,7 +309,7 @@ class _BackLink extends StatelessWidget {
               color: AppColors.textSecondary,
             ),
             const SizedBox(width: AppSpacing.xs),
-            Text('Back', style: AppTypography.chipLabel),
+            Text(context.l10n.common_back, style: AppTypography.chipLabel),
           ],
         ),
       ),
@@ -331,14 +336,14 @@ class _ModeToggle extends StatelessWidget {
         children: [
           Expanded(
             child: _ModeSegment(
-              label: 'Create account',
+              label: context.l10n.auth_createAccount,
               selected: mode == AuthMode.signup,
               onTap: () => onChanged(AuthMode.signup),
             ),
           ),
           Expanded(
             child: _ModeSegment(
-              label: 'Log in',
+              label: context.l10n.auth_logIn,
               selected: mode == AuthMode.login,
               onTap: () => onChanged(AuthMode.login),
             ),
@@ -392,6 +397,7 @@ class _RewardTeaseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tease = splitAroundPlaceholder(context.l10n.auth_rewardTease);
     return DashedRRectBorder(
       color: AppColors.tint(AppColors.textPrimary, .28),
       borderRadius: AppRadius.cardRadius,
@@ -423,19 +429,15 @@ class _RewardTeaseCard extends StatelessWidget {
                     color: AppColors.textSecondary,
                   ),
                   children: [
-                    const TextSpan(text: 'Your first memory earns '),
+                    TextSpan(text: tease.before),
                     TextSpan(
-                      text: '10 stars',
+                      text: context.l10n.auth_rewardTeaseStars,
                       style: AppTypography.chipLabel.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const TextSpan(
-                      text:
-                          ' — and the Storyteller badge is only three notes '
-                          'away.',
-                    ),
+                    TextSpan(text: tease.after),
                   ],
                 ),
               ),

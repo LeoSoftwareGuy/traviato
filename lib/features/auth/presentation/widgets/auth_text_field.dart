@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -131,7 +132,9 @@ class _ObscureToggle extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.only(left: AppSpacing.sm),
         child: Text(
-          obscured ? 'Show' : 'Hide',
+          obscured
+              ? context.l10n.auth_showPassword
+              : context.l10n.auth_hidePassword,
           style: AppTypography.chipLabel.copyWith(color: AppColors.primary),
         ),
       ),

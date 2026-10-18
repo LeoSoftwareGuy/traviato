@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -17,28 +18,21 @@ class _Step {
   final String description;
 }
 
-const _steps = [
+List<_Step> _steps(AppLocalizations l10n) => [
   _Step(
-    eyebrow: 'THE BEFORE',
-    title: "Plan the fun. We'll handle the details.",
-    description:
-        'Big weekend? Little adventure? Just a Tuesday worth remembering? '
-        'Map out your plans, make your lists, and keep everything in one '
-        'happy place.',
+    eyebrow: l10n.guest_stepBeforeEyebrow,
+    title: l10n.guest_stepBeforeTitle,
+    description: l10n.guest_stepBeforeBody,
   ),
   _Step(
-    eyebrow: 'THE DURING',
-    title: 'Live it up. Jot it down.',
-    description:
-        'Snap photos, drop little notes, and take on surprise challenges '
-        "along the way. The best memories aren't always the ones you planned.",
+    eyebrow: l10n.guest_stepDuringEyebrow,
+    title: l10n.guest_stepDuringTitle,
+    description: l10n.guest_stepDuringBody,
   ),
   _Step(
-    eyebrow: 'THE AFTER',
-    title: 'Good times deserve a replay.',
-    description:
-        'When the adventure ends, watch your moments come together in a '
-        'personal highlight film. Relive the magic and keep the memories.',
+    eyebrow: l10n.guest_stepAfterEyebrow,
+    title: l10n.guest_stepAfterTitle,
+    description: l10n.guest_stepAfterBody,
   ),
 ];
 
@@ -49,20 +43,21 @@ class HowItWorksSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final steps = _steps(context.l10n);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Make plans. Make memories. Make them last.',
+          context.l10n.guest_howTitle,
           style: AppTypography.screenTitle.copyWith(fontSize: 22, height: 1.25),
         ),
         const SizedBox(height: AppSpacing.base),
-        for (var i = 0; i < _steps.length; i++) ...[
+        for (var i = 0; i < steps.length; i++) ...[
           _HowItWorksCard(
-            step: _steps[i],
-            highlighted: i == _steps.length - 1,
+            step: steps[i],
+            highlighted: i == steps.length - 1,
           ),
-          if (i < _steps.length - 1) const SizedBox(height: AppSpacing.md),
+          if (i < steps.length - 1) const SizedBox(height: AppSpacing.md),
         ],
       ],
     );
@@ -95,7 +90,7 @@ class _HowItWorksCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            step.eyebrow,
+            step.eyebrow.toUpperCase(),
             style: AppTypography.mono.copyWith(color: AppColors.primary),
           ),
           const SizedBox(height: AppSpacing.xs),

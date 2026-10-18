@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/config/router/app_router.dart';
 import '../../../../core/config/router/route_constants.dart';
+import '../../../../core/errors/failure_message.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/auth_link_failure_controller.dart';
@@ -32,9 +34,9 @@ class AuthLinkFailureListener extends ConsumerWidget {
           ref.read(authControllerProvider).status == AuthStatus.unauthenticated;
       showAppSnackbar(
         context,
-        failure.message,
+        presentationFailureMessage(failure, context.l10n),
         kind: AppSnackbarKind.error,
-        actionLabel: isSignedOut ? 'Log in' : null,
+        actionLabel: isSignedOut ? context.l10n.auth_logIn : null,
         onAction: isSignedOut
             ? () => ref.read(routerProvider).goNamed(RouteNames.login)
             : null,

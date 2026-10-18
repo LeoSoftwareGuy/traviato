@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -13,22 +14,29 @@ class PasswordStrengthMeter extends StatelessWidget {
 
   final String password;
 
-  static ({int filled, String label}) strengthOf(String password) {
-    if (password.isEmpty) return (filled: 0, label: '');
+  /// Filled segments, 0–3: empty, weak, good, strong.
+  static int strengthOf(String password) {
+    if (password.isEmpty) return 0;
     final hasLetter = RegExp(r'[A-Za-z]').hasMatch(password);
     final hasDigit = RegExp(r'\d').hasMatch(password);
     final variety = (hasLetter ? 1 : 0) + (hasDigit ? 1 : 0);
     if (password.length >= 10 && variety == 2) {
-      return (filled: 3, label: 'Strong');
+      return 3;
     }
-    if (password.length >= 6) return (filled: 2, label: 'Good');
-    return (filled: 1, label: 'Weak');
+    if (password.length >= 6) return 2;
+    return 1;
   }
 
   @override
   Widget build(BuildContext context) {
-    final strength = strengthOf(password);
-    if (strength.filled == 0) return const SizedBox.shrink();
+    final filled = strengthOf(password);
+    if (filled == 0) return const SizedBox.shrink();
+    final l10n = context.l10n;
+    final label = switch (filled) {
+      1 => l10n.auth_strengthWeak,
+      2 => l10n.auth_strengthGood,
+      _ => l10n.auth_strengthStrong,
+    };
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
@@ -40,7 +48,7 @@ class PasswordStrengthMeter extends StatelessWidget {
               child: Container(
                 height: 3,
                 decoration: BoxDecoration(
-                  color: i < strength.filled
+                  color: i < filled
                       ? AppColors.primary
                       : AppColors.surfaceBorder,
                   borderRadius: AppRadius.pillRadius,
@@ -50,7 +58,7 @@ class PasswordStrengthMeter extends StatelessWidget {
           ],
           const SizedBox(width: AppSpacing.sm),
           Text(
-            strength.label,
+            label,
             style: AppTypography.caption.copyWith(letterSpacing: 0),
           ),
         ],
