@@ -13,6 +13,7 @@ import '../../../trip/presentation/widgets/create_memory_field.dart';
 import '../controllers/profile_controller.dart';
 import '../mutations/profile_mutations.dart';
 import 'avatar_upload_tile.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 /// Username + bio + avatar (`docs/design/README.md` § 11's "Edit" entry
 /// point). No editing UI beyond these three fields — matches the sheet's
@@ -83,7 +84,7 @@ class _ProfileEditSheetState extends ConsumerState<ProfileEditSheet> {
         if (next is MutationError) {
           showErrorSnackbar(
             context,
-            message: presentationFailureMessage(next.error),
+            message: presentationFailureMessage(next.error, context.l10n),
           );
         }
       });

@@ -21,6 +21,7 @@ import '../../../trip/presentation/widgets/cover_picker.dart';
 import '../../../trip/presentation/widgets/create_memory_field.dart';
 import '../controllers/plan_controller.dart';
 import '../mutations/manage_memory_mutations.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 final _dateFormat = DateFormat('d MMM y');
 
@@ -149,7 +150,7 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
         if (next is MutationError) {
           showErrorSnackbar(
             context,
-            message: presentationFailureMessage(next.error),
+            message: presentationFailureMessage(next.error, context.l10n),
           );
         }
       });

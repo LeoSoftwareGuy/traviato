@@ -13,6 +13,7 @@ import '../../../trip/presentation/widgets/create_memory_field.dart';
 import '../../domain/entities/quest_entity.dart';
 import '../mutations/quest_mutations.dart';
 import 'quest_time_format.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 /// Add/edit bottom sheet for a quest, on the R-1 sheet chrome. If [quest]
 /// is provided, the sheet will be in edit mode.
@@ -143,7 +144,7 @@ class _AddEditQuestSheetState extends ConsumerState<AddEditQuestSheet> {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });
@@ -151,7 +152,7 @@ class _AddEditQuestSheetState extends ConsumerState<AddEditQuestSheet> {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });

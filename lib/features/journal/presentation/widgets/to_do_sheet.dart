@@ -12,6 +12,7 @@ import '../../../quest/presentation/mutations/quest_mutations.dart';
 import '../../../quest/presentation/providers/quest_providers.dart';
 import '../../../quest/presentation/widgets/quest_timeline.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 /// Bottom sheet with the day's quests, reusing `QuestTimeline`/`QuestTile`.
 /// Check-off toggles `completed_at` via the existing quest mutation; adding
@@ -88,7 +89,7 @@ class _ToDoSheetState extends ConsumerState<ToDoSheet> {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });
@@ -128,7 +129,7 @@ class _ToDoSheetState extends ConsumerState<ToDoSheet> {
             const SizedBox(height: AppSpacing.lg),
             if (_error != null)
               Text(
-                presentationFailureMessage(_error!),
+                presentationFailureMessage(_error!, context.l10n),
                 style: AppTypography.chipLabel.copyWith(
                   color: AppColors.accentCoral,
                 ),

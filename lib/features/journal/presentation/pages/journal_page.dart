@@ -35,6 +35,7 @@ import '../widgets/note_page/note_title_page.dart';
 import '../widgets/photos_strip.dart';
 import '../widgets/to_do_sheet.dart';
 import 'note_page.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 final _stampDateFormat = DateFormat('d MMM');
 
@@ -49,7 +50,7 @@ class JournalPage extends ConsumerWidget {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });
@@ -59,7 +60,7 @@ class JournalPage extends ConsumerWidget {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });
@@ -79,7 +80,7 @@ class JournalPage extends ConsumerWidget {
         child: journalAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => AsyncErrorRetryScaffold(
-            message: presentationFailureMessage(error),
+            message: presentationFailureMessage(error, context.l10n),
             onRetry: () => ref.invalidate(journalControllerProvider(tripId)),
           ),
           data: (state) => _JournalContent(

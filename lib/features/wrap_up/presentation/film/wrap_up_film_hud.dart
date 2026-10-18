@@ -10,6 +10,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../mutations/wrap_up_mutations.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 /// The film itself is an ambient, non-interactive loop (docs/design/
 /// WRAP_UP_FILM_FLUTTER_SPEC.md has no CTAs at all) — this is a persistent overlay
@@ -43,7 +44,7 @@ class WrapUpFilmHud extends ConsumerWidget {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });

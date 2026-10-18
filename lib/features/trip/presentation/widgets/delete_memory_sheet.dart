@@ -11,6 +11,7 @@ import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../journal/presentation/providers/day_note_providers.dart';
 import '../../../photo/presentation/providers/photo_providers.dart';
 import '../mutations/trip_mutations.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 /// Delete-only sheet for a finished ("kept forever") memory — issue #115.
 ///
@@ -93,7 +94,7 @@ class _DeleteMemorySheetState extends ConsumerState<DeleteMemorySheet> {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });

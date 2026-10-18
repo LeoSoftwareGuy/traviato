@@ -13,6 +13,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../mutations/auth_mutations.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 /// "Continue with Apple" / "Continue with Google", under both Create-account
 /// and Log-in modes of [AuthPage]. Apple's official button on iOS only —
@@ -29,7 +30,7 @@ class SocialSignInButtons extends ConsumerWidget {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });
@@ -40,7 +41,7 @@ class SocialSignInButtons extends ConsumerWidget {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });

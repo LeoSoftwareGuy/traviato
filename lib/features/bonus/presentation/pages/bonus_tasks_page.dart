@@ -23,6 +23,7 @@ import '../widgets/bonus_earned_banner.dart';
 import '../widgets/bonus_task_popup_sheet.dart';
 import '../widgets/bonus_task_tile.dart';
 import '../widgets/stretch_offer_card.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 class BonusTasksPage extends ConsumerWidget {
   const BonusTasksPage({required this.tripId, super.key});
@@ -38,7 +39,7 @@ class BonusTasksPage extends ConsumerWidget {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });
@@ -49,7 +50,7 @@ class BonusTasksPage extends ConsumerWidget {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });
@@ -67,7 +68,7 @@ class BonusTasksPage extends ConsumerWidget {
           child: trayAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => AsyncErrorRetryScaffold(
-              message: presentationFailureMessage(error),
+              message: presentationFailureMessage(error, context.l10n),
               onRetry: () =>
                   ref.invalidate(bonusTrayControllerProvider(tripId)),
             ),

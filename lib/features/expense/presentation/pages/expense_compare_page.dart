@@ -13,6 +13,7 @@ import '../controllers/expense_compare_state.dart';
 import '../widgets/expense_compare_table.dart';
 import '../widgets/expense_compare_verdict_card.dart';
 import '../widgets/expense_summary_tile.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 /// "Put two memories' spending side by side." `docs/design/README.md` § 9.
 class ExpenseComparePage extends ConsumerWidget {
@@ -29,7 +30,7 @@ class ExpenseComparePage extends ConsumerWidget {
           child: compareAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => AsyncErrorRetryScaffold(
-              message: presentationFailureMessage(error),
+              message: presentationFailureMessage(error, context.l10n),
               onRetry: () => ref.invalidate(expenseCompareControllerProvider),
             ),
             data: (state) => _CompareContent(state: state),

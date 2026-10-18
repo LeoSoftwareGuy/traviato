@@ -25,6 +25,7 @@ import '../widgets/home_header.dart';
 import '../widgets/home_stats_bar.dart';
 import '../widgets/memories_grid_section.dart';
 import '../widgets/upcoming_hero_card.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -47,7 +48,7 @@ class HomePage extends ConsumerWidget {
         child: homeAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => AsyncErrorRetryScaffold(
-            message: presentationFailureMessage(error),
+            message: presentationFailureMessage(error, context.l10n),
             onRetry: () => ref.invalidate(homeControllerProvider),
           ),
           data: (state) => _HomeContent(
@@ -120,7 +121,7 @@ class _HomeContent extends ConsumerWidget {
     result.fold(
       (failure) => showErrorSnackbar(
         context,
-        message: presentationFailureMessage(failure),
+        message: presentationFailureMessage(failure, context.l10n),
       ),
       (summaries) => AddExpenseSheet.show(
         context,

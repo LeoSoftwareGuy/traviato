@@ -11,6 +11,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../mutations/auth_mutations.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 /// The auth screen's "Check your inbox" state after a signup that still
 /// needs email confirmation (#162). Deliberately calm — surface card,
@@ -89,7 +90,7 @@ class _ConfirmEmailCardState extends ConsumerState<ConfirmEmailCard> {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });

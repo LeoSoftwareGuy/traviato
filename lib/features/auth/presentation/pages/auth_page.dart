@@ -16,6 +16,7 @@ import '../widgets/auth_text_field.dart';
 import '../widgets/confirm_email_card.dart';
 import '../widgets/password_strength_meter.dart';
 import '../widgets/social_sign_in_buttons.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 enum AuthMode { login, signup }
 
@@ -137,7 +138,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });

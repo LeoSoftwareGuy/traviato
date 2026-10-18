@@ -17,6 +17,7 @@ import '../film/wrap_up_film_hud.dart';
 import '../film/wrap_up_film_photo.dart';
 import '../film/wrap_up_film_photo_pins.dart';
 import '../widgets/wrap_up_generating_view.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 class WrapUpPage extends ConsumerWidget {
   const WrapUpPage({required this.tripId, super.key});
@@ -32,7 +33,7 @@ class WrapUpPage extends ConsumerWidget {
       body: wrapUpAsync.when(
         loading: () => const WrapUpGeneratingView(),
         error: (error, _) => AsyncErrorRetryScaffold(
-          message: presentationFailureMessage(error),
+          message: presentationFailureMessage(error, context.l10n),
           onRetry: () => ref.invalidate(wrapUpControllerProvider(tripId)),
         ),
         data: (state) => Stack(

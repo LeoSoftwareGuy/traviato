@@ -19,6 +19,7 @@ import '../widgets/add_checklist_item_input.dart';
 import '../widgets/category_tabs.dart';
 import '../widgets/checklist_item_tile.dart';
 import '../widgets/checklist_progress_bar.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 class ChecklistPage extends ConsumerWidget {
   const ChecklistPage({required this.tripId, super.key});
@@ -34,7 +35,7 @@ class ChecklistPage extends ConsumerWidget {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });
@@ -45,7 +46,7 @@ class ChecklistPage extends ConsumerWidget {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });
@@ -56,7 +57,7 @@ class ChecklistPage extends ConsumerWidget {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });
@@ -70,7 +71,7 @@ class ChecklistPage extends ConsumerWidget {
           child: checklistAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => AsyncErrorRetryScaffold(
-              message: presentationFailureMessage(error),
+              message: presentationFailureMessage(error, context.l10n),
               onRetry: () =>
                   ref.invalidate(checklistControllerProvider(tripId)),
             ),
