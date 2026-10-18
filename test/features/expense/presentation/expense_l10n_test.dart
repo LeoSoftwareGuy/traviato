@@ -130,7 +130,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  for (final locale in const [Locale('ru'), Locale('et')]) {
+  for (final locale in const [Locale('en'), Locale('ru'), Locale('et')]) {
     testWidgets('Expenses and Compare lay out without overflow at 360pt in '
         '${locale.languageCode}', (tester) async {
       setScreenSize(tester, height: 2400);

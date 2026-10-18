@@ -133,7 +133,7 @@ void main() {
     expect(find.text('＋ Lisa foto'), findsOneWidget);
   });
 
-  for (final locale in const [Locale('ru'), Locale('et')]) {
+  for (final locale in const [Locale('en'), Locale('ru'), Locale('et')]) {
     for (final withEntries in const [true, false]) {
       testWidgets('Journal lays out without overflow at 360pt in '
           '${locale.languageCode} (entries: $withEntries)', (tester) async {

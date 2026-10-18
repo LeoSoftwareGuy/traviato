@@ -59,7 +59,7 @@ void main() {
       expect(find.text('1 PÄEV · 42 FOTOT'), findsOneWidget);
     });
 
-    for (final locale in const [Locale('ru'), Locale('et')]) {
+    for (final locale in const [Locale('en'), Locale('ru'), Locale('et')]) {
       testWidgets('lays out without overflow at 360pt in '
           '${locale.languageCode}', (tester) async {
         setScreenSize(tester);
@@ -95,7 +95,7 @@ void main() {
       expect(find.text('Придумайте пароль.'), findsOneWidget);
     });
 
-    for (final locale in const [Locale('ru'), Locale('et')]) {
+    for (final locale in const [Locale('en'), Locale('ru'), Locale('et')]) {
       testWidgets('lays out without overflow at 360pt in '
           '${locale.languageCode}', (tester) async {
         setScreenSize(tester);
