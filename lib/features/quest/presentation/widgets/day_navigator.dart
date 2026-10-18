@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-
-final _dayFormat = DateFormat('d MMM');
-final _fullDayFormat = DateFormat('EEEE, d MMM');
 
 /// Prev/next day arrows, "Day N" + a mono done-count sub-line, and tappable
 /// segment dots for every day. `docs/design/README.md` § 5.
@@ -39,6 +37,8 @@ class DayNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final locale = l10n.localeName;
     return Column(
       children: [
         Row(
@@ -55,15 +55,15 @@ class DayNavigator extends StatelessWidget {
                 // becomes the title instead (#186).
                 Text(
                   totalDays == 1
-                      ? _fullDayFormat.format(currentDate)
-                      : 'Day $dayNumber',
+                      ? DateFormat('EEEE, d MMM', locale).format(currentDate)
+                      : l10n.plan_dayN(dayNumber),
                   style: AppTypography.screenTitle.copyWith(fontSize: 19),
                 ),
                 Text(
                   totalDays == 1
-                      ? '$doneCount of $totalForDay done'
-                      : '${_dayFormat.format(currentDate)} · $doneCount of '
-                            '$totalForDay done',
+                      ? l10n.plan_doneCount(doneCount, totalForDay)
+                      : '${DateFormat('d MMM', locale).format(currentDate)}'
+                            ' · ${l10n.plan_doneCount(doneCount, totalForDay)}',
                   style: AppTypography.mono.copyWith(
                     color: AppColors.textTertiary,
                   ),

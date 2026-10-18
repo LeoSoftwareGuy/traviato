@@ -5,13 +5,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
-import '../../../../core/utils/pluralize.dart';
 import '../../../../core/widgets/star_award_toast.dart';
 import '../controllers/plan_controller.dart';
 import '../controllers/plan_state.dart';
@@ -22,7 +22,6 @@ import '../widgets/day_navigator.dart';
 import '../widgets/manage_memory_sheet.dart';
 import '../widgets/plan_header.dart';
 import '../widgets/quest_timeline.dart';
-import '../../../../core/l10n/context_l10n.dart';
 
 class PlanPage extends ConsumerWidget {
   const PlanPage({required this.tripId, super.key});
@@ -76,13 +75,13 @@ class PlanPage extends ConsumerWidget {
         items: [
           AppBottomNavBarItem(
             icon: Icons.home_rounded,
-            label: 'Home',
+            label: context.l10n.nav_home,
             selected: false,
             onTap: () => context.goNamed(RouteNames.home),
           ),
           AppBottomNavBarItem(
             icon: Icons.receipt_long_outlined,
-            label: 'Expenses',
+            label: context.l10n.nav_expenses,
             selected: false,
             onTap: () => context.goNamed(RouteNames.expenses),
           ),
@@ -132,9 +131,8 @@ class _PlanContent extends ConsumerWidget {
           const _NoDatesYet()
         else ...[
           Text(
-            '${state.totalQuestsPlanned} quests planned · '
-            '${state.totalDays} '
-            '${pluralize(state.totalDays, 'day', 'days')} total',
+            '${context.l10n.home_questsPlanned(state.totalQuestsPlanned)} · '
+            '${context.l10n.plan_daysTotal(state.totalDays)}',
             style: AppTypography.chipLabel.copyWith(color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -163,7 +161,7 @@ class _PlanContent extends ConsumerWidget {
               final wasCompleted = quest.isCompleted;
               runToggleQuest(ref: ref, tripId: tripId, quest: quest);
               if (!wasCompleted) {
-                showStarToast(context, '✦ +1 star · quest done');
+                showStarToast(context, context.l10n.toast_questDone);
               }
             },
             onEditQuest: (quest) => AddEditQuestSheet.show(
@@ -206,7 +204,7 @@ class _NoDatesYet extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.base),
           Text(
-            'Add dates to this memory to start planning your days.',
+            context.l10n.plan_noDates,
             textAlign: TextAlign.center,
             style: AppTypography.chipLabel.copyWith(color: AppColors.textMuted),
           ),

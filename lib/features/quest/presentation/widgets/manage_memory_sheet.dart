@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -21,9 +22,6 @@ import '../../../trip/presentation/widgets/cover_picker.dart';
 import '../../../trip/presentation/widgets/create_memory_field.dart';
 import '../controllers/plan_controller.dart';
 import '../mutations/manage_memory_mutations.dart';
-import '../../../../core/l10n/context_l10n.dart';
-
-final _dateFormat = DateFormat('d MMM y');
 
 /// Rename, date-shift, cover-change, and two-step delete for a memory.
 /// `docs/design/README.md` § Shared: Manage memory sheet.
@@ -140,6 +138,7 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     for (final mutation in [
       renameMemoryMutation,
       changeCoverMutation,
@@ -174,23 +173,23 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
             children: [
               Expanded(
                 child: Text(
-                  'Edit this memory',
+                  l10n.manage_title,
                   style: AppTypography.screenTitle.copyWith(fontSize: 21),
                 ),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Done'),
+                child: Text(l10n.common_done),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
           CreateMemoryField(
-            label: 'Name',
+            label: l10n.manage_nameLabel,
             controller: _name,
             trailing: TextButton(
               onPressed: _rename,
-              child: const Text('Rename'),
+              child: Text(l10n.manage_rename),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -198,7 +197,7 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
             children: [
               Expanded(
                 child: _ShiftDateCard(
-                  label: 'Starts',
+                  label: l10n.trip_startsLabel,
                   date: trip?.startDate,
                   onShiftForward: () => _shiftDates(1),
                   onShiftBack: () => _shiftDates(-1),
@@ -207,7 +206,7 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: _ShiftDateCard(
-                  label: 'Ends',
+                  label: l10n.trip_endsLabel,
                   date: trip?.endDate,
                   onShiftForward: () => _shiftDates(1),
                   onShiftBack: () => _shiftDates(-1),
@@ -217,13 +216,12 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Tap a date to shift it a day forward, hold to shift it back — '
-            "quests move with it.",
+            l10n.manage_shiftHint,
             style: AppTypography.chipLabel.copyWith(color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'COVER',
+            l10n.manage_cover.toUpperCase(),
             style: AppTypography.mono.copyWith(color: AppColors.textTertiary),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -259,17 +257,18 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
                     )
                   : Text(
                       _deleteArmed
-                          ? 'Yes — delete it forever'
-                          : 'Delete this memory',
+                          ? l10n.trip_deleteConfirm
+                          : l10n.trip_deleteTitle,
                     ),
             ),
           ),
           if (_deleteArmed) ...[
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'This removes ${_photoCount ?? 0} photos and '
-              '${_noteDaysCount ?? 0} days of notes. Your earned stars are '
-              "kept. It can't be undone.",
+              l10n.trip_deleteConsequence(
+                l10n.common_photoCount(_photoCount ?? 0),
+                l10n.trip_noteDays(_noteDaysCount ?? 0),
+              ),
               textAlign: TextAlign.center,
               style: AppTypography.caption.copyWith(letterSpacing: 0),
             ),
@@ -318,7 +317,12 @@ class _ShiftDateCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              date == null ? 'Not set' : _dateFormat.format(date!),
+              date == null
+                  ? context.l10n.manage_notSet
+                  : DateFormat(
+                      'd MMM y',
+                      context.l10n.localeName,
+                    ).format(date!),
               style: AppTypography.bodyInput.copyWith(
                 color: date == null
                     ? AppColors.textTertiary

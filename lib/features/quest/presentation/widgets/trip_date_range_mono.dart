@@ -1,23 +1,29 @@
 import 'package:intl/intl.dart';
 
-final _dayFormat = DateFormat('d');
-final _monthFormat = DateFormat('MMM');
-final _yearFormat = DateFormat('y');
+import '../../../../core/l10n/context_l10n.dart';
 
 /// "22–26 AUG 2026" (or "22 AUG – 03 SEP 2026" across a month boundary) —
 /// the mono date range on the Plan cover banner.
-String tripDateRangeMono(DateTime? start, DateTime? end) {
-  if (start == null && end == null) return 'DATES TBD';
+String tripDateRangeMono(
+  AppLocalizations l10n,
+  DateTime? start,
+  DateTime? end,
+) {
+  if (start == null && end == null) return l10n.home_datesTbd.toUpperCase();
+  final locale = l10n.localeName;
+  final dayFormat = DateFormat('d', locale);
+  final monthFormat = DateFormat('MMM', locale);
+  final yearFormat = DateFormat('y', locale);
   if (start != null && end != null) {
     if (start.month == end.month && start.year == end.year) {
-      return '${_dayFormat.format(start)}–${_dayFormat.format(end)} '
-          '${_monthFormat.format(end).toUpperCase()} ${_yearFormat.format(end)}';
+      return '${dayFormat.format(start)}–${dayFormat.format(end)} '
+          '${monthFormat.format(end).toUpperCase()} ${yearFormat.format(end)}';
     }
-    return '${_dayFormat.format(start)} ${_monthFormat.format(start).toUpperCase()}'
-        ' – ${_dayFormat.format(end)} ${_monthFormat.format(end).toUpperCase()} '
-        '${_yearFormat.format(end)}';
+    return '${dayFormat.format(start)} ${monthFormat.format(start).toUpperCase()}'
+        ' – ${dayFormat.format(end)} ${monthFormat.format(end).toUpperCase()} '
+        '${yearFormat.format(end)}';
   }
   final d = start ?? end!;
-  return '${_dayFormat.format(d)} ${_monthFormat.format(d).toUpperCase()} '
-      '${_yearFormat.format(d)}';
+  return '${dayFormat.format(d)} ${monthFormat.format(d).toUpperCase()} '
+      '${yearFormat.format(d)}';
 }
