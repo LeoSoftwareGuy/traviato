@@ -7,13 +7,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../mutations/auth_mutations.dart';
-import '../../../../core/l10n/context_l10n.dart';
 
 /// "Continue with Apple" / "Continue with Google", under both Create-account
 /// and Log-in modes of [AuthPage]. Apple's official button on iOS only —
@@ -62,6 +62,7 @@ class SocialSignInButtons extends ConsumerWidget {
             width: double.infinity,
             height: 48,
             child: SignInWithAppleButton(
+              text: context.l10n.auth_signInWithApple,
               borderRadius: AppRadius.cardRadius,
               // Errors surface via the ref.listen above; .ignore() only
               // marks this Future's rejection as handled so it isn't also
@@ -94,7 +95,7 @@ class _OrDivider extends StatelessWidget {
         const Expanded(child: Divider(color: AppColors.surfaceBorder)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: Text('or', style: AppTypography.caption),
+          child: Text(context.l10n.auth_or, style: AppTypography.caption),
         ),
         const Expanded(child: Divider(color: AppColors.surfaceBorder)),
       ],
@@ -134,9 +135,14 @@ class _GoogleSignInButton extends StatelessWidget {
                 children: [
                   const _GoogleG(),
                   const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    'Continue with Google',
-                    style: AppTypography.buttonLabel,
+                  // Wraps to a second line rather than overflowing when the
+                  // translation runs long (#220).
+                  Flexible(
+                    child: Text(
+                      context.l10n.auth_continueWithGoogle,
+                      textAlign: TextAlign.center,
+                      style: AppTypography.buttonLabel,
+                    ),
                   ),
                 ],
               ),

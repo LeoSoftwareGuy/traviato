@@ -75,5 +75,265 @@
   "error_rateLimitedSeconds": "{count, plural, one{Слишком много попыток. Подождите {count} секунду и попробуйте снова.} few{Слишком много попыток. Подождите {count} секунды и попробуйте снова.} many{Слишком много попыток. Подождите {count} секунд и попробуйте снова.} other{Слишком много попыток. Подождите {count} секунды и попробуйте снова.}}",
   "@error_rateLimitedSeconds": {
     "x-review": "pending"
+  },
+  "common_back": "Назад",
+  "@common_back": {
+    "x-review": "pending"
+  },
+  "common_dayCount": "{count, plural, one{{count} день} few{{count} дня} many{{count} дней} other{{count} дня}}",
+  "@common_dayCount": {
+    "x-review": "pending"
+  },
+  "common_photoCount": "{count, plural, other{{count} фото}}",
+  "@common_photoCount": {
+    "x-review": "pending"
+  },
+  "auth_logIn": "Войти",
+  "@auth_logIn": {
+    "x-review": "pending"
+  },
+  "auth_createAccount": "Регистрация",
+  "@auth_createAccount": {
+    "x-review": "pending"
+  },
+  "auth_createMyAccount": "Создать аккаунт",
+  "@auth_createMyAccount": {
+    "x-review": "pending"
+  },
+  "auth_titleLead": "Начните свою",
+  "@auth_titleLead": {
+    "x-review": "pending"
+  },
+  "auth_titleEmphasis": "коллекцию.",
+  "@auth_titleEmphasis": {
+    "x-review": "pending"
+  },
+  "auth_nameLabel": "Имя",
+  "@auth_nameLabel": {
+    "x-review": "pending"
+  },
+  "auth_nameHint": "Анна Смирнова",
+  "@auth_nameHint": {
+    "x-review": "pending"
+  },
+  "auth_emailLabel": "Email",
+  "@auth_emailLabel": {
+    "x-review": "pending"
+  },
+  "auth_emailHint": "anna@example.com",
+  "@auth_emailHint": {
+    "x-review": "pending"
+  },
+  "auth_passwordLabel": "Пароль",
+  "@auth_passwordLabel": {
+    "x-review": "pending"
+  },
+  "auth_confirmPasswordLabel": "Повторите пароль",
+  "@auth_confirmPasswordLabel": {
+    "x-review": "pending"
+  },
+  "auth_nameRequired": "Введите имя.",
+  "@auth_nameRequired": {
+    "x-review": "pending"
+  },
+  "auth_emailRequired": "Введите email.",
+  "@auth_emailRequired": {
+    "x-review": "pending"
+  },
+  "auth_emailInvalid": "Введите корректный email.",
+  "@auth_emailInvalid": {
+    "x-review": "pending"
+  },
+  "auth_passwordRequiredSignup": "Придумайте пароль.",
+  "@auth_passwordRequiredSignup": {
+    "x-review": "pending"
+  },
+  "auth_passwordRequiredLogin": "Введите пароль.",
+  "@auth_passwordRequiredLogin": {
+    "x-review": "pending"
+  },
+  "auth_passwordTooShort": "Не менее 6 символов.",
+  "@auth_passwordTooShort": {
+    "x-review": "pending"
+  },
+  "auth_passwordsMismatch": "Пароли не совпадают.",
+  "@auth_passwordsMismatch": {
+    "x-review": "pending"
+  },
+  "auth_showPassword": "Показать",
+  "@auth_showPassword": {
+    "x-review": "pending"
+  },
+  "auth_hidePassword": "Скрыть",
+  "@auth_hidePassword": {
+    "x-review": "pending"
+  },
+  "auth_strengthWeak": "Слабый",
+  "@auth_strengthWeak": {
+    "x-review": "pending"
+  },
+  "auth_strengthGood": "Хороший",
+  "@auth_strengthGood": {
+    "x-review": "pending"
+  },
+  "auth_strengthStrong": "Надёжный",
+  "@auth_strengthStrong": {
+    "x-review": "pending"
+  },
+  "auth_privacyNote": "Ваши воспоминания принадлежат только вам — мы ничего не публикуем.",
+  "@auth_privacyNote": {
+    "x-review": "pending"
+  },
+  "auth_rewardTease": "Первое воспоминание принесёт {stars}, а до значка «Рассказчик» — всего три заметки.",
+  "@auth_rewardTease": {
+    "x-review": "pending"
+  },
+  "auth_rewardTeaseStars": "10 звёзд",
+  "@auth_rewardTeaseStars": {
+    "x-review": "pending"
+  },
+  "auth_or": "или",
+  "@auth_or": {
+    "x-review": "pending"
+  },
+  "auth_signInWithApple": "Вход с Apple",
+  "@auth_signInWithApple": {
+    "x-review": "pending"
+  },
+  "auth_continueWithGoogle": "Продолжить с Google",
+  "@auth_continueWithGoogle": {
+    "x-review": "pending"
+  },
+  "auth_checkInbox": "Проверьте почту",
+  "@auth_checkInbox": {
+    "x-review": "pending"
+  },
+  "auth_confirmationSent": "Мы отправили ссылку для подтверждения на {email}. Откройте её на этом телефоне — и вы сразу войдёте, или подтвердите на другом устройстве и войдите здесь.",
+  "@auth_confirmationSent": {
+    "x-review": "pending"
+  },
+  "auth_backToLogin": "Вернуться ко входу",
+  "@auth_backToLogin": {
+    "x-review": "pending"
+  },
+  "auth_resendIn": "Отправить снова через {seconds} с",
+  "@auth_resendIn": {
+    "x-review": "pending"
+  },
+  "auth_resendEmail": "Отправить письмо снова",
+  "@auth_resendEmail": {
+    "x-review": "pending"
+  },
+  "auth_sentAgain": "Отправлено ✓",
+  "@auth_sentAgain": {
+    "x-review": "pending"
+  },
+  "auth_useDifferentEmail": "Указать другой email",
+  "@auth_useDifferentEmail": {
+    "x-review": "pending"
+  },
+  "guest_eyebrow": "Хранитель ваших воспоминаний",
+  "@guest_eyebrow": {
+    "x-review": "pending"
+  },
+  "guest_headlineLead": "Каждое воспоминание —",
+  "@guest_headlineLead": {
+    "x-review": "pending"
+  },
+  "guest_headlineEmphasis": "бережно сохранено.",
+  "@guest_headlineEmphasis": {
+    "x-review": "pending"
+  },
+  "guest_body": "От больших праздников до спонтанных маленьких приключений — некоторые моменты слишком хороши, чтобы их забыть. Планируйте их, проживайте, а мы превратим лучшее в истории, к которым захочется возвращаться снова и снова.",
+  "@guest_body": {
+    "x-review": "pending"
+  },
+  "guest_occasionWeddings": "Свадьбы",
+  "@guest_occasionWeddings": {
+    "x-review": "pending"
+  },
+  "guest_occasionTrips": "Поездки",
+  "@guest_occasionTrips": {
+    "x-review": "pending"
+  },
+  "guest_occasionBirthdays": "Дни рождения",
+  "@guest_occasionBirthdays": {
+    "x-review": "pending"
+  },
+  "guest_occasionMilestones": "Важные события",
+  "@guest_occasionMilestones": {
+    "x-review": "pending"
+  },
+  "guest_cta": "Начните сохранять свои моменты",
+  "@guest_cta": {
+    "x-review": "pending"
+  },
+  "guest_howTitle": "Планируйте. Вспоминайте. Сохраняйте навсегда.",
+  "@guest_howTitle": {
+    "x-review": "pending"
+  },
+  "guest_stepBeforeEyebrow": "До",
+  "@guest_stepBeforeEyebrow": {
+    "x-review": "pending"
+  },
+  "guest_stepBeforeTitle": "Планируйте веселье. Детали — на нас.",
+  "@guest_stepBeforeTitle": {
+    "x-review": "pending"
+  },
+  "guest_stepBeforeBody": "Большие выходные? Маленькое приключение? Или просто вторник, который хочется запомнить? Составляйте планы и списки — всё в одном уютном месте.",
+  "@guest_stepBeforeBody": {
+    "x-review": "pending"
+  },
+  "guest_stepDuringEyebrow": "Во время",
+  "@guest_stepDuringEyebrow": {
+    "x-review": "pending"
+  },
+  "guest_stepDuringTitle": "Проживайте. Записывайте.",
+  "@guest_stepDuringTitle": {
+    "x-review": "pending"
+  },
+  "guest_stepDuringBody": "Снимайте фото, оставляйте короткие заметки и принимайте неожиданные вызовы по пути. Лучшие воспоминания не всегда те, что вы планировали.",
+  "@guest_stepDuringBody": {
+    "x-review": "pending"
+  },
+  "guest_stepAfterEyebrow": "После",
+  "@guest_stepAfterEyebrow": {
+    "x-review": "pending"
+  },
+  "guest_stepAfterTitle": "Хорошие моменты стоит пересмотреть.",
+  "@guest_stepAfterTitle": {
+    "x-review": "pending"
+  },
+  "guest_stepAfterBody": "Когда приключение закончится, ваши моменты соберутся в личный фильм. Переживите волшебство снова и сохраните воспоминания.",
+  "@guest_stepAfterBody": {
+    "x-review": "pending"
+  },
+  "guest_sampleMemoriesEyebrow": "Несколько сохранённых воспоминаний",
+  "@guest_sampleMemoriesEyebrow": {
+    "x-review": "pending"
+  },
+  "guest_sampleTokyo": "Семейная поездка в Токио",
+  "@guest_sampleTokyo": {
+    "x-review": "pending"
+  },
+  "guest_sampleSolo": "Путешествие в одиночку",
+  "@guest_sampleSolo": {
+    "x-review": "pending"
+  },
+  "guest_sampleAnniversary": "Наша годовщина",
+  "@guest_sampleAnniversary": {
+    "x-review": "pending"
+  },
+  "guest_sampleGraduation": "Выпускной",
+  "@guest_sampleGraduation": {
+    "x-review": "pending"
+  },
+  "guest_sampleFood": "Выходные гурмана",
+  "@guest_sampleFood": {
+    "x-review": "pending"
+  },
+  "guest_sampleBucketList": "Мечта, ставшая явью",
+  "@guest_sampleBucketList": {
+    "x-review": "pending"
   }
 }

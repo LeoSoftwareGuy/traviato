@@ -1,6 +1,6 @@
-import '../../../../core/utils/pluralize.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -17,45 +17,52 @@ class _Moment {
   });
 
   final String imagePath;
-  final String title;
+  final String Function(AppLocalizations l10n) title;
   final int days;
   final int photos;
 }
 
+String _sampleTokyoTitle(AppLocalizations l) => l.guest_sampleTokyo;
+String _sampleSoloTitle(AppLocalizations l) => l.guest_sampleSolo;
+String _sampleAnniversaryTitle(AppLocalizations l) => l.guest_sampleAnniversary;
+String _sampleGraduationTitle(AppLocalizations l) => l.guest_sampleGraduation;
+String _sampleFoodTitle(AppLocalizations l) => l.guest_sampleFood;
+String _sampleBucketListTitle(AppLocalizations l) => l.guest_sampleBucketList;
+
 const _moments = [
   _Moment(
     imagePath: GuestImages.familyAdventure,
-    title: 'Family trip to Tokyo',
+    title: _sampleTokyoTitle,
     days: 9,
     photos: 214,
   ),
   _Moment(
     imagePath: GuestImages.soloGetaway,
-    title: 'A solo getaway',
+    title: _sampleSoloTitle,
     days: 4,
     photos: 96,
   ),
   _Moment(
     imagePath: GuestImages.anniversary,
-    title: 'Our anniversary',
+    title: _sampleAnniversaryTitle,
     days: 3,
     photos: 86,
   ),
   _Moment(
     imagePath: GuestImages.graduation,
-    title: 'Graduation',
+    title: _sampleGraduationTitle,
     days: 1,
     photos: 42,
   ),
   _Moment(
     imagePath: GuestImages.foodLoversWeekend,
-    title: "A food lover's weekend",
+    title: _sampleFoodTitle,
     days: 3,
     photos: 118,
   ),
   _Moment(
     imagePath: GuestImages.bucketListMoment,
-    title: 'A bucket-list moment',
+    title: _sampleBucketListTitle,
     days: 1,
     photos: 27,
   ),
@@ -71,7 +78,7 @@ class SampleMemoriesScroller extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'A FEW MEMORIES, KEPT',
+          context.l10n.guest_sampleMemoriesEyebrow.toUpperCase(),
           style: AppTypography.mono.copyWith(color: AppColors.primary),
         ),
         const SizedBox(height: AppSpacing.base),
@@ -114,7 +121,7 @@ class _MomentCard extends StatelessWidget {
                 child: Align(
                   alignment: Alignment.bottomLeft,
                   child: Text(
-                    moment.title,
+                    moment.title(context.l10n),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.screenTitle.copyWith(
@@ -128,8 +135,9 @@ class _MomentCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            '${moment.days} ${pluralize(moment.days, 'DAY', 'DAYS')} · '
-            '${moment.photos} ${pluralize(moment.photos, 'PHOTO', 'PHOTOS')}',
+            '${context.l10n.common_dayCount(moment.days)} · '
+                    '${context.l10n.common_photoCount(moment.photos)}'
+                .toUpperCase(),
             style: AppTypography.mono,
           ),
         ],

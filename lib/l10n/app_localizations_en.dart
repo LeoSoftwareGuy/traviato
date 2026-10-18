@@ -80,4 +80,227 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get common_back => 'Back';
+
+  @override
+  String common_dayCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String common_photoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos',
+      one: '1 photo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get auth_logIn => 'Log in';
+
+  @override
+  String get auth_createAccount => 'Create account';
+
+  @override
+  String get auth_createMyAccount => 'Create my account';
+
+  @override
+  String get auth_titleLead => 'Begin your';
+
+  @override
+  String get auth_titleEmphasis => 'collection.';
+
+  @override
+  String get auth_nameLabel => 'Name';
+
+  @override
+  String get auth_nameHint => 'Ada Wong';
+
+  @override
+  String get auth_emailLabel => 'Email';
+
+  @override
+  String get auth_emailHint => 'ada@example.com';
+
+  @override
+  String get auth_passwordLabel => 'Password';
+
+  @override
+  String get auth_confirmPasswordLabel => 'Confirm password';
+
+  @override
+  String get auth_nameRequired => 'Enter your name.';
+
+  @override
+  String get auth_emailRequired => 'Enter your email.';
+
+  @override
+  String get auth_emailInvalid => 'Enter a valid email.';
+
+  @override
+  String get auth_passwordRequiredSignup => 'Enter a password.';
+
+  @override
+  String get auth_passwordRequiredLogin => 'Enter your password.';
+
+  @override
+  String get auth_passwordTooShort => 'At least 6 characters.';
+
+  @override
+  String get auth_passwordsMismatch => 'Passwords do not match.';
+
+  @override
+  String get auth_showPassword => 'Show';
+
+  @override
+  String get auth_hidePassword => 'Hide';
+
+  @override
+  String get auth_strengthWeak => 'Weak';
+
+  @override
+  String get auth_strengthGood => 'Good';
+
+  @override
+  String get auth_strengthStrong => 'Strong';
+
+  @override
+  String get auth_privacyNote =>
+      'Your memories stay yours — nothing is ever published.';
+
+  @override
+  String auth_rewardTease(String stars) {
+    return 'Your first memory earns $stars — and the Storyteller badge is only three notes away.';
+  }
+
+  @override
+  String get auth_rewardTeaseStars => '10 stars';
+
+  @override
+  String get auth_or => 'or';
+
+  @override
+  String get auth_signInWithApple => 'Sign in with Apple';
+
+  @override
+  String get auth_continueWithGoogle => 'Continue with Google';
+
+  @override
+  String get auth_checkInbox => 'Check your inbox';
+
+  @override
+  String auth_confirmationSent(String email) {
+    return 'We sent a confirmation link to $email. Open it on this phone and you\'ll be signed straight in, or confirm anywhere and log in here.';
+  }
+
+  @override
+  String get auth_backToLogin => 'Back to log in';
+
+  @override
+  String auth_resendIn(int seconds) {
+    return 'Resend in ${seconds}s';
+  }
+
+  @override
+  String get auth_resendEmail => 'Resend email';
+
+  @override
+  String get auth_sentAgain => 'Sent again ✓';
+
+  @override
+  String get auth_useDifferentEmail => 'Use a different email';
+
+  @override
+  String get guest_eyebrow => 'Your memory companion';
+
+  @override
+  String get guest_headlineLead => 'Every memory,';
+
+  @override
+  String get guest_headlineEmphasis => 'beautifully captured.';
+
+  @override
+  String get guest_body =>
+      'From big celebrations to spontaneous little adventures, some moments are just too good to forget. Plan them, live them, and let us turn the best bits into stories you\'ll want to revisit again and again.';
+
+  @override
+  String get guest_occasionWeddings => 'Weddings';
+
+  @override
+  String get guest_occasionTrips => 'Trips';
+
+  @override
+  String get guest_occasionBirthdays => 'Birthdays';
+
+  @override
+  String get guest_occasionMilestones => 'Milestones';
+
+  @override
+  String get guest_cta => 'Start capturing your moments';
+
+  @override
+  String get guest_howTitle => 'Make plans. Make memories. Make them last.';
+
+  @override
+  String get guest_stepBeforeEyebrow => 'The before';
+
+  @override
+  String get guest_stepBeforeTitle =>
+      'Plan the fun. We\'ll handle the details.';
+
+  @override
+  String get guest_stepBeforeBody =>
+      'Big weekend? Little adventure? Just a Tuesday worth remembering? Map out your plans, make your lists, and keep everything in one happy place.';
+
+  @override
+  String get guest_stepDuringEyebrow => 'The during';
+
+  @override
+  String get guest_stepDuringTitle => 'Live it up. Jot it down.';
+
+  @override
+  String get guest_stepDuringBody =>
+      'Snap photos, drop little notes, and take on surprise challenges along the way. The best memories aren\'t always the ones you planned.';
+
+  @override
+  String get guest_stepAfterEyebrow => 'The after';
+
+  @override
+  String get guest_stepAfterTitle => 'Good times deserve a replay.';
+
+  @override
+  String get guest_stepAfterBody =>
+      'When the adventure ends, watch your moments come together in a personal highlight film. Relive the magic and keep the memories.';
+
+  @override
+  String get guest_sampleMemoriesEyebrow => 'A few memories, kept';
+
+  @override
+  String get guest_sampleTokyo => 'Family trip to Tokyo';
+
+  @override
+  String get guest_sampleSolo => 'A solo getaway';
+
+  @override
+  String get guest_sampleAnniversary => 'Our anniversary';
+
+  @override
+  String get guest_sampleGraduation => 'Graduation';
+
+  @override
+  String get guest_sampleFood => 'A food lover\'s weekend';
+
+  @override
+  String get guest_sampleBucketList => 'A bucket-list moment';
 }

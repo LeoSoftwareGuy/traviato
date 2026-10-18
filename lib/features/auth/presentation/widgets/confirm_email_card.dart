@@ -5,13 +5,14 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
+import '../../../../core/l10n/inline_placeholder.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../mutations/auth_mutations.dart';
-import '../../../../core/l10n/context_l10n.dart';
 
 /// The auth screen's "Check your inbox" state after a signup that still
 /// needs email confirmation (#162). Deliberately calm — surface card,
@@ -96,6 +97,10 @@ class _ConfirmEmailCardState extends ConsumerState<ConfirmEmailCard> {
     });
     final isSending = ref.watch(resendConfirmationMutation) is MutationPending;
     final canResend = _secondsLeft <= 0 && !isSending;
+    final l10n = context.l10n;
+    final sent = splitAroundPlaceholder(
+      (email) => l10n.auth_confirmationSent(email),
+    );
 
     return Container(
       key: const Key('confirm-email-card'),
@@ -124,7 +129,7 @@ class _ConfirmEmailCardState extends ConsumerState<ConfirmEmailCard> {
             ),
           ),
           const SizedBox(height: AppSpacing.base),
-          Text('Check your inbox', style: AppTypography.headlineSerif),
+          Text(l10n.auth_checkInbox, style: AppTypography.headlineSerif),
           const SizedBox(height: AppSpacing.sm),
           Text.rich(
             TextSpan(
@@ -133,7 +138,7 @@ class _ConfirmEmailCardState extends ConsumerState<ConfirmEmailCard> {
                 height: 1.5,
               ),
               children: [
-                const TextSpan(text: 'We sent a confirmation link to '),
+                TextSpan(text: sent.before),
                 TextSpan(
                   text: widget.email,
                   style: AppTypography.chipLabel.copyWith(
@@ -142,11 +147,7 @@ class _ConfirmEmailCardState extends ConsumerState<ConfirmEmailCard> {
                     height: 1.5,
                   ),
                 ),
-                const TextSpan(
-                  text:
-                      ". Open it on this phone and you'll be signed straight "
-                      'in, or confirm anywhere and log in here.',
-                ),
+                TextSpan(text: sent.after),
               ],
             ),
           ),
@@ -158,7 +159,7 @@ class _ConfirmEmailCardState extends ConsumerState<ConfirmEmailCard> {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
               ),
-              child: const Text('Back to log in'),
+              child: Text(l10n.auth_backToLogin),
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -168,13 +169,13 @@ class _ConfirmEmailCardState extends ConsumerState<ConfirmEmailCard> {
                 onPressed: canResend ? _resend : null,
                 child: Text(
                   _secondsLeft > 0
-                      ? 'Resend in ${_secondsLeft}s'
-                      : 'Resend email',
+                      ? l10n.auth_resendIn(_secondsLeft)
+                      : l10n.auth_resendEmail,
                 ),
               ),
               if (_sentAgain)
                 Text(
-                  'Sent again ✓',
+                  l10n.auth_sentAgain,
                   style: AppTypography.chipLabel.copyWith(
                     color: AppColors.success,
                   ),
@@ -183,7 +184,7 @@ class _ConfirmEmailCardState extends ConsumerState<ConfirmEmailCard> {
           ),
           TextButton(
             onPressed: widget.onUseDifferentEmail,
-            child: const Text('Use a different email'),
+            child: Text(l10n.auth_useDifferentEmail),
           ),
         ],
       ),
