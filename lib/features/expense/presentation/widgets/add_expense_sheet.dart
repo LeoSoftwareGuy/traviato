@@ -16,6 +16,7 @@ import '../../domain/entities/expense_summary_entity.dart';
 import '../mutations/expense_mutations.dart';
 import 'expense_category_chip_group.dart';
 import 'expense_trip_selector.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 final _dateFormat = DateFormat('MMM d, y');
 final _dateChipFormat = DateFormat('MMM d');
@@ -126,7 +127,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });

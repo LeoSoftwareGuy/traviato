@@ -21,6 +21,7 @@ import '../../../subscription/domain/entities/subscription_offering_entity.dart'
 import '../../../subscription/presentation/mutations/subscription_mutations.dart';
 import 'tier_pill.dart';
 import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 // Mirrors trip_mutations.dart's `_freeTierMemoryLimit` and
 // photo_mutations.dart's `_freeTierPhotoLimit` — this section only displays
@@ -61,7 +62,7 @@ class SubscriptionSection extends ConsumerWidget {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       } else if (next is MutationSuccess) {
         // Same outcome branching as the paywall (#141): RevenueCat's

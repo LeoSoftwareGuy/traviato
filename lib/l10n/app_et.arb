@@ -1,0 +1,79 @@
+{
+  "@@locale": "et",
+  "common_cancel": "Loobu",
+  "@common_cancel": {
+    "x-review": "pending"
+  },
+  "common_done": "Valmis",
+  "@common_done": {
+    "x-review": "pending"
+  },
+  "common_retry": "Proovi uuesti",
+  "@common_retry": {
+    "x-review": "pending"
+  },
+  "common_upgrade": "Uuenda",
+  "@common_upgrade": {
+    "x-review": "pending"
+  },
+  "nav_home": "Avaleht",
+  "@nav_home": {
+    "x-review": "pending"
+  },
+  "nav_expenses": "Kulud",
+  "@nav_expenses": {
+    "x-review": "pending"
+  },
+  "datePicker_defaultLabel": "Vali kuupäev",
+  "@datePicker_defaultLabel": {
+    "x-review": "pending"
+  },
+  "placeholder_onItsWay": "{title} on tulekul.",
+  "@placeholder_onItsWay": {
+    "x-review": "pending"
+  },
+  "error_network": "Kontrolli internetiühendust.",
+  "@error_network": {
+    "x-review": "pending"
+  },
+  "error_permission": "Sul pole selleks õigust.",
+  "@error_permission": {
+    "x-review": "pending"
+  },
+  "error_notFound": "Soovitud andmeid ei leitud.",
+  "@error_notFound": {
+    "x-review": "pending"
+  },
+  "error_unknown": "Tekkis tundmatu viga. Proovi hiljem uuesti.",
+  "@error_unknown": {
+    "x-review": "pending"
+  },
+  "error_freeTierMemories": "Tasuta paketis saab luua kuni 3 mälestust. Piiranguteta mälestuste jaoks vali Pro.",
+  "@error_freeTierMemories": {
+    "x-review": "pending"
+  },
+  "error_freeTierPhotos": "Tasuta paketis on ühe mälestuse kohta kuni 40 fotot. Piiranguteta fotode jaoks vali Pro.",
+  "@error_freeTierPhotos": {
+    "x-review": "pending"
+  },
+  "error_questPlanningClosed": "See mälestus lisati pärast reisi lõppu, seega pole midagi planeerida.",
+  "@error_questPlanningClosed": {
+    "x-review": "pending"
+  },
+  "error_authLink": "Link on aegunud või juba kasutatud. Kui oled e-posti juba kinnitanud, logi lihtsalt sisse.",
+  "@error_authLink": {
+    "x-review": "pending"
+  },
+  "error_rateLimitedEmail": "Oleme praegu liiga palju kirju saatnud. Proovi veidi aja pärast uuesti.",
+  "@error_rateLimitedEmail": {
+    "x-review": "pending"
+  },
+  "error_rateLimited": "Liiga palju katseid. Oota veidi ja proovi uuesti.",
+  "@error_rateLimited": {
+    "x-review": "pending"
+  },
+  "error_rateLimitedSeconds": "{count, plural, one{Liiga palju katseid. Oota {count} sekund ja proovi uuesti.} other{Liiga palju katseid. Oota {count} sekundit ja proovi uuesti.}}",
+  "@error_rateLimitedSeconds": {
+    "x-review": "pending"
+  }
+}

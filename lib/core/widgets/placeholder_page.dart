@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/context_l10n.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
@@ -20,7 +21,7 @@ class PlaceholderPage extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Text(
-            message ?? '$title is on its way.',
+            message ?? context.l10n.placeholder_onItsWay(title),
             textAlign: TextAlign.center,
             style: AppTypography.bodyInput.copyWith(
               color: AppColors.textSecondary,

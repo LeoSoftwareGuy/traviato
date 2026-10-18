@@ -13,6 +13,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../domain/entities/photo_entity.dart';
 import '../widgets/storage_photo_image.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 final _takenAtFormat = DateFormat('MMM d, h:mm a');
 
@@ -216,7 +217,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage>
       });
       showErrorSnackbar(
         _overlayContext,
-        message: presentationFailureMessage(error),
+        message: presentationFailureMessage(error, context.l10n),
       );
     }
   }

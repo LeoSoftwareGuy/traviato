@@ -2,11 +2,13 @@ import 'core/constants/app_constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/router/app_router.dart';
+import 'core/l10n/context_l10n.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/widgets/auth_link_failure_listener.dart';
 import 'features/notifications/presentation/controllers/bonus_notifications_lifecycle_controller.dart';
@@ -17,6 +19,9 @@ import 'features/subscription/presentation/providers/subscription_providers.dart
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
+  // Date symbols for every supported locale, so `DateFormat(…, locale)`
+  // never throws for ru/et (#220).
+  await initializeDateFormatting();
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL']!,
     publishableKey: dotenv.env['SUPABASE_PUBLISHABLE_KEY']!,
@@ -79,6 +84,8 @@ class TraviatoApp extends ConsumerWidget {
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: ref.watch(routerProvider),
       builder: (context, child) =>
           AuthLinkFailureListener(child: child ?? const SizedBox.shrink()),

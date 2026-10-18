@@ -1,0 +1,79 @@
+{
+  "@@locale": "ru",
+  "common_cancel": "Отмена",
+  "@common_cancel": {
+    "x-review": "pending"
+  },
+  "common_done": "Готово",
+  "@common_done": {
+    "x-review": "pending"
+  },
+  "common_retry": "Повторить",
+  "@common_retry": {
+    "x-review": "pending"
+  },
+  "common_upgrade": "Улучшить",
+  "@common_upgrade": {
+    "x-review": "pending"
+  },
+  "nav_home": "Главная",
+  "@nav_home": {
+    "x-review": "pending"
+  },
+  "nav_expenses": "Расходы",
+  "@nav_expenses": {
+    "x-review": "pending"
+  },
+  "datePicker_defaultLabel": "Выберите дату",
+  "@datePicker_defaultLabel": {
+    "x-review": "pending"
+  },
+  "placeholder_onItsWay": "{title} — скоро будет.",
+  "@placeholder_onItsWay": {
+    "x-review": "pending"
+  },
+  "error_network": "Проверьте подключение к интернету.",
+  "@error_network": {
+    "x-review": "pending"
+  },
+  "error_permission": "У вас нет доступа.",
+  "@error_permission": {
+    "x-review": "pending"
+  },
+  "error_notFound": "Запрошенные данные не найдены.",
+  "@error_notFound": {
+    "x-review": "pending"
+  },
+  "error_unknown": "Произошла неизвестная ошибка. Попробуйте позже.",
+  "@error_unknown": {
+    "x-review": "pending"
+  },
+  "error_freeTierMemories": "В бесплатном тарифе можно создать до 3 воспоминаний. Перейдите на Pro, чтобы снять ограничение.",
+  "@error_freeTierMemories": {
+    "x-review": "pending"
+  },
+  "error_freeTierPhotos": "В бесплатном тарифе — до 40 фото на одно воспоминание. Перейдите на Pro, чтобы снять ограничение.",
+  "@error_freeTierPhotos": {
+    "x-review": "pending"
+  },
+  "error_questPlanningClosed": "Это воспоминание добавлено после окончания поездки, поэтому планировать нечего.",
+  "@error_questPlanningClosed": {
+    "x-review": "pending"
+  },
+  "error_authLink": "Ссылка устарела или уже использована. Если вы уже подтвердили почту, просто войдите.",
+  "@error_authLink": {
+    "x-review": "pending"
+  },
+  "error_rateLimitedEmail": "Мы отправили слишком много писем. Попробуйте чуть позже.",
+  "@error_rateLimitedEmail": {
+    "x-review": "pending"
+  },
+  "error_rateLimited": "Слишком много попыток. Подождите немного и попробуйте снова.",
+  "@error_rateLimited": {
+    "x-review": "pending"
+  },
+  "error_rateLimitedSeconds": "{count, plural, one{Слишком много попыток. Подождите {count} секунду и попробуйте снова.} few{Слишком много попыток. Подождите {count} секунды и попробуйте снова.} many{Слишком много попыток. Подождите {count} секунд и попробуйте снова.} other{Слишком много попыток. Подождите {count} секунды и попробуйте снова.}}",
+  "@error_rateLimitedSeconds": {
+    "x-review": "pending"
+  }
+}

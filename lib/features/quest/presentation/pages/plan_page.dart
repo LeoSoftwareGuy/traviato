@@ -22,6 +22,7 @@ import '../widgets/day_navigator.dart';
 import '../widgets/manage_memory_sheet.dart';
 import '../widgets/plan_header.dart';
 import '../widgets/quest_timeline.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 class PlanPage extends ConsumerWidget {
   const PlanPage({required this.tripId, super.key});
@@ -44,7 +45,7 @@ class PlanPage extends ConsumerWidget {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });
@@ -59,7 +60,7 @@ class PlanPage extends ConsumerWidget {
           child: planAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => AsyncErrorRetryScaffold(
-              message: presentationFailureMessage(error),
+              message: presentationFailureMessage(error, context.l10n),
               onRetry: () => ref.invalidate(planControllerProvider(tripId)),
             ),
             data: (state) => _PlanContent(

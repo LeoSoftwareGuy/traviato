@@ -23,6 +23,7 @@ import '../widgets/expense_load_more_row.dart';
 import '../widgets/expense_sort_toggle.dart';
 import '../widgets/expense_stats_strip.dart';
 import '../widgets/expense_summary_tile.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 class ExpensesPage extends ConsumerWidget {
   const ExpensesPage({super.key});
@@ -38,7 +39,7 @@ class ExpensesPage extends ConsumerWidget {
           child: expensesAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => AsyncErrorRetryScaffold(
-              message: presentationFailureMessage(error),
+              message: presentationFailureMessage(error, context.l10n),
               onRetry: () => ref.invalidate(expenseListControllerProvider),
             ),
             data: (state) => _ExpensesContent(state: state),

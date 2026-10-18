@@ -20,6 +20,7 @@ import '../widgets/profile_header.dart';
 import '../widgets/profile_stats_row.dart';
 import '../widgets/profile_top_bar.dart';
 import '../widgets/subscription_section.dart';
+import '../../../../core/l10n/context_l10n.dart';
 
 /// The full Profile screen (issue #96), replacing the auth feature's
 /// stopgap (#75) outright.
@@ -32,7 +33,7 @@ class ProfilePage extends ConsumerWidget {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
-          message: presentationFailureMessage(next.error),
+          message: presentationFailureMessage(next.error, context.l10n),
         );
       }
     });
@@ -63,7 +64,7 @@ class ProfilePage extends ConsumerWidget {
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
                   error: (error, _) => AsyncErrorRetryScaffold(
-                    message: presentationFailureMessage(error),
+                    message: presentationFailureMessage(error, context.l10n),
                     onRetry: () => ref.invalidate(profileControllerProvider),
                   ),
                   data: (state) => _ProfileContent(state: state),

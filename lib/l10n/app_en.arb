@@ -1,0 +1,49 @@
+{
+  "@@locale": "en",
+  "common_cancel": "Cancel",
+  "common_done": "Done",
+  "common_retry": "Retry",
+  "common_upgrade": "Upgrade",
+  "@common_upgrade": {
+    "description": "Snackbar action that opens the paywall."
+  },
+  "nav_home": "Home",
+  "@nav_home": {
+    "description": "Bottom nav tab. @maxLength 9"
+  },
+  "nav_expenses": "Expenses",
+  "@nav_expenses": {
+    "description": "Bottom nav tab. @maxLength 9"
+  },
+  "datePicker_defaultLabel": "Pick a date",
+  "@datePicker_defaultLabel": {
+    "description": "Eyebrow above the date picker when the caller gives no label."
+  },
+  "placeholder_onItsWay": "{title} is on its way.",
+  "@placeholder_onItsWay": {
+    "description": "Body of a coming-soon page.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "error_network": "Please check your connection.",
+  "error_permission": "You do not have permission.",
+  "error_notFound": "The requested data was not found.",
+  "error_unknown": "An unknown error occurred. Try again later.",
+  "error_freeTierMemories": "Free plan is limited to 3 memories. Upgrade to Pro for unlimited memories.",
+  "error_freeTierPhotos": "Free plan is limited to 40 photos per memory. Upgrade to Pro for unlimited photos.",
+  "error_questPlanningClosed": "This memory was logged after the trip ended, so there's nothing to plan.",
+  "error_authLink": "That link has expired or was already used. If you've already confirmed your email, just log in.",
+  "error_rateLimitedEmail": "We've sent too many emails for now. Please try again in a little while.",
+  "error_rateLimited": "Too many attempts. Please wait a bit and try again.",
+  "error_rateLimitedSeconds": "{count, plural, =1{Too many attempts. Please wait 1 second and try again.} other{Too many attempts. Please wait {count} seconds and try again.}}",
+  "@error_rateLimitedSeconds": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
+}
