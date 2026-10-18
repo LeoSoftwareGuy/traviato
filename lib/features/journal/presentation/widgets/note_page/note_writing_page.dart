@@ -27,6 +27,9 @@ class NoteWritingPage extends StatelessWidget {
     required this.dictation,
     required this.onMicTap,
     required this.onFieldTap,
+    required this.languageCode,
+    required this.isLanguageAvailable,
+    required this.onLanguageTap,
     super.key,
   });
 
@@ -45,6 +48,11 @@ class NoteWritingPage extends StatelessWidget {
 
   /// Tapping into the field while listening stops the recording.
   final VoidCallback onFieldTap;
+
+  /// The dictation language and whether it works here (#218).
+  final String languageCode;
+  final bool isLanguageAvailable;
+  final VoidCallback onLanguageTap;
 
   @override
   Widget build(BuildContext context) {
@@ -72,6 +80,9 @@ class NoteWritingPage extends StatelessWidget {
                 ),
                 Expanded(
                   child: _RuledScroll(
+                    hintText: isLanguageAvailable
+                        ? context.l10n.note_bodyHint
+                        : context.l10n.note_bodyHintUnavailable,
                     existingText: existingText,
                     controller: controller,
                     focusNode: focusNode,
@@ -84,6 +95,9 @@ class NoteWritingPage extends StatelessWidget {
                   bottomPadding: dockBottomPadding,
                   onAaTap: onAaTap,
                   onMicTap: onMicTap,
+                  languageCode: languageCode,
+                  isLanguageAvailable: isLanguageAvailable,
+                  onLanguageTap: onLanguageTap,
                 ),
               ],
             ),
@@ -151,12 +165,14 @@ class _Header extends StatelessWidget {
 
 class _RuledScroll extends StatelessWidget {
   const _RuledScroll({
+    required this.hintText,
     required this.existingText,
     required this.controller,
     required this.focusNode,
     required this.onFieldTap,
   });
 
+  final String hintText;
   final String existingText;
   final TextEditingController controller;
   final FocusNode focusNode;
@@ -211,7 +227,7 @@ class _RuledScroll extends StatelessWidget {
                     strutStyle: AppTypography.noteBodyStrut,
                     cursorColor: AppColors.paperInk,
                     decoration: InputDecoration.collapsed(
-                      hintText: context.l10n.note_bodyHint,
+                      hintText: hintText,
                       hintStyle: bodyStyle.copyWith(
                         color: AppColors.tint(AppColors.paperInkMuted, .7),
                       ),

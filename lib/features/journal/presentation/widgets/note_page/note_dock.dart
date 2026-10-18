@@ -1,12 +1,15 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/l10n/context_l10n.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_gradients.dart';
 import '../../../../../core/theme/app_motion.dart';
+import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../core/widgets/dashed_rrect_border.dart';
 import 'note_dictation_controller.dart';
 
 /// The note page's bottom dock (docs/design/JOURNAL_NOTE_PAGETURN_SPEC.md
@@ -20,6 +23,9 @@ class NoteDock extends StatelessWidget {
     required this.bottomPadding,
     required this.onAaTap,
     required this.onMicTap,
+    required this.languageCode,
+    required this.isLanguageAvailable,
+    required this.onLanguageTap,
     super.key,
   });
 
@@ -28,6 +34,16 @@ class NoteDock extends StatelessWidget {
   final double bottomPadding;
   final VoidCallback onAaTap;
   final VoidCallback onMicTap;
+
+  /// The dictation language, e.g. `ru` (#218, design 2a).
+  final String languageCode;
+
+  /// False when this device can't recognise [languageCode] (design 2d):
+  /// the mic is disabled (not hidden) and typing becomes the main action.
+  final bool isLanguageAvailable;
+
+  /// Opens the "Speak in…" sheet (design 2b).
+  final VoidCallback onLanguageTap;
 
   @override
   Widget build(BuildContext context) {
@@ -42,30 +58,39 @@ class NoteDock extends StatelessWidget {
         listenable: dictation,
         builder: (context, _) {
           final listening = dictation.isListening;
-          final notice = _noticeText(context.l10n, dictation.notice);
+          final unavailable = !isLanguageAvailable && !listening;
+          final notice = unavailable
+              ? null
+              : _noticeText(context.l10n, dictation.notice);
+          final code = languageCode.toUpperCase();
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (listening) ...[
-                _ListeningRow(dictation: dictation),
+                _ListeningRow(dictation: dictation, code: code),
+                const SizedBox(height: 10),
+              ],
+              if (unavailable) ...[
+                _UnavailableWarning(
+                  languageCode: languageCode,
+                  onChooseAnother: onLanguageTap,
+                ),
                 const SizedBox(height: 10),
               ],
               Row(
                 children: [
-                  _AaButton(onTap: onAaTap),
+                  _AaButton(onTap: onAaTap, accented: unavailable),
                   Expanded(
-                    child: _MicButton(listening: listening, onTap: onMicTap),
+                    child: unavailable
+                        ? const _UnavailableMic()
+                        : _MicButton(listening: listening, onTap: onMicTap),
                   ),
-                  SizedBox(
-                    width: 72,
-                    child: draftWordCount == 0
-                        ? null
-                        : Text(
-                            context.l10n.note_wordsAdded(draftWordCount),
-                            key: const Key('note-page-word-counter'),
-                            textAlign: TextAlign.right,
-                            style: AppTypography.noteDockCounter,
-                          ),
+                  _LanguageSlot(
+                    code: code,
+                    wordCount: draftWordCount,
+                    isLocked: listening,
+                    hasWarning: unavailable,
+                    onTap: onLanguageTap,
                   ),
                 ],
               ),
@@ -94,9 +119,12 @@ class NoteDock extends StatelessWidget {
 }
 
 class _AaButton extends StatelessWidget {
-  const _AaButton({required this.onTap});
+  const _AaButton({required this.onTap, this.accented = false});
 
   final VoidCallback onTap;
+
+  /// Typing is the main action (dictation unavailable, design 2d).
+  final bool accented;
 
   @override
   Widget build(BuildContext context) {
@@ -105,9 +133,16 @@ class _AaButton extends StatelessWidget {
       label: context.l10n.note_typeSemantics,
       excludeSemantics: true,
       child: Material(
-        type: MaterialType.transparency,
+        color: accented
+            ? AppColors.tint(AppColors.primary, .14)
+            : Colors.transparent,
         shape: CircleBorder(
-          side: BorderSide(color: AppColors.tint(AppColors.paperInk, .2)),
+          side: BorderSide(
+            color: accented
+                ? AppColors.primary
+                : AppColors.tint(AppColors.paperInk, .2),
+            width: accented ? 1.5 : 1,
+          ),
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -262,9 +297,12 @@ class _PulsingRingState extends State<_PulsingRing>
 }
 
 class _ListeningRow extends StatelessWidget {
-  const _ListeningRow({required this.dictation});
+  const _ListeningRow({required this.dictation, required this.code});
 
   final NoteDictationController dictation;
+
+  /// Dictation language shown in the status line (design 2c).
+  final String code;
 
   @override
   Widget build(BuildContext context) {
@@ -279,7 +317,7 @@ class _ListeningRow extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           context.l10n
-              .note_listening('${elapsed.inMinutes}:$seconds')
+              .note_listeningIn(code, '${elapsed.inMinutes}:$seconds')
               .toUpperCase(),
           style: AppTypography.noteListening,
         ),
@@ -379,3 +417,212 @@ class _WaveformState extends State<_Waveform>
     );
   }
 }
+
+/// Right slot of the dock (design 2a): the dictation-language chip with
+/// the word count under it. Locked while listening (2c): dimmed, no caret,
+/// not tappable — stop first to switch. An orange dot flags an
+/// unavailable language (2d).
+class _LanguageSlot extends StatelessWidget {
+  const _LanguageSlot({
+    required this.code,
+    required this.wordCount,
+    required this.isLocked,
+    required this.hasWarning,
+    required this.onTap,
+  });
+
+  final String code;
+  final int wordCount;
+  final bool isLocked;
+  final bool hasWarning;
+  final VoidCallback onTap;
+
+  static const width = 56.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final chip = Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          key: const Key('note-page-language-chip'),
+          height: 30,
+          padding: const EdgeInsets.symmetric(horizontal: 9),
+          decoration: BoxDecoration(
+            color: AppColors.paper,
+            border: Border.all(color: AppColors.tint(AppColors.paperInk, .2)),
+            borderRadius: AppRadius.pillRadius,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                code,
+                style: AppTypography.mono.copyWith(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0,
+                  color: AppColors.paperInk,
+                ),
+              ),
+              if (!isLocked) ...[
+                const SizedBox(width: 3),
+                Text(
+                  '▾',
+                  style: AppTypography.caption.copyWith(
+                    fontSize: 8,
+                    color: AppColors.paperInkMuted,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        if (hasWarning)
+          Positioned(
+            top: -2,
+            right: -2,
+            child: Container(
+              key: const Key('note-page-language-warning-dot'),
+              width: 9,
+              height: 9,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.paperDock, width: 1.5),
+              ),
+            ),
+          ),
+      ],
+    );
+    return SizedBox(
+      width: width,
+      child: Semantics(
+        button: true,
+        enabled: !isLocked,
+        label: l10n.dictation_languageSemantics(code),
+        excludeSemantics: true,
+        child: GestureDetector(
+          key: const Key('note-page-language-slot'),
+          behavior: HitTestBehavior.opaque,
+          onTap: isLocked ? null : onTap,
+          // ≥48pt tall hit area, like Aa.
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Opacity(opacity: isLocked ? .45 : 1, child: chip),
+                const SizedBox(height: 4),
+                Text(
+                  l10n.note_wordCountShort(wordCount),
+                  key: const Key('note-page-word-counter'),
+                  style: AppTypography.noteDockCounter,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The mic when the dictation language can't be recognised here (design
+/// 2d): dashed outline + slashed mic, disabled rather than hidden.
+class _UnavailableMic extends StatelessWidget {
+  const _UnavailableMic();
+
+  static const _size = 68.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      enabled: false,
+      label: context.l10n.dictation_notAvailable,
+      excludeSemantics: true,
+      child: Column(
+        key: const Key('note-page-mic-unavailable'),
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: _size,
+            height: _size,
+            child: DashedRRectBorder(
+              color: AppColors.tint(AppColors.paperInkMuted, .6),
+              borderRadius: const BorderRadius.all(Radius.circular(_size / 2)),
+              strokeWidth: 1.5,
+              child: const Center(
+                child: Icon(
+                  Icons.mic_off_rounded,
+                  color: AppColors.paperInkMuted,
+                  size: 26,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            context.l10n.dictation_notAvailable,
+            style: AppTypography.noteDockLabel.copyWith(
+              color: AppColors.paperInkMuted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Inline warning above the dock (design 2d), with a link that opens the
+/// "Speak in…" sheet.
+class _UnavailableWarning extends StatelessWidget {
+  const _UnavailableWarning({
+    required this.languageCode,
+    required this.onChooseAnother,
+  });
+
+  final String languageCode;
+  final VoidCallback onChooseAnother;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return GestureDetector(
+      key: const Key('note-page-language-warning'),
+      onTap: onChooseAnother,
+      child: Text.rich(
+        TextSpan(
+          style: AppTypography.noteNotice,
+          children: [
+            TextSpan(
+              text: l10n.dictation_unavailableWarning(
+                languageCode,
+                dictationPlatformName(),
+              ),
+            ),
+            const TextSpan(text: ' '),
+            TextSpan(
+              text: l10n.dictation_chooseAnother,
+              style: AppTypography.noteNotice.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+
+/// `ios` / `android` / `other` — picks "iPhone" vs "phone" wording.
+String dictationPlatformName() => switch (defaultTargetPlatform) {
+  TargetPlatform.iOS => 'ios',
+  TargetPlatform.android => 'android',
+  _ => 'other',
+};

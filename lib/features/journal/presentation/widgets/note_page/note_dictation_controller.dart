@@ -18,10 +18,21 @@ enum DictationNotice { none, micOff, unavailable }
 /// `m:ss` timer, the waveform levels and the inline notice, and streams
 /// the transcript into [draft] at the caret.
 class NoteDictationController extends ChangeNotifier {
-  NoteDictationController({required this.service, required this.draft});
+  NoteDictationController({
+    required this.service,
+    required this.draft,
+    this.resolveLocale,
+  });
 
   final DictationService service;
   final NoteDraftController draft;
+
+  /// Called once speech access is granted, right before listening: which
+  /// recogniser locale to use, or `isAvailable: false` when the chosen
+  /// dictation language can't be recognised on this device (#218). `null`
+  /// listens in the device locale.
+  final Future<({bool isAvailable, String? localeId})> Function()?
+  resolveLocale;
 
   /// Auto-stop after this long without speech…
   static const silenceTimeout = Duration(seconds: 8);
@@ -75,6 +86,14 @@ class NoteDictationController extends ChangeNotifier {
       return;
     }
 
+    final locale = await resolveLocale?.call();
+    if (_disposed) return;
+    if (locale != null && !locale.isAvailable) {
+      // The page shows the "not available" state (design 2d); typing works.
+      notifyListeners();
+      return;
+    }
+
     _notice = DictationNotice.none;
     _insertion = DictationInsertion.at(draft.value);
     _lastApplied = draft.text;
@@ -88,7 +107,11 @@ class NoteDictationController extends ChangeNotifier {
     // result belongs to the old anchor, so drop it.
     unawaited(_session?.cancel());
     _session = service
-        .listen(pauseFor: silenceTimeout, listenFor: maxDuration)
+        .listen(
+          pauseFor: silenceTimeout,
+          listenFor: maxDuration,
+          localeId: locale?.localeId,
+        )
         .listen(_onEvent);
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       _elapsed += const Duration(seconds: 1);
