@@ -987,6 +987,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This removes {photos} and {notes}. Your earned stars are kept. It can\'t be undone.'**
   String trip_deleteConsequence(String photos, String notes);
+
+  /// No description provided for @common_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get common_edit;
+
+  /// No description provided for @common_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get common_delete;
+
+  /// No description provided for @common_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get common_save;
+
+  /// Star award toast. The ✦ glyph replaces the word "star" (spec Phase 4).
+  ///
+  /// In en, this message translates to:
+  /// **'+1 ✦ · quest done'**
+  String get toast_questDone;
+
+  /// Checklist toast (no stars awarded).
+  ///
+  /// In en, this message translates to:
+  /// **'✦ Packed — nice'**
+  String get toast_packed;
+
+  /// Mono eyebrow, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'The plan'**
+  String get plan_eyebrow;
+
+  /// Follows home_questsPlanned after a ·.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day total} other{{count} days total}}'**
+  String plan_daysTotal(int count);
+
+  /// No description provided for @plan_noDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Add dates to this memory to start planning your days.'**
+  String get plan_noDates;
+
+  /// Day pager title / tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day}'**
+  String plan_dayN(int day);
+
+  /// Mono sub-line under the day title.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} done'**
+  String plan_doneCount(int done, int total);
+
+  /// No description provided for @plan_addQuest.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Add a quest'**
+  String get plan_addQuest;
+
+  /// No description provided for @plan_addQuestToDay.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Add a quest to Day {day}'**
+  String plan_addQuestToDay(int day);
+
+  /// No description provided for @plan_addTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add plan'**
+  String get plan_addTitle;
+
+  /// No description provided for @plan_editTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit plan'**
+  String get plan_editTitle;
+
+  /// No description provided for @plan_nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name this plan'**
+  String get plan_nameLabel;
+
+  /// No description provided for @plan_nameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Pack the car'**
+  String get plan_nameHint;
+
+  /// No description provided for @plan_nameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Give this plan a name.'**
+  String get plan_nameRequired;
+
+  /// No description provided for @plan_timeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time (optional)'**
+  String get plan_timeLabel;
+
+  /// No description provided for @plan_noTime.
+  ///
+  /// In en, this message translates to:
+  /// **'No time set'**
+  String get plan_noTime;
+
+  /// No description provided for @plan_detailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Detail (optional)'**
+  String get plan_detailLabel;
+
+  /// No description provided for @plan_detailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Cooler, blankets, hiking boots'**
+  String get plan_detailHint;
+
+  /// No description provided for @manage_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit this memory'**
+  String get manage_title;
+
+  /// The memory's name field.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get manage_nameLabel;
+
+  /// No description provided for @manage_rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get manage_rename;
+
+  /// No description provided for @manage_shiftHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a date to shift it a day forward, hold to shift it back — quests move with it.'**
+  String get manage_shiftHint;
+
+  /// Mono eyebrow, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover'**
+  String get manage_cover;
+
+  /// No description provided for @manage_notSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get manage_notSet;
+
+  /// No description provided for @checklist_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pack for the trip'**
+  String get checklist_title;
+
+  /// No description provided for @checklist_emptyCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No items in this category yet.'**
+  String get checklist_emptyCategory;
+
+  /// No description provided for @checklist_addHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add something of your own...'**
+  String get checklist_addHint;
+
+  /// Badge on must-pack items.
+  ///
+  /// In en, this message translates to:
+  /// **'Essential'**
+  String get checklist_essential;
+
+  /// No description provided for @checklist_packedOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{checked} of {total} packed'**
+  String checklist_packedOf(int checked, int total);
+
+  /// No description provided for @checklist_catTravelEssentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel essentials'**
+  String get checklist_catTravelEssentials;
+
+  /// No description provided for @checklist_catClothingShoes.
+  ///
+  /// In en, this message translates to:
+  /// **'Clothing & shoes'**
+  String get checklist_catClothingShoes;
+
+  /// No description provided for @checklist_catGadgetsTech.
+  ///
+  /// In en, this message translates to:
+  /// **'Gadgets & tech'**
+  String get checklist_catGadgetsTech;
+
+  /// No description provided for @checklist_catToiletriesHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Toiletries & health'**
+  String get checklist_catToiletriesHealth;
+
+  /// No description provided for @checklist_catNiceToHaves.
+  ///
+  /// In en, this message translates to:
+  /// **'Nice-to-haves'**
+  String get checklist_catNiceToHaves;
 }
 
 class _AppLocalizationsDelegate

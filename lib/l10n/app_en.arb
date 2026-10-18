@@ -402,5 +402,104 @@
         "type": "String"
       }
     }
-  }
+  },
+  "common_edit": "Edit",
+  "common_delete": "Delete",
+  "common_save": "Save",
+  "toast_questDone": "+1 ✦ · quest done",
+  "@toast_questDone": {
+    "description": "Star award toast. The ✦ glyph replaces the word \"star\" (spec Phase 4)."
+  },
+  "toast_packed": "✦ Packed — nice",
+  "@toast_packed": {
+    "description": "Checklist toast (no stars awarded)."
+  },
+  "plan_eyebrow": "The plan",
+  "@plan_eyebrow": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "plan_daysTotal": "{count, plural, =1{1 day total} other{{count} days total}}",
+  "@plan_daysTotal": {
+    "description": "Follows home_questsPlanned after a ·.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "plan_noDates": "Add dates to this memory to start planning your days.",
+  "plan_dayN": "Day {day}",
+  "@plan_dayN": {
+    "description": "Day pager title / tab.",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "plan_doneCount": "{done} of {total} done",
+  "@plan_doneCount": {
+    "description": "Mono sub-line under the day title.",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "plan_addQuest": "+ Add a quest",
+  "plan_addQuestToDay": "+ Add a quest to Day {day}",
+  "@plan_addQuestToDay": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "plan_addTitle": "Add plan",
+  "plan_editTitle": "Edit plan",
+  "plan_nameLabel": "Name this plan",
+  "plan_nameHint": "e.g. Pack the car",
+  "plan_nameRequired": "Give this plan a name.",
+  "plan_timeLabel": "Time (optional)",
+  "plan_noTime": "No time set",
+  "plan_detailLabel": "Detail (optional)",
+  "plan_detailHint": "e.g. Cooler, blankets, hiking boots",
+  "manage_title": "Edit this memory",
+  "manage_nameLabel": "Name",
+  "@manage_nameLabel": {
+    "description": "The memory's name field."
+  },
+  "manage_rename": "Rename",
+  "manage_shiftHint": "Tap a date to shift it a day forward, hold to shift it back — quests move with it.",
+  "manage_cover": "Cover",
+  "@manage_cover": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "manage_notSet": "Not set",
+  "checklist_title": "Pack for the trip",
+  "checklist_emptyCategory": "No items in this category yet.",
+  "checklist_addHint": "Add something of your own...",
+  "checklist_essential": "Essential",
+  "@checklist_essential": {
+    "description": "Badge on must-pack items."
+  },
+  "checklist_packedOf": "{checked} of {total} packed",
+  "@checklist_packedOf": {
+    "placeholders": {
+      "checked": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "checklist_catTravelEssentials": "Travel essentials",
+  "checklist_catClothingShoes": "Clothing & shoes",
+  "checklist_catGadgetsTech": "Gadgets & tech",
+  "checklist_catToiletriesHealth": "Toiletries & health",
+  "checklist_catNiceToHaves": "Nice-to-haves"
 }

@@ -591,5 +591,153 @@
   "trip_deleteConsequence": "Будут удалены {photos} и {notes}. Заработанные звёзды останутся. Отменить это нельзя.",
   "@trip_deleteConsequence": {
     "x-review": "pending"
+  },
+  "common_edit": "Изменить",
+  "@common_edit": {
+    "x-review": "pending"
+  },
+  "common_delete": "Удалить",
+  "@common_delete": {
+    "x-review": "pending"
+  },
+  "common_save": "Сохранить",
+  "@common_save": {
+    "x-review": "pending"
+  },
+  "toast_questDone": "+1 ✦ · дело сделано",
+  "@toast_questDone": {
+    "x-review": "pending"
+  },
+  "toast_packed": "✦ Собрано — отлично",
+  "@toast_packed": {
+    "x-review": "pending"
+  },
+  "plan_eyebrow": "План",
+  "@plan_eyebrow": {
+    "x-review": "pending"
+  },
+  "plan_daysTotal": "{count, plural, one{всего {count} день} few{всего {count} дня} many{всего {count} дней} other{всего {count} дня}}",
+  "@plan_daysTotal": {
+    "x-review": "pending"
+  },
+  "plan_noDates": "Добавьте даты, чтобы начать планировать дни.",
+  "@plan_noDates": {
+    "x-review": "pending"
+  },
+  "plan_dayN": "День {day}",
+  "@plan_dayN": {
+    "x-review": "pending"
+  },
+  "plan_doneCount": "готово {done} из {total}",
+  "@plan_doneCount": {
+    "x-review": "pending"
+  },
+  "plan_addQuest": "+ Добавить дело",
+  "@plan_addQuest": {
+    "x-review": "pending"
+  },
+  "plan_addQuestToDay": "+ Добавить дело на день {day}",
+  "@plan_addQuestToDay": {
+    "x-review": "pending"
+  },
+  "plan_addTitle": "Новое дело",
+  "@plan_addTitle": {
+    "x-review": "pending"
+  },
+  "plan_editTitle": "Изменить дело",
+  "@plan_editTitle": {
+    "x-review": "pending"
+  },
+  "plan_nameLabel": "Название",
+  "@plan_nameLabel": {
+    "x-review": "pending"
+  },
+  "plan_nameHint": "например, Собрать машину",
+  "@plan_nameHint": {
+    "x-review": "pending"
+  },
+  "plan_nameRequired": "Дайте делу название.",
+  "@plan_nameRequired": {
+    "x-review": "pending"
+  },
+  "plan_timeLabel": "Время (необязательно)",
+  "@plan_timeLabel": {
+    "x-review": "pending"
+  },
+  "plan_noTime": "Время не задано",
+  "@plan_noTime": {
+    "x-review": "pending"
+  },
+  "plan_detailLabel": "Подробности (необязательно)",
+  "@plan_detailLabel": {
+    "x-review": "pending"
+  },
+  "plan_detailHint": "например, Холодильник, пледы, ботинки",
+  "@plan_detailHint": {
+    "x-review": "pending"
+  },
+  "manage_title": "Изменить воспоминание",
+  "@manage_title": {
+    "x-review": "pending"
+  },
+  "manage_nameLabel": "Название",
+  "@manage_nameLabel": {
+    "x-review": "pending"
+  },
+  "manage_rename": "Переименовать",
+  "@manage_rename": {
+    "x-review": "pending"
+  },
+  "manage_shiftHint": "Нажмите на дату, чтобы сдвинуть её на день вперёд, удерживайте — чтобы назад. Дела сдвинутся вместе с ней.",
+  "@manage_shiftHint": {
+    "x-review": "pending"
+  },
+  "manage_cover": "Обложка",
+  "@manage_cover": {
+    "x-review": "pending"
+  },
+  "manage_notSet": "Не задано",
+  "@manage_notSet": {
+    "x-review": "pending"
+  },
+  "checklist_title": "Соберитесь в поездку",
+  "@checklist_title": {
+    "x-review": "pending"
+  },
+  "checklist_emptyCategory": "В этой категории пока ничего нет.",
+  "@checklist_emptyCategory": {
+    "x-review": "pending"
+  },
+  "checklist_addHint": "Добавьте что-то своё…",
+  "@checklist_addHint": {
+    "x-review": "pending"
+  },
+  "checklist_essential": "Важное",
+  "@checklist_essential": {
+    "x-review": "pending"
+  },
+  "checklist_packedOf": "Собрано {checked} из {total}",
+  "@checklist_packedOf": {
+    "x-review": "pending"
+  },
+  "checklist_catTravelEssentials": "Самое нужное",
+  "@checklist_catTravelEssentials": {
+    "x-review": "pending"
+  },
+  "checklist_catClothingShoes": "Одежда и обувь",
+  "@checklist_catClothingShoes": {
+    "x-review": "pending"
+  },
+  "checklist_catGadgetsTech": "Гаджеты и техника",
+  "@checklist_catGadgetsTech": {
+    "x-review": "pending"
+  },
+  "checklist_catToiletriesHealth": "Гигиена и здоровье",
+  "@checklist_catToiletriesHealth": {
+    "x-review": "pending"
+  },
+  "checklist_catNiceToHaves": "Приятные мелочи",
+  "@checklist_catNiceToHaves": {
+    "x-review": "pending"
   }
 }
