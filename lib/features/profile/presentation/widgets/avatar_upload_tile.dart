@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -127,19 +128,19 @@ class _AvatarSourcePicker extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Update your photo',
+            context.l10n.profile_updatePhoto,
             style: AppTypography.screenTitle.copyWith(fontSize: 21),
           ),
           const SizedBox(height: AppSpacing.lg),
           _SourceTile(
             icon: Icons.photo_camera_outlined,
-            label: 'Take a photo',
+            label: context.l10n.trip_takePhoto,
             onTap: () => Navigator.of(context).pop(ImageSource.camera),
           ),
           const SizedBox(height: AppSpacing.sm),
           _SourceTile(
             icon: Icons.photo_library_outlined,
-            label: 'Choose from gallery',
+            label: context.l10n.trip_chooseFromGallery,
             onTap: () => Navigator.of(context).pop(ImageSource.gallery),
           ),
         ],

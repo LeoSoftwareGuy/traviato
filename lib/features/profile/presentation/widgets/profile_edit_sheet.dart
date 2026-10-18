@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/bottom_sheet_chrome.dart';
@@ -13,7 +14,6 @@ import '../../../trip/presentation/widgets/create_memory_field.dart';
 import '../controllers/profile_controller.dart';
 import '../mutations/profile_mutations.dart';
 import 'avatar_upload_tile.dart';
-import '../../../../core/l10n/context_l10n.dart';
 
 /// Username + bio + avatar (`docs/design/README.md` § 11's "Edit" entry
 /// point). No editing UI beyond these three fields — matches the sheet's
@@ -107,13 +107,13 @@ class _ProfileEditSheetState extends ConsumerState<ProfileEditSheet> {
             children: [
               Expanded(
                 child: Text(
-                  'Edit your profile',
+                  context.l10n.profile_editTitle,
                   style: AppTypography.screenTitle.copyWith(fontSize: 21),
                 ),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Done'),
+                child: Text(context.l10n.common_done),
               ),
             ],
           ),
@@ -127,22 +127,22 @@ class _ProfileEditSheetState extends ConsumerState<ProfileEditSheet> {
           ),
           const SizedBox(height: AppSpacing.lg),
           CreateMemoryField(
-            label: 'Name',
+            label: context.l10n.profile_nameLabel,
             controller: _username,
             trailing: TextButton(
               onPressed: _saveUsername,
-              child: const Text('Save'),
+              child: Text(context.l10n.common_save),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
           CreateMemoryField(
-            label: 'Bio',
+            label: context.l10n.profile_bioLabel,
             controller: _bio,
             maxLines: 3,
-            hintText: 'A line about your travels',
+            hintText: context.l10n.profile_bioHint,
             trailing: TextButton(
               onPressed: _saveBio,
-              child: const Text('Save'),
+              child: Text(context.l10n.common_save),
             ),
           ),
         ],

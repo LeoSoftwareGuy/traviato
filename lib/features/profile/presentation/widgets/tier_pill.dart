@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -18,9 +19,11 @@ class TierPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final pro = l10n.sub_proPill.toUpperCase();
     final label = isPro
-        ? (periodLabel != null ? 'PRO · $periodLabel' : 'PRO')
-        : 'FREE PLAN';
+        ? (periodLabel != null ? '$pro · $periodLabel' : pro)
+        : l10n.sub_freePlanPill.toUpperCase();
     final glyphColor = isPro ? AppColors.primary : AppColors.textTertiary;
 
     return Container(

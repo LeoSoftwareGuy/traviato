@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -22,14 +23,17 @@ class AchievementsGrid extends StatelessWidget {
         Row(
           children: [
             Text(
-              'ACHIEVEMENTS',
+              context.l10n.profile_achievements.toUpperCase(),
               style: AppTypography.mono.copyWith(
                 color: AppColors.textTertiary,
               ),
             ),
             const Spacer(),
             Text(
-              '$earnedCount/${achievements.length} earned',
+              context.l10n.profile_achievementsEarned(
+                earnedCount,
+                achievements.length,
+              ),
               style: AppTypography.chipLabel.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w600,

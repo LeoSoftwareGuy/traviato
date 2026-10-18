@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -9,8 +10,6 @@ import '../../../subscription/domain/entities/entitlement_entity.dart';
 import '../../domain/entities/profile_entity.dart';
 import 'profile_avatar.dart';
 import 'tier_pill.dart';
-
-final _joinedFormat = DateFormat('MMMM yyyy');
 
 /// Centred avatar + stars pill, name/@handle, bio, joined date, and the Edit
 /// entry point (`docs/design/README.md` § 11). `username` is the app's only
@@ -47,7 +46,7 @@ class ProfileHeader extends StatelessWidget {
           alignment: Alignment.centerRight,
           child: TextButton(
             onPressed: onEdit,
-            child: const Text('Edit'),
+            child: Text(context.l10n.common_edit),
           ),
         ),
         Stack(
@@ -63,7 +62,7 @@ class ProfileHeader extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          hasUsername ? username : 'Traveler',
+          hasUsername ? username : context.l10n.profile_defaultName,
           style: AppTypography.screenTitle.copyWith(fontSize: 25),
         ),
         if (hasUsername) ...[
@@ -88,7 +87,14 @@ class ProfileHeader extends StatelessWidget {
         ],
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'JOINED ${_joinedFormat.format(profile.createdAt).toUpperCase()}',
+          context.l10n
+              .profile_joined(
+                DateFormat(
+                  'MMMM y',
+                  context.l10n.localeName,
+                ).format(profile.createdAt),
+              )
+              .toUpperCase(),
           style: AppTypography.mono,
         ),
       ],

@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/router/route_constants.dart';
-
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
@@ -20,7 +20,6 @@ import '../widgets/profile_header.dart';
 import '../widgets/profile_stats_row.dart';
 import '../widgets/profile_top_bar.dart';
 import '../widgets/subscription_section.dart';
-import '../../../../core/l10n/context_l10n.dart';
 
 /// The full Profile screen (issue #96), replacing the auth feature's
 /// stopgap (#75) outright.
@@ -97,8 +96,9 @@ class _ProfileContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoggingOut = ref.watch(logoutMutation) is MutationPending;
     final periodLabel = switch (state.activeSubscription?.period) {
-      SubscriptionPeriod.annual => 'ANNUAL',
-      SubscriptionPeriod.monthly => 'MONTHLY',
+      SubscriptionPeriod.annual => context.l10n.sub_periodAnnual.toUpperCase(),
+      SubscriptionPeriod.monthly =>
+        context.l10n.sub_periodMonthly.toUpperCase(),
       null => null,
     };
 
@@ -140,7 +140,7 @@ class _ProfileContent extends ConsumerWidget {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Log out'),
+                : Text(context.l10n.profile_logOut),
           ),
         ),
       ],
