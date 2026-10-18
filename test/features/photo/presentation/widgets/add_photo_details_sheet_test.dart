@@ -120,7 +120,7 @@ void main() {
     await tester.pump(); // one frame: the mutation + toast are synchronous
 
     expect(photoRepo.addPhotoCallCount, 1);
-    expect(find.text('✦ +2 stars · photo logged'), findsOneWidget);
+    expect(find.text('+2 ✦ · photo logged'), findsOneWidget);
 
     await tester.pumpAndSettle(); // let the toast's own timer finish cleanly
   });

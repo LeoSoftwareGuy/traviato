@@ -1,4 +1,5 @@
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -15,19 +16,16 @@ Future<bool> resolveLocationPermission(BuildContext context) async {
   final shouldAsk = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Tag this photo with its location?'),
-      content: const Text(
-        '${AppConstants.appName} can save where a photo was taken so it shows up in your '
-        "journal and wrap-up. You can still add photos without this.",
-      ),
+      title: Text(context.l10n.photo_locationTitle),
+      content: Text(context.l10n.photo_locationBody(AppConstants.appName)),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Not now'),
+          child: Text(context.l10n.photo_notNow),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Allow'),
+          child: Text(context.l10n.photo_allow),
         ),
       ],
     ),
