@@ -3,18 +3,30 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/features/checklist/domain/entities/checklist_category.dart';
 import 'package:traviato/features/checklist/presentation/controllers/checklist_controller.dart';
+import 'package:traviato/features/checklist/domain/entities/checklist_suggestion_entity.dart';
 import 'package:traviato/features/checklist/presentation/providers/checklist_providers.dart';
+import 'package:traviato/features/settings/domain/app_language.dart';
+import 'package:traviato/features/settings/presentation/providers/settings_providers.dart';
 
 import '../../fakes/fake_checklist_repository.dart';
 
-ProviderContainer _buildContainer(FakeChecklistRepository repo) {
+ProviderContainer _buildContainer(
+  FakeChecklistRepository repo, {
+  AppLanguage language = AppLanguage.en,
+}) {
   return ProviderContainer(
     retry: (_, _) => null,
-    overrides: [checklistRepositoryProvider.overrideWithValue(repo)],
+    overrides: [
+      checklistRepositoryProvider.overrideWithValue(repo),
+      initialAppLanguageProvider.overrideWithValue(language),
+    ],
   );
 }
 
 void main() {
+  // The controller reads the UI locale (#243), which needs the binding.
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('populates from suggestions when the checklist is empty', () async {
     final repo = FakeChecklistRepository()
       ..itemsResult = const Right([])
@@ -181,5 +193,35 @@ void main() {
     final state = container.read(checklistControllerProvider('t1')).value!;
     expect(state.items, hasLength(1));
     expect(state.items.single.id, 'i2');
+  });
+
+  test('a new checklist is written in the UI language (#243)', () async {
+    final repo = FakeChecklistRepository()..itemsResult = const Right([]);
+    final container = _buildContainer(repo, language: AppLanguage.ru);
+    addTearDown(container.dispose);
+
+    await container.read(checklistControllerProvider('t1').future);
+
+    const passport = ChecklistSuggestionEntity(
+      id: 1,
+      code: 'passport',
+      title: 'Passport',
+      category: ChecklistCategory.travelEssentials,
+      isEssential: true,
+    );
+    expect(repo.lastTitleFor!(passport), 'Паспорт');
+    // A suggestion the app doesn't know keeps the catalog title.
+    expect(
+      repo.lastTitleFor!(
+        const ChecklistSuggestionEntity(
+          id: 2,
+          code: 'brand_new',
+          title: 'Brand new',
+          category: ChecklistCategory.niceToHaves,
+          isEssential: false,
+        ),
+      ),
+      'Brand new',
+    );
   });
 }

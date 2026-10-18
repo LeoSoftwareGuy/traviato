@@ -190,6 +190,29 @@ void main() {
   });
 
   group('ChecklistRepositoryImpl.populateFromSuggestions', () {
+    test('writes titles through titleFor (UI language, #243)', () async {
+      final remote = _FakeChecklistRemoteDataSource(
+        suggestions: [
+          const ChecklistSuggestionModel(
+            id: 1,
+            code: 'passport',
+            title: 'Passport',
+            category: ChecklistCategory.travelEssentials,
+            isEssential: true,
+          ),
+        ],
+      );
+      final repo = ChecklistRepositoryImpl(remote: remote);
+
+      await repo.populateFromSuggestions(
+        't1',
+        titleFor: (s) => s.code == 'passport' ? 'Паспорт' : s.title,
+      );
+
+      expect(remote.lastInsertedItems!.single.title, 'Паспорт');
+      expect(remote.lastInsertedItems!.single.isEssential, isTrue);
+    });
+
     test(
       'assigns a fresh id and a sequential per-category position to each '
       'suggestion',

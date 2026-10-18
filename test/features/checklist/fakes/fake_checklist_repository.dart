@@ -21,6 +21,7 @@ class FakeChecklistRepository implements ChecklistRepository {
   var toggleCallCount = 0;
   var deleteCallCount = 0;
   var populateCallCount = 0;
+  String Function(ChecklistSuggestionEntity suggestion)? lastTitleFor;
   int? lastAddPosition;
   String? lastDeletedId;
 
@@ -78,9 +79,11 @@ class FakeChecklistRepository implements ChecklistRepository {
 
   @override
   Future<Either<Failure, List<ChecklistItemEntity>>> populateFromSuggestions(
-    String tripId,
-  ) async {
+    String tripId, {
+    String Function(ChecklistSuggestionEntity suggestion)? titleFor,
+  }) async {
     populateCallCount++;
+    lastTitleFor = titleFor;
     return populateResult ?? const Right([]);
   }
 }

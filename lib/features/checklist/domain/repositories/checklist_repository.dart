@@ -27,7 +27,11 @@ abstract interface class ChecklistRepository {
   /// Copies the global suggestions catalog into `checklist_items` for
   /// [tripId] (client-side batch insert), one sequential `position` per
   /// category. Called once, on first open of an empty checklist.
+  ///
+  /// [titleFor] writes each item's title (the UI language, #243); without
+  /// it the catalog's own title is used.
   Future<Either<Failure, List<ChecklistItemEntity>>> populateFromSuggestions(
-    String tripId,
-  );
+    String tripId, {
+    String Function(ChecklistSuggestionEntity suggestion)? titleFor,
+  });
 }

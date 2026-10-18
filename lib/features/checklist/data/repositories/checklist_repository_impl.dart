@@ -102,8 +102,9 @@ class ChecklistRepositoryImpl implements ChecklistRepository {
 
   @override
   Future<Either<Failure, List<ChecklistItemEntity>>> populateFromSuggestions(
-    String tripId,
-  ) async {
+    String tripId, {
+    String Function(ChecklistSuggestionEntity suggestion)? titleFor,
+  }) async {
     try {
       final suggestions = await _remote.getSuggestions();
       final positionByCategory = <ChecklistCategory, int>{};
@@ -112,7 +113,7 @@ class ChecklistRepositoryImpl implements ChecklistRepository {
           ChecklistItemDraft(
             id: const Uuid().v4(),
             tripId: tripId,
-            title: suggestion.title,
+            title: titleFor?.call(suggestion) ?? suggestion.title,
             category: suggestion.category,
             isEssential: suggestion.isEssential,
             position: positionByCategory.update(

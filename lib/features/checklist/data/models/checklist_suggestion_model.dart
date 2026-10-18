@@ -7,6 +7,7 @@ class ChecklistSuggestionModel extends ChecklistSuggestionEntity {
     required super.title,
     required super.category,
     required super.isEssential,
+    super.code,
   });
 
   factory ChecklistSuggestionModel.fromJson(Map<String, dynamic> json) =>
@@ -15,5 +16,6 @@ class ChecklistSuggestionModel extends ChecklistSuggestionEntity {
         title: json['title'] as String,
         category: ChecklistCategory.fromDbValue(json['category'] as String),
         isEssential: json['is_essential'] as bool,
+        code: json['code'] as String? ?? '',
       );
 }
