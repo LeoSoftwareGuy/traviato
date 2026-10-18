@@ -25,11 +25,13 @@ Widget _app({
   required FakeAuthRepository auth,
   required FakeProfileRepository profile,
   AppLanguage initial = AppLanguage.system,
+  AppLanguage? dictation,
 }) => ProviderScope(
   overrides: [
     authRepositoryProvider.overrideWithValue(auth),
     profileRepositoryProvider.overrideWithValue(profile),
     initialAppLanguageProvider.overrideWithValue(initial),
+    initialDictationLanguageProvider.overrideWithValue(dictation),
   ],
   child: Consumer(
     builder: (context, ref, _) {
@@ -141,6 +143,38 @@ void main() {
   });
 
   group('profile sync on sign-in', () {
+    testWidgets('dictation language: a profile value is adopted (#218)', (
+      tester,
+    ) async {
+      profile.profileResult = Right(buildProfile(dictationLanguage: 'ru'));
+      await tester.pumpWidget(
+        _app(home: const SizedBox(), auth: auth, profile: profile),
+      );
+      auth.emit(_user);
+      await tester.pumpAndSettle();
+
+      final stored = await SharedPreferences.getInstance();
+      expect(stored.getString('dictation_language'), 'ru');
+      expect(profile.dictationLanguageUpdates, isEmpty);
+    });
+
+    testWidgets('dictation language: this device\'s choice is written up '
+        'to an empty profile (#218)', (tester) async {
+      profile.profileResult = Right(buildProfile());
+      await tester.pumpWidget(
+        _app(
+          home: const SizedBox(),
+          auth: auth,
+          profile: profile,
+          dictation: AppLanguage.et,
+        ),
+      );
+      auth.emit(_user);
+      await tester.pumpAndSettle();
+
+      expect(profile.dictationLanguageUpdates, ['et']);
+    });
+
     testWidgets('a language saved on the profile wins over the device', (
       tester,
     ) async {

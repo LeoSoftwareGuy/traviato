@@ -71,6 +71,70 @@ abstract class _$AppLanguageController extends $Notifier<AppLanguage> {
   }
 }
 
+/// The last-used dictation language (#218), separate from the UI
+/// language. `null` until the user picks one; never changes on its own.
+
+@ProviderFor(DictationLanguageController)
+final dictationLanguageControllerProvider =
+    DictationLanguageControllerProvider._();
+
+/// The last-used dictation language (#218), separate from the UI
+/// language. `null` until the user picks one; never changes on its own.
+final class DictationLanguageControllerProvider
+    extends $NotifierProvider<DictationLanguageController, AppLanguage?> {
+  /// The last-used dictation language (#218), separate from the UI
+  /// language. `null` until the user picks one; never changes on its own.
+  DictationLanguageControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'dictationLanguageControllerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$dictationLanguageControllerHash();
+
+  @$internal
+  @override
+  DictationLanguageController create() => DictationLanguageController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AppLanguage? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AppLanguage?>(value),
+    );
+  }
+}
+
+String _$dictationLanguageControllerHash() =>
+    r'ca2f8cb23f09339989bb59344db326097c73f130';
+
+/// The last-used dictation language (#218), separate from the UI
+/// language. `null` until the user picks one; never changes on its own.
+
+abstract class _$DictationLanguageController extends $Notifier<AppLanguage?> {
+  AppLanguage? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AppLanguage?, AppLanguage?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AppLanguage?, AppLanguage?>,
+              AppLanguage?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 /// What the choice resolves to right now — `system` becomes the device's
 /// first supported language (or English).
 
@@ -167,8 +231,8 @@ final class AppLocaleProvider
 
 String _$appLocaleHash() => r'270f5499bf301b8b3b94e7d4f614f89e19b398ae';
 
-/// Reconciles the device choice with `profiles.language` on sign-in
-/// (#236): a value on the profile wins (it's the user's choice from
+/// Reconciles the device choices with `profiles.language` (#236) and
+/// `profiles.dictation_language` (#218) on sign-in: a value on the profile wins (it's the user's choice from
 /// another device); otherwise this device's choice is written up.
 /// Instantiated from `TraviatoApp.build()`, like the other lifecycle
 /// controllers.
@@ -177,15 +241,15 @@ String _$appLocaleHash() => r'270f5499bf301b8b3b94e7d4f614f89e19b398ae';
 final languageProfileSyncControllerProvider =
     LanguageProfileSyncControllerProvider._();
 
-/// Reconciles the device choice with `profiles.language` on sign-in
-/// (#236): a value on the profile wins (it's the user's choice from
+/// Reconciles the device choices with `profiles.language` (#236) and
+/// `profiles.dictation_language` (#218) on sign-in: a value on the profile wins (it's the user's choice from
 /// another device); otherwise this device's choice is written up.
 /// Instantiated from `TraviatoApp.build()`, like the other lifecycle
 /// controllers.
 final class LanguageProfileSyncControllerProvider
     extends $NotifierProvider<LanguageProfileSyncController, void> {
-  /// Reconciles the device choice with `profiles.language` on sign-in
-  /// (#236): a value on the profile wins (it's the user's choice from
+  /// Reconciles the device choices with `profiles.language` (#236) and
+  /// `profiles.dictation_language` (#218) on sign-in: a value on the profile wins (it's the user's choice from
   /// another device); otherwise this device's choice is written up.
   /// Instantiated from `TraviatoApp.build()`, like the other lifecycle
   /// controllers.
@@ -217,10 +281,10 @@ final class LanguageProfileSyncControllerProvider
 }
 
 String _$languageProfileSyncControllerHash() =>
-    r'cf8297ae7a932228e91937bad0f324633513042d';
+    r'cda202f95c207f0b8252208b7d068f76ba4ea199';
 
-/// Reconciles the device choice with `profiles.language` on sign-in
-/// (#236): a value on the profile wins (it's the user's choice from
+/// Reconciles the device choices with `profiles.language` (#236) and
+/// `profiles.dictation_language` (#218) on sign-in: a value on the profile wins (it's the user's choice from
 /// another device); otherwise this device's choice is written up.
 /// Instantiated from `TraviatoApp.build()`, like the other lifecycle
 /// controllers.
