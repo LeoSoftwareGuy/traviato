@@ -10,6 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/router/app_router.dart';
 import 'core/l10n/context_l10n.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/app_typography.dart';
 import 'features/auth/presentation/widgets/auth_link_failure_listener.dart';
 import 'features/notifications/presentation/controllers/bonus_notifications_lifecycle_controller.dart';
 import 'features/settings/data/app_language_prefs.dart';
@@ -97,6 +98,9 @@ class TraviatoApp extends ConsumerWidget {
     // sign-in (#236).
     ref.watch(languageProfileSyncControllerProvider);
     final locale = ref.watch(appLocaleProvider);
+    // Serif per UI language (Literata for Russian, #239) — set before the
+    // theme and tree build below read it.
+    AppTypography.useLocale(locale);
     return MaterialApp.router(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,

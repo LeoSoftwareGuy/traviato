@@ -3,14 +3,64 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 
-/// Typography tokens: Fraunces (serif) for headings, Roboto (sans) for body
+/// Typography tokens: Fraunces (serif; Literata in Russian, #239) for headings, Roboto (sans) for body
 /// and labels — matching the Figma "Leo's team library" frames, plus the
 /// redesign handoff's JetBrains Mono label voice and additional serif roles
 /// (see `docs/design/README.md` § Typography).
 abstract class AppTypography {
+  /// The bundled Cyrillic-capable serif (#239).
+  static const literata = 'Literata';
+
+  static var _serifIsLiterata = false;
+
+  /// Picks the serif for the UI language (spec Phase 3): Literata for every
+  /// serif role in Russian — Latin included, so no line mixes two serifs —
+  /// and Fraunces otherwise. Called by the app root whenever the locale
+  /// changes, before the tree rebuilds.
+  static void useLocale(Locale locale) =>
+      _serifIsLiterata = locale.languageCode == 'ru';
+
+  /// Whether serif roles currently render in Literata.
+  static bool get serifIsLiterata => _serifIsLiterata;
+
+  /// A serif style in the current locale's serif. Every serif falls back to
+  /// Literata, so Russian user text (a note, a memory name) under an
+  /// English or Estonian UI renders in Literata rather than the system
+  /// serif.
+  static TextStyle serif({
+    double? fontSize,
+    double? height,
+    FontWeight fontWeight = FontWeight.w400,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    Color? color,
+  }) {
+    if (_serifIsLiterata) {
+      return TextStyle(
+        fontFamily: literata,
+        fontSize: fontSize,
+        height: height,
+        fontWeight: fontWeight,
+        fontStyle: fontStyle,
+        letterSpacing: letterSpacing,
+        color: color,
+        // A variable font: Flutter doesn't map fontWeight onto `wght`.
+        fontVariations: [FontVariation.weight(fontWeight.value.toDouble())],
+      );
+    }
+    return GoogleFonts.fraunces(
+      fontSize: fontSize,
+      height: height,
+      fontWeight: fontWeight,
+      fontStyle: fontStyle,
+      letterSpacing: letterSpacing,
+      color: color,
+    ).copyWith(fontFamilyFallback: const [literata]);
+  }
+
   /// Hero headline (landing, wrap-up). Callers wrap the emphasis span in
   /// `.copyWith(fontStyle: FontStyle.italic, color: AppColors.primaryLight)`.
-  static TextStyle get heroHeadline => GoogleFonts.fraunces(
+  static TextStyle get heroHeadline => serif(
     fontSize: 40,
     height: 1.05,
     fontWeight: FontWeight.w400,
@@ -19,7 +69,7 @@ abstract class AppTypography {
   );
 
   /// Screen title (Fraunces 26–30/1.15 in the spec).
-  static TextStyle get screenTitle => GoogleFonts.fraunces(
+  static TextStyle get screenTitle => serif(
     fontSize: 28,
     height: 1.15,
     fontWeight: FontWeight.w400,
@@ -27,7 +77,7 @@ abstract class AppTypography {
   );
 
   /// Big number: totals, stats, day counts (Fraunces 21–42/1).
-  static TextStyle get bigNumber => GoogleFonts.fraunces(
+  static TextStyle get bigNumber => serif(
     fontSize: 30,
     height: 1.0,
     fontWeight: FontWeight.w400,
@@ -35,7 +85,7 @@ abstract class AppTypography {
   );
 
   /// Italic pull-quote / narrative copy.
-  static TextStyle get pullQuote => GoogleFonts.fraunces(
+  static TextStyle get pullQuote => serif(
     fontSize: 15,
     height: 1.7,
     fontWeight: FontWeight.w400,
@@ -62,14 +112,14 @@ abstract class AppTypography {
     color: AppColors.textTertiary,
   );
 
-  static TextStyle get displaySerif => GoogleFonts.fraunces(
+  static TextStyle get displaySerif => serif(
     fontSize: 22,
     height: 33 / 22,
     fontWeight: FontWeight.w400,
     color: AppColors.textPrimary,
   );
 
-  static TextStyle get headlineSerif => GoogleFonts.fraunces(
+  static TextStyle get headlineSerif => serif(
     fontSize: 20,
     height: 30 / 20,
     fontWeight: FontWeight.w400,
@@ -128,7 +178,7 @@ abstract class AppTypography {
   );
 
   /// Note body, old and new: Fraunces italic 15 on a 30px line.
-  static TextStyle get noteBody => GoogleFonts.fraunces(
+  static TextStyle get noteBody => serif(
     fontSize: 15,
     height: noteLineHeight / 15,
     fontWeight: FontWeight.w400,
@@ -137,7 +187,7 @@ abstract class AppTypography {
   );
 
   /// Writing-page title.
-  static TextStyle get noteTitle => GoogleFonts.fraunces(
+  static TextStyle get noteTitle => serif(
     fontSize: 23,
     height: 1.2,
     fontWeight: FontWeight.w400,
@@ -157,7 +207,7 @@ abstract class AppTypography {
   );
 
   /// The dock's "Aa" button glyph.
-  static TextStyle get noteDockAa => GoogleFonts.fraunces(
+  static TextStyle get noteDockAa => serif(
     fontSize: 15,
     height: 1,
     fontWeight: FontWeight.w600,
@@ -199,7 +249,7 @@ abstract class AppTypography {
   );
 
   /// Title-page title — Fraunces 32/1.15, centred by caller.
-  static TextStyle get titlePageTitle => GoogleFonts.fraunces(
+  static TextStyle get titlePageTitle => serif(
     fontSize: 32,
     height: 1.15,
     fontWeight: FontWeight.w400,
@@ -207,7 +257,7 @@ abstract class AppTypography {
   );
 
   /// "128 words · 5 photos" under the polaroid.
-  static TextStyle get titlePageMeta => GoogleFonts.fraunces(
+  static TextStyle get titlePageMeta => serif(
     fontSize: 13,
     height: 1.4,
     fontWeight: FontWeight.w400,

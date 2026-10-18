@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_typography.dart';
 
 /// Color/font token reconciliation for the Wrap-Up Film
 /// (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §2) against this app's actual theme —
@@ -36,7 +37,7 @@ abstract class WrapUpFilmText {
     double letterSpacing = 0,
     bool italic = false,
     FontWeight weight = FontWeight.w300,
-  }) => GoogleFonts.fraunces(
+  }) => AppTypography.serif(
     fontSize: size,
     height: height,
     letterSpacing: letterSpacing,

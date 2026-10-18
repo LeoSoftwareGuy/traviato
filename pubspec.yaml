@@ -86,6 +86,16 @@ flutter:
   uses-material-design: true
   generate: true
 
+  # Literata (OFL, google/fonts; licence in assets/fonts/Literata-OFL.txt):
+  # the serif for Russian, since Fraunces has no Cyrillic (#239). Bundled,
+  # not fetched at runtime. Variable fonts — weight goes via FontVariation.
+  fonts:
+    - family: Literata
+      fonts:
+        - asset: assets/fonts/Literata[opsz,wght].ttf
+        - asset: assets/fonts/Literata-Italic[opsz,wght].ttf
+          style: italic
+
   assets:
     - .env
     - assets/images/guest/

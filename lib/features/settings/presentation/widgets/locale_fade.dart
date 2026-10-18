@@ -1,7 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 /// Softly fades the app back in whenever [locale] changes (#236 / spec 1c),
-/// so a language switch reads as a 200ms crossfade.
+/// so a language switch reads as a 200ms crossfade, and re-renders every
+/// widget so per-locale styles (the Russian serif, #239) apply at once.
 ///
 /// It fades the *same* subtree in place rather than swapping it out with a
 /// keyed `AnimatedSwitcher`: re-keying the app root would remount the
@@ -33,8 +34,18 @@ class _LocaleFadeState extends State<LocaleFade>
   @override
   void didUpdateWidget(LocaleFade oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.locale != widget.locale &&
-        !(MediaQuery.maybeDisableAnimationsOf(context) ?? false)) {
+    if (oldWidget.locale == widget.locale) return;
+    // Styles come from static `AppTypography` getters, and the serif changes
+    // with the locale (#239). Widgets that don't depend on Localizations
+    // wouldn't rebuild on their own, so dirty the whole subtree once — in
+    // place, without remounting anything.
+    void rebuild(Element element) {
+      element.markNeedsBuild();
+      element.visitChildren(rebuild);
+    }
+
+    (context as Element).visitChildren(rebuild);
+    if (!(MediaQuery.maybeDisableAnimationsOf(context) ?? false)) {
       _controller.forward(from: 0);
     }
   }
