@@ -24,3 +24,15 @@ void setScreenSize(
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 }
+
+/// [localizedApp] for pages that need a router (`context.pop`, named routes).
+Widget localizedRouterApp({
+  required Locale locale,
+  required RouterConfig<Object> routerConfig,
+}) => MaterialApp.router(
+  theme: AppTheme.dark,
+  locale: locale,
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  routerConfig: routerConfig,
+);
