@@ -7,6 +7,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/bottom_sheet_chrome.dart';
 import '../controllers/bonus_tray_state.dart';
+import 'bonus_template_text.dart';
 
 /// Task detail popup — reward + prompt, "Open camera" / "Maybe later"
 /// (issue #64 AC). Purely presentational: resolves to `true` when the user
@@ -30,7 +31,7 @@ class BonusTaskPopupSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final detail = task.template.detail;
+    final detail = bonusTemplateDetail(context.l10n, task.template);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.xl,
@@ -46,7 +47,7 @@ class BonusTaskPopupSheet extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  task.template.title,
+                  bonusTemplateTitle(context.l10n, task.template),
                   style: AppTypography.screenTitle.copyWith(fontSize: 21),
                 ),
               ),

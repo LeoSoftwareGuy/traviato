@@ -6,6 +6,7 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/bonus_task_template_entity.dart';
+import 'bonus_template_text.dart';
 
 /// The single opt-in stretch offer shown once both dailies are done —
 /// dashed border, visibly optional, never auto-inserted (functionality.md
@@ -45,7 +46,10 @@ class StretchOfferCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(template.title, style: AppTypography.bodyEmphasis),
+                    Text(
+                      bonusTemplateTitle(context.l10n, template),
+                      style: AppTypography.bodyEmphasis,
+                    ),
                   ],
                 ),
               ),

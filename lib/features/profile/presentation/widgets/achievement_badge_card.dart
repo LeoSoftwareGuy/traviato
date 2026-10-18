@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/achievement_entity.dart';
 import 'achievement_icons.dart';
+import 'achievement_text.dart';
 
 /// One achievement tile — filled/earned or dimmed/locked-with-progress
 /// (`docs/design/README.md` § 11). Icon per badge comes from
@@ -54,7 +56,7 @@ class AchievementBadgeCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            achievement.title,
+            achievementTitle(context.l10n, achievement),
             style: AppTypography.headlineSerif.copyWith(
               fontSize: 15,
               height: 1.2,
@@ -63,7 +65,7 @@ class AchievementBadgeCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            achievement.description,
+            achievementDescription(context.l10n, achievement),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: AppTypography.caption.copyWith(letterSpacing: 0),

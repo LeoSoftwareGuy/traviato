@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/bonus_task_template_entity.dart';
 import '../controllers/bonus_tray_state.dart';
+import 'bonus_template_text.dart';
 
 IconData _iconFor(BonusTaskKind kind) => switch (kind) {
   BonusTaskKind.starter => Icons.auto_awesome_outlined,
@@ -57,7 +59,7 @@ class BonusTaskTile extends StatelessWidget {
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
-                task.template.title,
+                bonusTemplateTitle(context.l10n, task.template),
                 style: AppTypography.bodyEmphasis.copyWith(
                   color: completed
                       ? AppColors.textTertiary

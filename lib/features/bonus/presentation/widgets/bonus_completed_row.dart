@@ -6,6 +6,7 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../controllers/bonus_tray_state.dart';
+import 'bonus_template_text.dart';
 
 /// A past-days completion row for the COMPLETED history section —
 /// "COMPLETED · DAY N" per issue #64 AC.
@@ -33,7 +34,7 @@ class BonusCompletedRow extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
-              task.template.title,
+              bonusTemplateTitle(context.l10n, task.template),
               style: AppTypography.chipLabel.copyWith(
                 color: AppColors.textSecondary,
               ),
