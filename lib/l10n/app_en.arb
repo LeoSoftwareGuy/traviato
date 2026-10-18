@@ -1416,5 +1416,505 @@
         "type": "int"
       }
     }
+  },
+  "content_bonus_worst_photo_of_day_title": "The worst photo of the day",
+  "@content_bonus_worst_photo_of_day_title": {
+    "description": "Seeded bonus task title (DB code worst_photo_of_day)."
+  },
+  "content_bonus_worst_photo_of_day_detail": "Not your best angle. Not your best moment. That's the point.",
+  "@content_bonus_worst_photo_of_day_detail": {
+    "description": "Seeded bonus task detail (DB code worst_photo_of_day)."
+  },
+  "content_bonus_something_free_title": "Find something free",
+  "@content_bonus_something_free_title": {
+    "description": "Seeded bonus task title (DB code something_free)."
+  },
+  "content_bonus_something_free_detail": "A view, a smile, a street performance — snap whatever cost you nothing today.",
+  "@content_bonus_something_free_detail": {
+    "description": "Seeded bonus task detail (DB code something_free)."
+  },
+  "content_bonus_local_snack_title": "Try a snack you can't get at home",
+  "@content_bonus_local_snack_title": {
+    "description": "Seeded bonus task title (DB code local_snack)."
+  },
+  "content_bonus_local_snack_detail": "Bonus points if you can't pronounce it.",
+  "@content_bonus_local_snack_detail": {
+    "description": "Seeded bonus task detail (DB code local_snack)."
+  },
+  "content_bonus_menu_mystery_title": "Order something you can't translate",
+  "@content_bonus_menu_mystery_title": {
+    "description": "Seeded bonus task title (DB code menu_mystery)."
+  },
+  "content_bonus_menu_mystery_detail": "Point at the menu and commit.",
+  "@content_bonus_menu_mystery_detail": {
+    "description": "Seeded bonus task detail (DB code menu_mystery)."
+  },
+  "content_bonus_stranger_kindness_title": "Capture a small kindness from a stranger",
+  "@content_bonus_stranger_kindness_title": {
+    "description": "Seeded bonus task title (DB code stranger_kindness)."
+  },
+  "content_bonus_stranger_kindness_detail": "A wave, a smile, directions when you were lost.",
+  "@content_bonus_stranger_kindness_detail": {
+    "description": "Seeded bonus task detail (DB code stranger_kindness)."
+  },
+  "content_bonus_overheard_title": "Photograph what you're listening to",
+  "@content_bonus_overheard_title": {
+    "description": "Seeded bonus task title (DB code overheard)."
+  },
+  "content_bonus_overheard_detail": "Street music, a language you don't speak, the sound of somewhere new.",
+  "@content_bonus_overheard_detail": {
+    "description": "Seeded bonus task detail (DB code overheard)."
+  },
+  "content_bonus_souvenir_hunt_title": "Photograph the tackiest souvenir you can find",
+  "@content_bonus_souvenir_hunt_title": {
+    "description": "Seeded bonus task title (DB code souvenir_hunt)."
+  },
+  "content_bonus_souvenir_hunt_detail": "You don't have to buy it. Just admire it.",
+  "@content_bonus_souvenir_hunt_detail": {
+    "description": "Seeded bonus task detail (DB code souvenir_hunt)."
+  },
+  "content_bonus_sky_moment_title": "Catch the sky doing something",
+  "@content_bonus_sky_moment_title": {
+    "description": "Seeded bonus task title (DB code sky_moment)."
+  },
+  "content_bonus_sky_moment_detail": "Sunset, storm clouds, an unreasonable number of stars.",
+  "@content_bonus_sky_moment_detail": {
+    "description": "Seeded bonus task detail (DB code sky_moment)."
+  },
+  "content_bonus_local_transport_title": "Document how you got around today",
+  "@content_bonus_local_transport_title": {
+    "description": "Seeded bonus task title (DB code local_transport)."
+  },
+  "content_bonus_local_transport_detail": "Bus, bike, boat, blistered feet — all valid.",
+  "@content_bonus_local_transport_detail": {
+    "description": "Seeded bonus task detail (DB code local_transport)."
+  },
+  "content_bonus_unexpected_detour_title": "Snap a detour you didn't plan",
+  "@content_bonus_unexpected_detour_title": {
+    "description": "Seeded bonus task title (DB code unexpected_detour)."
+  },
+  "content_bonus_unexpected_detour_detail": "The wrong turn that turned out fine.",
+  "@content_bonus_unexpected_detour_detail": {
+    "description": "Seeded bonus task detail (DB code unexpected_detour)."
+  },
+  "content_bonus_color_hunt_title": "Find the most colorful thing around you",
+  "@content_bonus_color_hunt_title": {
+    "description": "Seeded bonus task title (DB code color_hunt)."
+  },
+  "content_bonus_color_hunt_detail": "A wall, a market stall, someone's questionable fashion choice.",
+  "@content_bonus_color_hunt_detail": {
+    "description": "Seeded bonus task detail (DB code color_hunt)."
+  },
+  "content_bonus_closeup_texture_title": "Get up close on a texture",
+  "@content_bonus_closeup_texture_title": {
+    "description": "Seeded bonus task title (DB code closeup_texture)."
+  },
+  "content_bonus_closeup_texture_detail": "Cobblestones, tree bark, the weird pattern on your hotel bedspread.",
+  "@content_bonus_closeup_texture_detail": {
+    "description": "Seeded bonus task detail (DB code closeup_texture)."
+  },
+  "content_bonus_reflection_shot_title": "Catch a reflection",
+  "@content_bonus_reflection_shot_title": {
+    "description": "Seeded bonus task title (DB code reflection_shot)."
+  },
+  "content_bonus_reflection_shot_detail": "Water, glass, a suspiciously shiny spoon.",
+  "@content_bonus_reflection_shot_detail": {
+    "description": "Seeded bonus task detail (DB code reflection_shot)."
+  },
+  "content_bonus_halfway_selfie_title": "Take a halfway-there selfie",
+  "@content_bonus_halfway_selfie_title": {
+    "description": "Seeded bonus task title (DB code halfway_selfie)."
+  },
+  "content_bonus_halfway_selfie_detail": "Tired eyes optional. Big smile mandatory.",
+  "@content_bonus_halfway_selfie_detail": {
+    "description": "Seeded bonus task detail (DB code halfway_selfie)."
+  },
+  "content_bonus_local_hangout_title": "Photograph where the locals actually hang out",
+  "@content_bonus_local_hangout_title": {
+    "description": "Seeded bonus task title (DB code local_hangout)."
+  },
+  "content_bonus_local_hangout_detail": "Not the postcard spot — the real one.",
+  "@content_bonus_local_hangout_detail": {
+    "description": "Seeded bonus task detail (DB code local_hangout)."
+  },
+  "content_bonus_comfort_food_title": "Snap the meal that felt like home",
+  "@content_bonus_comfort_food_title": {
+    "description": "Seeded bonus task title (DB code comfort_food)."
+  },
+  "content_bonus_comfort_food_detail": "Even a thousand miles from it.",
+  "@content_bonus_comfort_food_detail": {
+    "description": "Seeded bonus task detail (DB code comfort_food)."
+  },
+  "content_bonus_new_skill_title": "Try something you've never done before",
+  "@content_bonus_new_skill_title": {
+    "description": "Seeded bonus task title (DB code new_skill)."
+  },
+  "content_bonus_new_skill_detail": "A dance move, a dish, a language you're butchering on purpose.",
+  "@content_bonus_new_skill_detail": {
+    "description": "Seeded bonus task detail (DB code new_skill)."
+  },
+  "content_bonus_market_haul_title": "Document a market or shop visit",
+  "@content_bonus_market_haul_title": {
+    "description": "Seeded bonus task title (DB code market_haul)."
+  },
+  "content_bonus_market_haul_detail": "What did you almost buy and talk yourself out of?",
+  "@content_bonus_market_haul_detail": {
+    "description": "Seeded bonus task detail (DB code market_haul)."
+  },
+  "content_bonus_quiet_moment_title": "Capture a quiet moment mid-trip",
+  "@content_bonus_quiet_moment_title": {
+    "description": "Seeded bonus task title (DB code quiet_moment)."
+  },
+  "content_bonus_quiet_moment_detail": "Not everything has to be a highlight reel.",
+  "@content_bonus_quiet_moment_detail": {
+    "description": "Seeded bonus task detail (DB code quiet_moment)."
+  },
+  "content_bonus_view_from_bed_title": "Photograph the view from where you're staying",
+  "@content_bonus_view_from_bed_title": {
+    "description": "Seeded bonus task title (DB code view_from_bed)."
+  },
+  "content_bonus_view_from_bed_detail": "Balcony, window, or just a very honest ceiling.",
+  "@content_bonus_view_from_bed_detail": {
+    "description": "Seeded bonus task detail (DB code view_from_bed)."
+  },
+  "content_bonus_unplanned_friend_title": "Snap someone you met along the way",
+  "@content_bonus_unplanned_friend_title": {
+    "description": "Seeded bonus task title (DB code unplanned_friend)."
+  },
+  "content_bonus_unplanned_friend_detail": "A new friend, a fellow traveler, a very opinionated local cat.",
+  "@content_bonus_unplanned_friend_detail": {
+    "description": "Seeded bonus task detail (DB code unplanned_friend)."
+  },
+  "content_bonus_touchdown_title": "Mark the moment you arrived",
+  "@content_bonus_touchdown_title": {
+    "description": "Seeded bonus task title (DB code touchdown)."
+  },
+  "content_bonus_touchdown_detail": "Airport sign, train platform, that first breath of new air.",
+  "@content_bonus_touchdown_detail": {
+    "description": "Seeded bonus task detail (DB code touchdown)."
+  },
+  "content_bonus_first_impression_title": "Snap your very first impression",
+  "@content_bonus_first_impression_title": {
+    "description": "Seeded bonus task title (DB code first_impression)."
+  },
+  "content_bonus_first_impression_detail": "The view, the smell, the chaos — capture it before it becomes normal.",
+  "@content_bonus_first_impression_detail": {
+    "description": "Seeded bonus task detail (DB code first_impression)."
+  },
+  "content_bonus_unpacking_ritual_title": "Photograph your unpacking ritual",
+  "@content_bonus_unpacking_ritual_title": {
+    "description": "Seeded bonus task title (DB code unpacking_ritual)."
+  },
+  "content_bonus_unpacking_ritual_detail": "However messy. However fast.",
+  "@content_bonus_unpacking_ritual_detail": {
+    "description": "Seeded bonus task detail (DB code unpacking_ritual)."
+  },
+  "content_bonus_last_look_title": "Take one last look before you go",
+  "@content_bonus_last_look_title": {
+    "description": "Seeded bonus task title (DB code last_look)."
+  },
+  "content_bonus_last_look_detail": "The view, the room, the spot you'll miss most.",
+  "@content_bonus_last_look_detail": {
+    "description": "Seeded bonus task detail (DB code last_look)."
+  },
+  "content_bonus_farewell_meal_title": "Capture your final meal here",
+  "@content_bonus_farewell_meal_title": {
+    "description": "Seeded bonus task title (DB code farewell_meal)."
+  },
+  "content_bonus_farewell_meal_detail": "Make it count — or make it whatever's left in the fridge.",
+  "@content_bonus_farewell_meal_detail": {
+    "description": "Seeded bonus task detail (DB code farewell_meal)."
+  },
+  "content_bonus_souvenir_final_title": "Photograph what you're bringing home",
+  "@content_bonus_souvenir_final_title": {
+    "description": "Seeded bonus task title (DB code souvenir_final)."
+  },
+  "content_bonus_souvenir_final_detail": "Physical or otherwise.",
+  "@content_bonus_souvenir_final_detail": {
+    "description": "Seeded bonus task detail (DB code souvenir_final)."
+  },
+  "content_bonus_snap_anything_title": "Snap anything at all",
+  "@content_bonus_snap_anything_title": {
+    "description": "Seeded bonus task title (DB code snap_anything)."
+  },
+  "content_bonus_snap_anything_detail": "Seriously. Anything. This one's just to get you started.",
+  "@content_bonus_snap_anything_detail": {
+    "description": "Seeded bonus task detail (DB code snap_anything)."
+  },
+  "content_bonus_snap_suitecase_title": "Snap your packing process",
+  "@content_bonus_snap_suitecase_title": {
+    "description": "Seeded bonus task title (DB code snap_suitecase)."
+  },
+  "content_bonus_snap_suitecase_detail": "Document the chaos of getting ready for your trip.",
+  "@content_bonus_snap_suitecase_detail": {
+    "description": "Seeded bonus task detail (DB code snap_suitecase)."
+  },
+  "content_bonus_stranger_portrait_title": "Ask a stranger if you can take their photo",
+  "@content_bonus_stranger_portrait_title": {
+    "description": "Seeded bonus task title (DB code stranger_portrait)."
+  },
+  "content_bonus_stranger_portrait_detail": "Bonus vulnerability points. They'll probably say yes.",
+  "@content_bonus_stranger_portrait_detail": {
+    "description": "Seeded bonus task detail (DB code stranger_portrait)."
+  },
+  "content_bonus_no_phone_hour_title": "Go an hour without checking your phone, then tell us what you noticed",
+  "@content_bonus_no_phone_hour_title": {
+    "description": "Seeded bonus task title (DB code no_phone_hour)."
+  },
+  "content_bonus_no_phone_hour_detail": "Write it, don't just remember it.",
+  "@content_bonus_no_phone_hour_detail": {
+    "description": "Seeded bonus task detail (DB code no_phone_hour)."
+  },
+  "content_bonus_try_the_dare_title": "Do the thing you keep talking yourself out of",
+  "@content_bonus_try_the_dare_title": {
+    "description": "Seeded bonus task title (DB code try_the_dare)."
+  },
+  "content_bonus_try_the_dare_detail": "You know the one.",
+  "@content_bonus_try_the_dare_detail": {
+    "description": "Seeded bonus task detail (DB code try_the_dare)."
+  },
+  "content_bonus_milestone_week_one_title": "One week in — how has this trip changed you already?",
+  "@content_bonus_milestone_week_one_title": {
+    "description": "Seeded bonus task title (DB code milestone_week_one)."
+  },
+  "content_bonus_milestone_week_one_detail": "A photo and a moment of honesty.",
+  "@content_bonus_milestone_week_one_detail": {
+    "description": "Seeded bonus task detail (DB code milestone_week_one)."
+  },
+  "content_bonus_milestone_two_weeks_title": "Two weeks deep — what do you know now that you didn't at the start?",
+  "@content_bonus_milestone_two_weeks_title": {
+    "description": "Seeded bonus task title (DB code milestone_two_weeks)."
+  },
+  "content_bonus_milestone_two_weeks_detail": "Capture the moment it clicked.",
+  "@content_bonus_milestone_two_weeks_detail": {
+    "description": "Seeded bonus task detail (DB code milestone_two_weeks)."
+  },
+  "content_bonus_milestone_three_weeks_title": "Three weeks out — what will you miss most when this ends?",
+  "@content_bonus_milestone_three_weeks_title": {
+    "description": "Seeded bonus task title (DB code milestone_three_weeks)."
+  },
+  "content_bonus_milestone_three_weeks_detail": "Say it before you have to.",
+  "@content_bonus_milestone_three_weeks_detail": {
+    "description": "Seeded bonus task detail (DB code milestone_three_weeks)."
+  },
+  "content_bonus_streak_saver_checkin_title": "Just check in",
+  "@content_bonus_streak_saver_checkin_title": {
+    "description": "Seeded bonus task title (DB code streak_saver_checkin)."
+  },
+  "content_bonus_streak_saver_checkin_detail": "No pressure, no theme — one photo of wherever you are right now.",
+  "@content_bonus_streak_saver_checkin_detail": {
+    "description": "Seeded bonus task detail (DB code streak_saver_checkin)."
+  },
+  "content_achievement_first_adventure_title": "First Adventure",
+  "@content_achievement_first_adventure_title": {
+    "description": "Achievement title (DB code first_adventure)."
+  },
+  "content_achievement_first_adventure_description": "Log your first memory.",
+  "@content_achievement_first_adventure_description": {
+    "description": "Achievement description (DB code first_adventure)."
+  },
+  "content_achievement_globetrotter_title": "World Wanderer",
+  "@content_achievement_globetrotter_title": {
+    "description": "Achievement title (DB code globetrotter)."
+  },
+  "content_achievement_globetrotter_description": "Visit 10 countries.",
+  "@content_achievement_globetrotter_description": {
+    "description": "Achievement description (DB code globetrotter)."
+  },
+  "content_achievement_century_title": "100 Days Deep",
+  "@content_achievement_century_title": {
+    "description": "Achievement title (DB code century)."
+  },
+  "content_achievement_century_description": "Capture 100 days of travel.",
+  "@content_achievement_century_description": {
+    "description": "Achievement description (DB code century)."
+  },
+  "content_achievement_star_collector_title": "Star Collector",
+  "@content_achievement_star_collector_title": {
+    "description": "Achievement title (DB code star_collector)."
+  },
+  "content_achievement_star_collector_description": "Earn 250 stars.",
+  "@content_achievement_star_collector_description": {
+    "description": "Achievement description (DB code star_collector)."
+  },
+  "content_achievement_shutterbug_title": "Say Cheese",
+  "@content_achievement_shutterbug_title": {
+    "description": "Achievement title (DB code shutterbug)."
+  },
+  "content_achievement_shutterbug_description": "Add 50 photos to your memories.",
+  "@content_achievement_shutterbug_description": {
+    "description": "Achievement description (DB code shutterbug)."
+  },
+  "content_achievement_storyteller_title": "Storyteller",
+  "@content_achievement_storyteller_title": {
+    "description": "Achievement title (DB code storyteller)."
+  },
+  "content_achievement_storyteller_description": "Write 20 journal notes.",
+  "@content_achievement_storyteller_description": {
+    "description": "Achievement description (DB code storyteller)."
+  },
+  "content_achievement_jetsetter_title": "Wanderlust Certified",
+  "@content_achievement_jetsetter_title": {
+    "description": "Achievement title (DB code jetsetter)."
+  },
+  "content_achievement_jetsetter_description": "Log 5 memories.",
+  "@content_achievement_jetsetter_description": {
+    "description": "Achievement description (DB code jetsetter)."
+  },
+  "content_achievement_legend_title": "Legend",
+  "@content_achievement_legend_title": {
+    "description": "Achievement title (DB code legend)."
+  },
+  "content_achievement_legend_description": "Earn 1000 stars.",
+  "@content_achievement_legend_description": {
+    "description": "Achievement description (DB code legend)."
+  },
+  "content_checklist_passport": "Passport",
+  "@content_checklist_passport": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_visa_documents": "Visa documents",
+  "@content_checklist_visa_documents": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_travel_insurance": "Travel insurance",
+  "@content_checklist_travel_insurance": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_boarding_passes_tickets": "Boarding passes / tickets",
+  "@content_checklist_boarding_passes_tickets": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_id_card": "ID card",
+  "@content_checklist_id_card": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_local_currency_cash": "Local currency cash",
+  "@content_checklist_local_currency_cash": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_credit_debit_cards": "Credit / debit cards",
+  "@content_checklist_credit_debit_cards": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_phone_charger": "Phone charger",
+  "@content_checklist_phone_charger": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_underwear": "Underwear",
+  "@content_checklist_underwear": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_comfortable_walking_shoes": "Comfortable walking shoes",
+  "@content_checklist_comfortable_walking_shoes": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_t_shirts": "T-shirts",
+  "@content_checklist_t_shirts": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_jacket": "Jacket",
+  "@content_checklist_jacket": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_swimsuit": "Swimsuit",
+  "@content_checklist_swimsuit": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_sleepwear": "Sleepwear",
+  "@content_checklist_sleepwear": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_sunglasses": "Sunglasses",
+  "@content_checklist_sunglasses": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_toothbrush_toothpaste": "Toothbrush & toothpaste",
+  "@content_checklist_toothbrush_toothpaste": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_prescription_medications": "Prescription medications",
+  "@content_checklist_prescription_medications": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_first_aid_kit": "First aid kit",
+  "@content_checklist_first_aid_kit": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_sunscreen": "Sunscreen",
+  "@content_checklist_sunscreen": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_deodorant": "Deodorant",
+  "@content_checklist_deodorant": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_hand_sanitizer": "Hand sanitizer",
+  "@content_checklist_hand_sanitizer": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_shampoo_conditioner": "Shampoo & conditioner",
+  "@content_checklist_shampoo_conditioner": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_contact_lenses_or_glasses": "Contact lenses or glasses",
+  "@content_checklist_contact_lenses_or_glasses": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_phone": "Phone",
+  "@content_checklist_phone": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_charging_cables": "Charging cables",
+  "@content_checklist_charging_cables": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_power_adapter": "Power adapter",
+  "@content_checklist_power_adapter": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_portable_battery_pack": "Portable battery pack",
+  "@content_checklist_portable_battery_pack": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_headphones": "Headphones",
+  "@content_checklist_headphones": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_camera": "Camera",
+  "@content_checklist_camera": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_sim_card_or_esim": "SIM card or eSIM",
+  "@content_checklist_sim_card_or_esim": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_travel_pillow": "Travel pillow",
+  "@content_checklist_travel_pillow": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_reusable_water_bottle": "Reusable water bottle",
+  "@content_checklist_reusable_water_bottle": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_snacks": "Snacks",
+  "@content_checklist_snacks": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_packing_cubes": "Packing cubes",
+  "@content_checklist_packing_cubes": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_earplugs_eye_mask": "Earplugs & eye mask",
+  "@content_checklist_earplugs_eye_mask": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_travel_journal": "Travel journal",
+  "@content_checklist_travel_journal": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "content_checklist_umbrella": "Umbrella",
+  "@content_checklist_umbrella": {
+    "description": "Checklist suggestion, written into a new checklist in the UI language."
   }
 }

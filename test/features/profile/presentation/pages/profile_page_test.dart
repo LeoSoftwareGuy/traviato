@@ -169,7 +169,9 @@ void main() {
       await _pump(tester, profileRepo: profileRepo);
 
       expect(find.text('First Adventure'), findsOneWidget);
-      expect(find.text('Century'), findsOneWidget);
+      // Known codes show the app's own (translatable) title, not the DB
+      // row's — `century` is "100 Days Deep" (#243).
+      expect(find.text('100 Days Deep'), findsOneWidget);
       expect(find.text('12 OF 100 DAYS'), findsOneWidget);
       expect(find.text('1/2 earned'), findsOneWidget);
     },

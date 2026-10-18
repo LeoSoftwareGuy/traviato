@@ -1,9 +1,12 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/errors/presentation_failure_exception.dart';
+import '../../../../core/l10n/context_l10n.dart';
+import '../../../settings/presentation/controllers/app_language_controller.dart';
 import '../../domain/entities/checklist_category.dart';
 import '../../domain/entities/checklist_item_entity.dart';
 import '../providers/checklist_providers.dart';
+import '../widgets/checklist_suggestion_title.dart';
 import 'checklist_state.dart';
 
 part 'checklist_controller.g.dart';
@@ -25,7 +28,13 @@ class ChecklistController extends _$ChecklistController {
 
     // First open of an empty checklist: seed it from the suggestions catalog.
     if (items.isEmpty) {
-      final populateResult = await repo.populateFromSuggestions(tripId);
+      // Written in the UI language (#243); the items are the user's own
+      // from here on, like anything they add themselves.
+      final l10n = lookupAppLocalizations(ref.read(appLocaleProvider));
+      final populateResult = await repo.populateFromSuggestions(
+        tripId,
+        titleFor: (suggestion) => checklistSuggestionTitle(l10n, suggestion),
+      );
       items = populateResult.fold(
         (failure) => throw PresentationFailureException(failure),
         (i) => i,

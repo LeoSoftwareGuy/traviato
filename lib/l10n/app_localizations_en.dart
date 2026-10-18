@@ -1701,4 +1701,452 @@ class AppLocalizationsEn extends AppLocalizations {
   String note_wordCountShort(int count) {
     return '$count W';
   }
+
+  @override
+  String get content_bonus_worst_photo_of_day_title =>
+      'The worst photo of the day';
+
+  @override
+  String get content_bonus_worst_photo_of_day_detail =>
+      'Not your best angle. Not your best moment. That\'s the point.';
+
+  @override
+  String get content_bonus_something_free_title => 'Find something free';
+
+  @override
+  String get content_bonus_something_free_detail =>
+      'A view, a smile, a street performance — snap whatever cost you nothing today.';
+
+  @override
+  String get content_bonus_local_snack_title =>
+      'Try a snack you can\'t get at home';
+
+  @override
+  String get content_bonus_local_snack_detail =>
+      'Bonus points if you can\'t pronounce it.';
+
+  @override
+  String get content_bonus_menu_mystery_title =>
+      'Order something you can\'t translate';
+
+  @override
+  String get content_bonus_menu_mystery_detail =>
+      'Point at the menu and commit.';
+
+  @override
+  String get content_bonus_stranger_kindness_title =>
+      'Capture a small kindness from a stranger';
+
+  @override
+  String get content_bonus_stranger_kindness_detail =>
+      'A wave, a smile, directions when you were lost.';
+
+  @override
+  String get content_bonus_overheard_title =>
+      'Photograph what you\'re listening to';
+
+  @override
+  String get content_bonus_overheard_detail =>
+      'Street music, a language you don\'t speak, the sound of somewhere new.';
+
+  @override
+  String get content_bonus_souvenir_hunt_title =>
+      'Photograph the tackiest souvenir you can find';
+
+  @override
+  String get content_bonus_souvenir_hunt_detail =>
+      'You don\'t have to buy it. Just admire it.';
+
+  @override
+  String get content_bonus_sky_moment_title => 'Catch the sky doing something';
+
+  @override
+  String get content_bonus_sky_moment_detail =>
+      'Sunset, storm clouds, an unreasonable number of stars.';
+
+  @override
+  String get content_bonus_local_transport_title =>
+      'Document how you got around today';
+
+  @override
+  String get content_bonus_local_transport_detail =>
+      'Bus, bike, boat, blistered feet — all valid.';
+
+  @override
+  String get content_bonus_unexpected_detour_title =>
+      'Snap a detour you didn\'t plan';
+
+  @override
+  String get content_bonus_unexpected_detour_detail =>
+      'The wrong turn that turned out fine.';
+
+  @override
+  String get content_bonus_color_hunt_title =>
+      'Find the most colorful thing around you';
+
+  @override
+  String get content_bonus_color_hunt_detail =>
+      'A wall, a market stall, someone\'s questionable fashion choice.';
+
+  @override
+  String get content_bonus_closeup_texture_title => 'Get up close on a texture';
+
+  @override
+  String get content_bonus_closeup_texture_detail =>
+      'Cobblestones, tree bark, the weird pattern on your hotel bedspread.';
+
+  @override
+  String get content_bonus_reflection_shot_title => 'Catch a reflection';
+
+  @override
+  String get content_bonus_reflection_shot_detail =>
+      'Water, glass, a suspiciously shiny spoon.';
+
+  @override
+  String get content_bonus_halfway_selfie_title =>
+      'Take a halfway-there selfie';
+
+  @override
+  String get content_bonus_halfway_selfie_detail =>
+      'Tired eyes optional. Big smile mandatory.';
+
+  @override
+  String get content_bonus_local_hangout_title =>
+      'Photograph where the locals actually hang out';
+
+  @override
+  String get content_bonus_local_hangout_detail =>
+      'Not the postcard spot — the real one.';
+
+  @override
+  String get content_bonus_comfort_food_title =>
+      'Snap the meal that felt like home';
+
+  @override
+  String get content_bonus_comfort_food_detail =>
+      'Even a thousand miles from it.';
+
+  @override
+  String get content_bonus_new_skill_title =>
+      'Try something you\'ve never done before';
+
+  @override
+  String get content_bonus_new_skill_detail =>
+      'A dance move, a dish, a language you\'re butchering on purpose.';
+
+  @override
+  String get content_bonus_market_haul_title =>
+      'Document a market or shop visit';
+
+  @override
+  String get content_bonus_market_haul_detail =>
+      'What did you almost buy and talk yourself out of?';
+
+  @override
+  String get content_bonus_quiet_moment_title =>
+      'Capture a quiet moment mid-trip';
+
+  @override
+  String get content_bonus_quiet_moment_detail =>
+      'Not everything has to be a highlight reel.';
+
+  @override
+  String get content_bonus_view_from_bed_title =>
+      'Photograph the view from where you\'re staying';
+
+  @override
+  String get content_bonus_view_from_bed_detail =>
+      'Balcony, window, or just a very honest ceiling.';
+
+  @override
+  String get content_bonus_unplanned_friend_title =>
+      'Snap someone you met along the way';
+
+  @override
+  String get content_bonus_unplanned_friend_detail =>
+      'A new friend, a fellow traveler, a very opinionated local cat.';
+
+  @override
+  String get content_bonus_touchdown_title => 'Mark the moment you arrived';
+
+  @override
+  String get content_bonus_touchdown_detail =>
+      'Airport sign, train platform, that first breath of new air.';
+
+  @override
+  String get content_bonus_first_impression_title =>
+      'Snap your very first impression';
+
+  @override
+  String get content_bonus_first_impression_detail =>
+      'The view, the smell, the chaos — capture it before it becomes normal.';
+
+  @override
+  String get content_bonus_unpacking_ritual_title =>
+      'Photograph your unpacking ritual';
+
+  @override
+  String get content_bonus_unpacking_ritual_detail =>
+      'However messy. However fast.';
+
+  @override
+  String get content_bonus_last_look_title =>
+      'Take one last look before you go';
+
+  @override
+  String get content_bonus_last_look_detail =>
+      'The view, the room, the spot you\'ll miss most.';
+
+  @override
+  String get content_bonus_farewell_meal_title =>
+      'Capture your final meal here';
+
+  @override
+  String get content_bonus_farewell_meal_detail =>
+      'Make it count — or make it whatever\'s left in the fridge.';
+
+  @override
+  String get content_bonus_souvenir_final_title =>
+      'Photograph what you\'re bringing home';
+
+  @override
+  String get content_bonus_souvenir_final_detail => 'Physical or otherwise.';
+
+  @override
+  String get content_bonus_snap_anything_title => 'Snap anything at all';
+
+  @override
+  String get content_bonus_snap_anything_detail =>
+      'Seriously. Anything. This one\'s just to get you started.';
+
+  @override
+  String get content_bonus_snap_suitecase_title => 'Snap your packing process';
+
+  @override
+  String get content_bonus_snap_suitecase_detail =>
+      'Document the chaos of getting ready for your trip.';
+
+  @override
+  String get content_bonus_stranger_portrait_title =>
+      'Ask a stranger if you can take their photo';
+
+  @override
+  String get content_bonus_stranger_portrait_detail =>
+      'Bonus vulnerability points. They\'ll probably say yes.';
+
+  @override
+  String get content_bonus_no_phone_hour_title =>
+      'Go an hour without checking your phone, then tell us what you noticed';
+
+  @override
+  String get content_bonus_no_phone_hour_detail =>
+      'Write it, don\'t just remember it.';
+
+  @override
+  String get content_bonus_try_the_dare_title =>
+      'Do the thing you keep talking yourself out of';
+
+  @override
+  String get content_bonus_try_the_dare_detail => 'You know the one.';
+
+  @override
+  String get content_bonus_milestone_week_one_title =>
+      'One week in — how has this trip changed you already?';
+
+  @override
+  String get content_bonus_milestone_week_one_detail =>
+      'A photo and a moment of honesty.';
+
+  @override
+  String get content_bonus_milestone_two_weeks_title =>
+      'Two weeks deep — what do you know now that you didn\'t at the start?';
+
+  @override
+  String get content_bonus_milestone_two_weeks_detail =>
+      'Capture the moment it clicked.';
+
+  @override
+  String get content_bonus_milestone_three_weeks_title =>
+      'Three weeks out — what will you miss most when this ends?';
+
+  @override
+  String get content_bonus_milestone_three_weeks_detail =>
+      'Say it before you have to.';
+
+  @override
+  String get content_bonus_streak_saver_checkin_title => 'Just check in';
+
+  @override
+  String get content_bonus_streak_saver_checkin_detail =>
+      'No pressure, no theme — one photo of wherever you are right now.';
+
+  @override
+  String get content_achievement_first_adventure_title => 'First Adventure';
+
+  @override
+  String get content_achievement_first_adventure_description =>
+      'Log your first memory.';
+
+  @override
+  String get content_achievement_globetrotter_title => 'World Wanderer';
+
+  @override
+  String get content_achievement_globetrotter_description =>
+      'Visit 10 countries.';
+
+  @override
+  String get content_achievement_century_title => '100 Days Deep';
+
+  @override
+  String get content_achievement_century_description =>
+      'Capture 100 days of travel.';
+
+  @override
+  String get content_achievement_star_collector_title => 'Star Collector';
+
+  @override
+  String get content_achievement_star_collector_description =>
+      'Earn 250 stars.';
+
+  @override
+  String get content_achievement_shutterbug_title => 'Say Cheese';
+
+  @override
+  String get content_achievement_shutterbug_description =>
+      'Add 50 photos to your memories.';
+
+  @override
+  String get content_achievement_storyteller_title => 'Storyteller';
+
+  @override
+  String get content_achievement_storyteller_description =>
+      'Write 20 journal notes.';
+
+  @override
+  String get content_achievement_jetsetter_title => 'Wanderlust Certified';
+
+  @override
+  String get content_achievement_jetsetter_description => 'Log 5 memories.';
+
+  @override
+  String get content_achievement_legend_title => 'Legend';
+
+  @override
+  String get content_achievement_legend_description => 'Earn 1000 stars.';
+
+  @override
+  String get content_checklist_passport => 'Passport';
+
+  @override
+  String get content_checklist_visa_documents => 'Visa documents';
+
+  @override
+  String get content_checklist_travel_insurance => 'Travel insurance';
+
+  @override
+  String get content_checklist_boarding_passes_tickets =>
+      'Boarding passes / tickets';
+
+  @override
+  String get content_checklist_id_card => 'ID card';
+
+  @override
+  String get content_checklist_local_currency_cash => 'Local currency cash';
+
+  @override
+  String get content_checklist_credit_debit_cards => 'Credit / debit cards';
+
+  @override
+  String get content_checklist_phone_charger => 'Phone charger';
+
+  @override
+  String get content_checklist_underwear => 'Underwear';
+
+  @override
+  String get content_checklist_comfortable_walking_shoes =>
+      'Comfortable walking shoes';
+
+  @override
+  String get content_checklist_t_shirts => 'T-shirts';
+
+  @override
+  String get content_checklist_jacket => 'Jacket';
+
+  @override
+  String get content_checklist_swimsuit => 'Swimsuit';
+
+  @override
+  String get content_checklist_sleepwear => 'Sleepwear';
+
+  @override
+  String get content_checklist_sunglasses => 'Sunglasses';
+
+  @override
+  String get content_checklist_toothbrush_toothpaste =>
+      'Toothbrush & toothpaste';
+
+  @override
+  String get content_checklist_prescription_medications =>
+      'Prescription medications';
+
+  @override
+  String get content_checklist_first_aid_kit => 'First aid kit';
+
+  @override
+  String get content_checklist_sunscreen => 'Sunscreen';
+
+  @override
+  String get content_checklist_deodorant => 'Deodorant';
+
+  @override
+  String get content_checklist_hand_sanitizer => 'Hand sanitizer';
+
+  @override
+  String get content_checklist_shampoo_conditioner => 'Shampoo & conditioner';
+
+  @override
+  String get content_checklist_contact_lenses_or_glasses =>
+      'Contact lenses or glasses';
+
+  @override
+  String get content_checklist_phone => 'Phone';
+
+  @override
+  String get content_checklist_charging_cables => 'Charging cables';
+
+  @override
+  String get content_checklist_power_adapter => 'Power adapter';
+
+  @override
+  String get content_checklist_portable_battery_pack => 'Portable battery pack';
+
+  @override
+  String get content_checklist_headphones => 'Headphones';
+
+  @override
+  String get content_checklist_camera => 'Camera';
+
+  @override
+  String get content_checklist_sim_card_or_esim => 'SIM card or eSIM';
+
+  @override
+  String get content_checklist_travel_pillow => 'Travel pillow';
+
+  @override
+  String get content_checklist_reusable_water_bottle => 'Reusable water bottle';
+
+  @override
+  String get content_checklist_snacks => 'Snacks';
+
+  @override
+  String get content_checklist_packing_cubes => 'Packing cubes';
+
+  @override
+  String get content_checklist_earplugs_eye_mask => 'Earplugs & eye mask';
+
+  @override
+  String get content_checklist_travel_journal => 'Travel journal';
+
+  @override
+  String get content_checklist_umbrella => 'Umbrella';
 }

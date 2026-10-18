@@ -2612,6 +2612,756 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} W'**
   String note_wordCountShort(int count);
+
+  /// Seeded bonus task title (DB code worst_photo_of_day).
+  ///
+  /// In en, this message translates to:
+  /// **'The worst photo of the day'**
+  String get content_bonus_worst_photo_of_day_title;
+
+  /// Seeded bonus task detail (DB code worst_photo_of_day).
+  ///
+  /// In en, this message translates to:
+  /// **'Not your best angle. Not your best moment. That\'s the point.'**
+  String get content_bonus_worst_photo_of_day_detail;
+
+  /// Seeded bonus task title (DB code something_free).
+  ///
+  /// In en, this message translates to:
+  /// **'Find something free'**
+  String get content_bonus_something_free_title;
+
+  /// Seeded bonus task detail (DB code something_free).
+  ///
+  /// In en, this message translates to:
+  /// **'A view, a smile, a street performance — snap whatever cost you nothing today.'**
+  String get content_bonus_something_free_detail;
+
+  /// Seeded bonus task title (DB code local_snack).
+  ///
+  /// In en, this message translates to:
+  /// **'Try a snack you can\'t get at home'**
+  String get content_bonus_local_snack_title;
+
+  /// Seeded bonus task detail (DB code local_snack).
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus points if you can\'t pronounce it.'**
+  String get content_bonus_local_snack_detail;
+
+  /// Seeded bonus task title (DB code menu_mystery).
+  ///
+  /// In en, this message translates to:
+  /// **'Order something you can\'t translate'**
+  String get content_bonus_menu_mystery_title;
+
+  /// Seeded bonus task detail (DB code menu_mystery).
+  ///
+  /// In en, this message translates to:
+  /// **'Point at the menu and commit.'**
+  String get content_bonus_menu_mystery_detail;
+
+  /// Seeded bonus task title (DB code stranger_kindness).
+  ///
+  /// In en, this message translates to:
+  /// **'Capture a small kindness from a stranger'**
+  String get content_bonus_stranger_kindness_title;
+
+  /// Seeded bonus task detail (DB code stranger_kindness).
+  ///
+  /// In en, this message translates to:
+  /// **'A wave, a smile, directions when you were lost.'**
+  String get content_bonus_stranger_kindness_detail;
+
+  /// Seeded bonus task title (DB code overheard).
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph what you\'re listening to'**
+  String get content_bonus_overheard_title;
+
+  /// Seeded bonus task detail (DB code overheard).
+  ///
+  /// In en, this message translates to:
+  /// **'Street music, a language you don\'t speak, the sound of somewhere new.'**
+  String get content_bonus_overheard_detail;
+
+  /// Seeded bonus task title (DB code souvenir_hunt).
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph the tackiest souvenir you can find'**
+  String get content_bonus_souvenir_hunt_title;
+
+  /// Seeded bonus task detail (DB code souvenir_hunt).
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have to buy it. Just admire it.'**
+  String get content_bonus_souvenir_hunt_detail;
+
+  /// Seeded bonus task title (DB code sky_moment).
+  ///
+  /// In en, this message translates to:
+  /// **'Catch the sky doing something'**
+  String get content_bonus_sky_moment_title;
+
+  /// Seeded bonus task detail (DB code sky_moment).
+  ///
+  /// In en, this message translates to:
+  /// **'Sunset, storm clouds, an unreasonable number of stars.'**
+  String get content_bonus_sky_moment_detail;
+
+  /// Seeded bonus task title (DB code local_transport).
+  ///
+  /// In en, this message translates to:
+  /// **'Document how you got around today'**
+  String get content_bonus_local_transport_title;
+
+  /// Seeded bonus task detail (DB code local_transport).
+  ///
+  /// In en, this message translates to:
+  /// **'Bus, bike, boat, blistered feet — all valid.'**
+  String get content_bonus_local_transport_detail;
+
+  /// Seeded bonus task title (DB code unexpected_detour).
+  ///
+  /// In en, this message translates to:
+  /// **'Snap a detour you didn\'t plan'**
+  String get content_bonus_unexpected_detour_title;
+
+  /// Seeded bonus task detail (DB code unexpected_detour).
+  ///
+  /// In en, this message translates to:
+  /// **'The wrong turn that turned out fine.'**
+  String get content_bonus_unexpected_detour_detail;
+
+  /// Seeded bonus task title (DB code color_hunt).
+  ///
+  /// In en, this message translates to:
+  /// **'Find the most colorful thing around you'**
+  String get content_bonus_color_hunt_title;
+
+  /// Seeded bonus task detail (DB code color_hunt).
+  ///
+  /// In en, this message translates to:
+  /// **'A wall, a market stall, someone\'s questionable fashion choice.'**
+  String get content_bonus_color_hunt_detail;
+
+  /// Seeded bonus task title (DB code closeup_texture).
+  ///
+  /// In en, this message translates to:
+  /// **'Get up close on a texture'**
+  String get content_bonus_closeup_texture_title;
+
+  /// Seeded bonus task detail (DB code closeup_texture).
+  ///
+  /// In en, this message translates to:
+  /// **'Cobblestones, tree bark, the weird pattern on your hotel bedspread.'**
+  String get content_bonus_closeup_texture_detail;
+
+  /// Seeded bonus task title (DB code reflection_shot).
+  ///
+  /// In en, this message translates to:
+  /// **'Catch a reflection'**
+  String get content_bonus_reflection_shot_title;
+
+  /// Seeded bonus task detail (DB code reflection_shot).
+  ///
+  /// In en, this message translates to:
+  /// **'Water, glass, a suspiciously shiny spoon.'**
+  String get content_bonus_reflection_shot_detail;
+
+  /// Seeded bonus task title (DB code halfway_selfie).
+  ///
+  /// In en, this message translates to:
+  /// **'Take a halfway-there selfie'**
+  String get content_bonus_halfway_selfie_title;
+
+  /// Seeded bonus task detail (DB code halfway_selfie).
+  ///
+  /// In en, this message translates to:
+  /// **'Tired eyes optional. Big smile mandatory.'**
+  String get content_bonus_halfway_selfie_detail;
+
+  /// Seeded bonus task title (DB code local_hangout).
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph where the locals actually hang out'**
+  String get content_bonus_local_hangout_title;
+
+  /// Seeded bonus task detail (DB code local_hangout).
+  ///
+  /// In en, this message translates to:
+  /// **'Not the postcard spot — the real one.'**
+  String get content_bonus_local_hangout_detail;
+
+  /// Seeded bonus task title (DB code comfort_food).
+  ///
+  /// In en, this message translates to:
+  /// **'Snap the meal that felt like home'**
+  String get content_bonus_comfort_food_title;
+
+  /// Seeded bonus task detail (DB code comfort_food).
+  ///
+  /// In en, this message translates to:
+  /// **'Even a thousand miles from it.'**
+  String get content_bonus_comfort_food_detail;
+
+  /// Seeded bonus task title (DB code new_skill).
+  ///
+  /// In en, this message translates to:
+  /// **'Try something you\'ve never done before'**
+  String get content_bonus_new_skill_title;
+
+  /// Seeded bonus task detail (DB code new_skill).
+  ///
+  /// In en, this message translates to:
+  /// **'A dance move, a dish, a language you\'re butchering on purpose.'**
+  String get content_bonus_new_skill_detail;
+
+  /// Seeded bonus task title (DB code market_haul).
+  ///
+  /// In en, this message translates to:
+  /// **'Document a market or shop visit'**
+  String get content_bonus_market_haul_title;
+
+  /// Seeded bonus task detail (DB code market_haul).
+  ///
+  /// In en, this message translates to:
+  /// **'What did you almost buy and talk yourself out of?'**
+  String get content_bonus_market_haul_detail;
+
+  /// Seeded bonus task title (DB code quiet_moment).
+  ///
+  /// In en, this message translates to:
+  /// **'Capture a quiet moment mid-trip'**
+  String get content_bonus_quiet_moment_title;
+
+  /// Seeded bonus task detail (DB code quiet_moment).
+  ///
+  /// In en, this message translates to:
+  /// **'Not everything has to be a highlight reel.'**
+  String get content_bonus_quiet_moment_detail;
+
+  /// Seeded bonus task title (DB code view_from_bed).
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph the view from where you\'re staying'**
+  String get content_bonus_view_from_bed_title;
+
+  /// Seeded bonus task detail (DB code view_from_bed).
+  ///
+  /// In en, this message translates to:
+  /// **'Balcony, window, or just a very honest ceiling.'**
+  String get content_bonus_view_from_bed_detail;
+
+  /// Seeded bonus task title (DB code unplanned_friend).
+  ///
+  /// In en, this message translates to:
+  /// **'Snap someone you met along the way'**
+  String get content_bonus_unplanned_friend_title;
+
+  /// Seeded bonus task detail (DB code unplanned_friend).
+  ///
+  /// In en, this message translates to:
+  /// **'A new friend, a fellow traveler, a very opinionated local cat.'**
+  String get content_bonus_unplanned_friend_detail;
+
+  /// Seeded bonus task title (DB code touchdown).
+  ///
+  /// In en, this message translates to:
+  /// **'Mark the moment you arrived'**
+  String get content_bonus_touchdown_title;
+
+  /// Seeded bonus task detail (DB code touchdown).
+  ///
+  /// In en, this message translates to:
+  /// **'Airport sign, train platform, that first breath of new air.'**
+  String get content_bonus_touchdown_detail;
+
+  /// Seeded bonus task title (DB code first_impression).
+  ///
+  /// In en, this message translates to:
+  /// **'Snap your very first impression'**
+  String get content_bonus_first_impression_title;
+
+  /// Seeded bonus task detail (DB code first_impression).
+  ///
+  /// In en, this message translates to:
+  /// **'The view, the smell, the chaos — capture it before it becomes normal.'**
+  String get content_bonus_first_impression_detail;
+
+  /// Seeded bonus task title (DB code unpacking_ritual).
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph your unpacking ritual'**
+  String get content_bonus_unpacking_ritual_title;
+
+  /// Seeded bonus task detail (DB code unpacking_ritual).
+  ///
+  /// In en, this message translates to:
+  /// **'However messy. However fast.'**
+  String get content_bonus_unpacking_ritual_detail;
+
+  /// Seeded bonus task title (DB code last_look).
+  ///
+  /// In en, this message translates to:
+  /// **'Take one last look before you go'**
+  String get content_bonus_last_look_title;
+
+  /// Seeded bonus task detail (DB code last_look).
+  ///
+  /// In en, this message translates to:
+  /// **'The view, the room, the spot you\'ll miss most.'**
+  String get content_bonus_last_look_detail;
+
+  /// Seeded bonus task title (DB code farewell_meal).
+  ///
+  /// In en, this message translates to:
+  /// **'Capture your final meal here'**
+  String get content_bonus_farewell_meal_title;
+
+  /// Seeded bonus task detail (DB code farewell_meal).
+  ///
+  /// In en, this message translates to:
+  /// **'Make it count — or make it whatever\'s left in the fridge.'**
+  String get content_bonus_farewell_meal_detail;
+
+  /// Seeded bonus task title (DB code souvenir_final).
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph what you\'re bringing home'**
+  String get content_bonus_souvenir_final_title;
+
+  /// Seeded bonus task detail (DB code souvenir_final).
+  ///
+  /// In en, this message translates to:
+  /// **'Physical or otherwise.'**
+  String get content_bonus_souvenir_final_detail;
+
+  /// Seeded bonus task title (DB code snap_anything).
+  ///
+  /// In en, this message translates to:
+  /// **'Snap anything at all'**
+  String get content_bonus_snap_anything_title;
+
+  /// Seeded bonus task detail (DB code snap_anything).
+  ///
+  /// In en, this message translates to:
+  /// **'Seriously. Anything. This one\'s just to get you started.'**
+  String get content_bonus_snap_anything_detail;
+
+  /// Seeded bonus task title (DB code snap_suitecase).
+  ///
+  /// In en, this message translates to:
+  /// **'Snap your packing process'**
+  String get content_bonus_snap_suitecase_title;
+
+  /// Seeded bonus task detail (DB code snap_suitecase).
+  ///
+  /// In en, this message translates to:
+  /// **'Document the chaos of getting ready for your trip.'**
+  String get content_bonus_snap_suitecase_detail;
+
+  /// Seeded bonus task title (DB code stranger_portrait).
+  ///
+  /// In en, this message translates to:
+  /// **'Ask a stranger if you can take their photo'**
+  String get content_bonus_stranger_portrait_title;
+
+  /// Seeded bonus task detail (DB code stranger_portrait).
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus vulnerability points. They\'ll probably say yes.'**
+  String get content_bonus_stranger_portrait_detail;
+
+  /// Seeded bonus task title (DB code no_phone_hour).
+  ///
+  /// In en, this message translates to:
+  /// **'Go an hour without checking your phone, then tell us what you noticed'**
+  String get content_bonus_no_phone_hour_title;
+
+  /// Seeded bonus task detail (DB code no_phone_hour).
+  ///
+  /// In en, this message translates to:
+  /// **'Write it, don\'t just remember it.'**
+  String get content_bonus_no_phone_hour_detail;
+
+  /// Seeded bonus task title (DB code try_the_dare).
+  ///
+  /// In en, this message translates to:
+  /// **'Do the thing you keep talking yourself out of'**
+  String get content_bonus_try_the_dare_title;
+
+  /// Seeded bonus task detail (DB code try_the_dare).
+  ///
+  /// In en, this message translates to:
+  /// **'You know the one.'**
+  String get content_bonus_try_the_dare_detail;
+
+  /// Seeded bonus task title (DB code milestone_week_one).
+  ///
+  /// In en, this message translates to:
+  /// **'One week in — how has this trip changed you already?'**
+  String get content_bonus_milestone_week_one_title;
+
+  /// Seeded bonus task detail (DB code milestone_week_one).
+  ///
+  /// In en, this message translates to:
+  /// **'A photo and a moment of honesty.'**
+  String get content_bonus_milestone_week_one_detail;
+
+  /// Seeded bonus task title (DB code milestone_two_weeks).
+  ///
+  /// In en, this message translates to:
+  /// **'Two weeks deep — what do you know now that you didn\'t at the start?'**
+  String get content_bonus_milestone_two_weeks_title;
+
+  /// Seeded bonus task detail (DB code milestone_two_weeks).
+  ///
+  /// In en, this message translates to:
+  /// **'Capture the moment it clicked.'**
+  String get content_bonus_milestone_two_weeks_detail;
+
+  /// Seeded bonus task title (DB code milestone_three_weeks).
+  ///
+  /// In en, this message translates to:
+  /// **'Three weeks out — what will you miss most when this ends?'**
+  String get content_bonus_milestone_three_weeks_title;
+
+  /// Seeded bonus task detail (DB code milestone_three_weeks).
+  ///
+  /// In en, this message translates to:
+  /// **'Say it before you have to.'**
+  String get content_bonus_milestone_three_weeks_detail;
+
+  /// Seeded bonus task title (DB code streak_saver_checkin).
+  ///
+  /// In en, this message translates to:
+  /// **'Just check in'**
+  String get content_bonus_streak_saver_checkin_title;
+
+  /// Seeded bonus task detail (DB code streak_saver_checkin).
+  ///
+  /// In en, this message translates to:
+  /// **'No pressure, no theme — one photo of wherever you are right now.'**
+  String get content_bonus_streak_saver_checkin_detail;
+
+  /// Achievement title (DB code first_adventure).
+  ///
+  /// In en, this message translates to:
+  /// **'First Adventure'**
+  String get content_achievement_first_adventure_title;
+
+  /// Achievement description (DB code first_adventure).
+  ///
+  /// In en, this message translates to:
+  /// **'Log your first memory.'**
+  String get content_achievement_first_adventure_description;
+
+  /// Achievement title (DB code globetrotter).
+  ///
+  /// In en, this message translates to:
+  /// **'World Wanderer'**
+  String get content_achievement_globetrotter_title;
+
+  /// Achievement description (DB code globetrotter).
+  ///
+  /// In en, this message translates to:
+  /// **'Visit 10 countries.'**
+  String get content_achievement_globetrotter_description;
+
+  /// Achievement title (DB code century).
+  ///
+  /// In en, this message translates to:
+  /// **'100 Days Deep'**
+  String get content_achievement_century_title;
+
+  /// Achievement description (DB code century).
+  ///
+  /// In en, this message translates to:
+  /// **'Capture 100 days of travel.'**
+  String get content_achievement_century_description;
+
+  /// Achievement title (DB code star_collector).
+  ///
+  /// In en, this message translates to:
+  /// **'Star Collector'**
+  String get content_achievement_star_collector_title;
+
+  /// Achievement description (DB code star_collector).
+  ///
+  /// In en, this message translates to:
+  /// **'Earn 250 stars.'**
+  String get content_achievement_star_collector_description;
+
+  /// Achievement title (DB code shutterbug).
+  ///
+  /// In en, this message translates to:
+  /// **'Say Cheese'**
+  String get content_achievement_shutterbug_title;
+
+  /// Achievement description (DB code shutterbug).
+  ///
+  /// In en, this message translates to:
+  /// **'Add 50 photos to your memories.'**
+  String get content_achievement_shutterbug_description;
+
+  /// Achievement title (DB code storyteller).
+  ///
+  /// In en, this message translates to:
+  /// **'Storyteller'**
+  String get content_achievement_storyteller_title;
+
+  /// Achievement description (DB code storyteller).
+  ///
+  /// In en, this message translates to:
+  /// **'Write 20 journal notes.'**
+  String get content_achievement_storyteller_description;
+
+  /// Achievement title (DB code jetsetter).
+  ///
+  /// In en, this message translates to:
+  /// **'Wanderlust Certified'**
+  String get content_achievement_jetsetter_title;
+
+  /// Achievement description (DB code jetsetter).
+  ///
+  /// In en, this message translates to:
+  /// **'Log 5 memories.'**
+  String get content_achievement_jetsetter_description;
+
+  /// Achievement title (DB code legend).
+  ///
+  /// In en, this message translates to:
+  /// **'Legend'**
+  String get content_achievement_legend_title;
+
+  /// Achievement description (DB code legend).
+  ///
+  /// In en, this message translates to:
+  /// **'Earn 1000 stars.'**
+  String get content_achievement_legend_description;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Passport'**
+  String get content_checklist_passport;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Visa documents'**
+  String get content_checklist_visa_documents;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel insurance'**
+  String get content_checklist_travel_insurance;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Boarding passes / tickets'**
+  String get content_checklist_boarding_passes_tickets;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'ID card'**
+  String get content_checklist_id_card;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Local currency cash'**
+  String get content_checklist_local_currency_cash;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit / debit cards'**
+  String get content_checklist_credit_debit_cards;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone charger'**
+  String get content_checklist_phone_charger;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Underwear'**
+  String get content_checklist_underwear;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Comfortable walking shoes'**
+  String get content_checklist_comfortable_walking_shoes;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'T-shirts'**
+  String get content_checklist_t_shirts;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Jacket'**
+  String get content_checklist_jacket;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Swimsuit'**
+  String get content_checklist_swimsuit;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleepwear'**
+  String get content_checklist_sleepwear;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunglasses'**
+  String get content_checklist_sunglasses;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Toothbrush & toothpaste'**
+  String get content_checklist_toothbrush_toothpaste;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Prescription medications'**
+  String get content_checklist_prescription_medications;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'First aid kit'**
+  String get content_checklist_first_aid_kit;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunscreen'**
+  String get content_checklist_sunscreen;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Deodorant'**
+  String get content_checklist_deodorant;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand sanitizer'**
+  String get content_checklist_hand_sanitizer;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Shampoo & conditioner'**
+  String get content_checklist_shampoo_conditioner;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact lenses or glasses'**
+  String get content_checklist_contact_lenses_or_glasses;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get content_checklist_phone;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Charging cables'**
+  String get content_checklist_charging_cables;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Power adapter'**
+  String get content_checklist_power_adapter;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Portable battery pack'**
+  String get content_checklist_portable_battery_pack;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Headphones'**
+  String get content_checklist_headphones;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get content_checklist_camera;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'SIM card or eSIM'**
+  String get content_checklist_sim_card_or_esim;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel pillow'**
+  String get content_checklist_travel_pillow;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Reusable water bottle'**
+  String get content_checklist_reusable_water_bottle;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Snacks'**
+  String get content_checklist_snacks;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Packing cubes'**
+  String get content_checklist_packing_cubes;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Earplugs & eye mask'**
+  String get content_checklist_earplugs_eye_mask;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel journal'**
+  String get content_checklist_travel_journal;
+
+  /// Checklist suggestion, written into a new checklist in the UI language.
+  ///
+  /// In en, this message translates to:
+  /// **'Umbrella'**
+  String get content_checklist_umbrella;
 }
 
 class _AppLocalizationsDelegate

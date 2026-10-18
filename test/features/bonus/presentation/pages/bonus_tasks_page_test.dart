@@ -160,6 +160,40 @@ void main() {
   });
 
   group('in ru / et (#220)', () {
+    testWidgets('seeded tasks read in Russian; unknown codes keep the DB '
+        'title (#243)', (tester) async {
+      final bonusRepo = FakeBonusTaskRepository()
+        ..templates = const [
+          BonusTaskTemplateEntity(
+            id: 1,
+            code: 'worst_photo_of_day',
+            title: 'The worst photo of the day',
+            points: 2,
+            phase: BonusTaskPhase.anytime,
+            kind: BonusTaskKind.regular,
+          ),
+          BonusTaskTemplateEntity(
+            id: 2,
+            code: 'not_seeded_yet',
+            title: 'A dare the app does not know',
+            points: 1,
+            phase: BonusTaskPhase.anytime,
+            kind: BonusTaskKind.regular,
+          ),
+        ];
+      await _pump(
+        tester,
+        tripRepo: _activeTripRepo(),
+        bonusRepo: bonusRepo,
+        locale: const Locale('ru'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Худшее фото дня'), findsOneWidget);
+      expect(find.text('The worst photo of the day'), findsNothing);
+      expect(find.text('A dare the app does not know'), findsOneWidget);
+    });
+
     testWidgets('earned banner and completed history read in Russian', (
       tester,
     ) async {

@@ -1663,5 +1663,505 @@
   "note_wordCountShort": "{count} сл.",
   "@note_wordCountShort": {
     "x-review": "pending"
+  },
+  "content_bonus_worst_photo_of_day_title": "Худшее фото дня",
+  "@content_bonus_worst_photo_of_day_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_worst_photo_of_day_detail": "Не лучший ракурс. Не лучший момент. В этом и смысл.",
+  "@content_bonus_worst_photo_of_day_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_something_free_title": "Найдите что-то бесплатное",
+  "@content_bonus_something_free_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_something_free_detail": "Вид, улыбка, уличный артист — снимите то, что сегодня ничего вам не стоило.",
+  "@content_bonus_something_free_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_local_snack_title": "Попробуйте перекус, которого нет дома",
+  "@content_bonus_local_snack_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_local_snack_detail": "Бонус, если не можете выговорить название.",
+  "@content_bonus_local_snack_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_menu_mystery_title": "Закажите то, что не можете перевести",
+  "@content_bonus_menu_mystery_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_menu_mystery_detail": "Ткните в меню — и без отступлений.",
+  "@content_bonus_menu_mystery_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_stranger_kindness_title": "Запечатлейте маленькую доброту незнакомца",
+  "@content_bonus_stranger_kindness_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_stranger_kindness_detail": "Взмах рукой, улыбка, подсказка, когда вы заблудились.",
+  "@content_bonus_stranger_kindness_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_overheard_title": "Сфотографируйте то, что слышите",
+  "@content_bonus_overheard_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_overheard_detail": "Уличная музыка, незнакомый язык, звуки нового места.",
+  "@content_bonus_overheard_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_souvenir_hunt_title": "Сфотографируйте самый безвкусный сувенир",
+  "@content_bonus_souvenir_hunt_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_souvenir_hunt_detail": "Покупать не обязательно. Просто полюбуйтесь.",
+  "@content_bonus_souvenir_hunt_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_sky_moment_title": "Поймайте небо в деле",
+  "@content_bonus_sky_moment_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_sky_moment_detail": "Закат, грозовые тучи, неприлично много звёзд.",
+  "@content_bonus_sky_moment_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_local_transport_title": "Покажите, как вы сегодня передвигались",
+  "@content_bonus_local_transport_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_local_transport_detail": "Автобус, велосипед, лодка, стёртые ноги — всё считается.",
+  "@content_bonus_local_transport_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_unexpected_detour_title": "Снимите незапланированный крюк",
+  "@content_bonus_unexpected_detour_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_unexpected_detour_detail": "Не тот поворот, который оказался тем самым.",
+  "@content_bonus_unexpected_detour_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_color_hunt_title": "Найдите самое яркое вокруг",
+  "@content_bonus_color_hunt_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_color_hunt_detail": "Стена, прилавок на рынке, чей-то сомнительный наряд.",
+  "@content_bonus_color_hunt_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_closeup_texture_title": "Снимите текстуру крупным планом",
+  "@content_bonus_closeup_texture_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_closeup_texture_detail": "Брусчатка, кора дерева, странный узор на покрывале в отеле.",
+  "@content_bonus_closeup_texture_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_reflection_shot_title": "Поймайте отражение",
+  "@content_bonus_reflection_shot_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_reflection_shot_detail": "Вода, стекло, подозрительно блестящая ложка.",
+  "@content_bonus_reflection_shot_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_halfway_selfie_title": "Селфи на полпути",
+  "@content_bonus_halfway_selfie_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_halfway_selfie_detail": "Уставшие глаза — по желанию. Широкая улыбка — обязательно.",
+  "@content_bonus_halfway_selfie_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_local_hangout_title": "Сфотографируйте, где на самом деле проводят время местные",
+  "@content_bonus_local_hangout_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_local_hangout_detail": "Не открыточное место — настоящее.",
+  "@content_bonus_local_hangout_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_comfort_food_title": "Снимите еду, которая напомнила о доме",
+  "@content_bonus_comfort_food_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_comfort_food_detail": "Даже за тысячи километров от него.",
+  "@content_bonus_comfort_food_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_new_skill_title": "Попробуйте то, чего никогда не делали",
+  "@content_bonus_new_skill_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_new_skill_detail": "Танцевальное движение, блюдо, язык, который вы нарочно коверкаете.",
+  "@content_bonus_new_skill_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_market_haul_title": "Сфотографируйте поход на рынок или в магазин",
+  "@content_bonus_market_haul_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_market_haul_detail": "Что вы чуть не купили, но передумали?",
+  "@content_bonus_market_haul_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_quiet_moment_title": "Запечатлейте тихий момент посреди поездки",
+  "@content_bonus_quiet_moment_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_quiet_moment_detail": "Не всё должно быть лучшими кадрами.",
+  "@content_bonus_quiet_moment_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_view_from_bed_title": "Сфотографируйте вид оттуда, где вы живёте",
+  "@content_bonus_view_from_bed_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_view_from_bed_detail": "Балкон, окно или просто очень честный потолок.",
+  "@content_bonus_view_from_bed_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_unplanned_friend_title": "Снимите того, с кем познакомились в пути",
+  "@content_bonus_unplanned_friend_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_unplanned_friend_detail": "Новый друг, попутчик, очень своенравный местный кот.",
+  "@content_bonus_unplanned_friend_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_touchdown_title": "Отметьте момент прибытия",
+  "@content_bonus_touchdown_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_touchdown_detail": "Табличка в аэропорту, перрон, первый вдох нового воздуха.",
+  "@content_bonus_touchdown_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_first_impression_title": "Снимите самое первое впечатление",
+  "@content_bonus_first_impression_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_first_impression_detail": "Вид, запах, суматоха — поймайте их, пока они не стали привычными.",
+  "@content_bonus_first_impression_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_unpacking_ritual_title": "Сфотографируйте свой ритуал распаковки",
+  "@content_bonus_unpacking_ritual_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_unpacking_ritual_detail": "Каким бы хаотичным он ни был. Каким бы быстрым.",
+  "@content_bonus_unpacking_ritual_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_last_look_title": "Взгляните в последний раз перед отъездом",
+  "@content_bonus_last_look_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_last_look_detail": "Вид, комната, место, по которому будете скучать больше всего.",
+  "@content_bonus_last_look_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_farewell_meal_title": "Сфотографируйте последнюю трапезу здесь",
+  "@content_bonus_farewell_meal_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_farewell_meal_detail": "Пусть она запомнится — или будет тем, что осталось в холодильнике.",
+  "@content_bonus_farewell_meal_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_souvenir_final_title": "Сфотографируйте то, что увозите домой",
+  "@content_bonus_souvenir_final_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_souvenir_final_detail": "В прямом смысле или нет.",
+  "@content_bonus_souvenir_final_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_snap_anything_title": "Снимите что угодно",
+  "@content_bonus_snap_anything_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_snap_anything_detail": "Серьёзно. Что угодно. Это просто чтобы начать.",
+  "@content_bonus_snap_anything_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_snap_suitecase_title": "Сфотографируйте, как вы собираетесь",
+  "@content_bonus_snap_suitecase_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_snap_suitecase_detail": "Запечатлейте хаос сборов в поездку.",
+  "@content_bonus_snap_suitecase_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_stranger_portrait_title": "Спросите незнакомца, можно ли его сфотографировать",
+  "@content_bonus_stranger_portrait_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_stranger_portrait_detail": "Бонус за смелость. Скорее всего, вам скажут «да».",
+  "@content_bonus_stranger_portrait_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_no_phone_hour_title": "Проведите час без телефона, а потом расскажите, что заметили",
+  "@content_bonus_no_phone_hour_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_no_phone_hour_detail": "Запишите, а не просто запомните.",
+  "@content_bonus_no_phone_hour_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_try_the_dare_title": "Сделайте то, от чего себя всё время отговариваете",
+  "@content_bonus_try_the_dare_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_try_the_dare_detail": "Вы знаете, о чём речь.",
+  "@content_bonus_try_the_dare_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_milestone_week_one_title": "Неделя позади — как эта поездка уже изменила вас?",
+  "@content_bonus_milestone_week_one_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_milestone_week_one_detail": "Фото и минута честности.",
+  "@content_bonus_milestone_week_one_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_milestone_two_weeks_title": "Две недели в пути — что вы знаете теперь, чего не знали в начале?",
+  "@content_bonus_milestone_two_weeks_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_milestone_two_weeks_detail": "Поймайте момент, когда всё сложилось.",
+  "@content_bonus_milestone_two_weeks_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_milestone_three_weeks_title": "Три недели в пути — по чему вы будете скучать больше всего, когда всё закончится?",
+  "@content_bonus_milestone_three_weeks_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_milestone_three_weeks_detail": "Скажите это, пока не пришлось.",
+  "@content_bonus_milestone_three_weeks_detail": {
+    "x-review": "pending"
+  },
+  "content_bonus_streak_saver_checkin_title": "Просто отметьтесь",
+  "@content_bonus_streak_saver_checkin_title": {
+    "x-review": "pending"
+  },
+  "content_bonus_streak_saver_checkin_detail": "Без давления и без темы — одно фото того места, где вы сейчас.",
+  "@content_bonus_streak_saver_checkin_detail": {
+    "x-review": "pending"
+  },
+  "content_achievement_first_adventure_title": "Первое приключение",
+  "@content_achievement_first_adventure_title": {
+    "x-review": "pending"
+  },
+  "content_achievement_first_adventure_description": "Создайте первое воспоминание.",
+  "@content_achievement_first_adventure_description": {
+    "x-review": "pending"
+  },
+  "content_achievement_globetrotter_title": "Путешественник по миру",
+  "@content_achievement_globetrotter_title": {
+    "x-review": "pending"
+  },
+  "content_achievement_globetrotter_description": "Побывайте в 10 странах.",
+  "@content_achievement_globetrotter_description": {
+    "x-review": "pending"
+  },
+  "content_achievement_century_title": "100 дней в пути",
+  "@content_achievement_century_title": {
+    "x-review": "pending"
+  },
+  "content_achievement_century_description": "Запечатлейте 100 дней путешествий.",
+  "@content_achievement_century_description": {
+    "x-review": "pending"
+  },
+  "content_achievement_star_collector_title": "Собиратель звёзд",
+  "@content_achievement_star_collector_title": {
+    "x-review": "pending"
+  },
+  "content_achievement_star_collector_description": "Заработайте 250 звёзд.",
+  "@content_achievement_star_collector_description": {
+    "x-review": "pending"
+  },
+  "content_achievement_shutterbug_title": "Скажите «сыр»",
+  "@content_achievement_shutterbug_title": {
+    "x-review": "pending"
+  },
+  "content_achievement_shutterbug_description": "Добавьте 50 фото в воспоминания.",
+  "@content_achievement_shutterbug_description": {
+    "x-review": "pending"
+  },
+  "content_achievement_storyteller_title": "Рассказчик",
+  "@content_achievement_storyteller_title": {
+    "x-review": "pending"
+  },
+  "content_achievement_storyteller_description": "Напишите 20 заметок в дневник.",
+  "@content_achievement_storyteller_description": {
+    "x-review": "pending"
+  },
+  "content_achievement_jetsetter_title": "Заядлый путешественник",
+  "@content_achievement_jetsetter_title": {
+    "x-review": "pending"
+  },
+  "content_achievement_jetsetter_description": "Создайте 5 воспоминаний.",
+  "@content_achievement_jetsetter_description": {
+    "x-review": "pending"
+  },
+  "content_achievement_legend_title": "Легенда",
+  "@content_achievement_legend_title": {
+    "x-review": "pending"
+  },
+  "content_achievement_legend_description": "Заработайте 1000 звёзд.",
+  "@content_achievement_legend_description": {
+    "x-review": "pending"
+  },
+  "content_checklist_passport": "Паспорт",
+  "@content_checklist_passport": {
+    "x-review": "pending"
+  },
+  "content_checklist_visa_documents": "Визовые документы",
+  "@content_checklist_visa_documents": {
+    "x-review": "pending"
+  },
+  "content_checklist_travel_insurance": "Туристическая страховка",
+  "@content_checklist_travel_insurance": {
+    "x-review": "pending"
+  },
+  "content_checklist_boarding_passes_tickets": "Посадочные талоны / билеты",
+  "@content_checklist_boarding_passes_tickets": {
+    "x-review": "pending"
+  },
+  "content_checklist_id_card": "Удостоверение личности",
+  "@content_checklist_id_card": {
+    "x-review": "pending"
+  },
+  "content_checklist_local_currency_cash": "Наличные в местной валюте",
+  "@content_checklist_local_currency_cash": {
+    "x-review": "pending"
+  },
+  "content_checklist_credit_debit_cards": "Кредитные / дебетовые карты",
+  "@content_checklist_credit_debit_cards": {
+    "x-review": "pending"
+  },
+  "content_checklist_phone_charger": "Зарядка для телефона",
+  "@content_checklist_phone_charger": {
+    "x-review": "pending"
+  },
+  "content_checklist_underwear": "Нижнее бельё",
+  "@content_checklist_underwear": {
+    "x-review": "pending"
+  },
+  "content_checklist_comfortable_walking_shoes": "Удобная обувь для прогулок",
+  "@content_checklist_comfortable_walking_shoes": {
+    "x-review": "pending"
+  },
+  "content_checklist_t_shirts": "Футболки",
+  "@content_checklist_t_shirts": {
+    "x-review": "pending"
+  },
+  "content_checklist_jacket": "Куртка",
+  "@content_checklist_jacket": {
+    "x-review": "pending"
+  },
+  "content_checklist_swimsuit": "Купальник / плавки",
+  "@content_checklist_swimsuit": {
+    "x-review": "pending"
+  },
+  "content_checklist_sleepwear": "Одежда для сна",
+  "@content_checklist_sleepwear": {
+    "x-review": "pending"
+  },
+  "content_checklist_sunglasses": "Солнцезащитные очки",
+  "@content_checklist_sunglasses": {
+    "x-review": "pending"
+  },
+  "content_checklist_toothbrush_toothpaste": "Зубная щётка и паста",
+  "@content_checklist_toothbrush_toothpaste": {
+    "x-review": "pending"
+  },
+  "content_checklist_prescription_medications": "Рецептурные лекарства",
+  "@content_checklist_prescription_medications": {
+    "x-review": "pending"
+  },
+  "content_checklist_first_aid_kit": "Аптечка",
+  "@content_checklist_first_aid_kit": {
+    "x-review": "pending"
+  },
+  "content_checklist_sunscreen": "Солнцезащитный крем",
+  "@content_checklist_sunscreen": {
+    "x-review": "pending"
+  },
+  "content_checklist_deodorant": "Дезодорант",
+  "@content_checklist_deodorant": {
+    "x-review": "pending"
+  },
+  "content_checklist_hand_sanitizer": "Антисептик для рук",
+  "@content_checklist_hand_sanitizer": {
+    "x-review": "pending"
+  },
+  "content_checklist_shampoo_conditioner": "Шампунь и кондиционер",
+  "@content_checklist_shampoo_conditioner": {
+    "x-review": "pending"
+  },
+  "content_checklist_contact_lenses_or_glasses": "Контактные линзы или очки",
+  "@content_checklist_contact_lenses_or_glasses": {
+    "x-review": "pending"
+  },
+  "content_checklist_phone": "Телефон",
+  "@content_checklist_phone": {
+    "x-review": "pending"
+  },
+  "content_checklist_charging_cables": "Зарядные кабели",
+  "@content_checklist_charging_cables": {
+    "x-review": "pending"
+  },
+  "content_checklist_power_adapter": "Переходник для розетки",
+  "@content_checklist_power_adapter": {
+    "x-review": "pending"
+  },
+  "content_checklist_portable_battery_pack": "Пауэрбанк",
+  "@content_checklist_portable_battery_pack": {
+    "x-review": "pending"
+  },
+  "content_checklist_headphones": "Наушники",
+  "@content_checklist_headphones": {
+    "x-review": "pending"
+  },
+  "content_checklist_camera": "Фотоаппарат",
+  "@content_checklist_camera": {
+    "x-review": "pending"
+  },
+  "content_checklist_sim_card_or_esim": "SIM-карта или eSIM",
+  "@content_checklist_sim_card_or_esim": {
+    "x-review": "pending"
+  },
+  "content_checklist_travel_pillow": "Подушка для путешествий",
+  "@content_checklist_travel_pillow": {
+    "x-review": "pending"
+  },
+  "content_checklist_reusable_water_bottle": "Многоразовая бутылка для воды",
+  "@content_checklist_reusable_water_bottle": {
+    "x-review": "pending"
+  },
+  "content_checklist_snacks": "Перекусы",
+  "@content_checklist_snacks": {
+    "x-review": "pending"
+  },
+  "content_checklist_packing_cubes": "Органайзеры для вещей",
+  "@content_checklist_packing_cubes": {
+    "x-review": "pending"
+  },
+  "content_checklist_earplugs_eye_mask": "Беруши и маска для сна",
+  "@content_checklist_earplugs_eye_mask": {
+    "x-review": "pending"
+  },
+  "content_checklist_travel_journal": "Дневник путешествий",
+  "@content_checklist_travel_journal": {
+    "x-review": "pending"
+  },
+  "content_checklist_umbrella": "Зонт",
+  "@content_checklist_umbrella": {
+    "x-review": "pending"
   }
 }

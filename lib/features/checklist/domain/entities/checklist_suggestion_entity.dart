@@ -10,6 +10,7 @@ class ChecklistSuggestionEntity extends Equatable {
     required this.title,
     required this.category,
     required this.isEssential,
+    this.code = '',
   });
 
   final int id;
@@ -17,6 +18,9 @@ class ChecklistSuggestionEntity extends Equatable {
   final ChecklistCategory category;
   final bool isEssential;
 
+  /// Stable key (#243) used to write the item in the UI language.
+  final String code;
+
   @override
-  List<Object?> get props => [id, title, category, isEssential];
+  List<Object?> get props => [id, title, category, isEssential, code];
 }

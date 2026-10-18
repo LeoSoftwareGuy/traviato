@@ -1696,4 +1696,449 @@ class AppLocalizationsEt extends AppLocalizations {
   String note_wordCountShort(int count) {
     return '$count S';
   }
+
+  @override
+  String get content_bonus_worst_photo_of_day_title => 'Päeva halvim foto';
+
+  @override
+  String get content_bonus_worst_photo_of_day_detail =>
+      'Mitte sinu parim nurk. Mitte sinu parim hetk. Just selles ongi asi.';
+
+  @override
+  String get content_bonus_something_free_title => 'Leia midagi tasuta';
+
+  @override
+  String get content_bonus_something_free_detail =>
+      'Vaade, naeratus, tänavaesineja — pildista seda, mis sulle täna midagi ei maksnud.';
+
+  @override
+  String get content_bonus_local_snack_title =>
+      'Proovi suupistet, mida kodus ei saa';
+
+  @override
+  String get content_bonus_local_snack_detail =>
+      'Lisapunktid, kui sa selle nime hääldada ei oska.';
+
+  @override
+  String get content_bonus_menu_mystery_title =>
+      'Telli midagi, mida tõlkida ei oska';
+
+  @override
+  String get content_bonus_menu_mystery_detail =>
+      'Näita menüüs näpuga ja jää oma valiku juurde.';
+
+  @override
+  String get content_bonus_stranger_kindness_title =>
+      'Jäädvusta võõra väike lahkus';
+
+  @override
+  String get content_bonus_stranger_kindness_detail =>
+      'Lehvitus, naeratus, teejuhatus, kui olid eksinud.';
+
+  @override
+  String get content_bonus_overheard_title => 'Pildista seda, mida kuuled';
+
+  @override
+  String get content_bonus_overheard_detail =>
+      'Tänavamuusika, keel, mida sa ei räägi, uue paiga helid.';
+
+  @override
+  String get content_bonus_souvenir_hunt_title =>
+      'Pildista kõige kitšimat suveniiri';
+
+  @override
+  String get content_bonus_souvenir_hunt_detail =>
+      'Ostma ei pea. Lihtsalt imetle.';
+
+  @override
+  String get content_bonus_sky_moment_title =>
+      'Püüa taevas hetkel, mil midagi toimub';
+
+  @override
+  String get content_bonus_sky_moment_detail =>
+      'Päikeseloojang, tormipilved, ebamõistlikult palju tähti.';
+
+  @override
+  String get content_bonus_local_transport_title =>
+      'Jäädvusta, kuidas täna ringi liikusid';
+
+  @override
+  String get content_bonus_local_transport_detail =>
+      'Buss, ratas, paat, villis jalad — kõik loeb.';
+
+  @override
+  String get content_bonus_unexpected_detour_title =>
+      'Pildista ringteed, mida sa ei plaaninud';
+
+  @override
+  String get content_bonus_unexpected_detour_detail =>
+      'Vale pööre, mis lõppes hästi.';
+
+  @override
+  String get content_bonus_color_hunt_title =>
+      'Leia ümbrusest kõige värvikam asi';
+
+  @override
+  String get content_bonus_color_hunt_detail =>
+      'Sein, turulett, kellegi kahtlane moevalik.';
+
+  @override
+  String get content_bonus_closeup_texture_title =>
+      'Pildista mõnda tekstuuri lähedalt';
+
+  @override
+  String get content_bonus_closeup_texture_detail =>
+      'Munakivid, puukoor, veider muster hotelli voodikattel.';
+
+  @override
+  String get content_bonus_reflection_shot_title => 'Püüa peegeldus';
+
+  @override
+  String get content_bonus_reflection_shot_detail =>
+      'Vesi, klaas, kahtlaselt läikiv lusikas.';
+
+  @override
+  String get content_bonus_halfway_selfie_title => 'Tee poolel teel selfi';
+
+  @override
+  String get content_bonus_halfway_selfie_detail =>
+      'Väsinud silmad pole kohustuslikud. Lai naeratus on.';
+
+  @override
+  String get content_bonus_local_hangout_title =>
+      'Pildista kohta, kus kohalikud päriselt aega veedavad';
+
+  @override
+  String get content_bonus_local_hangout_detail =>
+      'Mitte postkaardikoht — see päris.';
+
+  @override
+  String get content_bonus_comfort_food_title =>
+      'Pildista sööki, mis tundus nagu kodus';
+
+  @override
+  String get content_bonus_comfort_food_detail =>
+      'Isegi tuhandete kilomeetrite kaugusel.';
+
+  @override
+  String get content_bonus_new_skill_title =>
+      'Proovi midagi, mida sa pole kunagi teinud';
+
+  @override
+  String get content_bonus_new_skill_detail =>
+      'Tantsusamm, roog, keel, mida meelega mäkerdad.';
+
+  @override
+  String get content_bonus_market_haul_title => 'Jäädvusta turu- või poekäik';
+
+  @override
+  String get content_bonus_market_haul_detail =>
+      'Mida sa peaaegu ostsid, aga rääkisid end sellest välja?';
+
+  @override
+  String get content_bonus_quiet_moment_title =>
+      'Jäädvusta vaikne hetk keset reisi';
+
+  @override
+  String get content_bonus_quiet_moment_detail =>
+      'Kõik ei pea olema esiletõstetud hetk.';
+
+  @override
+  String get content_bonus_view_from_bed_title =>
+      'Pildista vaadet oma ööbimiskohast';
+
+  @override
+  String get content_bonus_view_from_bed_detail =>
+      'Rõdu, aken või lihtsalt väga aus lagi.';
+
+  @override
+  String get content_bonus_unplanned_friend_title =>
+      'Pildista kedagi, kellega teel kohtusid';
+
+  @override
+  String get content_bonus_unplanned_friend_detail =>
+      'Uus sõber, kaasrändur, väga kindlate arvamustega kohalik kass.';
+
+  @override
+  String get content_bonus_touchdown_title => 'Jäädvusta saabumise hetk';
+
+  @override
+  String get content_bonus_touchdown_detail =>
+      'Lennujaama silt, rongiperroon, esimene hingetõmme uut õhku.';
+
+  @override
+  String get content_bonus_first_impression_title =>
+      'Pildista oma kõige esimest muljet';
+
+  @override
+  String get content_bonus_first_impression_detail =>
+      'Vaade, lõhn, kaos — jäädvusta see enne, kui see harjumuspäraseks muutub.';
+
+  @override
+  String get content_bonus_unpacking_ritual_title =>
+      'Pildista oma lahtipakkimise rituaali';
+
+  @override
+  String get content_bonus_unpacking_ritual_detail =>
+      'Ükskõik kui segane. Ükskõik kui kiire.';
+
+  @override
+  String get content_bonus_last_look_title =>
+      'Heida enne lahkumist viimane pilk';
+
+  @override
+  String get content_bonus_last_look_detail =>
+      'Vaade, tuba, koht, mida kõige rohkem igatsema hakkad.';
+
+  @override
+  String get content_bonus_farewell_meal_title =>
+      'Jäädvusta oma viimane söögikord siin';
+
+  @override
+  String get content_bonus_farewell_meal_detail =>
+      'Tee see meeldejäävaks — või söö ära, mis külmikusse jäi.';
+
+  @override
+  String get content_bonus_souvenir_final_title =>
+      'Pildista seda, mida koju kaasa viid';
+
+  @override
+  String get content_bonus_souvenir_final_detail =>
+      'Käegakatsutavat või mitte.';
+
+  @override
+  String get content_bonus_snap_anything_title => 'Pildista ükskõik mida';
+
+  @override
+  String get content_bonus_snap_anything_detail =>
+      'Tõsiselt. Ükskõik mida. See on lihtsalt alustamiseks.';
+
+  @override
+  String get content_bonus_snap_suitecase_title => 'Pildista oma pakkimist';
+
+  @override
+  String get content_bonus_snap_suitecase_detail =>
+      'Jäädvusta reisiks valmistumise kaos.';
+
+  @override
+  String get content_bonus_stranger_portrait_title =>
+      'Küsi võõralt, kas võid teda pildistada';
+
+  @override
+  String get content_bonus_stranger_portrait_detail =>
+      'Lisapunktid julguse eest. Tõenäoliselt ütleb ta jah.';
+
+  @override
+  String get content_bonus_no_phone_hour_title =>
+      'Ole tund aega telefoni vaatamata ja kirjuta siis, mida märkasid';
+
+  @override
+  String get content_bonus_no_phone_hour_detail =>
+      'Kirjuta see üles, ära ainult mäleta.';
+
+  @override
+  String get content_bonus_try_the_dare_title =>
+      'Tee see, millest end pidevalt välja räägid';
+
+  @override
+  String get content_bonus_try_the_dare_detail => 'Sa tead küll, mida.';
+
+  @override
+  String get content_bonus_milestone_week_one_title =>
+      'Nädal möödas — kuidas see reis sind juba muutnud on?';
+
+  @override
+  String get content_bonus_milestone_week_one_detail => 'Foto ja hetk ausust.';
+
+  @override
+  String get content_bonus_milestone_two_weeks_title =>
+      'Kaks nädalat sees — mida sa nüüd tead, mida alguses ei teadnud?';
+
+  @override
+  String get content_bonus_milestone_two_weeks_detail =>
+      'Jäädvusta hetk, mil see kohale jõudis.';
+
+  @override
+  String get content_bonus_milestone_three_weeks_title =>
+      'Kolm nädalat läbi — mida sa kõige rohkem igatsema hakkad, kui see lõpeb?';
+
+  @override
+  String get content_bonus_milestone_three_weeks_detail =>
+      'Ütle see enne, kui pead.';
+
+  @override
+  String get content_bonus_streak_saver_checkin_title => 'Lihtsalt anna märku';
+
+  @override
+  String get content_bonus_streak_saver_checkin_detail =>
+      'Ei mingit survet ega teemat — üks foto sellest, kus sa praegu oled.';
+
+  @override
+  String get content_achievement_first_adventure_title => 'Esimene seiklus';
+
+  @override
+  String get content_achievement_first_adventure_description =>
+      'Lisa oma esimene mälestus.';
+
+  @override
+  String get content_achievement_globetrotter_title => 'Maailmarändur';
+
+  @override
+  String get content_achievement_globetrotter_description =>
+      'Külasta 10 riiki.';
+
+  @override
+  String get content_achievement_century_title => '100 päeva teel';
+
+  @override
+  String get content_achievement_century_description =>
+      'Jäädvusta 100 reisipäeva.';
+
+  @override
+  String get content_achievement_star_collector_title => 'Tähekoguja';
+
+  @override
+  String get content_achievement_star_collector_description =>
+      'Teeni 250 tähte.';
+
+  @override
+  String get content_achievement_shutterbug_title => 'Naerata!';
+
+  @override
+  String get content_achievement_shutterbug_description =>
+      'Lisa oma mälestustele 50 fotot.';
+
+  @override
+  String get content_achievement_storyteller_title => 'Jutustaja';
+
+  @override
+  String get content_achievement_storyteller_description =>
+      'Kirjuta 20 päevikumärget.';
+
+  @override
+  String get content_achievement_jetsetter_title => 'Tõeline rändaja';
+
+  @override
+  String get content_achievement_jetsetter_description => 'Lisa 5 mälestust.';
+
+  @override
+  String get content_achievement_legend_title => 'Legend';
+
+  @override
+  String get content_achievement_legend_description => 'Teeni 1000 tähte.';
+
+  @override
+  String get content_checklist_passport => 'Pass';
+
+  @override
+  String get content_checklist_visa_documents => 'Viisadokumendid';
+
+  @override
+  String get content_checklist_travel_insurance => 'Reisikindlustus';
+
+  @override
+  String get content_checklist_boarding_passes_tickets =>
+      'Pardakaardid / piletid';
+
+  @override
+  String get content_checklist_id_card => 'ID-kaart';
+
+  @override
+  String get content_checklist_local_currency_cash => 'Kohalik sularaha';
+
+  @override
+  String get content_checklist_credit_debit_cards => 'Krediit- / deebetkaardid';
+
+  @override
+  String get content_checklist_phone_charger => 'Telefonilaadija';
+
+  @override
+  String get content_checklist_underwear => 'Aluspesu';
+
+  @override
+  String get content_checklist_comfortable_walking_shoes =>
+      'Mugavad jalutusjalanõud';
+
+  @override
+  String get content_checklist_t_shirts => 'T-särgid';
+
+  @override
+  String get content_checklist_jacket => 'Jope';
+
+  @override
+  String get content_checklist_swimsuit => 'Ujumisriided';
+
+  @override
+  String get content_checklist_sleepwear => 'Ööriided';
+
+  @override
+  String get content_checklist_sunglasses => 'Päikeseprillid';
+
+  @override
+  String get content_checklist_toothbrush_toothpaste => 'Hambahari ja -pasta';
+
+  @override
+  String get content_checklist_prescription_medications => 'Retseptiravimid';
+
+  @override
+  String get content_checklist_first_aid_kit => 'Esmaabikomplekt';
+
+  @override
+  String get content_checklist_sunscreen => 'Päikesekreem';
+
+  @override
+  String get content_checklist_deodorant => 'Deodorant';
+
+  @override
+  String get content_checklist_hand_sanitizer => 'Kätepuhastusvahend';
+
+  @override
+  String get content_checklist_shampoo_conditioner => 'Šampoon ja palsam';
+
+  @override
+  String get content_checklist_contact_lenses_or_glasses =>
+      'Kontaktläätsed või prillid';
+
+  @override
+  String get content_checklist_phone => 'Telefon';
+
+  @override
+  String get content_checklist_charging_cables => 'Laadimiskaablid';
+
+  @override
+  String get content_checklist_power_adapter => 'Pistikuadapter';
+
+  @override
+  String get content_checklist_portable_battery_pack => 'Akupank';
+
+  @override
+  String get content_checklist_headphones => 'Kõrvaklapid';
+
+  @override
+  String get content_checklist_camera => 'Kaamera';
+
+  @override
+  String get content_checklist_sim_card_or_esim => 'SIM-kaart või eSIM';
+
+  @override
+  String get content_checklist_travel_pillow => 'Reisipadi';
+
+  @override
+  String get content_checklist_reusable_water_bottle =>
+      'Korduvkasutatav veepudel';
+
+  @override
+  String get content_checklist_snacks => 'Suupisted';
+
+  @override
+  String get content_checklist_packing_cubes => 'Pakkimiskuubikud';
+
+  @override
+  String get content_checklist_earplugs_eye_mask => 'Kõrvatropid ja unemask';
+
+  @override
+  String get content_checklist_travel_journal => 'Reisipäevik';
+
+  @override
+  String get content_checklist_umbrella => 'Vihmavari';
 }
