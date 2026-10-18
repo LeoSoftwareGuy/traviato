@@ -75,5 +75,265 @@
   "error_rateLimitedSeconds": "{count, plural, one{Liiga palju katseid. Oota {count} sekund ja proovi uuesti.} other{Liiga palju katseid. Oota {count} sekundit ja proovi uuesti.}}",
   "@error_rateLimitedSeconds": {
     "x-review": "pending"
+  },
+  "common_back": "Tagasi",
+  "@common_back": {
+    "x-review": "pending"
+  },
+  "common_dayCount": "{count, plural, one{{count} päev} other{{count} päeva}}",
+  "@common_dayCount": {
+    "x-review": "pending"
+  },
+  "common_photoCount": "{count, plural, one{{count} foto} other{{count} fotot}}",
+  "@common_photoCount": {
+    "x-review": "pending"
+  },
+  "auth_logIn": "Logi sisse",
+  "@auth_logIn": {
+    "x-review": "pending"
+  },
+  "auth_createAccount": "Loo konto",
+  "@auth_createAccount": {
+    "x-review": "pending"
+  },
+  "auth_createMyAccount": "Loo minu konto",
+  "@auth_createMyAccount": {
+    "x-review": "pending"
+  },
+  "auth_titleLead": "Alusta oma",
+  "@auth_titleLead": {
+    "x-review": "pending"
+  },
+  "auth_titleEmphasis": "kogumikku.",
+  "@auth_titleEmphasis": {
+    "x-review": "pending"
+  },
+  "auth_nameLabel": "Nimi",
+  "@auth_nameLabel": {
+    "x-review": "pending"
+  },
+  "auth_nameHint": "Mari Tamm",
+  "@auth_nameHint": {
+    "x-review": "pending"
+  },
+  "auth_emailLabel": "E-post",
+  "@auth_emailLabel": {
+    "x-review": "pending"
+  },
+  "auth_emailHint": "mari@example.com",
+  "@auth_emailHint": {
+    "x-review": "pending"
+  },
+  "auth_passwordLabel": "Parool",
+  "@auth_passwordLabel": {
+    "x-review": "pending"
+  },
+  "auth_confirmPasswordLabel": "Korda parooli",
+  "@auth_confirmPasswordLabel": {
+    "x-review": "pending"
+  },
+  "auth_nameRequired": "Sisesta oma nimi.",
+  "@auth_nameRequired": {
+    "x-review": "pending"
+  },
+  "auth_emailRequired": "Sisesta oma e-post.",
+  "@auth_emailRequired": {
+    "x-review": "pending"
+  },
+  "auth_emailInvalid": "Sisesta kehtiv e-posti aadress.",
+  "@auth_emailInvalid": {
+    "x-review": "pending"
+  },
+  "auth_passwordRequiredSignup": "Sisesta parool.",
+  "@auth_passwordRequiredSignup": {
+    "x-review": "pending"
+  },
+  "auth_passwordRequiredLogin": "Sisesta oma parool.",
+  "@auth_passwordRequiredLogin": {
+    "x-review": "pending"
+  },
+  "auth_passwordTooShort": "Vähemalt 6 tähemärki.",
+  "@auth_passwordTooShort": {
+    "x-review": "pending"
+  },
+  "auth_passwordsMismatch": "Paroolid ei ühti.",
+  "@auth_passwordsMismatch": {
+    "x-review": "pending"
+  },
+  "auth_showPassword": "Näita",
+  "@auth_showPassword": {
+    "x-review": "pending"
+  },
+  "auth_hidePassword": "Peida",
+  "@auth_hidePassword": {
+    "x-review": "pending"
+  },
+  "auth_strengthWeak": "Nõrk",
+  "@auth_strengthWeak": {
+    "x-review": "pending"
+  },
+  "auth_strengthGood": "Hea",
+  "@auth_strengthGood": {
+    "x-review": "pending"
+  },
+  "auth_strengthStrong": "Tugev",
+  "@auth_strengthStrong": {
+    "x-review": "pending"
+  },
+  "auth_privacyNote": "Sinu mälestused jäävad sulle — midagi ei avaldata.",
+  "@auth_privacyNote": {
+    "x-review": "pending"
+  },
+  "auth_rewardTease": "Esimene mälestus toob {stars} — ja Jutustaja märgini on vaid kolm märget.",
+  "@auth_rewardTease": {
+    "x-review": "pending"
+  },
+  "auth_rewardTeaseStars": "10 tähte",
+  "@auth_rewardTeaseStars": {
+    "x-review": "pending"
+  },
+  "auth_or": "või",
+  "@auth_or": {
+    "x-review": "pending"
+  },
+  "auth_signInWithApple": "Logi sisse Apple'iga",
+  "@auth_signInWithApple": {
+    "x-review": "pending"
+  },
+  "auth_continueWithGoogle": "Jätka Google'iga",
+  "@auth_continueWithGoogle": {
+    "x-review": "pending"
+  },
+  "auth_checkInbox": "Vaata oma postkasti",
+  "@auth_checkInbox": {
+    "x-review": "pending"
+  },
+  "auth_confirmationSent": "Saatsime kinnituslingi aadressile {email}. Ava see selles telefonis ja sind logitakse kohe sisse või kinnita mujal ja logi siin sisse.",
+  "@auth_confirmationSent": {
+    "x-review": "pending"
+  },
+  "auth_backToLogin": "Tagasi sisselogimisse",
+  "@auth_backToLogin": {
+    "x-review": "pending"
+  },
+  "auth_resendIn": "Saada uuesti {seconds} s pärast",
+  "@auth_resendIn": {
+    "x-review": "pending"
+  },
+  "auth_resendEmail": "Saada kiri uuesti",
+  "@auth_resendEmail": {
+    "x-review": "pending"
+  },
+  "auth_sentAgain": "Saadetud uuesti ✓",
+  "@auth_sentAgain": {
+    "x-review": "pending"
+  },
+  "auth_useDifferentEmail": "Kasuta teist e-posti",
+  "@auth_useDifferentEmail": {
+    "x-review": "pending"
+  },
+  "guest_eyebrow": "Sinu mälestuste kaaslane",
+  "@guest_eyebrow": {
+    "x-review": "pending"
+  },
+  "guest_headlineLead": "Iga mälestus,",
+  "@guest_headlineLead": {
+    "x-review": "pending"
+  },
+  "guest_headlineEmphasis": "kaunilt talletatud.",
+  "@guest_headlineEmphasis": {
+    "x-review": "pending"
+  },
+  "guest_body": "Suurtest pidustustest spontaansete väikeste seiklusteni — mõned hetked on liiga head, et unustada. Planeeri neid, ela need läbi ja lase meil muuta parimad palad lugudeks, mille juurde tahad ikka ja jälle naasta.",
+  "@guest_body": {
+    "x-review": "pending"
+  },
+  "guest_occasionWeddings": "Pulmad",
+  "@guest_occasionWeddings": {
+    "x-review": "pending"
+  },
+  "guest_occasionTrips": "Reisid",
+  "@guest_occasionTrips": {
+    "x-review": "pending"
+  },
+  "guest_occasionBirthdays": "Sünnipäevad",
+  "@guest_occasionBirthdays": {
+    "x-review": "pending"
+  },
+  "guest_occasionMilestones": "Verstapostid",
+  "@guest_occasionMilestones": {
+    "x-review": "pending"
+  },
+  "guest_cta": "Hakka oma hetki talletama",
+  "@guest_cta": {
+    "x-review": "pending"
+  },
+  "guest_howTitle": "Tee plaane. Loo mälestusi. Hoia neid alles.",
+  "@guest_howTitle": {
+    "x-review": "pending"
+  },
+  "guest_stepBeforeEyebrow": "Enne",
+  "@guest_stepBeforeEyebrow": {
+    "x-review": "pending"
+  },
+  "guest_stepBeforeTitle": "Planeeri lõbu. Detailid jäta meile.",
+  "@guest_stepBeforeTitle": {
+    "x-review": "pending"
+  },
+  "guest_stepBeforeBody": "Suur nädalavahetus? Väike seiklus? Või lihtsalt meeldejääv teisipäev? Pane plaanid ja nimekirjad kirja ning hoia kõike ühes toredas kohas.",
+  "@guest_stepBeforeBody": {
+    "x-review": "pending"
+  },
+  "guest_stepDuringEyebrow": "Ajal",
+  "@guest_stepDuringEyebrow": {
+    "x-review": "pending"
+  },
+  "guest_stepDuringTitle": "Ela täiel rinnal. Pane kirja.",
+  "@guest_stepDuringTitle": {
+    "x-review": "pending"
+  },
+  "guest_stepDuringBody": "Tee fotosid, kirjuta väikesi märkmeid ja võta teel vastu üllatusväljakutseid. Parimad mälestused pole alati need, mida planeerisid.",
+  "@guest_stepDuringBody": {
+    "x-review": "pending"
+  },
+  "guest_stepAfterEyebrow": "Pärast",
+  "@guest_stepAfterEyebrow": {
+    "x-review": "pending"
+  },
+  "guest_stepAfterTitle": "Head hetked väärivad kordust.",
+  "@guest_stepAfterTitle": {
+    "x-review": "pending"
+  },
+  "guest_stepAfterBody": "Kui seiklus lõpeb, saavad sinu hetked kokku isiklikus filmis. Ela võlu uuesti läbi ja hoia mälestused alles.",
+  "@guest_stepAfterBody": {
+    "x-review": "pending"
+  },
+  "guest_sampleMemoriesEyebrow": "Mõned talletatud mälestused",
+  "@guest_sampleMemoriesEyebrow": {
+    "x-review": "pending"
+  },
+  "guest_sampleTokyo": "Perereis Tokyosse",
+  "@guest_sampleTokyo": {
+    "x-review": "pending"
+  },
+  "guest_sampleSolo": "Üksi puhkusele",
+  "@guest_sampleSolo": {
+    "x-review": "pending"
+  },
+  "guest_sampleAnniversary": "Meie aastapäev",
+  "@guest_sampleAnniversary": {
+    "x-review": "pending"
+  },
+  "guest_sampleGraduation": "Lõpetamine",
+  "@guest_sampleGraduation": {
+    "x-review": "pending"
+  },
+  "guest_sampleFood": "Gurmaani nädalavahetus",
+  "@guest_sampleFood": {
+    "x-review": "pending"
+  },
+  "guest_sampleBucketList": "Unistuste hetk",
+  "@guest_sampleBucketList": {
+    "x-review": "pending"
   }
 }

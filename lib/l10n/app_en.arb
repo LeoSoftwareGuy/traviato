@@ -45,5 +45,149 @@
         "type": "int"
       }
     }
-  }
+  },
+  "common_back": "Back",
+  "common_dayCount": "{count, plural, =1{1 day} other{{count} days}}",
+  "@common_dayCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "common_photoCount": "{count, plural, =1{1 photo} other{{count} photos}}",
+  "@common_photoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "auth_logIn": "Log in",
+  "auth_createAccount": "Create account",
+  "@auth_createAccount": {
+    "description": "Mode toggle segment."
+  },
+  "auth_createMyAccount": "Create my account",
+  "@auth_createMyAccount": {
+    "description": "Sign-up submit button."
+  },
+  "auth_titleLead": "Begin your",
+  "@auth_titleLead": {
+    "description": "Auth title, line 1 (upright)."
+  },
+  "auth_titleEmphasis": "collection.",
+  "@auth_titleEmphasis": {
+    "description": "Auth title, line 2 (italic accent)."
+  },
+  "auth_nameLabel": "Name",
+  "auth_nameHint": "Ada Wong",
+  "@auth_nameHint": {
+    "description": "Example name in the empty field."
+  },
+  "auth_emailLabel": "Email",
+  "auth_emailHint": "ada@example.com",
+  "auth_passwordLabel": "Password",
+  "auth_confirmPasswordLabel": "Confirm password",
+  "auth_nameRequired": "Enter your name.",
+  "auth_emailRequired": "Enter your email.",
+  "auth_emailInvalid": "Enter a valid email.",
+  "auth_passwordRequiredSignup": "Enter a password.",
+  "auth_passwordRequiredLogin": "Enter your password.",
+  "auth_passwordTooShort": "At least 6 characters.",
+  "auth_passwordsMismatch": "Passwords do not match.",
+  "auth_showPassword": "Show",
+  "auth_hidePassword": "Hide",
+  "auth_strengthWeak": "Weak",
+  "auth_strengthGood": "Good",
+  "auth_strengthStrong": "Strong",
+  "auth_privacyNote": "Your memories stay yours — nothing is ever published.",
+  "auth_rewardTease": "Your first memory earns {stars} — and the Storyteller badge is only three notes away.",
+  "@auth_rewardTease": {
+    "description": "{stars} is auth_rewardTeaseStars, shown highlighted.",
+    "placeholders": {
+      "stars": {
+        "type": "String"
+      }
+    }
+  },
+  "auth_rewardTeaseStars": "10 stars",
+  "auth_or": "or",
+  "@auth_or": {
+    "description": "Divider between the form and social sign-in."
+  },
+  "auth_signInWithApple": "Sign in with Apple",
+  "@auth_signInWithApple": {
+    "description": "Apple's own button wording per language."
+  },
+  "auth_continueWithGoogle": "Continue with Google",
+  "auth_checkInbox": "Check your inbox",
+  "auth_confirmationSent": "We sent a confirmation link to {email}. Open it on this phone and you'll be signed straight in, or confirm anywhere and log in here.",
+  "@auth_confirmationSent": {
+    "description": "{email} is shown bold.",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "auth_backToLogin": "Back to log in",
+  "auth_resendIn": "Resend in {seconds}s",
+  "@auth_resendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "auth_resendEmail": "Resend email",
+  "auth_sentAgain": "Sent again ✓",
+  "auth_useDifferentEmail": "Use a different email",
+  "guest_eyebrow": "Your memory companion",
+  "@guest_eyebrow": {
+    "description": "Mono eyebrow, uppercased in code. @maxLength 26"
+  },
+  "guest_headlineLead": "Every memory,",
+  "@guest_headlineLead": {
+    "description": "Hero headline line 1 (upright)."
+  },
+  "guest_headlineEmphasis": "beautifully captured.",
+  "@guest_headlineEmphasis": {
+    "description": "Hero headline line 2 (italic accent)."
+  },
+  "guest_body": "From big celebrations to spontaneous little adventures, some moments are just too good to forget. Plan them, live them, and let us turn the best bits into stories you'll want to revisit again and again.",
+  "guest_occasionWeddings": "Weddings",
+  "guest_occasionTrips": "Trips",
+  "guest_occasionBirthdays": "Birthdays",
+  "guest_occasionMilestones": "Milestones",
+  "guest_cta": "Start capturing your moments",
+  "guest_howTitle": "Make plans. Make memories. Make them last.",
+  "guest_stepBeforeEyebrow": "The before",
+  "@guest_stepBeforeEyebrow": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "guest_stepBeforeTitle": "Plan the fun. We'll handle the details.",
+  "guest_stepBeforeBody": "Big weekend? Little adventure? Just a Tuesday worth remembering? Map out your plans, make your lists, and keep everything in one happy place.",
+  "guest_stepDuringEyebrow": "The during",
+  "@guest_stepDuringEyebrow": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "guest_stepDuringTitle": "Live it up. Jot it down.",
+  "guest_stepDuringBody": "Snap photos, drop little notes, and take on surprise challenges along the way. The best memories aren't always the ones you planned.",
+  "guest_stepAfterEyebrow": "The after",
+  "@guest_stepAfterEyebrow": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "guest_stepAfterTitle": "Good times deserve a replay.",
+  "guest_stepAfterBody": "When the adventure ends, watch your moments come together in a personal highlight film. Relive the magic and keep the memories.",
+  "guest_sampleMemoriesEyebrow": "A few memories, kept",
+  "@guest_sampleMemoriesEyebrow": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "guest_sampleTokyo": "Family trip to Tokyo",
+  "guest_sampleSolo": "A solo getaway",
+  "guest_sampleAnniversary": "Our anniversary",
+  "guest_sampleGraduation": "Graduation",
+  "guest_sampleFood": "A food lover's weekend",
+  "guest_sampleBucketList": "A bucket-list moment"
 }
