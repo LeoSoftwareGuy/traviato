@@ -1219,5 +1219,377 @@
   "compare_verdictMoreButPerDay": "{bigger} läks {total} rohkem maksma, kuid {higher} puhul kulus päevas {perDay} rohkem. {cheaper} oli päeva kohta odavam.",
   "@compare_verdictMoreButPerDay": {
     "x-review": "pending"
+  },
+  "bonus_eyebrow": "Boonusülesanded",
+  "@bonus_eyebrow": {
+    "x-review": "pending"
+  },
+  "bonus_emptyTitle": "Käimasolevat mälestust veel pole",
+  "@bonus_emptyTitle": {
+    "x-review": "pending"
+  },
+  "bonus_emptyBody": "Boonusülesanded ilmuvad siia, kui mälestus on alanud.",
+  "@bonus_emptyBody": {
+    "x-review": "pending"
+  },
+  "bonus_backHome": "Avalehele",
+  "@bonus_backHome": {
+    "x-review": "pending"
+  },
+  "toast_dareDone": "+{points} ✦ · ülesanne tehtud",
+  "@toast_dareDone": {
+    "x-review": "pending"
+  },
+  "bonus_streakSaverHeader": "Pole kiiret · ootab sind",
+  "@bonus_streakSaverHeader": {
+    "x-review": "pending"
+  },
+  "bonus_completed": "Tehtud",
+  "@bonus_completed": {
+    "x-review": "pending"
+  },
+  "bonus_completedDay": "Tehtud · päev {day}",
+  "@bonus_completedDay": {
+    "x-review": "pending"
+  },
+  "bonus_openCamera": "Ava kaamera",
+  "@bonus_openCamera": {
+    "x-review": "pending"
+  },
+  "bonus_maybeLater": "Võib-olla hiljem",
+  "@bonus_maybeLater": {
+    "x-review": "pending"
+  },
+  "bonus_stretchUnlocked": "Avatud · valikuline",
+  "@bonus_stretchUnlocked": {
+    "x-review": "pending"
+  },
+  "bonus_bothDone": "Mõlemad tehtud · ✦{stars} täna",
+  "@bonus_bothDone": {
+    "x-review": "pending"
+  },
+  "bonus_newOnesTomorrow": "Uued tulevad homme.",
+  "@bonus_newOnesTomorrow": {
+    "x-review": "pending"
+  },
+  "notif_promptTitle": "Kas soovid igapäevaste ülesannete kohta õrna meeldetuletust?",
+  "@notif_promptTitle": {
+    "x-review": "pending"
+  },
+  "notif_promptBody": "{appName} saab sulle meelde tuletada hommikul ja õhtul, kui boonusülesanne on veel tegemata — mitte rohkem ja seda on hiljem lihtne välja lülitada.",
+  "@notif_promptBody": {
+    "x-review": "pending"
+  },
+  "profile_eyebrow": "Profiil",
+  "@profile_eyebrow": {
+    "x-review": "pending"
+  },
+  "profile_defaultName": "Rändur",
+  "@profile_defaultName": {
+    "x-review": "pending"
+  },
+  "profile_joined": "Liitus {date}",
+  "@profile_joined": {
+    "x-review": "pending"
+  },
+  "profile_logOut": "Logi välja",
+  "@profile_logOut": {
+    "x-review": "pending"
+  },
+  "profile_achievements": "Saavutused",
+  "@profile_achievements": {
+    "x-review": "pending"
+  },
+  "profile_achievementsEarned": "{earned}/{total} teenitud",
+  "@profile_achievementsEarned": {
+    "x-review": "pending"
+  },
+  "profile_updatePhoto": "Uuenda oma fotot",
+  "@profile_updatePhoto": {
+    "x-review": "pending"
+  },
+  "profile_editTitle": "Muuda profiili",
+  "@profile_editTitle": {
+    "x-review": "pending"
+  },
+  "profile_nameLabel": "Nimi",
+  "@profile_nameLabel": {
+    "x-review": "pending"
+  },
+  "profile_bioLabel": "Tutvustus",
+  "@profile_bioLabel": {
+    "x-review": "pending"
+  },
+  "profile_bioHint": "Üks lause sinu reisidest",
+  "@profile_bioHint": {
+    "x-review": "pending"
+  },
+  "profile_statMemories": "{count, plural, one{mälestus} other{mälestust}}",
+  "@profile_statMemories": {
+    "x-review": "pending"
+  },
+  "profile_statCountries": "{count, plural, one{riik} other{riiki}}",
+  "@profile_statCountries": {
+    "x-review": "pending"
+  },
+  "profile_statDays": "{count, plural, one{päev} other{päeva}}",
+  "@profile_statDays": {
+    "x-review": "pending"
+  },
+  "profile_statStars": "{count, plural, one{täht} other{tähte}}",
+  "@profile_statStars": {
+    "x-review": "pending"
+  },
+  "sub_periodAnnual": "Aastane",
+  "@sub_periodAnnual": {
+    "x-review": "pending"
+  },
+  "sub_periodMonthly": "Kuine",
+  "@sub_periodMonthly": {
+    "x-review": "pending"
+  },
+  "sub_freePlanPill": "Tasuta pakett",
+  "@sub_freePlanPill": {
+    "x-review": "pending"
+  },
+  "sub_proPill": "Pro",
+  "@sub_proPill": {
+    "x-review": "pending"
+  },
+  "sub_header": "Tellimus",
+  "@sub_header": {
+    "x-review": "pending"
+  },
+  "sub_proName": "{appName} Pro",
+  "@sub_proName": {
+    "x-review": "pending"
+  },
+  "sub_freePlan": "Tasuta pakett",
+  "@sub_freePlan": {
+    "x-review": "pending"
+  },
+  "sub_memoriesKeptMeta": "Hoitud mälestusi: {kept}/{cap}. Vali Pro, et jätkata.",
+  "@sub_memoriesKeptMeta": {
+    "x-review": "pending"
+  },
+  "sub_renewsSoon": "varsti",
+  "@sub_renewsSoon": {
+    "x-review": "pending"
+  },
+  "sub_renews": "Uueneb {date}",
+  "@sub_renews": {
+    "x-review": "pending"
+  },
+  "sub_renewsYearly": "Uueneb {date} · {price}/aastas",
+  "@sub_renewsYearly": {
+    "x-review": "pending"
+  },
+  "sub_renewsMonthly": "Uueneb {date} · {price}/kuus",
+  "@sub_renewsMonthly": {
+    "x-review": "pending"
+  },
+  "sub_trialTerms": "7 päeva tasuta, siis tellimus. Saad igal ajal tühistada.",
+  "@sub_trialTerms": {
+    "x-review": "pending"
+  },
+  "sub_trialTermsYearly": "7 päeva tasuta, siis {price}/aastas. Saad igal ajal tühistada.",
+  "@sub_trialTermsYearly": {
+    "x-review": "pending"
+  },
+  "sub_memoriesKept": "Hoitud mälestused",
+  "@sub_memoriesKept": {
+    "x-review": "pending"
+  },
+  "sub_unlimited": "Piiramatu",
+  "@sub_unlimited": {
+    "x-review": "pending"
+  },
+  "sub_ofCap": "{used}/{cap}",
+  "@sub_ofCap": {
+    "x-review": "pending"
+  },
+  "sub_photosInMemory": "Fotod selles mälestuses",
+  "@sub_photosInMemory": {
+    "x-review": "pending"
+  },
+  "sub_noLimit": "{count} · piiranguta",
+  "@sub_noLimit": {
+    "x-review": "pending"
+  },
+  "sub_manageHint": "Avab poe tellimuse seaded. Muudatused ja tühistamine käivad seal.",
+  "@sub_manageHint": {
+    "x-review": "pending"
+  },
+  "sub_restore": "Taasta ostud",
+  "@sub_restore": {
+    "x-review": "pending"
+  },
+  "sub_restored": "Ostud taastatud",
+  "@sub_restored": {
+    "x-review": "pending"
+  },
+  "sub_nothingToRestore": "Selle kontoga pole midagi taastada",
+  "@sub_nothingToRestore": {
+    "x-review": "pending"
+  },
+  "sub_upgradeToPro": "Vali Pro",
+  "@sub_upgradeToPro": {
+    "x-review": "pending"
+  },
+  "sub_manage": "Halda tellimust",
+  "@sub_manage": {
+    "x-review": "pending"
+  },
+  "sub_noSubscription": "Hallatavat tellimust ei leitud.",
+  "@sub_noSubscription": {
+    "x-review": "pending"
+  },
+  "sub_cantOpenSettings": "Tellimuse seadeid ei õnnestunud avada.",
+  "@sub_cantOpenSettings": {
+    "x-review": "pending"
+  },
+  "paywall_subMemoryCap": "Kolm tasuta mälestust on täis. Vali Pro, et hoida iga reisi, mitte ainult kolme.",
+  "@paywall_subMemoryCap": {
+    "x-review": "pending"
+  },
+  "paywall_subPhotoCap": "Selles mälestuses on juba 40 fotot. Vali Pro, et lisada piiramatult fotosid.",
+  "@paywall_subPhotoCap": {
+    "x-review": "pending"
+  },
+  "paywall_subProfile": "Iga mälestus väärib oma kohta. Vali Pro millal tahes ja ruumi jätkub kõigeks.",
+  "@paywall_subProfile": {
+    "x-review": "pending"
+  },
+  "paywall_trialStarted": "Prooviperiood algas · 7 päeva tasuta",
+  "@paywall_trialStarted": {
+    "x-review": "pending"
+  },
+  "paywall_brandEyebrow": "{appName} Pro",
+  "@paywall_brandEyebrow": {
+    "x-review": "pending"
+  },
+  "paywall_titleLead": "Ruumi igale",
+  "@paywall_titleLead": {
+    "x-review": "pending"
+  },
+  "paywall_titleEmphasis": "sinu mälestusele",
+  "@paywall_titleEmphasis": {
+    "x-review": "pending"
+  },
+  "paywall_perkMemories": "Piiramatult mälestusi",
+  "@paywall_perkMemories": {
+    "x-review": "pending"
+  },
+  "paywall_perkMemoriesDetail": "Hoia iga reisi, selle asemel et valida kolm.",
+  "@paywall_perkMemoriesDetail": {
+    "x-review": "pending"
+  },
+  "paywall_perkPhotos": "Piiramatult fotosid mälestuse kohta",
+  "@paywall_perkPhotos": {
+    "x-review": "pending"
+  },
+  "paywall_perkPhotosDetail": "Heal nädalal pole 40 foto piirangut.",
+  "@paywall_perkPhotosDetail": {
+    "x-review": "pending"
+  },
+  "paywall_perkExport": "Filmi HD-eksport",
+  "@paywall_perkExport": {
+    "x-review": "pending"
+  },
+  "paywall_perkExportDetail": "Salvesta kokkuvõte täiskvaliteedis. Tulekul.",
+  "@paywall_perkExportDetail": {
+    "x-review": "pending"
+  },
+  "paywall_perkPriority": "Kokkuvõtte eelisloomine",
+  "@paywall_perkPriority": {
+    "x-review": "pending"
+  },
+  "paywall_perkPriorityDetail": "Sinu film läheb järjekorrast mööda.",
+  "@paywall_perkPriorityDetail": {
+    "x-review": "pending"
+  },
+  "paywall_planAnnual": "Aasta",
+  "@paywall_planAnnual": {
+    "x-review": "pending"
+  },
+  "paywall_planMonthly": "Kuu",
+  "@paywall_planMonthly": {
+    "x-review": "pending"
+  },
+  "paywall_perYear": "aastas",
+  "@paywall_perYear": {
+    "x-review": "pending"
+  },
+  "paywall_perMonth": "kuus",
+  "@paywall_perMonth": {
+    "x-review": "pending"
+  },
+  "paywall_perMonthEquivalent": "{price} kuus",
+  "@paywall_perMonthEquivalent": {
+    "x-review": "pending"
+  },
+  "paywall_savePercent": "Säästa {percent}%",
+  "@paywall_savePercent": {
+    "x-review": "pending"
+  },
+  "paywall_termsPrivacy": "Tingimused · Privaatsus",
+  "@paywall_termsPrivacy": {
+    "x-review": "pending"
+  },
+  "paywall_trialTermsYearly": "7 päeva tasuta, siis {price}/aastas. Tühista igal ajal seadetes.",
+  "@paywall_trialTermsYearly": {
+    "x-review": "pending"
+  },
+  "paywall_trialTermsMonthly": "7 päeva tasuta, siis {price}/kuus. Tühista igal ajal seadetes.",
+  "@paywall_trialTermsMonthly": {
+    "x-review": "pending"
+  },
+  "paywall_startTrial": "Alusta 7-päevast tasuta prooviperioodi",
+  "@paywall_startTrial": {
+    "x-review": "pending"
+  },
+  "paywall_reassurance": "Sinu kolm tasuta mälestust jäävad sulle igal juhul — kui Pro-d ei vali, ei kustutata ega lukustata midagi.",
+  "@paywall_reassurance": {
+    "x-review": "pending"
+  },
+  "wrapUp_openJournal": "Ava päevik",
+  "@wrapUp_openJournal": {
+    "x-review": "pending"
+  },
+  "wrapUp_keepForever": "Hoia igavesti",
+  "@wrapUp_keepForever": {
+    "x-review": "pending"
+  },
+  "wrapUp_photographs": "{count, plural, one{foto} other{fotot}}",
+  "@wrapUp_photographs": {
+    "x-review": "pending"
+  },
+  "wrapUp_bonusTasks": "{count, plural, one{boonusülesanne} other{boonusülesannet}}",
+  "@wrapUp_bonusTasks": {
+    "x-review": "pending"
+  },
+  "wrapUp_stars": "{count, plural, one{täht} other{tähte}}",
+  "@wrapUp_stars": {
+    "x-review": "pending"
+  },
+  "wrapUp_footnoteClosing": "Kuid mitte sellepärast ei jää see sulle meelde.",
+  "@wrapUp_footnoteClosing": {
+    "x-review": "pending"
+  },
+  "wrapUp_generating1": "Elame reisi uuesti läbi…",
+  "@wrapUp_generating1": {
+    "x-review": "pending"
+  },
+  "wrapUp_generating2": "Otsime parimaid hetki…",
+  "@wrapUp_generating2": {
+    "x-review": "pending"
+  },
+  "wrapUp_generating3": "Kirjutame lugu…",
+  "@wrapUp_generating3": {
+    "x-review": "pending"
+  },
+  "wrapUp_generating4": "Peaaegu valmis…",
+  "@wrapUp_generating4": {
+    "x-review": "pending"
   }
 }

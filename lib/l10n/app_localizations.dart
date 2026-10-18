@@ -1946,6 +1946,564 @@ abstract class AppLocalizations {
     String perDay,
     String cheaper,
   );
+
+  /// Mono eyebrow, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus tasks'**
+  String get bonus_eyebrow;
+
+  /// No description provided for @bonus_emptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No active memory yet'**
+  String get bonus_emptyTitle;
+
+  /// No description provided for @bonus_emptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus tasks show up here once a memory is under way.'**
+  String get bonus_emptyBody;
+
+  /// No description provided for @bonus_backHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back home'**
+  String get bonus_backHome;
+
+  /// Star award toast (spec format).
+  ///
+  /// In en, this message translates to:
+  /// **'+{points} ✦ · dare done'**
+  String toast_dareDone(int points);
+
+  /// Mono header, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'No rush · waits for you'**
+  String get bonus_streakSaverHeader;
+
+  /// Mono header / badge, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get bonus_completed;
+
+  /// Mono badge, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed · Day {day}'**
+  String bonus_completedDay(int day);
+
+  /// No description provided for @bonus_openCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Open camera'**
+  String get bonus_openCamera;
+
+  /// No description provided for @bonus_maybeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get bonus_maybeLater;
+
+  /// Mono header, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked · optional'**
+  String get bonus_stretchUnlocked;
+
+  /// No description provided for @bonus_bothDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Both done · ✦{stars} today'**
+  String bonus_bothDone(int stars);
+
+  /// No description provided for @bonus_newOnesTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'New ones tomorrow.'**
+  String get bonus_newOnesTomorrow;
+
+  /// No description provided for @notif_promptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a gentle nudge for your daily dares?'**
+  String get notif_promptTitle;
+
+  /// No description provided for @notif_promptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{appName} can remind you once in the morning and once in the evening when a bonus task is still open — never more than that, and easy to turn off later.'**
+  String notif_promptBody(String appName);
+
+  /// Mono eyebrow, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile_eyebrow;
+
+  /// No description provided for @profile_defaultName.
+  ///
+  /// In en, this message translates to:
+  /// **'Traveler'**
+  String get profile_defaultName;
+
+  /// Mono line, uppercased in code; {date} is month + year.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined {date}'**
+  String profile_joined(String date);
+
+  /// No description provided for @profile_logOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get profile_logOut;
+
+  /// Mono header, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements'**
+  String get profile_achievements;
+
+  /// No description provided for @profile_achievementsEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'{earned}/{total} earned'**
+  String profile_achievementsEarned(int earned, int total);
+
+  /// No description provided for @profile_updatePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Update your photo'**
+  String get profile_updatePhoto;
+
+  /// No description provided for @profile_editTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit your profile'**
+  String get profile_editTitle;
+
+  /// No description provided for @profile_nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get profile_nameLabel;
+
+  /// No description provided for @profile_bioLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bio'**
+  String get profile_bioLabel;
+
+  /// No description provided for @profile_bioHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A line about your travels'**
+  String get profile_bioHint;
+
+  /// Stat label, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{memory} other{memories}}'**
+  String profile_statMemories(int count);
+
+  /// Stat label, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{country} other{countries}}'**
+  String profile_statCountries(int count);
+
+  /// Stat label, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{day} other{days}}'**
+  String profile_statDays(int count);
+
+  /// Stat label, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{star} other{stars}}'**
+  String profile_statStars(int count);
+
+  /// Tier pill period, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual'**
+  String get sub_periodAnnual;
+
+  /// Tier pill period, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get sub_periodMonthly;
+
+  /// Tier pill, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Free plan'**
+  String get sub_freePlanPill;
+
+  /// Tier pill; brand word, keep as is.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro'**
+  String get sub_proPill;
+
+  /// Mono header, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get sub_header;
+
+  /// No description provided for @sub_proName.
+  ///
+  /// In en, this message translates to:
+  /// **'{appName} Pro'**
+  String sub_proName(String appName);
+
+  /// No description provided for @sub_freePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Free plan'**
+  String get sub_freePlan;
+
+  /// No description provided for @sub_memoriesKeptMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{kept} of {cap} memories kept. Upgrade for room to keep going.'**
+  String sub_memoriesKeptMeta(int kept, int cap);
+
+  /// Used as {date} in sub_renews* when the date is unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'soon'**
+  String get sub_renewsSoon;
+
+  /// No description provided for @sub_renews.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews {date}'**
+  String sub_renews(String date);
+
+  /// No description provided for @sub_renewsYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews {date} · {price}/year'**
+  String sub_renewsYearly(String date, String price);
+
+  /// No description provided for @sub_renewsMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews {date} · {price}/month'**
+  String sub_renewsMonthly(String date, String price);
+
+  /// No description provided for @sub_trialTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'7 days free, then upgrade. Cancel anytime.'**
+  String get sub_trialTerms;
+
+  /// No description provided for @sub_trialTermsYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'7 days free, then {price}/year. Cancel anytime.'**
+  String sub_trialTermsYearly(String price);
+
+  /// No description provided for @sub_memoriesKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Memories kept'**
+  String get sub_memoriesKept;
+
+  /// No description provided for @sub_unlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get sub_unlimited;
+
+  /// No description provided for @sub_ofCap.
+  ///
+  /// In en, this message translates to:
+  /// **'{used} of {cap}'**
+  String sub_ofCap(int used, int cap);
+
+  /// No description provided for @sub_photosInMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos in this memory'**
+  String get sub_photosInMemory;
+
+  /// No description provided for @sub_noLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} · no limit'**
+  String sub_noLimit(int count);
+
+  /// No description provided for @sub_manageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens your store\'s subscription settings. Changes and cancellations happen there.'**
+  String get sub_manageHint;
+
+  /// No description provided for @sub_restore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get sub_restore;
+
+  /// No description provided for @sub_restored.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases restored'**
+  String get sub_restored;
+
+  /// No description provided for @sub_nothingToRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to restore on this account'**
+  String get sub_nothingToRestore;
+
+  /// No description provided for @sub_upgradeToPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Pro'**
+  String get sub_upgradeToPro;
+
+  /// No description provided for @sub_manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage subscription'**
+  String get sub_manage;
+
+  /// No description provided for @sub_noSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'No subscription found to manage.'**
+  String get sub_noSubscription;
+
+  /// No description provided for @sub_cantOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open subscription settings.'**
+  String get sub_cantOpenSettings;
+
+  /// No description provided for @paywall_subMemoryCap.
+  ///
+  /// In en, this message translates to:
+  /// **'Your three free memories are full. Upgrade to keep every trip you take, not just three.'**
+  String get paywall_subMemoryCap;
+
+  /// No description provided for @paywall_subPhotoCap.
+  ///
+  /// In en, this message translates to:
+  /// **'This memory is full at 40 photos. Upgrade for unlimited photos on every trip.'**
+  String get paywall_subPhotoCap;
+
+  /// No description provided for @paywall_subProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Every memory deserves a place to live. Upgrade any time for unlimited room.'**
+  String get paywall_subProfile;
+
+  /// No description provided for @paywall_trialStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial started · 7 days free'**
+  String get paywall_trialStarted;
+
+  /// Mono eyebrow, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'{appName} Pro'**
+  String paywall_brandEyebrow(String appName);
+
+  /// No description provided for @paywall_titleLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Room for every'**
+  String get paywall_titleLead;
+
+  /// No description provided for @paywall_titleEmphasis.
+  ///
+  /// In en, this message translates to:
+  /// **'memory you make'**
+  String get paywall_titleEmphasis;
+
+  /// No description provided for @paywall_perkMemories.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited memories'**
+  String get paywall_perkMemories;
+
+  /// No description provided for @paywall_perkMemoriesDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep every trip instead of choosing three.'**
+  String get paywall_perkMemoriesDetail;
+
+  /// No description provided for @paywall_perkPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited photos per memory'**
+  String get paywall_perkPhotos;
+
+  /// No description provided for @paywall_perkPhotosDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'No 40-photo ceiling on a good week.'**
+  String get paywall_perkPhotosDetail;
+
+  /// No description provided for @paywall_perkExport.
+  ///
+  /// In en, this message translates to:
+  /// **'HD film export'**
+  String get paywall_perkExport;
+
+  /// No description provided for @paywall_perkExportDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the wrap-up in full quality. Coming soon.'**
+  String get paywall_perkExportDetail;
+
+  /// No description provided for @paywall_perkPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority wrap-up generation'**
+  String get paywall_perkPriority;
+
+  /// No description provided for @paywall_perkPriorityDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Your film jumps the queue.'**
+  String get paywall_perkPriorityDetail;
+
+  /// No description provided for @paywall_planAnnual.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual'**
+  String get paywall_planAnnual;
+
+  /// No description provided for @paywall_planMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get paywall_planMonthly;
+
+  /// No description provided for @paywall_perYear.
+  ///
+  /// In en, this message translates to:
+  /// **'per year'**
+  String get paywall_perYear;
+
+  /// No description provided for @paywall_perMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'per month'**
+  String get paywall_perMonth;
+
+  /// Mono line, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} a month'**
+  String paywall_perMonthEquivalent(String price);
+
+  /// Mono badge, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Save {percent}%'**
+  String paywall_savePercent(int percent);
+
+  /// No description provided for @paywall_termsPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms · Privacy'**
+  String get paywall_termsPrivacy;
+
+  /// No description provided for @paywall_trialTermsYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Free for 7 days, then {price}/year. Cancel anytime in Settings.'**
+  String paywall_trialTermsYearly(String price);
+
+  /// No description provided for @paywall_trialTermsMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Free for 7 days, then {price}/month. Cancel anytime in Settings.'**
+  String paywall_trialTermsMonthly(String price);
+
+  /// No description provided for @paywall_startTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Start 7-day free trial'**
+  String get paywall_startTrial;
+
+  /// No description provided for @paywall_reassurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Your three free memories stay yours either way — nothing is deleted or locked if you don\'t upgrade.'**
+  String get paywall_reassurance;
+
+  /// No description provided for @wrapUp_openJournal.
+  ///
+  /// In en, this message translates to:
+  /// **'Open journal'**
+  String get wrapUp_openJournal;
+
+  /// No description provided for @wrapUp_keepForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep forever'**
+  String get wrapUp_keepForever;
+
+  /// Film footnote label under a number.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{photograph} other{photographs}}'**
+  String wrapUp_photographs(int count);
+
+  /// Film footnote label under a number.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{bonus task} other{bonus tasks}}'**
+  String wrapUp_bonusTasks(int count);
+
+  /// Film footnote label under a number.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{star} other{stars}}'**
+  String wrapUp_stars(int count);
+
+  /// No description provided for @wrapUp_footnoteClosing.
+  ///
+  /// In en, this message translates to:
+  /// **'None of which is the reason you\'ll remember it.'**
+  String get wrapUp_footnoteClosing;
+
+  /// No description provided for @wrapUp_generating1.
+  ///
+  /// In en, this message translates to:
+  /// **'Reliving your trip…'**
+  String get wrapUp_generating1;
+
+  /// No description provided for @wrapUp_generating2.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding the best moments…'**
+  String get wrapUp_generating2;
+
+  /// No description provided for @wrapUp_generating3.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing the story…'**
+  String get wrapUp_generating3;
+
+  /// No description provided for @wrapUp_generating4.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost ready…'**
+  String get wrapUp_generating4;
 }
 
 class _AppLocalizationsDelegate

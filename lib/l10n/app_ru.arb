@@ -1219,5 +1219,377 @@
   "compare_verdictMoreButPerDay": "Поездка «{bigger}» обошлась на {total} дороже, но в «{higher}» в день уходило на {perDay} больше. «{cheaper}» — дешевле в пересчёте на день.",
   "@compare_verdictMoreButPerDay": {
     "x-review": "pending"
+  },
+  "bonus_eyebrow": "Бонусные задания",
+  "@bonus_eyebrow": {
+    "x-review": "pending"
+  },
+  "bonus_emptyTitle": "Пока нет текущего воспоминания",
+  "@bonus_emptyTitle": {
+    "x-review": "pending"
+  },
+  "bonus_emptyBody": "Бонусные задания появятся здесь, когда начнётся воспоминание.",
+  "@bonus_emptyBody": {
+    "x-review": "pending"
+  },
+  "bonus_backHome": "На главную",
+  "@bonus_backHome": {
+    "x-review": "pending"
+  },
+  "toast_dareDone": "+{points} ✦ · задание выполнено",
+  "@toast_dareDone": {
+    "x-review": "pending"
+  },
+  "bonus_streakSaverHeader": "Не спешите · подождёт",
+  "@bonus_streakSaverHeader": {
+    "x-review": "pending"
+  },
+  "bonus_completed": "Выполнено",
+  "@bonus_completed": {
+    "x-review": "pending"
+  },
+  "bonus_completedDay": "Выполнено · день {day}",
+  "@bonus_completedDay": {
+    "x-review": "pending"
+  },
+  "bonus_openCamera": "Открыть камеру",
+  "@bonus_openCamera": {
+    "x-review": "pending"
+  },
+  "bonus_maybeLater": "Может, позже",
+  "@bonus_maybeLater": {
+    "x-review": "pending"
+  },
+  "bonus_stretchUnlocked": "Открыто · по желанию",
+  "@bonus_stretchUnlocked": {
+    "x-review": "pending"
+  },
+  "bonus_bothDone": "Оба выполнены · ✦{stars} сегодня",
+  "@bonus_bothDone": {
+    "x-review": "pending"
+  },
+  "bonus_newOnesTomorrow": "Новые — завтра.",
+  "@bonus_newOnesTomorrow": {
+    "x-review": "pending"
+  },
+  "notif_promptTitle": "Напоминать о ежедневных заданиях?",
+  "@notif_promptTitle": {
+    "x-review": "pending"
+  },
+  "notif_promptBody": "{appName} может напомнить утром и вечером, если бонусное задание ещё не выполнено, — не чаще, и это легко отключить.",
+  "@notif_promptBody": {
+    "x-review": "pending"
+  },
+  "profile_eyebrow": "Профиль",
+  "@profile_eyebrow": {
+    "x-review": "pending"
+  },
+  "profile_defaultName": "Путешественник",
+  "@profile_defaultName": {
+    "x-review": "pending"
+  },
+  "profile_joined": "С нами с {date}",
+  "@profile_joined": {
+    "x-review": "pending"
+  },
+  "profile_logOut": "Выйти",
+  "@profile_logOut": {
+    "x-review": "pending"
+  },
+  "profile_achievements": "Достижения",
+  "@profile_achievements": {
+    "x-review": "pending"
+  },
+  "profile_achievementsEarned": "получено {earned}/{total}",
+  "@profile_achievementsEarned": {
+    "x-review": "pending"
+  },
+  "profile_updatePhoto": "Обновить фото",
+  "@profile_updatePhoto": {
+    "x-review": "pending"
+  },
+  "profile_editTitle": "Редактировать профиль",
+  "@profile_editTitle": {
+    "x-review": "pending"
+  },
+  "profile_nameLabel": "Имя",
+  "@profile_nameLabel": {
+    "x-review": "pending"
+  },
+  "profile_bioLabel": "О себе",
+  "@profile_bioLabel": {
+    "x-review": "pending"
+  },
+  "profile_bioHint": "Пара слов о ваших путешествиях",
+  "@profile_bioHint": {
+    "x-review": "pending"
+  },
+  "profile_statMemories": "{count, plural, one{воспоминание} few{воспоминания} many{воспоминаний} other{воспоминания}}",
+  "@profile_statMemories": {
+    "x-review": "pending"
+  },
+  "profile_statCountries": "{count, plural, one{страна} few{страны} many{стран} other{страны}}",
+  "@profile_statCountries": {
+    "x-review": "pending"
+  },
+  "profile_statDays": "{count, plural, one{день} few{дня} many{дней} other{дня}}",
+  "@profile_statDays": {
+    "x-review": "pending"
+  },
+  "profile_statStars": "{count, plural, one{звезда} few{звезды} many{звёзд} other{звезды}}",
+  "@profile_statStars": {
+    "x-review": "pending"
+  },
+  "sub_periodAnnual": "Годовая",
+  "@sub_periodAnnual": {
+    "x-review": "pending"
+  },
+  "sub_periodMonthly": "Месячная",
+  "@sub_periodMonthly": {
+    "x-review": "pending"
+  },
+  "sub_freePlanPill": "Бесплатный тариф",
+  "@sub_freePlanPill": {
+    "x-review": "pending"
+  },
+  "sub_proPill": "Pro",
+  "@sub_proPill": {
+    "x-review": "pending"
+  },
+  "sub_header": "Подписка",
+  "@sub_header": {
+    "x-review": "pending"
+  },
+  "sub_proName": "{appName} Pro",
+  "@sub_proName": {
+    "x-review": "pending"
+  },
+  "sub_freePlan": "Бесплатный тариф",
+  "@sub_freePlan": {
+    "x-review": "pending"
+  },
+  "sub_memoriesKeptMeta": "Сохранено воспоминаний: {kept} из {cap}. Перейдите на Pro, чтобы сохранять больше.",
+  "@sub_memoriesKeptMeta": {
+    "x-review": "pending"
+  },
+  "sub_renewsSoon": "скоро",
+  "@sub_renewsSoon": {
+    "x-review": "pending"
+  },
+  "sub_renews": "Продление {date}",
+  "@sub_renews": {
+    "x-review": "pending"
+  },
+  "sub_renewsYearly": "Продление {date} · {price}/год",
+  "@sub_renewsYearly": {
+    "x-review": "pending"
+  },
+  "sub_renewsMonthly": "Продление {date} · {price}/мес.",
+  "@sub_renewsMonthly": {
+    "x-review": "pending"
+  },
+  "sub_trialTerms": "7 дней бесплатно, потом — по подписке. Отменить можно в любой момент.",
+  "@sub_trialTerms": {
+    "x-review": "pending"
+  },
+  "sub_trialTermsYearly": "7 дней бесплатно, затем {price}/год. Отменить можно в любой момент.",
+  "@sub_trialTermsYearly": {
+    "x-review": "pending"
+  },
+  "sub_memoriesKept": "Сохранено воспоминаний",
+  "@sub_memoriesKept": {
+    "x-review": "pending"
+  },
+  "sub_unlimited": "Без ограничений",
+  "@sub_unlimited": {
+    "x-review": "pending"
+  },
+  "sub_ofCap": "{used} из {cap}",
+  "@sub_ofCap": {
+    "x-review": "pending"
+  },
+  "sub_photosInMemory": "Фото в этом воспоминании",
+  "@sub_photosInMemory": {
+    "x-review": "pending"
+  },
+  "sub_noLimit": "{count} · без лимита",
+  "@sub_noLimit": {
+    "x-review": "pending"
+  },
+  "sub_manageHint": "Откроются настройки подписки в магазине приложений. Изменить или отменить её можно там.",
+  "@sub_manageHint": {
+    "x-review": "pending"
+  },
+  "sub_restore": "Восстановить покупки",
+  "@sub_restore": {
+    "x-review": "pending"
+  },
+  "sub_restored": "Покупки восстановлены",
+  "@sub_restored": {
+    "x-review": "pending"
+  },
+  "sub_nothingToRestore": "Для этого аккаунта нечего восстанавливать",
+  "@sub_nothingToRestore": {
+    "x-review": "pending"
+  },
+  "sub_upgradeToPro": "Перейти на Pro",
+  "@sub_upgradeToPro": {
+    "x-review": "pending"
+  },
+  "sub_manage": "Управление подпиской",
+  "@sub_manage": {
+    "x-review": "pending"
+  },
+  "sub_noSubscription": "Подписка не найдена.",
+  "@sub_noSubscription": {
+    "x-review": "pending"
+  },
+  "sub_cantOpenSettings": "Не удалось открыть настройки подписки.",
+  "@sub_cantOpenSettings": {
+    "x-review": "pending"
+  },
+  "paywall_subMemoryCap": "Три бесплатных воспоминания заняты. Перейдите на Pro, чтобы сохранять каждую поездку, а не только три.",
+  "@paywall_subMemoryCap": {
+    "x-review": "pending"
+  },
+  "paywall_subPhotoCap": "В этом воспоминании уже 40 фото. Перейдите на Pro, чтобы добавлять фото без ограничений.",
+  "@paywall_subPhotoCap": {
+    "x-review": "pending"
+  },
+  "paywall_subProfile": "Каждому воспоминанию нужно место. Перейдите на Pro в любой момент — и места хватит на всё.",
+  "@paywall_subProfile": {
+    "x-review": "pending"
+  },
+  "paywall_trialStarted": "Пробный период начат · 7 дней бесплатно",
+  "@paywall_trialStarted": {
+    "x-review": "pending"
+  },
+  "paywall_brandEyebrow": "{appName} Pro",
+  "@paywall_brandEyebrow": {
+    "x-review": "pending"
+  },
+  "paywall_titleLead": "Место для каждого",
+  "@paywall_titleLead": {
+    "x-review": "pending"
+  },
+  "paywall_titleEmphasis": "вашего воспоминания",
+  "@paywall_titleEmphasis": {
+    "x-review": "pending"
+  },
+  "paywall_perkMemories": "Безлимит воспоминаний",
+  "@paywall_perkMemories": {
+    "x-review": "pending"
+  },
+  "paywall_perkMemoriesDetail": "Сохраняйте каждую поездку, а не выбирайте три.",
+  "@paywall_perkMemoriesDetail": {
+    "x-review": "pending"
+  },
+  "paywall_perkPhotos": "Безлимит фото в воспоминании",
+  "@paywall_perkPhotos": {
+    "x-review": "pending"
+  },
+  "paywall_perkPhotosDetail": "Никакого потолка в 40 фото за удачную неделю.",
+  "@paywall_perkPhotosDetail": {
+    "x-review": "pending"
+  },
+  "paywall_perkExport": "Экспорт фильма в HD",
+  "@paywall_perkExport": {
+    "x-review": "pending"
+  },
+  "paywall_perkExportDetail": "Сохраняйте итоги в полном качестве. Скоро.",
+  "@paywall_perkExportDetail": {
+    "x-review": "pending"
+  },
+  "paywall_perkPriority": "Приоритетная сборка итогов",
+  "@paywall_perkPriority": {
+    "x-review": "pending"
+  },
+  "paywall_perkPriorityDetail": "Ваш фильм соберётся без очереди.",
+  "@paywall_perkPriorityDetail": {
+    "x-review": "pending"
+  },
+  "paywall_planAnnual": "Год",
+  "@paywall_planAnnual": {
+    "x-review": "pending"
+  },
+  "paywall_planMonthly": "Месяц",
+  "@paywall_planMonthly": {
+    "x-review": "pending"
+  },
+  "paywall_perYear": "в год",
+  "@paywall_perYear": {
+    "x-review": "pending"
+  },
+  "paywall_perMonth": "в месяц",
+  "@paywall_perMonth": {
+    "x-review": "pending"
+  },
+  "paywall_perMonthEquivalent": "{price} в месяц",
+  "@paywall_perMonthEquivalent": {
+    "x-review": "pending"
+  },
+  "paywall_savePercent": "Выгода {percent}%",
+  "@paywall_savePercent": {
+    "x-review": "pending"
+  },
+  "paywall_termsPrivacy": "Условия · Конфиденциальность",
+  "@paywall_termsPrivacy": {
+    "x-review": "pending"
+  },
+  "paywall_trialTermsYearly": "7 дней бесплатно, затем {price}/год. Отменить можно в Настройках в любой момент.",
+  "@paywall_trialTermsYearly": {
+    "x-review": "pending"
+  },
+  "paywall_trialTermsMonthly": "7 дней бесплатно, затем {price}/мес. Отменить можно в Настройках в любой момент.",
+  "@paywall_trialTermsMonthly": {
+    "x-review": "pending"
+  },
+  "paywall_startTrial": "Начать 7 дней бесплатно",
+  "@paywall_startTrial": {
+    "x-review": "pending"
+  },
+  "paywall_reassurance": "Три бесплатных воспоминания останутся с вами в любом случае — без Pro ничего не удалится и не заблокируется.",
+  "@paywall_reassurance": {
+    "x-review": "pending"
+  },
+  "wrapUp_openJournal": "Открыть дневник",
+  "@wrapUp_openJournal": {
+    "x-review": "pending"
+  },
+  "wrapUp_keepForever": "Сохранить навсегда",
+  "@wrapUp_keepForever": {
+    "x-review": "pending"
+  },
+  "wrapUp_photographs": "{count, plural, one{фотография} few{фотографии} many{фотографий} other{фотографии}}",
+  "@wrapUp_photographs": {
+    "x-review": "pending"
+  },
+  "wrapUp_bonusTasks": "{count, plural, one{бонусное задание} few{бонусных задания} many{бонусных заданий} other{бонусных задания}}",
+  "@wrapUp_bonusTasks": {
+    "x-review": "pending"
+  },
+  "wrapUp_stars": "{count, plural, one{звезда} few{звезды} many{звёзд} other{звезды}}",
+  "@wrapUp_stars": {
+    "x-review": "pending"
+  },
+  "wrapUp_footnoteClosing": "Но запомните вы её совсем не поэтому.",
+  "@wrapUp_footnoteClosing": {
+    "x-review": "pending"
+  },
+  "wrapUp_generating1": "Переживаем поездку заново…",
+  "@wrapUp_generating1": {
+    "x-review": "pending"
+  },
+  "wrapUp_generating2": "Ищем лучшие моменты…",
+  "@wrapUp_generating2": {
+    "x-review": "pending"
+  },
+  "wrapUp_generating3": "Пишем историю…",
+  "@wrapUp_generating3": {
+    "x-review": "pending"
+  },
+  "wrapUp_generating4": "Почти готово…",
+  "@wrapUp_generating4": {
+    "x-review": "pending"
   }
 }
