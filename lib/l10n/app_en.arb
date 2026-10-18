@@ -501,5 +501,251 @@
   "checklist_catClothingShoes": "Clothing & shoes",
   "checklist_catGadgetsTech": "Gadgets & tech",
   "checklist_catToiletriesHealth": "Toiletries & health",
-  "checklist_catNiceToHaves": "Nice-to-haves"
+  "checklist_catNiceToHaves": "Nice-to-haves",
+  "journal_eyebrow": "Journal",
+  "@journal_eyebrow": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "journal_quietOne": "A quiet one",
+  "journal_dayQuietOne": "Day {day} — a quiet one",
+  "@journal_dayQuietOne": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "journal_noEntries": "No photos, no notes yet",
+  "@journal_noEntries": {
+    "description": "Followed by · and journal_questsDone."
+  },
+  "journal_questsDone": "{count, plural, =1{1 quest done} other{{count} quests done}}",
+  "@journal_questsDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "journal_dayTitle": "Day {day} — {name}",
+  "@journal_dayTitle": {
+    "description": "{name} is the memory's own title (user content).",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "journal_noteStamp": "Day {day} · {date}",
+  "@journal_noteStamp": {
+    "description": "Note page stamp, uppercased in code.",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "journal_noDates": "Add dates to this memory to start your journal.",
+  "journal_dayNotYet": "This day hasn't happened yet",
+  "journal_toDo": "To Do",
+  "journal_todayToDo": "Today's to do",
+  "journal_viewWrapUp": "View wrap-up",
+  "@journal_viewWrapUp": {
+    "description": "Wrap-up button; the unlocked one appends ▸ in code."
+  },
+  "journal_photos": "Photos",
+  "journal_photosSaved": "{count} saved",
+  "@journal_photosSaved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "journal_addPhotoTile": "Add ✦2",
+  "@journal_addPhotoTile": {
+    "description": "Add-photo tile in the strip; ✦2 is the award."
+  },
+  "journal_wrapUpExplainer": "Your film needs a little more to work with. {ask}",
+  "@journal_wrapUpExplainer": {
+    "description": "{ask} is one of journal_wrapUpAsk*.",
+    "placeholders": {
+      "ask": {
+        "type": "String"
+      }
+    }
+  },
+  "journal_wrapUpAskPhotosAndNote": "{count, plural, =1{Add 1 more photo and one note to unlock it.} other{Add {count} more photos and one note to unlock it.}}",
+  "@journal_wrapUpAskPhotosAndNote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "journal_wrapUpAskPhotos": "{count, plural, =1{Add 1 more photo to unlock it.} other{Add {count} more photos to unlock it.}}",
+  "@journal_wrapUpAskPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "journal_wrapUpAskNote": "Write one note to unlock it.",
+  "journal_wrapUpReqPhotos": "Five photos in this memory",
+  "journal_wrapUpReqNote": "At least one note written",
+  "journal_wrapUpFree": "Nothing to buy — this one's the same on every plan.",
+  "journal_nothingYet": "Nothing here yet",
+  "journal_nothingFromDay": "Nothing from Day {day} yet",
+  "@journal_nothingFromDay": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "journal_nudgeBody": "Even one photo helps your wrap-up. Quiet days still make the film — this one will just pass through it.",
+  "journal_addAPhoto": "＋ Add a photo",
+  "journal_writeNote": "Write a note",
+  "journal_addNotesToday": "✎ Add notes about today",
+  "journal_continueEntry": "✎ Continue entry",
+  "journal_wordCount": "{count, plural, =1{1 word} other{{count} words}}",
+  "@journal_wordCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "journal_edited": "Edited {time}",
+  "@journal_edited": {
+    "description": "Note card footer, uppercased in code.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "toast_noteSaved": "+1 ✦ · note saved",
+  "@toast_noteSaved": {
+    "description": "Star award toast (spec copy table)."
+  },
+  "note_discardTitle": "Discard what you added?",
+  "note_keepWriting": "Keep writing",
+  "note_discard": "Discard",
+  "note_bodyHint": "Keep going — type, or tap the mic and just talk.",
+  "note_wordsAdded": "{count, plural, =1{+1 word} other{+{count} words}}",
+  "@note_wordsAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "note_micOff": "Microphone is off. Turn it on in Settings, or just type.",
+  "note_voiceUnavailable": "Voice isn't available right now — typing works.",
+  "note_typeSemantics": "Type",
+  "@note_typeSemantics": {
+    "description": "Screen-reader label for the Aa button."
+  },
+  "note_dictateSemantics": "Dictate",
+  "@note_dictateSemantics": {
+    "description": "Screen-reader label for the mic."
+  },
+  "note_stopDictationSemantics": "Stop dictation",
+  "@note_stopDictationSemantics": {
+    "description": "Screen-reader label for the mic while listening."
+  },
+  "dictation_tapToTalk": "Tap to talk",
+  "dictation_tapToStop": "Tap to stop",
+  "note_listening": "Listening · {time}",
+  "@note_listening": {
+    "description": "Mono status line, uppercased in code.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "photo_addTitle": "Add a photo",
+  "@photo_addTitle": {
+    "description": "Source picker sheet title."
+  },
+  "photo_detailsTitle": "Add photo",
+  "@photo_detailsTitle": {
+    "description": "Details form title before saving."
+  },
+  "photo_captionLabel": "Caption (optional)",
+  "photo_captionHint": "e.g. Sunset at the harbor",
+  "photo_placeLabel": "Place (optional)",
+  "photo_placeHint": "e.g. Old Town",
+  "toast_photoLogged": "+2 ✦ · photo logged",
+  "@toast_photoLogged": {
+    "description": "Star award toast."
+  },
+  "toast_photosLogged": "+{points} ✦ · {count, plural, =1{1 photo logged} other{{count} photos logged}}",
+  "@toast_photosLogged": {
+    "description": "Star award toast after a batch upload.",
+    "placeholders": {
+      "points": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "photo_uploadingTitle": "Uploading photos",
+  "photo_uploadingProgress": "Uploading {current} of {total}…",
+  "@photo_uploadingProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "photo_uploadComplete": "Upload complete",
+  "photo_uploadSummary": "{success} uploaded, {failed} failed.",
+  "@photo_uploadSummary": {
+    "placeholders": {
+      "success": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "photo_retryFailed": "Retry failed ({count})",
+  "@photo_retryFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "photo_locationTitle": "Tag this photo with its location?",
+  "photo_locationBody": "{appName} can save where a photo was taken so it shows up in your journal and wrap-up. You can still add photos without this.",
+  "@photo_locationBody": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "photo_notNow": "Not now",
+  "photo_allow": "Allow",
+  "photo_deleteSemantics": "Delete photo",
+  "@photo_deleteSemantics": {
+    "description": "Screen-reader label."
+  }
 }

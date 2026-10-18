@@ -739,5 +739,257 @@
   "checklist_catNiceToHaves": "Toredad lisad",
   "@checklist_catNiceToHaves": {
     "x-review": "pending"
+  },
+  "journal_eyebrow": "Päevik",
+  "@journal_eyebrow": {
+    "x-review": "pending"
+  },
+  "journal_quietOne": "Vaikne päev",
+  "@journal_quietOne": {
+    "x-review": "pending"
+  },
+  "journal_dayQuietOne": "Päev {day} — vaikne päev",
+  "@journal_dayQuietOne": {
+    "x-review": "pending"
+  },
+  "journal_noEntries": "Veel pole fotosid ega märkmeid",
+  "@journal_noEntries": {
+    "x-review": "pending"
+  },
+  "journal_questsDone": "{count, plural, one{{count} tegevus tehtud} other{{count} tegevust tehtud}}",
+  "@journal_questsDone": {
+    "x-review": "pending"
+  },
+  "journal_dayTitle": "Päev {day} — {name}",
+  "@journal_dayTitle": {
+    "x-review": "pending"
+  },
+  "journal_noteStamp": "Päev {day} · {date}",
+  "@journal_noteStamp": {
+    "x-review": "pending"
+  },
+  "journal_noDates": "Lisa mälestusele kuupäevad, et päevikut alustada.",
+  "@journal_noDates": {
+    "x-review": "pending"
+  },
+  "journal_dayNotYet": "See päev pole veel saabunud",
+  "@journal_dayNotYet": {
+    "x-review": "pending"
+  },
+  "journal_toDo": "Tegevused",
+  "@journal_toDo": {
+    "x-review": "pending"
+  },
+  "journal_todayToDo": "Tänased tegevused",
+  "@journal_todayToDo": {
+    "x-review": "pending"
+  },
+  "journal_viewWrapUp": "Vaata kokkuvõtet",
+  "@journal_viewWrapUp": {
+    "x-review": "pending"
+  },
+  "journal_photos": "Fotod",
+  "@journal_photos": {
+    "x-review": "pending"
+  },
+  "journal_photosSaved": "salvestatud: {count}",
+  "@journal_photosSaved": {
+    "x-review": "pending"
+  },
+  "journal_addPhotoTile": "Lisa ✦2",
+  "@journal_addPhotoTile": {
+    "x-review": "pending"
+  },
+  "journal_wrapUpExplainer": "Filmil on veel vähe materjali. {ask}",
+  "@journal_wrapUpExplainer": {
+    "x-review": "pending"
+  },
+  "journal_wrapUpAskPhotosAndNote": "{count, plural, one{Lisa veel {count} foto ja üks märge, et film avada.} other{Lisa veel {count} fotot ja üks märge, et film avada.}}",
+  "@journal_wrapUpAskPhotosAndNote": {
+    "x-review": "pending"
+  },
+  "journal_wrapUpAskPhotos": "{count, plural, one{Lisa veel {count} foto, et film avada.} other{Lisa veel {count} fotot, et film avada.}}",
+  "@journal_wrapUpAskPhotos": {
+    "x-review": "pending"
+  },
+  "journal_wrapUpAskNote": "Kirjuta üks märge, et film avada.",
+  "@journal_wrapUpAskNote": {
+    "x-review": "pending"
+  },
+  "journal_wrapUpReqPhotos": "Viis fotot selles mälestuses",
+  "@journal_wrapUpReqPhotos": {
+    "x-review": "pending"
+  },
+  "journal_wrapUpReqNote": "Vähemalt üks märge kirjutatud",
+  "@journal_wrapUpReqNote": {
+    "x-review": "pending"
+  },
+  "journal_wrapUpFree": "Midagi pole vaja osta — see on igas paketis sama.",
+  "@journal_wrapUpFree": {
+    "x-review": "pending"
+  },
+  "journal_nothingYet": "Siin pole veel midagi",
+  "@journal_nothingYet": {
+    "x-review": "pending"
+  },
+  "journal_nothingFromDay": "{day}. päevast pole veel midagi",
+  "@journal_nothingFromDay": {
+    "x-review": "pending"
+  },
+  "journal_nudgeBody": "Isegi üks foto aitab kokkuvõtet. Vaiksed päevad jõuavad ka filmi — see lihtsalt vilksatab mööda.",
+  "@journal_nudgeBody": {
+    "x-review": "pending"
+  },
+  "journal_addAPhoto": "＋ Lisa foto",
+  "@journal_addAPhoto": {
+    "x-review": "pending"
+  },
+  "journal_writeNote": "Kirjuta märge",
+  "@journal_writeNote": {
+    "x-review": "pending"
+  },
+  "journal_addNotesToday": "✎ Lisa märkmeid tänase kohta",
+  "@journal_addNotesToday": {
+    "x-review": "pending"
+  },
+  "journal_continueEntry": "✎ Jätka sissekannet",
+  "@journal_continueEntry": {
+    "x-review": "pending"
+  },
+  "journal_wordCount": "{count, plural, one{{count} sõna} other{{count} sõna}}",
+  "@journal_wordCount": {
+    "x-review": "pending"
+  },
+  "journal_edited": "Muudetud {time}",
+  "@journal_edited": {
+    "x-review": "pending"
+  },
+  "toast_noteSaved": "+1 ✦ · märge salvestatud",
+  "@toast_noteSaved": {
+    "x-review": "pending"
+  },
+  "note_discardTitle": "Kas loobuda lisatust?",
+  "@note_discardTitle": {
+    "x-review": "pending"
+  },
+  "note_keepWriting": "Kirjuta edasi",
+  "@note_keepWriting": {
+    "x-review": "pending"
+  },
+  "note_discard": "Loobu",
+  "@note_discard": {
+    "x-review": "pending"
+  },
+  "note_bodyHint": "Jätka — kirjuta või puuduta mikrofoni ja lihtsalt räägi.",
+  "@note_bodyHint": {
+    "x-review": "pending"
+  },
+  "note_wordsAdded": "{count, plural, one{+{count} sõna} other{+{count} sõna}}",
+  "@note_wordsAdded": {
+    "x-review": "pending"
+  },
+  "note_micOff": "Mikrofon on välja lülitatud. Lülita see seadetes sisse või lihtsalt kirjuta.",
+  "@note_micOff": {
+    "x-review": "pending"
+  },
+  "note_voiceUnavailable": "Häälsisestus pole praegu saadaval — kirjutamine töötab.",
+  "@note_voiceUnavailable": {
+    "x-review": "pending"
+  },
+  "note_typeSemantics": "Kirjuta",
+  "@note_typeSemantics": {
+    "x-review": "pending"
+  },
+  "note_dictateSemantics": "Dikteeri",
+  "@note_dictateSemantics": {
+    "x-review": "pending"
+  },
+  "note_stopDictationSemantics": "Lõpeta dikteerimine",
+  "@note_stopDictationSemantics": {
+    "x-review": "pending"
+  },
+  "dictation_tapToTalk": "Puuduta ja räägi",
+  "@dictation_tapToTalk": {
+    "x-review": "pending"
+  },
+  "dictation_tapToStop": "Puuduta, et lõpetada",
+  "@dictation_tapToStop": {
+    "x-review": "pending"
+  },
+  "note_listening": "Kuulan · {time}",
+  "@note_listening": {
+    "x-review": "pending"
+  },
+  "photo_addTitle": "Lisa foto",
+  "@photo_addTitle": {
+    "x-review": "pending"
+  },
+  "photo_detailsTitle": "Lisa foto",
+  "@photo_detailsTitle": {
+    "x-review": "pending"
+  },
+  "photo_captionLabel": "Allkiri (valikuline)",
+  "@photo_captionLabel": {
+    "x-review": "pending"
+  },
+  "photo_captionHint": "nt Päikeseloojang sadamas",
+  "@photo_captionHint": {
+    "x-review": "pending"
+  },
+  "photo_placeLabel": "Koht (valikuline)",
+  "@photo_placeLabel": {
+    "x-review": "pending"
+  },
+  "photo_placeHint": "nt Vanalinn",
+  "@photo_placeHint": {
+    "x-review": "pending"
+  },
+  "toast_photoLogged": "+2 ✦ · foto lisatud",
+  "@toast_photoLogged": {
+    "x-review": "pending"
+  },
+  "toast_photosLogged": "+{points} ✦ · {count, plural, one{{count} foto lisatud} other{{count} fotot lisatud}}",
+  "@toast_photosLogged": {
+    "x-review": "pending"
+  },
+  "photo_uploadingTitle": "Laadime fotosid üles",
+  "@photo_uploadingTitle": {
+    "x-review": "pending"
+  },
+  "photo_uploadingProgress": "Laadin üles {current}/{total}…",
+  "@photo_uploadingProgress": {
+    "x-review": "pending"
+  },
+  "photo_uploadComplete": "Üleslaadimine lõpetatud",
+  "@photo_uploadComplete": {
+    "x-review": "pending"
+  },
+  "photo_uploadSummary": "Üles laaditud: {success}, ebaõnnestus: {failed}.",
+  "@photo_uploadSummary": {
+    "x-review": "pending"
+  },
+  "photo_retryFailed": "Proovi ebaõnnestunuid uuesti ({count})",
+  "@photo_retryFailed": {
+    "x-review": "pending"
+  },
+  "photo_locationTitle": "Kas lisada fotole asukoht?",
+  "@photo_locationTitle": {
+    "x-review": "pending"
+  },
+  "photo_locationBody": "{appName} saab salvestada, kus foto tehti, et see ilmuks sinu päevikus ja kokkuvõttes. Fotosid saad lisada ka ilma selleta.",
+  "@photo_locationBody": {
+    "x-review": "pending"
+  },
+  "photo_notNow": "Mitte praegu",
+  "@photo_notNow": {
+    "x-review": "pending"
+  },
+  "photo_allow": "Luba",
+  "@photo_allow": {
+    "x-review": "pending"
+  },
+  "photo_deleteSemantics": "Kustuta foto",
+  "@photo_deleteSemantics": {
+    "x-review": "pending"
   }
 }

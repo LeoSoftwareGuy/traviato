@@ -1209,6 +1209,384 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nice-to-haves'**
   String get checklist_catNiceToHaves;
+
+  /// Mono eyebrow, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Journal'**
+  String get journal_eyebrow;
+
+  /// No description provided for @journal_quietOne.
+  ///
+  /// In en, this message translates to:
+  /// **'A quiet one'**
+  String get journal_quietOne;
+
+  /// No description provided for @journal_dayQuietOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day} — a quiet one'**
+  String journal_dayQuietOne(int day);
+
+  /// Followed by · and journal_questsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'No photos, no notes yet'**
+  String get journal_noEntries;
+
+  /// No description provided for @journal_questsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 quest done} other{{count} quests done}}'**
+  String journal_questsDone(int count);
+
+  /// {name} is the memory's own title (user content).
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day} — {name}'**
+  String journal_dayTitle(int day, String name);
+
+  /// Note page stamp, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day} · {date}'**
+  String journal_noteStamp(int day, String date);
+
+  /// No description provided for @journal_noDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Add dates to this memory to start your journal.'**
+  String get journal_noDates;
+
+  /// No description provided for @journal_dayNotYet.
+  ///
+  /// In en, this message translates to:
+  /// **'This day hasn\'t happened yet'**
+  String get journal_dayNotYet;
+
+  /// No description provided for @journal_toDo.
+  ///
+  /// In en, this message translates to:
+  /// **'To Do'**
+  String get journal_toDo;
+
+  /// No description provided for @journal_todayToDo.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s to do'**
+  String get journal_todayToDo;
+
+  /// Wrap-up button; the unlocked one appends ▸ in code.
+  ///
+  /// In en, this message translates to:
+  /// **'View wrap-up'**
+  String get journal_viewWrapUp;
+
+  /// No description provided for @journal_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get journal_photos;
+
+  /// No description provided for @journal_photosSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} saved'**
+  String journal_photosSaved(int count);
+
+  /// Add-photo tile in the strip; ✦2 is the award.
+  ///
+  /// In en, this message translates to:
+  /// **'Add ✦2'**
+  String get journal_addPhotoTile;
+
+  /// {ask} is one of journal_wrapUpAsk*.
+  ///
+  /// In en, this message translates to:
+  /// **'Your film needs a little more to work with. {ask}'**
+  String journal_wrapUpExplainer(String ask);
+
+  /// No description provided for @journal_wrapUpAskPhotosAndNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Add 1 more photo and one note to unlock it.} other{Add {count} more photos and one note to unlock it.}}'**
+  String journal_wrapUpAskPhotosAndNote(int count);
+
+  /// No description provided for @journal_wrapUpAskPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Add 1 more photo to unlock it.} other{Add {count} more photos to unlock it.}}'**
+  String journal_wrapUpAskPhotos(int count);
+
+  /// No description provided for @journal_wrapUpAskNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Write one note to unlock it.'**
+  String get journal_wrapUpAskNote;
+
+  /// No description provided for @journal_wrapUpReqPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Five photos in this memory'**
+  String get journal_wrapUpReqPhotos;
+
+  /// No description provided for @journal_wrapUpReqNote.
+  ///
+  /// In en, this message translates to:
+  /// **'At least one note written'**
+  String get journal_wrapUpReqNote;
+
+  /// No description provided for @journal_wrapUpFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to buy — this one\'s the same on every plan.'**
+  String get journal_wrapUpFree;
+
+  /// No description provided for @journal_nothingYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here yet'**
+  String get journal_nothingYet;
+
+  /// No description provided for @journal_nothingFromDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing from Day {day} yet'**
+  String journal_nothingFromDay(int day);
+
+  /// No description provided for @journal_nudgeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Even one photo helps your wrap-up. Quiet days still make the film — this one will just pass through it.'**
+  String get journal_nudgeBody;
+
+  /// No description provided for @journal_addAPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'＋ Add a photo'**
+  String get journal_addAPhoto;
+
+  /// No description provided for @journal_writeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a note'**
+  String get journal_writeNote;
+
+  /// No description provided for @journal_addNotesToday.
+  ///
+  /// In en, this message translates to:
+  /// **'✎ Add notes about today'**
+  String get journal_addNotesToday;
+
+  /// No description provided for @journal_continueEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'✎ Continue entry'**
+  String get journal_continueEntry;
+
+  /// No description provided for @journal_wordCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 word} other{{count} words}}'**
+  String journal_wordCount(int count);
+
+  /// Note card footer, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Edited {time}'**
+  String journal_edited(String time);
+
+  /// Star award toast (spec copy table).
+  ///
+  /// In en, this message translates to:
+  /// **'+1 ✦ · note saved'**
+  String get toast_noteSaved;
+
+  /// No description provided for @note_discardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard what you added?'**
+  String get note_discardTitle;
+
+  /// No description provided for @note_keepWriting.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep writing'**
+  String get note_keepWriting;
+
+  /// No description provided for @note_discard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get note_discard;
+
+  /// No description provided for @note_bodyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep going — type, or tap the mic and just talk.'**
+  String get note_bodyHint;
+
+  /// No description provided for @note_wordsAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{+1 word} other{+{count} words}}'**
+  String note_wordsAdded(int count);
+
+  /// No description provided for @note_micOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone is off. Turn it on in Settings, or just type.'**
+  String get note_micOff;
+
+  /// No description provided for @note_voiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice isn\'t available right now — typing works.'**
+  String get note_voiceUnavailable;
+
+  /// Screen-reader label for the Aa button.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get note_typeSemantics;
+
+  /// Screen-reader label for the mic.
+  ///
+  /// In en, this message translates to:
+  /// **'Dictate'**
+  String get note_dictateSemantics;
+
+  /// Screen-reader label for the mic while listening.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop dictation'**
+  String get note_stopDictationSemantics;
+
+  /// No description provided for @dictation_tapToTalk.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to talk'**
+  String get dictation_tapToTalk;
+
+  /// No description provided for @dictation_tapToStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to stop'**
+  String get dictation_tapToStop;
+
+  /// Mono status line, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening · {time}'**
+  String note_listening(String time);
+
+  /// Source picker sheet title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a photo'**
+  String get photo_addTitle;
+
+  /// Details form title before saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get photo_detailsTitle;
+
+  /// No description provided for @photo_captionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Caption (optional)'**
+  String get photo_captionLabel;
+
+  /// No description provided for @photo_captionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Sunset at the harbor'**
+  String get photo_captionHint;
+
+  /// No description provided for @photo_placeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Place (optional)'**
+  String get photo_placeLabel;
+
+  /// No description provided for @photo_placeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Old Town'**
+  String get photo_placeHint;
+
+  /// Star award toast.
+  ///
+  /// In en, this message translates to:
+  /// **'+2 ✦ · photo logged'**
+  String get toast_photoLogged;
+
+  /// Star award toast after a batch upload.
+  ///
+  /// In en, this message translates to:
+  /// **'+{points} ✦ · {count, plural, =1{1 photo logged} other{{count} photos logged}}'**
+  String toast_photosLogged(int points, int count);
+
+  /// No description provided for @photo_uploadingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading photos'**
+  String get photo_uploadingTitle;
+
+  /// No description provided for @photo_uploadingProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading {current} of {total}…'**
+  String photo_uploadingProgress(int current, int total);
+
+  /// No description provided for @photo_uploadComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload complete'**
+  String get photo_uploadComplete;
+
+  /// No description provided for @photo_uploadSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{success} uploaded, {failed} failed.'**
+  String photo_uploadSummary(int success, int failed);
+
+  /// No description provided for @photo_retryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry failed ({count})'**
+  String photo_retryFailed(int count);
+
+  /// No description provided for @photo_locationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag this photo with its location?'**
+  String get photo_locationTitle;
+
+  /// No description provided for @photo_locationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{appName} can save where a photo was taken so it shows up in your journal and wrap-up. You can still add photos without this.'**
+  String photo_locationBody(String appName);
+
+  /// No description provided for @photo_notNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get photo_notNow;
+
+  /// No description provided for @photo_allow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get photo_allow;
+
+  /// Screen-reader label.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete photo'**
+  String get photo_deleteSemantics;
 }
 
 class _AppLocalizationsDelegate

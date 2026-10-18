@@ -690,4 +690,271 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checklist_catNiceToHaves => 'Nice-to-haves';
+
+  @override
+  String get journal_eyebrow => 'Journal';
+
+  @override
+  String get journal_quietOne => 'A quiet one';
+
+  @override
+  String journal_dayQuietOne(int day) {
+    return 'Day $day — a quiet one';
+  }
+
+  @override
+  String get journal_noEntries => 'No photos, no notes yet';
+
+  @override
+  String journal_questsDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count quests done',
+      one: '1 quest done',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journal_dayTitle(int day, String name) {
+    return 'Day $day — $name';
+  }
+
+  @override
+  String journal_noteStamp(int day, String date) {
+    return 'Day $day · $date';
+  }
+
+  @override
+  String get journal_noDates =>
+      'Add dates to this memory to start your journal.';
+
+  @override
+  String get journal_dayNotYet => 'This day hasn\'t happened yet';
+
+  @override
+  String get journal_toDo => 'To Do';
+
+  @override
+  String get journal_todayToDo => 'Today\'s to do';
+
+  @override
+  String get journal_viewWrapUp => 'View wrap-up';
+
+  @override
+  String get journal_photos => 'Photos';
+
+  @override
+  String journal_photosSaved(int count) {
+    return '$count saved';
+  }
+
+  @override
+  String get journal_addPhotoTile => 'Add ✦2';
+
+  @override
+  String journal_wrapUpExplainer(String ask) {
+    return 'Your film needs a little more to work with. $ask';
+  }
+
+  @override
+  String journal_wrapUpAskPhotosAndNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count more photos and one note to unlock it.',
+      one: 'Add 1 more photo and one note to unlock it.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journal_wrapUpAskPhotos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count more photos to unlock it.',
+      one: 'Add 1 more photo to unlock it.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get journal_wrapUpAskNote => 'Write one note to unlock it.';
+
+  @override
+  String get journal_wrapUpReqPhotos => 'Five photos in this memory';
+
+  @override
+  String get journal_wrapUpReqNote => 'At least one note written';
+
+  @override
+  String get journal_wrapUpFree =>
+      'Nothing to buy — this one\'s the same on every plan.';
+
+  @override
+  String get journal_nothingYet => 'Nothing here yet';
+
+  @override
+  String journal_nothingFromDay(int day) {
+    return 'Nothing from Day $day yet';
+  }
+
+  @override
+  String get journal_nudgeBody =>
+      'Even one photo helps your wrap-up. Quiet days still make the film — this one will just pass through it.';
+
+  @override
+  String get journal_addAPhoto => '＋ Add a photo';
+
+  @override
+  String get journal_writeNote => 'Write a note';
+
+  @override
+  String get journal_addNotesToday => '✎ Add notes about today';
+
+  @override
+  String get journal_continueEntry => '✎ Continue entry';
+
+  @override
+  String journal_wordCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count words',
+      one: '1 word',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journal_edited(String time) {
+    return 'Edited $time';
+  }
+
+  @override
+  String get toast_noteSaved => '+1 ✦ · note saved';
+
+  @override
+  String get note_discardTitle => 'Discard what you added?';
+
+  @override
+  String get note_keepWriting => 'Keep writing';
+
+  @override
+  String get note_discard => 'Discard';
+
+  @override
+  String get note_bodyHint =>
+      'Keep going — type, or tap the mic and just talk.';
+
+  @override
+  String note_wordsAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count words',
+      one: '+1 word',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get note_micOff =>
+      'Microphone is off. Turn it on in Settings, or just type.';
+
+  @override
+  String get note_voiceUnavailable =>
+      'Voice isn\'t available right now — typing works.';
+
+  @override
+  String get note_typeSemantics => 'Type';
+
+  @override
+  String get note_dictateSemantics => 'Dictate';
+
+  @override
+  String get note_stopDictationSemantics => 'Stop dictation';
+
+  @override
+  String get dictation_tapToTalk => 'Tap to talk';
+
+  @override
+  String get dictation_tapToStop => 'Tap to stop';
+
+  @override
+  String note_listening(String time) {
+    return 'Listening · $time';
+  }
+
+  @override
+  String get photo_addTitle => 'Add a photo';
+
+  @override
+  String get photo_detailsTitle => 'Add photo';
+
+  @override
+  String get photo_captionLabel => 'Caption (optional)';
+
+  @override
+  String get photo_captionHint => 'e.g. Sunset at the harbor';
+
+  @override
+  String get photo_placeLabel => 'Place (optional)';
+
+  @override
+  String get photo_placeHint => 'e.g. Old Town';
+
+  @override
+  String get toast_photoLogged => '+2 ✦ · photo logged';
+
+  @override
+  String toast_photosLogged(int points, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos logged',
+      one: '1 photo logged',
+    );
+    return '+$points ✦ · $_temp0';
+  }
+
+  @override
+  String get photo_uploadingTitle => 'Uploading photos';
+
+  @override
+  String photo_uploadingProgress(int current, int total) {
+    return 'Uploading $current of $total…';
+  }
+
+  @override
+  String get photo_uploadComplete => 'Upload complete';
+
+  @override
+  String photo_uploadSummary(int success, int failed) {
+    return '$success uploaded, $failed failed.';
+  }
+
+  @override
+  String photo_retryFailed(int count) {
+    return 'Retry failed ($count)';
+  }
+
+  @override
+  String get photo_locationTitle => 'Tag this photo with its location?';
+
+  @override
+  String photo_locationBody(String appName) {
+    return '$appName can save where a photo was taken so it shows up in your journal and wrap-up. You can still add photos without this.';
+  }
+
+  @override
+  String get photo_notNow => 'Not now';
+
+  @override
+  String get photo_allow => 'Allow';
+
+  @override
+  String get photo_deleteSemantics => 'Delete photo';
 }
