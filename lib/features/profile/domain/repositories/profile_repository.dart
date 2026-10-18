@@ -21,6 +21,9 @@ abstract interface class ProfileRepository {
   /// Separate from [updateProfile], which can't clear a field.
   Future<Either<Failure, Unit>> updateLanguage(String? code);
 
+  /// Saves the last-used dictation language (#218).
+  Future<Either<Failure, Unit>> updateDictationLanguage(String code);
+
   /// The full `achievement_templates` catalog, joined with which ones this
   /// user has earned and each one's current progress against [stats] — see
   /// `AchievementEntity`'s doc comment for how the join is done. Takes

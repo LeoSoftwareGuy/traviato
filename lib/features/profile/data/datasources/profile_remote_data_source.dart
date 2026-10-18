@@ -15,6 +15,9 @@ abstract interface class ProfileRemoteDataSource {
   /// Writes `profiles.language`; `null` clears it (System default).
   Future<void> updateLanguage(String? code);
 
+  /// Writes `profiles.dictation_language`.
+  Future<void> updateDictationLanguage(String code);
+
   /// Ordered by `position` — the design's fixed badge display order.
   Future<List<AchievementTemplateModel>> getAchievementTemplates();
 
