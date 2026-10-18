@@ -1733,4 +1733,454 @@ class AppLocalizationsRu extends AppLocalizations {
   String note_wordCountShort(int count) {
     return '$count сл.';
   }
+
+  @override
+  String get content_bonus_worst_photo_of_day_title => 'Худшее фото дня';
+
+  @override
+  String get content_bonus_worst_photo_of_day_detail =>
+      'Не лучший ракурс. Не лучший момент. В этом и смысл.';
+
+  @override
+  String get content_bonus_something_free_title => 'Найдите что-то бесплатное';
+
+  @override
+  String get content_bonus_something_free_detail =>
+      'Вид, улыбка, уличный артист — снимите то, что сегодня ничего вам не стоило.';
+
+  @override
+  String get content_bonus_local_snack_title =>
+      'Попробуйте перекус, которого нет дома';
+
+  @override
+  String get content_bonus_local_snack_detail =>
+      'Бонус, если не можете выговорить название.';
+
+  @override
+  String get content_bonus_menu_mystery_title =>
+      'Закажите то, что не можете перевести';
+
+  @override
+  String get content_bonus_menu_mystery_detail =>
+      'Ткните в меню — и без отступлений.';
+
+  @override
+  String get content_bonus_stranger_kindness_title =>
+      'Запечатлейте маленькую доброту незнакомца';
+
+  @override
+  String get content_bonus_stranger_kindness_detail =>
+      'Взмах рукой, улыбка, подсказка, когда вы заблудились.';
+
+  @override
+  String get content_bonus_overheard_title => 'Сфотографируйте то, что слышите';
+
+  @override
+  String get content_bonus_overheard_detail =>
+      'Уличная музыка, незнакомый язык, звуки нового места.';
+
+  @override
+  String get content_bonus_souvenir_hunt_title =>
+      'Сфотографируйте самый безвкусный сувенир';
+
+  @override
+  String get content_bonus_souvenir_hunt_detail =>
+      'Покупать не обязательно. Просто полюбуйтесь.';
+
+  @override
+  String get content_bonus_sky_moment_title => 'Поймайте небо в деле';
+
+  @override
+  String get content_bonus_sky_moment_detail =>
+      'Закат, грозовые тучи, неприлично много звёзд.';
+
+  @override
+  String get content_bonus_local_transport_title =>
+      'Покажите, как вы сегодня передвигались';
+
+  @override
+  String get content_bonus_local_transport_detail =>
+      'Автобус, велосипед, лодка, стёртые ноги — всё считается.';
+
+  @override
+  String get content_bonus_unexpected_detour_title =>
+      'Снимите незапланированный крюк';
+
+  @override
+  String get content_bonus_unexpected_detour_detail =>
+      'Не тот поворот, который оказался тем самым.';
+
+  @override
+  String get content_bonus_color_hunt_title => 'Найдите самое яркое вокруг';
+
+  @override
+  String get content_bonus_color_hunt_detail =>
+      'Стена, прилавок на рынке, чей-то сомнительный наряд.';
+
+  @override
+  String get content_bonus_closeup_texture_title =>
+      'Снимите текстуру крупным планом';
+
+  @override
+  String get content_bonus_closeup_texture_detail =>
+      'Брусчатка, кора дерева, странный узор на покрывале в отеле.';
+
+  @override
+  String get content_bonus_reflection_shot_title => 'Поймайте отражение';
+
+  @override
+  String get content_bonus_reflection_shot_detail =>
+      'Вода, стекло, подозрительно блестящая ложка.';
+
+  @override
+  String get content_bonus_halfway_selfie_title => 'Селфи на полпути';
+
+  @override
+  String get content_bonus_halfway_selfie_detail =>
+      'Уставшие глаза — по желанию. Широкая улыбка — обязательно.';
+
+  @override
+  String get content_bonus_local_hangout_title =>
+      'Сфотографируйте, где на самом деле проводят время местные';
+
+  @override
+  String get content_bonus_local_hangout_detail =>
+      'Не открыточное место — настоящее.';
+
+  @override
+  String get content_bonus_comfort_food_title =>
+      'Снимите еду, которая напомнила о доме';
+
+  @override
+  String get content_bonus_comfort_food_detail =>
+      'Даже за тысячи километров от него.';
+
+  @override
+  String get content_bonus_new_skill_title =>
+      'Попробуйте то, чего никогда не делали';
+
+  @override
+  String get content_bonus_new_skill_detail =>
+      'Танцевальное движение, блюдо, язык, который вы нарочно коверкаете.';
+
+  @override
+  String get content_bonus_market_haul_title =>
+      'Сфотографируйте поход на рынок или в магазин';
+
+  @override
+  String get content_bonus_market_haul_detail =>
+      'Что вы чуть не купили, но передумали?';
+
+  @override
+  String get content_bonus_quiet_moment_title =>
+      'Запечатлейте тихий момент посреди поездки';
+
+  @override
+  String get content_bonus_quiet_moment_detail =>
+      'Не всё должно быть лучшими кадрами.';
+
+  @override
+  String get content_bonus_view_from_bed_title =>
+      'Сфотографируйте вид оттуда, где вы живёте';
+
+  @override
+  String get content_bonus_view_from_bed_detail =>
+      'Балкон, окно или просто очень честный потолок.';
+
+  @override
+  String get content_bonus_unplanned_friend_title =>
+      'Снимите того, с кем познакомились в пути';
+
+  @override
+  String get content_bonus_unplanned_friend_detail =>
+      'Новый друг, попутчик, очень своенравный местный кот.';
+
+  @override
+  String get content_bonus_touchdown_title => 'Отметьте момент прибытия';
+
+  @override
+  String get content_bonus_touchdown_detail =>
+      'Табличка в аэропорту, перрон, первый вдох нового воздуха.';
+
+  @override
+  String get content_bonus_first_impression_title =>
+      'Снимите самое первое впечатление';
+
+  @override
+  String get content_bonus_first_impression_detail =>
+      'Вид, запах, суматоха — поймайте их, пока они не стали привычными.';
+
+  @override
+  String get content_bonus_unpacking_ritual_title =>
+      'Сфотографируйте свой ритуал распаковки';
+
+  @override
+  String get content_bonus_unpacking_ritual_detail =>
+      'Каким бы хаотичным он ни был. Каким бы быстрым.';
+
+  @override
+  String get content_bonus_last_look_title =>
+      'Взгляните в последний раз перед отъездом';
+
+  @override
+  String get content_bonus_last_look_detail =>
+      'Вид, комната, место, по которому будете скучать больше всего.';
+
+  @override
+  String get content_bonus_farewell_meal_title =>
+      'Сфотографируйте последнюю трапезу здесь';
+
+  @override
+  String get content_bonus_farewell_meal_detail =>
+      'Пусть она запомнится — или будет тем, что осталось в холодильнике.';
+
+  @override
+  String get content_bonus_souvenir_final_title =>
+      'Сфотографируйте то, что увозите домой';
+
+  @override
+  String get content_bonus_souvenir_final_detail => 'В прямом смысле или нет.';
+
+  @override
+  String get content_bonus_snap_anything_title => 'Снимите что угодно';
+
+  @override
+  String get content_bonus_snap_anything_detail =>
+      'Серьёзно. Что угодно. Это просто чтобы начать.';
+
+  @override
+  String get content_bonus_snap_suitecase_title =>
+      'Сфотографируйте, как вы собираетесь';
+
+  @override
+  String get content_bonus_snap_suitecase_detail =>
+      'Запечатлейте хаос сборов в поездку.';
+
+  @override
+  String get content_bonus_stranger_portrait_title =>
+      'Спросите незнакомца, можно ли его сфотографировать';
+
+  @override
+  String get content_bonus_stranger_portrait_detail =>
+      'Бонус за смелость. Скорее всего, вам скажут «да».';
+
+  @override
+  String get content_bonus_no_phone_hour_title =>
+      'Проведите час без телефона, а потом расскажите, что заметили';
+
+  @override
+  String get content_bonus_no_phone_hour_detail =>
+      'Запишите, а не просто запомните.';
+
+  @override
+  String get content_bonus_try_the_dare_title =>
+      'Сделайте то, от чего себя всё время отговариваете';
+
+  @override
+  String get content_bonus_try_the_dare_detail => 'Вы знаете, о чём речь.';
+
+  @override
+  String get content_bonus_milestone_week_one_title =>
+      'Неделя позади — как эта поездка уже изменила вас?';
+
+  @override
+  String get content_bonus_milestone_week_one_detail =>
+      'Фото и минута честности.';
+
+  @override
+  String get content_bonus_milestone_two_weeks_title =>
+      'Две недели в пути — что вы знаете теперь, чего не знали в начале?';
+
+  @override
+  String get content_bonus_milestone_two_weeks_detail =>
+      'Поймайте момент, когда всё сложилось.';
+
+  @override
+  String get content_bonus_milestone_three_weeks_title =>
+      'Три недели в пути — по чему вы будете скучать больше всего, когда всё закончится?';
+
+  @override
+  String get content_bonus_milestone_three_weeks_detail =>
+      'Скажите это, пока не пришлось.';
+
+  @override
+  String get content_bonus_streak_saver_checkin_title => 'Просто отметьтесь';
+
+  @override
+  String get content_bonus_streak_saver_checkin_detail =>
+      'Без давления и без темы — одно фото того места, где вы сейчас.';
+
+  @override
+  String get content_achievement_first_adventure_title => 'Первое приключение';
+
+  @override
+  String get content_achievement_first_adventure_description =>
+      'Создайте первое воспоминание.';
+
+  @override
+  String get content_achievement_globetrotter_title => 'Путешественник по миру';
+
+  @override
+  String get content_achievement_globetrotter_description =>
+      'Побывайте в 10 странах.';
+
+  @override
+  String get content_achievement_century_title => '100 дней в пути';
+
+  @override
+  String get content_achievement_century_description =>
+      'Запечатлейте 100 дней путешествий.';
+
+  @override
+  String get content_achievement_star_collector_title => 'Собиратель звёзд';
+
+  @override
+  String get content_achievement_star_collector_description =>
+      'Заработайте 250 звёзд.';
+
+  @override
+  String get content_achievement_shutterbug_title => 'Скажите «сыр»';
+
+  @override
+  String get content_achievement_shutterbug_description =>
+      'Добавьте 50 фото в воспоминания.';
+
+  @override
+  String get content_achievement_storyteller_title => 'Рассказчик';
+
+  @override
+  String get content_achievement_storyteller_description =>
+      'Напишите 20 заметок в дневник.';
+
+  @override
+  String get content_achievement_jetsetter_title => 'Заядлый путешественник';
+
+  @override
+  String get content_achievement_jetsetter_description =>
+      'Создайте 5 воспоминаний.';
+
+  @override
+  String get content_achievement_legend_title => 'Легенда';
+
+  @override
+  String get content_achievement_legend_description =>
+      'Заработайте 1000 звёзд.';
+
+  @override
+  String get content_checklist_passport => 'Паспорт';
+
+  @override
+  String get content_checklist_visa_documents => 'Визовые документы';
+
+  @override
+  String get content_checklist_travel_insurance => 'Туристическая страховка';
+
+  @override
+  String get content_checklist_boarding_passes_tickets =>
+      'Посадочные талоны / билеты';
+
+  @override
+  String get content_checklist_id_card => 'Удостоверение личности';
+
+  @override
+  String get content_checklist_local_currency_cash =>
+      'Наличные в местной валюте';
+
+  @override
+  String get content_checklist_credit_debit_cards =>
+      'Кредитные / дебетовые карты';
+
+  @override
+  String get content_checklist_phone_charger => 'Зарядка для телефона';
+
+  @override
+  String get content_checklist_underwear => 'Нижнее бельё';
+
+  @override
+  String get content_checklist_comfortable_walking_shoes =>
+      'Удобная обувь для прогулок';
+
+  @override
+  String get content_checklist_t_shirts => 'Футболки';
+
+  @override
+  String get content_checklist_jacket => 'Куртка';
+
+  @override
+  String get content_checklist_swimsuit => 'Купальник / плавки';
+
+  @override
+  String get content_checklist_sleepwear => 'Одежда для сна';
+
+  @override
+  String get content_checklist_sunglasses => 'Солнцезащитные очки';
+
+  @override
+  String get content_checklist_toothbrush_toothpaste => 'Зубная щётка и паста';
+
+  @override
+  String get content_checklist_prescription_medications =>
+      'Рецептурные лекарства';
+
+  @override
+  String get content_checklist_first_aid_kit => 'Аптечка';
+
+  @override
+  String get content_checklist_sunscreen => 'Солнцезащитный крем';
+
+  @override
+  String get content_checklist_deodorant => 'Дезодорант';
+
+  @override
+  String get content_checklist_hand_sanitizer => 'Антисептик для рук';
+
+  @override
+  String get content_checklist_shampoo_conditioner => 'Шампунь и кондиционер';
+
+  @override
+  String get content_checklist_contact_lenses_or_glasses =>
+      'Контактные линзы или очки';
+
+  @override
+  String get content_checklist_phone => 'Телефон';
+
+  @override
+  String get content_checklist_charging_cables => 'Зарядные кабели';
+
+  @override
+  String get content_checklist_power_adapter => 'Переходник для розетки';
+
+  @override
+  String get content_checklist_portable_battery_pack => 'Пауэрбанк';
+
+  @override
+  String get content_checklist_headphones => 'Наушники';
+
+  @override
+  String get content_checklist_camera => 'Фотоаппарат';
+
+  @override
+  String get content_checklist_sim_card_or_esim => 'SIM-карта или eSIM';
+
+  @override
+  String get content_checklist_travel_pillow => 'Подушка для путешествий';
+
+  @override
+  String get content_checklist_reusable_water_bottle =>
+      'Многоразовая бутылка для воды';
+
+  @override
+  String get content_checklist_snacks => 'Перекусы';
+
+  @override
+  String get content_checklist_packing_cubes => 'Органайзеры для вещей';
+
+  @override
+  String get content_checklist_earplugs_eye_mask => 'Беруши и маска для сна';
+
+  @override
+  String get content_checklist_travel_journal => 'Дневник путешествий';
+
+  @override
+  String get content_checklist_umbrella => 'Зонт';
 }
