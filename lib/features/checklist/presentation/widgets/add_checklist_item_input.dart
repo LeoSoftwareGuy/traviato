@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -56,7 +57,7 @@ class _AddChecklistItemInputState extends State<AddChecklistItemInput> {
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _submit(),
               decoration: InputDecoration(
-                hintText: 'Add something of your own...',
+                hintText: context.l10n.checklist_addHint,
                 hintStyle: AppTypography.bodyInput.copyWith(
                   color: AppColors.textTertiary,
                   fontWeight: FontWeight.w500,
