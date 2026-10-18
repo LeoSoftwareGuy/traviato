@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/l10n/context_l10n.dart';
 import '../../../domain/entities/wrap_up_footnote.dart';
 import '../wrap_up_film_motion.dart';
 import '../wrap_up_film_scenes.dart';
@@ -29,13 +30,19 @@ class WrapUpFilmFootnote extends StatelessWidget {
     final rowRise = rise(t, a + 0.5, 1.6, lift: 26);
     final closingRise = rise(t, a + 1.6, 1.6, lift: 24);
 
-    final bonusLabel = footnote.bonusCompletedCount == 1
-        ? 'bonus task'
-        : 'bonus tasks';
+    final l10n = context.l10n;
     final bits = [
-      ('${footnote.photoCount}', 'photographs', false),
-      ('${footnote.bonusCompletedCount}', bonusLabel, false),
-      ('✦${footnote.stars}', 'stars', true),
+      (
+        '${footnote.photoCount}',
+        l10n.wrapUp_photographs(footnote.photoCount),
+        false,
+      ),
+      (
+        '${footnote.bonusCompletedCount}',
+        l10n.wrapUp_bonusTasks(footnote.bonusCompletedCount),
+        false,
+      ),
+      ('✦${footnote.stars}', l10n.wrapUp_stars(footnote.stars), true),
     ];
 
     return Positioned(
@@ -92,7 +99,7 @@ class WrapUpFilmFootnote extends StatelessWidget {
               child: Opacity(
                 opacity: closingRise.opacity.clamp(0.0, 1.0),
                 child: Text(
-                  "None of which is the reason you'll remember it.",
+                  l10n.wrapUp_footnoteClosing,
                   textAlign: TextAlign.center,
                   style: WrapUpFilmText.serif(
                     size: 40,
