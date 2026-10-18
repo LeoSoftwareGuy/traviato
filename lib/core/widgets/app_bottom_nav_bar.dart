@@ -7,6 +7,7 @@ import '../theme/app_gradients.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
+import 'shrink_to_floor_text.dart';
 
 /// One tab in [AppBottomNavBar] (Home, Expenses, ...). The center action is
 /// always the FAB — see [AppBottomNavBar.onFabTap].
@@ -128,8 +129,11 @@ class _NavTab extends StatelessWidget {
             children: [
               Icon(item.icon, color: color, size: 15),
               const SizedBox(height: AppSpacing.xs),
-              Text(
+              // Spec 4t "Bottom nav": always one line, scaling down a step
+              // for a long label (translator limit: 9 chars).
+              ShrinkToFloorText(
                 item.label,
+                minFontSize: 8.5,
                 style: AppTypography.buttonLabel.copyWith(
                   fontSize: 9.5,
                   height: 1,

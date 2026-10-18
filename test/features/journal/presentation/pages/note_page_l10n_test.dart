@@ -48,12 +48,17 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('note page lays out without overflow at 360pt in et', (
-    tester,
-  ) async {
-    await _open(tester, const Locale('et'));
+  for (final (locale, tapToTalk) in const [
+    (Locale('en'), 'Tap to talk'),
+    (Locale('ru'), 'Нажмите, чтобы говорить'),
+    (Locale('et'), 'Puuduta ja räägi'),
+  ]) {
+    testWidgets('note page toolbar lays out at 360pt in '
+        '${locale.languageCode}', (tester) async {
+      await _open(tester, locale);
 
-    expect(find.text('Puuduta ja räägi'), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+      expect(find.text(tapToTalk), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
 }

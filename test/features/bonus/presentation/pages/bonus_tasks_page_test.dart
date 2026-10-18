@@ -197,7 +197,7 @@ void main() {
       expect(find.textContaining('ВЫПОЛНЕНО · ДЕНЬ'), findsOneWidget);
     });
 
-    for (final locale in const [Locale('ru'), Locale('et')]) {
+    for (final locale in const [Locale('en'), Locale('ru'), Locale('et')]) {
       testWidgets('lays out without overflow at 360pt in '
           '${locale.languageCode}', (tester) async {
         setScreenSize(tester, height: 1600);

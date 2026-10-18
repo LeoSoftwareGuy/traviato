@@ -131,6 +131,11 @@ class _StarToastState extends State<_StarToast>
             child: Material(
               type: MaterialType.transparency,
               child: Container(
+                // Spec 4t "Star award toast": at most screen − 44, then up to
+                // two centred lines.
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.sizeOf(context).width - 44,
+                ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 18,
                   vertical: 11,
@@ -141,6 +146,8 @@ class _StarToastState extends State<_StarToast>
                 ),
                 child: Text(
                   widget.text,
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
                   style: AppTypography.buttonLabel.copyWith(
                     fontSize: 13,
                     color: AppColors.background,

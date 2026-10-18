@@ -17,8 +17,21 @@ abstract class AppTypography {
   /// serif role in Russian — Latin included, so no line mixes two serifs —
   /// and Fraunces otherwise. Called by the app root whenever the locale
   /// changes, before the tree rebuilds.
-  static void useLocale(Locale locale) =>
-      _serifIsLiterata = locale.languageCode == 'ru';
+  static void useLocale(Locale locale) {
+    _serifIsLiterata = locale.languageCode == 'ru';
+    _eyebrowEm = switch (locale.languageCode) {
+      'ru' || 'et' => .08,
+      _ => _defaultEyebrowEm,
+    };
+  }
+
+  /// Mono eyebrow tracking in em (spec 4t, "Mono eyebrows"): longer RU/ET
+  /// caps get .08em instead of the English ~.14em, so they wrap later.
+  static const _defaultEyebrowEm = 1.3 / 9.5;
+  static var _eyebrowEm = _defaultEyebrowEm;
+
+  /// Letter-spacing for mono caps at [fontSize] in the current locale.
+  static double eyebrowTracking(double fontSize) => fontSize * _eyebrowEm;
 
   /// Whether serif roles currently render in Literata.
   static bool get serifIsLiterata => _serifIsLiterata;
@@ -108,7 +121,8 @@ abstract class AppTypography {
     fontSize: 9.5,
     height: 1.3,
     fontWeight: FontWeight.w500,
-    letterSpacing: 1.3, // ~.14em at this size; spec range is .10–.18em.
+    // ~.14em in English (spec range .10–.18em); .08em in RU/ET.
+    letterSpacing: eyebrowTracking(9.5),
     color: AppColors.textTertiary,
   );
 

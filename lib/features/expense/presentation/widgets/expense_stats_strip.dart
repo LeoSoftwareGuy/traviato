@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/shrink_to_floor_text.dart';
 import 'expense_money_format.dart';
 
 /// Total spent / per-day average tiles under the selected memory
@@ -84,21 +85,25 @@ class _StatCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
+          ShrinkToFloorText(
             label,
             style: AppTypography.mono,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            minFontSize: 7.5,
+            minLetterSpacing: 9.5 * .02,
+            maxLines: 2,
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text(
-            value,
-            style: AppTypography.bigNumber.copyWith(
-              fontSize: emphasized ? 29 : 22,
-              color: emphasized ? AppColors.primary : AppColors.textPrimary,
+          // Scales down rather than truncating an amount (spec 4t).
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: AppTypography.bigNumber.copyWith(
+                fontSize: emphasized ? 29 : 22,
+                color: emphasized ? AppColors.primary : AppColors.textPrimary,
+              ),
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

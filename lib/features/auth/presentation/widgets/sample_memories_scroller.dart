@@ -6,6 +6,7 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/photo_scrim.dart';
+import '../../../../core/widgets/shrink_to_floor_text.dart';
 import 'guest_images.dart';
 
 class _Moment {
@@ -120,10 +121,12 @@ class _MomentCard extends StatelessWidget {
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 child: Align(
                   alignment: Alignment.bottomLeft,
-                  child: Text(
+                  // Translated sample copy, not user content: shrinks, then
+                  // wraps — no ellipsis (spec 4t).
+                  child: ShrinkToFloorText(
                     moment.title(context.l10n),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    minFontSize: 11,
+                    maxLines: 2,
                     style: AppTypography.screenTitle.copyWith(
                       fontSize: 13,
                       color: AppColors.textOnPhoto,

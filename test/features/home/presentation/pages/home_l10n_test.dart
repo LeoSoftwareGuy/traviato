@@ -128,7 +128,7 @@ void main() {
     expect(find.text('1 PÄEV · 21 FOTOT'), findsOneWidget);
   });
 
-  for (final locale in const [Locale('ru'), Locale('et')]) {
+  for (final locale in const [Locale('en'), Locale('ru'), Locale('et')]) {
     testWidgets('Home lays out without overflow at 360pt in '
         '${locale.languageCode}', (tester) async {
       setScreenSize(tester, height: 2400);

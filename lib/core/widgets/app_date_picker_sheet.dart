@@ -6,6 +6,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import 'adaptive_button_pair.dart';
 import 'bottom_sheet_chrome.dart';
 
 /// Opens [AppDatePickerSheet] in the shared bottom-sheet chrome and resolves
@@ -117,22 +118,18 @@ class _AppDatePickerSheetState extends State<AppDatePickerSheet> {
               onDateChanged: (date) => setState(() => _selected = date),
             ),
             const SizedBox(height: AppSpacing.sm),
-            Row(
-              children: [
-                Expanded(
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(l10n.common_cancel),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(_selected),
-                    child: Text(l10n.common_done),
-                  ),
-                ),
-              ],
+            AdaptiveButtonPair(
+              primaryLabel: l10n.common_done,
+              secondaryLabel: l10n.common_cancel,
+              labelStyle: AppTypography.buttonLabel,
+              primary: ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(_selected),
+                child: Text(l10n.common_done),
+              ),
+              secondary: TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n.common_cancel),
+              ),
             ),
           ],
         ),

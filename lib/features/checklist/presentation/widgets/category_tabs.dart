@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/trailing_fade.dart';
 import '../../domain/entities/checklist_category.dart';
 import 'checklist_category_label.dart';
 
@@ -26,22 +27,26 @@ class CategoryTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Spec 4t: a horizontally scrolling chip row keeps scrolling and fades
+    // its trailing 16px, so a cut-off tab reads as "more this way".
     return SizedBox(
       height: 35,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: ChecklistCategory.values.length,
-        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
-        itemBuilder: (context, index) {
-          final category = ChecklistCategory.values[index];
-          return _CategoryTab(
-            category: category,
-            isSelected: category == selected,
-            checked: checkedCountFor(category),
-            total: countFor(category),
-            onTap: () => onSelect(category),
-          );
-        },
+      child: TrailingFade(
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: ChecklistCategory.values.length,
+          separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
+          itemBuilder: (context, index) {
+            final category = ChecklistCategory.values[index];
+            return _CategoryTab(
+              category: category,
+              isSelected: category == selected,
+              checked: checkedCountFor(category),
+              total: countFor(category),
+              onTap: () => onSelect(category),
+            );
+          },
+        ),
       ),
     );
   }
