@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_date_picker_sheet.dart';
-
-final _dateFormat = DateFormat('d MMM y');
 
 /// Starts / Ends field cards, side by side. `docs/design/README.md` § 4.
 class MemoryDateRangeField extends StatelessWidget {
@@ -52,19 +51,27 @@ class MemoryDateRangeField extends StatelessWidget {
           children: [
             Expanded(
               child: _DateCard(
-                label: 'Starts',
+                label: context.l10n.trip_startsLabel,
                 date: startDate,
-                onTap: () =>
-                    _pickDate(context, 'Starts', startDate, onStartDateChanged),
+                onTap: () => _pickDate(
+                  context,
+                  context.l10n.trip_startsLabel,
+                  startDate,
+                  onStartDateChanged,
+                ),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: _DateCard(
-                label: 'Ends',
+                label: context.l10n.trip_endsLabel,
                 date: endDate,
-                onTap: () =>
-                    _pickDate(context, 'Ends', endDate, onEndDateChanged),
+                onTap: () => _pickDate(
+                  context,
+                  context.l10n.trip_endsLabel,
+                  endDate,
+                  onEndDateChanged,
+                ),
               ),
             ),
           ],
@@ -120,7 +127,12 @@ class _DateCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              date == null ? 'Pick a date' : _dateFormat.format(date!),
+              date == null
+                  ? context.l10n.datePicker_defaultLabel
+                  : DateFormat(
+                      'd MMM y',
+                      context.l10n.localeName,
+                    ).format(date!),
               style: AppTypography.bodyInput.copyWith(
                 color: date == null
                     ? AppColors.textTertiary

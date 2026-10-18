@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -12,6 +13,7 @@ import '../../../../core/widgets/dashed_rrect_border.dart';
 import '../../../../core/widgets/photo_scrim.dart';
 import 'cover_options.dart';
 import 'cover_upload_tile.dart';
+import 'vibe_label.dart';
 
 /// The New memory cover picker: a 150px slot (empty/chosen state) above
 /// the bundled-cover strip. `docs/design/README.md` § 4. The slot itself is
@@ -131,7 +133,9 @@ class _CoverSlotState extends State<_CoverSlot> with CoverPhotoPicker {
 
     return Semantics(
       button: true,
-      label: hasCover ? 'Change cover' : 'Choose a cover',
+      label: hasCover
+          ? context.l10n.trip_coverChange
+          : context.l10n.trip_coverChoose,
       excludeSemantics: true,
       child: Stack(
         children: [
@@ -199,11 +203,11 @@ class _CoverSlotContent extends StatelessWidget {
         ),
         child: PhotoScrim(
           image: image,
-          child: const Padding(
-            padding: EdgeInsets.all(AppSpacing.md),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Align(
               alignment: Alignment.bottomLeft,
-              child: _MonoTag('YOUR COVER'),
+              child: _MonoTag(context.l10n.trip_coverYours.toUpperCase()),
             ),
           ),
         ),
@@ -241,12 +245,12 @@ class _CoverSlotContent extends StatelessWidget {
                     const _FloatingStar(),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
-                      'Choose a cover',
+                      context.l10n.trip_coverChoose,
                       style: AppTypography.screenTitle.copyWith(fontSize: 16),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      "or we'll pick one that suits the vibe",
+                      context.l10n.trip_coverAutoHint,
                       style: AppTypography.chipLabel.copyWith(
                         fontSize: 10.5,
                         color: AppColors.textMuted,
@@ -260,7 +264,9 @@ class _CoverSlotContent extends StatelessWidget {
                   left: 0,
                   bottom: 0,
                   child: _MonoTag(
-                    'SUGGESTED: ${vibe.toUpperCase()}',
+                    context.l10n
+                        .trip_coverSuggested(vibeLabel(context.l10n, vibe))
+                        .toUpperCase(),
                   ),
                 ),
             ],

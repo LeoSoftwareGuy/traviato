@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -11,7 +12,6 @@ import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../journal/presentation/providers/day_note_providers.dart';
 import '../../../photo/presentation/providers/photo_providers.dart';
 import '../mutations/trip_mutations.dart';
-import '../../../../core/l10n/context_l10n.dart';
 
 /// Delete-only sheet for a finished ("kept forever") memory — issue #115.
 ///
@@ -90,6 +90,7 @@ class _DeleteMemorySheetState extends ConsumerState<DeleteMemorySheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     ref.listen<MutationState<void>>(deleteMemoryMutation, (previous, next) {
       if (next is MutationError) {
         showErrorSnackbar(
@@ -116,13 +117,13 @@ class _DeleteMemorySheetState extends ConsumerState<DeleteMemorySheet> {
             children: [
               Expanded(
                 child: Text(
-                  'Delete this memory',
+                  l10n.trip_deleteTitle,
                   style: AppTypography.screenTitle.copyWith(fontSize: 21),
                 ),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancel'),
+                child: Text(l10n.common_cancel),
               ),
             ],
           ),
@@ -160,17 +161,18 @@ class _DeleteMemorySheetState extends ConsumerState<DeleteMemorySheet> {
                     )
                   : Text(
                       _deleteArmed
-                          ? 'Yes — delete it forever'
-                          : 'Delete this memory',
+                          ? l10n.trip_deleteConfirm
+                          : l10n.trip_deleteTitle,
                     ),
             ),
           ),
           if (_deleteArmed) ...[
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'This removes ${_photoCount ?? 0} photos and '
-              '${_noteDaysCount ?? 0} days of notes. Your earned stars are '
-              "kept. It can't be undone.",
+              l10n.trip_deleteConsequence(
+                l10n.common_photoCount(_photoCount ?? 0),
+                l10n.trip_noteDays(_noteDaysCount ?? 0),
+              ),
               textAlign: TextAlign.center,
               style: AppTypography.caption.copyWith(letterSpacing: 0),
             ),

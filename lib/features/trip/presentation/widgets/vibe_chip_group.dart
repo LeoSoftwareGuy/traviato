@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import 'vibe_label.dart';
 
 /// The fixed 10-vibe list (functionality.md §5). No hard cap on selection —
 /// the open question in data-model.md is left to app-side UX, not a
@@ -41,9 +43,9 @@ class VibeChipGroup extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('The vibe', style: AppTypography.fieldLabel),
+            Text(context.l10n.trip_vibeLabel, style: AppTypography.fieldLabel),
             Text(
-              '${selected.length} chosen',
+              context.l10n.trip_vibesChosen(selected.length),
               style: AppTypography.chipLabel.copyWith(
                 color: AppColors.textMuted,
               ),
@@ -57,7 +59,7 @@ class VibeChipGroup extends StatelessWidget {
           children: [
             for (final vibe in kTripVibes)
               _VibeChip(
-                label: vibe,
+                label: vibeLabel(context.l10n, vibe),
                 selected: selected.contains(vibe),
                 onTap: () => onToggle(vibe),
               ),
