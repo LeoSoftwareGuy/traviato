@@ -310,4 +310,275 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get guest_sampleBucketList => 'Мечта, ставшая явью';
+
+  @override
+  String get common_today => 'Сегодня';
+
+  @override
+  String common_dayOf(int day, int total) {
+    return 'День $day из $total';
+  }
+
+  @override
+  String common_starCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count звезды',
+      many: '$count звёзд',
+      few: '$count звезды',
+      one: '$count звезда',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get home_defaultName => 'путешественник';
+
+  @override
+  String home_greeting(String name) {
+    return 'Привет, $name';
+  }
+
+  @override
+  String get home_happeningNow => 'Сейчас';
+
+  @override
+  String get home_comingUp => 'Скоро';
+
+  @override
+  String get home_keptForever => 'Сохранено навсегда';
+
+  @override
+  String get home_recap => 'Итоги';
+
+  @override
+  String get home_emptyTitle => 'Пока нет воспоминаний';
+
+  @override
+  String get home_emptyBody =>
+      'Начните первое воспоминание — и оно превратится в дневник, который останется с вами навсегда.';
+
+  @override
+  String get home_emptyCta => 'Создать первое воспоминание';
+
+  @override
+  String get home_keptForeverEmpty =>
+      'Пока ничего нет — воспоминания появятся здесь, когда поездка завершится.';
+
+  @override
+  String home_statMemories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'воспоминания',
+      many: 'воспоминаний',
+      few: 'воспоминания',
+      one: 'воспоминание',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String home_statPlaces(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'места',
+      many: 'мест',
+      few: 'места',
+      one: 'место',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String home_statDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'дня',
+      many: 'дней',
+      few: 'дня',
+      one: 'день',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get home_countdownToday => 'сегодня';
+
+  @override
+  String home_countdownInDays(int days) {
+    return 'через $days дн.';
+  }
+
+  @override
+  String get home_datesTbd => 'Даты не выбраны';
+
+  @override
+  String home_questsPlanned(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count дела в плане',
+      many: '$count дел в плане',
+      few: '$count дела в плане',
+      one: '$count дело в плане',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get home_nothingPlanned => 'Пока ничего не запланировано';
+
+  @override
+  String get home_planArrow => 'План →';
+
+  @override
+  String get home_actionPlan => 'План';
+
+  @override
+  String get home_actionExpenses => 'Расходы';
+
+  @override
+  String get home_actionJournal => 'Дневник';
+
+  @override
+  String get home_checklist => 'Чек-лист';
+
+  @override
+  String home_packedProgress(int packed, int total) {
+    return 'Собрано $packed из $total →';
+  }
+
+  @override
+  String get vibe_romantic => 'Романтика';
+
+  @override
+  String get vibe_adventure => 'Приключения';
+
+  @override
+  String get vibe_cultural => 'Культура';
+
+  @override
+  String get vibe_chill => 'Отдых';
+
+  @override
+  String get vibe_foodie => 'Гастрономия';
+
+  @override
+  String get vibe_roadTrip => 'Автопутешествие';
+
+  @override
+  String get vibe_wellness => 'Велнес';
+
+  @override
+  String get vibe_wildlife => 'Дикая природа';
+
+  @override
+  String get vibe_nightlife => 'Ночная жизнь';
+
+  @override
+  String get vibe_photography => 'Фотография';
+
+  @override
+  String get trip_newMemory => 'Новое воспоминание';
+
+  @override
+  String get trip_createTitleLead => 'Что достойно';
+
+  @override
+  String get trip_createTitleEmphasis => 'воспоминания?';
+
+  @override
+  String get trip_nameLabel => 'Название';
+
+  @override
+  String get trip_nameHint => 'например, Лето в Токио';
+
+  @override
+  String get trip_nameRequired => 'Дайте воспоминанию название.';
+
+  @override
+  String get trip_whereLabel => 'Где это было?';
+
+  @override
+  String get trip_whereHint => 'Где это происходило?';
+
+  @override
+  String get trip_startsLabel => 'Начало';
+
+  @override
+  String get trip_endsLabel => 'Конец';
+
+  @override
+  String get trip_endBeforeStart =>
+      'Дата окончания не может быть раньше даты начала.';
+
+  @override
+  String get trip_vibeLabel => 'Настроение';
+
+  @override
+  String trip_vibesChosen(int count) {
+    return 'выбрано: $count';
+  }
+
+  @override
+  String get trip_createCta => 'Создать воспоминание';
+
+  @override
+  String trip_rewardNudge(String stars) {
+    return 'За создание — $stars. Пишите заметку каждый день, и откроется значок «Рассказчик».';
+  }
+
+  @override
+  String get trip_coverChoose => 'Выберите обложку';
+
+  @override
+  String get trip_coverChange => 'Сменить обложку';
+
+  @override
+  String get trip_coverAutoHint => 'или мы подберём её под настроение';
+
+  @override
+  String get trip_coverYours => 'Ваша обложка';
+
+  @override
+  String trip_coverSuggested(String vibe) {
+    return 'Предложено: $vibe';
+  }
+
+  @override
+  String get trip_coverUploadTitle => 'Загрузить фото обложки';
+
+  @override
+  String get trip_takePhoto => 'Сделать фото';
+
+  @override
+  String get trip_chooseFromGallery => 'Выбрать из галереи';
+
+  @override
+  String get trip_deleteTitle => 'Удалить воспоминание';
+
+  @override
+  String get trip_deleteConfirm => 'Да — удалить навсегда';
+
+  @override
+  String trip_noteDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count дня заметок',
+      many: '$count дней заметок',
+      few: '$count дня заметок',
+      one: '$count день заметок',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trip_deleteConsequence(String photos, String notes) {
+    return 'Будут удалены $photos и $notes. Заработанные звёзды останутся. Отменить это нельзя.';
+  }
 }

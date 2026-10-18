@@ -335,5 +335,261 @@
   "guest_sampleBucketList": "Unistuste hetk",
   "@guest_sampleBucketList": {
     "x-review": "pending"
+  },
+  "common_today": "Täna",
+  "@common_today": {
+    "x-review": "pending"
+  },
+  "common_dayOf": "Päev {day}/{total}",
+  "@common_dayOf": {
+    "x-review": "pending"
+  },
+  "common_starCount": "{count, plural, one{{count} täht} other{{count} tähte}}",
+  "@common_starCount": {
+    "x-review": "pending"
+  },
+  "home_defaultName": "rändur",
+  "@home_defaultName": {
+    "x-review": "pending"
+  },
+  "home_greeting": "Tere, {name}",
+  "@home_greeting": {
+    "x-review": "pending"
+  },
+  "home_happeningNow": "Praegu käimas",
+  "@home_happeningNow": {
+    "x-review": "pending"
+  },
+  "home_comingUp": "Tulekul",
+  "@home_comingUp": {
+    "x-review": "pending"
+  },
+  "home_keptForever": "Igaveseks hoitud",
+  "@home_keptForever": {
+    "x-review": "pending"
+  },
+  "home_recap": "Kokkuvõte",
+  "@home_recap": {
+    "x-review": "pending"
+  },
+  "home_emptyTitle": "Mälestusi veel pole",
+  "@home_emptyTitle": {
+    "x-review": "pending"
+  },
+  "home_emptyBody": "Alusta oma esimest mälestust ja vaata, kuidas sellest saab päevik, mida hoiad igavesti.",
+  "@home_emptyBody": {
+    "x-review": "pending"
+  },
+  "home_emptyCta": "Loo oma esimene mälestus",
+  "@home_emptyCta": {
+    "x-review": "pending"
+  },
+  "home_keptForeverEmpty": "Siin pole veel midagi — mälestused ilmuvad siia, kui reis lõpeb.",
+  "@home_keptForeverEmpty": {
+    "x-review": "pending"
+  },
+  "home_statMemories": "{count, plural, one{mälestus} other{mälestust}}",
+  "@home_statMemories": {
+    "x-review": "pending"
+  },
+  "home_statPlaces": "{count, plural, one{koht} other{kohta}}",
+  "@home_statPlaces": {
+    "x-review": "pending"
+  },
+  "home_statDays": "{count, plural, one{päev} other{päeva}}",
+  "@home_statDays": {
+    "x-review": "pending"
+  },
+  "home_countdownToday": "täna",
+  "@home_countdownToday": {
+    "x-review": "pending"
+  },
+  "home_countdownInDays": "{days} p pärast",
+  "@home_countdownInDays": {
+    "x-review": "pending"
+  },
+  "home_datesTbd": "Kuupäevad täpsustamata",
+  "@home_datesTbd": {
+    "x-review": "pending"
+  },
+  "home_questsPlanned": "{count, plural, one{{count} tegevus plaanis} other{{count} tegevust plaanis}}",
+  "@home_questsPlanned": {
+    "x-review": "pending"
+  },
+  "home_nothingPlanned": "Veel pole midagi planeeritud",
+  "@home_nothingPlanned": {
+    "x-review": "pending"
+  },
+  "home_planArrow": "Plaan →",
+  "@home_planArrow": {
+    "x-review": "pending"
+  },
+  "home_actionPlan": "Plaan",
+  "@home_actionPlan": {
+    "x-review": "pending"
+  },
+  "home_actionExpenses": "Kulud",
+  "@home_actionExpenses": {
+    "x-review": "pending"
+  },
+  "home_actionJournal": "Päevik",
+  "@home_actionJournal": {
+    "x-review": "pending"
+  },
+  "home_checklist": "Nimekiri",
+  "@home_checklist": {
+    "x-review": "pending"
+  },
+  "home_packedProgress": "{packed}/{total} pakitud →",
+  "@home_packedProgress": {
+    "x-review": "pending"
+  },
+  "vibe_romantic": "Romantika",
+  "@vibe_romantic": {
+    "x-review": "pending"
+  },
+  "vibe_adventure": "Seiklus",
+  "@vibe_adventure": {
+    "x-review": "pending"
+  },
+  "vibe_cultural": "Kultuur",
+  "@vibe_cultural": {
+    "x-review": "pending"
+  },
+  "vibe_chill": "Rahulik",
+  "@vibe_chill": {
+    "x-review": "pending"
+  },
+  "vibe_foodie": "Gurmee",
+  "@vibe_foodie": {
+    "x-review": "pending"
+  },
+  "vibe_roadTrip": "Autoreis",
+  "@vibe_roadTrip": {
+    "x-review": "pending"
+  },
+  "vibe_wellness": "Heaolu",
+  "@vibe_wellness": {
+    "x-review": "pending"
+  },
+  "vibe_wildlife": "Loodus",
+  "@vibe_wildlife": {
+    "x-review": "pending"
+  },
+  "vibe_nightlife": "Ööelu",
+  "@vibe_nightlife": {
+    "x-review": "pending"
+  },
+  "vibe_photography": "Fotograafia",
+  "@vibe_photography": {
+    "x-review": "pending"
+  },
+  "trip_newMemory": "Uus mälestus",
+  "@trip_newMemory": {
+    "x-review": "pending"
+  },
+  "trip_createTitleLead": "Mis väärib",
+  "@trip_createTitleLead": {
+    "x-review": "pending"
+  },
+  "trip_createTitleEmphasis": "mälestust?",
+  "@trip_createTitleEmphasis": {
+    "x-review": "pending"
+  },
+  "trip_nameLabel": "Nimi",
+  "@trip_nameLabel": {
+    "x-review": "pending"
+  },
+  "trip_nameHint": "nt Suvi Tokyos",
+  "@trip_nameHint": {
+    "x-review": "pending"
+  },
+  "trip_nameRequired": "Anna mälestusele nimi.",
+  "@trip_nameRequired": {
+    "x-review": "pending"
+  },
+  "trip_whereLabel": "Kus see toimus?",
+  "@trip_whereLabel": {
+    "x-review": "pending"
+  },
+  "trip_whereHint": "Kus see aset leidis?",
+  "@trip_whereHint": {
+    "x-review": "pending"
+  },
+  "trip_startsLabel": "Algus",
+  "@trip_startsLabel": {
+    "x-review": "pending"
+  },
+  "trip_endsLabel": "Lõpp",
+  "@trip_endsLabel": {
+    "x-review": "pending"
+  },
+  "trip_endBeforeStart": "Lõppkuupäev ei saa olla enne alguskuupäeva.",
+  "@trip_endBeforeStart": {
+    "x-review": "pending"
+  },
+  "trip_vibeLabel": "Meeleolu",
+  "@trip_vibeLabel": {
+    "x-review": "pending"
+  },
+  "trip_vibesChosen": "valitud: {count}",
+  "@trip_vibesChosen": {
+    "x-review": "pending"
+  },
+  "trip_createCta": "Loo mälestus",
+  "@trip_createCta": {
+    "x-review": "pending"
+  },
+  "trip_rewardNudge": "Loomise eest saad {stars}. Kirjuta iga päev märge ja avad Jutustaja märgi.",
+  "@trip_rewardNudge": {
+    "x-review": "pending"
+  },
+  "trip_coverChoose": "Vali kaanepilt",
+  "@trip_coverChoose": {
+    "x-review": "pending"
+  },
+  "trip_coverChange": "Muuda kaanepilti",
+  "@trip_coverChange": {
+    "x-review": "pending"
+  },
+  "trip_coverAutoHint": "või valime meeleoluga sobiva",
+  "@trip_coverAutoHint": {
+    "x-review": "pending"
+  },
+  "trip_coverYours": "Sinu kaanepilt",
+  "@trip_coverYours": {
+    "x-review": "pending"
+  },
+  "trip_coverSuggested": "Soovitus: {vibe}",
+  "@trip_coverSuggested": {
+    "x-review": "pending"
+  },
+  "trip_coverUploadTitle": "Laadi kaanepilt üles",
+  "@trip_coverUploadTitle": {
+    "x-review": "pending"
+  },
+  "trip_takePhoto": "Tee foto",
+  "@trip_takePhoto": {
+    "x-review": "pending"
+  },
+  "trip_chooseFromGallery": "Vali galeriist",
+  "@trip_chooseFromGallery": {
+    "x-review": "pending"
+  },
+  "trip_deleteTitle": "Kustuta see mälestus",
+  "@trip_deleteTitle": {
+    "x-review": "pending"
+  },
+  "trip_deleteConfirm": "Jah — kustuta jäädavalt",
+  "@trip_deleteConfirm": {
+    "x-review": "pending"
+  },
+  "trip_noteDays": "{count, plural, one{{count} päeva märkmed} other{{count} päeva märkmed}}",
+  "@trip_noteDays": {
+    "x-review": "pending"
+  },
+  "trip_deleteConsequence": "See eemaldab {photos} ja {notes}. Teenitud tähed jäävad alles. Seda ei saa tagasi võtta.",
+  "@trip_deleteConsequence": {
+    "x-review": "pending"
   }
 }

@@ -603,6 +603,390 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A bucket-list moment'**
   String get guest_sampleBucketList;
+
+  /// No description provided for @common_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get common_today;
+
+  /// Day pager / hero pill. ET abbreviates per spec.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day} of {total}'**
+  String common_dayOf(int day, int total);
+
+  /// No description provided for @common_starCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 star} other{{count} stars}}'**
+  String common_starCount(int count);
+
+  /// Greeting name when the profile has no username.
+  ///
+  /// In en, this message translates to:
+  /// **'traveler'**
+  String get home_defaultName;
+
+  /// {name} is shown in the accent colour.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, {name}'**
+  String home_greeting(String name);
+
+  /// Mono eyebrow, uppercased in code. @maxLength 26
+  ///
+  /// In en, this message translates to:
+  /// **'Happening now'**
+  String get home_happeningNow;
+
+  /// Mono eyebrow, uppercased in code. @maxLength 26
+  ///
+  /// In en, this message translates to:
+  /// **'Coming up'**
+  String get home_comingUp;
+
+  /// Mono eyebrow and badge.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept forever'**
+  String get home_keptForever;
+
+  /// Badge on a finished memory without a kept wrap-up.
+  ///
+  /// In en, this message translates to:
+  /// **'Recap'**
+  String get home_recap;
+
+  /// No description provided for @home_emptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No memories yet'**
+  String get home_emptyTitle;
+
+  /// No description provided for @home_emptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your first memory and watch it become a journal you keep forever.'**
+  String get home_emptyBody;
+
+  /// No description provided for @home_emptyCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first memory'**
+  String get home_emptyCta;
+
+  /// No description provided for @home_keptForeverEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No memories logged yet — they show up here once a trip wraps.'**
+  String get home_keptForeverEmpty;
+
+  /// Stat label under the number, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{memory} other{memories}}'**
+  String home_statMemories(int count);
+
+  /// Stat label under the number, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{place} other{places}}'**
+  String home_statPlaces(int count);
+
+  /// Stat label under the number, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{day} other{days}}'**
+  String home_statDays(int count);
+
+  /// Countdown pill on an upcoming memory.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get home_countdownToday;
+
+  /// Countdown pill on an upcoming memory.
+  ///
+  /// In en, this message translates to:
+  /// **'in {days}d'**
+  String home_countdownInDays(int days);
+
+  /// No description provided for @home_datesTbd.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates TBD'**
+  String get home_datesTbd;
+
+  /// No description provided for @home_questsPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 quest planned} other{{count} quests planned}}'**
+  String home_questsPlanned(int count);
+
+  /// No description provided for @home_nothingPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing planned yet'**
+  String get home_nothingPlanned;
+
+  /// No description provided for @home_planArrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan →'**
+  String get home_planArrow;
+
+  /// Hero action button. @maxLength 10
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get home_actionPlan;
+
+  /// Hero action button. @maxLength 10
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get home_actionExpenses;
+
+  /// Hero action button. @maxLength 10
+  ///
+  /// In en, this message translates to:
+  /// **'Journal'**
+  String get home_actionJournal;
+
+  /// No description provided for @home_checklist.
+  ///
+  /// In en, this message translates to:
+  /// **'Checklist'**
+  String get home_checklist;
+
+  /// No description provided for @home_packedProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{packed} of {total} packed →'**
+  String home_packedProgress(int packed, int total);
+
+  /// No description provided for @vibe_romantic.
+  ///
+  /// In en, this message translates to:
+  /// **'Romantic'**
+  String get vibe_romantic;
+
+  /// No description provided for @vibe_adventure.
+  ///
+  /// In en, this message translates to:
+  /// **'Adventure'**
+  String get vibe_adventure;
+
+  /// No description provided for @vibe_cultural.
+  ///
+  /// In en, this message translates to:
+  /// **'Cultural'**
+  String get vibe_cultural;
+
+  /// No description provided for @vibe_chill.
+  ///
+  /// In en, this message translates to:
+  /// **'Chill'**
+  String get vibe_chill;
+
+  /// No description provided for @vibe_foodie.
+  ///
+  /// In en, this message translates to:
+  /// **'Foodie'**
+  String get vibe_foodie;
+
+  /// No description provided for @vibe_roadTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Road trip'**
+  String get vibe_roadTrip;
+
+  /// No description provided for @vibe_wellness.
+  ///
+  /// In en, this message translates to:
+  /// **'Wellness'**
+  String get vibe_wellness;
+
+  /// No description provided for @vibe_wildlife.
+  ///
+  /// In en, this message translates to:
+  /// **'Wildlife'**
+  String get vibe_wildlife;
+
+  /// No description provided for @vibe_nightlife.
+  ///
+  /// In en, this message translates to:
+  /// **'Nightlife'**
+  String get vibe_nightlife;
+
+  /// No description provided for @vibe_photography.
+  ///
+  /// In en, this message translates to:
+  /// **'Photography'**
+  String get vibe_photography;
+
+  /// Mono eyebrow, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'New memory'**
+  String get trip_newMemory;
+
+  /// No description provided for @trip_createTitleLead.
+  ///
+  /// In en, this message translates to:
+  /// **'What deserves'**
+  String get trip_createTitleLead;
+
+  /// No description provided for @trip_createTitleEmphasis.
+  ///
+  /// In en, this message translates to:
+  /// **'a memory?'**
+  String get trip_createTitleEmphasis;
+
+  /// No description provided for @trip_nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name it'**
+  String get trip_nameLabel;
+
+  /// No description provided for @trip_nameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Summer in Tokyo'**
+  String get trip_nameHint;
+
+  /// No description provided for @trip_nameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Give this memory a name.'**
+  String get trip_nameRequired;
+
+  /// No description provided for @trip_whereLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Where did it happen?'**
+  String get trip_whereLabel;
+
+  /// No description provided for @trip_whereHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Where did this happen?'**
+  String get trip_whereHint;
+
+  /// No description provided for @trip_startsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts'**
+  String get trip_startsLabel;
+
+  /// No description provided for @trip_endsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends'**
+  String get trip_endsLabel;
+
+  /// No description provided for @trip_endBeforeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'End date can\'t be before the start date.'**
+  String get trip_endBeforeStart;
+
+  /// No description provided for @trip_vibeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'The vibe'**
+  String get trip_vibeLabel;
+
+  /// No description provided for @trip_vibesChosen.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} chosen'**
+  String trip_vibesChosen(int count);
+
+  /// No description provided for @trip_createCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Create memory'**
+  String get trip_createCta;
+
+  /// {stars} is common_starCount(10), shown highlighted.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating this earns {stars}. Log a note each day and you\'ll unlock Storyteller.'**
+  String trip_rewardNudge(String stars);
+
+  /// No description provided for @trip_coverChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a cover'**
+  String get trip_coverChoose;
+
+  /// No description provided for @trip_coverChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change cover'**
+  String get trip_coverChange;
+
+  /// No description provided for @trip_coverAutoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'or we\'ll pick one that suits the vibe'**
+  String get trip_coverAutoHint;
+
+  /// Mono tag, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cover'**
+  String get trip_coverYours;
+
+  /// Mono tag, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested: {vibe}'**
+  String trip_coverSuggested(String vibe);
+
+  /// No description provided for @trip_coverUploadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a cover photo'**
+  String get trip_coverUploadTitle;
+
+  /// No description provided for @trip_takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get trip_takePhoto;
+
+  /// No description provided for @trip_chooseFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get trip_chooseFromGallery;
+
+  /// No description provided for @trip_deleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this memory'**
+  String get trip_deleteTitle;
+
+  /// No description provided for @trip_deleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes — delete it forever'**
+  String get trip_deleteConfirm;
+
+  /// No description provided for @trip_noteDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day of notes} other{{count} days of notes}}'**
+  String trip_noteDays(int count);
+
+  /// {photos} is common_photoCount, {notes} is trip_noteDays.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes {photos} and {notes}. Your earned stars are kept. It can\'t be undone.'**
+  String trip_deleteConsequence(String photos, String notes);
 }
 
 class _AppLocalizationsDelegate
