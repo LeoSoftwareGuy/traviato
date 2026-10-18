@@ -594,6 +594,8 @@ void main() {
       expect(find.text('ДОСТИЖЕНИЯ'), findsOneWidget);
       expect(find.text('ПОДПИСКА'), findsOneWidget);
       expect(find.text('Выйти'), findsOneWidget);
+      expect(find.text('НАСТРОЙКИ'), findsOneWidget);
+      expect(find.text('Язык'), findsOneWidget);
       expect(find.textContaining('С НАМИ С '), findsOneWidget);
     });
 
