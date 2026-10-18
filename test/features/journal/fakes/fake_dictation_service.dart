@@ -12,6 +12,19 @@ class FakeDictationService implements DictationService {
   var cancelCallCount = 0;
   Duration? lastPauseFor;
   Duration? lastListenFor;
+  String? lastLocaleId;
+
+  /// What [supportedLocaleIds] reports; `null` = unknown (no permission).
+  List<String>? supported = const ['en_US', 'ru_RU', 'et_EE'];
+  var supportedCallCount = 0;
+
+  @override
+  Future<List<String>?> supportedLocaleIds({
+    required bool askPermission,
+  }) async {
+    supportedCallCount++;
+    return supported;
+  }
 
   StreamController<DictationEvent>? _session;
 
@@ -25,8 +38,10 @@ class FakeDictationService implements DictationService {
   Stream<DictationEvent> listen({
     required Duration pauseFor,
     required Duration listenFor,
+    String? localeId,
   }) {
     listenCallCount++;
+    lastLocaleId = localeId;
     lastPauseFor = pauseFor;
     lastListenFor = listenFor;
     _session = StreamController<DictationEvent>();

@@ -66,12 +66,19 @@ abstract class DictationService {
   /// again, e.g. after the user was told the mic is off.
   Future<DictationReadiness> prepare();
 
-  /// Starts a session in the device locale with partial results. The
+  /// The recogniser's locale ids ("ru_RU", "et_EE", …). With
+  /// [askPermission] false this never shows a permission dialog: it returns
+  /// `null` (unknown) until the user has granted speech access (#218).
+  Future<List<String>?> supportedLocaleIds({required bool askPermission});
+
+  /// Starts a session with partial results, in [localeId] (one of
+  /// [supportedLocaleIds]) or the device locale when `null`. The
   /// recogniser stops itself after [pauseFor] of silence or [listenFor] in
   /// total. The stream closes after its last event.
   Stream<DictationEvent> listen({
     required Duration pauseFor,
     required Duration listenFor,
+    String? localeId,
   });
 
   /// Ends the session and keeps what was heard.

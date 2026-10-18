@@ -37,9 +37,27 @@ class SpeechToTextDictationService implements DictationService {
   }
 
   @override
+  Future<List<String>?> supportedLocaleIds({
+    required bool askPermission,
+  }) async {
+    try {
+      if (!askPermission && !await _speech.hasPermission) return null;
+      if (!_speech.isAvailable && await prepare() != DictationReadiness.ready) {
+        return const [];
+      }
+      final locales = await _speech.locales();
+      return [for (final locale in locales) locale.localeId];
+    } catch (e) {
+      debugPrint('Speech recogniser locales failed: $e');
+      return null;
+    }
+  }
+
+  @override
   Stream<DictationEvent> listen({
     required Duration pauseFor,
     required Duration listenFor,
+    String? localeId,
   }) {
     _close();
     final session = StreamController<DictationEvent>();
@@ -63,6 +81,7 @@ class SpeechToTextDictationService implements DictationService {
               cancelOnError: true,
               pauseFor: pauseFor,
               listenFor: listenFor,
+              localeId: localeId,
             ),
           )
           .catchError((Object e) {
