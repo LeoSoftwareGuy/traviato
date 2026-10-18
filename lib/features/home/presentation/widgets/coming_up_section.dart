@@ -144,8 +144,7 @@ class _UpcomingListCard extends StatelessWidget {
                               questCount > 0
                                   ? context.l10n.home_questsPlanned(questCount)
                                   : context.l10n.home_nothingPlanned,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                              // UI label: wraps, never an ellipsis (spec 4t).
                               style: AppTypography.chipLabel.copyWith(
                                 color: questCount > 0
                                     ? AppColors.primary

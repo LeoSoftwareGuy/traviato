@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/shrink_to_floor_text.dart';
 import '../../domain/entities/profile_stats_entity.dart';
 
 /// Memories / Places / Days totals — three plain cards, no icons.
@@ -69,8 +70,12 @@ class _StatCard extends StatelessWidget {
         children: [
           Text('$value', style: AppTypography.bigNumber.copyWith(fontSize: 23)),
           const SizedBox(height: AppSpacing.xs),
-          Text(
+          // Spec 4t "Stat labels": tighter tracking, then down to 7.5px —
+          // never an abbreviation.
+          ShrinkToFloorText(
             label,
+            minFontSize: 7.5,
+            minLetterSpacing: 9.5 * .02,
             style: AppTypography.mono.copyWith(color: AppColors.textTertiary),
           ),
         ],

@@ -172,7 +172,6 @@ class _CategoryRow extends StatelessWidget {
           child: Text(
             expenseCategoryLabel(context.l10n, category),
             style: AppTypography.chipLabel,
-            overflow: TextOverflow.ellipsis,
           ),
         ),
         SizedBox(

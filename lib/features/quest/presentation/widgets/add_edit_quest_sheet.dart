@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/adaptive_button_pair.dart';
 import '../../../../core/widgets/bottom_sheet_chrome.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../trip/presentation/widgets/create_memory_field.dart';
@@ -255,52 +256,79 @@ class _AddEditQuestSheetState extends ConsumerState<AddEditQuestSheet> {
                 textInputAction: TextInputAction.done,
               ),
               const SizedBox(height: AppSpacing.xl),
-              Row(
-                children: [
-                  if (_isEditing) ...[
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: isSaving || isDeleting ? null : _delete,
-                        icon: isDeleting
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.delete_outline),
-                        label: Text(context.l10n.common_delete),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.accentCoral,
-                          side: const BorderSide(color: AppColors.accentCoral),
-                          minimumSize: const Size.fromHeight(48),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                  ],
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: isSaving || isDeleting ? null : _save,
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(48),
-                      ),
-                      child: isSaving
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(context.l10n.common_save),
-                    ),
-                  ),
-                ],
+              _ActionButtons(
+                isEditing: _isEditing,
+                isSaving: isSaving,
+                isDeleting: isDeleting,
+                onSave: _save,
+                onDelete: _delete,
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Delete · Save while editing, Save alone when adding. The pair stacks
+/// (Save on top) if a translation won't fit at half width (spec 4t, #241).
+class _ActionButtons extends StatelessWidget {
+  const _ActionButtons({
+    required this.isEditing,
+    required this.isSaving,
+    required this.isDeleting,
+    required this.onSave,
+    required this.onDelete,
+  });
+
+  final bool isEditing;
+  final bool isSaving;
+  final bool isDeleting;
+  final VoidCallback onSave;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final busy = isSaving || isDeleting;
+    final save = ElevatedButton(
+      onPressed: busy ? null : onSave,
+      style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+      child: isSaving
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Text(l10n.common_save),
+    );
+    if (!isEditing) return SizedBox(width: double.infinity, child: save);
+    final delete = OutlinedButton.icon(
+      onPressed: busy ? null : onDelete,
+      icon: isDeleting
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.delete_outline),
+      label: Text(l10n.common_delete),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.accentCoral,
+        side: const BorderSide(color: AppColors.accentCoral),
+        minimumSize: const Size.fromHeight(48),
+      ),
+    );
+    return AdaptiveButtonPair(
+      primary: save,
+      secondary: delete,
+      primaryLabel: l10n.common_save,
+      secondaryLabel: l10n.common_delete,
+      labelStyle: AppTypography.buttonLabel,
+      gap: AppSpacing.md,
+      // Delete also carries an icon.
+      labelPadding: 56,
     );
   }
 }

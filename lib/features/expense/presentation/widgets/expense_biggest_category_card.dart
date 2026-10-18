@@ -66,7 +66,6 @@ class ExpenseBiggestCategoryCard extends StatelessWidget {
                 Text(
                   '${expenseCategoryLabel(context.l10n, category)} — ${formatEuro(amount, context.l10n.localeName)}',
                   style: AppTypography.headlineSerif.copyWith(fontSize: 16),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

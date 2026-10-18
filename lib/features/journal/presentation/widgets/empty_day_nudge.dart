@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/adaptive_button_pair.dart';
 import '../../../../core/widgets/dashed_rrect_border.dart';
 
 /// Replaces the note card + photo strip for a Journal day with zero photos
@@ -68,35 +69,34 @@ class EmptyDayNudge extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.base),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    key: const Key('empty-day-nudge-add-photo'),
-                    onPressed: onAddPhoto,
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: AppColors.tint(AppColors.primary, 0.14),
-                      side: BorderSide(
-                        color: AppColors.tint(AppColors.primary, 0.4),
-                      ),
-                      foregroundColor: AppColors.primary,
-                    ),
-                    child: Text(context.l10n.journal_addAPhoto),
+            // Spec 4t "Paired buttons": stacks (Add a photo on top) when a
+            // translation won't fit at half width.
+            AdaptiveButtonPair(
+              primaryFirstInRow: true,
+              primaryLabel: context.l10n.journal_addAPhoto,
+              secondaryLabel: context.l10n.journal_writeNote,
+              labelStyle: AppTypography.buttonLabel,
+              primary: OutlinedButton(
+                key: const Key('empty-day-nudge-add-photo'),
+                onPressed: onAddPhoto,
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: AppColors.tint(AppColors.primary, 0.14),
+                  side: BorderSide(
+                    color: AppColors.tint(AppColors.primary, 0.4),
                   ),
+                  foregroundColor: AppColors.primary,
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: OutlinedButton(
-                    key: const Key('empty-day-nudge-write-note'),
-                    onPressed: onWriteNote,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.textSecondary,
-                      side: const BorderSide(color: AppColors.surfaceBorder),
-                    ),
-                    child: Text(context.l10n.journal_writeNote),
-                  ),
+                child: Text(context.l10n.journal_addAPhoto),
+              ),
+              secondary: OutlinedButton(
+                key: const Key('empty-day-nudge-write-note'),
+                onPressed: onWriteNote,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.textSecondary,
+                  side: const BorderSide(color: AppColors.surfaceBorder),
                 ),
-              ],
+                child: Text(context.l10n.journal_writeNote),
+              ),
             ),
           ],
         ),

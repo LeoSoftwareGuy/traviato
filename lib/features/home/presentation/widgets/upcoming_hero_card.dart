@@ -8,6 +8,7 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/photo_scrim.dart';
+import '../../../../core/widgets/shrink_to_floor_text.dart';
 import '../../../checklist/presentation/providers/checklist_providers.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
 import '../../../trip/presentation/widgets/trip_cover_image.dart';
@@ -242,9 +243,13 @@ class _ActionButton extends StatelessWidget {
         highlightColor: AppColors.tint(pressTint, .1),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          // Spec 4t "Home hero actions": shrink one step, then 2 lines.
           child: Center(
-            child: Text(
+            child: ShrinkToFloorText(
               label,
+              minFontSize: 9,
+              maxLines: 2,
+              textAlign: TextAlign.center,
               style: AppTypography.caption.copyWith(
                 color: fg,
                 letterSpacing: 0,

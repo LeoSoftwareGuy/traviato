@@ -81,17 +81,21 @@ class _CategoryRow extends StatelessWidget {
               child: Text(
                 expenseCategoryLabel(context.l10n, category),
                 style: AppTypography.chipLabel,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
             Text('$percent%', style: AppTypography.mono),
+            // An amount is never cut off; it scales down to fit the column
+            // ("1 234,50 €" in RU/ET, spec 4t).
             SizedBox(
               width: 50,
-              child: Text(
-                formatEuro(amount, context.l10n.localeName),
-                textAlign: TextAlign.right,
-                style: AppTypography.headlineSerif.copyWith(fontSize: 15),
-                overflow: TextOverflow.ellipsis,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Text(
+                  formatEuro(amount, context.l10n.localeName),
+                  textAlign: TextAlign.right,
+                  style: AppTypography.headlineSerif.copyWith(fontSize: 15),
+                ),
               ),
             ),
           ],
