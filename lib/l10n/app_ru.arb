@@ -991,5 +991,233 @@
   "photo_deleteSemantics": "Удалить фото",
   "@photo_deleteSemantics": {
     "x-review": "pending"
+  },
+  "expense_eyebrow": "Расходы",
+  "@expense_eyebrow": {
+    "x-review": "pending"
+  },
+  "expense_compareLink": "Сравнить",
+  "@expense_compareLink": {
+    "x-review": "pending"
+  },
+  "expense_searchHint": "Поиск воспоминаний",
+  "@expense_searchHint": {
+    "x-review": "pending"
+  },
+  "expense_sortLatest": "Сначала новые",
+  "@expense_sortLatest": {
+    "x-review": "pending"
+  },
+  "expense_sortBiggest": "Самые затратные",
+  "@expense_sortBiggest": {
+    "x-review": "pending"
+  },
+  "expense_memoriesHeader": "Воспоминания",
+  "@expense_memoriesHeader": {
+    "x-review": "pending"
+  },
+  "expense_visibleOf": "{visible} из {total}",
+  "@expense_visibleOf": {
+    "x-review": "pending"
+  },
+  "expense_noSearchMatch": "Ничего не найдено.",
+  "@expense_noSearchMatch": {
+    "x-review": "pending"
+  },
+  "expense_loadThreeMore": "Показать ещё 3",
+  "@expense_loadThreeMore": {
+    "x-review": "pending"
+  },
+  "expense_loadMoreRemaining": "Показать ещё ({count})",
+  "@expense_loadMoreRemaining": {
+    "x-review": "pending"
+  },
+  "expense_addExpense": "Добавить расход",
+  "@expense_addExpense": {
+    "x-review": "pending"
+  },
+  "expense_emptyTitle": "Пока нет расходов",
+  "@expense_emptyTitle": {
+    "x-review": "pending"
+  },
+  "expense_emptyBody": "Сначала создайте воспоминание, а потом отмечайте, сколько тратите.",
+  "@expense_emptyBody": {
+    "x-review": "pending"
+  },
+  "expense_byCategory": "По категориям",
+  "@expense_byCategory": {
+    "x-review": "pending"
+  },
+  "expense_allExpenses": "Все расходы",
+  "@expense_allExpenses": {
+    "x-review": "pending"
+  },
+  "expense_itemCount": "{count, plural, one{{count} запись} few{{count} записи} many{{count} записей} other{{count} записи}}",
+  "@expense_itemCount": {
+    "x-review": "pending"
+  },
+  "expense_durationShort": "{days} дн.",
+  "@expense_durationShort": {
+    "x-review": "pending"
+  },
+  "expense_totalSpent": "Всего потрачено",
+  "@expense_totalSpent": {
+    "x-review": "pending"
+  },
+  "expense_perDayAvg": "В среднем в день",
+  "@expense_perDayAvg": {
+    "x-review": "pending"
+  },
+  "expense_biggestCategory": "Главная статья",
+  "@expense_biggestCategory": {
+    "x-review": "pending"
+  },
+  "expense_pickMemoryTitle": "Выберите воспоминание выше",
+  "@expense_pickMemoryTitle": {
+    "x-review": "pending"
+  },
+  "expense_pickMemoryBody": "Вы увидите итог, на что ушли деньги, и каждый расход так, как вы его записали.",
+  "@expense_pickMemoryBody": {
+    "x-review": "pending"
+  },
+  "expense_newExpense": "Новый расход",
+  "@expense_newExpense": {
+    "x-review": "pending"
+  },
+  "expense_memoryLabel": "Воспоминание",
+  "@expense_memoryLabel": {
+    "x-review": "pending"
+  },
+  "expense_memoryRequired": "Выберите, к какому воспоминанию это относится.",
+  "@expense_memoryRequired": {
+    "x-review": "pending"
+  },
+  "expense_descriptionLabel": "Описание",
+  "@expense_descriptionLabel": {
+    "x-review": "pending"
+  },
+  "expense_descriptionHint": "Ужин на закате",
+  "@expense_descriptionHint": {
+    "x-review": "pending"
+  },
+  "expense_descriptionRequired": "На что потратили?",
+  "@expense_descriptionRequired": {
+    "x-review": "pending"
+  },
+  "expense_amountLabel": "Сумма",
+  "@expense_amountLabel": {
+    "x-review": "pending"
+  },
+  "expense_amountInvalid": "Введите сумму больше 0.",
+  "@expense_amountInvalid": {
+    "x-review": "pending"
+  },
+  "expense_categoryHeader": "Категория",
+  "@expense_categoryHeader": {
+    "x-review": "pending"
+  },
+  "expense_spentOn": "Дата",
+  "@expense_spentOn": {
+    "x-review": "pending"
+  },
+  "expense_todayDate": "Сегодня · {date}",
+  "@expense_todayDate": {
+    "x-review": "pending"
+  },
+  "expense_saveExpense": "Сохранить расход",
+  "@expense_saveExpense": {
+    "x-review": "pending"
+  },
+  "expense_catFoodDrinks": "Еда и напитки",
+  "@expense_catFoodDrinks": {
+    "x-review": "pending"
+  },
+  "expense_catTransport": "Транспорт",
+  "@expense_catTransport": {
+    "x-review": "pending"
+  },
+  "expense_catAccommodation": "Жильё",
+  "@expense_catAccommodation": {
+    "x-review": "pending"
+  },
+  "expense_catActivities": "Развлечения",
+  "@expense_catActivities": {
+    "x-review": "pending"
+  },
+  "expense_catShopping": "Покупки",
+  "@expense_catShopping": {
+    "x-review": "pending"
+  },
+  "expense_catOther": "Другое",
+  "@expense_catOther": {
+    "x-review": "pending"
+  },
+  "compare_eyebrow": "Сравнение",
+  "@compare_eyebrow": {
+    "x-review": "pending"
+  },
+  "compare_titleLead": "Какая поездка обошлась",
+  "@compare_titleLead": {
+    "x-review": "pending"
+  },
+  "compare_titleEmphasis": "дороже на самом деле?",
+  "@compare_titleEmphasis": {
+    "x-review": "pending"
+  },
+  "compare_hintPickTwo": "Выберите два воспоминания, чтобы сравнить расходы.",
+  "@compare_hintPickTwo": {
+    "x-review": "pending"
+  },
+  "compare_hintPickSecond": "Теперь выберите второе.",
+  "@compare_hintPickSecond": {
+    "x-review": "pending"
+  },
+  "compare_hintReady": "«{a}» и «{b}» — нажмите на любое, чтобы заменить.",
+  "@compare_hintReady": {
+    "x-review": "pending"
+  },
+  "compare_needTwo": "Создайте хотя бы два воспоминания, чтобы сравнить расходы.",
+  "@compare_needTwo": {
+    "x-review": "pending"
+  },
+  "compare_doneComparing": "✕ Закончить",
+  "@compare_doneComparing": {
+    "x-review": "pending"
+  },
+  "compare_pickTwo": "Выберите два",
+  "@compare_pickTwo": {
+    "x-review": "pending"
+  },
+  "compare_tableHeader": "Сравнение расходов",
+  "@compare_tableHeader": {
+    "x-review": "pending"
+  },
+  "compare_total": "Итого",
+  "@compare_total": {
+    "x-review": "pending"
+  },
+  "compare_perDay": "В день",
+  "@compare_perDay": {
+    "x-review": "pending"
+  },
+  "compare_verdictSame": "Поездки «{a}» и «{b}» обошлись примерно одинаково.",
+  "@compare_verdictSame": {
+    "x-review": "pending"
+  },
+  "compare_verdictSameButPerDay": "Поездки «{a}» и «{b}» обошлись примерно одинаково, но в «{higher}» в день уходило на {perDay} больше. «{cheaper}» — дешевле в пересчёте на день.",
+  "@compare_verdictSameButPerDay": {
+    "x-review": "pending"
+  },
+  "compare_verdictMore": "Поездка «{bigger}» обошлась на {total} дороже, чем «{smaller}».",
+  "@compare_verdictMore": {
+    "x-review": "pending"
+  },
+  "compare_verdictMoreAndPerDay": "Поездка «{bigger}» обошлась на {total} дороже, и в день тоже уходило на {perDay} больше. «{cheaper}» — дешевле в пересчёте на день.",
+  "@compare_verdictMoreAndPerDay": {
+    "x-review": "pending"
+  },
+  "compare_verdictMoreButPerDay": "Поездка «{bigger}» обошлась на {total} дороже, но в «{higher}» в день уходило на {perDay} больше. «{cheaper}» — дешевле в пересчёте на день.",
+  "@compare_verdictMoreButPerDay": {
+    "x-review": "pending"
   }
 }

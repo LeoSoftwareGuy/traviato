@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/expense_category.dart';
 import 'expense_category_style.dart';
+import 'expense_labels.dart';
 import 'expense_money_format.dart';
 
 /// "BIGGEST CATEGORY" card under the selected memory's stats row — coral
@@ -57,9 +59,12 @@ class ExpenseBiggestCategoryCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('BIGGEST CATEGORY', style: AppTypography.mono),
                 Text(
-                  '${category.displayName} — ${formatEuro(amount)}',
+                  context.l10n.expense_biggestCategory.toUpperCase(),
+                  style: AppTypography.mono,
+                ),
+                Text(
+                  '${expenseCategoryLabel(context.l10n, category)} — ${formatEuro(amount, context.l10n.localeName)}',
                   style: AppTypography.headlineSerif.copyWith(fontSize: 16),
                   overflow: TextOverflow.ellipsis,
                 ),

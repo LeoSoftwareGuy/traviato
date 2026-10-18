@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/expense_category.dart';
 import 'expense_category_style.dart';
+import 'expense_labels.dart';
 import 'expense_money_format.dart';
 
 /// "By category" section: one bar row per category, sorted descending,
@@ -77,7 +79,7 @@ class _CategoryRow extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
-                category.displayName,
+                expenseCategoryLabel(context.l10n, category),
                 style: AppTypography.chipLabel,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -86,7 +88,7 @@ class _CategoryRow extends StatelessWidget {
             SizedBox(
               width: 50,
               child: Text(
-                formatEuro(amount),
+                formatEuro(amount, context.l10n.localeName),
                 textAlign: TextAlign.right,
                 style: AppTypography.headlineSerif.copyWith(fontSize: 15),
                 overflow: TextOverflow.ellipsis,

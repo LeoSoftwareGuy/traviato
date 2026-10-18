@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../controllers/expense_sort_mode.dart';
+import 'expense_labels.dart';
 
 /// Sort toggle pill — tapping flips between `Latest first` and `Biggest
 /// spender` (`docs/design/README.md` § 8: "a sort pill '⇅ Latest first' ⇄
@@ -53,7 +55,7 @@ class ExpenseSortToggle extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.xs),
             Text(
-              value.label,
+              expenseSortLabel(context.l10n, value),
               style: AppTypography.chipLabel.copyWith(
                 color: isActive ? AppColors.primary : AppColors.textSecondary,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,

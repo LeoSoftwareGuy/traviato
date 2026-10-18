@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/expense_entity.dart';
 import 'expense_category_style.dart';
+import 'expense_labels.dart';
 import 'expense_money_format.dart';
 
 /// One row of the selected memory's itemized expense list — zebra striped,
@@ -27,6 +29,7 @@ class ExpenseItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final category = expenseCategoryLabel(context.l10n, expense.category);
     return Container(
       color: isEven ? AppColors.tint(AppColors.surface, .55) : null,
       padding: const EdgeInsets.symmetric(
@@ -60,17 +63,17 @@ class ExpenseItemTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  dayNumber == null
-                      ? expense.category.displayName.toUpperCase()
-                      : 'DAY $dayNumber · '
-                            '${expense.category.displayName.toUpperCase()}',
+                  (dayNumber == null
+                          ? category
+                          : '${context.l10n.plan_dayN(dayNumber!)} · $category')
+                      .toUpperCase(),
                   style: AppTypography.mono,
                 ),
               ],
             ),
           ),
           Text(
-            formatEuro(expense.amount),
+            formatEuro(expense.amount, context.l10n.localeName),
             style: AppTypography.headlineSerif.copyWith(fontSize: 16),
           ),
         ],

@@ -991,5 +991,233 @@
   "photo_deleteSemantics": "Kustuta foto",
   "@photo_deleteSemantics": {
     "x-review": "pending"
+  },
+  "expense_eyebrow": "Kulud",
+  "@expense_eyebrow": {
+    "x-review": "pending"
+  },
+  "expense_compareLink": "Võrdle",
+  "@expense_compareLink": {
+    "x-review": "pending"
+  },
+  "expense_searchHint": "Otsi mälestusi",
+  "@expense_searchHint": {
+    "x-review": "pending"
+  },
+  "expense_sortLatest": "Uuemad enne",
+  "@expense_sortLatest": {
+    "x-review": "pending"
+  },
+  "expense_sortBiggest": "Suurimad kulud",
+  "@expense_sortBiggest": {
+    "x-review": "pending"
+  },
+  "expense_memoriesHeader": "Mälestused",
+  "@expense_memoriesHeader": {
+    "x-review": "pending"
+  },
+  "expense_visibleOf": "{visible}/{total}",
+  "@expense_visibleOf": {
+    "x-review": "pending"
+  },
+  "expense_noSearchMatch": "Otsingule ei vasta ükski mälestus.",
+  "@expense_noSearchMatch": {
+    "x-review": "pending"
+  },
+  "expense_loadThreeMore": "Näita veel 3",
+  "@expense_loadThreeMore": {
+    "x-review": "pending"
+  },
+  "expense_loadMoreRemaining": "Näita veel ({count})",
+  "@expense_loadMoreRemaining": {
+    "x-review": "pending"
+  },
+  "expense_addExpense": "Lisa kulu",
+  "@expense_addExpense": {
+    "x-review": "pending"
+  },
+  "expense_emptyTitle": "Kulusid veel pole",
+  "@expense_emptyTitle": {
+    "x-review": "pending"
+  },
+  "expense_emptyBody": "Loo esmalt mälestus ja hakka siis kulusid jälgima.",
+  "@expense_emptyBody": {
+    "x-review": "pending"
+  },
+  "expense_byCategory": "Kategooriate kaupa",
+  "@expense_byCategory": {
+    "x-review": "pending"
+  },
+  "expense_allExpenses": "Kõik kulud",
+  "@expense_allExpenses": {
+    "x-review": "pending"
+  },
+  "expense_itemCount": "{count, plural, one{{count} kirje} other{{count} kirjet}}",
+  "@expense_itemCount": {
+    "x-review": "pending"
+  },
+  "expense_durationShort": "{days} p",
+  "@expense_durationShort": {
+    "x-review": "pending"
+  },
+  "expense_totalSpent": "Kokku kulutatud",
+  "@expense_totalSpent": {
+    "x-review": "pending"
+  },
+  "expense_perDayAvg": "Keskmiselt päevas",
+  "@expense_perDayAvg": {
+    "x-review": "pending"
+  },
+  "expense_biggestCategory": "Suurim kategooria",
+  "@expense_biggestCategory": {
+    "x-review": "pending"
+  },
+  "expense_pickMemoryTitle": "Vali ülalt mälestus",
+  "@expense_pickMemoryTitle": {
+    "x-review": "pending"
+  },
+  "expense_pickMemoryBody": "Näed kogusummat, kuhu raha läks, ja iga kulu nii, nagu selle kirja panid.",
+  "@expense_pickMemoryBody": {
+    "x-review": "pending"
+  },
+  "expense_newExpense": "Uus kulu",
+  "@expense_newExpense": {
+    "x-review": "pending"
+  },
+  "expense_memoryLabel": "Mälestus",
+  "@expense_memoryLabel": {
+    "x-review": "pending"
+  },
+  "expense_memoryRequired": "Vali, millise mälestuse juurde see kuulub.",
+  "@expense_memoryRequired": {
+    "x-review": "pending"
+  },
+  "expense_descriptionLabel": "Kirjeldus",
+  "@expense_descriptionLabel": {
+    "x-review": "pending"
+  },
+  "expense_descriptionHint": "Õhtusöök päikeseloojangul",
+  "@expense_descriptionHint": {
+    "x-review": "pending"
+  },
+  "expense_descriptionRequired": "Mille eest?",
+  "@expense_descriptionRequired": {
+    "x-review": "pending"
+  },
+  "expense_amountLabel": "Summa",
+  "@expense_amountLabel": {
+    "x-review": "pending"
+  },
+  "expense_amountInvalid": "Sisesta summa, mis on suurem kui 0.",
+  "@expense_amountInvalid": {
+    "x-review": "pending"
+  },
+  "expense_categoryHeader": "Kategooria",
+  "@expense_categoryHeader": {
+    "x-review": "pending"
+  },
+  "expense_spentOn": "Kuupäev",
+  "@expense_spentOn": {
+    "x-review": "pending"
+  },
+  "expense_todayDate": "Täna · {date}",
+  "@expense_todayDate": {
+    "x-review": "pending"
+  },
+  "expense_saveExpense": "Salvesta kulu",
+  "@expense_saveExpense": {
+    "x-review": "pending"
+  },
+  "expense_catFoodDrinks": "Söök ja jook",
+  "@expense_catFoodDrinks": {
+    "x-review": "pending"
+  },
+  "expense_catTransport": "Transport",
+  "@expense_catTransport": {
+    "x-review": "pending"
+  },
+  "expense_catAccommodation": "Majutus",
+  "@expense_catAccommodation": {
+    "x-review": "pending"
+  },
+  "expense_catActivities": "Tegevused",
+  "@expense_catActivities": {
+    "x-review": "pending"
+  },
+  "expense_catShopping": "Ostlemine",
+  "@expense_catShopping": {
+    "x-review": "pending"
+  },
+  "expense_catOther": "Muu",
+  "@expense_catOther": {
+    "x-review": "pending"
+  },
+  "compare_eyebrow": "Võrdlus",
+  "@compare_eyebrow": {
+    "x-review": "pending"
+  },
+  "compare_titleLead": "Milline reis läks",
+  "@compare_titleLead": {
+    "x-review": "pending"
+  },
+  "compare_titleEmphasis": "tegelikult maksma?",
+  "@compare_titleEmphasis": {
+    "x-review": "pending"
+  },
+  "compare_hintPickTwo": "Vali kaks mälestust, et nende kulusid võrrelda.",
+  "@compare_hintPickTwo": {
+    "x-review": "pending"
+  },
+  "compare_hintPickSecond": "Nüüd vali teine.",
+  "@compare_hintPickSecond": {
+    "x-review": "pending"
+  },
+  "compare_hintReady": "{a} vs {b} — puuduta kumbagi, et see vahetada.",
+  "@compare_hintReady": {
+    "x-review": "pending"
+  },
+  "compare_needTwo": "Loo vähemalt kaks mälestust, et kulusid võrrelda.",
+  "@compare_needTwo": {
+    "x-review": "pending"
+  },
+  "compare_doneComparing": "✕ Lõpeta võrdlus",
+  "@compare_doneComparing": {
+    "x-review": "pending"
+  },
+  "compare_pickTwo": "Vali kaks",
+  "@compare_pickTwo": {
+    "x-review": "pending"
+  },
+  "compare_tableHeader": "Kulude võrdlus",
+  "@compare_tableHeader": {
+    "x-review": "pending"
+  },
+  "compare_total": "Kokku",
+  "@compare_total": {
+    "x-review": "pending"
+  },
+  "compare_perDay": "Päevas",
+  "@compare_perDay": {
+    "x-review": "pending"
+  },
+  "compare_verdictSame": "{a} ja {b} läksid kokku umbes sama palju maksma.",
+  "@compare_verdictSame": {
+    "x-review": "pending"
+  },
+  "compare_verdictSameButPerDay": "{a} ja {b} läksid kokku umbes sama palju maksma, kuid {higher} puhul kulus päevas {perDay} rohkem. {cheaper} oli päeva kohta odavam.",
+  "@compare_verdictSameButPerDay": {
+    "x-review": "pending"
+  },
+  "compare_verdictMore": "{bigger} läks {total} rohkem maksma kui {smaller}.",
+  "@compare_verdictMore": {
+    "x-review": "pending"
+  },
+  "compare_verdictMoreAndPerDay": "{bigger} läks {total} rohkem maksma ja kulus ka päevas {perDay} rohkem. {cheaper} oli päeva kohta odavam.",
+  "@compare_verdictMoreAndPerDay": {
+    "x-review": "pending"
+  },
+  "compare_verdictMoreButPerDay": "{bigger} läks {total} rohkem maksma, kuid {higher} puhul kulus päevas {perDay} rohkem. {cheaper} oli päeva kohta odavam.",
+  "@compare_verdictMoreButPerDay": {
+    "x-review": "pending"
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -94,14 +95,14 @@ class ExpenseSummaryTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      formatEuro(summary.totalAmount),
+                      formatEuro(summary.totalAmount, context.l10n.localeName),
                       style: AppTypography.bigNumber.copyWith(fontSize: 18),
                     ),
                     Text(
                       summary.durationDays == null
-                          ? '${summary.itemCount} items'
-                          : '${summary.durationDays}d · '
-                                '${summary.itemCount} items',
+                          ? context.l10n.expense_itemCount(summary.itemCount)
+                          : '${context.l10n.expense_durationShort(summary.durationDays!)} · '
+                                '${context.l10n.expense_itemCount(summary.itemCount)}',
                       style: AppTypography.mono,
                     ),
                   ],

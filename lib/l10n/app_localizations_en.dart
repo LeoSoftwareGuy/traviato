@@ -957,4 +957,224 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get photo_deleteSemantics => 'Delete photo';
+
+  @override
+  String get expense_eyebrow => 'Expenses';
+
+  @override
+  String get expense_compareLink => 'Compare';
+
+  @override
+  String get expense_searchHint => 'Search memories';
+
+  @override
+  String get expense_sortLatest => 'Latest first';
+
+  @override
+  String get expense_sortBiggest => 'Biggest spender';
+
+  @override
+  String get expense_memoriesHeader => 'Memories';
+
+  @override
+  String expense_visibleOf(int visible, int total) {
+    return '$visible of $total';
+  }
+
+  @override
+  String get expense_noSearchMatch => 'No memories match your search.';
+
+  @override
+  String get expense_loadThreeMore => 'Load 3 more';
+
+  @override
+  String expense_loadMoreRemaining(int count) {
+    return 'Load more ($count more)';
+  }
+
+  @override
+  String get expense_addExpense => 'Add expense';
+
+  @override
+  String get expense_emptyTitle => 'No expenses yet';
+
+  @override
+  String get expense_emptyBody =>
+      'Add a memory first, then start tracking what you spend on it.';
+
+  @override
+  String get expense_byCategory => 'By category';
+
+  @override
+  String get expense_allExpenses => 'All expenses';
+
+  @override
+  String expense_itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String expense_durationShort(int days) {
+    return '${days}d';
+  }
+
+  @override
+  String get expense_totalSpent => 'Total spent';
+
+  @override
+  String get expense_perDayAvg => 'Per day avg';
+
+  @override
+  String get expense_biggestCategory => 'Biggest category';
+
+  @override
+  String get expense_pickMemoryTitle => 'Pick a memory above';
+
+  @override
+  String get expense_pickMemoryBody =>
+      'You\'ll see the total, where it went, and every expense as you logged it.';
+
+  @override
+  String get expense_newExpense => 'New expense';
+
+  @override
+  String get expense_memoryLabel => 'Memory';
+
+  @override
+  String get expense_memoryRequired => 'Pick which memory this belongs to.';
+
+  @override
+  String get expense_descriptionLabel => 'Description';
+
+  @override
+  String get expense_descriptionHint => 'Sunset dinner';
+
+  @override
+  String get expense_descriptionRequired => 'What was it?';
+
+  @override
+  String get expense_amountLabel => 'Amount';
+
+  @override
+  String get expense_amountInvalid => 'Enter an amount greater than 0.';
+
+  @override
+  String get expense_categoryHeader => 'Category';
+
+  @override
+  String get expense_spentOn => 'Spent on';
+
+  @override
+  String expense_todayDate(String date) {
+    return 'Today · $date';
+  }
+
+  @override
+  String get expense_saveExpense => 'Save expense';
+
+  @override
+  String get expense_catFoodDrinks => 'Food & Drinks';
+
+  @override
+  String get expense_catTransport => 'Transport';
+
+  @override
+  String get expense_catAccommodation => 'Accommodation';
+
+  @override
+  String get expense_catActivities => 'Activities';
+
+  @override
+  String get expense_catShopping => 'Shopping';
+
+  @override
+  String get expense_catOther => 'Other';
+
+  @override
+  String get compare_eyebrow => 'Compare';
+
+  @override
+  String get compare_titleLead => 'Which trip cost';
+
+  @override
+  String get compare_titleEmphasis => 'what, really?';
+
+  @override
+  String get compare_hintPickTwo =>
+      'Pick two memories to put their spending side by side.';
+
+  @override
+  String get compare_hintPickSecond => 'Now pick a second one.';
+
+  @override
+  String compare_hintReady(String a, String b) {
+    return '$a vs $b — tap either to swap it out.';
+  }
+
+  @override
+  String get compare_needTwo =>
+      'Create at least two memories to compare their spending.';
+
+  @override
+  String get compare_doneComparing => '✕ Done comparing';
+
+  @override
+  String get compare_pickTwo => 'Pick two';
+
+  @override
+  String get compare_tableHeader => 'Financial comparison';
+
+  @override
+  String get compare_total => 'Total';
+
+  @override
+  String get compare_perDay => 'Per day';
+
+  @override
+  String compare_verdictSame(String a, String b) {
+    return '$a and $b cost about the same overall.';
+  }
+
+  @override
+  String compare_verdictSameButPerDay(
+    String a,
+    String b,
+    String higher,
+    String perDay,
+    String cheaper,
+  ) {
+    return '$a and $b cost about the same overall, but $higher ran $perDay/day higher. $cheaper was the cheaper trip per day.';
+  }
+
+  @override
+  String compare_verdictMore(String bigger, String total, String smaller) {
+    return '$bigger cost $total more overall than $smaller.';
+  }
+
+  @override
+  String compare_verdictMoreAndPerDay(
+    String bigger,
+    String total,
+    String perDay,
+    String cheaper,
+  ) {
+    return '$bigger cost $total more overall and ran $perDay/day higher too. $cheaper was the cheaper trip per day.';
+  }
+
+  @override
+  String compare_verdictMoreButPerDay(
+    String bigger,
+    String total,
+    String higher,
+    String perDay,
+    String cheaper,
+  ) {
+    return '$bigger cost $total more overall, but $higher ran $perDay/day higher. $cheaper was the cheaper trip per day.';
+  }
 }

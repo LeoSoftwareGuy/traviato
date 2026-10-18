@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -11,9 +12,9 @@ import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../controllers/expense_compare_controller.dart';
 import '../controllers/expense_compare_state.dart';
 import '../widgets/expense_compare_table.dart';
+import '../widgets/expense_compare_verdict.dart';
 import '../widgets/expense_compare_verdict_card.dart';
 import '../widgets/expense_summary_tile.dart';
-import '../../../../core/l10n/context_l10n.dart';
 
 /// "Put two memories' spending side by side." `docs/design/README.md` § 9.
 class ExpenseComparePage extends ConsumerWidget {
@@ -66,9 +67,12 @@ class _CompareContent extends ConsumerWidget {
           onDoneComparing: notifier.clearSelection,
         ),
         const SizedBox(height: AppSpacing.xl),
-        Text('Which trip cost', style: AppTypography.screenTitle),
         Text(
-          'what, really?',
+          context.l10n.compare_titleLead,
+          style: AppTypography.screenTitle,
+        ),
+        Text(
+          context.l10n.compare_titleEmphasis,
           style: AppTypography.screenTitle.copyWith(
             fontStyle: FontStyle.italic,
             color: AppColors.primaryLight,
@@ -76,7 +80,7 @@ class _CompareContent extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          state.hintLine,
+          compareHintLine(context.l10n, state),
           style: AppTypography.chipLabel.copyWith(color: AppColors.textMuted),
         ),
         const SizedBox(height: AppSpacing.xl),
@@ -84,7 +88,7 @@ class _CompareContent extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
             child: Text(
-              'Create at least two memories to compare their spending.',
+              context.l10n.compare_needTwo,
               style: AppTypography.chipLabel,
             ),
           )
@@ -162,7 +166,7 @@ class _CompareHeader extends StatelessWidget {
         Expanded(
           child: Center(
             child: Text(
-              'COMPARE',
+              context.l10n.compare_eyebrow.toUpperCase(),
               style: AppTypography.mono.copyWith(color: AppColors.textTertiary),
             ),
           ),
@@ -184,7 +188,7 @@ class _CompareHeader extends StatelessWidget {
                 borderRadius: AppRadius.pillRadius,
               ),
               child: Text(
-                '✕ Done comparing',
+                context.l10n.compare_doneComparing,
                 style: AppTypography.chipLabel.copyWith(
                   color: AppColors.accentCoral,
                   fontWeight: FontWeight.w600,
@@ -196,7 +200,7 @@ class _CompareHeader extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             child: Text(
-              'Pick two',
+              context.l10n.compare_pickTwo,
               style: AppTypography.chipLabel.copyWith(
                 color: AppColors.textTertiary,
               ),

@@ -1,10 +1,10 @@
-import '../../../../core/utils/pluralize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -23,7 +23,6 @@ import '../widgets/expense_load_more_row.dart';
 import '../widgets/expense_sort_toggle.dart';
 import '../widgets/expense_stats_strip.dart';
 import '../widgets/expense_summary_tile.dart';
-import '../../../../core/l10n/context_l10n.dart';
 
 class ExpensesPage extends ConsumerWidget {
   const ExpensesPage({super.key});
@@ -86,9 +85,9 @@ class _ExpensesContent extends ConsumerWidget {
                 child: TextField(
                   onChanged: notifier.setSearchQuery,
                   style: AppTypography.bodyInput,
-                  decoration: const InputDecoration(
-                    hintText: 'Search memories',
-                    prefixIcon: Icon(
+                  decoration: InputDecoration(
+                    hintText: context.l10n.expense_searchHint,
+                    prefixIcon: const Icon(
                       Icons.search,
                       color: AppColors.textSecondary,
                     ),
@@ -106,9 +105,17 @@ class _ExpensesContent extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('MEMORIES', style: AppTypography.mono),
               Text(
-                '${visible.length} OF ${state.matchingSummaries.length}',
+                context.l10n.expense_memoriesHeader.toUpperCase(),
+                style: AppTypography.mono,
+              ),
+              Text(
+                context.l10n
+                    .expense_visibleOf(
+                      visible.length,
+                      state.matchingSummaries.length,
+                    )
+                    .toUpperCase(),
                 style: AppTypography.mono,
               ),
             ],
@@ -118,7 +125,7 @@ class _ExpensesContent extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
               child: Text(
-                'No memories match your search.',
+                context.l10n.expense_noSearchMatch,
                 style: AppTypography.chipLabel,
               ),
             )
@@ -135,7 +142,7 @@ class _ExpensesContent extends ConsumerWidget {
           if (state.hasMoreSummaries) ...[
             const SizedBox(height: AppSpacing.xs),
             ExpenseLoadMoreRow(
-              label: 'Load 3 more',
+              label: context.l10n.expense_loadThreeMore,
               onTap: notifier.loadMoreSummaries,
             ),
           ],
@@ -154,7 +161,7 @@ class _ExpensesContent extends ConsumerWidget {
                 initialTripId: state.selectedTripId,
               ),
               icon: const Icon(Icons.add),
-              label: const Text('Add expense'),
+              label: Text(context.l10n.expense_addExpense),
             ),
           ),
         ],
@@ -173,11 +180,14 @@ class _ExpensesHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('EXPENSES', style: AppTypography.mono),
+        Text(
+          context.l10n.expense_eyebrow.toUpperCase(),
+          style: AppTypography.mono,
+        ),
         InkWell(
           onTap: onCompareTap,
           child: Text(
-            'Compare',
+            context.l10n.expense_compareLink,
             style: AppTypography.chipLabel.copyWith(
               color: AppColors.primary,
               fontWeight: FontWeight.w600,
@@ -205,20 +215,20 @@ class _NoExpensesYet extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.base),
         Text(
-          'No expenses yet',
+          context.l10n.expense_emptyTitle,
           style: AppTypography.headlineSerif,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Add a memory first, then start tracking what you spend on it.',
+          context.l10n.expense_emptyBody,
           textAlign: TextAlign.center,
           style: AppTypography.chipLabel.copyWith(color: AppColors.textMuted),
         ),
         const SizedBox(height: AppSpacing.lg),
         ElevatedButton(
           onPressed: onCreateTap,
-          child: const Text('Create your first memory'),
+          child: Text(context.l10n.home_emptyCta),
         ),
       ],
     );
@@ -274,18 +284,24 @@ class _SelectedMemoryDetail extends ConsumerWidget {
                 ),
               ],
               const SizedBox(height: AppSpacing.xl),
-              Text('BY CATEGORY', style: AppTypography.mono),
+              Text(
+                context.l10n.expense_byCategory.toUpperCase(),
+                style: AppTypography.mono,
+              ),
               const SizedBox(height: AppSpacing.sm),
               ExpenseCategoryBreakdown(totals: state.categoryTotalsSorted),
               const SizedBox(height: AppSpacing.xl),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('ALL EXPENSES', style: AppTypography.mono),
                   Text(
-                    '${selected.itemCount} '
-                    '${pluralize(selected.itemCount, 'ITEM', 'ITEMS')} · '
-                    '$dayCount ${pluralize(dayCount, 'DAY', 'DAYS')}',
+                    context.l10n.expense_allExpenses.toUpperCase(),
+                    style: AppTypography.mono,
+                  ),
+                  Text(
+                    '${context.l10n.expense_itemCount(selected.itemCount)} · '
+                            '${context.l10n.common_dayCount(dayCount)}'
+                        .toUpperCase(),
                     style: AppTypography.mono,
                   ),
                 ],
@@ -308,9 +324,10 @@ class _SelectedMemoryDetail extends ConsumerWidget {
               if (state.hasMoreSelectedExpenses) ...[
                 const SizedBox(height: AppSpacing.sm),
                 ExpenseLoadMoreRow(
-                  label:
-                      'Load more '
-                      '(${(state.selectedTripExpenses?.length ?? 0) - state.visibleExpenseCount} more)',
+                  label: context.l10n.expense_loadMoreRemaining(
+                    (state.selectedTripExpenses?.length ?? 0) -
+                        state.visibleExpenseCount,
+                  ),
                   onTap: ref
                       .read(expenseListControllerProvider.notifier)
                       .loadMoreExpenses,

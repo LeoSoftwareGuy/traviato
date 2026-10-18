@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -23,7 +24,7 @@ class ExpenseTripSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Memory', style: AppTypography.fieldLabel),
+        Text(context.l10n.expense_memoryLabel, style: AppTypography.fieldLabel),
         const SizedBox(height: AppSpacing.sm),
         DropdownButtonFormField<String>(
           initialValue: value,
@@ -46,7 +47,7 @@ class ExpenseTripSelector extends StatelessWidget {
           ],
           onChanged: onChanged,
           validator: (value) =>
-              value == null ? 'Pick which memory this belongs to.' : null,
+              value == null ? context.l10n.expense_memoryRequired : null,
         ),
       ],
     );

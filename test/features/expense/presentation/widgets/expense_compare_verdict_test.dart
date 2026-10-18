@@ -1,7 +1,11 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/expense/presentation/widgets/expense_compare_verdict.dart';
+import 'package:traviato/l10n/app_localizations.dart';
 
 import '../../fakes/fake_expense_repository.dart';
+
+final _en = lookupAppLocalizations(const Locale('en'));
 
 void main() {
   test('bigger total, no per-day data for one side: single sentence', () {
@@ -17,7 +21,7 @@ void main() {
     );
 
     expect(
-      buildCompareVerdict(a: a, b: b),
+      buildCompareVerdict(l10n: _en, a: a, b: b),
       'Iceland ring road cost €939 more overall than Santorini blues.',
     );
   });
@@ -35,7 +39,7 @@ void main() {
     );
 
     expect(
-      buildCompareVerdict(a: a, b: b),
+      buildCompareVerdict(l10n: _en, a: a, b: b),
       'A cost €400 more overall and ran €140/day higher too. B was the '
       'cheaper trip per day.',
     );
@@ -56,7 +60,7 @@ void main() {
       );
 
       expect(
-        buildCompareVerdict(a: a, b: b),
+        buildCompareVerdict(l10n: _en, a: a, b: b),
         'A cost €400 more overall, but B ran €70/day higher. A was the '
         'cheaper trip per day.',
       );
@@ -76,7 +80,7 @@ void main() {
     );
 
     expect(
-      buildCompareVerdict(a: a, b: b),
+      buildCompareVerdict(l10n: _en, a: a, b: b),
       'A and B cost about the same overall, but A ran €20/day higher. B '
       'was the cheaper trip per day.',
     );
@@ -95,7 +99,7 @@ void main() {
     );
 
     expect(
-      buildCompareVerdict(a: a, b: b),
+      buildCompareVerdict(l10n: _en, a: a, b: b),
       'A and B cost about the same overall.',
     );
   });
@@ -113,7 +117,7 @@ void main() {
     );
 
     expect(
-      buildCompareVerdict(a: a, b: b),
+      buildCompareVerdict(l10n: _en, a: a, b: b),
       'A and B cost about the same overall.',
     );
   });
