@@ -15,17 +15,10 @@ const _baseline = <String, int>{
   'lib/features/bonus/presentation/widgets/bonus_task_tile.dart': 1,
   'lib/features/bonus/presentation/widgets/stretch_offer_card.dart': 2,
   'lib/features/checklist/presentation/widgets/category_tabs.dart': 1,
-  'lib/features/expense/presentation/pages/expense_compare_page.dart': 6,
-  'lib/features/expense/presentation/pages/expenses_page.dart': 10,
-  'lib/features/expense/presentation/widgets/add_expense_sheet.dart': 6,
   'lib/features/expense/presentation/widgets/expense_biggest_category_card.dart':
-      2,
+      1,
   'lib/features/expense/presentation/widgets/expense_category_breakdown.dart':
       1,
-  'lib/features/expense/presentation/widgets/expense_compare_table.dart': 2,
-  'lib/features/expense/presentation/widgets/expense_empty_selection_panel.dart':
-      2,
-  'lib/features/expense/presentation/widgets/expense_trip_selector.dart': 1,
   'lib/features/home/presentation/widgets/home_header.dart': 1,
   'lib/features/home/presentation/widgets/home_stats_bar.dart': 1,
   'lib/features/journal/presentation/widgets/journal_header.dart': 1,
