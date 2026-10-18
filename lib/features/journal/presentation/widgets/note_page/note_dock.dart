@@ -2,11 +2,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../../core/l10n/context_l10n.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_gradients.dart';
 import '../../../../../core/theme/app_motion.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../../../core/utils/pluralize.dart';
 import 'note_dictation_controller.dart';
 
 /// The note page's bottom dock (docs/design/JOURNAL_NOTE_PAGETURN_SPEC.md
@@ -42,7 +42,7 @@ class NoteDock extends StatelessWidget {
         listenable: dictation,
         builder: (context, _) {
           final listening = dictation.isListening;
-          final notice = _noticeText(dictation.notice);
+          final notice = _noticeText(context.l10n, dictation.notice);
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -61,8 +61,7 @@ class NoteDock extends StatelessWidget {
                     child: draftWordCount == 0
                         ? null
                         : Text(
-                            '+$draftWordCount '
-                            '${pluralize(draftWordCount, 'word', 'words')}',
+                            context.l10n.note_wordsAdded(draftWordCount),
                             key: const Key('note-page-word-counter'),
                             textAlign: TextAlign.right,
                             style: AppTypography.noteDockCounter,
@@ -86,13 +85,12 @@ class NoteDock extends StatelessWidget {
     );
   }
 
-  static String? _noticeText(DictationNotice notice) => switch (notice) {
-    DictationNotice.none => null,
-    DictationNotice.micOff =>
-      'Microphone is off. Turn it on in Settings, or just type.',
-    DictationNotice.unavailable =>
-      "Voice isn't available right now — typing works.",
-  };
+  static String? _noticeText(AppLocalizations l10n, DictationNotice notice) =>
+      switch (notice) {
+        DictationNotice.none => null,
+        DictationNotice.micOff => l10n.note_micOff,
+        DictationNotice.unavailable => l10n.note_voiceUnavailable,
+      };
 }
 
 class _AaButton extends StatelessWidget {
@@ -104,7 +102,7 @@ class _AaButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Type',
+      label: context.l10n.note_typeSemantics,
       excludeSemantics: true,
       child: Material(
         type: MaterialType.transparency,
@@ -178,7 +176,9 @@ class _MicButton extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: listening ? 'Stop dictation' : 'Dictate',
+      label: listening
+          ? context.l10n.note_stopDictationSemantics
+          : context.l10n.note_dictateSemantics,
       excludeSemantics: true,
       child: GestureDetector(
         key: const Key('note-page-mic'),
@@ -190,7 +190,9 @@ class _MicButton extends StatelessWidget {
             if (listening) _PulsingRing(child: face) else face,
             const SizedBox(height: 6),
             Text(
-              listening ? 'Tap to stop' : 'Tap to talk',
+              listening
+                  ? context.l10n.dictation_tapToStop
+                  : context.l10n.dictation_tapToTalk,
               style: AppTypography.noteDockLabel,
             ),
           ],
@@ -276,7 +278,9 @@ class _ListeningRow extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          'LISTENING · ${elapsed.inMinutes}:$seconds',
+          context.l10n
+              .note_listening('${elapsed.inMinutes}:$seconds')
+              .toUpperCase(),
           style: AppTypography.noteListening,
         ),
       ],

@@ -161,21 +161,16 @@ class JournalState extends Equatable {
   int get wrapUpPhotosHave => photos.length.clamp(0, wrapUpMinPhotos);
   int get wrapUpNotesHave => notes.length.clamp(0, wrapUpMinNotes);
 
-  /// The explainer card's lead-line `{ask}` (spec §6's three variants) —
-  /// `null` unless the wrap-up is actually locked.
-  String? get wrapUpAskLine {
+  /// What's still missing before the wrap-up unlocks (spec §6's three
+  /// variants) — `null` unless it's actually locked. The sentence itself is
+  /// built in the UI language by `wrapUpAskLine` (#220).
+  ({int missingPhotos, bool needsNote})? get wrapUpMissing {
     if (wrapUpAvailability != WrapUpAvailability.locked) return null;
     final missingPhotos = wrapUpMinPhotos - photos.length;
-    final missingNotes = wrapUpMinNotes - notes.length;
-    if (missingPhotos > 0 && missingNotes > 0) {
-      return 'Add $missingPhotos more photo${_s(missingPhotos)} and one '
-          'note to unlock it.';
-    }
-    if (missingPhotos > 0) {
-      return 'Add $missingPhotos more photo${_s(missingPhotos)} to unlock '
-          'it.';
-    }
-    return 'Write one note to unlock it.';
+    return (
+      missingPhotos: missingPhotos > 0 ? missingPhotos : 0,
+      needsNote: notes.length < wrapUpMinNotes,
+    );
   }
 
   JournalState copyWith({
@@ -205,8 +200,6 @@ class JournalState extends Equatable {
     quests,
   ];
 }
-
-String _s(int count) => count == 1 ? '' : 's';
 
 bool _isSameDate(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month && a.day == b.day;

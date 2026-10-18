@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
+import '../../../../core/l10n/l10n_dates.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../../../photo/domain/entities/photo_entity.dart';
 import '../../../photo/presentation/widgets/storage_photo_image.dart';
-import '../../../../core/widgets/app_snackbar.dart';
-
-final _dayLabelFormat = DateFormat('MMM d');
 
 /// Horizontally scrollable day pills — a small thumbnail is shown only for
 /// a day that already has a photo. Simplified from Figma's two-row
@@ -118,7 +117,7 @@ class _DayTab extends StatelessWidget {
               const SizedBox(width: AppSpacing.xs),
             ],
             Text(
-              _dayLabelFormat.format(day),
+              L10nDates.monthDay(context.l10n.localeName).format(day),
               style: AppTypography.chipLabel.copyWith(
                 color: isSelected ? AppColors.primary : AppColors.textMuted,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
@@ -191,7 +190,7 @@ class _EmptyDayDot extends StatelessWidget {
 }
 
 void _showLockedDayMessage(BuildContext context) {
-  showAppSnackbar(context, "This day hasn't happened yet");
+  showAppSnackbar(context, context.l10n.journal_dayNotYet);
 }
 
 bool _isSameDate(DateTime a, DateTime b) =>

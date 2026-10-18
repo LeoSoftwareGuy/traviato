@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../controllers/journal_state.dart';
+import 'wrap_up_ask_line.dart';
 
 /// The locked wrap-up CTA's explainer card
 /// (docs/design/M6_MONETIZATION_SPEC.md §6, #140) — content gate only, never
@@ -17,7 +19,8 @@ class WrapUpExplainerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final askLine = state.wrapUpAskLine;
+    final l10n = context.l10n;
+    final askLine = wrapUpAskLine(l10n, state);
     if (askLine == null) return const SizedBox.shrink();
 
     return Container(
@@ -32,7 +35,7 @@ class WrapUpExplainerCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Your film needs a little more to work with. $askLine',
+            l10n.journal_wrapUpExplainer(askLine),
             style: AppTypography.bodyInput.copyWith(
               fontSize: 13,
               height: 1.55,
@@ -42,14 +45,14 @@ class WrapUpExplainerCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           _ChecklistRow(
-            label: 'Five photos in this memory',
+            label: l10n.journal_wrapUpReqPhotos,
             have: state.wrapUpPhotosHave,
             need: JournalState.wrapUpMinPhotos,
             met: state.wrapUpPhotosMet,
           ),
           const SizedBox(height: AppSpacing.sm),
           _ChecklistRow(
-            label: 'At least one note written',
+            label: l10n.journal_wrapUpReqNote,
             have: state.wrapUpNotesHave,
             need: JournalState.wrapUpMinNotes,
             met: state.wrapUpNotesMet,
@@ -58,7 +61,7 @@ class WrapUpExplainerCard extends StatelessWidget {
           const Divider(height: 1, color: AppColors.surfaceBorder),
           const SizedBox(height: AppSpacing.md),
           Text(
-            "Nothing to buy — this one's the same on every plan.",
+            l10n.journal_wrapUpFree,
             style: AppTypography.caption.copyWith(
               fontSize: 10.5,
               height: 1.5,

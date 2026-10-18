@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -45,13 +46,16 @@ class DayNoteCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Text(
-                '✎ Add notes about today',
-                style: AppTypography.bodyEmphasis.copyWith(
-                  color: AppColors.primary,
+              // Expanded (not Text + Spacer) so a longer translation wraps
+              // instead of overflowing (#220).
+              Expanded(
+                child: Text(
+                  context.l10n.journal_addNotesToday,
+                  style: AppTypography.bodyEmphasis.copyWith(
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
-              const Spacer(),
               if (isSaving) const _SavingIndicator(),
             ],
           ),
@@ -77,10 +81,11 @@ class DayNoteCard extends StatelessWidget {
           Row(
             children: [
               Text(
-                updatedAt == null
-                    ? '$wordCount WORDS'
-                    : 'EDITED ${_editedAtFormat.format(updatedAt!)} '
-                          '· $wordCount WORDS',
+                (updatedAt == null
+                        ? context.l10n.journal_wordCount(wordCount)
+                        : '${context.l10n.journal_edited(_editedAtFormat.format(updatedAt!))}'
+                              ' · ${context.l10n.journal_wordCount(wordCount)}')
+                    .toUpperCase(),
                 style: AppTypography.mono,
               ),
               const Spacer(),
@@ -98,7 +103,7 @@ class DayNoteCard extends StatelessWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Text(
-              '✎ Continue entry',
+              context.l10n.journal_continueEntry,
               style: AppTypography.bodyEmphasis.copyWith(
                 color: AppColors.primary,
               ),

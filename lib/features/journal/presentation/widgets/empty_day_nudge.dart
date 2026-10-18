@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -53,14 +54,13 @@ class EmptyDayNudge extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Text(
               dayNumber == null
-                  ? 'Nothing here yet'
-                  : 'Nothing from Day $dayNumber yet',
+                  ? context.l10n.journal_nothingYet
+                  : context.l10n.journal_nothingFromDay(dayNumber!),
               style: AppTypography.headlineSerif.copyWith(fontSize: 17),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'Even one photo helps your wrap-up. Quiet days still make the '
-              'film — this one will just pass through it.',
+              context.l10n.journal_nudgeBody,
               style: AppTypography.chipLabel.copyWith(
                 fontSize: 12,
                 height: 1.6,
@@ -81,7 +81,7 @@ class EmptyDayNudge extends StatelessWidget {
                       ),
                       foregroundColor: AppColors.primary,
                     ),
-                    child: const Text('＋ Add a photo'),
+                    child: Text(context.l10n.journal_addAPhoto),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -93,7 +93,7 @@ class EmptyDayNudge extends StatelessWidget {
                       foregroundColor: AppColors.textSecondary,
                       side: const BorderSide(color: AppColors.surfaceBorder),
                     ),
-                    child: const Text('Write a note'),
+                    child: Text(context.l10n.journal_writeNote),
                   ),
                 ),
               ],

@@ -1,10 +1,15 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/journal/presentation/controllers/journal_state.dart';
+import 'package:traviato/features/journal/presentation/widgets/wrap_up_ask_line.dart';
+import 'package:traviato/l10n/app_localizations.dart';
 
 import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
 import '../../fakes/fake_day_note_repository.dart';
+
+final _en = lookupAppLocalizations(const Locale('en'));
 
 DateTime get _today {
   final now = DateTime.now();
@@ -72,7 +77,7 @@ void main() {
       expect(state.wrapUpNotesMet, isTrue);
       expect(state.wrapUpPhotosHave, 3);
       expect(state.wrapUpNotesHave, 1);
-      expect(state.wrapUpAskLine, 'Add 2 more photos to unlock it.');
+      expect(wrapUpAskLine(_en, state), 'Add 2 more photos to unlock it.');
     });
 
     test(
@@ -84,7 +89,7 @@ void main() {
           photoCount: 6,
         );
         expect(state.wrapUpAvailability, WrapUpAvailability.locked);
-        expect(state.wrapUpAskLine, 'Write one note to unlock it.');
+        expect(wrapUpAskLine(_en, state), 'Write one note to unlock it.');
       },
     );
 
@@ -96,7 +101,7 @@ void main() {
         noteCount: 1,
       );
       expect(state.wrapUpAvailability, WrapUpAvailability.unlocked);
-      expect(state.wrapUpAskLine, isNull);
+      expect(wrapUpAskLine(_en, state), isNull);
     });
 
     test('is unlocked once ended with the trip past its end date too', () {
@@ -133,7 +138,7 @@ void main() {
         startDate: _today,
         endDate: _today.add(const Duration(days: 1)),
       );
-      expect(hidden.wrapUpAskLine, isNull);
+      expect(wrapUpAskLine(_en, hidden), isNull);
 
       final unlocked = _stateWith(
         startDate: _today,
@@ -141,13 +146,13 @@ void main() {
         photoCount: 5,
         noteCount: 1,
       );
-      expect(unlocked.wrapUpAskLine, isNull);
+      expect(wrapUpAskLine(_en, unlocked), isNull);
     });
 
     test('names both missing counts, pluralized correctly', () {
       final state = _stateWith(startDate: _today, endDate: _today);
       expect(
-        state.wrapUpAskLine,
+        wrapUpAskLine(_en, state),
         'Add 5 more photos and one note to unlock it.',
       );
     });
@@ -159,7 +164,7 @@ void main() {
         photoCount: 4,
       );
       expect(
-        state.wrapUpAskLine,
+        wrapUpAskLine(_en, state),
         'Add 1 more photo and one note to unlock it.',
       );
     });
@@ -171,7 +176,7 @@ void main() {
         photoCount: 4,
         noteCount: 1,
       );
-      expect(state.wrapUpAskLine, 'Add 1 more photo to unlock it.');
+      expect(wrapUpAskLine(_en, state), 'Add 1 more photo to unlock it.');
     });
   });
 

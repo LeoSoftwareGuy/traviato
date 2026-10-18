@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../controllers/journal_state.dart';
-import 'wrap_up_explainer_card.dart';
 import '../../../../core/widgets/app_snackbar.dart';
+import '../controllers/journal_state.dart';
+import 'wrap_up_ask_line.dart';
+import 'wrap_up_explainer_card.dart';
 
 /// "To Do" (opens the day's quests — hidden per [JournalState.showsToDo],
 /// #164) and "View wrap-up" (the gradient CTA,
@@ -43,7 +45,7 @@ class JournalActionButtons extends StatelessWidget {
             key: const Key('journal-to-do-action'),
             onPressed: onToDoTap,
             icon: const Icon(Icons.calendar_today_outlined, size: 16),
-            label: const Text('To Do'),
+            label: Text(context.l10n.journal_toDo),
             style: OutlinedButton.styleFrom(
               minimumSize: const Size.fromHeight(48),
               foregroundColor: AppColors.textSecondary,
@@ -55,7 +57,7 @@ class JournalActionButtons extends StatelessWidget {
           _WrapUpCta(onTap: onViewWrapUpTap),
         ] else if (availability == WrapUpAvailability.locked) ...[
           if (showsToDo) const SizedBox(height: AppSpacing.sm),
-          _WrapUpCtaLocked(askLine: state.wrapUpAskLine),
+          _WrapUpCtaLocked(askLine: wrapUpAskLine(context.l10n, state)),
           const SizedBox(height: 11),
           WrapUpExplainerCard(state: state),
         ],
@@ -85,7 +87,7 @@ class _WrapUpCta extends StatelessWidget {
               height: 48,
               alignment: Alignment.center,
               child: Text(
-                'View wrap-up ▸',
+                '${context.l10n.journal_viewWrapUp} ▸',
                 style: AppTypography.buttonLabel.copyWith(
                   color: AppColors.background,
                 ),
@@ -133,7 +135,7 @@ class _WrapUpCtaLocked extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                'View wrap-up',
+                context.l10n.journal_viewWrapUp,
                 style: AppTypography.buttonLabel.copyWith(
                   fontSize: 12.5,
                   color: AppColors.textTertiary,

@@ -1,8 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
+import '../../../../core/l10n/l10n_dates.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -15,8 +16,6 @@ const _photoTileWidth = 80.0;
 const _photoTileHeight = 100.0;
 const _photoTileGap = 10.0;
 const _photoTileRadius = AppRadius.badgeRadius;
-
-final _takenAtFormat = DateFormat('h:mm a');
 
 /// "Photos" section: count + one horizontally scrolling row of thumbnails,
 /// led by the "Add" tile. Tiles keep a fixed 80×100 size (never squeezed)
@@ -48,7 +47,7 @@ class PhotosStrip extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.xs),
             Text(
-              'Photos',
+              context.l10n.journal_photos,
               style: AppTypography.bodyInput.copyWith(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w600,
@@ -56,7 +55,7 @@ class PhotosStrip extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              '${photos.length} saved',
+              context.l10n.journal_photosSaved(photos.length),
               style: AppTypography.caption.copyWith(letterSpacing: 0),
             ),
           ],
@@ -203,7 +202,7 @@ class _TimePill extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             child: Text(
-              _takenAtFormat.format(takenAt),
+              L10nDates.time(context.l10n.localeName).format(takenAt),
               key: const Key('journal-photo-time-pill'),
               maxLines: 1,
               style: AppTypography.caption.copyWith(
@@ -252,7 +251,7 @@ class _AddPhotoTile extends StatelessWidget {
               const Icon(Icons.add, size: 20, color: AppColors.primary),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'Add ✦2',
+                context.l10n.journal_addPhotoTile,
                 style: AppTypography.caption.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w600,
