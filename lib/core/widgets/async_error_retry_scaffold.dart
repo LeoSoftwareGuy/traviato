@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/context_l10n.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
@@ -36,7 +37,10 @@ class AsyncErrorRetryScaffold extends StatelessWidget {
               style: AppTypography.bodyInput,
             ),
             const SizedBox(height: AppSpacing.lg),
-            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+            ElevatedButton(
+              onPressed: onRetry,
+              child: Text(context.l10n.common_retry),
+            ),
           ],
         ),
       ),

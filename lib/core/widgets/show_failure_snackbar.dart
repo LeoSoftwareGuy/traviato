@@ -5,6 +5,7 @@ import '../config/router/route_constants.dart';
 import '../errors/failure_message.dart';
 import '../errors/failures.dart';
 import '../errors/presentation_failure_exception.dart';
+import '../l10n/context_l10n.dart';
 import 'app_snackbar.dart';
 
 /// Shows a `MutationError`/`AsyncError` as a one-shot snackbar, routing a
@@ -27,9 +28,9 @@ void showFailureSnackbar(BuildContext context, Object error) {
   // auto-dismisses like every other message; see `showAppSnackbar`.
   showAppSnackbar(
     context,
-    presentationFailureMessage(error),
+    presentationFailureMessage(error, context.l10n),
     kind: AppSnackbarKind.error,
-    actionLabel: upsellEntry != null ? 'Upgrade' : null,
+    actionLabel: upsellEntry != null ? context.l10n.common_upgrade : null,
     onAction: upsellEntry != null
         ? () => context.pushNamed(
             RouteNames.subscriptionOfferings,

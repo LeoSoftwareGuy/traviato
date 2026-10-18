@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/router/route_constants.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 
 /// Persistent bottom nav for the Home/Expenses tabs, with a centered ➕
@@ -22,13 +23,13 @@ class HomeShellScaffold extends StatelessWidget {
         items: [
           AppBottomNavBarItem(
             icon: Icons.home_rounded,
-            label: 'Home',
+            label: context.l10n.nav_home,
             selected: navigationShell.currentIndex == 0,
             onTap: () => navigationShell.goBranch(0),
           ),
           AppBottomNavBarItem(
             icon: Icons.receipt_long_outlined,
-            label: 'Expenses',
+            label: context.l10n.nav_expenses,
             selected: navigationShell.currentIndex == 1,
             onTap: () => navigationShell.goBranch(1),
           ),
