@@ -1,8 +1,8 @@
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/l10n/context_l10n.dart';
+import '../providers/notification_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../providers/notification_providers.dart';
 
 /// Shows the local-notification rationale dialog once, the first time it's
 /// called after the user's first completed bonus task (issue #65 AC — "not
@@ -31,20 +31,16 @@ class NotificationPermissionPrompt {
     final wantsIt = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Get a gentle nudge for your daily dares?'),
-        content: const Text(
-          '${AppConstants.appName} can remind you once in the morning and once in the '
-          "evening when a bonus task is still open — never more than that, "
-          'and easy to turn off later.',
-        ),
+        title: Text(context.l10n.notif_promptTitle),
+        content: Text(context.l10n.notif_promptBody(AppConstants.appName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Not now'),
+            child: Text(context.l10n.photo_notNow),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Allow'),
+            child: Text(context.l10n.photo_allow),
           ),
         ],
       ),

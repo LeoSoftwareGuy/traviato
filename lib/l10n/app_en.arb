@@ -972,5 +972,344 @@
         "type": "String"
       }
     }
-  }
+  },
+  "bonus_eyebrow": "Bonus tasks",
+  "@bonus_eyebrow": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "bonus_emptyTitle": "No active memory yet",
+  "bonus_emptyBody": "Bonus tasks show up here once a memory is under way.",
+  "bonus_backHome": "Back home",
+  "toast_dareDone": "+{points} ✦ · dare done",
+  "@toast_dareDone": {
+    "description": "Star award toast (spec format).",
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "bonus_streakSaverHeader": "No rush · waits for you",
+  "@bonus_streakSaverHeader": {
+    "description": "Mono header, uppercased in code."
+  },
+  "bonus_completed": "Completed",
+  "@bonus_completed": {
+    "description": "Mono header / badge, uppercased in code."
+  },
+  "bonus_completedDay": "Completed · Day {day}",
+  "@bonus_completedDay": {
+    "description": "Mono badge, uppercased in code.",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "bonus_openCamera": "Open camera",
+  "bonus_maybeLater": "Maybe later",
+  "bonus_stretchUnlocked": "Unlocked · optional",
+  "@bonus_stretchUnlocked": {
+    "description": "Mono header, uppercased in code."
+  },
+  "bonus_bothDone": "Both done · ✦{stars} today",
+  "@bonus_bothDone": {
+    "placeholders": {
+      "stars": {
+        "type": "int"
+      }
+    }
+  },
+  "bonus_newOnesTomorrow": "New ones tomorrow.",
+  "notif_promptTitle": "Get a gentle nudge for your daily dares?",
+  "notif_promptBody": "{appName} can remind you once in the morning and once in the evening when a bonus task is still open — never more than that, and easy to turn off later.",
+  "@notif_promptBody": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "profile_eyebrow": "Profile",
+  "@profile_eyebrow": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "profile_defaultName": "Traveler",
+  "profile_joined": "Joined {date}",
+  "@profile_joined": {
+    "description": "Mono line, uppercased in code; {date} is month + year.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "profile_logOut": "Log out",
+  "profile_achievements": "Achievements",
+  "@profile_achievements": {
+    "description": "Mono header, uppercased in code."
+  },
+  "profile_achievementsEarned": "{earned}/{total} earned",
+  "@profile_achievementsEarned": {
+    "placeholders": {
+      "earned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "profile_updatePhoto": "Update your photo",
+  "profile_editTitle": "Edit your profile",
+  "profile_nameLabel": "Name",
+  "profile_bioLabel": "Bio",
+  "profile_bioHint": "A line about your travels",
+  "profile_statMemories": "{count, plural, =1{memory} other{memories}}",
+  "@profile_statMemories": {
+    "description": "Stat label, uppercased in code.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profile_statCountries": "{count, plural, =1{country} other{countries}}",
+  "@profile_statCountries": {
+    "description": "Stat label, uppercased in code.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profile_statDays": "{count, plural, =1{day} other{days}}",
+  "@profile_statDays": {
+    "description": "Stat label, uppercased in code.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profile_statStars": "{count, plural, =1{star} other{stars}}",
+  "@profile_statStars": {
+    "description": "Stat label, uppercased in code.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sub_periodAnnual": "Annual",
+  "@sub_periodAnnual": {
+    "description": "Tier pill period, uppercased in code."
+  },
+  "sub_periodMonthly": "Monthly",
+  "@sub_periodMonthly": {
+    "description": "Tier pill period, uppercased in code."
+  },
+  "sub_freePlanPill": "Free plan",
+  "@sub_freePlanPill": {
+    "description": "Tier pill, uppercased in code."
+  },
+  "sub_proPill": "Pro",
+  "@sub_proPill": {
+    "description": "Tier pill; brand word, keep as is."
+  },
+  "sub_header": "Subscription",
+  "@sub_header": {
+    "description": "Mono header, uppercased in code."
+  },
+  "sub_proName": "{appName} Pro",
+  "@sub_proName": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "sub_freePlan": "Free plan",
+  "sub_memoriesKeptMeta": "{kept} of {cap} memories kept. Upgrade for room to keep going.",
+  "@sub_memoriesKeptMeta": {
+    "placeholders": {
+      "kept": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      }
+    }
+  },
+  "sub_renewsSoon": "soon",
+  "@sub_renewsSoon": {
+    "description": "Used as {date} in sub_renews* when the date is unknown."
+  },
+  "sub_renews": "Renews {date}",
+  "@sub_renews": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "sub_renewsYearly": "Renews {date} · {price}/year",
+  "@sub_renewsYearly": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "sub_renewsMonthly": "Renews {date} · {price}/month",
+  "@sub_renewsMonthly": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "sub_trialTerms": "7 days free, then upgrade. Cancel anytime.",
+  "sub_trialTermsYearly": "7 days free, then {price}/year. Cancel anytime.",
+  "@sub_trialTermsYearly": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "sub_memoriesKept": "Memories kept",
+  "sub_unlimited": "Unlimited",
+  "sub_ofCap": "{used} of {cap}",
+  "@sub_ofCap": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      }
+    }
+  },
+  "sub_photosInMemory": "Photos in this memory",
+  "sub_noLimit": "{count} · no limit",
+  "@sub_noLimit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sub_manageHint": "Opens your store's subscription settings. Changes and cancellations happen there.",
+  "sub_restore": "Restore purchases",
+  "sub_restored": "Purchases restored",
+  "sub_nothingToRestore": "Nothing to restore on this account",
+  "sub_upgradeToPro": "Upgrade to Pro",
+  "sub_manage": "Manage subscription",
+  "sub_noSubscription": "No subscription found to manage.",
+  "sub_cantOpenSettings": "Could not open subscription settings.",
+  "paywall_subMemoryCap": "Your three free memories are full. Upgrade to keep every trip you take, not just three.",
+  "paywall_subPhotoCap": "This memory is full at 40 photos. Upgrade for unlimited photos on every trip.",
+  "paywall_subProfile": "Every memory deserves a place to live. Upgrade any time for unlimited room.",
+  "paywall_trialStarted": "Trial started · 7 days free",
+  "paywall_brandEyebrow": "{appName} Pro",
+  "@paywall_brandEyebrow": {
+    "description": "Mono eyebrow, uppercased in code.",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "paywall_titleLead": "Room for every",
+  "paywall_titleEmphasis": "memory you make",
+  "paywall_perkMemories": "Unlimited memories",
+  "paywall_perkMemoriesDetail": "Keep every trip instead of choosing three.",
+  "paywall_perkPhotos": "Unlimited photos per memory",
+  "paywall_perkPhotosDetail": "No 40-photo ceiling on a good week.",
+  "paywall_perkExport": "HD film export",
+  "paywall_perkExportDetail": "Save the wrap-up in full quality. Coming soon.",
+  "paywall_perkPriority": "Priority wrap-up generation",
+  "paywall_perkPriorityDetail": "Your film jumps the queue.",
+  "paywall_planAnnual": "Annual",
+  "paywall_planMonthly": "Monthly",
+  "paywall_perYear": "per year",
+  "paywall_perMonth": "per month",
+  "paywall_perMonthEquivalent": "{price} a month",
+  "@paywall_perMonthEquivalent": {
+    "description": "Mono line, uppercased in code.",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywall_savePercent": "Save {percent}%",
+  "@paywall_savePercent": {
+    "description": "Mono badge, uppercased in code.",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "paywall_termsPrivacy": "Terms · Privacy",
+  "paywall_trialTermsYearly": "Free for 7 days, then {price}/year. Cancel anytime in Settings.",
+  "@paywall_trialTermsYearly": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywall_trialTermsMonthly": "Free for 7 days, then {price}/month. Cancel anytime in Settings.",
+  "@paywall_trialTermsMonthly": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywall_startTrial": "Start 7-day free trial",
+  "paywall_reassurance": "Your three free memories stay yours either way — nothing is deleted or locked if you don't upgrade.",
+  "wrapUp_openJournal": "Open journal",
+  "wrapUp_keepForever": "Keep forever",
+  "wrapUp_photographs": "{count, plural, =1{photograph} other{photographs}}",
+  "@wrapUp_photographs": {
+    "description": "Film footnote label under a number.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrapUp_bonusTasks": "{count, plural, =1{bonus task} other{bonus tasks}}",
+  "@wrapUp_bonusTasks": {
+    "description": "Film footnote label under a number.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrapUp_stars": "{count, plural, =1{star} other{stars}}",
+  "@wrapUp_stars": {
+    "description": "Film footnote label under a number.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrapUp_footnoteClosing": "None of which is the reason you'll remember it.",
+  "wrapUp_generating1": "Reliving your trip…",
+  "wrapUp_generating2": "Finding the best moments…",
+  "wrapUp_generating3": "Writing the story…",
+  "wrapUp_generating4": "Almost ready…"
 }

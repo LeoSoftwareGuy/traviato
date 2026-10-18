@@ -1204,4 +1204,402 @@ class AppLocalizationsRu extends AppLocalizations {
   ) {
     return 'Поездка «$bigger» обошлась на $total дороже, но в «$higher» в день уходило на $perDay больше. «$cheaper» — дешевле в пересчёте на день.';
   }
+
+  @override
+  String get bonus_eyebrow => 'Бонусные задания';
+
+  @override
+  String get bonus_emptyTitle => 'Пока нет текущего воспоминания';
+
+  @override
+  String get bonus_emptyBody =>
+      'Бонусные задания появятся здесь, когда начнётся воспоминание.';
+
+  @override
+  String get bonus_backHome => 'На главную';
+
+  @override
+  String toast_dareDone(int points) {
+    return '+$points ✦ · задание выполнено';
+  }
+
+  @override
+  String get bonus_streakSaverHeader => 'Не спешите · подождёт';
+
+  @override
+  String get bonus_completed => 'Выполнено';
+
+  @override
+  String bonus_completedDay(int day) {
+    return 'Выполнено · день $day';
+  }
+
+  @override
+  String get bonus_openCamera => 'Открыть камеру';
+
+  @override
+  String get bonus_maybeLater => 'Может, позже';
+
+  @override
+  String get bonus_stretchUnlocked => 'Открыто · по желанию';
+
+  @override
+  String bonus_bothDone(int stars) {
+    return 'Оба выполнены · ✦$stars сегодня';
+  }
+
+  @override
+  String get bonus_newOnesTomorrow => 'Новые — завтра.';
+
+  @override
+  String get notif_promptTitle => 'Напоминать о ежедневных заданиях?';
+
+  @override
+  String notif_promptBody(String appName) {
+    return '$appName может напомнить утром и вечером, если бонусное задание ещё не выполнено, — не чаще, и это легко отключить.';
+  }
+
+  @override
+  String get profile_eyebrow => 'Профиль';
+
+  @override
+  String get profile_defaultName => 'Путешественник';
+
+  @override
+  String profile_joined(String date) {
+    return 'С нами с $date';
+  }
+
+  @override
+  String get profile_logOut => 'Выйти';
+
+  @override
+  String get profile_achievements => 'Достижения';
+
+  @override
+  String profile_achievementsEarned(int earned, int total) {
+    return 'получено $earned/$total';
+  }
+
+  @override
+  String get profile_updatePhoto => 'Обновить фото';
+
+  @override
+  String get profile_editTitle => 'Редактировать профиль';
+
+  @override
+  String get profile_nameLabel => 'Имя';
+
+  @override
+  String get profile_bioLabel => 'О себе';
+
+  @override
+  String get profile_bioHint => 'Пара слов о ваших путешествиях';
+
+  @override
+  String profile_statMemories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'воспоминания',
+      many: 'воспоминаний',
+      few: 'воспоминания',
+      one: 'воспоминание',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profile_statCountries(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'страны',
+      many: 'стран',
+      few: 'страны',
+      one: 'страна',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profile_statDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'дня',
+      many: 'дней',
+      few: 'дня',
+      one: 'день',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profile_statStars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'звезды',
+      many: 'звёзд',
+      few: 'звезды',
+      one: 'звезда',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sub_periodAnnual => 'Годовая';
+
+  @override
+  String get sub_periodMonthly => 'Месячная';
+
+  @override
+  String get sub_freePlanPill => 'Бесплатный тариф';
+
+  @override
+  String get sub_proPill => 'Pro';
+
+  @override
+  String get sub_header => 'Подписка';
+
+  @override
+  String sub_proName(String appName) {
+    return '$appName Pro';
+  }
+
+  @override
+  String get sub_freePlan => 'Бесплатный тариф';
+
+  @override
+  String sub_memoriesKeptMeta(int kept, int cap) {
+    return 'Сохранено воспоминаний: $kept из $cap. Перейдите на Pro, чтобы сохранять больше.';
+  }
+
+  @override
+  String get sub_renewsSoon => 'скоро';
+
+  @override
+  String sub_renews(String date) {
+    return 'Продление $date';
+  }
+
+  @override
+  String sub_renewsYearly(String date, String price) {
+    return 'Продление $date · $price/год';
+  }
+
+  @override
+  String sub_renewsMonthly(String date, String price) {
+    return 'Продление $date · $price/мес.';
+  }
+
+  @override
+  String get sub_trialTerms =>
+      '7 дней бесплатно, потом — по подписке. Отменить можно в любой момент.';
+
+  @override
+  String sub_trialTermsYearly(String price) {
+    return '7 дней бесплатно, затем $price/год. Отменить можно в любой момент.';
+  }
+
+  @override
+  String get sub_memoriesKept => 'Сохранено воспоминаний';
+
+  @override
+  String get sub_unlimited => 'Без ограничений';
+
+  @override
+  String sub_ofCap(int used, int cap) {
+    return '$used из $cap';
+  }
+
+  @override
+  String get sub_photosInMemory => 'Фото в этом воспоминании';
+
+  @override
+  String sub_noLimit(int count) {
+    return '$count · без лимита';
+  }
+
+  @override
+  String get sub_manageHint =>
+      'Откроются настройки подписки в магазине приложений. Изменить или отменить её можно там.';
+
+  @override
+  String get sub_restore => 'Восстановить покупки';
+
+  @override
+  String get sub_restored => 'Покупки восстановлены';
+
+  @override
+  String get sub_nothingToRestore =>
+      'Для этого аккаунта нечего восстанавливать';
+
+  @override
+  String get sub_upgradeToPro => 'Перейти на Pro';
+
+  @override
+  String get sub_manage => 'Управление подпиской';
+
+  @override
+  String get sub_noSubscription => 'Подписка не найдена.';
+
+  @override
+  String get sub_cantOpenSettings => 'Не удалось открыть настройки подписки.';
+
+  @override
+  String get paywall_subMemoryCap =>
+      'Три бесплатных воспоминания заняты. Перейдите на Pro, чтобы сохранять каждую поездку, а не только три.';
+
+  @override
+  String get paywall_subPhotoCap =>
+      'В этом воспоминании уже 40 фото. Перейдите на Pro, чтобы добавлять фото без ограничений.';
+
+  @override
+  String get paywall_subProfile =>
+      'Каждому воспоминанию нужно место. Перейдите на Pro в любой момент — и места хватит на всё.';
+
+  @override
+  String get paywall_trialStarted => 'Пробный период начат · 7 дней бесплатно';
+
+  @override
+  String paywall_brandEyebrow(String appName) {
+    return '$appName Pro';
+  }
+
+  @override
+  String get paywall_titleLead => 'Место для каждого';
+
+  @override
+  String get paywall_titleEmphasis => 'вашего воспоминания';
+
+  @override
+  String get paywall_perkMemories => 'Безлимит воспоминаний';
+
+  @override
+  String get paywall_perkMemoriesDetail =>
+      'Сохраняйте каждую поездку, а не выбирайте три.';
+
+  @override
+  String get paywall_perkPhotos => 'Безлимит фото в воспоминании';
+
+  @override
+  String get paywall_perkPhotosDetail =>
+      'Никакого потолка в 40 фото за удачную неделю.';
+
+  @override
+  String get paywall_perkExport => 'Экспорт фильма в HD';
+
+  @override
+  String get paywall_perkExportDetail =>
+      'Сохраняйте итоги в полном качестве. Скоро.';
+
+  @override
+  String get paywall_perkPriority => 'Приоритетная сборка итогов';
+
+  @override
+  String get paywall_perkPriorityDetail => 'Ваш фильм соберётся без очереди.';
+
+  @override
+  String get paywall_planAnnual => 'Год';
+
+  @override
+  String get paywall_planMonthly => 'Месяц';
+
+  @override
+  String get paywall_perYear => 'в год';
+
+  @override
+  String get paywall_perMonth => 'в месяц';
+
+  @override
+  String paywall_perMonthEquivalent(String price) {
+    return '$price в месяц';
+  }
+
+  @override
+  String paywall_savePercent(int percent) {
+    return 'Выгода $percent%';
+  }
+
+  @override
+  String get paywall_termsPrivacy => 'Условия · Конфиденциальность';
+
+  @override
+  String paywall_trialTermsYearly(String price) {
+    return '7 дней бесплатно, затем $price/год. Отменить можно в Настройках в любой момент.';
+  }
+
+  @override
+  String paywall_trialTermsMonthly(String price) {
+    return '7 дней бесплатно, затем $price/мес. Отменить можно в Настройках в любой момент.';
+  }
+
+  @override
+  String get paywall_startTrial => 'Начать 7 дней бесплатно';
+
+  @override
+  String get paywall_reassurance =>
+      'Три бесплатных воспоминания останутся с вами в любом случае — без Pro ничего не удалится и не заблокируется.';
+
+  @override
+  String get wrapUp_openJournal => 'Открыть дневник';
+
+  @override
+  String get wrapUp_keepForever => 'Сохранить навсегда';
+
+  @override
+  String wrapUp_photographs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'фотографии',
+      many: 'фотографий',
+      few: 'фотографии',
+      one: 'фотография',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wrapUp_bonusTasks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'бонусных задания',
+      many: 'бонусных заданий',
+      few: 'бонусных задания',
+      one: 'бонусное задание',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wrapUp_stars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'звезды',
+      many: 'звёзд',
+      few: 'звезды',
+      one: 'звезда',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wrapUp_footnoteClosing => 'Но запомните вы её совсем не поэтому.';
+
+  @override
+  String get wrapUp_generating1 => 'Переживаем поездку заново…';
+
+  @override
+  String get wrapUp_generating2 => 'Ищем лучшие моменты…';
+
+  @override
+  String get wrapUp_generating3 => 'Пишем историю…';
+
+  @override
+  String get wrapUp_generating4 => 'Почти готово…';
 }

@@ -5,12 +5,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../mutations/wrap_up_mutations.dart';
-import '../../../../core/l10n/context_l10n.dart';
 
 /// The film itself is an ambient, non-interactive loop (docs/design/
 /// WRAP_UP_FILM_FLUTTER_SPEC.md has no CTAs at all) — this is a persistent overlay
@@ -86,7 +86,7 @@ class WrapUpFilmHud extends ConsumerWidget {
                       foregroundColor: AppColors.textOnPhoto,
                       side: const BorderSide(color: AppColors.textOnPhotoMuted),
                     ),
-                    child: const Text('Open journal'),
+                    child: Text(context.l10n.wrapUp_openJournal),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
@@ -105,7 +105,7 @@ class WrapUpFilmHud extends ConsumerWidget {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Text('Keep forever'),
+                              : Text(context.l10n.wrapUp_keepForever),
                         ),
                 ),
               ],
@@ -150,7 +150,7 @@ class _KeptForeverBadge extends StatelessWidget {
         border: Border.all(color: AppColors.tint(AppColors.primary, .35)),
       ),
       child: Text(
-        '✦ Kept forever',
+        '✦ ${context.l10n.home_keptForever}',
         style: AppTypography.chipLabel.copyWith(color: AppColors.primary),
       ),
     );

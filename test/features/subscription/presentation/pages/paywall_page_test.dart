@@ -10,6 +10,8 @@ import 'package:traviato/features/subscription/presentation/pages/paywall_page.d
 import 'package:traviato/features/subscription/presentation/providers/subscription_providers.dart';
 
 import '../../fakes/fake_subscription_repository.dart';
+import 'package:traviato/l10n/app_localizations.dart';
+import '../../../../helpers/localized_app.dart';
 
 /// A bounded stand-in for `pumpAndSettle()` — the paywall's star specks and
 /// its "Start trial" CTA both carry a `repeat(reverse: true)` animation
@@ -42,6 +44,7 @@ Future<void> _pump(
   required FakeSubscriptionRepository repo,
   PaywallEntryPoint entryPoint = PaywallEntryPoint.profile,
   bool reduceMotion = false,
+  Locale locale = const Locale('en'),
 }) async {
   await tester.pumpWidget(
     ProviderScope(
@@ -49,6 +52,9 @@ Future<void> _pump(
       overrides: [subscriptionRepositoryProvider.overrideWithValue(repo)],
       child: MaterialApp(
         theme: AppTheme.dark,
+        locale: locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(
             context,
@@ -351,5 +357,40 @@ void main() {
         .boxShadow!
         .single;
     expect(glow.blurRadius, 0);
+  });
+
+  group('in ru / et (#220)', () {
+    testWidgets('reads in Estonian', (tester) async {
+      setScreenSize(tester, height: 1800);
+      final repo = FakeSubscriptionRepository()
+        ..offeringsResult = _bothOfferings;
+      await _pump(tester, repo: repo, locale: const Locale('et'));
+
+      expect(find.text('Ruumi igale'), findsOneWidget);
+      expect(find.text('Piiramatult mälestusi'), findsOneWidget);
+      expect(find.text('Aasta'), findsOneWidget);
+      expect(find.text('SÄÄSTA 63%'), findsOneWidget);
+      expect(find.textContaining('KUUS'), findsWidgets);
+      expect(
+        find.text('Alusta 7-päevast tasuta prooviperioodi'),
+        findsOneWidget,
+      );
+    });
+
+    for (final locale in const [Locale('ru'), Locale('et')]) {
+      testWidgets('lays out without overflow at 360pt in '
+          '${locale.languageCode}', (tester) async {
+        setScreenSize(tester, height: 1800);
+        final repo = FakeSubscriptionRepository()
+          ..offeringsResult = _bothOfferings;
+        await _pump(
+          tester,
+          repo: repo,
+          entryPoint: PaywallEntryPoint.memoryCap,
+          locale: locale,
+        );
+        expect(tester.takeException(), isNull);
+      });
+    }
   });
 }

@@ -1,16 +1,13 @@
 import '../../../../core/constants/app_constants.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/experimental/mutation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../../core/widgets/star_award_toast.dart';
@@ -19,8 +16,10 @@ import '../../domain/entities/entitlement_entity.dart';
 import '../../domain/entities/subscription_offering_entity.dart';
 import '../controllers/offerings_controller.dart';
 import '../mutations/subscription_mutations.dart';
-import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../core/l10n/context_l10n.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/experimental/mutation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 /// Which flow sent the user to the paywall — picks the contextual sub-copy
 /// under the headline (docs/design/M6_MONETIZATION_SPEC.md §4). An
@@ -36,16 +35,10 @@ enum PaywallEntryPoint {
         orElse: () => PaywallEntryPoint.profile,
       );
 
-  String get subCopy => switch (this) {
-    PaywallEntryPoint.memoryCap =>
-      'Your three free memories are full. Upgrade to keep every trip you '
-          'take, not just three.',
-    PaywallEntryPoint.photoCap =>
-      'This memory is full at 40 photos. Upgrade for unlimited photos on '
-          'every trip.',
-    PaywallEntryPoint.profile =>
-      'Every memory deserves a place to live. Upgrade any time for '
-          'unlimited room.',
+  String subCopy(AppLocalizations l10n) => switch (this) {
+    PaywallEntryPoint.memoryCap => l10n.paywall_subMemoryCap,
+    PaywallEntryPoint.photoCap => l10n.paywall_subPhotoCap,
+    PaywallEntryPoint.profile => l10n.paywall_subProfile,
   };
 }
 
@@ -75,7 +68,7 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
           message: presentationFailureMessage(next.error, context.l10n),
         );
       } else if (next is MutationSuccess && next.value != null) {
-        showStarToast(context, 'Trial started · 7 days free');
+        showStarToast(context, context.l10n.paywall_trialStarted);
         Navigator.of(context).maybePop();
       }
     });
@@ -92,9 +85,9 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
         // the "nothing to restore" outcome, not an error.
         final entitlement = next.value as EntitlementEntity;
         if (entitlement.isPro) {
-          showStarToast(context, 'Purchases restored');
+          showStarToast(context, context.l10n.sub_restored);
         } else {
-          showAppSnackbar(context, 'Nothing to restore on this account');
+          showAppSnackbar(context, context.l10n.sub_nothingToRestore);
         }
       }
     });
@@ -183,7 +176,7 @@ class _TopBar extends ConsumerWidget {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : Text(
-                    'Restore purchases',
+                    context.l10n.sub_restore,
                     style: AppTypography.chipLabel.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -365,7 +358,9 @@ class _Header extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              '${AppConstants.appName.toUpperCase()} PRO',
+              context.l10n
+                  .paywall_brandEyebrow(AppConstants.appName)
+                  .toUpperCase(),
               style: AppTypography.mono.copyWith(
                 fontSize: 9.5,
                 color: AppColors.primary,
@@ -375,11 +370,11 @@ class _Header extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.base),
         Text(
-          'Room for every',
+          context.l10n.paywall_titleLead,
           style: AppTypography.heroHeadline.copyWith(fontSize: 34),
         ),
         Text(
-          'memory you make',
+          context.l10n.paywall_titleEmphasis,
           style: AppTypography.heroHeadline.copyWith(
             fontSize: 34,
             fontStyle: FontStyle.italic,
@@ -390,7 +385,7 @@ class _Header extends StatelessWidget {
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 296),
           child: Text(
-            entryPoint.subCopy,
+            entryPoint.subCopy(context.l10n),
             style: AppTypography.bodyInput.copyWith(
               fontSize: 13,
               height: 1.65,
@@ -413,34 +408,43 @@ class _Perk {
   });
 
   final String glyph;
-  final String title;
-  final String detail;
+  final String Function(AppLocalizations l10n) title;
+  final String Function(AppLocalizations l10n) detail;
   final bool shipped;
 }
+
+String _perkMemories(AppLocalizations l) => l.paywall_perkMemories;
+String _perkMemoriesDetail(AppLocalizations l) => l.paywall_perkMemoriesDetail;
+String _perkPhotos(AppLocalizations l) => l.paywall_perkPhotos;
+String _perkPhotosDetail(AppLocalizations l) => l.paywall_perkPhotosDetail;
+String _perkExport(AppLocalizations l) => l.paywall_perkExport;
+String _perkExportDetail(AppLocalizations l) => l.paywall_perkExportDetail;
+String _perkPriority(AppLocalizations l) => l.paywall_perkPriority;
+String _perkPriorityDetail(AppLocalizations l) => l.paywall_perkPriorityDetail;
 
 const _perks = [
   _Perk(
     glyph: '∞',
-    title: 'Unlimited memories',
-    detail: 'Keep every trip instead of choosing three.',
+    title: _perkMemories,
+    detail: _perkMemoriesDetail,
     shipped: true,
   ),
   _Perk(
     glyph: '▣',
-    title: 'Unlimited photos per memory',
-    detail: 'No 40-photo ceiling on a good week.',
+    title: _perkPhotos,
+    detail: _perkPhotosDetail,
     shipped: true,
   ),
   _Perk(
     glyph: '▸',
-    title: 'HD film export',
-    detail: 'Save the wrap-up in full quality. Coming soon.',
+    title: _perkExport,
+    detail: _perkExportDetail,
     shipped: false,
   ),
   _Perk(
     glyph: '↯',
-    title: 'Priority wrap-up generation',
-    detail: 'Your film jumps the queue.',
+    title: _perkPriority,
+    detail: _perkPriorityDetail,
     shipped: false,
   ),
 ];
@@ -495,12 +499,12 @@ class _PerkRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                perk.title,
+                perk.title(context.l10n),
                 style: AppTypography.bodyEmphasis.copyWith(color: titleColor),
               ),
               const SizedBox(height: 2),
               Text(
-                perk.detail,
+                perk.detail(context.l10n),
                 style: AppTypography.caption.copyWith(
                   fontSize: 11.5,
                   height: 1.5,
@@ -529,8 +533,9 @@ class _PlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isAnnual = offering.period == SubscriptionPeriod.annual;
-    final label = isAnnual ? 'Annual' : 'Monthly';
-    final unit = isAnnual ? 'per year' : 'per month';
+    final l10n = context.l10n;
+    final label = isAnnual ? l10n.paywall_planAnnual : l10n.paywall_planMonthly;
+    final unit = isAnnual ? l10n.paywall_perYear : l10n.paywall_perMonth;
 
     return InkWell(
       onTap: onTap,
@@ -553,14 +558,16 @@ class _PlanCard extends StatelessWidget {
           children: [
             _RadioRing(selected: selected),
             const SizedBox(width: AppSpacing.md),
+            // Wrap: a longer plan name + the save pill move the pill to a
+            // second line instead of overflowing into the price (#220).
             Expanded(
-              child: Row(
+              child: Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Text(label, style: AppTypography.bodyEmphasis),
-                  if (isAnnual) ...[
-                    const SizedBox(width: AppSpacing.sm),
-                    const _SavePill(),
-                  ],
+                  if (isAnnual) const _SavePill(),
                 ],
               ),
             ),
@@ -575,7 +582,9 @@ class _PlanCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  isAnnual ? _monthlyEquivalent(offering) : unit.toUpperCase(),
+                  isAnnual
+                      ? _monthlyEquivalent(l10n, offering)
+                      : unit.toUpperCase(),
                   style: AppTypography.mono.copyWith(fontSize: 9),
                 ),
               ],
@@ -586,11 +595,15 @@ class _PlanCard extends StatelessWidget {
     );
   }
 
-  String _monthlyEquivalent(SubscriptionOfferingEntity offering) {
+  String _monthlyEquivalent(
+    AppLocalizations l10n,
+    SubscriptionOfferingEntity offering,
+  ) {
     final perMonth = NumberFormat.simpleCurrency(
+      locale: l10n.localeName,
       name: offering.currencyCode,
     ).format(offering.priceAmount / 12);
-    return '$perMonth A MONTH';
+    return l10n.paywall_perMonthEquivalent(perMonth).toUpperCase();
   }
 }
 
@@ -633,7 +646,7 @@ class _SavePill extends StatelessWidget {
         borderRadius: AppRadius.pillRadius,
       ),
       child: Text(
-        'SAVE 63%',
+        context.l10n.paywall_savePercent(63).toUpperCase(),
         style: AppTypography.mono.copyWith(
           fontSize: 8.5,
           color: AppColors.primary,
@@ -662,7 +675,7 @@ class _CtaBlock extends ConsumerWidget {
         const SizedBox(height: AppSpacing.sm),
         if (selected != null)
           Text(
-            _trialTerms(selected!),
+            _trialTerms(context.l10n, selected!),
             textAlign: TextAlign.center,
             style: AppTypography.caption.copyWith(
               fontSize: 11,
@@ -672,7 +685,7 @@ class _CtaBlock extends ConsumerWidget {
           ),
         const SizedBox(height: AppSpacing.md),
         Text(
-          'Terms · Privacy',
+          context.l10n.paywall_termsPrivacy,
           textAlign: TextAlign.center,
           style: AppTypography.caption.copyWith(
             fontSize: 10.5,
@@ -683,13 +696,12 @@ class _CtaBlock extends ConsumerWidget {
     );
   }
 
-  String _trialTerms(SubscriptionOfferingEntity offering) {
-    final unit = offering.period == SubscriptionPeriod.annual
-        ? 'year'
-        : 'month';
-    return 'Free for 7 days, then ${offering.priceString}/$unit. Cancel '
-        'anytime in Settings.';
-  }
+  String _trialTerms(
+    AppLocalizations l10n,
+    SubscriptionOfferingEntity offering,
+  ) => offering.period == SubscriptionPeriod.annual
+      ? l10n.paywall_trialTermsYearly(offering.priceString)
+      : l10n.paywall_trialTermsMonthly(offering.priceString);
 
   // The mutation's own error state (surfaced via ref.listen on PaywallPage)
   // already shows the failure as a snackbar (guidelines doc 06).
@@ -795,7 +807,7 @@ class _PulsingCtaState extends State<_PulsingCta>
                           ),
                         )
                       : Text(
-                          'Start 7-day free trial',
+                          context.l10n.paywall_startTrial,
                           style: AppTypography.buttonLabel.copyWith(
                             fontSize: 15,
                             color: AppColors.background,
@@ -824,8 +836,7 @@ class _ReassuranceCard extends StatelessWidget {
         borderRadius: AppRadius.cardRadius,
       ),
       child: Text(
-        'Your three free memories stay yours either way — nothing is '
-        'deleted or locked if you don\'t upgrade.',
+        context.l10n.paywall_reassurance,
         style: AppTypography.pullQuote.copyWith(
           fontSize: 12.5,
           height: 1.6,

@@ -1,6 +1,6 @@
-import '../../../../core/utils/pluralize.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -17,33 +17,34 @@ class ProfileStatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Row(
       children: [
         Expanded(
           child: _StatTile(
             value: stats.memories,
-            label: pluralize(stats.memories, 'MEMORY', 'MEMORIES'),
+            label: l10n.profile_statMemories(stats.memories).toUpperCase(),
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: _StatTile(
             value: stats.countries,
-            label: pluralize(stats.countries, 'COUNTRY', 'COUNTRIES'),
+            label: l10n.profile_statCountries(stats.countries).toUpperCase(),
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: _StatTile(
             value: stats.days,
-            label: pluralize(stats.days, 'DAY', 'DAYS'),
+            label: l10n.profile_statDays(stats.days).toUpperCase(),
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: _StatTile(
             value: stats.stars,
-            label: pluralize(stats.stars, 'STAR', 'STARS'),
+            label: l10n.profile_statStars(stats.stars).toUpperCase(),
             valueColor: AppColors.primary,
           ),
         ),

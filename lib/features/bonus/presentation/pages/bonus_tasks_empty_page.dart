@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -35,13 +36,13 @@ class BonusTasksEmptyPage extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.base),
                   Text(
-                    'No active memory yet',
+                    context.l10n.bonus_emptyTitle,
                     style: AppTypography.screenTitle.copyWith(fontSize: 20),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    'Bonus tasks show up here once a memory is under way.',
+                    context.l10n.bonus_emptyBody,
                     textAlign: TextAlign.center,
                     style: AppTypography.chipLabel.copyWith(
                       color: AppColors.textMuted,
@@ -50,7 +51,7 @@ class BonusTasksEmptyPage extends StatelessWidget {
                   const SizedBox(height: AppSpacing.lg),
                   ElevatedButton(
                     onPressed: () => context.pop(),
-                    child: const Text('Back home'),
+                    child: Text(context.l10n.bonus_backHome),
                   ),
                 ],
               ),

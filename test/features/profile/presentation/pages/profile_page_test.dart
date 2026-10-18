@@ -27,6 +27,7 @@ import '../../../subscription/fakes/fake_subscription_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
 import '../../fakes/fake_profile_repository.dart';
 import '../../fakes/fake_url_launcher_platform.dart';
+import '../../../../helpers/localized_app.dart';
 
 const _stats = ProfileStatsEntity(
   memories: 4,
@@ -45,6 +46,8 @@ Future<void> _pump(
   FakeProfileStatsRepository? statsRepo,
   FakeSubscriptionRepository? subscriptionRepo,
   FakeTripRepository? tripRepo,
+  Locale locale = const Locale('en'),
+  Size size = const Size(800, 2400),
 }) async {
   final resolvedAuthRepo = authRepo ?? FakeAuthRepository();
   addTearDown(resolvedAuthRepo.dispose);
@@ -52,7 +55,7 @@ Future<void> _pump(
   // no longer fits the default 800x600 test surface — tall enough that
   // everything (Achievements grid, Log out, Restore purchases) builds and
   // is hittable without a scroll-to-visible step in every test.
-  tester.view.physicalSize = const Size(800, 2400);
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
@@ -73,7 +76,7 @@ Future<void> _pump(
           tripRepo ?? FakeTripRepository(),
         ),
       ],
-      child: MaterialApp(theme: AppTheme.dark, home: const ProfilePage()),
+      child: localizedApp(locale: locale, home: const ProfilePage()),
     ),
   );
   await tester.pumpAndSettle();
@@ -577,5 +580,34 @@ void main() {
         expect(find.text('No subscription found to manage.'), findsOneWidget);
       },
     );
+  });
+
+  group('in ru / et (#220)', () {
+    testWidgets('reads in Russian', (tester) async {
+      await _pump(
+        tester,
+        profileRepo: FakeProfileRepository(),
+        locale: const Locale('ru'),
+      );
+
+      expect(find.text('ПРОФИЛЬ'), findsOneWidget);
+      expect(find.text('ДОСТИЖЕНИЯ'), findsOneWidget);
+      expect(find.text('ПОДПИСКА'), findsOneWidget);
+      expect(find.text('Выйти'), findsOneWidget);
+      expect(find.textContaining('С НАМИ С '), findsOneWidget);
+    });
+
+    for (final locale in const [Locale('ru'), Locale('et')]) {
+      testWidgets('lays out without overflow at 360pt in '
+          '${locale.languageCode}', (tester) async {
+        await _pump(
+          tester,
+          profileRepo: FakeProfileRepository(),
+          locale: locale,
+          size: const Size(360, 2400),
+        );
+        expect(tester.takeException(), isNull);
+      });
+    }
   });
 }

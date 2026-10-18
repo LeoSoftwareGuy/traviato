@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/bonus/domain/entities/bonus_task_assignment_entity.dart';
 import 'package:traviato/features/bonus/domain/entities/bonus_task_template_entity.dart';
 import 'package:traviato/features/bonus/presentation/pages/bonus_tasks_page.dart';
@@ -18,6 +17,7 @@ import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
 import '../../fakes/fake_bonus_task_repository.dart';
+import '../../../../helpers/localized_app.dart';
 
 const _tripId = 't1';
 
@@ -57,6 +57,7 @@ Future<void> _pump(
   WidgetTester tester, {
   required FakeTripRepository tripRepo,
   required FakeBonusTaskRepository bonusRepo,
+  Locale locale = const Locale('en'),
 }) async {
   final router = GoRouter(
     initialLocation: '/bonus',
@@ -76,7 +77,7 @@ Future<void> _pump(
         dayNoteRepositoryProvider.overrideWithValue(FakeDayNoteRepository()),
         photoRepositoryProvider.overrideWithValue(FakePhotoRepository()),
       ],
-      child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
+      child: localizedRouterApp(locale: locale, routerConfig: router),
     ),
   );
 }
@@ -156,5 +157,59 @@ void main() {
 
     expect(find.text('COMPLETED'), findsOneWidget);
     expect(find.textContaining('COMPLETED · DAY'), findsOneWidget);
+  });
+
+  group('in ru / et (#220)', () {
+    testWidgets('earned banner and completed history read in Russian', (
+      tester,
+    ) async {
+      final today = DateTime.now();
+      final todayDate = DateTime(today.year, today.month, today.day);
+      final bonusRepo = FakeBonusTaskRepository()
+        ..templates = _regularPair()
+        ..assignments = [
+          for (final (id, day) in [
+            ('a1', todayDate),
+            ('a2', todayDate),
+            ('p1', todayDate.subtract(const Duration(days: 2))),
+          ])
+            BonusTaskAssignmentEntity(
+              id: id,
+              tripId: _tripId,
+              templateId: id == 'a2' ? 2 : 1,
+              dayDate: day,
+              completedAt: DateTime(2026, 1, 1),
+              createdAt: DateTime(2026, 1, 1),
+            ),
+        ];
+      await _pump(
+        tester,
+        tripRepo: _activeTripRepo(),
+        bonusRepo: bonusRepo,
+        locale: const Locale('ru'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('БОНУСНЫЕ ЗАДАНИЯ'), findsOneWidget);
+      expect(find.textContaining('Оба выполнены · ✦'), findsOneWidget);
+      expect(find.text('Новые — завтра.'), findsOneWidget);
+      expect(find.text('ВЫПОЛНЕНО'), findsWidgets);
+      expect(find.textContaining('ВЫПОЛНЕНО · ДЕНЬ'), findsOneWidget);
+    });
+
+    for (final locale in const [Locale('ru'), Locale('et')]) {
+      testWidgets('lays out without overflow at 360pt in '
+          '${locale.languageCode}', (tester) async {
+        setScreenSize(tester, height: 1600);
+        await _pump(
+          tester,
+          tripRepo: _activeTripRepo(),
+          bonusRepo: FakeBonusTaskRepository()..templates = _regularPair(),
+          locale: locale,
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      });
+    }
   });
 }

@@ -1,27 +1,26 @@
-import '../../../../core/constants/app_constants.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/experimental/mutation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 import '../../../../core/config/router/route_constants.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../../core/widgets/star_award_toast.dart';
 import '../../../subscription/domain/entities/active_subscription_entity.dart';
 import '../../../subscription/domain/entities/entitlement_entity.dart';
 import '../../../subscription/domain/entities/subscription_offering_entity.dart';
 import '../../../subscription/presentation/mutations/subscription_mutations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/experimental/mutation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'tier_pill.dart';
-import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../core/l10n/context_l10n.dart';
 
 // Mirrors trip_mutations.dart's `_freeTierMemoryLimit` and
 // photo_mutations.dart's `_freeTierPhotoLimit` — this section only displays
@@ -29,8 +28,6 @@ import '../../../../core/l10n/context_l10n.dart';
 // the same numbers (docs/design/M6_MONETIZATION_SPEC.md §2/§3).
 const _memoryCap = 3;
 const _photoCap = 40;
-
-final _renewalDateFormat = DateFormat('MMM d, y');
 
 /// Profile's subscription card, tier pill, usage meters and actions (#142) —
 /// sits between the stats row and Achievements.
@@ -69,9 +66,9 @@ class SubscriptionSection extends ConsumerWidget {
         // restore never fails just because there was nothing to restore.
         final restored = next.value as EntitlementEntity;
         if (restored.isPro) {
-          showStarToast(context, 'Purchases restored');
+          showStarToast(context, context.l10n.sub_restored);
         } else {
-          showAppSnackbar(context, 'Nothing to restore on this account');
+          showAppSnackbar(context, context.l10n.sub_nothingToRestore);
         }
       }
     });
@@ -79,15 +76,19 @@ class SubscriptionSection extends ConsumerWidget {
     final isPro = entitlement.isPro;
     final isRestoring = ref.watch(restoreMutation) is MutationPending;
     final periodLabel = switch (activeSubscription?.period) {
-      SubscriptionPeriod.annual => 'ANNUAL',
-      SubscriptionPeriod.monthly => 'MONTHLY',
+      SubscriptionPeriod.annual => context.l10n.sub_periodAnnual.toUpperCase(),
+      SubscriptionPeriod.monthly =>
+        context.l10n.sub_periodMonthly.toUpperCase(),
       null => null,
     };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('SUBSCRIPTION', style: AppTypography.mono),
+        Text(
+          context.l10n.sub_header.toUpperCase(),
+          style: AppTypography.mono,
+        ),
         const SizedBox(height: AppSpacing.sm),
         Container(
           padding: const EdgeInsets.all(AppSpacing.base),
@@ -115,14 +116,16 @@ class SubscriptionSection extends ConsumerWidget {
                         TierPill(isPro: isPro, periodLabel: periodLabel),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
-                          isPro ? '${AppConstants.appName} Pro' : 'Free plan',
+                          isPro
+                              ? context.l10n.sub_proName(AppConstants.appName)
+                              : context.l10n.sub_freePlan,
                           style: AppTypography.displaySerif.copyWith(
                             fontSize: 21,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(
-                          _metaLine(isPro),
+                          _metaLine(context.l10n, isPro),
                           style: AppTypography.chipLabel.copyWith(
                             fontSize: 11.5,
                             height: 1.55,
@@ -139,8 +142,10 @@ class SubscriptionSection extends ConsumerWidget {
               const SizedBox(height: AppSpacing.lg),
               _UsageMeter(
                 key: const Key('memories-meter'),
-                label: 'Memories kept',
-                value: isPro ? 'Unlimited' : '$memoriesKept of $_memoryCap',
+                label: context.l10n.sub_memoriesKept,
+                value: isPro
+                    ? context.l10n.sub_unlimited
+                    : context.l10n.sub_ofCap(memoriesKept, _memoryCap),
                 fraction: isPro
                     ? 1
                     : (memoriesKept / _memoryCap).clamp(0, 1).toDouble(),
@@ -149,10 +154,10 @@ class SubscriptionSection extends ConsumerWidget {
               const SizedBox(height: 13),
               _UsageMeter(
                 key: const Key('photos-meter'),
-                label: 'Photos in this memory',
+                label: context.l10n.sub_photosInMemory,
                 value: isPro
-                    ? '$photosInBusiestMemory · no limit'
-                    : '$photosInBusiestMemory of $_photoCap',
+                    ? context.l10n.sub_noLimit(photosInBusiestMemory)
+                    : context.l10n.sub_ofCap(photosInBusiestMemory, _photoCap),
                 fraction: isPro
                     ? 1
                     : (photosInBusiestMemory / _photoCap)
@@ -167,8 +172,7 @@ class SubscriptionSection extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  "Opens your store's subscription settings. Changes and "
-                  'cancellations happen there.',
+                  context.l10n.sub_manageHint,
                   textAlign: TextAlign.center,
                   style: AppTypography.caption.copyWith(
                     color: AppColors.textTertiary,
@@ -183,7 +187,7 @@ class SubscriptionSection extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  _trialTerms(),
+                  _trialTerms(context.l10n),
                   textAlign: TextAlign.center,
                   style: AppTypography.caption.copyWith(
                     color: AppColors.textTertiary,
@@ -204,7 +208,7 @@ class SubscriptionSection extends ConsumerWidget {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : Text(
-                    'Restore purchases',
+                    context.l10n.sub_restore,
                     style: AppTypography.caption.copyWith(
                       color: AppColors.textTertiary,
                     ),
@@ -222,28 +226,28 @@ class SubscriptionSection extends ConsumerWidget {
     return null;
   }
 
-  String _metaLine(bool isPro) {
-    if (!isPro) {
-      return '$memoriesKept of $_memoryCap memories kept. Upgrade for room '
-          'to keep going.';
-    }
+  String _metaLine(AppLocalizations l10n, bool isPro) {
+    if (!isPro) return l10n.sub_memoriesKeptMeta(memoriesKept, _memoryCap);
     final expiresAt = entitlement.expiresAt;
+    final locale = l10n.localeName;
     final dateLabel = expiresAt != null
-        ? _renewalDateFormat.format(expiresAt)
-        : 'soon';
+        ? (locale == 'en'
+                  ? DateFormat('MMM d, y', locale)
+                  : DateFormat.yMMMd(locale))
+              .format(expiresAt)
+        : l10n.sub_renewsSoon;
     final period = activeSubscription?.period;
     final price = period == null ? null : _priceFor(period);
-    if (price == null || period == null) return 'Renews $dateLabel';
-    final unit = period == SubscriptionPeriod.annual ? 'year' : 'month';
-    return 'Renews $dateLabel · $price/$unit';
+    if (price == null || period == null) return l10n.sub_renews(dateLabel);
+    return period == SubscriptionPeriod.annual
+        ? l10n.sub_renewsYearly(dateLabel, price)
+        : l10n.sub_renewsMonthly(dateLabel, price);
   }
 
-  String _trialTerms() {
+  String _trialTerms(AppLocalizations l10n) {
     final annualPrice = _priceFor(SubscriptionPeriod.annual);
-    if (annualPrice == null) {
-      return '7 days free, then upgrade. Cancel anytime.';
-    }
-    return '7 days free, then $annualPrice/year. Cancel anytime.';
+    if (annualPrice == null) return l10n.sub_trialTerms;
+    return l10n.sub_trialTermsYearly(annualPrice);
   }
 
   // The mutation's own error state (surfaced via ref.listen above) already
@@ -313,13 +317,17 @@ class _UsageMeter extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              label,
-              style: AppTypography.chipLabel.copyWith(
-                fontSize: 11.5,
-                color: AppColors.textSecondary,
+            // Flexible: a long label wraps instead of overflowing (#220).
+            Flexible(
+              child: Text(
+                label,
+                style: AppTypography.chipLabel.copyWith(
+                  fontSize: 11.5,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
+            const SizedBox(width: AppSpacing.sm),
             Text(
               value.toUpperCase(),
               style: AppTypography.mono.copyWith(fontSize: 10.5),
@@ -361,7 +369,7 @@ class _UpgradeButton extends StatelessWidget {
               height: 48,
               alignment: Alignment.center,
               child: Text(
-                'Upgrade to Pro',
+                context.l10n.sub_upgradeToPro,
                 style: AppTypography.buttonLabel.copyWith(
                   color: AppColors.background,
                 ),
@@ -403,7 +411,7 @@ class _ManageSubscriptionButtonState extends State<_ManageSubscriptionButton> {
                 height: 18,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-            : const Text('Manage subscription'),
+            : Text(context.l10n.sub_manage),
       ),
     );
   }
@@ -411,7 +419,7 @@ class _ManageSubscriptionButtonState extends State<_ManageSubscriptionButton> {
   Future<void> _open() async {
     final url = widget.url;
     if (url == null) {
-      _showSnackbar('No subscription found to manage.');
+      _showSnackbar(context.l10n.sub_noSubscription);
       return;
     }
     setState(() => _opening = true);
@@ -421,7 +429,7 @@ class _ManageSubscriptionButtonState extends State<_ManageSubscriptionButton> {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!mounted) return;
     setState(() => _opening = false);
-    if (!launched) _showSnackbar('Could not open subscription settings.');
+    if (!launched) _showSnackbar(context.l10n.sub_cantOpenSettings);
   }
 
   void _showSnackbar(String message) {

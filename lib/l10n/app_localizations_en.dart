@@ -1177,4 +1177,386 @@ class AppLocalizationsEn extends AppLocalizations {
   ) {
     return '$bigger cost $total more overall, but $higher ran $perDay/day higher. $cheaper was the cheaper trip per day.';
   }
+
+  @override
+  String get bonus_eyebrow => 'Bonus tasks';
+
+  @override
+  String get bonus_emptyTitle => 'No active memory yet';
+
+  @override
+  String get bonus_emptyBody =>
+      'Bonus tasks show up here once a memory is under way.';
+
+  @override
+  String get bonus_backHome => 'Back home';
+
+  @override
+  String toast_dareDone(int points) {
+    return '+$points ✦ · dare done';
+  }
+
+  @override
+  String get bonus_streakSaverHeader => 'No rush · waits for you';
+
+  @override
+  String get bonus_completed => 'Completed';
+
+  @override
+  String bonus_completedDay(int day) {
+    return 'Completed · Day $day';
+  }
+
+  @override
+  String get bonus_openCamera => 'Open camera';
+
+  @override
+  String get bonus_maybeLater => 'Maybe later';
+
+  @override
+  String get bonus_stretchUnlocked => 'Unlocked · optional';
+
+  @override
+  String bonus_bothDone(int stars) {
+    return 'Both done · ✦$stars today';
+  }
+
+  @override
+  String get bonus_newOnesTomorrow => 'New ones tomorrow.';
+
+  @override
+  String get notif_promptTitle => 'Get a gentle nudge for your daily dares?';
+
+  @override
+  String notif_promptBody(String appName) {
+    return '$appName can remind you once in the morning and once in the evening when a bonus task is still open — never more than that, and easy to turn off later.';
+  }
+
+  @override
+  String get profile_eyebrow => 'Profile';
+
+  @override
+  String get profile_defaultName => 'Traveler';
+
+  @override
+  String profile_joined(String date) {
+    return 'Joined $date';
+  }
+
+  @override
+  String get profile_logOut => 'Log out';
+
+  @override
+  String get profile_achievements => 'Achievements';
+
+  @override
+  String profile_achievementsEarned(int earned, int total) {
+    return '$earned/$total earned';
+  }
+
+  @override
+  String get profile_updatePhoto => 'Update your photo';
+
+  @override
+  String get profile_editTitle => 'Edit your profile';
+
+  @override
+  String get profile_nameLabel => 'Name';
+
+  @override
+  String get profile_bioLabel => 'Bio';
+
+  @override
+  String get profile_bioHint => 'A line about your travels';
+
+  @override
+  String profile_statMemories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'memories',
+      one: 'memory',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profile_statCountries(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'countries',
+      one: 'country',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profile_statDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'days',
+      one: 'day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profile_statStars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'stars',
+      one: 'star',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sub_periodAnnual => 'Annual';
+
+  @override
+  String get sub_periodMonthly => 'Monthly';
+
+  @override
+  String get sub_freePlanPill => 'Free plan';
+
+  @override
+  String get sub_proPill => 'Pro';
+
+  @override
+  String get sub_header => 'Subscription';
+
+  @override
+  String sub_proName(String appName) {
+    return '$appName Pro';
+  }
+
+  @override
+  String get sub_freePlan => 'Free plan';
+
+  @override
+  String sub_memoriesKeptMeta(int kept, int cap) {
+    return '$kept of $cap memories kept. Upgrade for room to keep going.';
+  }
+
+  @override
+  String get sub_renewsSoon => 'soon';
+
+  @override
+  String sub_renews(String date) {
+    return 'Renews $date';
+  }
+
+  @override
+  String sub_renewsYearly(String date, String price) {
+    return 'Renews $date · $price/year';
+  }
+
+  @override
+  String sub_renewsMonthly(String date, String price) {
+    return 'Renews $date · $price/month';
+  }
+
+  @override
+  String get sub_trialTerms => '7 days free, then upgrade. Cancel anytime.';
+
+  @override
+  String sub_trialTermsYearly(String price) {
+    return '7 days free, then $price/year. Cancel anytime.';
+  }
+
+  @override
+  String get sub_memoriesKept => 'Memories kept';
+
+  @override
+  String get sub_unlimited => 'Unlimited';
+
+  @override
+  String sub_ofCap(int used, int cap) {
+    return '$used of $cap';
+  }
+
+  @override
+  String get sub_photosInMemory => 'Photos in this memory';
+
+  @override
+  String sub_noLimit(int count) {
+    return '$count · no limit';
+  }
+
+  @override
+  String get sub_manageHint =>
+      'Opens your store\'s subscription settings. Changes and cancellations happen there.';
+
+  @override
+  String get sub_restore => 'Restore purchases';
+
+  @override
+  String get sub_restored => 'Purchases restored';
+
+  @override
+  String get sub_nothingToRestore => 'Nothing to restore on this account';
+
+  @override
+  String get sub_upgradeToPro => 'Upgrade to Pro';
+
+  @override
+  String get sub_manage => 'Manage subscription';
+
+  @override
+  String get sub_noSubscription => 'No subscription found to manage.';
+
+  @override
+  String get sub_cantOpenSettings => 'Could not open subscription settings.';
+
+  @override
+  String get paywall_subMemoryCap =>
+      'Your three free memories are full. Upgrade to keep every trip you take, not just three.';
+
+  @override
+  String get paywall_subPhotoCap =>
+      'This memory is full at 40 photos. Upgrade for unlimited photos on every trip.';
+
+  @override
+  String get paywall_subProfile =>
+      'Every memory deserves a place to live. Upgrade any time for unlimited room.';
+
+  @override
+  String get paywall_trialStarted => 'Trial started · 7 days free';
+
+  @override
+  String paywall_brandEyebrow(String appName) {
+    return '$appName Pro';
+  }
+
+  @override
+  String get paywall_titleLead => 'Room for every';
+
+  @override
+  String get paywall_titleEmphasis => 'memory you make';
+
+  @override
+  String get paywall_perkMemories => 'Unlimited memories';
+
+  @override
+  String get paywall_perkMemoriesDetail =>
+      'Keep every trip instead of choosing three.';
+
+  @override
+  String get paywall_perkPhotos => 'Unlimited photos per memory';
+
+  @override
+  String get paywall_perkPhotosDetail => 'No 40-photo ceiling on a good week.';
+
+  @override
+  String get paywall_perkExport => 'HD film export';
+
+  @override
+  String get paywall_perkExportDetail =>
+      'Save the wrap-up in full quality. Coming soon.';
+
+  @override
+  String get paywall_perkPriority => 'Priority wrap-up generation';
+
+  @override
+  String get paywall_perkPriorityDetail => 'Your film jumps the queue.';
+
+  @override
+  String get paywall_planAnnual => 'Annual';
+
+  @override
+  String get paywall_planMonthly => 'Monthly';
+
+  @override
+  String get paywall_perYear => 'per year';
+
+  @override
+  String get paywall_perMonth => 'per month';
+
+  @override
+  String paywall_perMonthEquivalent(String price) {
+    return '$price a month';
+  }
+
+  @override
+  String paywall_savePercent(int percent) {
+    return 'Save $percent%';
+  }
+
+  @override
+  String get paywall_termsPrivacy => 'Terms · Privacy';
+
+  @override
+  String paywall_trialTermsYearly(String price) {
+    return 'Free for 7 days, then $price/year. Cancel anytime in Settings.';
+  }
+
+  @override
+  String paywall_trialTermsMonthly(String price) {
+    return 'Free for 7 days, then $price/month. Cancel anytime in Settings.';
+  }
+
+  @override
+  String get paywall_startTrial => 'Start 7-day free trial';
+
+  @override
+  String get paywall_reassurance =>
+      'Your three free memories stay yours either way — nothing is deleted or locked if you don\'t upgrade.';
+
+  @override
+  String get wrapUp_openJournal => 'Open journal';
+
+  @override
+  String get wrapUp_keepForever => 'Keep forever';
+
+  @override
+  String wrapUp_photographs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'photographs',
+      one: 'photograph',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wrapUp_bonusTasks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'bonus tasks',
+      one: 'bonus task',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wrapUp_stars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'stars',
+      one: 'star',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wrapUp_footnoteClosing =>
+      'None of which is the reason you\'ll remember it.';
+
+  @override
+  String get wrapUp_generating1 => 'Reliving your trip…';
+
+  @override
+  String get wrapUp_generating2 => 'Finding the best moments…';
+
+  @override
+  String get wrapUp_generating3 => 'Writing the story…';
+
+  @override
+  String get wrapUp_generating4 => 'Almost ready…';
 }

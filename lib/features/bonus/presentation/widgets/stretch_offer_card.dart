@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -38,7 +39,7 @@ class StretchOfferCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'UNLOCKED · OPTIONAL',
+                      context.l10n.bonus_stretchUnlocked.toUpperCase(),
                       style: AppTypography.mono.copyWith(
                         color: AppColors.accentPurpleLight,
                       ),

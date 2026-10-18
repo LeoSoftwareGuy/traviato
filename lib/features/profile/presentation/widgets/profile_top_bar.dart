@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -41,7 +42,7 @@ class ProfileTopBar extends StatelessWidget {
         Expanded(
           child: Center(
             child: Text(
-              'PROFILE',
+              context.l10n.profile_eyebrow.toUpperCase(),
               style: AppTypography.mono.copyWith(
                 color: AppColors.textTertiary,
               ),

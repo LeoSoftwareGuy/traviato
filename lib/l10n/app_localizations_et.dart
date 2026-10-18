@@ -1178,4 +1178,389 @@ class AppLocalizationsEt extends AppLocalizations {
   ) {
     return '$bigger läks $total rohkem maksma, kuid $higher puhul kulus päevas $perDay rohkem. $cheaper oli päeva kohta odavam.';
   }
+
+  @override
+  String get bonus_eyebrow => 'Boonusülesanded';
+
+  @override
+  String get bonus_emptyTitle => 'Käimasolevat mälestust veel pole';
+
+  @override
+  String get bonus_emptyBody =>
+      'Boonusülesanded ilmuvad siia, kui mälestus on alanud.';
+
+  @override
+  String get bonus_backHome => 'Avalehele';
+
+  @override
+  String toast_dareDone(int points) {
+    return '+$points ✦ · ülesanne tehtud';
+  }
+
+  @override
+  String get bonus_streakSaverHeader => 'Pole kiiret · ootab sind';
+
+  @override
+  String get bonus_completed => 'Tehtud';
+
+  @override
+  String bonus_completedDay(int day) {
+    return 'Tehtud · päev $day';
+  }
+
+  @override
+  String get bonus_openCamera => 'Ava kaamera';
+
+  @override
+  String get bonus_maybeLater => 'Võib-olla hiljem';
+
+  @override
+  String get bonus_stretchUnlocked => 'Avatud · valikuline';
+
+  @override
+  String bonus_bothDone(int stars) {
+    return 'Mõlemad tehtud · ✦$stars täna';
+  }
+
+  @override
+  String get bonus_newOnesTomorrow => 'Uued tulevad homme.';
+
+  @override
+  String get notif_promptTitle =>
+      'Kas soovid igapäevaste ülesannete kohta õrna meeldetuletust?';
+
+  @override
+  String notif_promptBody(String appName) {
+    return '$appName saab sulle meelde tuletada hommikul ja õhtul, kui boonusülesanne on veel tegemata — mitte rohkem ja seda on hiljem lihtne välja lülitada.';
+  }
+
+  @override
+  String get profile_eyebrow => 'Profiil';
+
+  @override
+  String get profile_defaultName => 'Rändur';
+
+  @override
+  String profile_joined(String date) {
+    return 'Liitus $date';
+  }
+
+  @override
+  String get profile_logOut => 'Logi välja';
+
+  @override
+  String get profile_achievements => 'Saavutused';
+
+  @override
+  String profile_achievementsEarned(int earned, int total) {
+    return '$earned/$total teenitud';
+  }
+
+  @override
+  String get profile_updatePhoto => 'Uuenda oma fotot';
+
+  @override
+  String get profile_editTitle => 'Muuda profiili';
+
+  @override
+  String get profile_nameLabel => 'Nimi';
+
+  @override
+  String get profile_bioLabel => 'Tutvustus';
+
+  @override
+  String get profile_bioHint => 'Üks lause sinu reisidest';
+
+  @override
+  String profile_statMemories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'mälestust',
+      one: 'mälestus',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profile_statCountries(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'riiki',
+      one: 'riik',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profile_statDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'päeva',
+      one: 'päev',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profile_statStars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'tähte',
+      one: 'täht',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sub_periodAnnual => 'Aastane';
+
+  @override
+  String get sub_periodMonthly => 'Kuine';
+
+  @override
+  String get sub_freePlanPill => 'Tasuta pakett';
+
+  @override
+  String get sub_proPill => 'Pro';
+
+  @override
+  String get sub_header => 'Tellimus';
+
+  @override
+  String sub_proName(String appName) {
+    return '$appName Pro';
+  }
+
+  @override
+  String get sub_freePlan => 'Tasuta pakett';
+
+  @override
+  String sub_memoriesKeptMeta(int kept, int cap) {
+    return 'Hoitud mälestusi: $kept/$cap. Vali Pro, et jätkata.';
+  }
+
+  @override
+  String get sub_renewsSoon => 'varsti';
+
+  @override
+  String sub_renews(String date) {
+    return 'Uueneb $date';
+  }
+
+  @override
+  String sub_renewsYearly(String date, String price) {
+    return 'Uueneb $date · $price/aastas';
+  }
+
+  @override
+  String sub_renewsMonthly(String date, String price) {
+    return 'Uueneb $date · $price/kuus';
+  }
+
+  @override
+  String get sub_trialTerms =>
+      '7 päeva tasuta, siis tellimus. Saad igal ajal tühistada.';
+
+  @override
+  String sub_trialTermsYearly(String price) {
+    return '7 päeva tasuta, siis $price/aastas. Saad igal ajal tühistada.';
+  }
+
+  @override
+  String get sub_memoriesKept => 'Hoitud mälestused';
+
+  @override
+  String get sub_unlimited => 'Piiramatu';
+
+  @override
+  String sub_ofCap(int used, int cap) {
+    return '$used/$cap';
+  }
+
+  @override
+  String get sub_photosInMemory => 'Fotod selles mälestuses';
+
+  @override
+  String sub_noLimit(int count) {
+    return '$count · piiranguta';
+  }
+
+  @override
+  String get sub_manageHint =>
+      'Avab poe tellimuse seaded. Muudatused ja tühistamine käivad seal.';
+
+  @override
+  String get sub_restore => 'Taasta ostud';
+
+  @override
+  String get sub_restored => 'Ostud taastatud';
+
+  @override
+  String get sub_nothingToRestore => 'Selle kontoga pole midagi taastada';
+
+  @override
+  String get sub_upgradeToPro => 'Vali Pro';
+
+  @override
+  String get sub_manage => 'Halda tellimust';
+
+  @override
+  String get sub_noSubscription => 'Hallatavat tellimust ei leitud.';
+
+  @override
+  String get sub_cantOpenSettings => 'Tellimuse seadeid ei õnnestunud avada.';
+
+  @override
+  String get paywall_subMemoryCap =>
+      'Kolm tasuta mälestust on täis. Vali Pro, et hoida iga reisi, mitte ainult kolme.';
+
+  @override
+  String get paywall_subPhotoCap =>
+      'Selles mälestuses on juba 40 fotot. Vali Pro, et lisada piiramatult fotosid.';
+
+  @override
+  String get paywall_subProfile =>
+      'Iga mälestus väärib oma kohta. Vali Pro millal tahes ja ruumi jätkub kõigeks.';
+
+  @override
+  String get paywall_trialStarted => 'Prooviperiood algas · 7 päeva tasuta';
+
+  @override
+  String paywall_brandEyebrow(String appName) {
+    return '$appName Pro';
+  }
+
+  @override
+  String get paywall_titleLead => 'Ruumi igale';
+
+  @override
+  String get paywall_titleEmphasis => 'sinu mälestusele';
+
+  @override
+  String get paywall_perkMemories => 'Piiramatult mälestusi';
+
+  @override
+  String get paywall_perkMemoriesDetail =>
+      'Hoia iga reisi, selle asemel et valida kolm.';
+
+  @override
+  String get paywall_perkPhotos => 'Piiramatult fotosid mälestuse kohta';
+
+  @override
+  String get paywall_perkPhotosDetail => 'Heal nädalal pole 40 foto piirangut.';
+
+  @override
+  String get paywall_perkExport => 'Filmi HD-eksport';
+
+  @override
+  String get paywall_perkExportDetail =>
+      'Salvesta kokkuvõte täiskvaliteedis. Tulekul.';
+
+  @override
+  String get paywall_perkPriority => 'Kokkuvõtte eelisloomine';
+
+  @override
+  String get paywall_perkPriorityDetail =>
+      'Sinu film läheb järjekorrast mööda.';
+
+  @override
+  String get paywall_planAnnual => 'Aasta';
+
+  @override
+  String get paywall_planMonthly => 'Kuu';
+
+  @override
+  String get paywall_perYear => 'aastas';
+
+  @override
+  String get paywall_perMonth => 'kuus';
+
+  @override
+  String paywall_perMonthEquivalent(String price) {
+    return '$price kuus';
+  }
+
+  @override
+  String paywall_savePercent(int percent) {
+    return 'Säästa $percent%';
+  }
+
+  @override
+  String get paywall_termsPrivacy => 'Tingimused · Privaatsus';
+
+  @override
+  String paywall_trialTermsYearly(String price) {
+    return '7 päeva tasuta, siis $price/aastas. Tühista igal ajal seadetes.';
+  }
+
+  @override
+  String paywall_trialTermsMonthly(String price) {
+    return '7 päeva tasuta, siis $price/kuus. Tühista igal ajal seadetes.';
+  }
+
+  @override
+  String get paywall_startTrial => 'Alusta 7-päevast tasuta prooviperioodi';
+
+  @override
+  String get paywall_reassurance =>
+      'Sinu kolm tasuta mälestust jäävad sulle igal juhul — kui Pro-d ei vali, ei kustutata ega lukustata midagi.';
+
+  @override
+  String get wrapUp_openJournal => 'Ava päevik';
+
+  @override
+  String get wrapUp_keepForever => 'Hoia igavesti';
+
+  @override
+  String wrapUp_photographs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'fotot',
+      one: 'foto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wrapUp_bonusTasks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'boonusülesannet',
+      one: 'boonusülesanne',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wrapUp_stars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'tähte',
+      one: 'täht',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wrapUp_footnoteClosing =>
+      'Kuid mitte sellepärast ei jää see sulle meelde.';
+
+  @override
+  String get wrapUp_generating1 => 'Elame reisi uuesti läbi…';
+
+  @override
+  String get wrapUp_generating2 => 'Otsime parimaid hetki…';
+
+  @override
+  String get wrapUp_generating3 => 'Kirjutame lugu…';
+
+  @override
+  String get wrapUp_generating4 => 'Peaaegu valmis…';
 }

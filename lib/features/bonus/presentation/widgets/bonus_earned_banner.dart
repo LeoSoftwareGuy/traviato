@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -45,12 +46,12 @@ class BonusEarnedBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Both done · ✦$starsEarnedToday today',
+                  context.l10n.bonus_bothDone(starsEarnedToday),
                   style: AppTypography.bodyEmphasis,
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'New ones tomorrow.',
+                  context.l10n.bonus_newOnesTomorrow,
                   style: AppTypography.chipLabel.copyWith(
                     color: AppColors.textMuted,
                   ),
