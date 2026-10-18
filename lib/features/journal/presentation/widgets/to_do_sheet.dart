@@ -3,16 +3,16 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../quest/domain/entities/quest_entity.dart';
 import '../../../quest/presentation/mutations/quest_mutations.dart';
 import '../../../quest/presentation/providers/quest_providers.dart';
 import '../../../quest/presentation/widgets/quest_timeline.dart';
-import '../../../../core/widgets/show_error_snackbar.dart';
-import '../../../../core/l10n/context_l10n.dart';
 
 /// Bottom sheet with the day's quests, reusing `QuestTimeline`/`QuestTile`.
 /// Check-off toggles `completed_at` via the existing quest mutation; adding
@@ -125,7 +125,10 @@ class _ToDoSheetState extends ConsumerState<ToDoSheet> {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            Text("Today's to do", style: AppTypography.headlineSerif),
+            Text(
+              context.l10n.journal_todayToDo,
+              style: AppTypography.headlineSerif,
+            ),
             const SizedBox(height: AppSpacing.lg),
             if (_error != null)
               Text(

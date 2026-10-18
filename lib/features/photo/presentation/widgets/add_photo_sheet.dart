@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -118,19 +119,19 @@ class _SourcePicker extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Add a photo',
+            context.l10n.photo_addTitle,
             style: AppTypography.screenTitle.copyWith(fontSize: 21),
           ),
           const SizedBox(height: AppSpacing.lg),
           _SourceTile(
             icon: Icons.photo_camera_outlined,
-            label: 'Take a photo',
+            label: context.l10n.trip_takePhoto,
             onTap: () => _pick(context, ImageSource.camera),
           ),
           const SizedBox(height: AppSpacing.sm),
           _SourceTile(
             icon: Icons.photo_library_outlined,
-            label: 'Choose from gallery',
+            label: context.l10n.trip_chooseFromGallery,
             onTap: () => _pickGallery(context),
           ),
         ],
@@ -256,7 +257,7 @@ class _AddPhotoDetailsSheetState extends ConsumerState<AddPhotoDetailsSheet> {
     if (onSaved != null) {
       await onSaved(photo);
     } else {
-      showStarToast(context, '✦ +2 stars · photo logged');
+      showStarToast(context, context.l10n.toast_photoLogged);
     }
     if (!mounted) return;
     Navigator.of(context).pop();
@@ -285,7 +286,7 @@ class _AddPhotoDetailsSheetState extends ConsumerState<AddPhotoDetailsSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Add photo',
+              context.l10n.photo_detailsTitle,
               style: AppTypography.screenTitle.copyWith(fontSize: 21),
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -300,16 +301,16 @@ class _AddPhotoDetailsSheetState extends ConsumerState<AddPhotoDetailsSheet> {
             ),
             const SizedBox(height: AppSpacing.lg),
             CreateMemoryField(
-              label: 'Caption (optional)',
+              label: context.l10n.photo_captionLabel,
               controller: _caption,
-              hintText: 'e.g. Sunset at the harbor',
+              hintText: context.l10n.photo_captionHint,
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: AppSpacing.lg),
             CreateMemoryField(
-              label: 'Place (optional)',
+              label: context.l10n.photo_placeLabel,
               controller: _place,
-              hintText: 'e.g. Old Town',
+              hintText: context.l10n.photo_placeHint,
               textInputAction: TextInputAction.done,
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -324,7 +325,7 @@ class _AddPhotoDetailsSheetState extends ConsumerState<AddPhotoDetailsSheet> {
                       height: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Save'),
+                  : Text(context.l10n.common_save),
             ),
           ],
         ),

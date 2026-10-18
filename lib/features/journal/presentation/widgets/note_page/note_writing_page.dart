@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/l10n/context_l10n.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import 'note_dictation_controller.dart';
@@ -117,7 +118,10 @@ class _Header extends StatelessWidget {
             style: TextButton.styleFrom(
               foregroundColor: AppColors.paperInkMuted,
             ),
-            child: Text('Cancel', style: AppTypography.noteHeaderAction),
+            child: Text(
+              context.l10n.common_cancel,
+              style: AppTypography.noteHeaderAction,
+            ),
           ),
           Expanded(
             child: Text(
@@ -133,7 +137,7 @@ class _Header extends StatelessWidget {
               foregroundColor: AppColors.paperDoneInk,
             ),
             child: Text(
-              'Done',
+              context.l10n.common_done,
               style: AppTypography.noteHeaderAction.copyWith(
                 color: AppColors.paperDoneInk,
               ),
@@ -207,8 +211,7 @@ class _RuledScroll extends StatelessWidget {
                     strutStyle: AppTypography.noteBodyStrut,
                     cursorColor: AppColors.paperInk,
                     decoration: InputDecoration.collapsed(
-                      hintText:
-                          'Keep going — type, or tap the mic and just talk.',
+                      hintText: context.l10n.note_bodyHint,
                       hintStyle: bodyStyle.copyWith(
                         color: AppColors.tint(AppColors.paperInkMuted, .7),
                       ),

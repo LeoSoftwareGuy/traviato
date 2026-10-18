@@ -690,4 +690,271 @@ class AppLocalizationsEt extends AppLocalizations {
 
   @override
   String get checklist_catNiceToHaves => 'Toredad lisad';
+
+  @override
+  String get journal_eyebrow => 'Päevik';
+
+  @override
+  String get journal_quietOne => 'Vaikne päev';
+
+  @override
+  String journal_dayQuietOne(int day) {
+    return 'Päev $day — vaikne päev';
+  }
+
+  @override
+  String get journal_noEntries => 'Veel pole fotosid ega märkmeid';
+
+  @override
+  String journal_questsDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tegevust tehtud',
+      one: '$count tegevus tehtud',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journal_dayTitle(int day, String name) {
+    return 'Päev $day — $name';
+  }
+
+  @override
+  String journal_noteStamp(int day, String date) {
+    return 'Päev $day · $date';
+  }
+
+  @override
+  String get journal_noDates =>
+      'Lisa mälestusele kuupäevad, et päevikut alustada.';
+
+  @override
+  String get journal_dayNotYet => 'See päev pole veel saabunud';
+
+  @override
+  String get journal_toDo => 'Tegevused';
+
+  @override
+  String get journal_todayToDo => 'Tänased tegevused';
+
+  @override
+  String get journal_viewWrapUp => 'Vaata kokkuvõtet';
+
+  @override
+  String get journal_photos => 'Fotod';
+
+  @override
+  String journal_photosSaved(int count) {
+    return 'salvestatud: $count';
+  }
+
+  @override
+  String get journal_addPhotoTile => 'Lisa ✦2';
+
+  @override
+  String journal_wrapUpExplainer(String ask) {
+    return 'Filmil on veel vähe materjali. $ask';
+  }
+
+  @override
+  String journal_wrapUpAskPhotosAndNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Lisa veel $count fotot ja üks märge, et film avada.',
+      one: 'Lisa veel $count foto ja üks märge, et film avada.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journal_wrapUpAskPhotos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Lisa veel $count fotot, et film avada.',
+      one: 'Lisa veel $count foto, et film avada.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get journal_wrapUpAskNote => 'Kirjuta üks märge, et film avada.';
+
+  @override
+  String get journal_wrapUpReqPhotos => 'Viis fotot selles mälestuses';
+
+  @override
+  String get journal_wrapUpReqNote => 'Vähemalt üks märge kirjutatud';
+
+  @override
+  String get journal_wrapUpFree =>
+      'Midagi pole vaja osta — see on igas paketis sama.';
+
+  @override
+  String get journal_nothingYet => 'Siin pole veel midagi';
+
+  @override
+  String journal_nothingFromDay(int day) {
+    return '$day. päevast pole veel midagi';
+  }
+
+  @override
+  String get journal_nudgeBody =>
+      'Isegi üks foto aitab kokkuvõtet. Vaiksed päevad jõuavad ka filmi — see lihtsalt vilksatab mööda.';
+
+  @override
+  String get journal_addAPhoto => '＋ Lisa foto';
+
+  @override
+  String get journal_writeNote => 'Kirjuta märge';
+
+  @override
+  String get journal_addNotesToday => '✎ Lisa märkmeid tänase kohta';
+
+  @override
+  String get journal_continueEntry => '✎ Jätka sissekannet';
+
+  @override
+  String journal_wordCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sõna',
+      one: '$count sõna',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journal_edited(String time) {
+    return 'Muudetud $time';
+  }
+
+  @override
+  String get toast_noteSaved => '+1 ✦ · märge salvestatud';
+
+  @override
+  String get note_discardTitle => 'Kas loobuda lisatust?';
+
+  @override
+  String get note_keepWriting => 'Kirjuta edasi';
+
+  @override
+  String get note_discard => 'Loobu';
+
+  @override
+  String get note_bodyHint =>
+      'Jätka — kirjuta või puuduta mikrofoni ja lihtsalt räägi.';
+
+  @override
+  String note_wordsAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count sõna',
+      one: '+$count sõna',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get note_micOff =>
+      'Mikrofon on välja lülitatud. Lülita see seadetes sisse või lihtsalt kirjuta.';
+
+  @override
+  String get note_voiceUnavailable =>
+      'Häälsisestus pole praegu saadaval — kirjutamine töötab.';
+
+  @override
+  String get note_typeSemantics => 'Kirjuta';
+
+  @override
+  String get note_dictateSemantics => 'Dikteeri';
+
+  @override
+  String get note_stopDictationSemantics => 'Lõpeta dikteerimine';
+
+  @override
+  String get dictation_tapToTalk => 'Puuduta ja räägi';
+
+  @override
+  String get dictation_tapToStop => 'Puuduta, et lõpetada';
+
+  @override
+  String note_listening(String time) {
+    return 'Kuulan · $time';
+  }
+
+  @override
+  String get photo_addTitle => 'Lisa foto';
+
+  @override
+  String get photo_detailsTitle => 'Lisa foto';
+
+  @override
+  String get photo_captionLabel => 'Allkiri (valikuline)';
+
+  @override
+  String get photo_captionHint => 'nt Päikeseloojang sadamas';
+
+  @override
+  String get photo_placeLabel => 'Koht (valikuline)';
+
+  @override
+  String get photo_placeHint => 'nt Vanalinn';
+
+  @override
+  String get toast_photoLogged => '+2 ✦ · foto lisatud';
+
+  @override
+  String toast_photosLogged(int points, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fotot lisatud',
+      one: '$count foto lisatud',
+    );
+    return '+$points ✦ · $_temp0';
+  }
+
+  @override
+  String get photo_uploadingTitle => 'Laadime fotosid üles';
+
+  @override
+  String photo_uploadingProgress(int current, int total) {
+    return 'Laadin üles $current/$total…';
+  }
+
+  @override
+  String get photo_uploadComplete => 'Üleslaadimine lõpetatud';
+
+  @override
+  String photo_uploadSummary(int success, int failed) {
+    return 'Üles laaditud: $success, ebaõnnestus: $failed.';
+  }
+
+  @override
+  String photo_retryFailed(int count) {
+    return 'Proovi ebaõnnestunuid uuesti ($count)';
+  }
+
+  @override
+  String get photo_locationTitle => 'Kas lisada fotole asukoht?';
+
+  @override
+  String photo_locationBody(String appName) {
+    return '$appName saab salvestada, kus foto tehti, et see ilmuks sinu päevikus ja kokkuvõttes. Fotosid saad lisada ka ilma selleta.';
+  }
+
+  @override
+  String get photo_notNow => 'Mitte praegu';
+
+  @override
+  String get photo_allow => 'Luba';
+
+  @override
+  String get photo_deleteSemantics => 'Kustuta foto';
 }

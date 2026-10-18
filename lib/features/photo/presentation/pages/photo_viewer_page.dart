@@ -3,9 +3,10 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
+import '../../../../core/l10n/l10n_dates.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -13,9 +14,6 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../domain/entities/photo_entity.dart';
 import '../widgets/storage_photo_image.dart';
-import '../../../../core/l10n/context_l10n.dart';
-
-final _takenAtFormat = DateFormat('MMM d, h:mm a');
 
 const _fadeInDuration = Duration(milliseconds: 350);
 const _snapDuration = Duration(milliseconds: 300);
@@ -330,7 +328,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage>
                   child: _RoundIconButton(
                     key: const Key('photo-viewer-delete'),
                     icon: Icons.delete_outline,
-                    semanticLabel: 'Delete photo',
+                    semanticLabel: context.l10n.photo_deleteSemantics,
                     diameter: 32,
                     iconSize: 16,
                     onTap: _deleteCurrent,
@@ -553,7 +551,10 @@ class _PhotoInfo extends StatelessWidget {
             ),
           if (takenAt != null) ...[
             const SizedBox(height: AppSpacing.xs),
-            Text(_takenAtFormat.format(takenAt), style: smallStyle),
+            Text(
+              L10nDates.monthDayTime(context.l10n.localeName).format(takenAt),
+              style: smallStyle,
+            ),
           ],
           if (total > 1) ...[
             const SizedBox(height: AppSpacing.xs),

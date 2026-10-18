@@ -739,5 +739,257 @@
   "checklist_catNiceToHaves": "Приятные мелочи",
   "@checklist_catNiceToHaves": {
     "x-review": "pending"
+  },
+  "journal_eyebrow": "Дневник",
+  "@journal_eyebrow": {
+    "x-review": "pending"
+  },
+  "journal_quietOne": "Тихий день",
+  "@journal_quietOne": {
+    "x-review": "pending"
+  },
+  "journal_dayQuietOne": "День {day} — тихий день",
+  "@journal_dayQuietOne": {
+    "x-review": "pending"
+  },
+  "journal_noEntries": "Пока ни фото, ни заметок",
+  "@journal_noEntries": {
+    "x-review": "pending"
+  },
+  "journal_questsDone": "{count, plural, one{сделано {count} дело} few{сделано {count} дела} many{сделано {count} дел} other{сделано {count} дела}}",
+  "@journal_questsDone": {
+    "x-review": "pending"
+  },
+  "journal_dayTitle": "День {day} — {name}",
+  "@journal_dayTitle": {
+    "x-review": "pending"
+  },
+  "journal_noteStamp": "День {day} · {date}",
+  "@journal_noteStamp": {
+    "x-review": "pending"
+  },
+  "journal_noDates": "Добавьте даты, чтобы начать дневник.",
+  "@journal_noDates": {
+    "x-review": "pending"
+  },
+  "journal_dayNotYet": "Этот день ещё не наступил",
+  "@journal_dayNotYet": {
+    "x-review": "pending"
+  },
+  "journal_toDo": "Дела",
+  "@journal_toDo": {
+    "x-review": "pending"
+  },
+  "journal_todayToDo": "Дела на сегодня",
+  "@journal_todayToDo": {
+    "x-review": "pending"
+  },
+  "journal_viewWrapUp": "Смотреть итоги",
+  "@journal_viewWrapUp": {
+    "x-review": "pending"
+  },
+  "journal_photos": "Фото",
+  "@journal_photos": {
+    "x-review": "pending"
+  },
+  "journal_photosSaved": "сохранено: {count}",
+  "@journal_photosSaved": {
+    "x-review": "pending"
+  },
+  "journal_addPhotoTile": "Добавить ✦2",
+  "@journal_addPhotoTile": {
+    "x-review": "pending"
+  },
+  "journal_wrapUpExplainer": "Фильму пока не хватает материала. {ask}",
+  "@journal_wrapUpExplainer": {
+    "x-review": "pending"
+  },
+  "journal_wrapUpAskPhotosAndNote": "{count, plural, other{Добавьте ещё {count} фото и одну заметку, чтобы открыть фильм.}}",
+  "@journal_wrapUpAskPhotosAndNote": {
+    "x-review": "pending"
+  },
+  "journal_wrapUpAskPhotos": "{count, plural, other{Добавьте ещё {count} фото, чтобы открыть фильм.}}",
+  "@journal_wrapUpAskPhotos": {
+    "x-review": "pending"
+  },
+  "journal_wrapUpAskNote": "Напишите одну заметку, чтобы открыть фильм.",
+  "@journal_wrapUpAskNote": {
+    "x-review": "pending"
+  },
+  "journal_wrapUpReqPhotos": "Пять фото в этом воспоминании",
+  "@journal_wrapUpReqPhotos": {
+    "x-review": "pending"
+  },
+  "journal_wrapUpReqNote": "Хотя бы одна заметка",
+  "@journal_wrapUpReqNote": {
+    "x-review": "pending"
+  },
+  "journal_wrapUpFree": "Ничего покупать не нужно — на любом тарифе всё одинаково.",
+  "@journal_wrapUpFree": {
+    "x-review": "pending"
+  },
+  "journal_nothingYet": "Здесь пока пусто",
+  "@journal_nothingYet": {
+    "x-review": "pending"
+  },
+  "journal_nothingFromDay": "Из дня {day} пока ничего",
+  "@journal_nothingFromDay": {
+    "x-review": "pending"
+  },
+  "journal_nudgeBody": "Даже одно фото поможет итогам. Тихие дни тоже попадают в фильм — этот просто промелькнёт.",
+  "@journal_nudgeBody": {
+    "x-review": "pending"
+  },
+  "journal_addAPhoto": "＋ Добавить фото",
+  "@journal_addAPhoto": {
+    "x-review": "pending"
+  },
+  "journal_writeNote": "Написать заметку",
+  "@journal_writeNote": {
+    "x-review": "pending"
+  },
+  "journal_addNotesToday": "✎ Добавить заметку о сегодня",
+  "@journal_addNotesToday": {
+    "x-review": "pending"
+  },
+  "journal_continueEntry": "✎ Продолжить запись",
+  "@journal_continueEntry": {
+    "x-review": "pending"
+  },
+  "journal_wordCount": "{count, plural, one{{count} слово} few{{count} слова} many{{count} слов} other{{count} слова}}",
+  "@journal_wordCount": {
+    "x-review": "pending"
+  },
+  "journal_edited": "Изменено {time}",
+  "@journal_edited": {
+    "x-review": "pending"
+  },
+  "toast_noteSaved": "+1 ✦ · заметка сохранена",
+  "@toast_noteSaved": {
+    "x-review": "pending"
+  },
+  "note_discardTitle": "Удалить добавленное?",
+  "@note_discardTitle": {
+    "x-review": "pending"
+  },
+  "note_keepWriting": "Продолжить",
+  "@note_keepWriting": {
+    "x-review": "pending"
+  },
+  "note_discard": "Удалить",
+  "@note_discard": {
+    "x-review": "pending"
+  },
+  "note_bodyHint": "Продолжайте — печатайте или нажмите на микрофон и просто говорите.",
+  "@note_bodyHint": {
+    "x-review": "pending"
+  },
+  "note_wordsAdded": "{count, plural, one{+{count} слово} few{+{count} слова} many{+{count} слов} other{+{count} слова}}",
+  "@note_wordsAdded": {
+    "x-review": "pending"
+  },
+  "note_micOff": "Микрофон выключен. Включите его в Настройках или просто печатайте.",
+  "@note_micOff": {
+    "x-review": "pending"
+  },
+  "note_voiceUnavailable": "Голосовой ввод сейчас недоступен — можно печатать.",
+  "@note_voiceUnavailable": {
+    "x-review": "pending"
+  },
+  "note_typeSemantics": "Печатать",
+  "@note_typeSemantics": {
+    "x-review": "pending"
+  },
+  "note_dictateSemantics": "Диктовать",
+  "@note_dictateSemantics": {
+    "x-review": "pending"
+  },
+  "note_stopDictationSemantics": "Остановить диктовку",
+  "@note_stopDictationSemantics": {
+    "x-review": "pending"
+  },
+  "dictation_tapToTalk": "Нажмите, чтобы говорить",
+  "@dictation_tapToTalk": {
+    "x-review": "pending"
+  },
+  "dictation_tapToStop": "Нажмите, чтобы остановить",
+  "@dictation_tapToStop": {
+    "x-review": "pending"
+  },
+  "note_listening": "Слушаю · {time}",
+  "@note_listening": {
+    "x-review": "pending"
+  },
+  "photo_addTitle": "Добавить фото",
+  "@photo_addTitle": {
+    "x-review": "pending"
+  },
+  "photo_detailsTitle": "Новое фото",
+  "@photo_detailsTitle": {
+    "x-review": "pending"
+  },
+  "photo_captionLabel": "Подпись (необязательно)",
+  "@photo_captionLabel": {
+    "x-review": "pending"
+  },
+  "photo_captionHint": "например, Закат в гавани",
+  "@photo_captionHint": {
+    "x-review": "pending"
+  },
+  "photo_placeLabel": "Место (необязательно)",
+  "@photo_placeLabel": {
+    "x-review": "pending"
+  },
+  "photo_placeHint": "например, Старый город",
+  "@photo_placeHint": {
+    "x-review": "pending"
+  },
+  "toast_photoLogged": "+2 ✦ · фото добавлено",
+  "@toast_photoLogged": {
+    "x-review": "pending"
+  },
+  "toast_photosLogged": "+{points} ✦ · {count, plural, other{{count} фото добавлено}}",
+  "@toast_photosLogged": {
+    "x-review": "pending"
+  },
+  "photo_uploadingTitle": "Загружаем фото",
+  "@photo_uploadingTitle": {
+    "x-review": "pending"
+  },
+  "photo_uploadingProgress": "Загрузка {current} из {total}…",
+  "@photo_uploadingProgress": {
+    "x-review": "pending"
+  },
+  "photo_uploadComplete": "Загрузка завершена",
+  "@photo_uploadComplete": {
+    "x-review": "pending"
+  },
+  "photo_uploadSummary": "Загружено: {success}, с ошибкой: {failed}.",
+  "@photo_uploadSummary": {
+    "x-review": "pending"
+  },
+  "photo_retryFailed": "Повторить неудачные ({count})",
+  "@photo_retryFailed": {
+    "x-review": "pending"
+  },
+  "photo_locationTitle": "Отметить место съёмки?",
+  "@photo_locationTitle": {
+    "x-review": "pending"
+  },
+  "photo_locationBody": "{appName} может сохранять место съёмки, чтобы оно появилось в дневнике и итогах. Фото можно добавлять и без этого.",
+  "@photo_locationBody": {
+    "x-review": "pending"
+  },
+  "photo_notNow": "Не сейчас",
+  "@photo_notNow": {
+    "x-review": "pending"
+  },
+  "photo_allow": "Разрешить",
+  "@photo_allow": {
+    "x-review": "pending"
+  },
+  "photo_deleteSemantics": "Удалить фото",
+  "@photo_deleteSemantics": {
+    "x-review": "pending"
   }
 }

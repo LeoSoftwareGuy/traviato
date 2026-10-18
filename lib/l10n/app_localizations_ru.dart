@@ -711,4 +711,274 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get checklist_catNiceToHaves => 'Приятные мелочи';
+
+  @override
+  String get journal_eyebrow => 'Дневник';
+
+  @override
+  String get journal_quietOne => 'Тихий день';
+
+  @override
+  String journal_dayQuietOne(int day) {
+    return 'День $day — тихий день';
+  }
+
+  @override
+  String get journal_noEntries => 'Пока ни фото, ни заметок';
+
+  @override
+  String journal_questsDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'сделано $count дела',
+      many: 'сделано $count дел',
+      few: 'сделано $count дела',
+      one: 'сделано $count дело',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journal_dayTitle(int day, String name) {
+    return 'День $day — $name';
+  }
+
+  @override
+  String journal_noteStamp(int day, String date) {
+    return 'День $day · $date';
+  }
+
+  @override
+  String get journal_noDates => 'Добавьте даты, чтобы начать дневник.';
+
+  @override
+  String get journal_dayNotYet => 'Этот день ещё не наступил';
+
+  @override
+  String get journal_toDo => 'Дела';
+
+  @override
+  String get journal_todayToDo => 'Дела на сегодня';
+
+  @override
+  String get journal_viewWrapUp => 'Смотреть итоги';
+
+  @override
+  String get journal_photos => 'Фото';
+
+  @override
+  String journal_photosSaved(int count) {
+    return 'сохранено: $count';
+  }
+
+  @override
+  String get journal_addPhotoTile => 'Добавить ✦2';
+
+  @override
+  String journal_wrapUpExplainer(String ask) {
+    return 'Фильму пока не хватает материала. $ask';
+  }
+
+  @override
+  String journal_wrapUpAskPhotosAndNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Добавьте ещё $count фото и одну заметку, чтобы открыть фильм.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journal_wrapUpAskPhotos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Добавьте ещё $count фото, чтобы открыть фильм.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get journal_wrapUpAskNote =>
+      'Напишите одну заметку, чтобы открыть фильм.';
+
+  @override
+  String get journal_wrapUpReqPhotos => 'Пять фото в этом воспоминании';
+
+  @override
+  String get journal_wrapUpReqNote => 'Хотя бы одна заметка';
+
+  @override
+  String get journal_wrapUpFree =>
+      'Ничего покупать не нужно — на любом тарифе всё одинаково.';
+
+  @override
+  String get journal_nothingYet => 'Здесь пока пусто';
+
+  @override
+  String journal_nothingFromDay(int day) {
+    return 'Из дня $day пока ничего';
+  }
+
+  @override
+  String get journal_nudgeBody =>
+      'Даже одно фото поможет итогам. Тихие дни тоже попадают в фильм — этот просто промелькнёт.';
+
+  @override
+  String get journal_addAPhoto => '＋ Добавить фото';
+
+  @override
+  String get journal_writeNote => 'Написать заметку';
+
+  @override
+  String get journal_addNotesToday => '✎ Добавить заметку о сегодня';
+
+  @override
+  String get journal_continueEntry => '✎ Продолжить запись';
+
+  @override
+  String journal_wordCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count слова',
+      many: '$count слов',
+      few: '$count слова',
+      one: '$count слово',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journal_edited(String time) {
+    return 'Изменено $time';
+  }
+
+  @override
+  String get toast_noteSaved => '+1 ✦ · заметка сохранена';
+
+  @override
+  String get note_discardTitle => 'Удалить добавленное?';
+
+  @override
+  String get note_keepWriting => 'Продолжить';
+
+  @override
+  String get note_discard => 'Удалить';
+
+  @override
+  String get note_bodyHint =>
+      'Продолжайте — печатайте или нажмите на микрофон и просто говорите.';
+
+  @override
+  String note_wordsAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count слова',
+      many: '+$count слов',
+      few: '+$count слова',
+      one: '+$count слово',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get note_micOff =>
+      'Микрофон выключен. Включите его в Настройках или просто печатайте.';
+
+  @override
+  String get note_voiceUnavailable =>
+      'Голосовой ввод сейчас недоступен — можно печатать.';
+
+  @override
+  String get note_typeSemantics => 'Печатать';
+
+  @override
+  String get note_dictateSemantics => 'Диктовать';
+
+  @override
+  String get note_stopDictationSemantics => 'Остановить диктовку';
+
+  @override
+  String get dictation_tapToTalk => 'Нажмите, чтобы говорить';
+
+  @override
+  String get dictation_tapToStop => 'Нажмите, чтобы остановить';
+
+  @override
+  String note_listening(String time) {
+    return 'Слушаю · $time';
+  }
+
+  @override
+  String get photo_addTitle => 'Добавить фото';
+
+  @override
+  String get photo_detailsTitle => 'Новое фото';
+
+  @override
+  String get photo_captionLabel => 'Подпись (необязательно)';
+
+  @override
+  String get photo_captionHint => 'например, Закат в гавани';
+
+  @override
+  String get photo_placeLabel => 'Место (необязательно)';
+
+  @override
+  String get photo_placeHint => 'например, Старый город';
+
+  @override
+  String get toast_photoLogged => '+2 ✦ · фото добавлено';
+
+  @override
+  String toast_photosLogged(int points, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count фото добавлено',
+    );
+    return '+$points ✦ · $_temp0';
+  }
+
+  @override
+  String get photo_uploadingTitle => 'Загружаем фото';
+
+  @override
+  String photo_uploadingProgress(int current, int total) {
+    return 'Загрузка $current из $total…';
+  }
+
+  @override
+  String get photo_uploadComplete => 'Загрузка завершена';
+
+  @override
+  String photo_uploadSummary(int success, int failed) {
+    return 'Загружено: $success, с ошибкой: $failed.';
+  }
+
+  @override
+  String photo_retryFailed(int count) {
+    return 'Повторить неудачные ($count)';
+  }
+
+  @override
+  String get photo_locationTitle => 'Отметить место съёмки?';
+
+  @override
+  String photo_locationBody(String appName) {
+    return '$appName может сохранять место съёмки, чтобы оно появилось в дневнике и итогах. Фото можно добавлять и без этого.';
+  }
+
+  @override
+  String get photo_notNow => 'Не сейчас';
+
+  @override
+  String get photo_allow => 'Разрешить';
+
+  @override
+  String get photo_deleteSemantics => 'Удалить фото';
 }

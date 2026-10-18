@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -123,7 +124,7 @@ class _BatchAddPhotoSheetState extends ConsumerState<BatchAddPhotoSheet> {
       final points = successCount * 2; // photo = ✦2, canonical + flat
       showStarToast(
         context,
-        '✦ +$points stars · $successCount photo${successCount == 1 ? '' : 's'} logged',
+        context.l10n.toast_photosLogged(points, successCount),
       );
     }
     Navigator.of(context).pop();
@@ -149,7 +150,7 @@ class _BatchAddPhotoSheetState extends ConsumerState<BatchAddPhotoSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Uploading photos',
+          context.l10n.photo_uploadingTitle,
           style: AppTypography.screenTitle.copyWith(fontSize: 21),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -165,7 +166,7 @@ class _BatchAddPhotoSheetState extends ConsumerState<BatchAddPhotoSheet> {
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Uploading $current of ${_items.length}…',
+          context.l10n.photo_uploadingProgress(current, _items.length),
           style: AppTypography.caption,
         ),
       ],
@@ -180,12 +181,12 @@ class _BatchAddPhotoSheetState extends ConsumerState<BatchAddPhotoSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Upload complete',
+          context.l10n.photo_uploadComplete,
           style: AppTypography.screenTitle.copyWith(fontSize: 21),
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          '$success uploaded, $failed failed.',
+          context.l10n.photo_uploadSummary(success, failed),
           style: AppTypography.bodyInput,
         ),
         const SizedBox(height: AppSpacing.xl),
@@ -195,7 +196,7 @@ class _BatchAddPhotoSheetState extends ConsumerState<BatchAddPhotoSheet> {
           style: ElevatedButton.styleFrom(
             minimumSize: const Size.fromHeight(48),
           ),
-          child: Text('Retry failed ($failed)'),
+          child: Text(context.l10n.photo_retryFailed(failed)),
         ),
         const SizedBox(height: AppSpacing.sm),
         OutlinedButton(
@@ -204,7 +205,7 @@ class _BatchAddPhotoSheetState extends ConsumerState<BatchAddPhotoSheet> {
           style: OutlinedButton.styleFrom(
             minimumSize: const Size.fromHeight(48),
           ),
-          child: const Text('Done'),
+          child: Text(context.l10n.common_done),
         ),
       ],
     );

@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../photo/domain/entities/photo_entity.dart';
@@ -167,17 +168,17 @@ class _NotePageState extends ConsumerState<NotePage>
       final discard = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Discard what you added?'),
+          title: Text(context.l10n.note_discardTitle),
           actions: [
             TextButton(
               key: const Key('note-page-keep-writing'),
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Keep writing'),
+              child: Text(context.l10n.note_keepWriting),
             ),
             TextButton(
               key: const Key('note-page-discard'),
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Discard'),
+              child: Text(context.l10n.note_discard),
             ),
           ],
         ),
@@ -226,8 +227,9 @@ class _NotePageState extends ConsumerState<NotePage>
   String get _meta {
     final words = countNoteWords(widget.existingText);
     final photos = widget.photoCount;
-    return '$words ${words == 1 ? 'word' : 'words'} · '
-        '$photos ${photos == 1 ? 'photo' : 'photos'}';
+    final l10n = context.l10n;
+    return '${l10n.journal_wordCount(words)} · '
+        '${l10n.common_photoCount(photos)}';
   }
 
   @override

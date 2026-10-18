@@ -121,7 +121,7 @@ void main() {
     (tester) async {
       final photoRepo = FakePhotoRepository();
       await _pump(tester, photoRepo, imageCount: 3);
-      final toast = find.text('✦ +6 stars · 3 photos logged');
+      final toast = find.text('+6 ✦ · 3 photos logged');
       await _pumpUntilVisible(tester, toast);
 
       expect(photoRepo.addPhotoCallCount, 3);
@@ -151,7 +151,7 @@ void main() {
       expect(find.text('Retry failed (1)'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('batch-photo-retry')));
-      final toast = find.text('✦ +6 stars · 3 photos logged');
+      final toast = find.text('+6 ✦ · 3 photos logged');
       await _pumpUntilVisible(tester, toast);
 
       // Only the failed photo was re-attempted (one more call, not three).

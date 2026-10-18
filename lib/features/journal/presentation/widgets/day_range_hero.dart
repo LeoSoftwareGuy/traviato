@@ -2,10 +2,11 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import 'journal_images.dart';
 import '../../../../core/widgets/app_snackbar.dart';
+import 'journal_images.dart';
 
 /// The day-range photo strip above the date pills (Figma "current trip -
 /// journal", DIV-38) — placeholder day photography (real per-day photos
@@ -144,7 +145,7 @@ class _DayTile extends StatelessWidget {
 }
 
 void _showLockedDayMessage(BuildContext context) {
-  showAppSnackbar(context, "This day hasn't happened yet");
+  showAppSnackbar(context, context.l10n.journal_dayNotYet);
 }
 
 bool _isSameDate(DateTime a, DateTime b) =>

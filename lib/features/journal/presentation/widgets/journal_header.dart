@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -29,7 +30,7 @@ class JournalHeader extends StatelessWidget {
         Expanded(
           child: Center(
             child: Text(
-              'JOURNAL',
+              context.l10n.journal_eyebrow.toUpperCase(),
               style: AppTypography.mono.copyWith(
                 color: AppColors.textTertiary,
               ),

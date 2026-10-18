@@ -200,7 +200,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400)); // mid-close
 
       expect(noteRepo.upsertNoteCallCount, 0);
-      expect(find.text('✦ +1 star · note saved'), findsNothing);
+      expect(find.text('+1 ✦ · note saved'), findsNothing);
 
       await tester.pump(const Duration(milliseconds: 600)); // route popped
       await tester.pump();
@@ -208,7 +208,7 @@ void main() {
       expect(find.byKey(const Key('note-page-field')), findsNothing);
       expect(noteRepo.upsertNoteCallCount, 1);
       expect(noteRepo.lastUpsertedContent, 'What a trip.');
-      expect(find.text('✦ +1 star · note saved'), findsOneWidget);
+      expect(find.text('+1 ✦ · note saved'), findsOneWidget);
 
       await tester.pumpAndSettle(); // let the toast's own timer finish
       expect(find.text('What a trip.'), findsOneWidget);

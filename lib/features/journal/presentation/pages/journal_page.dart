@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
+import '../../../../core/l10n/l10n_dates.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -35,9 +36,6 @@ import '../widgets/note_page/note_title_page.dart';
 import '../widgets/photos_strip.dart';
 import '../widgets/to_do_sheet.dart';
 import 'note_page.dart';
-import '../../../../core/l10n/context_l10n.dart';
-
-final _stampDateFormat = DateFormat('d MMM');
 
 class JournalPage extends ConsumerWidget {
   const JournalPage({required this.tripId, super.key});
@@ -96,13 +94,13 @@ class JournalPage extends ConsumerWidget {
         items: [
           AppBottomNavBarItem(
             icon: Icons.home_rounded,
-            label: 'Home',
+            label: context.l10n.nav_home,
             selected: false,
             onTap: () => context.goNamed(RouteNames.home),
           ),
           AppBottomNavBarItem(
             icon: Icons.receipt_long_outlined,
-            label: 'Expenses',
+            label: context.l10n.nav_expenses,
             selected: false,
             onTap: () => context.goNamed(RouteNames.expenses),
           ),
@@ -175,14 +173,16 @@ class _JournalContent extends ConsumerWidget {
           if (isEmptyDay) ...[
             Text(
               state.isSingleDay
-                  ? 'A quiet one'
-                  : 'Day ${state.currentDayNumber} — a quiet one',
+                  ? context.l10n.journal_quietOne
+                  : context.l10n.journal_dayQuietOne(
+                      state.currentDayNumber ?? 1,
+                    ),
               style: AppTypography.screenTitle.copyWith(fontSize: 26),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'No photos, no notes yet · '
-              '${state.completedQuestCountForDay(currentDay)} quests done',
+              '${context.l10n.journal_noEntries} · '
+              '${context.l10n.journal_questsDone(state.completedQuestCountForDay(currentDay))}',
               style: AppTypography.chipLabel.copyWith(
                 color: AppColors.textMuted,
               ),
@@ -201,7 +201,10 @@ class _JournalContent extends ConsumerWidget {
             Text(
               state.isSingleDay
                   ? state.trip.name
-                  : 'Day ${state.currentDayNumber} — ${state.trip.name}',
+                  : context.l10n.journal_dayTitle(
+                      state.currentDayNumber ?? 1,
+                      state.trip.name,
+                    ),
               style: AppTypography.screenTitle.copyWith(fontSize: 26),
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -285,12 +288,17 @@ class _JournalContent extends ConsumerWidget {
     }
 
     final existing = state.currentNote?.content ?? '';
-    final dateLabel = _stampDateFormat.format(day);
+    final dateLabel = L10nDates.dayMonth(
+      context.l10n.localeName,
+    ).format(day);
     final draft = await Navigator.of(context).push(
       NotePageRoute(
         stamp: state.isSingleDay
             ? dateLabel
-            : 'Day ${state.currentDayNumber} · $dateLabel',
+            : context.l10n.journal_noteStamp(
+                state.currentDayNumber ?? 1,
+                dateLabel,
+              ),
         title: state.trip.name,
         existingText: existing,
         photoCount: photos.length,
@@ -310,7 +318,7 @@ class _JournalContent extends ConsumerWidget {
         content: appendNoteText(existing, draft),
       ),
     );
-    if (isFirstNote) showStarToast(context, '✦ +1 star · note saved');
+    if (isFirstNote) showStarToast(context, context.l10n.toast_noteSaved);
   }
 }
 
@@ -330,7 +338,7 @@ class _NoDatesYet extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.base),
           Text(
-            'Add dates to this memory to start your journal.',
+            context.l10n.journal_noDates,
             textAlign: TextAlign.center,
             style: AppTypography.chipLabel.copyWith(color: AppColors.textMuted),
           ),
