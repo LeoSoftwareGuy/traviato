@@ -2504,6 +2504,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Almost ready…'**
   String get wrapUp_generating4;
+
+  /// Mono header on You, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings_header;
+
+  /// No description provided for @settings_language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settings_language;
+
+  /// No description provided for @language_systemDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get language_systemDefault;
+
+  /// No description provided for @language_sheetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes apply right away.'**
+  String get language_sheetSubtitle;
+
+  /// No description provided for @language_footer.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the app\'s labels change. Your notes, titles and captions stay exactly as you wrote them.'**
+  String get language_footer;
+
+  /// Toast after switching, shown in the NEW language; {name} is language_selfName.
+  ///
+  /// In en, this message translates to:
+  /// **'Language: {name}'**
+  String language_toast(String name);
+
+  /// This language's own name as used mid-sentence (lowercase in ru/et).
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get language_selfName;
+
+  /// A language's name in the UI language, under its native name in the sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'{lang, select, en{English} ru{Russian} et{Estonian} other{English}}'**
+  String language_name(String lang);
+
+  /// Subtitle under System default. platform: ios | android | other.
+  ///
+  /// In en, this message translates to:
+  /// **'{platform, select, ios{Follows your iPhone} android{Follows your Android} other{Follows your device}} — {lang, select, en{English} ru{Russian} et{Estonian} other{English}} right now'**
+  String language_systemFollows(String platform, String lang);
 }
 
 class _AppLocalizationsDelegate
