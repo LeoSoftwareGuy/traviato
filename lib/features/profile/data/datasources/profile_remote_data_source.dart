@@ -12,6 +12,9 @@ abstract interface class ProfileRemoteDataSource {
     String? avatarUrl,
   });
 
+  /// Writes `profiles.language`; `null` clears it (System default).
+  Future<void> updateLanguage(String? code);
+
   /// Ordered by `position` — the design's fixed badge display order.
   Future<List<AchievementTemplateModel>> getAchievementTemplates();
 

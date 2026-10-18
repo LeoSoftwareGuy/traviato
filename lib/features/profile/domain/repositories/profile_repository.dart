@@ -17,6 +17,10 @@ abstract interface class ProfileRepository {
     String? avatarUrl,
   });
 
+  /// Saves the UI-language choice; [code] `null` = System default (#236).
+  /// Separate from [updateProfile], which can't clear a field.
+  Future<Either<Failure, Unit>> updateLanguage(String? code);
+
   /// The full `achievement_templates` catalog, joined with which ones this
   /// user has earned and each one's current progress against [stats] — see
   /// `AchievementEntity`'s doc comment for how the join is done. Takes

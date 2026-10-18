@@ -53,6 +53,20 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
+  Future<Either<Failure, Unit>> updateLanguage(String? code) async {
+    try {
+      await _remote.updateLanguage(code);
+      return const Right(unit);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<AchievementEntity>>> getAchievements(
     ProfileStatsEntity stats,
   ) async {

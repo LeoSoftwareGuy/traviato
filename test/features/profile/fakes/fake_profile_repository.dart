@@ -40,6 +40,15 @@ class FakeProfileRepository implements ProfileRepository {
         Right(buildProfile(username: username, bio: bio, avatarUrl: avatarUrl));
   }
 
+  Either<Failure, Unit>? updateLanguageResult;
+  final languageUpdates = <String?>[];
+
+  @override
+  Future<Either<Failure, Unit>> updateLanguage(String? code) async {
+    languageUpdates.add(code);
+    return updateLanguageResult ?? const Right(unit);
+  }
+
   @override
   Future<Either<Failure, List<AchievementEntity>>> getAchievements(
     ProfileStatsEntity stats,
@@ -66,6 +75,7 @@ ProfileEntity buildProfile({
   String? bio,
   String? avatarUrl,
   DateTime? createdAt,
+  String? language,
 }) {
   return ProfileEntity(
     id: id,
@@ -73,6 +83,7 @@ ProfileEntity buildProfile({
     bio: bio,
     avatarUrl: avatarUrl,
     createdAt: createdAt ?? DateTime(2024, 3, 1),
+    language: language,
   );
 }
 

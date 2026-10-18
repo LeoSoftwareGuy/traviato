@@ -8,6 +8,7 @@ class ProfileModel extends ProfileEntity {
     super.bio,
     super.avatarUrl,
     required super.createdAt,
+    super.language,
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) => ProfileModel(
@@ -16,5 +17,6 @@ class ProfileModel extends ProfileEntity {
     bio: json['bio'] as String?,
     avatarUrl: json['avatar_url'] as String?,
     createdAt: DateTime.parse(json['created_at'] as String),
+    language: json['language'] as String?,
   );
 }

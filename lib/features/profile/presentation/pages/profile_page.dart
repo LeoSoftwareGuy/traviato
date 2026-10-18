@@ -11,6 +11,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../auth/presentation/mutations/auth_mutations.dart';
+import '../../../settings/presentation/widgets/language_settings_row.dart';
 import '../../../subscription/domain/entities/subscription_offering_entity.dart';
 import '../controllers/profile_controller.dart';
 import '../controllers/profile_state.dart';
@@ -129,6 +130,8 @@ class _ProfileContent extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.xl),
         AchievementsGrid(achievements: state.achievements),
+        const SizedBox(height: AppSpacing.xxl),
+        const LanguageSettingsSection(),
         const SizedBox(height: AppSpacing.xl),
         SizedBox(
           width: double.infinity,
