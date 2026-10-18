@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -9,6 +10,7 @@ import '../../domain/entities/expense_category.dart';
 import '../../domain/entities/expense_summary_entity.dart';
 import '../controllers/expense_compare_state.dart';
 import 'expense_category_style.dart';
+import 'expense_labels.dart';
 import 'expense_money_format.dart';
 
 const _columnWidth = 80.0;
@@ -45,7 +47,10 @@ class ExpenseCompareTable extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(AppSpacing.base),
-              child: Text('FINANCIAL COMPARISON', style: AppTypography.mono),
+              child: Text(
+                context.l10n.compare_tableHeader.toUpperCase(),
+                style: AppTypography.mono,
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -68,16 +73,20 @@ class ExpenseCompareTable extends StatelessWidget {
               ),
             const SizedBox(height: AppSpacing.xs),
             _TotalsRow(
-              label: 'Total',
-              valueA: formatEuro(a.totalAmount),
-              valueB: formatEuro(b.totalAmount),
+              label: context.l10n.compare_total,
+              valueA: formatEuro(a.totalAmount, context.l10n.localeName),
+              valueB: formatEuro(b.totalAmount, context.l10n.localeName),
               valueStyle: AppTypography.bigNumber.copyWith(fontSize: 17),
               labelStyle: AppTypography.bodyEmphasis.copyWith(fontSize: 12.5),
             ),
             _TotalsRow(
-              label: 'Per day',
-              valueA: a.perDay == null ? '—' : formatEuro(a.perDay!),
-              valueB: b.perDay == null ? '—' : formatEuro(b.perDay!),
+              label: context.l10n.compare_perDay,
+              valueA: a.perDay == null
+                  ? '—'
+                  : formatEuro(a.perDay!, context.l10n.localeName),
+              valueB: b.perDay == null
+                  ? '—'
+                  : formatEuro(b.perDay!, context.l10n.localeName),
               valueStyle: AppTypography.bigNumber.copyWith(
                 fontSize: 14,
                 color: AppColors.textMuted,
@@ -112,7 +121,10 @@ class _HeaderRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: Text('CATEGORY', style: AppTypography.mono),
+          child: Text(
+            context.l10n.expense_categoryHeader.toUpperCase(),
+            style: AppTypography.mono,
+          ),
         ),
         SizedBox(
           width: _columnWidth,
@@ -158,7 +170,7 @@ class _CategoryRow extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(
-            category.displayName,
+            expenseCategoryLabel(context.l10n, category),
             style: AppTypography.chipLabel,
             overflow: TextOverflow.ellipsis,
           ),
@@ -196,7 +208,7 @@ class _AmountText extends StatelessWidget {
     }
     final isSmaller = other > amount;
     return Text(
-      formatEuro(amount),
+      formatEuro(amount, context.l10n.localeName),
       textAlign: TextAlign.right,
       style: AppTypography.headlineSerif.copyWith(
         fontSize: 15,

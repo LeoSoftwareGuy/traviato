@@ -1,8 +1,13 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/expense/domain/entities/expense_category.dart';
 import 'package:traviato/features/expense/presentation/controllers/expense_compare_state.dart';
+import 'package:traviato/features/expense/presentation/widgets/expense_compare_verdict.dart';
+import 'package:traviato/l10n/app_localizations.dart';
 
 import '../../fakes/fake_expense_repository.dart';
+
+final _en = lookupAppLocalizations(const Locale('en'));
 
 void main() {
   final iceland = buildExpenseSummaryEntity(tripId: 't1', tripName: 'Iceland');
@@ -15,7 +20,7 @@ void main() {
     test('nothing picked', () {
       final state = ExpenseCompareState(summaries: [iceland, santorini]);
       expect(
-        state.hintLine,
+        compareHintLine(_en, state),
         'Pick two memories to put their spending side by side.',
       );
     });
@@ -25,7 +30,7 @@ void main() {
         summaries: [iceland, santorini],
         tripAId: 't1',
       );
-      expect(state.hintLine, 'Now pick a second one.');
+      expect(compareHintLine(_en, state), 'Now pick a second one.');
     });
 
     test('both picked', () {
@@ -35,7 +40,7 @@ void main() {
         tripBId: 't2',
       );
       expect(
-        state.hintLine,
+        compareHintLine(_en, state),
         'Iceland vs Santorini — tap either to swap it out.',
       );
     });

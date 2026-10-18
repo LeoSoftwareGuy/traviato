@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -29,7 +30,7 @@ class ExpenseCompareVerdictCard extends StatelessWidget {
         borderRadius: AppRadius.cardRadius,
       ),
       child: Text(
-        buildCompareVerdict(a: a, b: b),
+        buildCompareVerdict(l10n: context.l10n, a: a, b: b),
         style: AppTypography.chipLabel.copyWith(
           fontSize: 12,
           height: 1.6,

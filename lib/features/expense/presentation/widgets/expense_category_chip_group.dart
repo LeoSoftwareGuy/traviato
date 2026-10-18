@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/expense_category.dart';
 import 'expense_category_style.dart';
+import 'expense_labels.dart';
 
 /// Single-select category chips (Figma "add expenses" — 6 chips, 2 rows of
 /// 3). Same selected/unselected chip language as `VibeChipGroup`, but each
@@ -72,7 +74,7 @@ class _CategoryChip extends StatelessWidget {
             Icon(expenseCategoryIcon(category), size: 14, color: accent),
             const SizedBox(width: AppSpacing.xs),
             Text(
-              category.displayName,
+              expenseCategoryLabel(context.l10n, category),
               style: AppTypography.chipLabel.copyWith(
                 color: isSelected
                     ? AppColors.textPrimary

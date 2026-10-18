@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -29,8 +30,8 @@ class ExpenseStatsStrip extends StatelessWidget {
         Expanded(
           flex: 5,
           child: _StatCard(
-            label: 'TOTAL SPENT',
-            value: formatEuro(totalAmount),
+            label: context.l10n.expense_totalSpent.toUpperCase(),
+            value: formatEuro(totalAmount, context.l10n.localeName),
             emphasized: true,
           ),
         ),
@@ -38,10 +39,15 @@ class ExpenseStatsStrip extends StatelessWidget {
         Expanded(
           flex: 4,
           child: _StatCard(
-            label: durationDays == null
-                ? 'PER DAY AVG'
-                : 'PER DAY AVG · $durationDays D',
-            value: perDay == null ? '—' : formatEuro(perDay!),
+            label:
+                (durationDays == null
+                        ? context.l10n.expense_perDayAvg
+                        : '${context.l10n.expense_perDayAvg} · '
+                              '${context.l10n.expense_durationShort(durationDays!)}')
+                    .toUpperCase(),
+            value: perDay == null
+                ? '—'
+                : formatEuro(perDay!, context.l10n.localeName),
             emphasized: false,
           ),
         ),

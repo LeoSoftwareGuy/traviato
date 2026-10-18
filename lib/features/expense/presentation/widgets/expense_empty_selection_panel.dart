@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -32,11 +33,13 @@ class ExpenseEmptySelectionPanel extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.base),
-            Text('Pick a memory above', style: AppTypography.headlineSerif),
+            Text(
+              context.l10n.expense_pickMemoryTitle,
+              style: AppTypography.headlineSerif,
+            ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              "You'll see the total, where it went, and every expense as "
-              'you logged it.',
+              context.l10n.expense_pickMemoryBody,
               textAlign: TextAlign.center,
               style: AppTypography.chipLabel.copyWith(
                 color: AppColors.textMuted,

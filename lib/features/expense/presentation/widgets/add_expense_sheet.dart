@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
+import '../../../../core/l10n/l10n_dates.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -15,11 +17,8 @@ import '../../domain/entities/expense_category.dart';
 import '../../domain/entities/expense_summary_entity.dart';
 import '../mutations/expense_mutations.dart';
 import 'expense_category_chip_group.dart';
+import 'expense_money_format.dart';
 import 'expense_trip_selector.dart';
-import '../../../../core/l10n/context_l10n.dart';
-
-final _dateFormat = DateFormat('MMM d, y');
-final _dateChipFormat = DateFormat('MMM d');
 
 /// Bottom sheet to log a new expense against one memory.
 /// `docs/design/README.md` § Shared: Add-expense sheet.
@@ -77,13 +76,17 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
   }
 
   String? _validateTitle(String? value) {
-    if ((value ?? '').trim().isEmpty) return 'What was it?';
+    if ((value ?? '').trim().isEmpty) {
+      return context.l10n.expense_descriptionRequired;
+    }
     return null;
   }
 
   String? _validateAmount(String? value) {
-    final parsed = double.tryParse((value ?? '').trim());
-    if (parsed == null || parsed <= 0) return 'Enter an amount greater than 0.';
+    final parsed = parseEuroAmount(value ?? '');
+    if (parsed == null || parsed <= 0) {
+      return context.l10n.expense_amountInvalid;
+    }
     return null;
   }
 
@@ -91,7 +94,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
     final now = DateTime.now();
     final picked = await showAppDatePicker(
       context: context,
-      label: 'Spent on',
+      label: context.l10n.expense_spentOn,
       initialDate: _spentOn,
       firstDate: DateTime(now.year - 5),
       lastDate: DateTime(now.year + 5),
@@ -109,7 +112,8 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
         ref: ref,
         tripId: _tripId!,
         title: _title.text.trim(),
-        amount: double.parse(_amount.text.trim()),
+        // Validated above, so this is non-null.
+        amount: parseEuroAmount(_amount.text)!,
         category: _category,
         spentOn: _spentOn,
       );
@@ -152,13 +156,13 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                 children: [
                   Expanded(
                     child: Text(
-                      'New expense',
+                      context.l10n.expense_newExpense,
                       style: AppTypography.displaySerif,
                     ),
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
+                    child: Text(context.l10n.common_cancel),
                   ),
                 ],
               ),
@@ -177,15 +181,18 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Description', style: AppTypography.fieldLabel),
+                        Text(
+                          context.l10n.expense_descriptionLabel,
+                          style: AppTypography.fieldLabel,
+                        ),
                         const SizedBox(height: AppSpacing.sm),
                         TextFormField(
                           controller: _title,
                           style: AppTypography.bodyInput,
                           textInputAction: TextInputAction.next,
                           validator: _validateTitle,
-                          decoration: const InputDecoration(
-                            hintText: 'Sunset dinner',
+                          decoration: InputDecoration(
+                            hintText: context.l10n.expense_descriptionHint,
                           ),
                         ),
                       ],
@@ -197,7 +204,10 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Amount', style: AppTypography.fieldLabel),
+                        Text(
+                          context.l10n.expense_amountLabel,
+                          style: AppTypography.fieldLabel,
+                        ),
                         const SizedBox(height: AppSpacing.sm),
                         TextFormField(
                           controller: _amount,
@@ -220,7 +230,10 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text('CATEGORY', style: AppTypography.mono),
+              Text(
+                context.l10n.expense_categoryHeader.toUpperCase(),
+                style: AppTypography.mono,
+              ),
               const SizedBox(height: AppSpacing.sm),
               ExpenseCategoryChipGroup(
                 selected: _category,
@@ -244,7 +257,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                     children: [
                       Expanded(
                         child: Text(
-                          _dateChipDescription(_spentOn),
+                          _dateChipDescription(context.l10n, _spentOn),
                           style: AppTypography.bodyInput,
                         ),
                       ),
@@ -269,7 +282,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.add),
-                  label: const Text('Save expense'),
+                  label: Text(context.l10n.expense_saveExpense),
                 ),
               ),
             ],
@@ -279,14 +292,18 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
     );
   }
 
-  static String _dateChipDescription(DateTime date) {
+  static String _dateChipDescription(AppLocalizations l10n, DateTime date) {
+    final locale = l10n.localeName;
     final today = DateTime.now();
     final isToday =
         date.year == today.year &&
         date.month == today.month &&
         date.day == today.day;
     return isToday
-        ? 'Today · ${_dateChipFormat.format(date)}'
-        : _dateFormat.format(date);
+        ? l10n.expense_todayDate(L10nDates.monthDay(locale).format(date))
+        : (locale == 'en'
+                  ? DateFormat('MMM d, y', locale)
+                  : DateFormat.yMMMd(locale))
+              .format(date);
   }
 }

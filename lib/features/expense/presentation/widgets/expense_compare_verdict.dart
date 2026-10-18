@@ -1,4 +1,6 @@
+import '../../../../core/l10n/context_l10n.dart';
 import '../../domain/entities/expense_summary_entity.dart';
+import '../controllers/expense_compare_state.dart';
 import 'expense_money_format.dart';
 
 /// Computed verdict sentence for the Compare screen (`docs/design/README.md`
@@ -11,9 +13,12 @@ import 'expense_money_format.dart';
 /// consistent version: whichever trip has the *lower* per-day rate is the
 /// one named "the cheaper trip per day".
 String buildCompareVerdict({
+  required AppLocalizations l10n,
   required ExpenseSummaryEntity a,
   required ExpenseSummaryEntity b,
 }) {
+  String euro(double amount) => formatEuro(amount, l10n.localeName);
+
   final bigger = a.totalAmount == b.totalAmount
       ? null
       : (a.totalAmount > b.totalAmount ? a : b);
@@ -34,25 +39,50 @@ String buildCompareVerdict({
 
   if (bigger == null) {
     if (higherPerDay == null) {
-      return '${a.tripName} and ${b.tripName} cost about the same overall.';
+      return l10n.compare_verdictSame(a.tripName, b.tripName);
     }
-    return '${a.tripName} and ${b.tripName} cost about the same overall, '
-        'but ${higherPerDay.tripName} ran ${formatEuro(perDayDiff)}/day '
-        'higher. ${cheaperPerDay!.tripName} was the cheaper trip per day.';
+    return l10n.compare_verdictSameButPerDay(
+      a.tripName,
+      b.tripName,
+      higherPerDay.tripName,
+      euro(perDayDiff),
+      cheaperPerDay!.tripName,
+    );
   }
 
   if (higherPerDay == null) {
-    return '${bigger.tripName} cost ${formatEuro(totalDiff)} more overall '
-        'than ${smaller!.tripName}.';
+    return l10n.compare_verdictMore(
+      bigger.tripName,
+      euro(totalDiff),
+      smaller!.tripName,
+    );
   }
 
   if (higherPerDay == bigger) {
-    return '${bigger.tripName} cost ${formatEuro(totalDiff)} more overall '
-        'and ran ${formatEuro(perDayDiff)}/day higher too. '
-        '${cheaperPerDay!.tripName} was the cheaper trip per day.';
+    return l10n.compare_verdictMoreAndPerDay(
+      bigger.tripName,
+      euro(totalDiff),
+      euro(perDayDiff),
+      cheaperPerDay!.tripName,
+    );
   }
 
-  return '${bigger.tripName} cost ${formatEuro(totalDiff)} more overall, '
-      'but ${higherPerDay.tripName} ran ${formatEuro(perDayDiff)}/day '
-      'higher. ${cheaperPerDay!.tripName} was the cheaper trip per day.';
+  return l10n.compare_verdictMoreButPerDay(
+    bigger.tripName,
+    euro(totalDiff),
+    higherPerDay.tripName,
+    euro(perDayDiff),
+    cheaperPerDay!.tripName,
+  );
 }
+
+/// The Compare screen's hint line under the title, in the UI language.
+String compareHintLine(AppLocalizations l10n, ExpenseCompareState state) =>
+    switch (state.step) {
+      CompareStep.pickFirst => l10n.compare_hintPickTwo,
+      CompareStep.pickSecond => l10n.compare_hintPickSecond,
+      CompareStep.ready => l10n.compare_hintReady(
+        state.summaryA!.tripName,
+        state.summaryB!.tripName,
+      ),
+    };

@@ -71,16 +71,13 @@ class ExpenseCompareState extends Equatable {
     ];
   }
 
-  /// The 3-state hint line under the title.
-  String get hintLine {
-    final a = summaryA;
-    final b = summaryB;
-    if (a == null) {
-      return 'Pick two memories to put their spending side by side.';
-    }
-    if (b == null) return 'Now pick a second one.';
-    return '${a.tripName} vs ${b.tripName} — tap either to swap it out.';
-  }
+  /// Which of the 3 hint-line states the screen is in; the line itself is
+  /// written in the UI language by `compareHintLine` (#220).
+  CompareStep get step => summaryA == null
+      ? CompareStep.pickFirst
+      : summaryB == null
+      ? CompareStep.pickSecond
+      : CompareStep.ready;
 
   ExpenseCompareState copyWith({
     List<ExpenseSummaryEntity>? summaries,
@@ -109,3 +106,6 @@ class ExpenseCompareState extends Equatable {
     expensesB,
   ];
 }
+
+/// Progress through picking the A/B pair.
+enum CompareStep { pickFirst, pickSecond, ready }
