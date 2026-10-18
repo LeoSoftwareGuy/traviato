@@ -850,17 +850,6 @@ class AppLocalizationsEt extends AppLocalizations {
       'Jätka — kirjuta või puuduta mikrofoni ja lihtsalt räägi.';
 
   @override
-  String note_wordsAdded(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '+$count sõna',
-      one: '+$count sõna',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get note_micOff =>
       'Mikrofon on välja lülitatud. Lülita see seadetes sisse või lihtsalt kirjuta.';
 
@@ -882,11 +871,6 @@ class AppLocalizationsEt extends AppLocalizations {
 
   @override
   String get dictation_tapToStop => 'Puuduta, et lõpetada';
-
-  @override
-  String note_listening(String time) {
-    return 'Kuulan · $time';
-  }
 
   @override
   String get photo_addTitle => 'Lisa foto';
@@ -1622,5 +1606,94 @@ class AppLocalizationsEt extends AppLocalizations {
       },
     );
     return '$_temp0 — praegu $_temp1';
+  }
+
+  @override
+  String get dictation_title => 'Räägi keeles…';
+
+  @override
+  String dictation_sheetSubtitle(String lang) {
+    String _temp0 = intl.Intl.selectLogic(
+      lang,
+      {
+        'en': 'inglise',
+        'ru': 'vene',
+        'et': 'eesti',
+        'other': 'inglise',
+      },
+    );
+    return 'Muutub ainult dikteerimise keel. Rakendus jääb $_temp0 keelde.';
+  }
+
+  @override
+  String dictation_unavailableRow(String lang, String platform) {
+    String _temp0 = intl.Intl.selectLogic(
+      lang,
+      {
+        'en': 'Inglise',
+        'ru': 'Vene',
+        'et': 'Eesti',
+        'other': 'Inglise',
+      },
+    );
+    String _temp1 = intl.Intl.selectLogic(
+      platform,
+      {
+        'ios': 'iPhone\'is',
+        'android': 'telefonis',
+        'other': 'seadmes',
+      },
+    );
+    return '$_temp0 keele kõnetuvastus pole selles $_temp1 saadaval. Kirjutada saad ikka.';
+  }
+
+  @override
+  String get dictation_remember => 'Jätame selle järgmiseks märkmeks meelde.';
+
+  @override
+  String get dictation_notAvailable => 'Pole saadaval';
+
+  @override
+  String dictation_unavailableWarning(String lang, String platform) {
+    String _temp0 = intl.Intl.selectLogic(
+      lang,
+      {
+        'en': 'Inglise',
+        'ru': 'Vene',
+        'et': 'Eesti',
+        'other': 'Inglise',
+      },
+    );
+    String _temp1 = intl.Intl.selectLogic(
+      platform,
+      {
+        'ios': 'iPhone\'is',
+        'android': 'telefonis',
+        'other': 'seadmes',
+      },
+    );
+    return '$_temp0 keele kõnetuvastus pole selles $_temp1 saadaval.';
+  }
+
+  @override
+  String get dictation_chooseAnother => 'Vali teine keel';
+
+  @override
+  String dictation_languageSemantics(String name) {
+    return 'Dikteerimise keel: $name';
+  }
+
+  @override
+  String get note_bodyHintUnavailable =>
+      'Kirjuta edasi — või vali teine keel ja räägi.';
+
+  @override
+  String note_listeningIn(String code, String time) {
+    return 'Kuulan · $code · $time';
+  }
+
+  @override
+  String note_wordCountShort(int count) {
+    return '$count S';
   }
 }

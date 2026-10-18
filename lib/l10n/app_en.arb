@@ -640,14 +640,6 @@
   "note_keepWriting": "Keep writing",
   "note_discard": "Discard",
   "note_bodyHint": "Keep going — type, or tap the mic and just talk.",
-  "note_wordsAdded": "{count, plural, =1{+1 word} other{+{count} words}}",
-  "@note_wordsAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "note_micOff": "Microphone is off. Turn it on in Settings, or just type.",
   "note_voiceUnavailable": "Voice isn't available right now — typing works.",
   "note_typeSemantics": "Type",
@@ -664,15 +656,6 @@
   },
   "dictation_tapToTalk": "Tap to talk",
   "dictation_tapToStop": "Tap to stop",
-  "note_listening": "Listening · {time}",
-  "@note_listening": {
-    "description": "Mono status line, uppercased in code.",
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
   "photo_addTitle": "Add a photo",
   "@photo_addTitle": {
     "description": "Source picker sheet title."
@@ -1351,6 +1334,86 @@
       },
       "lang": {
         "type": "String"
+      }
+    }
+  },
+  "dictation_title": "Speak in…",
+  "@dictation_title": {
+    "description": "Dictation language sheet title (spec copy table)."
+  },
+  "dictation_sheetSubtitle": "Only changes dictation. The app stays in {lang, select, en{English} ru{Russian} et{Estonian} other{English}}.",
+  "@dictation_sheetSubtitle": {
+    "description": "{lang} is the current UI language code.",
+    "placeholders": {
+      "lang": {
+        "type": "String"
+      }
+    }
+  },
+  "dictation_unavailableRow": "{lang, select, en{English} ru{Russian} et{Estonian} other{English}} · not available for speech on this {platform, select, ios{iPhone} android{phone} other{device}}. You can still type in {lang, select, en{English} ru{Russian} et{Estonian} other{English}}.",
+  "@dictation_unavailableRow": {
+    "description": "Disabled row in the sheet. platform: ios | android | other.",
+    "placeholders": {
+      "lang": {
+        "type": "String"
+      },
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "dictation_remember": "We'll remember this for your next note.",
+  "@dictation_remember": {
+    "description": "Sheet footer (spec copy table)."
+  },
+  "dictation_notAvailable": "Not available",
+  "@dictation_notAvailable": {
+    "description": "Label under the disabled mic (spec copy table)."
+  },
+  "dictation_unavailableWarning": "{lang, select, en{English} ru{Russian} et{Estonian} other{English}} speech recognition isn't available on this {platform, select, ios{iPhone} android{phone} other{device}}.",
+  "@dictation_unavailableWarning": {
+    "description": "Inline warning above the dock; followed by dictation_chooseAnother as a link.",
+    "placeholders": {
+      "lang": {
+        "type": "String"
+      },
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "dictation_chooseAnother": "Choose another language",
+  "dictation_languageSemantics": "Dictation language: {name}",
+  "@dictation_languageSemantics": {
+    "description": "Screen-reader label for the dock chip.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "note_bodyHintUnavailable": "Keep typing — or pick another language and speak.",
+  "@note_bodyHintUnavailable": {
+    "description": "Body placeholder when the dictation language isn't available (design 2d)."
+  },
+  "note_listeningIn": "Listening · {code} · {time}",
+  "@note_listeningIn": {
+    "description": "Mono status line, uppercased in code; {code} is the 2-letter dictation language.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "note_wordCountShort": "{count} W",
+  "@note_wordCountShort": {
+    "description": "Compact word count under the dock chip (design 2a). @maxLength 6",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
     }
   }
