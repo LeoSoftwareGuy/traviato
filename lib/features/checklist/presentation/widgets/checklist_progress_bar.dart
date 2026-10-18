@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_motion.dart';
@@ -47,7 +48,7 @@ class ChecklistProgressBar extends StatelessWidget {
         ),
         const SizedBox(width: AppSpacing.sm),
         Text(
-          '$checkedCount of $totalCount packed',
+          context.l10n.checklist_packedOf(checkedCount, totalCount),
           style: AppTypography.chipLabel.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.w600,

@@ -581,4 +581,134 @@ class AppLocalizationsRu extends AppLocalizations {
   String trip_deleteConsequence(String photos, String notes) {
     return 'Будут удалены $photos и $notes. Заработанные звёзды останутся. Отменить это нельзя.';
   }
+
+  @override
+  String get common_edit => 'Изменить';
+
+  @override
+  String get common_delete => 'Удалить';
+
+  @override
+  String get common_save => 'Сохранить';
+
+  @override
+  String get toast_questDone => '+1 ✦ · дело сделано';
+
+  @override
+  String get toast_packed => '✦ Собрано — отлично';
+
+  @override
+  String get plan_eyebrow => 'План';
+
+  @override
+  String plan_daysTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'всего $count дня',
+      many: 'всего $count дней',
+      few: 'всего $count дня',
+      one: 'всего $count день',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plan_noDates => 'Добавьте даты, чтобы начать планировать дни.';
+
+  @override
+  String plan_dayN(int day) {
+    return 'День $day';
+  }
+
+  @override
+  String plan_doneCount(int done, int total) {
+    return 'готово $done из $total';
+  }
+
+  @override
+  String get plan_addQuest => '+ Добавить дело';
+
+  @override
+  String plan_addQuestToDay(int day) {
+    return '+ Добавить дело на день $day';
+  }
+
+  @override
+  String get plan_addTitle => 'Новое дело';
+
+  @override
+  String get plan_editTitle => 'Изменить дело';
+
+  @override
+  String get plan_nameLabel => 'Название';
+
+  @override
+  String get plan_nameHint => 'например, Собрать машину';
+
+  @override
+  String get plan_nameRequired => 'Дайте делу название.';
+
+  @override
+  String get plan_timeLabel => 'Время (необязательно)';
+
+  @override
+  String get plan_noTime => 'Время не задано';
+
+  @override
+  String get plan_detailLabel => 'Подробности (необязательно)';
+
+  @override
+  String get plan_detailHint => 'например, Холодильник, пледы, ботинки';
+
+  @override
+  String get manage_title => 'Изменить воспоминание';
+
+  @override
+  String get manage_nameLabel => 'Название';
+
+  @override
+  String get manage_rename => 'Переименовать';
+
+  @override
+  String get manage_shiftHint =>
+      'Нажмите на дату, чтобы сдвинуть её на день вперёд, удерживайте — чтобы назад. Дела сдвинутся вместе с ней.';
+
+  @override
+  String get manage_cover => 'Обложка';
+
+  @override
+  String get manage_notSet => 'Не задано';
+
+  @override
+  String get checklist_title => 'Соберитесь в поездку';
+
+  @override
+  String get checklist_emptyCategory => 'В этой категории пока ничего нет.';
+
+  @override
+  String get checklist_addHint => 'Добавьте что-то своё…';
+
+  @override
+  String get checklist_essential => 'Важное';
+
+  @override
+  String checklist_packedOf(int checked, int total) {
+    return 'Собрано $checked из $total';
+  }
+
+  @override
+  String get checklist_catTravelEssentials => 'Самое нужное';
+
+  @override
+  String get checklist_catClothingShoes => 'Одежда и обувь';
+
+  @override
+  String get checklist_catGadgetsTech => 'Гаджеты и техника';
+
+  @override
+  String get checklist_catToiletriesHealth => 'Гигиена и здоровье';
+
+  @override
+  String get checklist_catNiceToHaves => 'Приятные мелочи';
 }

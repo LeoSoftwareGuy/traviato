@@ -97,7 +97,7 @@ void main() {
     expect(find.text('Pack the car'), findsOneWidget);
     expect(find.text('Cooler, blankets, hiking boots'), findsOneWidget);
     expect(find.text('08:00'), findsOneWidget);
-    expect(find.text('1 quests planned · 61 days total'), findsOneWidget);
+    expect(find.text('1 quest planned · 61 days total'), findsOneWidget);
   });
 
   testWidgets('shows the empty-day state with no quests', (tester) async {
@@ -199,7 +199,7 @@ void main() {
     await tester.tap(find.byKey(const Key('quest-check-q1')));
     await tester.pump();
 
-    expect(find.text('✦ +1 star · quest done'), findsOneWidget);
+    expect(find.text('+1 ✦ · quest done'), findsOneWidget);
   });
 
   testWidgets('unchecking a quest does not show the star toast', (
@@ -226,7 +226,7 @@ void main() {
     await tester.tap(find.byKey(const Key('quest-check-q1')));
     await tester.pump();
 
-    expect(find.text('✦ +1 star · quest done'), findsNothing);
+    expect(find.text('+1 ✦ · quest done'), findsNothing);
   });
 
   testWidgets('the app-bar checklist action navigates to the checklist '
@@ -458,7 +458,7 @@ void main() {
 
       expect(find.text('Yes — delete it forever'), findsOneWidget);
       expect(
-        find.textContaining('This removes 2 photos and 1 days of notes'),
+        find.textContaining('This removes 2 photos and 1 day of notes'),
         findsOneWidget,
       );
       expect(tripRepo.deleteTripCallCount, 0);

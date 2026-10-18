@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -19,7 +20,6 @@ import '../widgets/add_checklist_item_input.dart';
 import '../widgets/category_tabs.dart';
 import '../widgets/checklist_item_tile.dart';
 import '../widgets/checklist_progress_bar.dart';
-import '../../../../core/l10n/context_l10n.dart';
 
 class ChecklistPage extends ConsumerWidget {
   const ChecklistPage({required this.tripId, super.key});
@@ -120,7 +120,7 @@ class _ChecklistContent extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
             child: Text(
-              'No items in this category yet.',
+              context.l10n.checklist_emptyCategory,
               style: AppTypography.chipLabel,
             ),
           )
@@ -177,7 +177,7 @@ class _ChecklistHeader extends StatelessWidget {
             Expanded(
               child: Center(
                 child: Text(
-                  'CHECKLIST',
+                  context.l10n.home_checklist.toUpperCase(),
                   style: AppTypography.mono.copyWith(
                     color: AppColors.textTertiary,
                   ),
@@ -189,7 +189,7 @@ class _ChecklistHeader extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.base),
         Text(
-          'Pack for the trip',
+          context.l10n.checklist_title,
           style: AppTypography.screenTitle.copyWith(fontSize: 26),
         ),
       ],
@@ -229,7 +229,7 @@ class _ToggleableItemTile extends ConsumerWidget {
         onToggle: () {
           final wasChecked = item.isChecked;
           runToggleChecklistItem(ref: ref, tripId: tripId, item: item);
-          if (!wasChecked) showStarToast(context, '✦ Packed — nice');
+          if (!wasChecked) showStarToast(context, context.l10n.toast_packed);
         },
       ),
     );

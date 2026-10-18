@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -28,8 +29,8 @@ class AddQuestRow extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             dayNumber == null
-                ? '+ Add a quest'
-                : '+ Add a quest to Day $dayNumber',
+                ? context.l10n.plan_addQuest
+                : context.l10n.plan_addQuestToDay(dayNumber!),
             style: AppTypography.chipLabel.copyWith(
               color: AppColors.textMuted,
             ),

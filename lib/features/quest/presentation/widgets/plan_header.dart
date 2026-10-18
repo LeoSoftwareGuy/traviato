@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -40,7 +41,7 @@ class PlanHeader extends StatelessWidget {
             Expanded(
               child: Center(
                 child: Text(
-                  'THE PLAN',
+                  context.l10n.plan_eyebrow.toUpperCase(),
                   style: AppTypography.mono.copyWith(
                     color: AppColors.textTertiary,
                   ),
@@ -78,7 +79,7 @@ class PlanHeader extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.xs),
                 child: Text(
-                  'Edit',
+                  context.l10n.common_edit,
                   style: AppTypography.chipLabel.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
@@ -113,7 +114,11 @@ class PlanHeader extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          tripDateRangeMono(trip.startDate, trip.endDate),
+                          tripDateRangeMono(
+                            context.l10n,
+                            trip.startDate,
+                            trip.endDate,
+                          ),
                           style: AppTypography.mono.copyWith(
                             color: AppColors.primaryLight,
                           ),
@@ -143,7 +148,10 @@ class PlanHeader extends StatelessWidget {
                           borderRadius: AppRadius.pillRadius,
                         ),
                         child: Text(
-                          'Day $currentDayNumber of $totalDays',
+                          context.l10n.common_dayOf(
+                            currentDayNumber!,
+                            totalDays,
+                          ),
                           style: AppTypography.chipLabel.copyWith(
                             color: AppColors.textOnPhoto,
                             fontWeight: FontWeight.w600,

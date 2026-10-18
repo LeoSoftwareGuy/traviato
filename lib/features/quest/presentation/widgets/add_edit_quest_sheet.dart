@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -13,7 +14,6 @@ import '../../../trip/presentation/widgets/create_memory_field.dart';
 import '../../domain/entities/quest_entity.dart';
 import '../mutations/quest_mutations.dart';
 import 'quest_time_format.dart';
-import '../../../../core/l10n/context_l10n.dart';
 
 /// Add/edit bottom sheet for a quest, on the R-1 sheet chrome. If [quest]
 /// is provided, the sheet will be in edit mode.
@@ -74,7 +74,7 @@ class _AddEditQuestSheetState extends ConsumerState<AddEditQuestSheet> {
   }
 
   String? _validateTitle(String? value) {
-    if ((value ?? '').trim().isEmpty) return 'Give this plan a name.';
+    if ((value ?? '').trim().isEmpty) return context.l10n.plan_nameRequired;
     return null;
   }
 
@@ -176,19 +176,24 @@ class _AddEditQuestSheetState extends ConsumerState<AddEditQuestSheet> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                _isEditing ? 'Edit plan' : 'Add plan',
+                _isEditing
+                    ? context.l10n.plan_editTitle
+                    : context.l10n.plan_addTitle,
                 style: AppTypography.screenTitle.copyWith(fontSize: 21),
               ),
               const SizedBox(height: AppSpacing.lg),
               CreateMemoryField(
-                label: 'Name this plan',
+                label: context.l10n.plan_nameLabel,
                 controller: _title,
-                hintText: 'e.g. Pack the car',
+                hintText: context.l10n.plan_nameHint,
                 textInputAction: TextInputAction.next,
                 validator: _validateTitle,
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text('Time (optional)', style: AppTypography.fieldLabel),
+              Text(
+                context.l10n.plan_timeLabel,
+                style: AppTypography.fieldLabel,
+              ),
               const SizedBox(height: AppSpacing.sm),
               InkWell(
                 onTap: _pickTime,
@@ -214,7 +219,7 @@ class _AddEditQuestSheetState extends ConsumerState<AddEditQuestSheet> {
                       const SizedBox(width: AppSpacing.md),
                       Text(
                         _time == null
-                            ? 'No time set'
+                            ? context.l10n.plan_noTime
                             : formatQuestTime(
                                 Duration(
                                   hours: _time!.hour,
@@ -244,9 +249,9 @@ class _AddEditQuestSheetState extends ConsumerState<AddEditQuestSheet> {
               ),
               const SizedBox(height: AppSpacing.lg),
               CreateMemoryField(
-                label: 'Detail (optional)',
+                label: context.l10n.plan_detailLabel,
                 controller: _detail,
-                hintText: 'e.g. Cooler, blankets, hiking boots',
+                hintText: context.l10n.plan_detailHint,
                 textInputAction: TextInputAction.done,
               ),
               const SizedBox(height: AppSpacing.xl),
@@ -265,7 +270,7 @@ class _AddEditQuestSheetState extends ConsumerState<AddEditQuestSheet> {
                                 ),
                               )
                             : const Icon(Icons.delete_outline),
-                        label: const Text('Delete'),
+                        label: Text(context.l10n.common_delete),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.accentCoral,
                           side: const BorderSide(color: AppColors.accentCoral),
@@ -287,7 +292,7 @@ class _AddEditQuestSheetState extends ConsumerState<AddEditQuestSheet> {
                               height: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Save'),
+                          : Text(context.l10n.common_save),
                     ),
                   ),
                 ],

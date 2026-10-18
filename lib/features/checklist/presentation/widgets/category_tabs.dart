@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/checklist_category.dart';
+import 'checklist_category_label.dart';
 
 /// Horizontally scrollable category pills, each showing "checked/total" —
 /// same active/inactive treatment as `VibeChipGroup`.
@@ -81,7 +83,7 @@ class _CategoryTab extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              category.displayName,
+              checklistCategoryLabel(context.l10n, category),
               style: AppTypography.chipLabel.copyWith(
                 color: isSelected
                     ? AppColors.background

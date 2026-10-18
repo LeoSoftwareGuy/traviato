@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -138,7 +139,7 @@ class _EssentialBadge extends StatelessWidget {
         borderRadius: AppRadius.pillRadius,
       ),
       child: Text(
-        'Essential',
+        context.l10n.checklist_essential,
         style: AppTypography.caption.copyWith(color: AppColors.accentCoral),
       ),
     );

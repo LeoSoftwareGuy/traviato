@@ -561,4 +561,133 @@ class AppLocalizationsEn extends AppLocalizations {
   String trip_deleteConsequence(String photos, String notes) {
     return 'This removes $photos and $notes. Your earned stars are kept. It can\'t be undone.';
   }
+
+  @override
+  String get common_edit => 'Edit';
+
+  @override
+  String get common_delete => 'Delete';
+
+  @override
+  String get common_save => 'Save';
+
+  @override
+  String get toast_questDone => '+1 ✦ · quest done';
+
+  @override
+  String get toast_packed => '✦ Packed — nice';
+
+  @override
+  String get plan_eyebrow => 'The plan';
+
+  @override
+  String plan_daysTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days total',
+      one: '1 day total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plan_noDates =>
+      'Add dates to this memory to start planning your days.';
+
+  @override
+  String plan_dayN(int day) {
+    return 'Day $day';
+  }
+
+  @override
+  String plan_doneCount(int done, int total) {
+    return '$done of $total done';
+  }
+
+  @override
+  String get plan_addQuest => '+ Add a quest';
+
+  @override
+  String plan_addQuestToDay(int day) {
+    return '+ Add a quest to Day $day';
+  }
+
+  @override
+  String get plan_addTitle => 'Add plan';
+
+  @override
+  String get plan_editTitle => 'Edit plan';
+
+  @override
+  String get plan_nameLabel => 'Name this plan';
+
+  @override
+  String get plan_nameHint => 'e.g. Pack the car';
+
+  @override
+  String get plan_nameRequired => 'Give this plan a name.';
+
+  @override
+  String get plan_timeLabel => 'Time (optional)';
+
+  @override
+  String get plan_noTime => 'No time set';
+
+  @override
+  String get plan_detailLabel => 'Detail (optional)';
+
+  @override
+  String get plan_detailHint => 'e.g. Cooler, blankets, hiking boots';
+
+  @override
+  String get manage_title => 'Edit this memory';
+
+  @override
+  String get manage_nameLabel => 'Name';
+
+  @override
+  String get manage_rename => 'Rename';
+
+  @override
+  String get manage_shiftHint =>
+      'Tap a date to shift it a day forward, hold to shift it back — quests move with it.';
+
+  @override
+  String get manage_cover => 'Cover';
+
+  @override
+  String get manage_notSet => 'Not set';
+
+  @override
+  String get checklist_title => 'Pack for the trip';
+
+  @override
+  String get checklist_emptyCategory => 'No items in this category yet.';
+
+  @override
+  String get checklist_addHint => 'Add something of your own...';
+
+  @override
+  String get checklist_essential => 'Essential';
+
+  @override
+  String checklist_packedOf(int checked, int total) {
+    return '$checked of $total packed';
+  }
+
+  @override
+  String get checklist_catTravelEssentials => 'Travel essentials';
+
+  @override
+  String get checklist_catClothingShoes => 'Clothing & shoes';
+
+  @override
+  String get checklist_catGadgetsTech => 'Gadgets & tech';
+
+  @override
+  String get checklist_catToiletriesHealth => 'Toiletries & health';
+
+  @override
+  String get checklist_catNiceToHaves => 'Nice-to-haves';
 }

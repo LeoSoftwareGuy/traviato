@@ -561,4 +561,133 @@ class AppLocalizationsEt extends AppLocalizations {
   String trip_deleteConsequence(String photos, String notes) {
     return 'See eemaldab $photos ja $notes. Teenitud tähed jäävad alles. Seda ei saa tagasi võtta.';
   }
+
+  @override
+  String get common_edit => 'Muuda';
+
+  @override
+  String get common_delete => 'Kustuta';
+
+  @override
+  String get common_save => 'Salvesta';
+
+  @override
+  String get toast_questDone => '+1 ✦ · tegevus tehtud';
+
+  @override
+  String get toast_packed => '✦ Pakitud — tubli';
+
+  @override
+  String get plan_eyebrow => 'Plaan';
+
+  @override
+  String plan_daysTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'kokku $count päeva',
+      one: 'kokku $count päev',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plan_noDates =>
+      'Lisa mälestusele kuupäevad, et päevi planeerima hakata.';
+
+  @override
+  String plan_dayN(int day) {
+    return 'Päev $day';
+  }
+
+  @override
+  String plan_doneCount(int done, int total) {
+    return '$done/$total tehtud';
+  }
+
+  @override
+  String get plan_addQuest => '+ Lisa tegevus';
+
+  @override
+  String plan_addQuestToDay(int day) {
+    return '+ Lisa tegevus $day. päevale';
+  }
+
+  @override
+  String get plan_addTitle => 'Lisa tegevus';
+
+  @override
+  String get plan_editTitle => 'Muuda tegevust';
+
+  @override
+  String get plan_nameLabel => 'Nimi';
+
+  @override
+  String get plan_nameHint => 'nt Paki auto';
+
+  @override
+  String get plan_nameRequired => 'Anna tegevusele nimi.';
+
+  @override
+  String get plan_timeLabel => 'Aeg (valikuline)';
+
+  @override
+  String get plan_noTime => 'Aeg määramata';
+
+  @override
+  String get plan_detailLabel => 'Üksikasjad (valikuline)';
+
+  @override
+  String get plan_detailHint => 'nt Külmakast, tekid, matkasaapad';
+
+  @override
+  String get manage_title => 'Muuda mälestust';
+
+  @override
+  String get manage_nameLabel => 'Nimi';
+
+  @override
+  String get manage_rename => 'Nimeta ümber';
+
+  @override
+  String get manage_shiftHint =>
+      'Puuduta kuupäeva, et nihutada seda päeva võrra edasi, hoia all, et nihutada tagasi — tegevused liiguvad kaasa.';
+
+  @override
+  String get manage_cover => 'Kaanepilt';
+
+  @override
+  String get manage_notSet => 'Määramata';
+
+  @override
+  String get checklist_title => 'Paki reisiks';
+
+  @override
+  String get checklist_emptyCategory => 'Selles kategoorias pole veel midagi.';
+
+  @override
+  String get checklist_addHint => 'Lisa midagi omalt poolt…';
+
+  @override
+  String get checklist_essential => 'Oluline';
+
+  @override
+  String checklist_packedOf(int checked, int total) {
+    return '$checked/$total pakitud';
+  }
+
+  @override
+  String get checklist_catTravelEssentials => 'Reisi põhiasjad';
+
+  @override
+  String get checklist_catClothingShoes => 'Riided ja jalanõud';
+
+  @override
+  String get checklist_catGadgetsTech => 'Vidinad ja tehnika';
+
+  @override
+  String get checklist_catToiletriesHealth => 'Hügieen ja tervis';
+
+  @override
+  String get checklist_catNiceToHaves => 'Toredad lisad';
 }

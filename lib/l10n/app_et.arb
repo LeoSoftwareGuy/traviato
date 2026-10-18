@@ -591,5 +591,153 @@
   "trip_deleteConsequence": "See eemaldab {photos} ja {notes}. Teenitud tähed jäävad alles. Seda ei saa tagasi võtta.",
   "@trip_deleteConsequence": {
     "x-review": "pending"
+  },
+  "common_edit": "Muuda",
+  "@common_edit": {
+    "x-review": "pending"
+  },
+  "common_delete": "Kustuta",
+  "@common_delete": {
+    "x-review": "pending"
+  },
+  "common_save": "Salvesta",
+  "@common_save": {
+    "x-review": "pending"
+  },
+  "toast_questDone": "+1 ✦ · tegevus tehtud",
+  "@toast_questDone": {
+    "x-review": "pending"
+  },
+  "toast_packed": "✦ Pakitud — tubli",
+  "@toast_packed": {
+    "x-review": "pending"
+  },
+  "plan_eyebrow": "Plaan",
+  "@plan_eyebrow": {
+    "x-review": "pending"
+  },
+  "plan_daysTotal": "{count, plural, one{kokku {count} päev} other{kokku {count} päeva}}",
+  "@plan_daysTotal": {
+    "x-review": "pending"
+  },
+  "plan_noDates": "Lisa mälestusele kuupäevad, et päevi planeerima hakata.",
+  "@plan_noDates": {
+    "x-review": "pending"
+  },
+  "plan_dayN": "Päev {day}",
+  "@plan_dayN": {
+    "x-review": "pending"
+  },
+  "plan_doneCount": "{done}/{total} tehtud",
+  "@plan_doneCount": {
+    "x-review": "pending"
+  },
+  "plan_addQuest": "+ Lisa tegevus",
+  "@plan_addQuest": {
+    "x-review": "pending"
+  },
+  "plan_addQuestToDay": "+ Lisa tegevus {day}. päevale",
+  "@plan_addQuestToDay": {
+    "x-review": "pending"
+  },
+  "plan_addTitle": "Lisa tegevus",
+  "@plan_addTitle": {
+    "x-review": "pending"
+  },
+  "plan_editTitle": "Muuda tegevust",
+  "@plan_editTitle": {
+    "x-review": "pending"
+  },
+  "plan_nameLabel": "Nimi",
+  "@plan_nameLabel": {
+    "x-review": "pending"
+  },
+  "plan_nameHint": "nt Paki auto",
+  "@plan_nameHint": {
+    "x-review": "pending"
+  },
+  "plan_nameRequired": "Anna tegevusele nimi.",
+  "@plan_nameRequired": {
+    "x-review": "pending"
+  },
+  "plan_timeLabel": "Aeg (valikuline)",
+  "@plan_timeLabel": {
+    "x-review": "pending"
+  },
+  "plan_noTime": "Aeg määramata",
+  "@plan_noTime": {
+    "x-review": "pending"
+  },
+  "plan_detailLabel": "Üksikasjad (valikuline)",
+  "@plan_detailLabel": {
+    "x-review": "pending"
+  },
+  "plan_detailHint": "nt Külmakast, tekid, matkasaapad",
+  "@plan_detailHint": {
+    "x-review": "pending"
+  },
+  "manage_title": "Muuda mälestust",
+  "@manage_title": {
+    "x-review": "pending"
+  },
+  "manage_nameLabel": "Nimi",
+  "@manage_nameLabel": {
+    "x-review": "pending"
+  },
+  "manage_rename": "Nimeta ümber",
+  "@manage_rename": {
+    "x-review": "pending"
+  },
+  "manage_shiftHint": "Puuduta kuupäeva, et nihutada seda päeva võrra edasi, hoia all, et nihutada tagasi — tegevused liiguvad kaasa.",
+  "@manage_shiftHint": {
+    "x-review": "pending"
+  },
+  "manage_cover": "Kaanepilt",
+  "@manage_cover": {
+    "x-review": "pending"
+  },
+  "manage_notSet": "Määramata",
+  "@manage_notSet": {
+    "x-review": "pending"
+  },
+  "checklist_title": "Paki reisiks",
+  "@checklist_title": {
+    "x-review": "pending"
+  },
+  "checklist_emptyCategory": "Selles kategoorias pole veel midagi.",
+  "@checklist_emptyCategory": {
+    "x-review": "pending"
+  },
+  "checklist_addHint": "Lisa midagi omalt poolt…",
+  "@checklist_addHint": {
+    "x-review": "pending"
+  },
+  "checklist_essential": "Oluline",
+  "@checklist_essential": {
+    "x-review": "pending"
+  },
+  "checklist_packedOf": "{checked}/{total} pakitud",
+  "@checklist_packedOf": {
+    "x-review": "pending"
+  },
+  "checklist_catTravelEssentials": "Reisi põhiasjad",
+  "@checklist_catTravelEssentials": {
+    "x-review": "pending"
+  },
+  "checklist_catClothingShoes": "Riided ja jalanõud",
+  "@checklist_catClothingShoes": {
+    "x-review": "pending"
+  },
+  "checklist_catGadgetsTech": "Vidinad ja tehnika",
+  "@checklist_catGadgetsTech": {
+    "x-review": "pending"
+  },
+  "checklist_catToiletriesHealth": "Hügieen ja tervis",
+  "@checklist_catToiletriesHealth": {
+    "x-review": "pending"
+  },
+  "checklist_catNiceToHaves": "Toredad lisad",
+  "@checklist_catNiceToHaves": {
+    "x-review": "pending"
   }
 }
