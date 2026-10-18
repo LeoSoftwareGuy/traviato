@@ -1311,5 +1311,47 @@
   "wrapUp_generating1": "Reliving your trip…",
   "wrapUp_generating2": "Finding the best moments…",
   "wrapUp_generating3": "Writing the story…",
-  "wrapUp_generating4": "Almost ready…"
+  "wrapUp_generating4": "Almost ready…",
+  "settings_header": "Settings",
+  "@settings_header": {
+    "description": "Mono header on You, uppercased in code."
+  },
+  "settings_language": "Language",
+  "language_systemDefault": "System default",
+  "language_sheetSubtitle": "Changes apply right away.",
+  "language_footer": "Only the app's labels change. Your notes, titles and captions stay exactly as you wrote them.",
+  "language_toast": "Language: {name}",
+  "@language_toast": {
+    "description": "Toast after switching, shown in the NEW language; {name} is language_selfName.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "language_selfName": "English",
+  "@language_selfName": {
+    "description": "This language's own name as used mid-sentence (lowercase in ru/et)."
+  },
+  "language_name": "{lang, select, en{English} ru{Russian} et{Estonian} other{English}}",
+  "@language_name": {
+    "description": "A language's name in the UI language, under its native name in the sheet.",
+    "placeholders": {
+      "lang": {
+        "type": "String"
+      }
+    }
+  },
+  "language_systemFollows": "{platform, select, ios{Follows your iPhone} android{Follows your Android} other{Follows your device}} — {lang, select, en{English} ru{Russian} et{Estonian} other{English}} right now",
+  "@language_systemFollows": {
+    "description": "Subtitle under System default. platform: ios | android | other.",
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      },
+      "lang": {
+        "type": "String"
+      }
+    }
+  }
 }

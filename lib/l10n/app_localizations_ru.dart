@@ -1602,4 +1602,64 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get wrapUp_generating4 => 'Почти готово…';
+
+  @override
+  String get settings_header => 'Настройки';
+
+  @override
+  String get settings_language => 'Язык';
+
+  @override
+  String get language_systemDefault => 'Как в системе';
+
+  @override
+  String get language_sheetSubtitle => 'Изменения применяются сразу.';
+
+  @override
+  String get language_footer =>
+      'Меняются только надписи в приложении. Ваши заметки, названия и подписи остаются такими, как вы их написали.';
+
+  @override
+  String language_toast(String name) {
+    return 'Язык: $name';
+  }
+
+  @override
+  String get language_selfName => 'русский';
+
+  @override
+  String language_name(String lang) {
+    String _temp0 = intl.Intl.selectLogic(
+      lang,
+      {
+        'en': 'Английский',
+        'ru': 'Русский',
+        'et': 'Эстонский',
+        'other': 'Английский',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String language_systemFollows(String platform, String lang) {
+    String _temp0 = intl.Intl.selectLogic(
+      platform,
+      {
+        'ios': 'Как на iPhone',
+        'android': 'Как на Android',
+        'other': 'Как на устройстве',
+      },
+    );
+    String _temp1 = intl.Intl.selectLogic(
+      lang,
+      {
+        'en': 'английский',
+        'ru': 'русский',
+        'et': 'эстонский',
+        'other': 'английский',
+      },
+    );
+    return '$_temp0 — сейчас $_temp1';
+  }
 }

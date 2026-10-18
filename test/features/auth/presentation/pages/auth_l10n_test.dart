@@ -33,6 +33,7 @@ void main() {
       expect(find.text('Каждое воспоминание —'), findsOneWidget);
       expect(find.text('бережно сохранено.'), findsOneWidget);
       expect(find.text('Войти'), findsOneWidget);
+      expect(find.text('RU'), findsOneWidget); // language chip (1d)
       expect(find.text('Свадьбы'), findsOneWidget);
       expect(find.text('ДО'), findsOneWidget);
       expect(find.text('Семейная поездка в Токио'), findsOneWidget);

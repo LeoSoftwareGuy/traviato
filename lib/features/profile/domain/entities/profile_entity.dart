@@ -10,6 +10,7 @@ class ProfileEntity extends Equatable {
     this.bio,
     this.avatarUrl,
     required this.createdAt,
+    this.language,
   });
 
   final String id;
@@ -23,6 +24,16 @@ class ProfileEntity extends Equatable {
   final String? avatarUrl;
   final DateTime createdAt;
 
+  /// UI language code (`en`/`ru`/`et`); `null` = follow the device (#236).
+  final String? language;
+
   @override
-  List<Object?> get props => [id, username, bio, avatarUrl, createdAt];
+  List<Object?> get props => [
+    id,
+    username,
+    bio,
+    avatarUrl,
+    createdAt,
+    language,
+  ];
 }

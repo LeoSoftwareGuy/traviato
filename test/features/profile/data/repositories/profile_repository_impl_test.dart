@@ -27,6 +27,14 @@ class _FakeProfileRemoteDataSource implements ProfileRemoteDataSource {
     );
   }
 
+  String? lastLanguage = 'unset';
+
+  @override
+  Future<void> updateLanguage(String? code) async {
+    if (exception != null) throw exception!;
+    lastLanguage = code;
+  }
+
   @override
   Future<ProfileModel> updateProfile({
     String? username,
@@ -122,6 +130,30 @@ void main() {
         'bio': 'New bio',
         'avatarUrl': null,
       });
+    });
+  });
+
+  group('updateLanguage (#236)', () {
+    test('writes the code, including null for System default', () async {
+      final remote = _FakeProfileRemoteDataSource();
+      final repo = ProfileRepositoryImpl(remote: remote);
+
+      expect((await repo.updateLanguage('et')).isRight(), isTrue);
+      expect(remote.lastLanguage, 'et');
+      await repo.updateLanguage(null);
+      expect(remote.lastLanguage, isNull);
+    });
+
+    test('maps NetworkException to NetworkFailure', () async {
+      final repo = ProfileRepositoryImpl(
+        remote: _FakeProfileRemoteDataSource()
+          ..exception = const NetworkException(),
+      );
+      final result = await repo.updateLanguage('ru');
+      result.fold(
+        (failure) => expect(failure, const NetworkFailure()),
+        (_) => fail('expected Left'),
+      );
     });
   });
 

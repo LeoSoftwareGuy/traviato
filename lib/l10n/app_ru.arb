@@ -1591,5 +1591,41 @@
   "wrapUp_generating4": "Почти готово…",
   "@wrapUp_generating4": {
     "x-review": "pending"
+  },
+  "settings_header": "Настройки",
+  "@settings_header": {
+    "x-review": "pending"
+  },
+  "settings_language": "Язык",
+  "@settings_language": {
+    "x-review": "pending"
+  },
+  "language_systemDefault": "Как в системе",
+  "@language_systemDefault": {
+    "x-review": "pending"
+  },
+  "language_sheetSubtitle": "Изменения применяются сразу.",
+  "@language_sheetSubtitle": {
+    "x-review": "pending"
+  },
+  "language_footer": "Меняются только надписи в приложении. Ваши заметки, названия и подписи остаются такими, как вы их написали.",
+  "@language_footer": {
+    "x-review": "pending"
+  },
+  "language_toast": "Язык: {name}",
+  "@language_toast": {
+    "x-review": "pending"
+  },
+  "language_selfName": "русский",
+  "@language_selfName": {
+    "x-review": "pending"
+  },
+  "language_name": "{lang, select, en{Английский} ru{Русский} et{Эстонский} other{Английский}}",
+  "@language_name": {
+    "x-review": "pending"
+  },
+  "language_systemFollows": "{platform, select, ios{Как на iPhone} android{Как на Android} other{Как на устройстве}} — сейчас {lang, select, en{английский} ru{русский} et{эстонский} other{английский}}",
+  "@language_systemFollows": {
+    "x-review": "pending"
   }
 }

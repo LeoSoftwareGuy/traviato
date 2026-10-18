@@ -7,6 +7,7 @@ import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../settings/presentation/widgets/language_chip.dart';
 import '../widgets/guest_hero.dart';
 import '../widgets/how_it_works_section.dart';
 import '../widgets/sample_memories_scroller.dart';
@@ -106,26 +107,36 @@ class _GuestLandingNavBar extends StatelessWidget {
             Text(AppConstants.appName, style: AppTypography.headlineSerif),
           ],
         ),
+        // Language chip (design 1d) to the left of Log in, as one cluster.
         // Flexible so a longer label (ET "Logi sisse") wraps instead of
         // overflowing; UI labels never truncate (#220).
         Flexible(
-          child: InkWell(
-            onTap: onLogin,
-            borderRadius: AppRadius.badgeRadius,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.xs,
-              ),
-              child: Text(
-                context.l10n.auth_logIn,
-                textAlign: TextAlign.end,
-                style: AppTypography.chipLabel.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w600,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const LanguageChip(),
+              const SizedBox(width: 6),
+              Flexible(
+                child: InkWell(
+                  onTap: onLogin,
+                  borderRadius: AppRadius.badgeRadius,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs,
+                    ),
+                    child: Text(
+                      context.l10n.auth_logIn,
+                      textAlign: TextAlign.end,
+                      style: AppTypography.chipLabel.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ],

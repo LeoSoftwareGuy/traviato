@@ -1591,5 +1591,41 @@
   "wrapUp_generating4": "Peaaegu valmis…",
   "@wrapUp_generating4": {
     "x-review": "pending"
+  },
+  "settings_header": "Seaded",
+  "@settings_header": {
+    "x-review": "pending"
+  },
+  "settings_language": "Keel",
+  "@settings_language": {
+    "x-review": "pending"
+  },
+  "language_systemDefault": "Süsteemi vaikimisi",
+  "@language_systemDefault": {
+    "x-review": "pending"
+  },
+  "language_sheetSubtitle": "Muudatused rakenduvad kohe.",
+  "@language_sheetSubtitle": {
+    "x-review": "pending"
+  },
+  "language_footer": "Muutuvad ainult rakenduse tekstid. Sinu märkmed, pealkirjad ja allkirjad jäävad täpselt nii, nagu sa need kirjutasid.",
+  "@language_footer": {
+    "x-review": "pending"
+  },
+  "language_toast": "Keel: {name}",
+  "@language_toast": {
+    "x-review": "pending"
+  },
+  "language_selfName": "eesti",
+  "@language_selfName": {
+    "x-review": "pending"
+  },
+  "language_name": "{lang, select, en{Inglise} ru{Vene} et{Eesti} other{Inglise}}",
+  "@language_name": {
+    "x-review": "pending"
+  },
+  "language_systemFollows": "{platform, select, ios{Nagu iPhone'is} android{Nagu Androidis} other{Nagu seadmes}} — praegu {lang, select, en{inglise} ru{vene} et{eesti} other{inglise}}",
+  "@language_systemFollows": {
+    "x-review": "pending"
   }
 }

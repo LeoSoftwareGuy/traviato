@@ -83,6 +83,25 @@ class SupabaseProfileRemoteDataSource implements ProfileRemoteDataSource {
   }
 
   @override
+  Future<void> updateLanguage(String? code) async {
+    final userId = _requireUserId();
+    try {
+      await _client
+          .from(Tables.profiles)
+          .update({'language': code})
+          .eq('id', userId);
+    } on AuthenticationException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw _mapPostgrestException(e);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
   Future<List<AchievementTemplateModel>> getAchievementTemplates() async {
     _requireUserId();
     try {

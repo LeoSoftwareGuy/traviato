@@ -1559,4 +1559,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wrapUp_generating4 => 'Almost ready…';
+
+  @override
+  String get settings_header => 'Settings';
+
+  @override
+  String get settings_language => 'Language';
+
+  @override
+  String get language_systemDefault => 'System default';
+
+  @override
+  String get language_sheetSubtitle => 'Changes apply right away.';
+
+  @override
+  String get language_footer =>
+      'Only the app\'s labels change. Your notes, titles and captions stay exactly as you wrote them.';
+
+  @override
+  String language_toast(String name) {
+    return 'Language: $name';
+  }
+
+  @override
+  String get language_selfName => 'English';
+
+  @override
+  String language_name(String lang) {
+    String _temp0 = intl.Intl.selectLogic(
+      lang,
+      {
+        'en': 'English',
+        'ru': 'Russian',
+        'et': 'Estonian',
+        'other': 'English',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String language_systemFollows(String platform, String lang) {
+    String _temp0 = intl.Intl.selectLogic(
+      platform,
+      {
+        'ios': 'Follows your iPhone',
+        'android': 'Follows your Android',
+        'other': 'Follows your device',
+      },
+    );
+    String _temp1 = intl.Intl.selectLogic(
+      lang,
+      {
+        'en': 'English',
+        'ru': 'Russian',
+        'et': 'Estonian',
+        'other': 'English',
+      },
+    );
+    return '$_temp0 — $_temp1 right now';
+  }
 }

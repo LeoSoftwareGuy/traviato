@@ -12,6 +12,10 @@ import 'core/l10n/context_l10n.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/widgets/auth_link_failure_listener.dart';
 import 'features/notifications/presentation/controllers/bonus_notifications_lifecycle_controller.dart';
+import 'features/settings/data/app_language_prefs.dart';
+import 'features/settings/presentation/controllers/app_language_controller.dart';
+import 'features/settings/presentation/providers/settings_providers.dart';
+import 'features/settings/presentation/widgets/locale_fade.dart';
 import 'features/subscription/data/datasources/revenuecat_api_key.dart';
 import 'features/subscription/presentation/controllers/subscription_identity_lifecycle_controller.dart';
 import 'features/subscription/presentation/providers/subscription_providers.dart';
@@ -33,6 +37,9 @@ Future<void> main() async {
     ),
   );
   final revenueCatConfigured = await _configureRevenueCat();
+  // Read before runApp so the first frame is already in the chosen
+  // language (#236).
+  final initialLanguage = await const AppLanguagePrefs().read();
   // Disable Riverpod's silent auto-retry; retries are handled explicitly with
   // Retry buttons (guidelines doc 02).
   runApp(
@@ -40,6 +47,7 @@ Future<void> main() async {
       retry: (_, _) => null,
       overrides: [
         revenueCatConfiguredProvider.overrideWithValue(revenueCatConfigured),
+        initialAppLanguageProvider.overrideWithValue(initialLanguage),
       ],
       child: const TraviatoApp(),
     ),
@@ -80,15 +88,22 @@ class TraviatoApp extends ConsumerWidget {
     // keepAlive — keeps RevenueCat's identified user in step with the
     // signed-in Supabase account for the whole session (issue #138).
     ref.watch(subscriptionIdentityLifecycleControllerProvider);
+    // keepAlive — mirrors the language choice to/from the profile on
+    // sign-in (#236).
+    ref.watch(languageProfileSyncControllerProvider);
+    final locale = ref.watch(appLocaleProvider);
     return MaterialApp.router(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      locale: locale,
       routerConfig: ref.watch(routerProvider),
-      builder: (context, child) =>
-          AuthLinkFailureListener(child: child ?? const SizedBox.shrink()),
+      builder: (context, child) => LocaleFade(
+        locale: locale,
+        child: AuthLinkFailureListener(child: child ?? const SizedBox.shrink()),
+      ),
     );
   }
 }

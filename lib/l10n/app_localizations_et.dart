@@ -1563,4 +1563,64 @@ class AppLocalizationsEt extends AppLocalizations {
 
   @override
   String get wrapUp_generating4 => 'Peaaegu valmis…';
+
+  @override
+  String get settings_header => 'Seaded';
+
+  @override
+  String get settings_language => 'Keel';
+
+  @override
+  String get language_systemDefault => 'Süsteemi vaikimisi';
+
+  @override
+  String get language_sheetSubtitle => 'Muudatused rakenduvad kohe.';
+
+  @override
+  String get language_footer =>
+      'Muutuvad ainult rakenduse tekstid. Sinu märkmed, pealkirjad ja allkirjad jäävad täpselt nii, nagu sa need kirjutasid.';
+
+  @override
+  String language_toast(String name) {
+    return 'Keel: $name';
+  }
+
+  @override
+  String get language_selfName => 'eesti';
+
+  @override
+  String language_name(String lang) {
+    String _temp0 = intl.Intl.selectLogic(
+      lang,
+      {
+        'en': 'Inglise',
+        'ru': 'Vene',
+        'et': 'Eesti',
+        'other': 'Inglise',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String language_systemFollows(String platform, String lang) {
+    String _temp0 = intl.Intl.selectLogic(
+      platform,
+      {
+        'ios': 'Nagu iPhone\'is',
+        'android': 'Nagu Androidis',
+        'other': 'Nagu seadmes',
+      },
+    );
+    String _temp1 = intl.Intl.selectLogic(
+      lang,
+      {
+        'en': 'inglise',
+        'ru': 'vene',
+        'et': 'eesti',
+        'other': 'inglise',
+      },
+    );
+    return '$_temp0 — praegu $_temp1';
+  }
 }
