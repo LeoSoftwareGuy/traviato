@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
+import '../../../../core/l10n/inline_placeholder.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
-final _weekdayFormat = DateFormat('EEE');
-final _monthDayFormat = DateFormat('d MMM');
-
-/// "MON · 24 AUG" — today's date as the header's mono eyebrow.
-String homeDateEyebrow() {
+/// "MON · 24 AUG" — today's date as the header's mono eyebrow, in the UI
+/// language: "ПН · 24 АВГ.", "E · 24. AUG" (#220).
+String homeDateEyebrow(AppLocalizations l10n) {
   final now = DateTime.now();
-  return '${_weekdayFormat.format(now)} · ${_monthDayFormat.format(now)}'
+  final locale = l10n.localeName;
+  final dayMonth = locale == 'en'
+      ? DateFormat('d MMM', locale)
+      : DateFormat.MMMd(locale);
+  return '${DateFormat('EEE', locale).format(now)} · ${dayMonth.format(now)}'
       .toUpperCase();
 }
 
@@ -39,6 +43,7 @@ class HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final greeting = splitAroundPlaceholder(context.l10n.home_greeting);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -47,7 +52,7 @@ class HomeHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                homeDateEyebrow(),
+                homeDateEyebrow(context.l10n),
                 style: AppTypography.mono.copyWith(color: AppColors.primary),
               ),
               const SizedBox(height: AppSpacing.xs),
@@ -56,11 +61,12 @@ class HomeHeader extends StatelessWidget {
                 TextSpan(
                   style: AppTypography.heroHeadline.copyWith(fontSize: 26),
                   children: [
-                    const TextSpan(text: 'Hello, '),
+                    TextSpan(text: greeting.before),
                     TextSpan(
                       text: username,
                       style: const TextStyle(color: AppColors.primary),
                     ),
+                    TextSpan(text: greeting.after),
                   ],
                 ),
               ),

@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
+import '../../../../core/l10n/inline_placeholder.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -46,12 +48,12 @@ class _CreateMemoryPageState extends ConsumerState<CreateMemoryPage> {
   }
 
   String? _validateName(String? value) {
-    if ((value ?? '').trim().isEmpty) return 'Give this memory a name.';
+    if ((value ?? '').trim().isEmpty) return context.l10n.trip_nameRequired;
     return null;
   }
 
   bool _validateDates() {
-    final error = validateMemoryDates(_startDate, _endDate);
+    final error = validateMemoryDates(context.l10n, _startDate, _endDate);
     setState(() => _dateError = error);
     return error == null;
   }
@@ -129,11 +131,11 @@ class _CreateMemoryPageState extends ConsumerState<CreateMemoryPage> {
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 Text(
-                  'What deserves',
+                  context.l10n.trip_createTitleLead,
                   style: AppTypography.screenTitle.copyWith(fontSize: 30),
                 ),
                 Text(
-                  'a memory?',
+                  context.l10n.trip_createTitleEmphasis,
                   style: AppTypography.screenTitle.copyWith(
                     fontSize: 30,
                     fontStyle: FontStyle.italic,
@@ -148,9 +150,9 @@ class _CreateMemoryPageState extends ConsumerState<CreateMemoryPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CreateMemoryField(
-                        label: 'Name it',
+                        label: context.l10n.trip_nameLabel,
                         controller: _name,
-                        hintText: 'e.g. Summer in Tokyo',
+                        hintText: context.l10n.trip_nameHint,
                         valueStyle: AppTypography.screenTitle.copyWith(
                           fontSize: 19,
                         ),
@@ -159,9 +161,9 @@ class _CreateMemoryPageState extends ConsumerState<CreateMemoryPage> {
                       ),
                       const SizedBox(height: AppSpacing.md),
                       CreateMemoryField(
-                        label: 'Where did it happen?',
+                        label: context.l10n.trip_whereLabel,
                         controller: _destination,
-                        hintText: 'Where did this happen?',
+                        hintText: context.l10n.trip_whereHint,
                         textInputAction: TextInputAction.done,
                         trailing: const Icon(
                           Icons.my_location,
@@ -208,7 +210,7 @@ class _CreateMemoryPageState extends ConsumerState<CreateMemoryPage> {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Text('Create memory'),
+                              : Text(context.l10n.trip_createCta),
                         ),
                       ),
                     ],
@@ -248,13 +250,16 @@ class _Header extends StatelessWidget {
                   color: AppColors.textSecondary,
                 ),
                 const SizedBox(width: AppSpacing.xs),
-                Text('Cancel', style: AppTypography.chipLabel),
+                Text(
+                  context.l10n.common_cancel,
+                  style: AppTypography.chipLabel,
+                ),
               ],
             ),
           ),
         ),
         Text(
-          'NEW MEMORY',
+          context.l10n.trip_newMemory.toUpperCase(),
           style: AppTypography.mono.copyWith(color: AppColors.textTertiary),
         ),
       ],
@@ -267,6 +272,8 @@ class _RewardNudgeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final stars = context.l10n.common_starCount(10);
+    final nudge = splitAroundPlaceholder(context.l10n.trip_rewardNudge);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -300,19 +307,15 @@ class _RewardNudgeCard extends StatelessWidget {
                   color: AppColors.textSecondary,
                 ),
                 children: [
-                  const TextSpan(text: 'Creating this earns '),
+                  TextSpan(text: nudge.before),
                   TextSpan(
-                    text: '10 stars',
+                    text: stars,
                     style: AppTypography.chipLabel.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const TextSpan(
-                    text:
-                        ". Log a note each day and you'll unlock "
-                        'Storyteller.',
-                  ),
+                  TextSpan(text: nudge.after),
                 ],
               ),
             ),

@@ -1,6 +1,6 @@
-import '../../../../core/utils/pluralize.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -16,26 +16,27 @@ class HomeStatsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Row(
       children: [
         Expanded(
           child: _StatCard(
             value: stats.memories,
-            label: pluralize(stats.memories, 'MEMORY', 'MEMORIES'),
+            label: l10n.home_statMemories(stats.memories).toUpperCase(),
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: _StatCard(
             value: stats.places,
-            label: pluralize(stats.places, 'PLACE', 'PLACES'),
+            label: l10n.home_statPlaces(stats.places).toUpperCase(),
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: _StatCard(
             value: stats.days,
-            label: pluralize(stats.days, 'DAY', 'DAYS'),
+            label: l10n.home_statDays(stats.days).toUpperCase(),
           ),
         ),
       ],

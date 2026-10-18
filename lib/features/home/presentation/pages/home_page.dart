@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -25,7 +26,6 @@ import '../widgets/home_header.dart';
 import '../widgets/home_stats_bar.dart';
 import '../widgets/memories_grid_section.dart';
 import '../widgets/upcoming_hero_card.dart';
-import '../../../../core/l10n/context_l10n.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -52,7 +52,7 @@ class HomePage extends ConsumerWidget {
             onRetry: () => ref.invalidate(homeControllerProvider),
           ),
           data: (state) => _HomeContent(
-            username: username ?? 'traveler',
+            username: username ?? context.l10n.home_defaultName,
             stars: stats.stars,
             memories: stats.memories,
             places: stats.places,
@@ -183,7 +183,7 @@ class _HomeContent extends ConsumerWidget {
           if (hero != null) ...[
             const SizedBox(height: AppSpacing.xl),
             Text(
-              'HAPPENING NOW',
+              context.l10n.home_happeningNow.toUpperCase(),
               style: AppTypography.mono.copyWith(
                 color: AppColors.textTertiary,
               ),
@@ -239,21 +239,20 @@ class _NoMemoriesYet extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.base),
         Text(
-          'No memories yet',
+          context.l10n.home_emptyTitle,
           style: AppTypography.screenTitle.copyWith(fontSize: 20),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Start your first memory and watch it become a journal you keep '
-          'forever.',
+          context.l10n.home_emptyBody,
           textAlign: TextAlign.center,
           style: AppTypography.chipLabel.copyWith(color: AppColors.textMuted),
         ),
         const SizedBox(height: AppSpacing.lg),
         ElevatedButton(
           onPressed: onCreateTap,
-          child: const Text('Create your first memory'),
+          child: Text(context.l10n.home_emptyCta),
         ),
       ],
     );

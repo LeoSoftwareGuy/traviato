@@ -189,5 +189,218 @@
   "guest_sampleAnniversary": "Our anniversary",
   "guest_sampleGraduation": "Graduation",
   "guest_sampleFood": "A food lover's weekend",
-  "guest_sampleBucketList": "A bucket-list moment"
+  "guest_sampleBucketList": "A bucket-list moment",
+  "common_today": "Today",
+  "common_dayOf": "Day {day} of {total}",
+  "@common_dayOf": {
+    "description": "Day pager / hero pill. ET abbreviates per spec.",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "common_starCount": "{count, plural, =1{1 star} other{{count} stars}}",
+  "@common_starCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "home_defaultName": "traveler",
+  "@home_defaultName": {
+    "description": "Greeting name when the profile has no username."
+  },
+  "home_greeting": "Hello, {name}",
+  "@home_greeting": {
+    "description": "{name} is shown in the accent colour.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "home_happeningNow": "Happening now",
+  "@home_happeningNow": {
+    "description": "Mono eyebrow, uppercased in code. @maxLength 26"
+  },
+  "home_comingUp": "Coming up",
+  "@home_comingUp": {
+    "description": "Mono eyebrow, uppercased in code. @maxLength 26"
+  },
+  "home_keptForever": "Kept forever",
+  "@home_keptForever": {
+    "description": "Mono eyebrow and badge."
+  },
+  "home_recap": "Recap",
+  "@home_recap": {
+    "description": "Badge on a finished memory without a kept wrap-up."
+  },
+  "home_emptyTitle": "No memories yet",
+  "home_emptyBody": "Start your first memory and watch it become a journal you keep forever.",
+  "home_emptyCta": "Create your first memory",
+  "home_keptForeverEmpty": "No memories logged yet — they show up here once a trip wraps.",
+  "home_statMemories": "{count, plural, =1{memory} other{memories}}",
+  "@home_statMemories": {
+    "description": "Stat label under the number, uppercased in code.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "home_statPlaces": "{count, plural, =1{place} other{places}}",
+  "@home_statPlaces": {
+    "description": "Stat label under the number, uppercased in code.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "home_statDays": "{count, plural, =1{day} other{days}}",
+  "@home_statDays": {
+    "description": "Stat label under the number, uppercased in code.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "home_countdownToday": "today",
+  "@home_countdownToday": {
+    "description": "Countdown pill on an upcoming memory."
+  },
+  "home_countdownInDays": "in {days}d",
+  "@home_countdownInDays": {
+    "description": "Countdown pill on an upcoming memory.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "home_datesTbd": "Dates TBD",
+  "home_questsPlanned": "{count, plural, =1{1 quest planned} other{{count} quests planned}}",
+  "@home_questsPlanned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "home_nothingPlanned": "Nothing planned yet",
+  "home_planArrow": "Plan →",
+  "home_actionPlan": "Plan",
+  "@home_actionPlan": {
+    "description": "Hero action button. @maxLength 10"
+  },
+  "home_actionExpenses": "Expenses",
+  "@home_actionExpenses": {
+    "description": "Hero action button. @maxLength 10"
+  },
+  "home_actionJournal": "Journal",
+  "@home_actionJournal": {
+    "description": "Hero action button. @maxLength 10"
+  },
+  "home_checklist": "Checklist",
+  "home_packedProgress": "{packed} of {total} packed →",
+  "@home_packedProgress": {
+    "placeholders": {
+      "packed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "vibe_romantic": "Romantic",
+  "vibe_adventure": "Adventure",
+  "vibe_cultural": "Cultural",
+  "vibe_chill": "Chill",
+  "vibe_foodie": "Foodie",
+  "vibe_roadTrip": "Road trip",
+  "vibe_wellness": "Wellness",
+  "vibe_wildlife": "Wildlife",
+  "vibe_nightlife": "Nightlife",
+  "vibe_photography": "Photography",
+  "trip_newMemory": "New memory",
+  "@trip_newMemory": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "trip_createTitleLead": "What deserves",
+  "trip_createTitleEmphasis": "a memory?",
+  "trip_nameLabel": "Name it",
+  "trip_nameHint": "e.g. Summer in Tokyo",
+  "trip_nameRequired": "Give this memory a name.",
+  "trip_whereLabel": "Where did it happen?",
+  "trip_whereHint": "Where did this happen?",
+  "trip_startsLabel": "Starts",
+  "trip_endsLabel": "Ends",
+  "trip_endBeforeStart": "End date can't be before the start date.",
+  "trip_vibeLabel": "The vibe",
+  "trip_vibesChosen": "{count} chosen",
+  "@trip_vibesChosen": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trip_createCta": "Create memory",
+  "trip_rewardNudge": "Creating this earns {stars}. Log a note each day and you'll unlock Storyteller.",
+  "@trip_rewardNudge": {
+    "description": "{stars} is common_starCount(10), shown highlighted.",
+    "placeholders": {
+      "stars": {
+        "type": "String"
+      }
+    }
+  },
+  "trip_coverChoose": "Choose a cover",
+  "trip_coverChange": "Change cover",
+  "trip_coverAutoHint": "or we'll pick one that suits the vibe",
+  "trip_coverYours": "Your cover",
+  "@trip_coverYours": {
+    "description": "Mono tag, uppercased in code."
+  },
+  "trip_coverSuggested": "Suggested: {vibe}",
+  "@trip_coverSuggested": {
+    "description": "Mono tag, uppercased in code.",
+    "placeholders": {
+      "vibe": {
+        "type": "String"
+      }
+    }
+  },
+  "trip_coverUploadTitle": "Upload a cover photo",
+  "trip_takePhoto": "Take a photo",
+  "trip_chooseFromGallery": "Choose from gallery",
+  "trip_deleteTitle": "Delete this memory",
+  "trip_deleteConfirm": "Yes — delete it forever",
+  "trip_noteDays": "{count, plural, =1{1 day of notes} other{{count} days of notes}}",
+  "@trip_noteDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trip_deleteConsequence": "This removes {photos} and {notes}. Your earned stars are kept. It can't be undone.",
+  "@trip_deleteConsequence": {
+    "description": "{photos} is common_photoCount, {notes} is trip_noteDays.",
+    "placeholders": {
+      "photos": {
+        "type": "String"
+      },
+      "notes": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -303,4 +303,262 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guest_sampleBucketList => 'A bucket-list moment';
+
+  @override
+  String get common_today => 'Today';
+
+  @override
+  String common_dayOf(int day, int total) {
+    return 'Day $day of $total';
+  }
+
+  @override
+  String common_starCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stars',
+      one: '1 star',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get home_defaultName => 'traveler';
+
+  @override
+  String home_greeting(String name) {
+    return 'Hello, $name';
+  }
+
+  @override
+  String get home_happeningNow => 'Happening now';
+
+  @override
+  String get home_comingUp => 'Coming up';
+
+  @override
+  String get home_keptForever => 'Kept forever';
+
+  @override
+  String get home_recap => 'Recap';
+
+  @override
+  String get home_emptyTitle => 'No memories yet';
+
+  @override
+  String get home_emptyBody =>
+      'Start your first memory and watch it become a journal you keep forever.';
+
+  @override
+  String get home_emptyCta => 'Create your first memory';
+
+  @override
+  String get home_keptForeverEmpty =>
+      'No memories logged yet — they show up here once a trip wraps.';
+
+  @override
+  String home_statMemories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'memories',
+      one: 'memory',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String home_statPlaces(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'places',
+      one: 'place',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String home_statDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'days',
+      one: 'day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get home_countdownToday => 'today';
+
+  @override
+  String home_countdownInDays(int days) {
+    return 'in ${days}d';
+  }
+
+  @override
+  String get home_datesTbd => 'Dates TBD';
+
+  @override
+  String home_questsPlanned(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count quests planned',
+      one: '1 quest planned',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get home_nothingPlanned => 'Nothing planned yet';
+
+  @override
+  String get home_planArrow => 'Plan →';
+
+  @override
+  String get home_actionPlan => 'Plan';
+
+  @override
+  String get home_actionExpenses => 'Expenses';
+
+  @override
+  String get home_actionJournal => 'Journal';
+
+  @override
+  String get home_checklist => 'Checklist';
+
+  @override
+  String home_packedProgress(int packed, int total) {
+    return '$packed of $total packed →';
+  }
+
+  @override
+  String get vibe_romantic => 'Romantic';
+
+  @override
+  String get vibe_adventure => 'Adventure';
+
+  @override
+  String get vibe_cultural => 'Cultural';
+
+  @override
+  String get vibe_chill => 'Chill';
+
+  @override
+  String get vibe_foodie => 'Foodie';
+
+  @override
+  String get vibe_roadTrip => 'Road trip';
+
+  @override
+  String get vibe_wellness => 'Wellness';
+
+  @override
+  String get vibe_wildlife => 'Wildlife';
+
+  @override
+  String get vibe_nightlife => 'Nightlife';
+
+  @override
+  String get vibe_photography => 'Photography';
+
+  @override
+  String get trip_newMemory => 'New memory';
+
+  @override
+  String get trip_createTitleLead => 'What deserves';
+
+  @override
+  String get trip_createTitleEmphasis => 'a memory?';
+
+  @override
+  String get trip_nameLabel => 'Name it';
+
+  @override
+  String get trip_nameHint => 'e.g. Summer in Tokyo';
+
+  @override
+  String get trip_nameRequired => 'Give this memory a name.';
+
+  @override
+  String get trip_whereLabel => 'Where did it happen?';
+
+  @override
+  String get trip_whereHint => 'Where did this happen?';
+
+  @override
+  String get trip_startsLabel => 'Starts';
+
+  @override
+  String get trip_endsLabel => 'Ends';
+
+  @override
+  String get trip_endBeforeStart => 'End date can\'t be before the start date.';
+
+  @override
+  String get trip_vibeLabel => 'The vibe';
+
+  @override
+  String trip_vibesChosen(int count) {
+    return '$count chosen';
+  }
+
+  @override
+  String get trip_createCta => 'Create memory';
+
+  @override
+  String trip_rewardNudge(String stars) {
+    return 'Creating this earns $stars. Log a note each day and you\'ll unlock Storyteller.';
+  }
+
+  @override
+  String get trip_coverChoose => 'Choose a cover';
+
+  @override
+  String get trip_coverChange => 'Change cover';
+
+  @override
+  String get trip_coverAutoHint => 'or we\'ll pick one that suits the vibe';
+
+  @override
+  String get trip_coverYours => 'Your cover';
+
+  @override
+  String trip_coverSuggested(String vibe) {
+    return 'Suggested: $vibe';
+  }
+
+  @override
+  String get trip_coverUploadTitle => 'Upload a cover photo';
+
+  @override
+  String get trip_takePhoto => 'Take a photo';
+
+  @override
+  String get trip_chooseFromGallery => 'Choose from gallery';
+
+  @override
+  String get trip_deleteTitle => 'Delete this memory';
+
+  @override
+  String get trip_deleteConfirm => 'Yes — delete it forever';
+
+  @override
+  String trip_noteDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days of notes',
+      one: '1 day of notes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trip_deleteConsequence(String photos, String notes) {
+    return 'This removes $photos and $notes. Your earned stars are kept. It can\'t be undone.';
+  }
 }

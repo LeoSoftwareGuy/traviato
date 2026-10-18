@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -10,6 +11,7 @@ import '../../../../core/widgets/photo_scrim.dart';
 import '../../../checklist/presentation/providers/checklist_providers.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
 import '../../../trip/presentation/widgets/trip_cover_image.dart';
+import '../../../trip/presentation/widgets/vibe_label.dart';
 import 'trip_card_pill.dart';
 import 'trip_date_format.dart';
 
@@ -98,12 +100,15 @@ class UpcomingHeroCard extends ConsumerWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: _ActionButton(label: 'Plan', onTap: onPlanTap),
+                        child: _ActionButton(
+                          label: context.l10n.home_actionPlan,
+                          onTap: onPlanTap,
+                        ),
                       ),
                       const SizedBox(width: 7),
                       Expanded(
                         child: _ActionButton(
-                          label: 'Expenses',
+                          label: context.l10n.home_actionExpenses,
                           onTap: onAddExpenseTap,
                         ),
                       ),
@@ -114,7 +119,7 @@ class UpcomingHeroCard extends ConsumerWidget {
                         // (functionality.md § 3). An upcoming memory shows
                         // all three at rest alike (#177).
                         child: _ActionButton(
-                          label: 'Journal',
+                          label: context.l10n.home_actionJournal,
                           onTap: onJournalTap,
                           primary: trip.status == TripStatus.current,
                         ),
@@ -149,12 +154,16 @@ class _TopBadgeRow extends StatelessWidget {
         trip.status == TripStatus.current &&
             start != null &&
             trip.endDate != null
-        ? tripDayOfLabel(start, trip.endDate!)
+        ? tripDayOfLabel(context.l10n, start, trip.endDate!)
         : start != null
-        ? tripCountdownLabel(start)
+        ? tripCountdownLabel(context.l10n, start)
         : null;
 
-    return Row(
+    // Wrap, not Row: a long day pill + vibe ("День 2 из 5" +
+    // "Автопутешествие") moves to a second line instead of overflowing (#220).
+    return Wrap(
+      spacing: AppSpacing.xs,
+      runSpacing: AppSpacing.xs,
       children: [
         if (dayLabel != null)
           TripCardPill(
@@ -168,11 +177,10 @@ class _TopBadgeRow extends StatelessWidget {
             ),
           ),
         if (trip.vibes.isNotEmpty) ...[
-          const SizedBox(width: AppSpacing.xs),
           TripCardPill(
             color: AppColors.tint(AppColors.background, .62),
             child: Text(
-              trip.vibes.first,
+              vibeLabel(context.l10n, trip.vibes.first),
               style: AppTypography.chipLabel.copyWith(
                 color: AppColors.textOnPhoto,
               ),
@@ -193,7 +201,7 @@ class _SubtitleRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final parts = [
       if (trip.destination != null) trip.destination!,
-      tripDateRangeLabel(trip.startDate, trip.endDate),
+      tripDateRangeLabel(context.l10n, trip.startDate, trip.endDate),
     ];
     return Text(
       parts.join(' · '),
@@ -300,20 +308,26 @@ class _ChecklistRow extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Checklist',
+                    context.l10n.home_checklist,
                     style: AppTypography.bodyEmphasis.copyWith(
                       color: AppColors.textOnPhoto,
                     ),
                   ),
-                  Text(
-                    '$packed of $total packed →',
-                    // White rather than the accent color (#111) — the
-                    // gradient fill can sit under either end of this text
-                    // depending on progress, and white stays legible
-                    // against both the fill and the resting background.
-                    style: AppTypography.chipLabel.copyWith(
-                      color: AppColors.textOnPhoto,
-                      fontWeight: FontWeight.w600,
+                  const SizedBox(width: AppSpacing.sm),
+                  // Flexible: the progress line wraps rather than overflows
+                  // when the translation runs long (#220).
+                  Flexible(
+                    child: Text(
+                      context.l10n.home_packedProgress(packed, total),
+                      textAlign: TextAlign.end,
+                      // White rather than the accent color (#111) — the
+                      // gradient fill can sit under either end of this text
+                      // depending on progress, and white stays legible
+                      // against both the fill and the resting background.
+                      style: AppTypography.chipLabel.copyWith(
+                        color: AppColors.textOnPhoto,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],

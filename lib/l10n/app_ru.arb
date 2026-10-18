@@ -335,5 +335,261 @@
   "guest_sampleBucketList": "Мечта, ставшая явью",
   "@guest_sampleBucketList": {
     "x-review": "pending"
+  },
+  "common_today": "Сегодня",
+  "@common_today": {
+    "x-review": "pending"
+  },
+  "common_dayOf": "День {day} из {total}",
+  "@common_dayOf": {
+    "x-review": "pending"
+  },
+  "common_starCount": "{count, plural, one{{count} звезда} few{{count} звезды} many{{count} звёзд} other{{count} звезды}}",
+  "@common_starCount": {
+    "x-review": "pending"
+  },
+  "home_defaultName": "путешественник",
+  "@home_defaultName": {
+    "x-review": "pending"
+  },
+  "home_greeting": "Привет, {name}",
+  "@home_greeting": {
+    "x-review": "pending"
+  },
+  "home_happeningNow": "Сейчас",
+  "@home_happeningNow": {
+    "x-review": "pending"
+  },
+  "home_comingUp": "Скоро",
+  "@home_comingUp": {
+    "x-review": "pending"
+  },
+  "home_keptForever": "Сохранено навсегда",
+  "@home_keptForever": {
+    "x-review": "pending"
+  },
+  "home_recap": "Итоги",
+  "@home_recap": {
+    "x-review": "pending"
+  },
+  "home_emptyTitle": "Пока нет воспоминаний",
+  "@home_emptyTitle": {
+    "x-review": "pending"
+  },
+  "home_emptyBody": "Начните первое воспоминание — и оно превратится в дневник, который останется с вами навсегда.",
+  "@home_emptyBody": {
+    "x-review": "pending"
+  },
+  "home_emptyCta": "Создать первое воспоминание",
+  "@home_emptyCta": {
+    "x-review": "pending"
+  },
+  "home_keptForeverEmpty": "Пока ничего нет — воспоминания появятся здесь, когда поездка завершится.",
+  "@home_keptForeverEmpty": {
+    "x-review": "pending"
+  },
+  "home_statMemories": "{count, plural, one{воспоминание} few{воспоминания} many{воспоминаний} other{воспоминания}}",
+  "@home_statMemories": {
+    "x-review": "pending"
+  },
+  "home_statPlaces": "{count, plural, one{место} few{места} many{мест} other{места}}",
+  "@home_statPlaces": {
+    "x-review": "pending"
+  },
+  "home_statDays": "{count, plural, one{день} few{дня} many{дней} other{дня}}",
+  "@home_statDays": {
+    "x-review": "pending"
+  },
+  "home_countdownToday": "сегодня",
+  "@home_countdownToday": {
+    "x-review": "pending"
+  },
+  "home_countdownInDays": "через {days} дн.",
+  "@home_countdownInDays": {
+    "x-review": "pending"
+  },
+  "home_datesTbd": "Даты не выбраны",
+  "@home_datesTbd": {
+    "x-review": "pending"
+  },
+  "home_questsPlanned": "{count, plural, one{{count} дело в плане} few{{count} дела в плане} many{{count} дел в плане} other{{count} дела в плане}}",
+  "@home_questsPlanned": {
+    "x-review": "pending"
+  },
+  "home_nothingPlanned": "Пока ничего не запланировано",
+  "@home_nothingPlanned": {
+    "x-review": "pending"
+  },
+  "home_planArrow": "План →",
+  "@home_planArrow": {
+    "x-review": "pending"
+  },
+  "home_actionPlan": "План",
+  "@home_actionPlan": {
+    "x-review": "pending"
+  },
+  "home_actionExpenses": "Расходы",
+  "@home_actionExpenses": {
+    "x-review": "pending"
+  },
+  "home_actionJournal": "Дневник",
+  "@home_actionJournal": {
+    "x-review": "pending"
+  },
+  "home_checklist": "Чек-лист",
+  "@home_checklist": {
+    "x-review": "pending"
+  },
+  "home_packedProgress": "Собрано {packed} из {total} →",
+  "@home_packedProgress": {
+    "x-review": "pending"
+  },
+  "vibe_romantic": "Романтика",
+  "@vibe_romantic": {
+    "x-review": "pending"
+  },
+  "vibe_adventure": "Приключения",
+  "@vibe_adventure": {
+    "x-review": "pending"
+  },
+  "vibe_cultural": "Культура",
+  "@vibe_cultural": {
+    "x-review": "pending"
+  },
+  "vibe_chill": "Отдых",
+  "@vibe_chill": {
+    "x-review": "pending"
+  },
+  "vibe_foodie": "Гастрономия",
+  "@vibe_foodie": {
+    "x-review": "pending"
+  },
+  "vibe_roadTrip": "Автопутешествие",
+  "@vibe_roadTrip": {
+    "x-review": "pending"
+  },
+  "vibe_wellness": "Велнес",
+  "@vibe_wellness": {
+    "x-review": "pending"
+  },
+  "vibe_wildlife": "Дикая природа",
+  "@vibe_wildlife": {
+    "x-review": "pending"
+  },
+  "vibe_nightlife": "Ночная жизнь",
+  "@vibe_nightlife": {
+    "x-review": "pending"
+  },
+  "vibe_photography": "Фотография",
+  "@vibe_photography": {
+    "x-review": "pending"
+  },
+  "trip_newMemory": "Новое воспоминание",
+  "@trip_newMemory": {
+    "x-review": "pending"
+  },
+  "trip_createTitleLead": "Что достойно",
+  "@trip_createTitleLead": {
+    "x-review": "pending"
+  },
+  "trip_createTitleEmphasis": "воспоминания?",
+  "@trip_createTitleEmphasis": {
+    "x-review": "pending"
+  },
+  "trip_nameLabel": "Название",
+  "@trip_nameLabel": {
+    "x-review": "pending"
+  },
+  "trip_nameHint": "например, Лето в Токио",
+  "@trip_nameHint": {
+    "x-review": "pending"
+  },
+  "trip_nameRequired": "Дайте воспоминанию название.",
+  "@trip_nameRequired": {
+    "x-review": "pending"
+  },
+  "trip_whereLabel": "Где это было?",
+  "@trip_whereLabel": {
+    "x-review": "pending"
+  },
+  "trip_whereHint": "Где это происходило?",
+  "@trip_whereHint": {
+    "x-review": "pending"
+  },
+  "trip_startsLabel": "Начало",
+  "@trip_startsLabel": {
+    "x-review": "pending"
+  },
+  "trip_endsLabel": "Конец",
+  "@trip_endsLabel": {
+    "x-review": "pending"
+  },
+  "trip_endBeforeStart": "Дата окончания не может быть раньше даты начала.",
+  "@trip_endBeforeStart": {
+    "x-review": "pending"
+  },
+  "trip_vibeLabel": "Настроение",
+  "@trip_vibeLabel": {
+    "x-review": "pending"
+  },
+  "trip_vibesChosen": "выбрано: {count}",
+  "@trip_vibesChosen": {
+    "x-review": "pending"
+  },
+  "trip_createCta": "Создать воспоминание",
+  "@trip_createCta": {
+    "x-review": "pending"
+  },
+  "trip_rewardNudge": "За создание — {stars}. Пишите заметку каждый день, и откроется значок «Рассказчик».",
+  "@trip_rewardNudge": {
+    "x-review": "pending"
+  },
+  "trip_coverChoose": "Выберите обложку",
+  "@trip_coverChoose": {
+    "x-review": "pending"
+  },
+  "trip_coverChange": "Сменить обложку",
+  "@trip_coverChange": {
+    "x-review": "pending"
+  },
+  "trip_coverAutoHint": "или мы подберём её под настроение",
+  "@trip_coverAutoHint": {
+    "x-review": "pending"
+  },
+  "trip_coverYours": "Ваша обложка",
+  "@trip_coverYours": {
+    "x-review": "pending"
+  },
+  "trip_coverSuggested": "Предложено: {vibe}",
+  "@trip_coverSuggested": {
+    "x-review": "pending"
+  },
+  "trip_coverUploadTitle": "Загрузить фото обложки",
+  "@trip_coverUploadTitle": {
+    "x-review": "pending"
+  },
+  "trip_takePhoto": "Сделать фото",
+  "@trip_takePhoto": {
+    "x-review": "pending"
+  },
+  "trip_chooseFromGallery": "Выбрать из галереи",
+  "@trip_chooseFromGallery": {
+    "x-review": "pending"
+  },
+  "trip_deleteTitle": "Удалить воспоминание",
+  "@trip_deleteTitle": {
+    "x-review": "pending"
+  },
+  "trip_deleteConfirm": "Да — удалить навсегда",
+  "@trip_deleteConfirm": {
+    "x-review": "pending"
+  },
+  "trip_noteDays": "{count, plural, one{{count} день заметок} few{{count} дня заметок} many{{count} дней заметок} other{{count} дня заметок}}",
+  "@trip_noteDays": {
+    "x-review": "pending"
+  },
+  "trip_deleteConsequence": "Будут удалены {photos} и {notes}. Заработанные звёзды останутся. Отменить это нельзя.",
+  "@trip_deleteConsequence": {
+    "x-review": "pending"
   }
 }

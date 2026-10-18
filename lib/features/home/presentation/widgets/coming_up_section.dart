@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -33,7 +34,7 @@ class ComingUpSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'COMING UP',
+          context.l10n.home_comingUp.toUpperCase(),
           style: AppTypography.mono.copyWith(color: AppColors.textTertiary),
         ),
         const SizedBox(height: AppSpacing.base),
@@ -96,7 +97,7 @@ class _UpcomingListCard extends StatelessWidget {
                   child: TripCardPill(
                     color: AppColors.primary,
                     child: Text(
-                      tripCountdownLabel(trip.startDate!),
+                      tripCountdownLabel(context.l10n, trip.startDate!),
                       style: AppTypography.caption.copyWith(
                         color: AppColors.background,
                         letterSpacing: 0,
@@ -126,7 +127,11 @@ class _UpcomingListCard extends StatelessWidget {
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        tripDateRangeLabel(trip.startDate, trip.endDate),
+                        tripDateRangeLabel(
+                          context.l10n,
+                          trip.startDate,
+                          trip.endDate,
+                        ),
                         style: AppTypography.mono.copyWith(
                           color: AppColors.textOnPhotoMuted,
                         ),
@@ -137,8 +142,8 @@ class _UpcomingListCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               questCount > 0
-                                  ? '$questCount quests planned'
-                                  : 'Nothing planned yet',
+                                  ? context.l10n.home_questsPlanned(questCount)
+                                  : context.l10n.home_nothingPlanned,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTypography.chipLabel.copyWith(
@@ -151,7 +156,7 @@ class _UpcomingListCard extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'Plan →',
+                            context.l10n.home_planArrow,
                             style: AppTypography.caption.copyWith(
                               color: AppColors.textOnPhotoMuted,
                               letterSpacing: 0,

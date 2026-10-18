@@ -88,7 +88,7 @@ void main() {
 
     expect(find.text('Yes — delete it forever'), findsOneWidget);
     expect(
-      find.textContaining('This removes 2 photos and 1 days of notes'),
+      find.textContaining('This removes 2 photos and 1 day of notes'),
       findsOneWidget,
     );
     expect(tripRepo.deleteTripCallCount, 0);

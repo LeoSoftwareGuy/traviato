@@ -1,6 +1,6 @@
-import '../../../../core/utils/pluralize.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -33,13 +33,13 @@ class MemoriesGridSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'KEPT FOREVER',
+          context.l10n.home_keptForever.toUpperCase(),
           style: AppTypography.mono.copyWith(color: AppColors.textTertiary),
         ),
         const SizedBox(height: AppSpacing.base),
         if (trips.isEmpty)
           Text(
-            'No memories logged yet — they show up here once a trip wraps.',
+            context.l10n.home_keptForeverEmpty,
             style: AppTypography.chipLabel.copyWith(
               color: AppColors.textMuted,
             ),
@@ -99,7 +99,9 @@ class _MemoryGridCard extends StatelessWidget {
                       ? AppColors.tint(AppColors.primary, .62)
                       : AppColors.tint(AppColors.background, .62),
                   child: Text(
-                    trip.isKeptForever ? '✦ Kept forever' : '▸ Recap',
+                    trip.isKeptForever
+                        ? '✦ ${context.l10n.home_keptForever}'
+                        : '▸ ${context.l10n.home_recap}',
                     style: AppTypography.caption.copyWith(
                       color: AppColors.textOnPhoto,
                       letterSpacing: 0,
@@ -128,10 +130,9 @@ class _MemoryGridCard extends StatelessWidget {
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        '${trip.durationDays ?? 0} '
-                        '${pluralize(trip.durationDays ?? 0, 'DAY', 'DAYS')} · '
-                        '${trip.photoCount} '
-                        '${pluralize(trip.photoCount, 'PHOTO', 'PHOTOS')}',
+                        '${context.l10n.common_dayCount(trip.durationDays ?? 0)} · '
+                                '${context.l10n.common_photoCount(trip.photoCount)}'
+                            .toUpperCase(),
                         style: AppTypography.mono.copyWith(
                           color: AppColors.textOnPhotoMuted,
                         ),
