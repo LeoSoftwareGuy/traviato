@@ -11,6 +11,7 @@ class ProfileEntity extends Equatable {
     this.avatarUrl,
     required this.createdAt,
     this.language,
+    this.dictationLanguage,
   });
 
   final String id;
@@ -27,6 +28,9 @@ class ProfileEntity extends Equatable {
   /// UI language code (`en`/`ru`/`et`); `null` = follow the device (#236).
   final String? language;
 
+  /// Last-used dictation language (`en`/`ru`/`et`), or `null` (#218).
+  final String? dictationLanguage;
+
   @override
   List<Object?> get props => [
     id,
@@ -35,5 +39,6 @@ class ProfileEntity extends Equatable {
     avatarUrl,
     createdAt,
     language,
+    dictationLanguage,
   ];
 }

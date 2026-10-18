@@ -873,19 +873,6 @@ class AppLocalizationsRu extends AppLocalizations {
       'Продолжайте — печатайте или нажмите на микрофон и просто говорите.';
 
   @override
-  String note_wordsAdded(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '+$count слова',
-      many: '+$count слов',
-      few: '+$count слова',
-      one: '+$count слово',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get note_micOff =>
       'Микрофон выключен. Включите его в Настройках или просто печатайте.';
 
@@ -907,11 +894,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get dictation_tapToStop => 'Нажмите, чтобы остановить';
-
-  @override
-  String note_listening(String time) {
-    return 'Слушаю · $time';
-  }
 
   @override
   String get photo_addTitle => 'Добавить фото';
@@ -1661,5 +1643,94 @@ class AppLocalizationsRu extends AppLocalizations {
       },
     );
     return '$_temp0 — сейчас $_temp1';
+  }
+
+  @override
+  String get dictation_title => 'Говорить на…';
+
+  @override
+  String dictation_sheetSubtitle(String lang) {
+    String _temp0 = intl.Intl.selectLogic(
+      lang,
+      {
+        'en': 'английском',
+        'ru': 'русском',
+        'et': 'эстонском',
+        'other': 'английском',
+      },
+    );
+    return 'Меняется только язык диктовки. Приложение останется на $_temp0.';
+  }
+
+  @override
+  String dictation_unavailableRow(String lang, String platform) {
+    String _temp0 = intl.Intl.selectLogic(
+      lang,
+      {
+        'en': 'Английский',
+        'ru': 'Русский',
+        'et': 'Эстонский',
+        'other': 'Английский',
+      },
+    );
+    String _temp1 = intl.Intl.selectLogic(
+      platform,
+      {
+        'ios': 'iPhone',
+        'android': 'телефоне',
+        'other': 'устройстве',
+      },
+    );
+    return '$_temp0 — распознавание речи недоступно на этом $_temp1. Печатать можно как обычно.';
+  }
+
+  @override
+  String get dictation_remember => 'Запомним для следующей заметки.';
+
+  @override
+  String get dictation_notAvailable => 'Недоступно';
+
+  @override
+  String dictation_unavailableWarning(String lang, String platform) {
+    String _temp0 = intl.Intl.selectLogic(
+      lang,
+      {
+        'en': 'английском',
+        'ru': 'русском',
+        'et': 'эстонском',
+        'other': 'английском',
+      },
+    );
+    String _temp1 = intl.Intl.selectLogic(
+      platform,
+      {
+        'ios': 'iPhone',
+        'android': 'телефоне',
+        'other': 'устройстве',
+      },
+    );
+    return 'Распознавание речи на $_temp0 недоступно на этом $_temp1.';
+  }
+
+  @override
+  String get dictation_chooseAnother => 'Выбрать другой язык';
+
+  @override
+  String dictation_languageSemantics(String name) {
+    return 'Язык диктовки: $name';
+  }
+
+  @override
+  String get note_bodyHintUnavailable =>
+      'Продолжайте печатать — или выберите другой язык и говорите.';
+
+  @override
+  String note_listeningIn(String code, String time) {
+    return 'Слушаю · $code · $time';
+  }
+
+  @override
+  String note_wordCountShort(int count) {
+    return '$count сл.';
   }
 }

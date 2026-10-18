@@ -170,11 +170,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('note-page-existing')), findsOneWidget);
-    expect(find.byKey(const Key('note-page-word-counter')), findsNothing);
+    // Design 2a: the count always shows under the language chip.
+    expect(find.text('0 W'), findsOneWidget);
 
     await tester.enterText(_field, 'Then the buses came.');
     await tester.pump();
-    expect(find.text('+4 words'), findsOneWidget);
+    expect(find.text('4 W'), findsOneWidget);
   });
 
   testWidgets('Aa focuses the field with the caret at the end', (tester) async {
@@ -281,10 +282,10 @@ void main() {
       expect(find.byKey(const Key('note-page-waveform')), findsOneWidget);
       expect(find.byKey(const Key('note-page-mic-stop')), findsOneWidget);
       expect(find.text('Tap to stop'), findsOneWidget);
-      expect(find.text('LISTENING · 0:00'), findsOneWidget);
+      expect(find.text('LISTENING · EN · 0:00'), findsOneWidget);
 
       await tester.pump(const Duration(seconds: 7));
-      expect(find.text('LISTENING · 0:07'), findsOneWidget);
+      expect(find.text('LISTENING · EN · 0:07'), findsOneWidget);
 
       service.partial('the water was');
       await tester.pump();
@@ -292,7 +293,7 @@ void main() {
       service.partial('the water was so still');
       await tester.pump();
       expect(field(tester).controller!.text, 'the water was so still');
-      expect(find.text('+5 words'), findsOneWidget);
+      expect(find.text('5 W'), findsOneWidget);
 
       await tester.tap(mic);
       await tester.pump();
@@ -358,7 +359,7 @@ void main() {
       expect(find.text('Tap to talk'), findsOneWidget);
       await tester.enterText(_field, 'Typed instead.');
       await tester.pump();
-      expect(find.text('+2 words'), findsOneWidget);
+      expect(find.text('2 W'), findsOneWidget);
 
       // The mic stays tappable and asks again.
       await tester.tap(mic);

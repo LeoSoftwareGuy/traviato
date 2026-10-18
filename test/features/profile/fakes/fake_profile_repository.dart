@@ -42,11 +42,18 @@ class FakeProfileRepository implements ProfileRepository {
 
   Either<Failure, Unit>? updateLanguageResult;
   final languageUpdates = <String?>[];
+  final dictationLanguageUpdates = <String>[];
 
   @override
   Future<Either<Failure, Unit>> updateLanguage(String? code) async {
     languageUpdates.add(code);
     return updateLanguageResult ?? const Right(unit);
+  }
+
+  @override
+  Future<Either<Failure, Unit>> updateDictationLanguage(String code) async {
+    dictationLanguageUpdates.add(code);
+    return const Right(unit);
   }
 
   @override
@@ -76,6 +83,7 @@ ProfileEntity buildProfile({
   String? avatarUrl,
   DateTime? createdAt,
   String? language,
+  String? dictationLanguage,
 }) {
   return ProfileEntity(
     id: id,
@@ -84,6 +92,7 @@ ProfileEntity buildProfile({
     avatarUrl: avatarUrl,
     createdAt: createdAt ?? DateTime(2024, 3, 1),
     language: language,
+    dictationLanguage: dictationLanguage,
   );
 }
 

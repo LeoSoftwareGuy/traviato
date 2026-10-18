@@ -176,4 +176,40 @@ void main() {
     expect(dictation.isListening, isFalse);
     expect(service.cancelCallCount, 1);
   });
+
+  group('dictation language (#218)', () {
+    test('listens in the locale the page resolves', () async {
+      final ru = NoteDictationController(
+        service: service,
+        draft: draft,
+        resolveLocale: () async => (isAvailable: true, localeId: 'ru_RU'),
+      );
+      addTearDown(ru.dispose);
+
+      await ru.start();
+
+      expect(ru.isListening, isTrue);
+      expect(service.lastLocaleId, 'ru_RU');
+    });
+
+    test('does not listen when the language is unavailable', () async {
+      final et = NoteDictationController(
+        service: service,
+        draft: draft,
+        resolveLocale: () async => (isAvailable: false, localeId: null),
+      );
+      addTearDown(et.dispose);
+
+      await et.start();
+
+      expect(et.isListening, isFalse);
+      expect(service.listenCallCount, 0);
+      expect(et.notice, DictationNotice.none);
+    });
+
+    test('without a resolver it listens in the device locale', () async {
+      await dictation.start();
+      expect(service.lastLocaleId, isNull);
+    });
+  });
 }

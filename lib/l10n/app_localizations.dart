@@ -1426,12 +1426,6 @@ abstract class AppLocalizations {
   /// **'Keep going — type, or tap the mic and just talk.'**
   String get note_bodyHint;
 
-  /// No description provided for @note_wordsAdded.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{+1 word} other{+{count} words}}'**
-  String note_wordsAdded(int count);
-
   /// No description provided for @note_micOff.
   ///
   /// In en, this message translates to:
@@ -1473,12 +1467,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap to stop'**
   String get dictation_tapToStop;
-
-  /// Mono status line, uppercased in code.
-  ///
-  /// In en, this message translates to:
-  /// **'Listening · {time}'**
-  String note_listening(String time);
 
   /// Source picker sheet title.
   ///
@@ -2558,6 +2546,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{platform, select, ios{Follows your iPhone} android{Follows your Android} other{Follows your device}} — {lang, select, en{English} ru{Russian} et{Estonian} other{English}} right now'**
   String language_systemFollows(String platform, String lang);
+
+  /// Dictation language sheet title (spec copy table).
+  ///
+  /// In en, this message translates to:
+  /// **'Speak in…'**
+  String get dictation_title;
+
+  /// {lang} is the current UI language code.
+  ///
+  /// In en, this message translates to:
+  /// **'Only changes dictation. The app stays in {lang, select, en{English} ru{Russian} et{Estonian} other{English}}.'**
+  String dictation_sheetSubtitle(String lang);
+
+  /// Disabled row in the sheet. platform: ios | android | other.
+  ///
+  /// In en, this message translates to:
+  /// **'{lang, select, en{English} ru{Russian} et{Estonian} other{English}} · not available for speech on this {platform, select, ios{iPhone} android{phone} other{device}}. You can still type in {lang, select, en{English} ru{Russian} et{Estonian} other{English}}.'**
+  String dictation_unavailableRow(String lang, String platform);
+
+  /// Sheet footer (spec copy table).
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll remember this for your next note.'**
+  String get dictation_remember;
+
+  /// Label under the disabled mic (spec copy table).
+  ///
+  /// In en, this message translates to:
+  /// **'Not available'**
+  String get dictation_notAvailable;
+
+  /// Inline warning above the dock; followed by dictation_chooseAnother as a link.
+  ///
+  /// In en, this message translates to:
+  /// **'{lang, select, en{English} ru{Russian} et{Estonian} other{English}} speech recognition isn\'t available on this {platform, select, ios{iPhone} android{phone} other{device}}.'**
+  String dictation_unavailableWarning(String lang, String platform);
+
+  /// No description provided for @dictation_chooseAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another language'**
+  String get dictation_chooseAnother;
+
+  /// Screen-reader label for the dock chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Dictation language: {name}'**
+  String dictation_languageSemantics(String name);
+
+  /// Body placeholder when the dictation language isn't available (design 2d).
+  ///
+  /// In en, this message translates to:
+  /// **'Keep typing — or pick another language and speak.'**
+  String get note_bodyHintUnavailable;
+
+  /// Mono status line, uppercased in code; {code} is the 2-letter dictation language.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening · {code} · {time}'**
+  String note_listeningIn(String code, String time);
+
+  /// Compact word count under the dock chip (design 2a). @maxLength 6
+  ///
+  /// In en, this message translates to:
+  /// **'{count} W'**
+  String note_wordCountShort(int count);
 }
 
 class _AppLocalizationsDelegate

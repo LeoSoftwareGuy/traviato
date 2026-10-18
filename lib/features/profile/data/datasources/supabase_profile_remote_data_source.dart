@@ -83,12 +83,18 @@ class SupabaseProfileRemoteDataSource implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<void> updateLanguage(String? code) async {
+  Future<void> updateLanguage(String? code) => _updateColumn('language', code);
+
+  @override
+  Future<void> updateDictationLanguage(String code) =>
+      _updateColumn('dictation_language', code);
+
+  Future<void> _updateColumn(String column, String? value) async {
     final userId = _requireUserId();
     try {
       await _client
           .from(Tables.profiles)
-          .update({'language': code})
+          .update({column: value})
           .eq('id', userId);
     } on AuthenticationException {
       rethrow;

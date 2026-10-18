@@ -884,10 +884,6 @@
   "@note_bodyHint": {
     "x-review": "pending"
   },
-  "note_wordsAdded": "{count, plural, one{+{count} sõna} other{+{count} sõna}}",
-  "@note_wordsAdded": {
-    "x-review": "pending"
-  },
   "note_micOff": "Mikrofon on välja lülitatud. Lülita see seadetes sisse või lihtsalt kirjuta.",
   "@note_micOff": {
     "x-review": "pending"
@@ -914,10 +910,6 @@
   },
   "dictation_tapToStop": "Puuduta, et lõpetada",
   "@dictation_tapToStop": {
-    "x-review": "pending"
-  },
-  "note_listening": "Kuulan · {time}",
-  "@note_listening": {
     "x-review": "pending"
   },
   "photo_addTitle": "Lisa foto",
@@ -1626,6 +1618,50 @@
   },
   "language_systemFollows": "{platform, select, ios{Nagu iPhone'is} android{Nagu Androidis} other{Nagu seadmes}} — praegu {lang, select, en{inglise} ru{vene} et{eesti} other{inglise}}",
   "@language_systemFollows": {
+    "x-review": "pending"
+  },
+  "dictation_title": "Räägi keeles…",
+  "@dictation_title": {
+    "x-review": "pending"
+  },
+  "dictation_sheetSubtitle": "Muutub ainult dikteerimise keel. Rakendus jääb {lang, select, en{inglise} ru{vene} et{eesti} other{inglise}} keelde.",
+  "@dictation_sheetSubtitle": {
+    "x-review": "pending"
+  },
+  "dictation_unavailableRow": "{lang, select, en{Inglise} ru{Vene} et{Eesti} other{Inglise}} keele kõnetuvastus pole selles {platform, select, ios{iPhone'is} android{telefonis} other{seadmes}} saadaval. Kirjutada saad ikka.",
+  "@dictation_unavailableRow": {
+    "x-review": "pending"
+  },
+  "dictation_remember": "Jätame selle järgmiseks märkmeks meelde.",
+  "@dictation_remember": {
+    "x-review": "pending"
+  },
+  "dictation_notAvailable": "Pole saadaval",
+  "@dictation_notAvailable": {
+    "x-review": "pending"
+  },
+  "dictation_unavailableWarning": "{lang, select, en{Inglise} ru{Vene} et{Eesti} other{Inglise}} keele kõnetuvastus pole selles {platform, select, ios{iPhone'is} android{telefonis} other{seadmes}} saadaval.",
+  "@dictation_unavailableWarning": {
+    "x-review": "pending"
+  },
+  "dictation_chooseAnother": "Vali teine keel",
+  "@dictation_chooseAnother": {
+    "x-review": "pending"
+  },
+  "dictation_languageSemantics": "Dikteerimise keel: {name}",
+  "@dictation_languageSemantics": {
+    "x-review": "pending"
+  },
+  "note_bodyHintUnavailable": "Kirjuta edasi — või vali teine keel ja räägi.",
+  "@note_bodyHintUnavailable": {
+    "x-review": "pending"
+  },
+  "note_listeningIn": "Kuulan · {code} · {time}",
+  "@note_listeningIn": {
+    "x-review": "pending"
+  },
+  "note_wordCountShort": "{count} S",
+  "@note_wordCountShort": {
     "x-review": "pending"
   }
 }

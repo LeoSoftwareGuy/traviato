@@ -104,3 +104,101 @@ final class InitialAppLanguageProvider
 
 String _$initialAppLanguageHash() =>
     r'eceb0a9f1a78b37f413214450208b3f4d3ab61d3';
+
+@ProviderFor(dictationLanguagePrefs)
+final dictationLanguagePrefsProvider = DictationLanguagePrefsProvider._();
+
+final class DictationLanguagePrefsProvider
+    extends
+        $FunctionalProvider<
+          DictationLanguagePrefs,
+          DictationLanguagePrefs,
+          DictationLanguagePrefs
+        >
+    with $Provider<DictationLanguagePrefs> {
+  DictationLanguagePrefsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'dictationLanguagePrefsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$dictationLanguagePrefsHash();
+
+  @$internal
+  @override
+  $ProviderElement<DictationLanguagePrefs> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  DictationLanguagePrefs create(Ref ref) {
+    return dictationLanguagePrefs(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DictationLanguagePrefs value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DictationLanguagePrefs>(value),
+    );
+  }
+}
+
+String _$dictationLanguagePrefsHash() =>
+    r'db03270197cfd5876f2b9fc877d9b79dd5ae50e0';
+
+/// The stored dictation language (or `null`), read in `main()` like
+/// [initialAppLanguage] (#218).
+
+@ProviderFor(initialDictationLanguage)
+final initialDictationLanguageProvider = InitialDictationLanguageProvider._();
+
+/// The stored dictation language (or `null`), read in `main()` like
+/// [initialAppLanguage] (#218).
+
+final class InitialDictationLanguageProvider
+    extends $FunctionalProvider<AppLanguage?, AppLanguage?, AppLanguage?>
+    with $Provider<AppLanguage?> {
+  /// The stored dictation language (or `null`), read in `main()` like
+  /// [initialAppLanguage] (#218).
+  InitialDictationLanguageProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'initialDictationLanguageProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$initialDictationLanguageHash();
+
+  @$internal
+  @override
+  $ProviderElement<AppLanguage?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  AppLanguage? create(Ref ref) {
+    return initialDictationLanguage(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AppLanguage? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AppLanguage?>(value),
+    );
+  }
+}
+
+String _$initialDictationLanguageHash() =>
+    r'77573993fd957736874710b09b4c614ec4ac4fd5';

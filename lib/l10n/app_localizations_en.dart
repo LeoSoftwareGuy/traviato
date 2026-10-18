@@ -850,17 +850,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Keep going — type, or tap the mic and just talk.';
 
   @override
-  String note_wordsAdded(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '+$count words',
-      one: '+1 word',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get note_micOff =>
       'Microphone is off. Turn it on in Settings, or just type.';
 
@@ -882,11 +871,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dictation_tapToStop => 'Tap to stop';
-
-  @override
-  String note_listening(String time) {
-    return 'Listening · $time';
-  }
 
   @override
   String get photo_addTitle => 'Add a photo';
@@ -1618,5 +1602,103 @@ class AppLocalizationsEn extends AppLocalizations {
       },
     );
     return '$_temp0 — $_temp1 right now';
+  }
+
+  @override
+  String get dictation_title => 'Speak in…';
+
+  @override
+  String dictation_sheetSubtitle(String lang) {
+    String _temp0 = intl.Intl.selectLogic(
+      lang,
+      {
+        'en': 'English',
+        'ru': 'Russian',
+        'et': 'Estonian',
+        'other': 'English',
+      },
+    );
+    return 'Only changes dictation. The app stays in $_temp0.';
+  }
+
+  @override
+  String dictation_unavailableRow(String lang, String platform) {
+    String _temp0 = intl.Intl.selectLogic(
+      lang,
+      {
+        'en': 'English',
+        'ru': 'Russian',
+        'et': 'Estonian',
+        'other': 'English',
+      },
+    );
+    String _temp1 = intl.Intl.selectLogic(
+      platform,
+      {
+        'ios': 'iPhone',
+        'android': 'phone',
+        'other': 'device',
+      },
+    );
+    String _temp2 = intl.Intl.selectLogic(
+      lang,
+      {
+        'en': 'English',
+        'ru': 'Russian',
+        'et': 'Estonian',
+        'other': 'English',
+      },
+    );
+    return '$_temp0 · not available for speech on this $_temp1. You can still type in $_temp2.';
+  }
+
+  @override
+  String get dictation_remember => 'We\'ll remember this for your next note.';
+
+  @override
+  String get dictation_notAvailable => 'Not available';
+
+  @override
+  String dictation_unavailableWarning(String lang, String platform) {
+    String _temp0 = intl.Intl.selectLogic(
+      lang,
+      {
+        'en': 'English',
+        'ru': 'Russian',
+        'et': 'Estonian',
+        'other': 'English',
+      },
+    );
+    String _temp1 = intl.Intl.selectLogic(
+      platform,
+      {
+        'ios': 'iPhone',
+        'android': 'phone',
+        'other': 'device',
+      },
+    );
+    return '$_temp0 speech recognition isn\'t available on this $_temp1.';
+  }
+
+  @override
+  String get dictation_chooseAnother => 'Choose another language';
+
+  @override
+  String dictation_languageSemantics(String name) {
+    return 'Dictation language: $name';
+  }
+
+  @override
+  String get note_bodyHintUnavailable =>
+      'Keep typing — or pick another language and speak.';
+
+  @override
+  String note_listeningIn(String code, String time) {
+    return 'Listening · $code · $time';
+  }
+
+  @override
+  String note_wordCountShort(int count) {
+    return '$count W';
   }
 }

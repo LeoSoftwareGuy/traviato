@@ -10,6 +10,7 @@ import '../../../../core/theme/app_motion.dart';
 import '../../../photo/domain/entities/photo_entity.dart';
 import '../../domain/note_text.dart';
 import '../providers/dictation_providers.dart';
+import '../widgets/note_page/dictation_language_sheet.dart';
 import '../widgets/note_page/note_dictation_controller.dart';
 import '../widgets/note_page/note_draft_controller.dart';
 import '../widgets/note_page/note_page_chrome.dart';
@@ -87,7 +88,18 @@ class _NotePageState extends ConsumerState<NotePage>
   late final _dictation = NoteDictationController(
     service: ref.read(dictationServiceProvider),
     draft: _text,
+    resolveLocale: _resolveDictationLocale,
   );
+
+  /// After the mic permission step: re-check what the recogniser supports
+  /// (it may only be known now) and hand back the locale to listen in.
+  Future<({bool isAvailable, String? localeId})>
+  _resolveDictationLocale() async {
+    ref.invalidate(dictationSupportedLocalesProvider);
+    await ref.read(dictationSupportedLocalesProvider.future);
+    final status = ref.read(dictationLanguageStatusProvider);
+    return (isAvailable: status.isAvailable, localeId: status.localeId);
+  }
 
   var _phase = _Phase.opening;
   var _reducedMotion = false;
@@ -237,6 +249,7 @@ class _NotePageState extends ConsumerState<NotePage>
     final media = MediaQuery.of(context);
     final keyboard = media.viewInsets.bottom;
 
+    final dictationLanguage = ref.watch(dictationLanguageStatusProvider);
     final writingPage = IgnorePointer(
       ignoring: _phase != _Phase.open,
       child: NoteWritingPage(
@@ -257,6 +270,9 @@ class _NotePageState extends ConsumerState<NotePage>
         dictation: _dictation,
         onMicTap: _onMicTap,
         onFieldTap: _onFieldTap,
+        languageCode: dictationLanguage.language.code!,
+        isLanguageAvailable: dictationLanguage.isAvailable,
+        onLanguageTap: () => DictationLanguageSheet.show(context),
       ),
     );
 

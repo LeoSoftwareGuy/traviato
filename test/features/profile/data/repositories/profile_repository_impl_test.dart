@@ -35,6 +35,14 @@ class _FakeProfileRemoteDataSource implements ProfileRemoteDataSource {
     lastLanguage = code;
   }
 
+  String? lastDictationLanguage;
+
+  @override
+  Future<void> updateDictationLanguage(String code) async {
+    if (exception != null) throw exception!;
+    lastDictationLanguage = code;
+  }
+
   @override
   Future<ProfileModel> updateProfile({
     String? username,

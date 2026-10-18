@@ -26,8 +26,9 @@ as below. Compare and the expenses breakdown are fully derived client-side.
 ## Tables (unchanged from v2 except where noted)
 
 ### `profiles`
-`id (=auth.users.id), username?, bio?, avatar_url?, created_at, language?`
-(`en`/`ru`/`et`; NULL = follow the device, #236).
+`id (=auth.users.id), username?, bio?, avatar_url?, created_at, language?,
+dictation_language?` (both `en`/`ru`/`et`; `language` NULL = follow the
+device, #236; `dictation_language` NULL = not chosen yet, #218).
 RLS: select/update own; insert via trigger.
 
 ### `trips`

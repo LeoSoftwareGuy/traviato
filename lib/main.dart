@@ -13,6 +13,7 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/widgets/auth_link_failure_listener.dart';
 import 'features/notifications/presentation/controllers/bonus_notifications_lifecycle_controller.dart';
 import 'features/settings/data/app_language_prefs.dart';
+import 'features/settings/data/dictation_language_prefs.dart';
 import 'features/settings/presentation/controllers/app_language_controller.dart';
 import 'features/settings/presentation/providers/settings_providers.dart';
 import 'features/settings/presentation/widgets/locale_fade.dart';
@@ -40,6 +41,7 @@ Future<void> main() async {
   // Read before runApp so the first frame is already in the chosen
   // language (#236).
   final initialLanguage = await const AppLanguagePrefs().read();
+  final initialDictationLanguage = await const DictationLanguagePrefs().read();
   // Disable Riverpod's silent auto-retry; retries are handled explicitly with
   // Retry buttons (guidelines doc 02).
   runApp(
@@ -48,6 +50,9 @@ Future<void> main() async {
       overrides: [
         revenueCatConfiguredProvider.overrideWithValue(revenueCatConfigured),
         initialAppLanguageProvider.overrideWithValue(initialLanguage),
+        initialDictationLanguageProvider.overrideWithValue(
+          initialDictationLanguage,
+        ),
       ],
       child: const TraviatoApp(),
     ),

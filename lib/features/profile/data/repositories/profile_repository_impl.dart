@@ -53,9 +53,16 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> updateLanguage(String? code) async {
+  Future<Either<Failure, Unit>> updateLanguage(String? code) =>
+      _guard(() => _remote.updateLanguage(code));
+
+  @override
+  Future<Either<Failure, Unit>> updateDictationLanguage(String code) =>
+      _guard(() => _remote.updateDictationLanguage(code));
+
+  Future<Either<Failure, Unit>> _guard(Future<void> Function() write) async {
     try {
-      await _remote.updateLanguage(code);
+      await write();
       return const Right(unit);
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
