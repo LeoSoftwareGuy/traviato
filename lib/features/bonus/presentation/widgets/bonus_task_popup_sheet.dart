@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -80,12 +81,12 @@ class BonusTaskPopupSheet extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               minimumSize: const Size.fromHeight(48),
             ),
-            child: const Text('Open camera'),
+            child: Text(context.l10n.bonus_openCamera),
           ),
           const SizedBox(height: AppSpacing.sm),
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Maybe later'),
+            child: Text(context.l10n.bonus_maybeLater),
           ),
         ],
       ),

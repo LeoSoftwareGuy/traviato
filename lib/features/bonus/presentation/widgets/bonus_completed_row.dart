@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -47,7 +48,10 @@ class BonusCompletedRow extends StatelessWidget {
               borderRadius: AppRadius.badgeRadius,
             ),
             child: Text(
-              dayIndex > 0 ? 'COMPLETED · DAY $dayIndex' : 'COMPLETED',
+              (dayIndex > 0
+                      ? context.l10n.bonus_completedDay(dayIndex)
+                      : context.l10n.bonus_completed)
+                  .toUpperCase(),
               style: AppTypography.mono,
             ),
           ),

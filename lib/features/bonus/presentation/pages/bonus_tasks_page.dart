@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/failure_message.dart';
+import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -23,7 +24,6 @@ import '../widgets/bonus_earned_banner.dart';
 import '../widgets/bonus_task_popup_sheet.dart';
 import '../widgets/bonus_task_tile.dart';
 import '../widgets/stretch_offer_card.dart';
-import '../../../../core/l10n/context_l10n.dart';
 
 class BonusTasksPage extends ConsumerWidget {
   const BonusTasksPage({required this.tripId, super.key});
@@ -112,7 +112,7 @@ class _BonusTrayContent extends ConsumerWidget {
         if (!context.mounted) return;
         showStarToast(
           context,
-          '✦ +${task.template.points} stars · dare done',
+          context.l10n.toast_dareDone(task.template.points),
         );
         // First-completion moment for the notification rationale (#65 AC —
         // "not at install"). No-ops after the first time it's shown.
@@ -172,7 +172,7 @@ class _BonusTrayContent extends ConsumerWidget {
         if (state.activeStreakSaver case final streakSaver?) ...[
           const SizedBox(height: AppSpacing.base),
           Text(
-            'NO RUSH · WAITS FOR YOU',
+            context.l10n.bonus_streakSaverHeader.toUpperCase(),
             style: AppTypography.mono.copyWith(color: AppColors.accentCoral),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -184,7 +184,7 @@ class _BonusTrayContent extends ConsumerWidget {
         if (state.completedHistory.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.xl),
           Text(
-            'COMPLETED',
+            context.l10n.bonus_completed.toUpperCase(),
             style: AppTypography.mono.copyWith(color: AppColors.textTertiary),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -230,7 +230,7 @@ class _BonusHeader extends StatelessWidget {
         Expanded(
           child: Center(
             child: Text(
-              'BONUS TASKS',
+              context.l10n.bonus_eyebrow.toUpperCase(),
               style: AppTypography.mono.copyWith(color: AppColors.textTertiary),
             ),
           ),
