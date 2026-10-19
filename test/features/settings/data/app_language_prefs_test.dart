@@ -11,18 +11,26 @@ void main() {
     expect(await prefs.read(), AppLanguage.system);
   });
 
-  test('every choice survives a write/read round trip', () async {
-    for (final language in AppLanguage.values) {
+  test('every UI choice survives a write/read round trip', () async {
+    for (final language in [AppLanguage.system, ...AppLanguage.uiLanguages]) {
       SharedPreferences.setMockInitialValues({});
       await prefs.write(language);
       expect(await prefs.read(), language);
     }
   });
 
+  test(
+    'an Estonian choice saved before #245 reads as System default',
+    () async {
+      SharedPreferences.setMockInitialValues({'app_language': 'et'});
+      expect(await prefs.read(), AppLanguage.system);
+    },
+  );
+
   test('stores under the app_language key', () async {
     SharedPreferences.setMockInitialValues({});
-    await prefs.write(AppLanguage.et);
+    await prefs.write(AppLanguage.ru);
     final raw = await SharedPreferences.getInstance();
-    expect(raw.getString('app_language'), 'et');
+    expect(raw.getString('app_language'), 'ru');
   });
 }

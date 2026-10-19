@@ -79,7 +79,7 @@ class DictationLanguageSheet extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.base),
-          for (final language in AppLanguage.pinned) ...[
+          for (final language in AppLanguage.dictationLanguages) ...[
             _Row(
               language: language,
               selected: language == current,
