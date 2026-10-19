@@ -52,7 +52,7 @@
   "@error_freeTierMemories": {
     "x-review": "pending"
   },
-  "error_freeTierPhotos": "В бесплатном тарифе — до 40 фото на одно воспоминание. Перейдите на Pro, чтобы снять ограничение.",
+  "error_freeTierPhotos": "В бесплатном тарифе: до 40 фото на одно воспоминание. Перейдите на Pro, чтобы снять ограничение.",
   "@error_freeTierPhotos": {
     "x-review": "pending"
   },
@@ -180,7 +180,7 @@
   "@auth_strengthStrong": {
     "x-review": "pending"
   },
-  "auth_privacyNote": "Ваши воспоминания принадлежат только вам — мы ничего не публикуем.",
+  "auth_privacyNote": "Ваши воспоминания принадлежат только вам, мы ничего не публикуем.",
   "@auth_privacyNote": {
     "x-review": "pending"
   },
@@ -208,7 +208,7 @@
   "@auth_checkInbox": {
     "x-review": "pending"
   },
-  "auth_confirmationSent": "Мы отправили ссылку для подтверждения на {email}. Откройте её на этом телефоне — и вы сразу войдёте, или подтвердите на другом устройстве и войдите здесь.",
+  "auth_confirmationSent": "Мы отправили ссылку для подтверждения на {email}. Откройте её на этом телефоне и вы сразу войдёте, или подтвердите на другом устройстве и войдите здесь.",
   "@auth_confirmationSent": {
     "x-review": "pending"
   },
@@ -236,7 +236,7 @@
   "@guest_eyebrow": {
     "x-review": "pending"
   },
-  "guest_headlineLead": "Каждое воспоминание —",
+  "guest_headlineLead": "Каждое воспоминание ",
   "@guest_headlineLead": {
     "x-review": "pending"
   },
@@ -244,7 +244,7 @@
   "@guest_headlineEmphasis": {
     "x-review": "pending"
   },
-  "guest_body": "От больших праздников до спонтанных маленьких приключений — некоторые моменты слишком хороши, чтобы их забыть. Планируйте их, проживайте, а мы превратим лучшее в истории, к которым захочется возвращаться снова и снова.",
+  "guest_body": "От больших праздников до спонтанных маленьких приключений, некоторые моменты слишком хороши, чтобы их забыть. Планируйте их, проживайте, а мы превратим лучшее в истории, к которым захочется возвращаться снова и снова.",
   "@guest_body": {
     "x-review": "pending"
   },
@@ -276,11 +276,11 @@
   "@guest_stepBeforeEyebrow": {
     "x-review": "pending"
   },
-  "guest_stepBeforeTitle": "Планируйте веселье. Детали — на нас.",
+  "guest_stepBeforeTitle": "Планируйте веселье. Детали на нас.",
   "@guest_stepBeforeTitle": {
     "x-review": "pending"
   },
-  "guest_stepBeforeBody": "Большие выходные? Маленькое приключение? Или просто вторник, который хочется запомнить? Составляйте планы и списки — всё в одном уютном месте.",
+  "guest_stepBeforeBody": "Большие выходные? Маленькое событие? Или просто вторник, который хочется запомнить? Составляйте планы и списки: всё в одном уютном месте.",
   "@guest_stepBeforeBody": {
     "x-review": "pending"
   },
@@ -304,7 +304,7 @@
   "@guest_stepAfterTitle": {
     "x-review": "pending"
   },
-  "guest_stepAfterBody": "Когда приключение закончится, ваши моменты соберутся в личный фильм. Переживите волшебство снова и сохраните воспоминания.",
+  "guest_stepAfterBody": "Когда событие закончится, ваши моменты соберутся в личный фильм. Переживите волшебство снова и сохраните воспоминания.",
   "@guest_stepAfterBody": {
     "x-review": "pending"
   },
@@ -376,7 +376,7 @@
   "@home_emptyTitle": {
     "x-review": "pending"
   },
-  "home_emptyBody": "Начните первое воспоминание — и оно превратится в дневник, который останется с вами навсегда.",
+  "home_emptyBody": "Начните первое воспоминание и оно превратится в дневник, который останется с вами навсегда.",
   "@home_emptyBody": {
     "x-review": "pending"
   },
@@ -384,7 +384,7 @@
   "@home_emptyCta": {
     "x-review": "pending"
   },
-  "home_keptForeverEmpty": "Пока ничего нет — воспоминания появятся здесь, когда поездка завершится.",
+  "home_keptForeverEmpty": "Пока ничего нет. Воспоминания появятся здесь, когда событие завершится.",
   "@home_keptForeverEmpty": {
     "x-review": "pending"
   },
@@ -580,7 +580,7 @@
   "@trip_deleteTitle": {
     "x-review": "pending"
   },
-  "trip_deleteConfirm": "Да — удалить навсегда",
+  "trip_deleteConfirm": "Да! Удалить навсегда",
   "@trip_deleteConfirm": {
     "x-review": "pending"
   },
@@ -588,7 +588,7 @@
   "@trip_noteDays": {
     "x-review": "pending"
   },
-  "trip_deleteConsequence": "Будут удалены {photos} и {notes}. Заработанные звёзды останутся. Отменить это нельзя.",
+  "trip_deleteConsequence": "Будут удалены {photos} и {notes}. Заработанные звёзды исчезнут. Отменить это нельзя.",
   "@trip_deleteConsequence": {
     "x-review": "pending"
   },
@@ -608,7 +608,7 @@
   "@toast_questDone": {
     "x-review": "pending"
   },
-  "toast_packed": "✦ Собрано — отлично",
+  "toast_packed": "✦ Собрано, отлично",
   "@toast_packed": {
     "x-review": "pending"
   },
@@ -688,7 +688,7 @@
   "@manage_rename": {
     "x-review": "pending"
   },
-  "manage_shiftHint": "Нажмите на дату, чтобы сдвинуть её на день вперёд, удерживайте — чтобы назад. Дела сдвинутся вместе с ней.",
+  "manage_shiftHint": "Нажмите на дату, чтобы сдвинуть её на день вперёд, удерживайте чтобы назад. Дела сдвинутся вместе с ней.",
   "@manage_shiftHint": {
     "x-review": "pending"
   },
@@ -748,7 +748,7 @@
   "@journal_quietOne": {
     "x-review": "pending"
   },
-  "journal_dayQuietOne": "День {day} — тихий день",
+  "journal_dayQuietOne": "День {day}: тихий день",
   "@journal_dayQuietOne": {
     "x-review": "pending"
   },
@@ -824,7 +824,7 @@
   "@journal_wrapUpReqNote": {
     "x-review": "pending"
   },
-  "journal_wrapUpFree": "Ничего покупать не нужно — на любом тарифе всё одинаково.",
+  "journal_wrapUpFree": "Ничего покупать не нужно: на любом тарифе всё одинаково.",
   "@journal_wrapUpFree": {
     "x-review": "pending"
   },
@@ -836,7 +836,7 @@
   "@journal_nothingFromDay": {
     "x-review": "pending"
   },
-  "journal_nudgeBody": "Даже одно фото поможет итогам. Тихие дни тоже попадают в фильм — этот просто промелькнёт.",
+  "journal_nudgeBody": "Даже одно фото поможет итогам. Тихие дни тоже попадают в фильм, этот просто промелькнёт.",
   "@journal_nudgeBody": {
     "x-review": "pending"
   },
@@ -880,7 +880,7 @@
   "@note_discard": {
     "x-review": "pending"
   },
-  "note_bodyHint": "Продолжайте — печатайте или нажмите на микрофон и просто говорите.",
+  "note_bodyHint": "Продолжайте: печатайте или нажмите на микрофон и просто говорите.",
   "@note_bodyHint": {
     "x-review": "pending"
   },
@@ -888,7 +888,7 @@
   "@note_micOff": {
     "x-review": "pending"
   },
-  "note_voiceUnavailable": "Голосовой ввод сейчас недоступен — можно печатать.",
+  "note_voiceUnavailable": "Голосовой ввод сейчас недоступен, можно печатать.",
   "@note_voiceUnavailable": {
     "x-review": "pending"
   },
@@ -1448,7 +1448,7 @@
   "@paywall_subPhotoCap": {
     "x-review": "pending"
   },
-  "paywall_subProfile": "Каждому воспоминанию нужно место. Перейдите на Pro в любой момент — и места хватит на всё.",
+  "paywall_subProfile": "Каждому воспоминанию нужно место. Перейдите на Pro в любой момент и места хватит на всё.",
   "@paywall_subProfile": {
     "x-review": "pending"
   },
@@ -1540,7 +1540,7 @@
   "@paywall_startTrial": {
     "x-review": "pending"
   },
-  "paywall_reassurance": "Три бесплатных воспоминания останутся с вами в любом случае — без Pro ничего не удалится и не заблокируется.",
+  "paywall_reassurance": "Три бесплатных воспоминания останутся с вами в любом случае без Pro ничего не удалится и не заблокируется.",
   "@paywall_reassurance": {
     "x-review": "pending"
   },
@@ -1652,7 +1652,7 @@
   "@dictation_languageSemantics": {
     "x-review": "pending"
   },
-  "note_bodyHintUnavailable": "Продолжайте печатать — или выберите другой язык и говорите.",
+  "note_bodyHintUnavailable": "Продолжайте печатать или выберите другой язык и говорите.",
   "@note_bodyHintUnavailable": {
     "x-review": "pending"
   },
@@ -1676,7 +1676,7 @@
   "@content_bonus_something_free_title": {
     "x-review": "pending"
   },
-  "content_bonus_something_free_detail": "Вид, улыбка, уличный артист — снимите то, что сегодня ничего вам не стоило.",
+  "content_bonus_something_free_detail": "Вид, улыбка, уличный артист: снимите то, что сегодня ничего вам не стоило.",
   "@content_bonus_something_free_detail": {
     "x-review": "pending"
   },
@@ -1692,7 +1692,7 @@
   "@content_bonus_menu_mystery_title": {
     "x-review": "pending"
   },
-  "content_bonus_menu_mystery_detail": "Ткните в меню — и без отступлений.",
+  "content_bonus_menu_mystery_detail": "Ткните в меню и без отступлений.",
   "@content_bonus_menu_mystery_detail": {
     "x-review": "pending"
   },
@@ -1732,7 +1732,7 @@
   "@content_bonus_local_transport_title": {
     "x-review": "pending"
   },
-  "content_bonus_local_transport_detail": "Автобус, велосипед, лодка, стёртые ноги — всё считается.",
+  "content_bonus_local_transport_detail": "Автобус, велосипед, лодка, стёртые ноги: всё считается.",
   "@content_bonus_local_transport_detail": {
     "x-review": "pending"
   },
@@ -1772,7 +1772,7 @@
   "@content_bonus_halfway_selfie_title": {
     "x-review": "pending"
   },
-  "content_bonus_halfway_selfie_detail": "Уставшие глаза — по желанию. Широкая улыбка — обязательно.",
+  "content_bonus_halfway_selfie_detail": "Уставшие глаза - по желанию. Широкая улыбка — обязательно.",
   "@content_bonus_halfway_selfie_detail": {
     "x-review": "pending"
   },
@@ -1780,7 +1780,7 @@
   "@content_bonus_local_hangout_title": {
     "x-review": "pending"
   },
-  "content_bonus_local_hangout_detail": "Не открыточное место — настоящее.",
+  "content_bonus_local_hangout_detail": "Не открыточное место а настоящее.",
   "@content_bonus_local_hangout_detail": {
     "x-review": "pending"
   },
@@ -1844,7 +1844,7 @@
   "@content_bonus_first_impression_title": {
     "x-review": "pending"
   },
-  "content_bonus_first_impression_detail": "Вид, запах, суматоха — поймайте их, пока они не стали привычными.",
+  "content_bonus_first_impression_detail": "Вид, запах, суматоха: поймайте их, пока они не стали привычными.",
   "@content_bonus_first_impression_detail": {
     "x-review": "pending"
   },
@@ -1868,7 +1868,7 @@
   "@content_bonus_farewell_meal_title": {
     "x-review": "pending"
   },
-  "content_bonus_farewell_meal_detail": "Пусть она запомнится — или будет тем, что осталось в холодильнике.",
+  "content_bonus_farewell_meal_detail": "Пусть она запомнится или будет тем, что осталось в холодильнике.",
   "@content_bonus_farewell_meal_detail": {
     "x-review": "pending"
   },
@@ -1920,7 +1920,7 @@
   "@content_bonus_try_the_dare_detail": {
     "x-review": "pending"
   },
-  "content_bonus_milestone_week_one_title": "Неделя позади — как эта поездка уже изменила вас?",
+  "content_bonus_milestone_week_one_title": "Неделя позади! Как эта поездка уже изменила вас?",
   "@content_bonus_milestone_week_one_title": {
     "x-review": "pending"
   },
@@ -1928,7 +1928,7 @@
   "@content_bonus_milestone_week_one_detail": {
     "x-review": "pending"
   },
-  "content_bonus_milestone_two_weeks_title": "Две недели в пути — что вы знаете теперь, чего не знали в начале?",
+  "content_bonus_milestone_two_weeks_title": "Две недели в пути! Что вы знаете теперь, чего не знали в начале?",
   "@content_bonus_milestone_two_weeks_title": {
     "x-review": "pending"
   },
@@ -1936,7 +1936,7 @@
   "@content_bonus_milestone_two_weeks_detail": {
     "x-review": "pending"
   },
-  "content_bonus_milestone_three_weeks_title": "Три недели в пути — по чему вы будете скучать больше всего, когда всё закончится?",
+  "content_bonus_milestone_three_weeks_title": "Три недели в пути! По чему вы будете скучать больше всего, когда всё закончится?",
   "@content_bonus_milestone_three_weeks_title": {
     "x-review": "pending"
   },
@@ -1948,7 +1948,7 @@
   "@content_bonus_streak_saver_checkin_title": {
     "x-review": "pending"
   },
-  "content_bonus_streak_saver_checkin_detail": "Без давления и без темы — одно фото того места, где вы сейчас.",
+  "content_bonus_streak_saver_checkin_detail": "Без давления и без темы: одно фото того места, где вы сейчас.",
   "@content_bonus_streak_saver_checkin_detail": {
     "x-review": "pending"
   },

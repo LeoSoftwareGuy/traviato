@@ -181,7 +181,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String auth_rewardTease(String stars) {
-    return 'Your first memory earns $stars — and the Storyteller badge is only three notes away.';
+    return 'Your first memory earns $stars and the Storyteller badge is only three notes away.';
   }
 
   @override
@@ -544,7 +544,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trip_deleteTitle => 'Delete this memory';
 
   @override
-  String get trip_deleteConfirm => 'Yes — delete it forever';
+  String get trip_deleteConfirm => 'Yes! Delete it forever';
 
   @override
   String trip_noteDays(int count) {
@@ -651,7 +651,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get manage_shiftHint =>
-      'Tap a date to shift it a day forward, hold to shift it back — quests move with it.';
+      'Tap a date to shift it a day forward, hold to shift it back, quests move with it.';
 
   @override
   String get manage_cover => 'Cover';
@@ -803,7 +803,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get journal_nudgeBody =>
-      'Even one photo helps your wrap-up. Quiet days still make the film — this one will just pass through it.';
+      'Even one photo helps your wrap-up. Quiet days still make the film, this one will just pass through it.';
 
   @override
   String get journal_addAPhoto => '＋ Add a photo';
@@ -847,7 +847,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get note_bodyHint =>
-      'Keep going — type, or tap the mic and just talk.';
+      'Keep going: type, or tap the mic and just talk.';
 
   @override
   String get note_micOff =>
@@ -855,7 +855,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get note_voiceUnavailable =>
-      'Voice isn\'t available right now — typing works.';
+      'Voice isn\'t available right now only typing works.';
 
   @override
   String get note_typeSemantics => 'Type';
@@ -1487,7 +1487,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paywall_reassurance =>
-      'Your three free memories stay yours either way — nothing is deleted or locked if you don\'t upgrade.';
+      'Your three free memories stay yours either way: nothing is deleted or locked if you don\'t upgrade.';
 
   @override
   String get wrapUp_openJournal => 'Open journal';
@@ -1715,7 +1715,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_bonus_something_free_detail =>
-      'A view, a smile, a street performance — snap whatever cost you nothing today.';
+      'A view, a smile, a street performance: snap whatever cost you nothing today.';
 
   @override
   String get content_bonus_local_snack_title =>
@@ -1816,7 +1816,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_bonus_local_hangout_detail =>
-      'Not the postcard spot — the real one.';
+      'Not the postcard spot but the real one.';
 
   @override
   String get content_bonus_comfort_food_title =>
@@ -1879,7 +1879,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_bonus_first_impression_detail =>
-      'The view, the smell, the chaos — capture it before it becomes normal.';
+      'The view, the smell, the chaos just capture it before it becomes normal.';
 
   @override
   String get content_bonus_unpacking_ritual_title =>
@@ -1903,7 +1903,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_bonus_farewell_meal_detail =>
-      'Make it count — or make it whatever\'s left in the fridge.';
+      'Make it count or make it whatever\'s left in the fridge.';
 
   @override
   String get content_bonus_souvenir_final_title =>
@@ -1951,7 +1951,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_bonus_milestone_week_one_title =>
-      'One week in — how has this trip changed you already?';
+      'One week in. How has this trip changed you already?';
 
   @override
   String get content_bonus_milestone_week_one_detail =>
@@ -1959,7 +1959,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_bonus_milestone_two_weeks_title =>
-      'Two weeks deep — what do you know now that you didn\'t at the start?';
+      'Two weeks deep. What do you know now that you didn\'t at the start?';
 
   @override
   String get content_bonus_milestone_two_weeks_detail =>
@@ -1967,7 +1967,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_bonus_milestone_three_weeks_title =>
-      'Three weeks out — what will you miss most when this ends?';
+      'Three weeks out. What will you miss most when this ends?';
 
   @override
   String get content_bonus_milestone_three_weeks_detail =>
@@ -1978,7 +1978,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_bonus_streak_saver_checkin_detail =>
-      'No pressure, no theme — one photo of wherever you are right now.';
+      'No pressure, no theme just one photo of wherever you are right now.';
 
   @override
   String get content_achievement_first_adventure_title => 'First Adventure';

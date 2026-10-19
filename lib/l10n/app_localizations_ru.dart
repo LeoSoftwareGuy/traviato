@@ -52,7 +52,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get error_freeTierPhotos =>
-      'В бесплатном тарифе — до 40 фото на одно воспоминание. Перейдите на Pro, чтобы снять ограничение.';
+      'В бесплатном тарифе до 40 фото на одно воспоминание. Перейдите на Pro, чтобы снять ограничение.';
 
   @override
   String get error_questPlanningClosed =>
@@ -184,11 +184,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get auth_privacyNote =>
-      'Ваши воспоминания принадлежат только вам — мы ничего не публикуем.';
+      'Ваши воспоминания принадлежат только вам, мы ничего не публикуем.';
 
   @override
   String auth_rewardTease(String stars) {
-    return 'Первое воспоминание принесёт $stars, а до значка «Рассказчик» — всего три заметки.';
+    return 'Первое воспоминание принесёт $stars, а до значка «Рассказчик» всего три заметки.';
   }
 
   @override
@@ -208,7 +208,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String auth_confirmationSent(String email) {
-    return 'Мы отправили ссылку для подтверждения на $email. Откройте её на этом телефоне — и вы сразу войдёте, или подтвердите на другом устройстве и войдите здесь.';
+    return 'Мы отправили ссылку для подтверждения на $email. Откройте её на этом телефоне и вы сразу войдёте, или подтвердите на другом устройстве и войдите здесь.';
   }
 
   @override
@@ -232,14 +232,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get guest_eyebrow => 'Хранитель ваших воспоминаний';
 
   @override
-  String get guest_headlineLead => 'Каждое воспоминание —';
+  String get guest_headlineLead => 'Каждое воспоминание ';
 
   @override
   String get guest_headlineEmphasis => 'бережно сохранено.';
 
   @override
   String get guest_body =>
-      'От больших праздников до спонтанных маленьких приключений — некоторые моменты слишком хороши, чтобы их забыть. Планируйте их, проживайте, а мы превратим лучшее в истории, к которым захочется возвращаться снова и снова.';
+      'От больших праздников до спонтанных маленьких приключений, некоторые моменты слишком хороши, чтобы их забыть. Планируйте их, проживайте, а мы превратим лучшее в истории, к которым захочется возвращаться снова и снова.';
 
   @override
   String get guest_occasionWeddings => 'Свадьбы';
@@ -263,11 +263,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get guest_stepBeforeEyebrow => 'До';
 
   @override
-  String get guest_stepBeforeTitle => 'Планируйте веселье. Детали — на нас.';
+  String get guest_stepBeforeTitle => 'Планируйте веселье. Детали на нас.';
 
   @override
   String get guest_stepBeforeBody =>
-      'Большие выходные? Маленькое приключение? Или просто вторник, который хочется запомнить? Составляйте планы и списки — всё в одном уютном месте.';
+      'Большие выходные? Маленькое приключение? Или просто вторник, который хочется запомнить? Составляйте планы и ведите дневник — всё в одном уютном месте.';
 
   @override
   String get guest_stepDuringEyebrow => 'Во время';
@@ -357,14 +357,14 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get home_emptyBody =>
-      'Начните первое воспоминание — и оно превратится в дневник, который останется с вами навсегда.';
+      'Начните первое воспоминание и оно превратится в дневник, который останется с вами навсегда.';
 
   @override
   String get home_emptyCta => 'Создать первое воспоминание';
 
   @override
   String get home_keptForeverEmpty =>
-      'Пока ничего нет — воспоминания появятся здесь, когда поездка завершится.';
+      'Пока ничего нет, воспоминания появятся здесь, когда событие завершится.';
 
   @override
   String home_statMemories(int count) {
@@ -562,7 +562,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get trip_deleteTitle => 'Удалить воспоминание';
 
   @override
-  String get trip_deleteConfirm => 'Да — удалить навсегда';
+  String get trip_deleteConfirm => 'Да! Удалить навсегда';
 
   @override
   String trip_noteDays(int count) {
@@ -595,7 +595,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get toast_questDone => '+1 ✦ · дело сделано';
 
   @override
-  String get toast_packed => '✦ Собрано — отлично';
+  String get toast_packed => '✦ Собрано отлично';
 
   @override
   String get plan_eyebrow => 'План';
@@ -672,7 +672,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get manage_shiftHint =>
-      'Нажмите на дату, чтобы сдвинуть её на день вперёд, удерживайте — чтобы назад. Дела сдвинутся вместе с ней.';
+      'Нажмите на дату, чтобы сдвинуть её на день вперёд, удерживайте чтобы назад. Дела сдвинутся вместе с ней.';
 
   @override
   String get manage_cover => 'Обложка';
@@ -824,7 +824,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get journal_nudgeBody =>
-      'Даже одно фото поможет итогам. Тихие дни тоже попадают в фильм — этот просто промелькнёт.';
+      'Даже одно фото поможет итогам. Тихие дни тоже попадают в фильм а этот просто промелькнёт.';
 
   @override
   String get journal_addAPhoto => '＋ Добавить фото';
@@ -870,7 +870,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get note_bodyHint =>
-      'Продолжайте — печатайте или нажмите на микрофон и просто говорите.';
+      'Продолжайте: печатайте или нажмите на микрофон и просто говорите.';
 
   @override
   String get note_micOff =>
@@ -878,7 +878,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get note_voiceUnavailable =>
-      'Голосовой ввод сейчас недоступен — можно печатать.';
+      'Голосовой ввод сейчас недоступен но можно печатать.';
 
   @override
   String get note_typeSemantics => 'Печатать';
@@ -1231,14 +1231,14 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get bonus_newOnesTomorrow => 'Новые — завтра.';
+  String get bonus_newOnesTomorrow => 'Новые завтра.';
 
   @override
   String get notif_promptTitle => 'Напоминать о ежедневных заданиях?';
 
   @override
   String notif_promptBody(String appName) {
-    return '$appName может напомнить утром и вечером, если бонусное задание ещё не выполнено, — не чаще, и это легко отключить.';
+    return '$appName может напомнить утром и вечером, если бонусное задание ещё не выполнено, не чаще, и это легко отключить.';
   }
 
   @override
@@ -1378,7 +1378,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get sub_trialTerms =>
-      '7 дней бесплатно, потом — по подписке. Отменить можно в любой момент.';
+      '7 дней бесплатно, потом уже по подписке. Отменить можно в любой момент.';
 
   @override
   String sub_trialTermsYearly(String price) {
@@ -1440,7 +1440,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get paywall_subProfile =>
-      'Каждому воспоминанию нужно место. Перейдите на Pro в любой момент — и места хватит на всё.';
+      'Каждому воспоминанию нужно место. Перейдите на Pro в любой момент и места хватит на всё.';
 
   @override
   String get paywall_trialStarted => 'Пробный период начат · 7 дней бесплатно';
@@ -1722,7 +1722,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get note_bodyHintUnavailable =>
-      'Продолжайте печатать — или выберите другой язык и говорите.';
+      'Продолжайте печатать или выберите другой язык и говорите.';
 
   @override
   String note_listeningIn(String code, String time) {
@@ -1746,7 +1746,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_bonus_something_free_detail =>
-      'Вид, улыбка, уличный артист — снимите то, что сегодня ничего вам не стоило.';
+      'Вид, улыбка, уличный артист: снимите то, что сегодня ничего вам не стоило.';
 
   @override
   String get content_bonus_local_snack_title =>
@@ -1762,7 +1762,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_bonus_menu_mystery_detail =>
-      'Ткните в меню — и без отступлений.';
+      'Ткните в меню и без отступлений.';
 
   @override
   String get content_bonus_stranger_kindness_title =>
@@ -1845,7 +1845,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_bonus_local_hangout_detail =>
-      'Не открыточное место — настоящее.';
+      'Не открыточное место а настоящее.';
 
   @override
   String get content_bonus_comfort_food_title =>
@@ -1932,7 +1932,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_bonus_farewell_meal_detail =>
-      'Пусть она запомнится — или будет тем, что осталось в холодильнике.';
+      'Пусть она запомнится или будет тем, что осталось в холодильнике.';
 
   @override
   String get content_bonus_souvenir_final_title =>
@@ -1981,7 +1981,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_bonus_milestone_week_one_title =>
-      'Неделя позади — как эта поездка уже изменила вас?';
+      'Неделя позади! Как эта поездка уже изменила вас?';
 
   @override
   String get content_bonus_milestone_week_one_detail =>
@@ -1989,7 +1989,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_bonus_milestone_two_weeks_title =>
-      'Две недели в пути — что вы знаете теперь, чего не знали в начале?';
+      'Две недели в пути! Что вы знаете теперь, чего не знали в начале?';
 
   @override
   String get content_bonus_milestone_two_weeks_detail =>
@@ -1997,7 +1997,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_bonus_milestone_three_weeks_title =>
-      'Три недели в пути — по чему вы будете скучать больше всего, когда всё закончится?';
+      'Три недели в пути! По чему вы будете скучать больше всего, когда всё закончится?';
 
   @override
   String get content_bonus_milestone_three_weeks_detail =>
@@ -2008,7 +2008,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_bonus_streak_saver_checkin_detail =>
-      'Без давления и без темы — одно фото того места, где вы сейчас.';
+      'Без давления и без темы просто одно фото того места, где вы сейчас.';
 
   @override
   String get content_achievement_first_adventure_title => 'Первое приключение';

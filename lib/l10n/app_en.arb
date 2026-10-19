@@ -101,8 +101,8 @@
   "auth_strengthWeak": "Weak",
   "auth_strengthGood": "Good",
   "auth_strengthStrong": "Strong",
-  "auth_privacyNote": "Your memories stay yours — nothing is ever published.",
-  "auth_rewardTease": "Your first memory earns {stars} — and the Storyteller badge is only three notes away.",
+  "auth_privacyNote": "Your memories stay yours, nothing is ever published.",
+  "auth_rewardTease": "Your first memory earns {stars} and the Storyteller badge is only three notes away.",
   "@auth_rewardTease": {
     "description": "{stars} is auth_rewardTeaseStars, shown highlighted.",
     "placeholders": {
@@ -382,7 +382,7 @@
   "trip_takePhoto": "Take a photo",
   "trip_chooseFromGallery": "Choose from gallery",
   "trip_deleteTitle": "Delete this memory",
-  "trip_deleteConfirm": "Yes — delete it forever",
+  "trip_deleteConfirm": "Yes, delete it forever",
   "trip_noteDays": "{count, plural, =1{1 day of notes} other{{count} days of notes}}",
   "@trip_noteDays": {
     "placeholders": {
@@ -391,7 +391,7 @@
       }
     }
   },
-  "trip_deleteConsequence": "This removes {photos} and {notes}. Your earned stars are kept. It can't be undone.",
+  "trip_deleteConsequence": "This removes {photos} and {notes}. Your earned stars are lost. It can't be undone.",
   "@trip_deleteConsequence": {
     "description": "{photos} is common_photoCount, {notes} is trip_noteDays.",
     "placeholders": {
@@ -473,7 +473,7 @@
     "description": "The memory's name field."
   },
   "manage_rename": "Rename",
-  "manage_shiftHint": "Tap a date to shift it a day forward, hold to shift it back — quests move with it.",
+  "manage_shiftHint": "Tap a date to shift it a day forward, hold to shift it back, quests move with it.",
   "manage_cover": "Cover",
   "@manage_cover": {
     "description": "Mono eyebrow, uppercased in code."
@@ -507,7 +507,7 @@
     "description": "Mono eyebrow, uppercased in code."
   },
   "journal_quietOne": "A quiet one",
-  "journal_dayQuietOne": "Day {day} — a quiet one",
+  "journal_dayQuietOne": "Day {day} a quiet one",
   "@journal_dayQuietOne": {
     "placeholders": {
       "day": {
@@ -600,7 +600,7 @@
   "journal_wrapUpAskNote": "Write one note to unlock it.",
   "journal_wrapUpReqPhotos": "Five photos in this memory",
   "journal_wrapUpReqNote": "At least one note written",
-  "journal_wrapUpFree": "Nothing to buy — this one's the same on every plan.",
+  "journal_wrapUpFree": "Nothing to buy, this one's the same on every plan.",
   "journal_nothingYet": "Nothing here yet",
   "journal_nothingFromDay": "Nothing from Day {day} yet",
   "@journal_nothingFromDay": {
@@ -610,7 +610,7 @@
       }
     }
   },
-  "journal_nudgeBody": "Even one photo helps your wrap-up. Quiet days still make the film — this one will just pass through it.",
+  "journal_nudgeBody": "Even one photo helps your wrap-up. Quiet days still make the film, this one will just pass through it.",
   "journal_addAPhoto": "＋ Add a photo",
   "journal_writeNote": "Write a note",
   "journal_addNotesToday": "✎ Add notes about today",
@@ -639,9 +639,9 @@
   "note_discardTitle": "Discard what you added?",
   "note_keepWriting": "Keep writing",
   "note_discard": "Discard",
-  "note_bodyHint": "Keep going — type, or tap the mic and just talk.",
+  "note_bodyHint": "Keep going: type, or tap the mic and just talk.",
   "note_micOff": "Microphone is off. Turn it on in Settings, or just type.",
-  "note_voiceUnavailable": "Voice isn't available right now — typing works.",
+  "note_voiceUnavailable": "Voice isn't available right now but typing works.",
   "note_typeSemantics": "Type",
   "@note_typeSemantics": {
     "description": "Screen-reader label for the Aa button."
@@ -1005,7 +1005,7 @@
   },
   "bonus_newOnesTomorrow": "New ones tomorrow.",
   "notif_promptTitle": "Get a gentle nudge for your daily dares?",
-  "notif_promptBody": "{appName} can remind you once in the morning and once in the evening when a bonus task is still open — never more than that, and easy to turn off later.",
+  "notif_promptBody": "{appName} can remind you once in the morning and once in the evening when a bonus task is still open but never more than that, and easy to turn off later.",
   "@notif_promptBody": {
     "placeholders": {
       "appName": {
@@ -1260,7 +1260,7 @@
     }
   },
   "paywall_startTrial": "Start 7-day free trial",
-  "paywall_reassurance": "Your three free memories stay yours either way — nothing is deleted or locked if you don't upgrade.",
+  "paywall_reassurance": "Your three free memories stay yours either way, nothing is deleted or locked if you don't upgrade.",
   "wrapUp_openJournal": "Open journal",
   "wrapUp_keepForever": "Keep forever",
   "wrapUp_photographs": "{count, plural, =1{photograph} other{photographs}}",
@@ -1392,7 +1392,7 @@
       }
     }
   },
-  "note_bodyHintUnavailable": "Keep typing — or pick another language and speak.",
+  "note_bodyHintUnavailable": "Keep typing or pick another language and speak.",
   "@note_bodyHintUnavailable": {
     "description": "Body placeholder when the dictation language isn't available (design 2d)."
   },
@@ -1429,7 +1429,7 @@
   "@content_bonus_something_free_title": {
     "description": "Seeded bonus task title (DB code something_free)."
   },
-  "content_bonus_something_free_detail": "A view, a smile, a street performance — snap whatever cost you nothing today.",
+  "content_bonus_something_free_detail": "A view, a smile, a street performance, snap whatever cost you nothing today.",
   "@content_bonus_something_free_detail": {
     "description": "Seeded bonus task detail (DB code something_free)."
   },
@@ -1441,7 +1441,7 @@
   "@content_bonus_local_snack_detail": {
     "description": "Seeded bonus task detail (DB code local_snack)."
   },
-  "content_bonus_menu_mystery_title": "Order something you can't translate",
+  "content_bonus_menu_mystery_title": "Order something",
   "@content_bonus_menu_mystery_title": {
     "description": "Seeded bonus task title (DB code menu_mystery)."
   },
@@ -1485,7 +1485,7 @@
   "@content_bonus_local_transport_title": {
     "description": "Seeded bonus task title (DB code local_transport)."
   },
-  "content_bonus_local_transport_detail": "Bus, bike, boat, blistered feet — all valid.",
+  "content_bonus_local_transport_detail": "Bus, bike, boat, blistered feet: all valid.",
   "@content_bonus_local_transport_detail": {
     "description": "Seeded bonus task detail (DB code local_transport)."
   },
@@ -1533,7 +1533,7 @@
   "@content_bonus_local_hangout_title": {
     "description": "Seeded bonus task title (DB code local_hangout)."
   },
-  "content_bonus_local_hangout_detail": "Not the postcard spot — the real one.",
+  "content_bonus_local_hangout_detail": "Not the postcard spot but the real one.",
   "@content_bonus_local_hangout_detail": {
     "description": "Seeded bonus task detail (DB code local_hangout)."
   },
@@ -1597,7 +1597,7 @@
   "@content_bonus_first_impression_title": {
     "description": "Seeded bonus task title (DB code first_impression)."
   },
-  "content_bonus_first_impression_detail": "The view, the smell, the chaos — capture it before it becomes normal.",
+  "content_bonus_first_impression_detail": "The view, the smell, the chaos: capture it before it becomes normal.",
   "@content_bonus_first_impression_detail": {
     "description": "Seeded bonus task detail (DB code first_impression)."
   },
@@ -1621,7 +1621,7 @@
   "@content_bonus_farewell_meal_title": {
     "description": "Seeded bonus task title (DB code farewell_meal)."
   },
-  "content_bonus_farewell_meal_detail": "Make it count — or make it whatever's left in the fridge.",
+  "content_bonus_farewell_meal_detail": "Make it count or make it whatever's left in the fridge.",
   "@content_bonus_farewell_meal_detail": {
     "description": "Seeded bonus task detail (DB code farewell_meal)."
   },
@@ -1673,7 +1673,7 @@
   "@content_bonus_try_the_dare_detail": {
     "description": "Seeded bonus task detail (DB code try_the_dare)."
   },
-  "content_bonus_milestone_week_one_title": "One week in — how has this trip changed you already?",
+  "content_bonus_milestone_week_one_title": "One week in, how has this trip changed you already?",
   "@content_bonus_milestone_week_one_title": {
     "description": "Seeded bonus task title (DB code milestone_week_one)."
   },
@@ -1681,7 +1681,7 @@
   "@content_bonus_milestone_week_one_detail": {
     "description": "Seeded bonus task detail (DB code milestone_week_one)."
   },
-  "content_bonus_milestone_two_weeks_title": "Two weeks deep — what do you know now that you didn't at the start?",
+  "content_bonus_milestone_two_weeks_title": "Two weeks deep, what do you know now that you didn't at the start?",
   "@content_bonus_milestone_two_weeks_title": {
     "description": "Seeded bonus task title (DB code milestone_two_weeks)."
   },
@@ -1689,7 +1689,7 @@
   "@content_bonus_milestone_two_weeks_detail": {
     "description": "Seeded bonus task detail (DB code milestone_two_weeks)."
   },
-  "content_bonus_milestone_three_weeks_title": "Three weeks out — what will you miss most when this ends?",
+  "content_bonus_milestone_three_weeks_title": "Three weeks out, what will you miss most when this ends?",
   "@content_bonus_milestone_three_weeks_title": {
     "description": "Seeded bonus task title (DB code milestone_three_weeks)."
   },
@@ -1701,7 +1701,7 @@
   "@content_bonus_streak_saver_checkin_title": {
     "description": "Seeded bonus task title (DB code streak_saver_checkin)."
   },
-  "content_bonus_streak_saver_checkin_detail": "No pressure, no theme — one photo of wherever you are right now.",
+  "content_bonus_streak_saver_checkin_detail": "No pressure, no theme, one photo of wherever you are right now.",
   "@content_bonus_streak_saver_checkin_detail": {
     "description": "Seeded bonus task detail (DB code streak_saver_checkin)."
   },
