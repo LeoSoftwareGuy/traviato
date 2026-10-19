@@ -52,7 +52,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get error_freeTierPhotos =>
-      'В бесплатном тарифе: до 40 фото на одно воспоминание. Перейдите на Pro, чтобы снять ограничение.';
+      'В бесплатном тарифе до 40 фото на одно воспоминание. Перейдите на Pro, чтобы снять ограничение.';
 
   @override
   String get error_questPlanningClosed =>
@@ -188,7 +188,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String auth_rewardTease(String stars) {
-    return 'Первое воспоминание принесёт $stars, а до значка «Рассказчик» — всего три заметки.';
+    return 'Первое воспоминание принесёт $stars, а до значка «Рассказчик» всего три заметки.';
   }
 
   @override
@@ -232,7 +232,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get guest_eyebrow => 'Хранитель ваших воспоминаний';
 
   @override
-  String get guest_headlineLead => 'Каждое воспоминание ';
+  String get guest_headlineLead => 'Каждое воспоминание ';
 
   @override
   String get guest_headlineEmphasis => 'бережно сохранено.';
@@ -267,7 +267,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get guest_stepBeforeBody =>
-      'Большие выходные? Маленькое событие? Или просто вторник, который хочется запомнить? Составляйте планы и списки: всё в одном уютном месте.';
+      'Большие выходные? Маленькое приключение? Или просто вторник, который хочется запомнить? Составляйте планы и ведите дневник — всё в одном уютном месте.';
 
   @override
   String get guest_stepDuringEyebrow => 'Во время';
@@ -287,7 +287,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get guest_stepAfterBody =>
-      'Когда событие закончится, ваши моменты соберутся в личный фильм. Переживите волшебство снова и сохраните воспоминания.';
+      'Когда приключение закончится, ваши моменты соберутся в личный фильм. Переживите волшебство снова и сохраните воспоминания.';
 
   @override
   String get guest_sampleMemoriesEyebrow =>
@@ -364,7 +364,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get home_keptForeverEmpty =>
-      'Пока ничего нет. Воспоминания появятся здесь, когда событие завершится.';
+      'Пока ничего нет, воспоминания появятся здесь, когда событие завершится.';
 
   @override
   String home_statMemories(int count) {
@@ -595,7 +595,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get toast_questDone => '+1 ✦ · дело сделано';
 
   @override
-  String get toast_packed => '✦ Собрано, отлично';
+  String get toast_packed => '✦ Собрано отлично';
 
   @override
   String get plan_eyebrow => 'План';
@@ -720,7 +720,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String journal_dayQuietOne(int day) {
-    return 'День $day: тихий день';
+    return 'День $day — тихий день';
   }
 
   @override
@@ -812,7 +812,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get journal_wrapUpFree =>
-      'Ничего покупать не нужно: на любом тарифе всё одинаково.';
+      'Ничего покупать не нужно — на любом тарифе всё одинаково.';
 
   @override
   String get journal_nothingYet => 'Здесь пока пусто';
@@ -824,7 +824,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get journal_nudgeBody =>
-      'Даже одно фото поможет итогам. Тихие дни тоже попадают в фильм, этот просто промелькнёт.';
+      'Даже одно фото поможет итогам. Тихие дни тоже попадают в фильм а этот просто промелькнёт.';
 
   @override
   String get journal_addAPhoto => '＋ Добавить фото';
@@ -878,7 +878,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get note_voiceUnavailable =>
-      'Голосовой ввод сейчас недоступен, можно печатать.';
+      'Голосовой ввод сейчас недоступен но можно печатать.';
 
   @override
   String get note_typeSemantics => 'Печатать';
@@ -1231,14 +1231,14 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get bonus_newOnesTomorrow => 'Новые — завтра.';
+  String get bonus_newOnesTomorrow => 'Новые завтра.';
 
   @override
   String get notif_promptTitle => 'Напоминать о ежедневных заданиях?';
 
   @override
   String notif_promptBody(String appName) {
-    return '$appName может напомнить утром и вечером, если бонусное задание ещё не выполнено, — не чаще, и это легко отключить.';
+    return '$appName может напомнить утром и вечером, если бонусное задание ещё не выполнено, не чаще, и это легко отключить.';
   }
 
   @override
@@ -1405,7 +1405,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get sub_trialTerms =>
-      '7 дней бесплатно, потом — по подписке. Отменить можно в любой момент.';
+      '7 дней бесплатно, потом уже по подписке. Отменить можно в любой момент.';
 
   @override
   String sub_trialTermsYearly(String price) {
@@ -1550,7 +1550,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get paywall_reassurance =>
-      'Три бесплатных воспоминания останутся с вами в любом случае без Pro ничего не удалится и не заблокируется.';
+      'Три бесплатных воспоминания останутся с вами в любом случае — без Pro ничего не удалится и не заблокируется.';
 
   @override
   String get wrapUp_openJournal => 'Открыть дневник';
@@ -1827,7 +1827,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_bonus_local_transport_detail =>
-      'Автобус, велосипед, лодка, стёртые ноги: всё считается.';
+      'Автобус, велосипед, лодка, стёртые ноги — всё считается.';
 
   @override
   String get content_bonus_unexpected_detour_title =>
@@ -1864,7 +1864,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_bonus_halfway_selfie_detail =>
-      'Уставшие глаза - по желанию. Широкая улыбка — обязательно.';
+      'Уставшие глаза — по желанию. Широкая улыбка — обязательно.';
 
   @override
   String get content_bonus_local_hangout_title =>
@@ -1935,7 +1935,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_bonus_first_impression_detail =>
-      'Вид, запах, суматоха: поймайте их, пока они не стали привычными.';
+      'Вид, запах, суматоха — поймайте их, пока они не стали привычными.';
 
   @override
   String get content_bonus_unpacking_ritual_title =>
@@ -2035,7 +2035,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_bonus_streak_saver_checkin_detail =>
-      'Без давления и без темы: одно фото того места, где вы сейчас.';
+      'Без давления и без темы просто одно фото того места, где вы сейчас.';
 
   @override
   String get content_achievement_first_adventure_title => 'Первое приключение';

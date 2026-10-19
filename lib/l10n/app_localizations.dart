@@ -371,7 +371,7 @@ abstract class AppLocalizations {
   /// No description provided for @auth_privacyNote.
   ///
   /// In en, this message translates to:
-  /// **'Your memories stay yours, nothing is ever published.'**
+  /// **'Your memories stay yours — nothing is ever published.'**
   String get auth_privacyNote;
 
   /// {stars} is auth_rewardTeaseStars, shown highlighted.
@@ -971,7 +971,7 @@ abstract class AppLocalizations {
   /// No description provided for @trip_deleteConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Yes, delete it forever'**
+  /// **'Yes! Delete it forever'**
   String get trip_deleteConfirm;
 
   /// No description provided for @trip_noteDays.
@@ -1223,7 +1223,7 @@ abstract class AppLocalizations {
   /// No description provided for @journal_dayQuietOne.
   ///
   /// In en, this message translates to:
-  /// **'Day {day} a quiet one'**
+  /// **'Day {day} — a quiet one'**
   String journal_dayQuietOne(int day);
 
   /// Followed by · and journal_questsDone.
@@ -1337,7 +1337,7 @@ abstract class AppLocalizations {
   /// No description provided for @journal_wrapUpFree.
   ///
   /// In en, this message translates to:
-  /// **'Nothing to buy, this one\'s the same on every plan.'**
+  /// **'Nothing to buy — this one\'s the same on every plan.'**
   String get journal_wrapUpFree;
 
   /// No description provided for @journal_nothingYet.
@@ -1433,7 +1433,7 @@ abstract class AppLocalizations {
   /// No description provided for @note_voiceUnavailable.
   ///
   /// In en, this message translates to:
-  /// **'Voice isn\'t available right now but typing works.'**
+  /// **'Voice isn\'t available right now only typing works.'**
   String get note_voiceUnavailable;
 
   /// Screen-reader label for the Aa button.
@@ -2020,7 +2020,7 @@ abstract class AppLocalizations {
   /// No description provided for @notif_promptBody.
   ///
   /// In en, this message translates to:
-  /// **'{appName} can remind you once in the morning and once in the evening when a bonus task is still open but never more than that, and easy to turn off later.'**
+  /// **'{appName} can remind you once in the morning and once in the evening when a bonus task is still open — never more than that, and easy to turn off later.'**
   String notif_promptBody(String appName);
 
   /// Local notification, ~9:00 on a memory day after an active day.
@@ -2476,7 +2476,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywall_reassurance.
   ///
   /// In en, this message translates to:
-  /// **'Your three free memories stay yours either way, nothing is deleted or locked if you don\'t upgrade.'**
+  /// **'Your three free memories stay yours either way: nothing is deleted or locked if you don\'t upgrade.'**
   String get paywall_reassurance;
 
   /// No description provided for @wrapUp_openJournal.
@@ -2644,7 +2644,7 @@ abstract class AppLocalizations {
   /// Body placeholder when the dictation language isn't available (design 2d).
   ///
   /// In en, this message translates to:
-  /// **'Keep typing or pick another language and speak.'**
+  /// **'Keep typing — or pick another language and speak.'**
   String get note_bodyHintUnavailable;
 
   /// Mono status line, uppercased in code; {code} is the 2-letter dictation language.
@@ -2680,7 +2680,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task detail (DB code something_free).
   ///
   /// In en, this message translates to:
-  /// **'A view, a smile, a street performance, snap whatever cost you nothing today.'**
+  /// **'A view, a smile, a street performance: snap whatever cost you nothing today.'**
   String get content_bonus_something_free_detail;
 
   /// Seeded bonus task title (DB code local_snack).
@@ -2698,7 +2698,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task title (DB code menu_mystery).
   ///
   /// In en, this message translates to:
-  /// **'Order something'**
+  /// **'Order something you can\'t translate'**
   String get content_bonus_menu_mystery_title;
 
   /// Seeded bonus task detail (DB code menu_mystery).
@@ -2764,7 +2764,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task detail (DB code local_transport).
   ///
   /// In en, this message translates to:
-  /// **'Bus, bike, boat, blistered feet: all valid.'**
+  /// **'Bus, bike, boat, blistered feet — all valid.'**
   String get content_bonus_local_transport_detail;
 
   /// Seeded bonus task title (DB code unexpected_detour).
@@ -2932,7 +2932,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task detail (DB code first_impression).
   ///
   /// In en, this message translates to:
-  /// **'The view, the smell, the chaos: capture it before it becomes normal.'**
+  /// **'The view, the smell, the chaos just capture it before it becomes normal.'**
   String get content_bonus_first_impression_detail;
 
   /// Seeded bonus task title (DB code unpacking_ritual).
@@ -3046,7 +3046,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task title (DB code milestone_week_one).
   ///
   /// In en, this message translates to:
-  /// **'One week in, how has this trip changed you already?'**
+  /// **'One week in. How has this trip changed you already?'**
   String get content_bonus_milestone_week_one_title;
 
   /// Seeded bonus task detail (DB code milestone_week_one).
@@ -3058,7 +3058,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task title (DB code milestone_two_weeks).
   ///
   /// In en, this message translates to:
-  /// **'Two weeks deep, what do you know now that you didn\'t at the start?'**
+  /// **'Two weeks deep. What do you know now that you didn\'t at the start?'**
   String get content_bonus_milestone_two_weeks_title;
 
   /// Seeded bonus task detail (DB code milestone_two_weeks).
@@ -3070,7 +3070,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task title (DB code milestone_three_weeks).
   ///
   /// In en, this message translates to:
-  /// **'Three weeks out, what will you miss most when this ends?'**
+  /// **'Three weeks out. What will you miss most when this ends?'**
   String get content_bonus_milestone_three_weeks_title;
 
   /// Seeded bonus task detail (DB code milestone_three_weeks).
@@ -3088,7 +3088,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task detail (DB code streak_saver_checkin).
   ///
   /// In en, this message translates to:
-  /// **'No pressure, no theme, one photo of wherever you are right now.'**
+  /// **'No pressure, no theme just one photo of wherever you are right now.'**
   String get content_bonus_streak_saver_checkin_detail;
 
   /// Achievement title (DB code first_adventure).

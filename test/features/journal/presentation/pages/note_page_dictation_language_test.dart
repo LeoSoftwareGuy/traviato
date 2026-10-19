@@ -137,7 +137,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.text('Keep typing or pick another language and speak.'),
+      find.text('Keep typing — or pick another language and speak.'),
       findsOneWidget,
     );
     expect(

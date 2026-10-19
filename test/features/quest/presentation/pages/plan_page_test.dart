@@ -369,7 +369,7 @@ void main() {
       expect(find.text('22 Aug 2026'), findsOneWidget);
       expect(find.text('26 Aug 2026'), findsOneWidget);
       expect(find.text('Delete this memory'), findsOneWidget);
-      expect(find.text('Yes — delete it forever'), findsNothing);
+      expect(find.text('Yes! Delete it forever'), findsNothing);
     });
 
     testWidgets('renaming calls the repository with the new name', (
@@ -456,7 +456,7 @@ void main() {
       await tester.tap(find.text('Delete this memory'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Yes — delete it forever'), findsOneWidget);
+      expect(find.text('Yes! Delete it forever'), findsOneWidget);
       expect(
         find.textContaining('This removes 2 photos and 1 day of notes'),
         findsOneWidget,
@@ -479,7 +479,7 @@ void main() {
 
       await tester.tap(find.text('Delete this memory'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Yes — delete it forever'));
+      await tester.tap(find.text('Yes! Delete it forever'));
       await tester.pumpAndSettle();
 
       expect(tripRepo.deleteTripCallCount, 1);
@@ -497,7 +497,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Delete this memory'));
       await tester.pumpAndSettle();
-      expect(find.text('Yes — delete it forever'), findsOneWidget);
+      expect(find.text('Yes! Delete it forever'), findsOneWidget);
 
       await tester.tap(find.text('Done'));
       await tester.pumpAndSettle();
@@ -506,7 +506,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Delete this memory'), findsOneWidget);
-      expect(find.text('Yes — delete it forever'), findsNothing);
+      expect(find.text('Yes! Delete it forever'), findsNothing);
     });
   });
 
