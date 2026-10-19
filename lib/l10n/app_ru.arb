@@ -1272,6 +1272,38 @@
   "@notif_promptBody": {
     "x-review": "pending"
   },
+  "notif_morningTitle": "Два маленьких задания на сегодня ✦",
+  "@notif_morningTitle": {
+    "x-review": "pending"
+  },
+  "notif_morningBody": "Загляните — посмотрите, что приготовил сегодняшний день.",
+  "@notif_morningBody": {
+    "x-review": "pending"
+  },
+  "notif_eveningTitle": "Ещё есть время для задания",
+  "@notif_eveningTitle": {
+    "x-review": "pending"
+  },
+  "notif_eveningBody": "Сегодняшние бонусные задания ждут вас.",
+  "@notif_eveningBody": {
+    "x-review": "pending"
+  },
+  "notif_arrivalTitle": "Ваша поездка начинается сегодня ✦",
+  "@notif_arrivalTitle": {
+    "x-review": "pending"
+  },
+  "notif_arrivalBody": "Сохраните первый момент и посмотрите, что вас ждёт.",
+  "@notif_arrivalBody": {
+    "x-review": "pending"
+  },
+  "notif_channelName": "Бонусные задания",
+  "@notif_channelName": {
+    "x-review": "pending"
+  },
+  "notif_channelDescription": "Ежедневные напоминания о бонусных заданиях поездки.",
+  "@notif_channelDescription": {
+    "x-review": "pending"
+  },
   "profile_eyebrow": "Профиль",
   "@profile_eyebrow": {
     "x-review": "pending"
