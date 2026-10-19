@@ -25,6 +25,7 @@ import {
 } from "./ai_fields.ts";
 import type { TripData } from "./gather.ts";
 import { inclusiveDayCount } from "./assemble.ts";
+import { languageInstruction, type WrapUpLanguage } from "./language.ts";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
@@ -80,7 +81,10 @@ export class WrapUpGenerationError extends Error {
   }
 }
 
-function buildPrompt(tripData: TripData): string {
+export function buildPrompt(
+  tripData: TripData,
+  language: WrapUpLanguage = "en",
+): string {
   const { trip, notes, latestAchievement } = tripData;
   const dayCount = inclusiveDayCount(trip.start_date, trip.end_date);
 
@@ -107,6 +111,7 @@ function buildPrompt(tripData: TripData): string {
     "show one); unlock_reason (one line on why the achievement was earned, or ",
     "null if no achievement was given above); keepsake_closing_quote (one ",
     "short, warm closing line).",
+    languageInstruction(language),
   ].join("");
 }
 
@@ -121,6 +126,7 @@ export async function callAnthropic(
   apiKey: string,
   fetchImpl: FetchLike = fetch,
   log: LogLike = console.error,
+  language: WrapUpLanguage = "en",
 ): Promise<AiGeneratedFields> {
   let lastError = new WrapUpGenerationError(
     "ai_unreachable",
@@ -140,7 +146,10 @@ export async function callAnthropic(
         body: JSON.stringify({
           model: MODEL,
           max_tokens: MAX_TOKENS,
-          messages: [{ role: "user", content: buildPrompt(tripData) }],
+          messages: [{
+            role: "user",
+            content: buildPrompt(tripData, language),
+          }],
           tools: [aiGeneratedFieldsToolSchema],
           tool_choice: {
             type: "tool",

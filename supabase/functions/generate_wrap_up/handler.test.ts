@@ -321,6 +321,54 @@ Deno.test("draft whose notes changed: regenerates and counts the call", async ()
   assertEquals(client.writes[0].values.ai_fields, validAiFields);
 });
 
+Deno.test("the requested language reaches the AI and its hash (#250)", async () => {
+  const client = draftClient({
+    ai_fields: OLD_FIELDS,
+    ai_input_hash: await currentHash(), // English, unchanged inputs
+    ai_generation_count: 1,
+  });
+  const languages: string[] = [];
+  const deps = baseDeps({
+    serviceClient: client,
+    generateAiFields: (_tripData, language) => {
+      languages.push(language);
+      return Promise.resolve(validAiFields);
+    },
+    log: () => {},
+  });
+
+  const res = await handleRequest(
+    request({ trip_id: TRIP_ID, language: "ru" }),
+    deps,
+  );
+
+  assertEquals(res.status, 200);
+  assertEquals(languages, ["ru"]);
+  assertEquals(client.writes[0].values.ai_generation_count, 2);
+  assertEquals(
+    client.writes[0].values.ai_input_hash,
+    await computeAiInputHash(
+      await gatherTripData(fakeSupabaseClient(DRAFT_TABLES), TRIP_ID),
+      "ru",
+    ),
+  );
+});
+
+Deno.test("no or unknown language is English: an English draft stays put", async () => {
+  for (const language of [undefined, "et"]) {
+    const client = draftClient({
+      ai_fields: OLD_FIELDS,
+      ai_input_hash: await currentHash(),
+      ai_generation_count: 1,
+    });
+    const { deps, calls } = countingDeps(client);
+
+    await handleRequest(request({ trip_id: TRIP_ID, language }), deps);
+
+    assertEquals(calls.n, 0, `language: ${language}`);
+  }
+});
+
 Deno.test("draft at the AI cap: no call, last AI text reused, film still rebuilt", async () => {
   const client = draftClient({
     ai_fields: OLD_FIELDS,
