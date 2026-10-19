@@ -8,7 +8,6 @@ import 'package:traviato/l10n/app_localizations.dart';
 void main() {
   final en = lookupAppLocalizations(const Locale('en'));
   final ru = lookupAppLocalizations(const Locale('ru'));
-  final et = lookupAppLocalizations(const Locale('et'));
 
   group('presentationFailureMessage', () {
     test('unwraps a PresentationFailureException to its failure message', () {
@@ -58,10 +57,6 @@ void main() {
       expect(
         presentationFailureMessage(const NetworkFailure(), ru),
         'Проверьте подключение к интернету.',
-      );
-      expect(
-        presentationFailureMessage(const NetworkFailure(), et),
-        'Kontrolli internetiühendust.',
       );
     });
 

@@ -119,21 +119,7 @@ void main() {
     expect(find.text('Главная'), findsOneWidget);
   });
 
-  testWidgets('an empty day reads in Estonian', (tester) async {
-    setScreenSize(tester, height: 2000);
-    await _pump(tester, const Locale('et'), withEntries: false);
-
-    expect(find.text('PÄEVIK'), findsOneWidget);
-    expect(find.text('Päev 2 — vaikne päev'), findsOneWidget);
-    expect(
-      find.text('Veel pole fotosid ega märkmeid · 0 tegevust tehtud'),
-      findsOneWidget,
-    );
-    expect(find.text('2. päevast pole veel midagi'), findsOneWidget);
-    expect(find.text('＋ Lisa foto'), findsOneWidget);
-  });
-
-  for (final locale in const [Locale('en'), Locale('ru'), Locale('et')]) {
+  for (final locale in const [Locale('en'), Locale('ru')]) {
     for (final withEntries in const [true, false]) {
       testWidgets('Journal lays out without overflow at 360pt in '
           '${locale.languageCode} (entries: $withEntries)', (tester) async {

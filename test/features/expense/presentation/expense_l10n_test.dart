@@ -18,7 +18,6 @@ import '../fakes/fake_expense_repository.dart';
 
 final _en = lookupAppLocalizations(const Locale('en'));
 final _ru = lookupAppLocalizations(const Locale('ru'));
-final _et = lookupAppLocalizations(const Locale('et'));
 
 FakeExpenseRepository _repo() => FakeExpenseRepository()
   ..summariesResult = Right([
@@ -51,12 +50,10 @@ FakeExpenseRepository _repo() => FakeExpenseRepository()
 
 void main() {
   group('money', () {
-    test('English keeps its format; ru/et put the euro last', () {
+    test('English keeps its format; Russian puts the euro last', () {
       expect(formatEuro(1234.5, 'en'), '€1,234.50');
       expect(formatEuro(42, 'en'), '€42');
       expect(formatEuro(1234.5, 'ru'), '1 234,50 €');
-      expect(formatEuro(1234.5, 'et'), '1 234,50 €');
-      expect(formatEuro(42, 'et'), '42 €');
     });
 
     test('typed amounts accept a decimal comma and grouping spaces', () {
@@ -70,7 +67,7 @@ void main() {
   });
 
   test('every category and sort mode has a distinct label per language', () {
-    for (final l10n in [_en, _ru, _et]) {
+    for (final l10n in [_en, _ru]) {
       expect(
         {for (final c in ExpenseCategory.values) expenseCategoryLabel(l10n, c)},
         hasLength(ExpenseCategory.values.length),
@@ -130,7 +127,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  for (final locale in const [Locale('en'), Locale('ru'), Locale('et')]) {
+  for (final locale in const [Locale('en'), Locale('ru')]) {
     testWidgets('Expenses and Compare lay out without overflow at 360pt in '
         '${locale.languageCode}', (tester) async {
       setScreenSize(tester, height: 2400);
@@ -167,7 +164,7 @@ void main() {
       ProviderScope(
         overrides: [expenseRepositoryProvider.overrideWithValue(repo)],
         child: localizedApp(
-          locale: const Locale('et'),
+          locale: const Locale('ru'),
           home: Scaffold(
             body: Builder(
               builder: (context) => ElevatedButton(
@@ -186,15 +183,15 @@ void main() {
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Uus kulu'), findsOneWidget);
-    expect(find.textContaining('Täna ·'), findsOneWidget);
+    expect(find.text('Новый расход'), findsOneWidget);
+    expect(find.textContaining('Сегодня ·'), findsOneWidget);
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Õhtusöök päikeseloojangul'),
-      'Kohv',
+      find.widgetWithText(TextFormField, 'Ужин на закате'),
+      'Кофе',
     );
     await tester.enterText(find.widgetWithText(TextFormField, '0'), '12,50');
-    await tester.ensureVisible(find.text('Salvesta kulu'));
-    await tester.tap(find.text('Salvesta kulu'));
+    await tester.ensureVisible(find.text('Сохранить расход'));
+    await tester.tap(find.text('Сохранить расход'));
     await tester.pumpAndSettle();
 
     expect(repo.lastAddExpenseArgs?['amount'], 12.5);

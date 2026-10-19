@@ -7,7 +7,6 @@ import 'package:traviato/l10n/app_localizations.dart';
 void main() {
   final en = lookupAppLocalizations(const Locale('en'));
   final ru = lookupAppLocalizations(const Locale('ru'));
-  final et = lookupAppLocalizations(const Locale('et'));
 
   test('English labels equal the stored vibe names', () {
     for (final vibe in kTripVibes) {
@@ -16,11 +15,9 @@ void main() {
   });
 
   test('every canonical vibe has its own translation', () {
-    for (final l10n in [ru, et]) {
-      final labels = {for (final vibe in kTripVibes) vibeLabel(l10n, vibe)};
-      expect(labels, hasLength(kTripVibes.length));
-      expect(labels.intersection(kTripVibes.toSet()), isEmpty);
-    }
+    final labels = {for (final vibe in kTripVibes) vibeLabel(ru, vibe)};
+    expect(labels, hasLength(kTripVibes.length));
+    expect(labels.intersection(kTripVibes.toSet()), isEmpty);
   });
 
   test('an unknown stored vibe is shown as stored', () {

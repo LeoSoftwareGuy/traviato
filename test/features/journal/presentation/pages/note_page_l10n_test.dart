@@ -51,7 +51,6 @@ void main() {
   for (final (locale, tapToTalk) in const [
     (Locale('en'), 'Tap to talk'),
     (Locale('ru'), 'Нажмите, чтобы говорить'),
-    (Locale('et'), 'Puuduta ja räägi'),
   ]) {
     testWidgets('note page toolbar lays out at 360pt in '
         '${locale.languageCode}', (tester) async {

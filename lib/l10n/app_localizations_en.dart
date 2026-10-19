@@ -177,7 +177,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get auth_privacyNote =>
-      'Your memories stay yours — nothing is ever published.';
+      'Your memories stay yours, nothing is ever published.';
 
   @override
   String auth_rewardTease(String stars) {
@@ -544,7 +544,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trip_deleteTitle => 'Delete this memory';
 
   @override
-  String get trip_deleteConfirm => 'Yes! Delete it forever';
+  String get trip_deleteConfirm => 'Yes, delete it forever';
 
   @override
   String trip_noteDays(int count) {
@@ -559,7 +559,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String trip_deleteConsequence(String photos, String notes) {
-    return 'This removes $photos and $notes. Your earned stars are kept. It can\'t be undone.';
+    return 'This removes $photos and $notes. Your earned stars are lost. It can\'t be undone.';
   }
 
   @override
@@ -699,7 +699,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String journal_dayQuietOne(int day) {
-    return 'Day $day — a quiet one';
+    return 'Day $day a quiet one';
   }
 
   @override
@@ -791,7 +791,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get journal_wrapUpFree =>
-      'Nothing to buy — this one\'s the same on every plan.';
+      'Nothing to buy, this one\'s the same on every plan.';
 
   @override
   String get journal_nothingYet => 'Nothing here yet';
@@ -846,8 +846,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get note_discard => 'Discard';
 
   @override
-  String get note_bodyHint =>
-      'Keep going: type, or tap the mic and just talk.';
+  String get note_bodyHint => 'Keep going: type, or tap the mic and just talk.';
 
   @override
   String get note_micOff =>
@@ -855,7 +854,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get note_voiceUnavailable =>
-      'Voice isn\'t available right now only typing works.';
+      'Voice isn\'t available right now but typing works.';
 
   @override
   String get note_typeSemantics => 'Type';
@@ -1213,7 +1212,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String notif_promptBody(String appName) {
-    return '$appName can remind you once in the morning and once in the evening when a bonus task is still open — never more than that, and easy to turn off later.';
+    return '$appName can remind you once in the morning and once in the evening when a bonus task is still open but never more than that, and easy to turn off later.';
   }
 
   @override
@@ -1487,7 +1486,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paywall_reassurance =>
-      'Your three free memories stay yours either way: nothing is deleted or locked if you don\'t upgrade.';
+      'Your three free memories stay yours either way, nothing is deleted or locked if you don\'t upgrade.';
 
   @override
   String get wrapUp_openJournal => 'Open journal';
@@ -1690,7 +1689,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get note_bodyHintUnavailable =>
-      'Keep typing — or pick another language and speak.';
+      'Keep typing or pick another language and speak.';
 
   @override
   String note_listeningIn(String code, String time) {
@@ -1715,7 +1714,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_bonus_something_free_detail =>
-      'A view, a smile, a street performance: snap whatever cost you nothing today.';
+      'A view, a smile, a street performance, snap whatever cost you nothing today.';
 
   @override
   String get content_bonus_local_snack_title =>
@@ -1726,8 +1725,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Bonus points if you can\'t pronounce it.';
 
   @override
-  String get content_bonus_menu_mystery_title =>
-      'Order something you can\'t translate';
+  String get content_bonus_menu_mystery_title => 'Order something';
 
   @override
   String get content_bonus_menu_mystery_detail =>
@@ -1770,7 +1768,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_bonus_local_transport_detail =>
-      'Bus, bike, boat, blistered feet — all valid.';
+      'Bus, bike, boat, blistered feet: all valid.';
 
   @override
   String get content_bonus_unexpected_detour_title =>
@@ -1879,7 +1877,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_bonus_first_impression_detail =>
-      'The view, the smell, the chaos just capture it before it becomes normal.';
+      'The view, the smell, the chaos: capture it before it becomes normal.';
 
   @override
   String get content_bonus_unpacking_ritual_title =>
@@ -1951,7 +1949,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_bonus_milestone_week_one_title =>
-      'One week in. How has this trip changed you already?';
+      'One week in, how has this trip changed you already?';
 
   @override
   String get content_bonus_milestone_week_one_detail =>
@@ -1959,7 +1957,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_bonus_milestone_two_weeks_title =>
-      'Two weeks deep. What do you know now that you didn\'t at the start?';
+      'Two weeks deep, what do you know now that you didn\'t at the start?';
 
   @override
   String get content_bonus_milestone_two_weeks_detail =>
@@ -1967,7 +1965,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_bonus_milestone_three_weeks_title =>
-      'Three weeks out. What will you miss most when this ends?';
+      'Three weeks out, what will you miss most when this ends?';
 
   @override
   String get content_bonus_milestone_three_weeks_detail =>
@@ -1978,7 +1976,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_bonus_streak_saver_checkin_detail =>
-      'No pressure, no theme just one photo of wherever you are right now.';
+      'No pressure, no theme, one photo of wherever you are right now.';
 
   @override
   String get content_achievement_first_adventure_title => 'First Adventure';

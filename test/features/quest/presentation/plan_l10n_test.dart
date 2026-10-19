@@ -94,15 +94,6 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Plan reads in Estonian', (tester) async {
-    setScreenSize(tester, height: 1600);
-    await _pump(tester, const Locale('et'));
-
-    expect(find.text('Päev 2/5'), findsOneWidget);
-    expect(find.text('2 tegevust plaanis · kokku 5 päeva'), findsOneWidget);
-    expect(find.textContaining('0/2 tehtud'), findsOneWidget);
-  });
-
   testWidgets('manage sheet reads in Russian', (tester) async {
     setScreenSize(tester, height: 1600);
     await _pump(tester, const Locale('ru'));
@@ -117,7 +108,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  for (final locale in const [Locale('en'), Locale('ru'), Locale('et')]) {
+  for (final locale in const [Locale('en'), Locale('ru')]) {
     testWidgets('Plan lays out without overflow at 360pt in '
         '${locale.languageCode}', (tester) async {
       setScreenSize(tester, height: 1600);

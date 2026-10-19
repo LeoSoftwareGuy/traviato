@@ -6,7 +6,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
-import 'app_localizations_et.dart';
 import 'app_localizations_ru.dart';
 
 // ignore_for_file: type=lint
@@ -96,7 +95,6 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('et'),
     Locale('ru'),
   ];
 
@@ -373,13 +371,13 @@ abstract class AppLocalizations {
   /// No description provided for @auth_privacyNote.
   ///
   /// In en, this message translates to:
-  /// **'Your memories stay yours — nothing is ever published.'**
+  /// **'Your memories stay yours, nothing is ever published.'**
   String get auth_privacyNote;
 
   /// {stars} is auth_rewardTeaseStars, shown highlighted.
   ///
   /// In en, this message translates to:
-  /// **'Your first memory earns {stars} — and the Storyteller badge is only three notes away.'**
+  /// **'Your first memory earns {stars} and the Storyteller badge is only three notes away.'**
   String auth_rewardTease(String stars);
 
   /// No description provided for @auth_rewardTeaseStars.
@@ -973,7 +971,7 @@ abstract class AppLocalizations {
   /// No description provided for @trip_deleteConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Yes — delete it forever'**
+  /// **'Yes, delete it forever'**
   String get trip_deleteConfirm;
 
   /// No description provided for @trip_noteDays.
@@ -985,7 +983,7 @@ abstract class AppLocalizations {
   /// {photos} is common_photoCount, {notes} is trip_noteDays.
   ///
   /// In en, this message translates to:
-  /// **'This removes {photos} and {notes}. Your earned stars are kept. It can\'t be undone.'**
+  /// **'This removes {photos} and {notes}. Your earned stars are lost. It can\'t be undone.'**
   String trip_deleteConsequence(String photos, String notes);
 
   /// No description provided for @common_edit.
@@ -1135,7 +1133,7 @@ abstract class AppLocalizations {
   /// No description provided for @manage_shiftHint.
   ///
   /// In en, this message translates to:
-  /// **'Tap a date to shift it a day forward, hold to shift it back — quests move with it.'**
+  /// **'Tap a date to shift it a day forward, hold to shift it back, quests move with it.'**
   String get manage_shiftHint;
 
   /// Mono eyebrow, uppercased in code.
@@ -1225,7 +1223,7 @@ abstract class AppLocalizations {
   /// No description provided for @journal_dayQuietOne.
   ///
   /// In en, this message translates to:
-  /// **'Day {day} — a quiet one'**
+  /// **'Day {day} a quiet one'**
   String journal_dayQuietOne(int day);
 
   /// Followed by · and journal_questsDone.
@@ -1339,7 +1337,7 @@ abstract class AppLocalizations {
   /// No description provided for @journal_wrapUpFree.
   ///
   /// In en, this message translates to:
-  /// **'Nothing to buy — this one\'s the same on every plan.'**
+  /// **'Nothing to buy, this one\'s the same on every plan.'**
   String get journal_wrapUpFree;
 
   /// No description provided for @journal_nothingYet.
@@ -1357,7 +1355,7 @@ abstract class AppLocalizations {
   /// No description provided for @journal_nudgeBody.
   ///
   /// In en, this message translates to:
-  /// **'Even one photo helps your wrap-up. Quiet days still make the film — this one will just pass through it.'**
+  /// **'Even one photo helps your wrap-up. Quiet days still make the film, this one will just pass through it.'**
   String get journal_nudgeBody;
 
   /// No description provided for @journal_addAPhoto.
@@ -1423,7 +1421,7 @@ abstract class AppLocalizations {
   /// No description provided for @note_bodyHint.
   ///
   /// In en, this message translates to:
-  /// **'Keep going — type, or tap the mic and just talk.'**
+  /// **'Keep going: type, or tap the mic and just talk.'**
   String get note_bodyHint;
 
   /// No description provided for @note_micOff.
@@ -1435,7 +1433,7 @@ abstract class AppLocalizations {
   /// No description provided for @note_voiceUnavailable.
   ///
   /// In en, this message translates to:
-  /// **'Voice isn\'t available right now — typing works.'**
+  /// **'Voice isn\'t available right now but typing works.'**
   String get note_voiceUnavailable;
 
   /// Screen-reader label for the Aa button.
@@ -2022,7 +2020,7 @@ abstract class AppLocalizations {
   /// No description provided for @notif_promptBody.
   ///
   /// In en, this message translates to:
-  /// **'{appName} can remind you once in the morning and once in the evening when a bonus task is still open — never more than that, and easy to turn off later.'**
+  /// **'{appName} can remind you once in the morning and once in the evening when a bonus task is still open but never more than that, and easy to turn off later.'**
   String notif_promptBody(String appName);
 
   /// Mono eyebrow, uppercased in code.
@@ -2430,7 +2428,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywall_reassurance.
   ///
   /// In en, this message translates to:
-  /// **'Your three free memories stay yours either way — nothing is deleted or locked if you don\'t upgrade.'**
+  /// **'Your three free memories stay yours either way, nothing is deleted or locked if you don\'t upgrade.'**
   String get paywall_reassurance;
 
   /// No description provided for @wrapUp_openJournal.
@@ -2598,7 +2596,7 @@ abstract class AppLocalizations {
   /// Body placeholder when the dictation language isn't available (design 2d).
   ///
   /// In en, this message translates to:
-  /// **'Keep typing — or pick another language and speak.'**
+  /// **'Keep typing or pick another language and speak.'**
   String get note_bodyHintUnavailable;
 
   /// Mono status line, uppercased in code; {code} is the 2-letter dictation language.
@@ -2634,7 +2632,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task detail (DB code something_free).
   ///
   /// In en, this message translates to:
-  /// **'A view, a smile, a street performance — snap whatever cost you nothing today.'**
+  /// **'A view, a smile, a street performance, snap whatever cost you nothing today.'**
   String get content_bonus_something_free_detail;
 
   /// Seeded bonus task title (DB code local_snack).
@@ -2652,7 +2650,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task title (DB code menu_mystery).
   ///
   /// In en, this message translates to:
-  /// **'Order something you can\'t translate'**
+  /// **'Order something'**
   String get content_bonus_menu_mystery_title;
 
   /// Seeded bonus task detail (DB code menu_mystery).
@@ -2718,7 +2716,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task detail (DB code local_transport).
   ///
   /// In en, this message translates to:
-  /// **'Bus, bike, boat, blistered feet — all valid.'**
+  /// **'Bus, bike, boat, blistered feet: all valid.'**
   String get content_bonus_local_transport_detail;
 
   /// Seeded bonus task title (DB code unexpected_detour).
@@ -2790,7 +2788,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task detail (DB code local_hangout).
   ///
   /// In en, this message translates to:
-  /// **'Not the postcard spot — the real one.'**
+  /// **'Not the postcard spot but the real one.'**
   String get content_bonus_local_hangout_detail;
 
   /// Seeded bonus task title (DB code comfort_food).
@@ -2886,7 +2884,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task detail (DB code first_impression).
   ///
   /// In en, this message translates to:
-  /// **'The view, the smell, the chaos — capture it before it becomes normal.'**
+  /// **'The view, the smell, the chaos: capture it before it becomes normal.'**
   String get content_bonus_first_impression_detail;
 
   /// Seeded bonus task title (DB code unpacking_ritual).
@@ -2922,7 +2920,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task detail (DB code farewell_meal).
   ///
   /// In en, this message translates to:
-  /// **'Make it count — or make it whatever\'s left in the fridge.'**
+  /// **'Make it count or make it whatever\'s left in the fridge.'**
   String get content_bonus_farewell_meal_detail;
 
   /// Seeded bonus task title (DB code souvenir_final).
@@ -3000,7 +2998,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task title (DB code milestone_week_one).
   ///
   /// In en, this message translates to:
-  /// **'One week in — how has this trip changed you already?'**
+  /// **'One week in, how has this trip changed you already?'**
   String get content_bonus_milestone_week_one_title;
 
   /// Seeded bonus task detail (DB code milestone_week_one).
@@ -3012,7 +3010,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task title (DB code milestone_two_weeks).
   ///
   /// In en, this message translates to:
-  /// **'Two weeks deep — what do you know now that you didn\'t at the start?'**
+  /// **'Two weeks deep, what do you know now that you didn\'t at the start?'**
   String get content_bonus_milestone_two_weeks_title;
 
   /// Seeded bonus task detail (DB code milestone_two_weeks).
@@ -3024,7 +3022,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task title (DB code milestone_three_weeks).
   ///
   /// In en, this message translates to:
-  /// **'Three weeks out — what will you miss most when this ends?'**
+  /// **'Three weeks out, what will you miss most when this ends?'**
   String get content_bonus_milestone_three_weeks_title;
 
   /// Seeded bonus task detail (DB code milestone_three_weeks).
@@ -3042,7 +3040,7 @@ abstract class AppLocalizations {
   /// Seeded bonus task detail (DB code streak_saver_checkin).
   ///
   /// In en, this message translates to:
-  /// **'No pressure, no theme — one photo of wherever you are right now.'**
+  /// **'No pressure, no theme, one photo of wherever you are right now.'**
   String get content_bonus_streak_saver_checkin_detail;
 
   /// Achievement title (DB code first_adventure).
@@ -3375,7 +3373,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'et', 'ru'].contains(locale.languageCode);
+      <String>['en', 'ru'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -3386,8 +3384,6 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return AppLocalizationsEn();
-    case 'et':
-      return AppLocalizationsEt();
     case 'ru':
       return AppLocalizationsRu();
   }

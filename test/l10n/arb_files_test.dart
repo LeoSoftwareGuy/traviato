@@ -13,7 +13,7 @@ Set<String> _messageKeys(Map<String, dynamic> arb) =>
 void main() {
   final en = _arb('en');
 
-  for (final locale in ['ru', 'et']) {
+  for (final locale in ['ru']) {
     group('app_$locale.arb', () {
       final arb = _arb(locale);
 

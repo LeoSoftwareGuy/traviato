@@ -49,7 +49,7 @@ Future<void> _pump(WidgetTester tester, Locale locale) async {
 
 void main() {
   test('every category has a distinct label per language', () {
-    for (final locale in const ['en', 'ru', 'et']) {
+    for (final locale in const ['en', 'ru']) {
       final l10n = lookupAppLocalizations(Locale(locale));
       final labels = {
         for (final c in ChecklistCategory.values)
@@ -82,7 +82,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  for (final locale in const [Locale('en'), Locale('ru'), Locale('et')]) {
+  for (final locale in const [Locale('en'), Locale('ru')]) {
     testWidgets('Checklist lays out without overflow at 360pt in '
         '${locale.languageCode}', (tester) async {
       setScreenSize(tester);
