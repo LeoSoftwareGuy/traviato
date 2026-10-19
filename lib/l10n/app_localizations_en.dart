@@ -559,7 +559,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String trip_deleteConsequence(String photos, String notes) {
-    return 'This removes $photos and $notes. Your earned stars are kept. It can\'t be undone.';
+    return 'This removes $photos and $notes. Your earned stars are lost. It can\'t be undone.';
   }
 
   @override
@@ -846,8 +846,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get note_discard => 'Discard';
 
   @override
-  String get note_bodyHint =>
-      'Keep going: type, or tap the mic and just talk.';
+  String get note_bodyHint => 'Keep going: type, or tap the mic and just talk.';
 
   @override
   String get note_micOff =>

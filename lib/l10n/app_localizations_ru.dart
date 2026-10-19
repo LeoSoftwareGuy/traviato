@@ -579,7 +579,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String trip_deleteConsequence(String photos, String notes) {
-    return 'Будут удалены $photos и $notes. Заработанные звёзды останутся. Отменить это нельзя.';
+    return 'Будут удалены $photos и $notes. Заработанные звёзды исчезнут. Отменить это нельзя.';
   }
 
   @override
