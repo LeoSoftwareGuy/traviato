@@ -60,7 +60,7 @@ void main() {
 
     expect(find.text('Delete this memory'), findsWidgets); // title + button
     expect(find.text('Atlas high road'), findsOneWidget);
-    expect(find.text('Yes — delete it forever'), findsNothing);
+    expect(find.text('Yes! Delete it forever'), findsNothing);
     expect(find.text('Rename'), findsNothing);
     expect(find.text('COVER'), findsNothing);
   });
@@ -86,7 +86,7 @@ void main() {
     await tester.tap(find.text('Delete this memory').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Yes — delete it forever'), findsOneWidget);
+    expect(find.text('Yes! Delete it forever'), findsOneWidget);
     expect(
       find.textContaining('This removes 2 photos and 1 day of notes'),
       findsOneWidget,
@@ -102,7 +102,7 @@ void main() {
 
     await tester.tap(find.text('Delete this memory').last);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Yes — delete it forever'));
+    await tester.tap(find.text('Yes! Delete it forever'));
     await tester.pumpAndSettle();
 
     expect(tripRepo.deleteTripCallCount, 1);

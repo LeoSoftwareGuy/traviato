@@ -30,7 +30,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('ХРАНИТЕЛЬ ВАШИХ ВОСПОМИНАНИЙ'), findsOneWidget);
-      expect(find.text('Каждое воспоминание —'), findsOneWidget);
+      expect(find.text('Каждое воспоминание\u00a0'), findsOneWidget);
       expect(find.text('бережно сохранено.'), findsOneWidget);
       expect(find.text('Войти'), findsOneWidget);
       expect(find.text('RU'), findsOneWidget); // language chip (1d)

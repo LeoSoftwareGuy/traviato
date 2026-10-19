@@ -376,7 +376,7 @@ void main() {
       await tester.pump();
 
       expect(
-        find.text("Voice isn't available right now — typing works."),
+        find.text("Voice isn't available right now only typing works."),
         findsOneWidget,
       );
     });

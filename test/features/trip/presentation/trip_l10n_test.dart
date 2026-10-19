@@ -107,7 +107,7 @@ void main() {
     await tester.tap(find.text('Удалить воспоминание').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Да — удалить навсегда'), findsOneWidget);
+    expect(find.text('Да! Удалить навсегда'), findsOneWidget);
     expect(
       find.textContaining('Будут удалены 5 фото и 3 дня заметок.'),
       findsOneWidget,
