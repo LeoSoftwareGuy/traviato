@@ -58,7 +58,7 @@ final class BonusNotificationLocalDataSourceProvider
 }
 
 String _$bonusNotificationLocalDataSourceHash() =>
-    r'56b138fed4dc6d172f782ce45759cc30d51ad378';
+    r'60e50233596ca2f424ba149f93442efbd2d5ff4e';
 
 @ProviderFor(bonusNotificationRepository)
 final bonusNotificationRepositoryProvider =

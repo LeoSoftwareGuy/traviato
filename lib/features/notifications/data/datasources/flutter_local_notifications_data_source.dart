@@ -4,11 +4,10 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+import 'bonus_notification_copy.dart';
 import 'bonus_notification_local_data_source.dart';
 
 const _androidChannelId = 'bonus_tasks';
-const _androidChannelName = 'Bonus dares';
-const _androidChannelDescription = 'Daily nudges for your trip\'s bonus tasks.';
 
 /// Fixed ids — there is only ever one active trip's morning/evening pair at
 /// a time (see #65's plan comment). Arrival ids are derived per-trip so
@@ -45,6 +44,13 @@ tz.Location resolveTimezoneLocation(String zoneName) {
 
 class FlutterLocalNotificationsDataSource
     implements BonusNotificationLocalDataSource {
+  /// [copy] is read on every schedule, so each reminder is written in the
+  /// UI language of that moment (#252).
+  FlutterLocalNotificationsDataSource({
+    required BonusNotificationCopy Function() copy,
+  }) : _copy = copy;
+
+  final BonusNotificationCopy Function() _copy;
   final _plugin = FlutterLocalNotificationsPlugin();
 
   @override
@@ -131,37 +137,49 @@ class FlutterLocalNotificationsDataSource
   Future<void> scheduleMorning({
     required DateTime fireAt,
     required String tripId,
-  }) => _schedule(
-    id: _morningId,
-    fireAt: fireAt,
-    payload: tripId,
-    title: 'Two little dares today ✦',
-    body: 'Open the tray and see what today\'s got.',
-  );
+  }) {
+    final copy = _copy();
+    return _schedule(
+      id: _morningId,
+      fireAt: fireAt,
+      payload: tripId,
+      title: copy.morningTitle,
+      body: copy.morningBody,
+      copy: copy,
+    );
+  }
 
   @override
   Future<void> scheduleEvening({
     required DateTime fireAt,
     required String tripId,
-  }) => _schedule(
-    id: _eveningId,
-    fireAt: fireAt,
-    payload: tripId,
-    title: 'Still time for a dare',
-    body: 'Today\'s bonus tasks are waiting.',
-  );
+  }) {
+    final copy = _copy();
+    return _schedule(
+      id: _eveningId,
+      fireAt: fireAt,
+      payload: tripId,
+      title: copy.eveningTitle,
+      body: copy.eveningBody,
+      copy: copy,
+    );
+  }
 
   @override
   Future<void> scheduleArrival({
     required DateTime fireAt,
     required String tripId,
-  }) => _schedule(
-    id: _arrivalId(tripId),
-    fireAt: fireAt,
-    payload: tripId,
-    title: 'Your trip starts today ✦',
-    body: 'Log the first moment and see what\'s waiting.',
-  );
+  }) {
+    final copy = _copy();
+    return _schedule(
+      id: _arrivalId(tripId),
+      fireAt: fireAt,
+      payload: tripId,
+      title: copy.arrivalTitle,
+      body: copy.arrivalBody,
+      copy: copy,
+    );
+  }
 
   @override
   Future<void> cancelMorning() => _plugin.cancel(id: _morningId);
@@ -179,6 +197,7 @@ class FlutterLocalNotificationsDataSource
     required String payload,
     required String title,
     required String body,
+    required BonusNotificationCopy copy,
   }) {
     return _plugin.zonedSchedule(
       id: id,
@@ -187,15 +206,16 @@ class FlutterLocalNotificationsDataSource
       body: body,
       payload: payload,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      notificationDetails: const NotificationDetails(
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           _androidChannelId,
-          _androidChannelName,
-          channelDescription: _androidChannelDescription,
+          // Android renames an existing channel when these change.
+          copy.channelName,
+          channelDescription: copy.channelDescription,
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
         ),
-        iOS: DarwinNotificationDetails(),
+        iOS: const DarwinNotificationDetails(),
       ),
     );
   }

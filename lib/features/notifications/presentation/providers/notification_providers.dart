@@ -1,10 +1,13 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../../bonus/presentation/providers/bonus_task_providers.dart';
 import '../../../journal/presentation/providers/day_note_providers.dart';
 import '../../../photo/presentation/providers/photo_providers.dart';
 import '../../../quest/presentation/providers/quest_providers.dart';
+import '../../../settings/presentation/controllers/app_language_controller.dart';
 import '../../../trip/presentation/providers/trip_providers.dart';
+import '../../data/datasources/bonus_notification_copy.dart';
 import '../../data/datasources/bonus_notification_local_data_source.dart';
 import '../../data/datasources/flutter_local_notifications_data_source.dart';
 import '../../data/datasources/notification_prefs_shared_prefs_data_source.dart';
@@ -18,7 +21,12 @@ part 'notification_providers.g.dart';
 
 @riverpod
 BonusNotificationLocalDataSource bonusNotificationLocalDataSource(Ref ref) =>
-    FlutterLocalNotificationsDataSource();
+    FlutterLocalNotificationsDataSource(
+      // Looked up per schedule: the UI language of that moment (#252).
+      copy: () => BonusNotificationCopy.fromL10n(
+        lookupAppLocalizations(ref.read(appLocaleProvider)),
+      ),
+    );
 
 @riverpod
 BonusNotificationRepository bonusNotificationRepository(Ref ref) =>
