@@ -78,7 +78,7 @@ void main() {
 
     await tester.tap(find.text('Passport'));
     await tester.pump();
-    expect(find.text('✦ Собрано — отлично'), findsOneWidget);
+    expect(find.text('✦ Собрано отлично'), findsOneWidget);
     await tester.pumpAndSettle();
   });
 

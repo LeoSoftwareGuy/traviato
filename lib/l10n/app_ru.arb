@@ -52,7 +52,7 @@
   "@error_freeTierMemories": {
     "x-review": "pending"
   },
-  "error_freeTierPhotos": "В бесплатном тарифе: до 40 фото на одно воспоминание. Перейдите на Pro, чтобы снять ограничение.",
+  "error_freeTierPhotos": "В бесплатном тарифе до 40 фото на одно воспоминание. Перейдите на Pro, чтобы снять ограничение.",
   "@error_freeTierPhotos": {
     "x-review": "pending"
   },
@@ -184,7 +184,7 @@
   "@auth_privacyNote": {
     "x-review": "pending"
   },
-  "auth_rewardTease": "Первое воспоминание принесёт {stars}, а до значка «Рассказчик» — всего три заметки.",
+  "auth_rewardTease": "Первое воспоминание принесёт {stars}, а до значка «Рассказчик» всего три заметки.",
   "@auth_rewardTease": {
     "x-review": "pending"
   },
@@ -236,7 +236,7 @@
   "@guest_eyebrow": {
     "x-review": "pending"
   },
-  "guest_headlineLead": "Каждое воспоминание ",
+  "guest_headlineLead": "Каждое воспоминание ",
   "@guest_headlineLead": {
     "x-review": "pending"
   },
@@ -280,7 +280,7 @@
   "@guest_stepBeforeTitle": {
     "x-review": "pending"
   },
-  "guest_stepBeforeBody": "Большие выходные? Маленькое событие? Или просто вторник, который хочется запомнить? Составляйте планы и списки: всё в одном уютном месте.",
+  "guest_stepBeforeBody": "Большие выходные? Маленькое приключение? Или просто вторник, который хочется запомнить? Составляйте планы и ведите дневник — всё в одном уютном месте.",
   "@guest_stepBeforeBody": {
     "x-review": "pending"
   },
@@ -304,7 +304,7 @@
   "@guest_stepAfterTitle": {
     "x-review": "pending"
   },
-  "guest_stepAfterBody": "Когда событие закончится, ваши моменты соберутся в личный фильм. Переживите волшебство снова и сохраните воспоминания.",
+  "guest_stepAfterBody": "Когда приключение закончится, ваши моменты соберутся в личный фильм. Переживите волшебство снова и сохраните воспоминания.",
   "@guest_stepAfterBody": {
     "x-review": "pending"
   },
@@ -384,7 +384,7 @@
   "@home_emptyCta": {
     "x-review": "pending"
   },
-  "home_keptForeverEmpty": "Пока ничего нет. Воспоминания появятся здесь, когда событие завершится.",
+  "home_keptForeverEmpty": "Пока ничего нет, воспоминания появятся здесь, когда событие завершится.",
   "@home_keptForeverEmpty": {
     "x-review": "pending"
   },
@@ -608,7 +608,7 @@
   "@toast_questDone": {
     "x-review": "pending"
   },
-  "toast_packed": "✦ Собрано, отлично",
+  "toast_packed": "✦ Собрано отлично",
   "@toast_packed": {
     "x-review": "pending"
   },
@@ -748,7 +748,7 @@
   "@journal_quietOne": {
     "x-review": "pending"
   },
-  "journal_dayQuietOne": "День {day}: тихий день",
+  "journal_dayQuietOne": "День {day} — тихий день",
   "@journal_dayQuietOne": {
     "x-review": "pending"
   },
@@ -824,7 +824,7 @@
   "@journal_wrapUpReqNote": {
     "x-review": "pending"
   },
-  "journal_wrapUpFree": "Ничего покупать не нужно: на любом тарифе всё одинаково.",
+  "journal_wrapUpFree": "Ничего покупать не нужно — на любом тарифе всё одинаково.",
   "@journal_wrapUpFree": {
     "x-review": "pending"
   },
@@ -836,7 +836,7 @@
   "@journal_nothingFromDay": {
     "x-review": "pending"
   },
-  "journal_nudgeBody": "Даже одно фото поможет итогам. Тихие дни тоже попадают в фильм, этот просто промелькнёт.",
+  "journal_nudgeBody": "Даже одно фото поможет итогам. Тихие дни тоже попадают в фильм а этот просто промелькнёт.",
   "@journal_nudgeBody": {
     "x-review": "pending"
   },
@@ -888,7 +888,7 @@
   "@note_micOff": {
     "x-review": "pending"
   },
-  "note_voiceUnavailable": "Голосовой ввод сейчас недоступен, можно печатать.",
+  "note_voiceUnavailable": "Голосовой ввод сейчас недоступен но можно печатать.",
   "@note_voiceUnavailable": {
     "x-review": "pending"
   },
@@ -1260,7 +1260,7 @@
   "@bonus_bothDone": {
     "x-review": "pending"
   },
-  "bonus_newOnesTomorrow": "Новые — завтра.",
+  "bonus_newOnesTomorrow": "Новые завтра.",
   "@bonus_newOnesTomorrow": {
     "x-review": "pending"
   },
@@ -1268,7 +1268,7 @@
   "@notif_promptTitle": {
     "x-review": "pending"
   },
-  "notif_promptBody": "{appName} может напомнить утром и вечером, если бонусное задание ещё не выполнено, — не чаще, и это легко отключить.",
+  "notif_promptBody": "{appName} может напомнить утром и вечером, если бонусное задание ещё не выполнено, не чаще, и это легко отключить.",
   "@notif_promptBody": {
     "x-review": "pending"
   },
@@ -1412,7 +1412,7 @@
   "@sub_renewsMonthly": {
     "x-review": "pending"
   },
-  "sub_trialTerms": "7 дней бесплатно, потом — по подписке. Отменить можно в любой момент.",
+  "sub_trialTerms": "7 дней бесплатно, потом уже по подписке. Отменить можно в любой момент.",
   "@sub_trialTerms": {
     "x-review": "pending"
   },
@@ -1572,7 +1572,7 @@
   "@paywall_startTrial": {
     "x-review": "pending"
   },
-  "paywall_reassurance": "Три бесплатных воспоминания останутся с вами в любом случае без Pro ничего не удалится и не заблокируется.",
+  "paywall_reassurance": "Три бесплатных воспоминания останутся с вами в любом случае — без Pro ничего не удалится и не заблокируется.",
   "@paywall_reassurance": {
     "x-review": "pending"
   },
@@ -1764,7 +1764,7 @@
   "@content_bonus_local_transport_title": {
     "x-review": "pending"
   },
-  "content_bonus_local_transport_detail": "Автобус, велосипед, лодка, стёртые ноги: всё считается.",
+  "content_bonus_local_transport_detail": "Автобус, велосипед, лодка, стёртые ноги — всё считается.",
   "@content_bonus_local_transport_detail": {
     "x-review": "pending"
   },
@@ -1804,7 +1804,7 @@
   "@content_bonus_halfway_selfie_title": {
     "x-review": "pending"
   },
-  "content_bonus_halfway_selfie_detail": "Уставшие глаза - по желанию. Широкая улыбка — обязательно.",
+  "content_bonus_halfway_selfie_detail": "Уставшие глаза — по желанию. Широкая улыбка — обязательно.",
   "@content_bonus_halfway_selfie_detail": {
     "x-review": "pending"
   },
@@ -1876,7 +1876,7 @@
   "@content_bonus_first_impression_title": {
     "x-review": "pending"
   },
-  "content_bonus_first_impression_detail": "Вид, запах, суматоха: поймайте их, пока они не стали привычными.",
+  "content_bonus_first_impression_detail": "Вид, запах, суматоха — поймайте их, пока они не стали привычными.",
   "@content_bonus_first_impression_detail": {
     "x-review": "pending"
   },
@@ -1980,7 +1980,7 @@
   "@content_bonus_streak_saver_checkin_title": {
     "x-review": "pending"
   },
-  "content_bonus_streak_saver_checkin_detail": "Без давления и без темы: одно фото того места, где вы сейчас.",
+  "content_bonus_streak_saver_checkin_detail": "Без давления и без темы просто одно фото того места, где вы сейчас.",
   "@content_bonus_streak_saver_checkin_detail": {
     "x-review": "pending"
   },
