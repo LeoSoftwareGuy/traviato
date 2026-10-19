@@ -18,6 +18,29 @@ String _sql(String name) =>
 
 String _unquote(String s) => s.replaceAll("''", "'");
 
+/// Later rewordings of seeded bonus text (#248), applied in migration order
+/// on top of the reseed: `{code: {field: text}}`.
+Map<String, Map<String, String>> _bonusUpdates() {
+  final files =
+      Directory('supabase/migrations')
+          .listSync()
+          .map((f) => f.uri.pathSegments.last)
+          .where((n) => n.endsWith('.sql'))
+          .toList()
+        ..sort();
+  final updates = <String, Map<String, String>>{};
+  final pattern = RegExp(
+    r"update public\.bonus_task_templates set (title|detail) = "
+    r"'((?:[^']|'')*)' where code = '([a-z_]+)';",
+  );
+  for (final name in files) {
+    for (final m in pattern.allMatches(_sql(name))) {
+      (updates[m[3]!] ??= {})[m[1]!] = _unquote(m[2]!);
+    }
+  }
+  return updates;
+}
+
 final _en = lookupAppLocalizations(const Locale('en'));
 final _ru = lookupAppLocalizations(const Locale('ru'));
 final _et = lookupAppLocalizations(const Locale('et'));
@@ -41,11 +64,13 @@ void main() {
 
     test('every seeded template has English copy equal to the DB', () {
       expect(rows, isNotEmpty);
+      final updates = _bonusUpdates();
       for (final row in rows) {
+        final updated = updates[row[1]!] ?? const {};
         final t = _template(
           row[1]!,
-          _unquote(row[2]!),
-          _unquote(row[3]!),
+          updated['title'] ?? _unquote(row[2]!),
+          updated['detail'] ?? _unquote(row[3]!),
         );
         expect(bonusTemplateTitle(_en, t), t.title, reason: t.code);
         expect(bonusTemplateDetail(_en, t), t.detail, reason: t.code);

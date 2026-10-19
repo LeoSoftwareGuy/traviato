@@ -226,7 +226,7 @@ void main() {
 
       expect(find.text('БОНУСНЫЕ ЗАДАНИЯ'), findsOneWidget);
       expect(find.textContaining('Оба выполнены · ✦'), findsOneWidget);
-      expect(find.text('Новые — завтра.'), findsOneWidget);
+      expect(find.text('Новые завтра.'), findsOneWidget);
       expect(find.text('ВЫПОЛНЕНО'), findsWidgets);
       expect(find.textContaining('ВЫПОЛНЕНО · ДЕНЬ'), findsOneWidget);
     });
