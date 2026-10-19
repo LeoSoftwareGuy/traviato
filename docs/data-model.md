@@ -84,7 +84,7 @@ Exception: `streak_saver` assignments stay live past their day until
 completed. The daily draw is computed deterministically client-side
 (hash(trip_id, day_date) over eligible templates, phase-filtered, minus the
 10-day repeat set) and inserted idempotently via the unique constraint.
-### `points_ledger` — unchanged (values in `award_points` RPC)
+### `points_ledger` — values in `award_points` RPC; `trip_id` cascades, so deleting a memory deletes its stars (#247)
 ### `achievement_templates` / `user_achievements` — unchanged (seeded 8:
 first_adventure, globetrotter, century, star_collector, shutterbug, storyteller
 + 2 per design; `check_achievements` RPC)
@@ -136,5 +136,7 @@ Checklist suggestions (5 categories, essentials flagged); bonus templates;
 - Redesign's variable quest stars → REJECTED (flat 1, no column).
 - Redesign's photo ✦1 → REJECTED (photo = 2).
 - Redesign's alternate vibes + achievement names → REJECTED (v2 lists stand).
-- Quests checkable (`completed_at`); deletion keeps stars (trip_id set null).
+- Quests checkable (`completed_at`). Deleting a memory **removes its stars**
+  (ledger `trip_id` cascades, #247; was set null). Unlocked achievements stay;
+  rows orphaned before #247 stay too.
 - Compare + Photo detail: in MVP, no schema impact beyond `use_in_wrap_up`.

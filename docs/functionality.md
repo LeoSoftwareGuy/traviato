@@ -68,8 +68,8 @@ set. Mockup copy showing other numbers is adjusted at implementation.
 
 - Rename; **shift start/end by a day — quests move with it** (app-side re-date);
   change cover (same thumbnail strip); **two-step delete** (armed state shows
-  consequences: "removes N photos, N days of notes and N stars… can't be undone" —
-  per data model, earned stars are actually KEPT; fix the copy at implementation).
+  consequences: photos and notes are removed and **the memory's earned stars are
+  lost**, can't be undone — #247; unlocked badges stay).
 
 ## 6. Plan (day quests) ✅ — redesigned
 
