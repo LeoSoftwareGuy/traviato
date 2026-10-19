@@ -22,7 +22,10 @@ class SupabaseWrapUpRemoteDataSource implements WrapUpRemoteDataSource {
   }
 
   @override
-  Future<WrapUpModel> getOrGenerate(String tripId) async {
+  Future<WrapUpModel> getOrGenerate(
+    String tripId, {
+    required String language,
+  }) async {
     _guardAuthenticated();
     try {
       final existing = await _client
@@ -39,7 +42,7 @@ class SupabaseWrapUpRemoteDataSource implements WrapUpRemoteDataSource {
 
       final response = await _client.functions.invoke(
         EdgeFunctions.generateWrapUp,
-        body: {'trip_id': tripId},
+        body: generateWrapUpBody(tripId, language),
       );
       final data = response.data;
       if (data is! Map) {
@@ -80,6 +83,13 @@ class SupabaseWrapUpRemoteDataSource implements WrapUpRemoteDataSource {
     }
   }
 }
+
+/// The `generate_wrap_up` request: the trip, and the UI language the AI
+/// writes in (#250).
+Map<String, String> generateWrapUpBody(String tripId, String language) => {
+  'trip_id': tripId,
+  'language': language,
+};
 
 /// A kept-forever wrap-up with stored content — played exactly as stored.
 /// Anything else (a draft, or no film yet) goes through `generate_wrap_up`.

@@ -13,9 +13,12 @@ class WrapUpRepositoryImpl implements WrapUpRepository {
   final WrapUpRemoteDataSource _remote;
 
   @override
-  Future<Either<Failure, WrapUpEntity>> getOrGenerate(String tripId) async {
+  Future<Either<Failure, WrapUpEntity>> getOrGenerate(
+    String tripId, {
+    required String language,
+  }) async {
     try {
-      return Right(await _remote.getOrGenerate(tripId));
+      return Right(await _remote.getOrGenerate(tripId, language: language));
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
     } on PermissionException catch (e) {

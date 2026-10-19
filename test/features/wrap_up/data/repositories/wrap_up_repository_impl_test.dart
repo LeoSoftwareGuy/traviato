@@ -11,7 +11,10 @@ class _FakeWrapUpRemoteDataSource implements WrapUpRemoteDataSource {
   var publishCallCount = 0;
 
   @override
-  Future<WrapUpModel> getOrGenerate(String tripId) async {
+  Future<WrapUpModel> getOrGenerate(
+    String tripId, {
+    required String language,
+  }) async {
     throw UnimplementedError();
   }
 
