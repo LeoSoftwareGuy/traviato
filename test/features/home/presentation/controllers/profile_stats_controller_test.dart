@@ -86,6 +86,47 @@ void main() {
     expect(repo.getStatsCallCount, 2);
   });
 
+  test('refetches when a memory is deleted (#247)', () async {
+    final repo = FakeProfileStatsRepository()
+      ..statsResult = const Right(
+        ProfileStatsEntity(
+          memories: 2,
+          places: 0,
+          countries: 0,
+          days: 0,
+          stars: 12,
+          photos: 0,
+          notes: 0,
+        ),
+      );
+    final container = _buildContainer(repo);
+    addTearDown(container.dispose);
+
+    await container.read(profileStatsControllerProvider.future);
+    repo.statsResult = const Right(
+      ProfileStatsEntity(
+        memories: 1,
+        places: 0,
+        countries: 0,
+        days: 0,
+        stars: 5,
+        photos: 0,
+        notes: 0,
+      ),
+    );
+    container
+        .read(globalEventBusProvider)
+        .add(const TripDeletedDispatched(tripId: 't1'));
+    await Future<void>.delayed(Duration.zero);
+
+    final updated = await container.read(
+      profileStatsControllerProvider.future,
+    );
+    expect(updated.stars, 5);
+    expect(updated.memories, 1);
+    expect(repo.getStatsCallCount, 2);
+  });
+
   test('propagates a repository failure', () async {
     final repo = FakeProfileStatsRepository()
       ..statsResult = const Left(NetworkFailure());
