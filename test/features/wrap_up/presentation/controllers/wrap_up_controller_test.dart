@@ -6,6 +6,8 @@ import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_entity.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_moment.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
+import 'package:traviato/features/settings/domain/app_language.dart';
+import 'package:traviato/features/settings/presentation/providers/settings_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_dates.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_invitation.dart';
@@ -17,6 +19,9 @@ import '../../../trip/fakes/fake_trip_repository.dart';
 import '../../fakes/fake_wrap_up_repository.dart';
 
 void main() {
+  // The UI language resolves against the device locales (#250).
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   // Baked before #186: a single-day trip stored as "12–12 August 2026" and
   // "1 days.".
   final staleWrapUp = buildWrapUpEntity(
@@ -35,12 +40,15 @@ void main() {
     FakeTripRepository tripRepo, {
     WrapUpEntity? wrapUp,
     List<PhotoEntity> photos = const [],
+    FakeWrapUpRepository? wrapUpRepo,
+    AppLanguage language = AppLanguage.en,
   }) {
     final c = ProviderContainer(
       retry: (_, _) => null,
       overrides: [
+        initialAppLanguageProvider.overrideWithValue(language),
         wrapUpRepositoryProvider.overrideWithValue(
-          FakeWrapUpRepository()
+          (wrapUpRepo ?? FakeWrapUpRepository())
             ..getOrGenerateResult = Right(wrapUp ?? staleWrapUp),
         ),
         photoRepositoryProvider.overrideWithValue(
@@ -103,5 +111,16 @@ void main() {
     ).read(wrapUpControllerProvider('t1').future);
 
     expect(state.wrapUp.moments.map((m) => m.photoId), ['kept']);
+  });
+
+  test('asks for the wrap-up in the UI language (#250)', () async {
+    final wrapUpRepo = FakeWrapUpRepository();
+    await container(
+      FakeTripRepository(),
+      wrapUpRepo: wrapUpRepo,
+      language: AppLanguage.ru,
+    ).read(wrapUpControllerProvider('t1').future);
+
+    expect(wrapUpRepo.lastLanguage, 'ru');
   });
 }

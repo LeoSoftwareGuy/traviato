@@ -7,7 +7,12 @@ abstract interface class WrapUpRepository {
   /// Returns the trip's wrap-up, generating it via `generate_wrap_up` (#93)
   /// on first call — the edge function itself is idempotent, so a second
   /// call for the same trip returns the same content without regenerating.
-  Future<Either<Failure, WrapUpEntity>> getOrGenerate(String tripId);
+  /// [language] is the UI language code the AI-written lines are written in
+  /// (#250); a kept-forever wrap-up stays in the language it was made in.
+  Future<Either<Failure, WrapUpEntity>> getOrGenerate(
+    String tripId, {
+    required String language,
+  });
 
   /// "Keep forever" — sets `published_at`. Direct client update, allowed by
   /// the `published_at`-scoped column grant from #93 (content/generated_at

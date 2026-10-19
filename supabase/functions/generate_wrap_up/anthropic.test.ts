@@ -5,6 +5,7 @@ import {
   assertStringIncludes,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
+  buildPrompt,
   callAnthropic,
   LOG_PREFIX,
   WrapUpGenerationError,
@@ -207,4 +208,27 @@ Deno.test("logs truncate huge payloads and never contain the API key or the prom
     assert(!line.includes("sk-secret-key"));
     assert(!line.includes(validTripData.notes[0].content));
   }
+});
+
+Deno.test("a Russian wrap-up asks for Russian copy (#250)", async () => {
+  let sentBody: Record<string, unknown> | undefined;
+  const fetchImpl = (_url: string | URL | Request, init?: RequestInit) => {
+    sentBody = JSON.parse(init!.body as string);
+    return Promise.resolve(toolResponse(validAiFields));
+  };
+  await callAnthropic(
+    validTripData,
+    "test-key",
+    fetchImpl as typeof fetch,
+    () => {},
+    "ru",
+  );
+
+  const promptText =
+    (sentBody!.messages as Array<{ content: string }>)[0].content;
+  assertEquals(promptText.includes("Write every field in natural"), true);
+  assertEquals(
+    buildPrompt(validTripData).includes("Write every field in natural"),
+    false,
+  );
 });

@@ -15,6 +15,7 @@ import {
   validateAiGeneratedFields,
 } from "./ai_fields.ts";
 import { computeAiInputHash } from "./ai_input_hash.ts";
+import { parseWrapUpLanguage, type WrapUpLanguage } from "./language.ts";
 import { logEvent, type LogLike, WrapUpGenerationError } from "./anthropic.ts";
 
 // deno-lint-ignore no-explicit-any
@@ -26,7 +27,10 @@ export const MAX_AI_GENERATIONS = 4;
 export interface Deps {
   serviceClient: SupabaseClient;
   authClient: (authHeader: string) => SupabaseClient;
-  generateAiFields: (tripData: TripData) => Promise<AiGeneratedFields>;
+  generateAiFields: (
+    tripData: TripData,
+    language: WrapUpLanguage,
+  ) => Promise<AiGeneratedFields>;
   // Defaults to `console.error` — see anthropic.ts's `[generate_wrap_up]`
   // log lines (#166).
   log?: LogLike;
@@ -57,6 +61,10 @@ export async function handleRequest(
   if (typeof tripId !== "string" || tripId.length === 0) {
     return json({ error: "trip_id is required" }, 400);
   }
+  // The app's UI language (#250); older app versions send none → English.
+  const language = parseWrapUpLanguage(
+    (body as Record<string, unknown>).language,
+  );
 
   const { data: userData, error: userError } = await deps.authClient(authHeader)
     .auth.getUser();
@@ -111,7 +119,7 @@ export async function handleRequest(
     }, 500);
   }
 
-  const inputHash = await computeAiInputHash(tripData);
+  const inputHash = await computeAiInputHash(tripData, language);
   const storedFields = validateAiGeneratedFields(existing?.ai_fields)
     ? existing!.ai_fields as AiGeneratedFields
     : null;
@@ -138,7 +146,7 @@ export async function handleRequest(
     // — and a failure falls back to the last text rather than breaking.
     newCount = generationCount + 1;
     try {
-      aiFields = await deps.generateAiFields(tripData);
+      aiFields = await deps.generateAiFields(tripData, language);
     } catch (err) {
       logGenerationFailure(deps, tripId, err, "regeneration_failed");
       aiFields = storedFields;
@@ -148,7 +156,7 @@ export async function handleRequest(
     // First generation: only counted on success, so a failed first attempt
     // can't burn the cap before the user ever has a wrap-up.
     try {
-      aiFields = await deps.generateAiFields(tripData);
+      aiFields = await deps.generateAiFields(tripData, language);
     } catch (err) {
       // `error` keeps its old shape (the Dart client reads it as the
       // message); `code` + `detail` say which of the three upstream

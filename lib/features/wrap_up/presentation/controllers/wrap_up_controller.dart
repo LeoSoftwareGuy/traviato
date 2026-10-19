@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/errors/presentation_failure_exception.dart';
 import '../../../photo/presentation/providers/photo_providers.dart';
+import '../../../settings/presentation/controllers/app_language_controller.dart';
 import '../../../trip/presentation/providers/trip_providers.dart';
 import '../../domain/entities/wrap_up_dates.dart';
 import '../../domain/entities/wrap_up_entity.dart';
@@ -28,7 +29,12 @@ class WrapUpController extends _$WrapUpController {
     // and day count are re-derived from the trip's live dates (#186) so they
     // stay right after a date shift and for wrap-ups baked before the
     // single-day fix.
-    final wrapUpFuture = wrapUpRepo.getOrGenerate(tripId);
+    // Read, not watched: switching language mid-film mustn't spend an AI
+    // call; the next open writes in the new language (#250).
+    final wrapUpFuture = wrapUpRepo.getOrGenerate(
+      tripId,
+      language: ref.read(resolvedAppLanguageProvider).code!,
+    );
     final photosFuture = photoRepo.getPhotosForTrip(tripId);
     final tripFuture = tripRepo.getTripCard(tripId);
 

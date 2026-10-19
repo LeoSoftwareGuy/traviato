@@ -16,14 +16,19 @@ class FakeWrapUpRepository implements WrapUpRepository {
   Either<Failure, WrapUpEntity>? getOrGenerateResult;
   Either<Failure, void>? publishResult;
   var getOrGenerateCallCount = 0;
+  String? lastLanguage;
   var publishCallCount = 0;
 
   /// Delays [getOrGenerate] so tests can observe the loading state.
   Duration delay = Duration.zero;
 
   @override
-  Future<Either<Failure, WrapUpEntity>> getOrGenerate(String tripId) async {
+  Future<Either<Failure, WrapUpEntity>> getOrGenerate(
+    String tripId, {
+    required String language,
+  }) async {
     getOrGenerateCallCount++;
+    lastLanguage = language;
     if (delay > Duration.zero) await Future<void>.delayed(delay);
     return getOrGenerateResult ?? Right(buildWrapUpEntity());
   }

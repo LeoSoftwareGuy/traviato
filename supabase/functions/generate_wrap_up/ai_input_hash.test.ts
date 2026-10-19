@@ -42,3 +42,17 @@ Deno.test("note, name, destination, vibe and achievement changes do", async () =
     assertNotEquals(await computeAiInputHash(v), base);
   }
 });
+
+Deno.test("English adds nothing, so hashes stored before #250 still match", async () => {
+  assertEquals(
+    await computeAiInputHash(validTripData, "en"),
+    await computeAiInputHash(validTripData),
+  );
+});
+
+Deno.test("another language changes the hash (#250)", async () => {
+  assertNotEquals(
+    await computeAiInputHash(validTripData, "ru"),
+    await computeAiInputHash(validTripData, "en"),
+  );
+});

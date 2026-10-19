@@ -22,6 +22,7 @@ Deno.serve((req) => {
   return handleRequest(req, {
     serviceClient,
     authClient,
-    generateAiFields: (tripData) => callAnthropic(tripData, anthropicApiKey),
+    generateAiFields: (tripData, language) =>
+      callAnthropic(tripData, anthropicApiKey, fetch, console.error, language),
   });
 });

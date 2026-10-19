@@ -33,4 +33,8 @@ void main() {
       );
     });
   });
+
+  test('the generate_wrap_up body carries the UI language (#250)', () {
+    expect(generateWrapUpBody('t1', 'ru'), {'trip_id': 't1', 'language': 'ru'});
+  });
 }
