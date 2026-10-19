@@ -1,0 +1,8 @@
+/* Russian permission prompts (#254). English lives in Info.plist. */
+/* Draft translation: needs native-speaker review before launch. */
+
+"NSCameraUsageDescription" = "Storyni использует камеру, чтобы вы могли снимать фото для своих воспоминаний.";
+"NSLocationWhenInUseUsageDescription" = "Storyni сохраняет место съёмки, чтобы фото появилось в вашем дневнике и в итогах.";
+"NSMicrophoneUsageDescription" = "Storyni использует микрофон, чтобы вы могли надиктовать заметку в дневник, а не печатать её.";
+"NSPhotoLibraryUsageDescription" = "Storyni позволяет добавлять в воспоминания фото из вашей медиатеки.";
+"NSSpeechRecognitionUsageDescription" = "Storyni превращает вашу речь в текст для заметок в дневнике. Для этого устройство может использовать сервис распознавания речи Apple.";
