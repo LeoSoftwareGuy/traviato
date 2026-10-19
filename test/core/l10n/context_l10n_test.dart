@@ -30,7 +30,8 @@ void main() {
   for (final (locale, retry) in [
     (const Locale('en'), 'Retry'),
     (const Locale('ru'), 'Повторить'),
-    (const Locale('et'), 'Proovi uuesti'),
+    // No Estonian UI (#245): an Estonian locale falls back to English.
+    (const Locale('et'), 'Retry'),
   ]) {
     testWidgets('retry scaffold reads "$retry" in ${locale.languageCode}', (
       tester,

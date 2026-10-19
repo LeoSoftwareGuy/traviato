@@ -6,7 +6,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
-import 'app_localizations_et.dart';
 import 'app_localizations_ru.dart';
 
 // ignore_for_file: type=lint
@@ -96,7 +95,6 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('et'),
     Locale('ru'),
   ];
 
@@ -2025,6 +2023,54 @@ abstract class AppLocalizations {
   /// **'{appName} can remind you once in the morning and once in the evening when a bonus task is still open — never more than that, and easy to turn off later.'**
   String notif_promptBody(String appName);
 
+  /// Local notification, ~9:00 on a memory day after an active day.
+  ///
+  /// In en, this message translates to:
+  /// **'Two little dares today ✦'**
+  String get notif_morningTitle;
+
+  /// No description provided for @notif_morningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the tray and see what today\'s got.'**
+  String get notif_morningBody;
+
+  /// Local notification, ~19:00 while a bonus task is still open.
+  ///
+  /// In en, this message translates to:
+  /// **'Still time for a dare'**
+  String get notif_eveningTitle;
+
+  /// No description provided for @notif_eveningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s bonus tasks are waiting.'**
+  String get notif_eveningBody;
+
+  /// Local notification on the morning a memory starts.
+  ///
+  /// In en, this message translates to:
+  /// **'Your trip starts today ✦'**
+  String get notif_arrivalTitle;
+
+  /// No description provided for @notif_arrivalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Log the first moment and see what\'s waiting.'**
+  String get notif_arrivalBody;
+
+  /// Android notification channel name, shown in system settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus dares'**
+  String get notif_channelName;
+
+  /// No description provided for @notif_channelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily nudges for your trip\'s bonus tasks.'**
+  String get notif_channelDescription;
+
   /// Mono eyebrow, uppercased in code.
   ///
   /// In en, this message translates to:
@@ -3375,7 +3421,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'et', 'ru'].contains(locale.languageCode);
+      <String>['en', 'ru'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -3386,8 +3432,6 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return AppLocalizationsEn();
-    case 'et':
-      return AppLocalizationsEt();
     case 'ru':
       return AppLocalizationsRu();
   }

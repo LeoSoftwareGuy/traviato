@@ -80,9 +80,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Changes apply right away.'), findsOneWidget);
     expect(find.textContaining('Follows your'), findsOneWidget);
-    // English has no subtitle in an English UI; the others are named.
+    // English has no subtitle in an English UI; Russian is named. No
+    // Estonian UI (#245).
     expect(find.text('Russian'), findsOneWidget);
-    expect(find.text('Estonian'), findsOneWidget);
+    expect(find.byKey(const Key('language-row-et')), findsNothing);
 
     await tester.tap(find.byKey(const Key('language-row-ru')));
     await tester.pump(); // sheet pops
@@ -113,7 +114,7 @@ void main() {
 
     expect(find.text('Как в системе'), findsOneWidget);
     expect(find.text('Английский'), findsOneWidget);
-    expect(find.text('Эстонский'), findsOneWidget);
+    expect(find.text('Эстонский'), findsNothing);
     // Русский has no subtitle in a Russian UI.
     expect(find.text('Русский'), findsWidgets);
   });
@@ -126,10 +127,10 @@ void main() {
         home: const Center(child: LanguageChip()),
         auth: auth,
         profile: profile,
-        initial: AppLanguage.et,
+        initial: AppLanguage.ru,
       ),
     );
-    expect(find.text('ET'), findsOneWidget);
+    expect(find.text('RU'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('guest-language-chip')));
     await tester.pumpAndSettle();
@@ -178,6 +179,26 @@ void main() {
     testWidgets('a language saved on the profile wins over the device', (
       tester,
     ) async {
+      profile.profileResult = Right(buildProfile(language: 'ru'));
+      await tester.pumpWidget(
+        _app(
+          home: const LanguageSettingsSection(),
+          auth: auth,
+          profile: profile,
+          initial: AppLanguage.en,
+        ),
+      );
+      auth.emit(_user);
+      await tester.pumpAndSettle();
+
+      expect(find.text('НАСТРОЙКИ'), findsOneWidget);
+      expect(profile.languageUpdates, isEmpty);
+      final stored = await SharedPreferences.getInstance();
+      expect(stored.getString('app_language'), 'ru');
+    });
+
+    testWidgets('an Estonian UI choice on the profile means System default '
+        '(#245)', (tester) async {
       profile.profileResult = Right(buildProfile(language: 'et'));
       await tester.pumpWidget(
         _app(
@@ -190,10 +211,9 @@ void main() {
       auth.emit(_user);
       await tester.pumpAndSettle();
 
-      expect(find.text('SEADED'), findsOneWidget);
-      expect(profile.languageUpdates, isEmpty);
+      expect(find.text('SETTINGS'), findsOneWidget);
       final stored = await SharedPreferences.getInstance();
-      expect(stored.getString('app_language'), 'et');
+      expect(stored.getString('app_language'), 'system');
     });
 
     testWidgets('an empty profile gets this device\'s choice written up', (
@@ -248,10 +268,10 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 2));
       await tester.tap(find.byKey(const Key('settings-language-row')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('language-row-et')));
+      await tester.tap(find.byKey(const Key('language-row-ru')));
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
-      expect(profile.languageUpdates, [null, 'et']);
+      expect(profile.languageUpdates, [null, 'ru']);
     });
   });
 }

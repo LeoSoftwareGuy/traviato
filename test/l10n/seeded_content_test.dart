@@ -43,7 +43,6 @@ Map<String, Map<String, String>> _bonusUpdates() {
 
 final _en = lookupAppLocalizations(const Locale('en'));
 final _ru = lookupAppLocalizations(const Locale('ru'));
-final _et = lookupAppLocalizations(const Locale('et'));
 
 BonusTaskTemplateEntity _template(String code, String title, String? detail) =>
     BonusTaskTemplateEntity(
@@ -75,7 +74,6 @@ void main() {
         expect(bonusTemplateTitle(_en, t), t.title, reason: t.code);
         expect(bonusTemplateDetail(_en, t), t.detail, reason: t.code);
         expect(bonusTemplateTitle(_ru, t), isNot(t.title), reason: t.code);
-        expect(bonusTemplateTitle(_et, t), isNot(t.title), reason: t.code);
       }
     });
 
@@ -118,9 +116,7 @@ void main() {
         );
         expect(achievementTitle(_en, a), a.title, reason: code);
         expect(achievementDescription(_en, a), a.description, reason: code);
-        // Russian always differs; Estonian may share a word ("Legend").
         expect(achievementTitle(_ru, a), isNot(a.title), reason: code);
-        expect(achievementTitle(_et, a), isNotEmpty, reason: code);
       }
     });
 
@@ -138,8 +134,6 @@ void main() {
       );
       expect(achievementTitle(_ru, a), 'Рассказчик');
       expect(_ru.auth_rewardTease('X'), contains('«Рассказчик»'));
-      expect(achievementTitle(_et, a), 'Jutustaja');
-      expect(_et.auth_rewardTease('X'), contains('Jutustaja'));
     });
   });
 
@@ -168,9 +162,7 @@ void main() {
           isEssential: false,
         );
         expect(checklistSuggestionTitle(_en, s), s.title, reason: s.code);
-        // Russian always differs; Estonian may share a word ("Deodorant").
         expect(checklistSuggestionTitle(_ru, s), isNot(s.title));
-        expect(checklistSuggestionTitle(_et, s), isNotEmpty);
       }
     });
   });

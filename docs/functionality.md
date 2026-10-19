@@ -21,6 +21,9 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   "Traviato"/"Wander". `traviato` is the **codename** — repo, Dart package, DB and
   code identifiers keep it. The iOS bundle id and Android application id are
   `com.leo.storyni` (#200, #210). In code, use `AppConstants.appName`.
+- UI languages: **English and Russian** (#220), following the phone by default
+  with an override in You → Settings. Estonian users read the app in English;
+  journal **dictation** also offers Estonian (#218, #245).
 
 ## 1. Guest landing ✅
 

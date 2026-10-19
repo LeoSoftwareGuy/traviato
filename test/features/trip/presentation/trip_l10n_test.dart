@@ -44,18 +44,7 @@ void main() {
       expect(find.text('выбрано: 1'), findsOneWidget);
     });
 
-    testWidgets('validation reads in Estonian', (tester) async {
-      setScreenSize(tester, height: 2000);
-      await _pumpCreate(tester, const Locale('et'));
-
-      await tester.ensureVisible(find.text('Loo mälestus'));
-      await tester.tap(find.text('Loo mälestus'));
-      await tester.pump();
-
-      expect(find.text('Anna mälestusele nimi.'), findsOneWidget);
-    });
-
-    for (final locale in const [Locale('en'), Locale('ru'), Locale('et')]) {
+    for (final locale in const [Locale('en'), Locale('ru')]) {
       testWidgets('lays out without overflow at 360pt in '
           '${locale.languageCode}', (tester) async {
         setScreenSize(tester, height: 2000);

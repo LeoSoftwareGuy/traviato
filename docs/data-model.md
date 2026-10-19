@@ -27,8 +27,9 @@ as below. Compare and the expenses breakdown are fully derived client-side.
 
 ### `profiles`
 `id (=auth.users.id), username?, bio?, avatar_url?, created_at, language?,
-dictation_language?` (both `en`/`ru`/`et`; `language` NULL = follow the
-device, #236; `dictation_language` NULL = not chosen yet, #218).
+dictation_language?` (`language` is `en`/`ru` — no Estonian UI, #245 —
+NULL = follow the device, #236; `dictation_language` is `en`/`ru`/`et`, NULL
+= not chosen yet, #218).
 RLS: select/update own; insert via trigger.
 
 ### `trips`

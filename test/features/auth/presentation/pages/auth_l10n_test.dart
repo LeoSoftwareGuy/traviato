@@ -42,24 +42,7 @@ void main() {
       expect(find.text('Начните сохранять свои моменты'), findsOneWidget);
     });
 
-    testWidgets('renders in Estonian', (tester) async {
-      await tester.pumpWidget(
-        localizedApp(
-          locale: const Locale('et'),
-          home: const GuestLandingPage(),
-        ),
-      );
-      await tester.pump();
-
-      expect(find.text('SINU MÄLESTUSTE KAASLANE'), findsOneWidget);
-      expect(find.text('Iga mälestus,'), findsOneWidget);
-      expect(find.text('kaunilt talletatud.'), findsOneWidget);
-      expect(find.text('Logi sisse'), findsOneWidget);
-      expect(find.text('9 PÄEVA · 214 FOTOT'), findsOneWidget);
-      expect(find.text('1 PÄEV · 42 FOTOT'), findsOneWidget);
-    });
-
-    for (final locale in const [Locale('en'), Locale('ru'), Locale('et')]) {
+    for (final locale in const [Locale('en'), Locale('ru')]) {
       testWidgets('lays out without overflow at 360pt in '
           '${locale.languageCode}', (tester) async {
         setScreenSize(tester);
@@ -95,7 +78,7 @@ void main() {
       expect(find.text('Придумайте пароль.'), findsOneWidget);
     });
 
-    for (final locale in const [Locale('en'), Locale('ru'), Locale('et')]) {
+    for (final locale in const [Locale('en'), Locale('ru')]) {
       testWidgets('lays out without overflow at 360pt in '
           '${locale.languageCode}', (tester) async {
         setScreenSize(tester);

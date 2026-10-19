@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 /// EUR-only MVP (docs/data-model.md) — drops the decimals when the amount
 /// is a whole number, matching the Figma "expenses" frame's amounts.
 /// [locale] is the UI language (#220): English keeps `€1,234.50`; Russian
-/// and Estonian write `1 234,50 €`.
+/// writes `1 234,50 €`.
 String formatEuro(double amount, String locale) {
   final isWhole = amount == amount.roundToDouble();
   return NumberFormat.currency(

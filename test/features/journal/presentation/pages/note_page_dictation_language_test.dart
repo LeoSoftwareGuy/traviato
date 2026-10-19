@@ -119,39 +119,47 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  // An Estonian user reads the app in English but dictates in Estonian
+  // (#245).
   testWidgets('2d · chosen language unavailable: mic disabled, Aa accented, '
       'warning opens the picker with the row disabled', (tester) async {
     await _open(
       tester,
       dictation: AppLanguage.et,
       supported: const ['en_US', 'ru_RU'],
-      locale: const Locale('et'),
+      locale: const Locale('en'),
     );
 
     expect(find.byKey(const Key('note-page-mic-unavailable')), findsOneWidget);
-    expect(find.text('Pole saadaval'), findsOneWidget);
+    expect(find.text('Not available'), findsOneWidget);
     expect(
       find.byKey(const Key('note-page-language-warning-dot')),
       findsOneWidget,
     );
     expect(
-      find.text('Kirjuta edasi — või vali teine keel ja räägi.'),
+      find.text('Keep typing — or pick another language and speak.'),
       findsOneWidget,
     );
     expect(
-      find.textContaining('kõnetuvastus pole selles', findRichText: true),
+      find.textContaining(
+        "Estonian speech recognition isn't available",
+        findRichText: true,
+      ),
       findsOneWidget,
     );
 
     await tester.tap(find.byKey(const Key('note-page-language-warning')));
     await tester.pumpAndSettle();
-    expect(find.text('Räägi keeles…'), findsOneWidget);
-    expect(find.textContaining('Kirjutada saad ikka.'), findsOneWidget);
+    expect(find.text('Speak in…'), findsOneWidget);
+    expect(
+      find.textContaining('You can still type in Estonian.'),
+      findsOneWidget,
+    );
 
     // The disabled row can't be picked; another one can.
     await tester.tap(find.byKey(const Key('dictation-row-et')));
     await tester.pumpAndSettle();
-    expect(find.text('Räägi keeles…'), findsOneWidget);
+    expect(find.text('Speak in…'), findsOneWidget);
     await tester.tap(find.byKey(const Key('dictation-row-ru')));
     await tester.pumpAndSettle();
 
@@ -168,7 +176,7 @@ void main() {
     expect(find.text('Нажмите, чтобы говорить'), findsOneWidget);
   });
 
-  for (final locale in const [Locale('ru'), Locale('et')]) {
+  for (final locale in const [Locale('en'), Locale('ru')]) {
     testWidgets('unavailable state lays out at 360pt in '
         '${locale.languageCode}', (tester) async {
       await _open(

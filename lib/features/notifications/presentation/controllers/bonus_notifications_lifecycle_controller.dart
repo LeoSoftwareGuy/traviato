@@ -7,7 +7,9 @@ import '../../../../core/config/router/app_router.dart';
 import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/events/global_event.dart';
 import '../../../../core/events/global_event_bus.dart';
+import '../../../settings/presentation/controllers/app_language_controller.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
+import '../../../trip/presentation/providers/trip_providers.dart';
 import '../../domain/rules/bonus_notification_rules.dart';
 import '../providers/notification_providers.dart';
 
@@ -43,7 +45,27 @@ class BonusNotificationsLifecycleController
     );
     ref.onDispose(() => _lifecycleListener?.dispose());
 
+    // Pending reminders carry the language they were scheduled in, so a
+    // switch re-schedules them all in the new one (#252).
+    ref.listen(appLocaleProvider, (previous, next) {
+      if (previous != next) unawaited(_rescheduleAll());
+    });
+
     unawaited(_evaluate());
+  }
+
+  /// Re-evaluates today's morning/evening pair and re-schedules every
+  /// memory's arrival reminder (or cancels it if its day has passed).
+  Future<void> _rescheduleAll() async {
+    await _evaluate();
+    try {
+      final trips = await ref.read(tripRepositoryProvider).getTripCards();
+      for (final trip in trips.getOrElse((_) => const [])) {
+        await _scheduleOrCancelArrival(trip);
+      }
+    } catch (e) {
+      debugPrint('Re-scheduling arrival reminders threw: $e');
+    }
   }
 
   /// Wrapped in a broad `try/catch`, not just an `Either` fold: unlike a

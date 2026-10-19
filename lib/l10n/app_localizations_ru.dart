@@ -1242,6 +1242,33 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get notif_morningTitle => 'Два маленьких задания на сегодня ✦';
+
+  @override
+  String get notif_morningBody =>
+      'Загляните — посмотрите, что приготовил сегодняшний день.';
+
+  @override
+  String get notif_eveningTitle => 'Ещё есть время для задания';
+
+  @override
+  String get notif_eveningBody => 'Сегодняшние бонусные задания ждут вас.';
+
+  @override
+  String get notif_arrivalTitle => 'Ваша поездка начинается сегодня ✦';
+
+  @override
+  String get notif_arrivalBody =>
+      'Сохраните первый момент и посмотрите, что вас ждёт.';
+
+  @override
+  String get notif_channelName => 'Бонусные задания';
+
+  @override
+  String get notif_channelDescription =>
+      'Ежедневные напоминания о бонусных заданиях поездки.';
+
+  @override
   String get profile_eyebrow => 'Профиль';
 
   @override

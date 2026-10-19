@@ -114,21 +114,7 @@ void main() {
     expect(find.text('1 ДЕНЬ · 21 ФОТО'), findsOneWidget);
   });
 
-  testWidgets('Home reads in Estonian', (tester) async {
-    setScreenSize(tester, height: 2400);
-    await _pump(tester, const Locale('et'));
-
-    expect(find.textContaining('Tere, ', findRichText: true), findsOne);
-    expect(find.text('MÄLESTUST'), findsOneWidget);
-    expect(find.text('Päev 2/5'), findsOneWidget);
-    expect(find.text('Autoreis'), findsOneWidget);
-    expect(find.text('Päevik'), findsOneWidget);
-    expect(find.text('4 p pärast'), findsOneWidget);
-    expect(find.text('5 tegevust plaanis'), findsOneWidget);
-    expect(find.text('1 PÄEV · 21 FOTOT'), findsOneWidget);
-  });
-
-  for (final locale in const [Locale('en'), Locale('ru'), Locale('et')]) {
+  for (final locale in const [Locale('en'), Locale('ru')]) {
     testWidgets('Home lays out without overflow at 360pt in '
         '${locale.languageCode}', (tester) async {
       setScreenSize(tester, height: 2400);

@@ -143,10 +143,10 @@ void main() {
     expect(tester.getSize(find.byType(TrailingFade)), const Size(200, 30));
   });
 
-  test('eyebrow tracking drops to .08em in Russian and Estonian', () {
+  test('eyebrow tracking drops to .08em in Russian', () {
     AppTypography.useLocale(const Locale('en'));
     expect(AppTypography.eyebrowTracking(9.5), closeTo(1.3, 1e-9));
-    for (final code in ['ru', 'et']) {
+    for (final code in ['ru']) {
       AppTypography.useLocale(Locale(code));
       expect(AppTypography.eyebrowTracking(10), closeTo(.8, 1e-9));
     }

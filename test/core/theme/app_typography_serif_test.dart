@@ -48,17 +48,15 @@ void main() {
     expect(AppTypography.pullQuote.fontStyle, FontStyle.italic);
   });
 
-  for (final code in ['en', 'et']) {
-    testWidgets('$code keeps Fraunces with a Literata fallback for Cyrillic', (
-      _,
-    ) async {
-      AppTypography.useLocale(Locale(code));
-      for (final style in _serifRoles()) {
-        expect(style.fontFamily, contains('Fraunces'));
-        expect(style.fontFamilyFallback, [AppTypography.literata]);
-      }
-    });
-  }
+  testWidgets('en keeps Fraunces with a Literata fallback for Cyrillic', (
+    _,
+  ) async {
+    AppTypography.useLocale(const Locale('en'));
+    for (final style in _serifRoles()) {
+      expect(style.fontFamily, contains('Fraunces'));
+      expect(style.fontFamilyFallback, [AppTypography.literata]);
+    }
+  });
 
   testWidgets('sans and mono styles are untouched', (_) async {
     AppTypography.useLocale(const Locale('ru'));
@@ -118,7 +116,7 @@ void main() {
 
     await container
         .read(appLanguageControllerProvider.notifier)
-        .select(AppLanguage.et);
+        .select(AppLanguage.en);
     await tester.pumpAndSettle();
     expect(title()?.fontFamily, contains('Fraunces'));
   });

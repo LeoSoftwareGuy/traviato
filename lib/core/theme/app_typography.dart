@@ -20,12 +20,12 @@ abstract class AppTypography {
   static void useLocale(Locale locale) {
     _serifIsLiterata = locale.languageCode == 'ru';
     _eyebrowEm = switch (locale.languageCode) {
-      'ru' || 'et' => .08,
+      'ru' => .08,
       _ => _defaultEyebrowEm,
     };
   }
 
-  /// Mono eyebrow tracking in em (spec 4t, "Mono eyebrows"): longer RU/ET
+  /// Mono eyebrow tracking in em (spec 4t, "Mono eyebrows"): longer RU
   /// caps get .08em instead of the English ~.14em, so they wrap later.
   static const _defaultEyebrowEm = 1.3 / 9.5;
   static var _eyebrowEm = _defaultEyebrowEm;
@@ -38,7 +38,7 @@ abstract class AppTypography {
 
   /// A serif style in the current locale's serif. Every serif falls back to
   /// Literata, so Russian user text (a note, a memory name) under an
-  /// English or Estonian UI renders in Literata rather than the system
+  /// English UI renders in Literata rather than the system
   /// serif.
   static TextStyle serif({
     double? fontSize,
@@ -121,7 +121,7 @@ abstract class AppTypography {
     fontSize: 9.5,
     height: 1.3,
     fontWeight: FontWeight.w500,
-    // ~.14em in English (spec range .10–.18em); .08em in RU/ET.
+    // ~.14em in English (spec range .10–.18em); .08em in Russian.
     letterSpacing: eyebrowTracking(9.5),
     color: AppColors.textTertiary,
   );

@@ -1216,6 +1216,32 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get notif_morningTitle => 'Two little dares today ✦';
+
+  @override
+  String get notif_morningBody => 'Open the tray and see what today\'s got.';
+
+  @override
+  String get notif_eveningTitle => 'Still time for a dare';
+
+  @override
+  String get notif_eveningBody => 'Today\'s bonus tasks are waiting.';
+
+  @override
+  String get notif_arrivalTitle => 'Your trip starts today ✦';
+
+  @override
+  String get notif_arrivalBody =>
+      'Log the first moment and see what\'s waiting.';
+
+  @override
+  String get notif_channelName => 'Bonus dares';
+
+  @override
+  String get notif_channelDescription =>
+      'Daily nudges for your trip\'s bonus tasks.';
+
+  @override
   String get profile_eyebrow => 'Profile';
 
   @override

@@ -1013,6 +1013,26 @@
       }
     }
   },
+  "notif_morningTitle": "Two little dares today ✦",
+  "@notif_morningTitle": {
+    "description": "Local notification, ~9:00 on a memory day after an active day."
+  },
+  "notif_morningBody": "Open the tray and see what today's got.",
+  "notif_eveningTitle": "Still time for a dare",
+  "@notif_eveningTitle": {
+    "description": "Local notification, ~19:00 while a bonus task is still open."
+  },
+  "notif_eveningBody": "Today's bonus tasks are waiting.",
+  "notif_arrivalTitle": "Your trip starts today ✦",
+  "@notif_arrivalTitle": {
+    "description": "Local notification on the morning a memory starts."
+  },
+  "notif_arrivalBody": "Log the first moment and see what's waiting.",
+  "notif_channelName": "Bonus dares",
+  "@notif_channelName": {
+    "description": "Android notification channel name, shown in system settings."
+  },
+  "notif_channelDescription": "Daily nudges for your trip's bonus tasks.",
   "profile_eyebrow": "Profile",
   "@profile_eyebrow": {
     "description": "Mono eyebrow, uppercased in code."

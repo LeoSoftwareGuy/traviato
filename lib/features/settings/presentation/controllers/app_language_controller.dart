@@ -126,7 +126,7 @@ class LanguageProfileSyncController extends _$LanguageProfileSyncController {
       if (loaded.language case final stored?) {
         await ref
             .read(appLanguageControllerProvider.notifier)
-            .adopt(AppLanguage.fromCode(stored));
+            .adopt(AppLanguage.uiFromCode(stored));
       } else {
         final local = ref.read(appLanguageControllerProvider);
         if (local != AppLanguage.system) await repo.updateLanguage(local.code);

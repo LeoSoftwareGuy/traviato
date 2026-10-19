@@ -359,25 +359,8 @@ void main() {
     expect(glow.blurRadius, 0);
   });
 
-  group('in ru / et (#220)', () {
-    testWidgets('reads in Estonian', (tester) async {
-      setScreenSize(tester, height: 1800);
-      final repo = FakeSubscriptionRepository()
-        ..offeringsResult = _bothOfferings;
-      await _pump(tester, repo: repo, locale: const Locale('et'));
-
-      expect(find.text('Ruumi igale'), findsOneWidget);
-      expect(find.text('Piiramatult mälestusi'), findsOneWidget);
-      expect(find.text('Aasta'), findsOneWidget);
-      expect(find.text('SÄÄSTA 63%'), findsOneWidget);
-      expect(find.textContaining('KUUS'), findsWidgets);
-      expect(
-        find.text('Alusta 7-päevast tasuta prooviperioodi'),
-        findsOneWidget,
-      );
-    });
-
-    for (final locale in const [Locale('en'), Locale('ru'), Locale('et')]) {
+  group('in ru (#220)', () {
+    for (final locale in const [Locale('en'), Locale('ru')]) {
       testWidgets('lays out without overflow at 360pt in '
           '${locale.languageCode}', (tester) async {
         setScreenSize(tester, height: 1800);

@@ -13,7 +13,7 @@ class AppLanguagePrefs {
   Future<AppLanguage> read() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      return AppLanguage.fromCode(prefs.getString(key));
+      return AppLanguage.uiFromCode(prefs.getString(key));
     } catch (_) {
       // Unreadable prefs must never block startup; follow the phone.
       return AppLanguage.system;

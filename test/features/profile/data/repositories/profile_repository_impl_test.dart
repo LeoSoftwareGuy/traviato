@@ -146,8 +146,8 @@ void main() {
       final remote = _FakeProfileRemoteDataSource();
       final repo = ProfileRepositoryImpl(remote: remote);
 
-      expect((await repo.updateLanguage('et')).isRight(), isTrue);
-      expect(remote.lastLanguage, 'et');
+      expect((await repo.updateLanguage('ru')).isRight(), isTrue);
+      expect(remote.lastLanguage, 'ru');
       await repo.updateLanguage(null);
       expect(remote.lastLanguage, isNull);
     });

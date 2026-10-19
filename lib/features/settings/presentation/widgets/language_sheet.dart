@@ -68,7 +68,7 @@ class LanguageSheet extends ConsumerWidget {
             selected: choice == AppLanguage.system,
             onTap: () => Navigator.of(context).pop(AppLanguage.system),
           ),
-          for (final language in AppLanguage.pinned) ...[
+          for (final language in AppLanguage.uiLanguages) ...[
             const SizedBox(height: 7),
             _LanguageRow(
               key: Key('language-row-${language.code}'),

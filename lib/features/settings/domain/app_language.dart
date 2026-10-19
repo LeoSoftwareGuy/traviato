@@ -1,7 +1,9 @@
 import 'dart:ui';
 
-/// The user's UI-language choice (#220). [system] follows the phone; the
-/// others pin the app to one of the supported locales.
+/// A language the app knows (#220). As a UI choice, [system] follows the
+/// phone and the others pin the app to a locale — but only [en] and [ru]
+/// are UI languages: Estonian users read the app in English (#245), so
+/// [et] exists for dictation only.
 enum AppLanguage {
   system(null),
   en('en'),
@@ -14,8 +16,15 @@ enum AppLanguage {
   /// `shared_preferences` and in `profiles.language`.
   final String? code;
 
-  /// The pinned languages, in the order the sheet lists them.
-  static const pinned = [en, ru, et];
+  /// The pinned UI languages, in the order the language sheet lists them.
+  static const uiLanguages = [en, ru];
+
+  /// The languages a note can be dictated in, in the order the Speak in…
+  /// sheet lists them.
+  static const dictationLanguages = [en, ru, et];
+
+  /// Whether the app's UI can be shown in this language.
+  bool get isUiLanguage => uiLanguages.contains(this);
 
   /// The name each language uses for itself; never translated.
   String get nativeName => switch (this) {
@@ -32,16 +41,23 @@ enum AppLanguage {
     'et' => et,
     _ => system,
   };
+
+  /// Parses a stored UI choice: like [fromCode], but a language the UI
+  /// isn't translated into (an `et` saved before #245) means [system].
+  static AppLanguage uiFromCode(String? code) {
+    final language = fromCode(code);
+    return language.isUiLanguage ? language : system;
+  }
 }
 
-/// The supported language a choice resolves to: a pinned choice is itself;
-/// [AppLanguage.system] takes the first device locale the app supports and
-/// falls back to English.
+/// The UI language a choice resolves to: a pinned UI choice is itself;
+/// [AppLanguage.system] (or a language the UI lacks) takes the first device locale the UI supports and
+/// falls back to English — so an Estonian phone reads the app in English.
 AppLanguage resolveAppLanguage(AppLanguage choice, List<Locale> deviceLocales) {
-  if (choice != AppLanguage.system) return choice;
+  if (choice.isUiLanguage) return choice;
   for (final locale in deviceLocales) {
     final match = AppLanguage.fromCode(locale.languageCode);
-    if (match != AppLanguage.system) return match;
+    if (match.isUiLanguage) return match;
   }
   return AppLanguage.en;
 }
