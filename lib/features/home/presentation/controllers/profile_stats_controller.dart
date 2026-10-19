@@ -11,7 +11,9 @@ part 'profile_stats_controller.g.dart';
 /// Home's stats-bar totals and stars badge. Refetches whenever a
 /// [StarsAwardedDispatched] event arrives — quest check-off, day-note
 /// save, photo add, or bonus-task completion (issue #77) — so the badge
-/// updates live instead of only on the next cold load.
+/// updates live instead of only on the next cold load. Also on
+/// [TripDeletedDispatched]: a deleted memory takes its stars and its
+/// counts with it (#247).
 @riverpod
 class ProfileStatsController extends _$ProfileStatsController {
   @override
@@ -22,7 +24,9 @@ class ProfileStatsController extends _$ProfileStatsController {
   }
 
   void _onEvent(GlobalEvent event) {
-    if (event is StarsAwardedDispatched) ref.invalidateSelf();
+    if (event is StarsAwardedDispatched || event is TripDeletedDispatched) {
+      ref.invalidateSelf();
+    }
   }
 
   Future<ProfileStatsEntity> _fetch() async {

@@ -103,6 +103,9 @@ class ProfileController extends _$ProfileController {
   void _onEvent(GlobalEvent event) {
     switch (event) {
       case StarsAwardedDispatched():
+      // A deleted memory takes its stars, counts and achievement progress
+      // with it (#247).
+      case TripDeletedDispatched():
         ref.invalidateSelf();
       case EntitlementUpdatedDispatched():
       // No explicit action needed: build() does
@@ -113,7 +116,6 @@ class ProfileController extends _$ProfileController {
       // underneath, and it picks up the new tier on pop through that
       // dependency, not a second invalidation here.
       case TripCreatedDispatched():
-      case TripDeletedDispatched():
       case TripUpdatedDispatched():
       case WrapUpPublishedDispatched():
       // Not relevant to profile/stats/subscription display.
