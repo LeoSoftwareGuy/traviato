@@ -1165,14 +1165,154 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bonus_eyebrow => 'Bonus tasks';
 
   @override
-  String get bonus_emptyTitle => 'No active memory yet';
+  String get bonus_nextMemory => 'Next memory';
 
   @override
-  String get bonus_emptyBody =>
-      'Bonus tasks show up here once a memory is under way.';
+  String get bonus_upcomingLead => 'Your next tray opens';
 
   @override
-  String get bonus_backHome => 'Back home';
+  String bonus_upcomingEmphasis(String weekday, String date) {
+    String _temp0 = intl.Intl.selectLogic(
+      weekday,
+      {
+        'mon': 'Monday',
+        'tue': 'Tuesday',
+        'wed': 'Wednesday',
+        'thu': 'Thursday',
+        'fri': 'Friday',
+        'sat': 'Saturday',
+        'other': 'Sunday',
+      },
+    );
+    return '$_temp0, $date';
+  }
+
+  @override
+  String bonus_upcomingBody(int days, String title) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'That\'s in $days days, when $title begins.',
+      one: 'That\'s in 1 day, when $title begins.',
+    );
+    return '$_temp0 Nothing to do before then.';
+  }
+
+  @override
+  String bonus_upcomingBodyTomorrow(String title) {
+    return 'That\'s tomorrow, when $title begins. Nothing to do before then.';
+  }
+
+  @override
+  String get bonus_trayPreview => 'What a tray looks like';
+
+  @override
+  String get bonus_trayCaption =>
+      'Two small dares a day. Do one, both, or neither. They\'re never homework.';
+
+  @override
+  String get bonus_nothingEyebrow => 'Nothing on the way';
+
+  @override
+  String get bonus_nothingLead => 'Bonus tasks start';
+
+  @override
+  String get bonus_nothingEmphasisNext => 'with your next memory';
+
+  @override
+  String get bonus_nothingEmphasisFirst => 'with your first memory';
+
+  @override
+  String get bonus_nothingBody =>
+      'Add one, even a rough one. Dares show up on its first day.';
+
+  @override
+  String get bonus_brandNewBody =>
+      'A wedding, a weekend away, a birthday dinner. Anything you\'d want to keep.';
+
+  @override
+  String get bonus_createMemory => 'Create a memory';
+
+  @override
+  String get stars_yourStars => 'Your stars';
+
+  @override
+  String stars_acrossMemories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'across $count memories',
+      one: 'across 1 memory',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get stars_photos => 'Photos';
+
+  @override
+  String get stars_notes => 'Notes';
+
+  @override
+  String get stars_quests => 'Quests';
+
+  @override
+  String get stars_bonusTasks => 'Bonus tasks';
+
+  @override
+  String stars_bonusCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dares',
+      one: '1 dare',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get stars_byMemory => 'By memory';
+
+  @override
+  String get stars_allMemories => 'All memories ›';
+
+  @override
+  String get stars_allMemoriesTitle => 'All memories';
+
+  @override
+  String get stars_earlierMemories => 'Earlier memories';
+
+  @override
+  String get stars_statusKept => 'Kept';
+
+  @override
+  String get stars_statusNow => 'Now';
+
+  @override
+  String get stars_statusUpcoming => 'Upcoming';
+
+  @override
+  String get stars_howCollect => 'How stars collect';
+
+  @override
+  String get stars_guideIntro =>
+      'Every star you earn shows up here, sorted by where it came from.';
+
+  @override
+  String get stars_guidePhoto => 'A photo';
+
+  @override
+  String get stars_guideNote => 'A note';
+
+  @override
+  String get stars_guideQuest => 'A quest done';
+
+  @override
+  String get stars_guideBonus => 'A bonus task';
+
+  @override
+  String get stars_footer =>
+      'Stars keep count of what you\'ve captured. They aren\'t points to spend, just a record of the memories you made.';
 
   @override
   String toast_dareDone(int points) {

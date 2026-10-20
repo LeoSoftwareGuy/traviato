@@ -960,9 +960,132 @@
   "@bonus_eyebrow": {
     "description": "Mono eyebrow, uppercased in code."
   },
-  "bonus_emptyTitle": "No active memory yet",
-  "bonus_emptyBody": "Bonus tasks show up here once a memory is under way.",
-  "bonus_backHome": "Back home",
+  "bonus_nextMemory": "Next memory",
+  "@bonus_nextMemory": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "bonus_upcomingLead": "Your next tray opens",
+  "@bonus_upcomingLead": {
+    "description": "Headline line 1; line 2 is bonus_upcomingEmphasis in italic."
+  },
+  "bonus_upcomingEmphasis": "{weekday, select, mon{Monday} tue{Tuesday} wed{Wednesday} thu{Thursday} fri{Friday} sat{Saturday} other{Sunday}}, {date}",
+  "@bonus_upcomingEmphasis": {
+    "description": "Italic headline line 2. weekday is mon…sun; date is the day and month, e.g. '21 October'.",
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "bonus_upcomingBody": "{days, plural, =1{That's in 1 day, when {title} begins.} other{That's in {days} days, when {title} begins.}} Nothing to do before then.",
+  "@bonus_upcomingBody": {
+    "description": "days is 2 or more (1 uses bonus_upcomingBodyTomorrow); title is the memory's own name, unquoted.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "bonus_upcomingBodyTomorrow": "That's tomorrow, when {title} begins. Nothing to do before then.",
+  "@bonus_upcomingBodyTomorrow": {
+    "description": "title is the memory's own name, unquoted.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "bonus_trayPreview": "What a tray looks like",
+  "@bonus_trayPreview": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "bonus_trayCaption": "Two small dares a day. Do one, both, or neither. They're never homework.",
+  "bonus_nothingEyebrow": "Nothing on the way",
+  "@bonus_nothingEyebrow": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "bonus_nothingLead": "Bonus tasks start",
+  "@bonus_nothingLead": {
+    "description": "Headline line 1."
+  },
+  "bonus_nothingEmphasisNext": "with your next memory",
+  "@bonus_nothingEmphasisNext": {
+    "description": "Italic headline line 2 when the user already has stars."
+  },
+  "bonus_nothingEmphasisFirst": "with your first memory",
+  "@bonus_nothingEmphasisFirst": {
+    "description": "Italic headline line 2 for a brand-new user."
+  },
+  "bonus_nothingBody": "Add one, even a rough one. Dares show up on its first day.",
+  "bonus_brandNewBody": "A wedding, a weekend away, a birthday dinner. Anything you'd want to keep.",
+  "bonus_createMemory": "Create a memory",
+  "stars_yourStars": "Your stars",
+  "@stars_yourStars": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "stars_acrossMemories": "{count, plural, =1{across 1 memory} other{across {count} memories}}",
+  "@stars_acrossMemories": {
+    "description": "Follows the big star total.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stars_photos": "Photos",
+  "stars_notes": "Notes",
+  "stars_quests": "Quests",
+  "stars_bonusTasks": "Bonus tasks",
+  "stars_bonusCount": "{count, plural, =1{1 dare} other{{count} dares}}",
+  "@stars_bonusCount": {
+    "description": "Mono detail on the Bonus tasks row.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stars_byMemory": "By memory",
+  "@stars_byMemory": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "stars_allMemories": "All memories ›",
+  "stars_allMemoriesTitle": "All memories",
+  "@stars_allMemoriesTitle": {
+    "description": "Title of the full stars-by-memory list."
+  },
+  "stars_earlierMemories": "Earlier memories",
+  "@stars_earlierMemories": {
+    "description": "Stars from memories that no longer exist."
+  },
+  "stars_statusKept": "Kept",
+  "@stars_statusKept": {
+    "description": "Memory status in a mono meta line, uppercased in code."
+  },
+  "stars_statusNow": "Now",
+  "@stars_statusNow": {
+    "description": "Memory status in a mono meta line, uppercased in code."
+  },
+  "stars_statusUpcoming": "Upcoming",
+  "@stars_statusUpcoming": {
+    "description": "Memory status in a mono meta line, uppercased in code."
+  },
+  "stars_howCollect": "How stars collect",
+  "@stars_howCollect": {
+    "description": "Mono eyebrow, uppercased in code."
+  },
+  "stars_guideIntro": "Every star you earn shows up here, sorted by where it came from.",
+  "stars_guidePhoto": "A photo",
+  "stars_guideNote": "A note",
+  "stars_guideQuest": "A quest done",
+  "stars_guideBonus": "A bonus task",
+  "stars_footer": "Stars keep count of what you've captured. They aren't points to spend, just a record of the memories you made.",
   "toast_dareDone": "+{points} ✦ · dare done",
   "@toast_dareDone": {
     "description": "Star award toast (spec format).",

@@ -8,6 +8,7 @@ abstract class RoutePaths {
   static const expensesCompare = '/expenses/compare';
   static const profile = '/profile';
   static const bonusTasks = '/bonus-tasks';
+  static const bonusStarsByMemory = '/bonus-tasks/memories';
   static const createMemory = '/create-memory';
   static const tripPlan = '/memory/:tripId/plan';
   static const tripChecklist = '/memory/:tripId/checklist';
@@ -27,6 +28,7 @@ abstract class RouteNames {
   static const expensesCompare = 'expensesCompare';
   static const profile = 'profile';
   static const bonusTasks = 'bonusTasks';
+  static const bonusStarsByMemory = 'bonusStarsByMemory';
   static const createMemory = 'createMemory';
   static const tripPlan = 'tripPlan';
   static const tripChecklist = 'tripChecklist';

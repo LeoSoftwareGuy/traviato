@@ -1191,14 +1191,157 @@ class AppLocalizationsRu extends AppLocalizations {
   String get bonus_eyebrow => 'Бонусные задания';
 
   @override
-  String get bonus_emptyTitle => 'Пока нет текущего воспоминания';
+  String get bonus_nextMemory => 'Следующее воспоминание';
 
   @override
-  String get bonus_emptyBody =>
-      'Бонусные задания появятся здесь, когда начнётся воспоминание.';
+  String get bonus_upcomingLead => 'Новые задания —';
 
   @override
-  String get bonus_backHome => 'На главную';
+  String bonus_upcomingEmphasis(String weekday, String date) {
+    String _temp0 = intl.Intl.selectLogic(
+      weekday,
+      {
+        'mon': 'в понедельник',
+        'tue': 'во вторник',
+        'wed': 'в среду',
+        'thu': 'в четверг',
+        'fri': 'в пятницу',
+        'sat': 'в субботу',
+        'other': 'в воскресенье',
+      },
+    );
+    return '$_temp0, $date';
+  }
+
+  @override
+  String bonus_upcomingBody(int days, String title) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Через $days дня, когда начнётся $title.',
+      many: 'Через $days дней, когда начнётся $title.',
+      few: 'Через $days дня, когда начнётся $title.',
+      one: 'Через $days день, когда начнётся $title.',
+    );
+    return '$_temp0 До тех пор ничего делать не нужно.';
+  }
+
+  @override
+  String bonus_upcomingBodyTomorrow(String title) {
+    return 'Завтра, когда начнётся $title. До тех пор ничего делать не нужно.';
+  }
+
+  @override
+  String get bonus_trayPreview => 'Как выглядят задания';
+
+  @override
+  String get bonus_trayCaption =>
+      'Два маленьких вызова в день. Одно, оба или ни одного — это не домашка.';
+
+  @override
+  String get bonus_nothingEyebrow => 'Ничего не запланировано';
+
+  @override
+  String get bonus_nothingLead => 'Бонусные задания начнутся';
+
+  @override
+  String get bonus_nothingEmphasisNext => 'с вашим следующим воспоминанием';
+
+  @override
+  String get bonus_nothingEmphasisFirst => 'с вашим первым воспоминанием';
+
+  @override
+  String get bonus_nothingBody =>
+      'Добавьте хотя бы черновик. Задания появятся в первый день.';
+
+  @override
+  String get bonus_brandNewBody =>
+      'Свадьба, поездка на выходные, ужин в день рождения. Всё, что хочется сохранить.';
+
+  @override
+  String get bonus_createMemory => 'Создать воспоминание';
+
+  @override
+  String get stars_yourStars => 'Ваши звёзды';
+
+  @override
+  String stars_acrossMemories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'в $count воспоминаниях',
+      many: 'в $count воспоминаниях',
+      few: 'в $count воспоминаниях',
+      one: 'в $count воспоминании',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get stars_photos => 'Фото';
+
+  @override
+  String get stars_notes => 'Заметки';
+
+  @override
+  String get stars_quests => 'Квесты';
+
+  @override
+  String get stars_bonusTasks => 'Бонусные задания';
+
+  @override
+  String stars_bonusCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count шт.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get stars_byMemory => 'По воспоминаниям';
+
+  @override
+  String get stars_allMemories => 'Все воспоминания ›';
+
+  @override
+  String get stars_allMemoriesTitle => 'Все воспоминания';
+
+  @override
+  String get stars_earlierMemories => 'Прошлые воспоминания';
+
+  @override
+  String get stars_statusKept => 'Сохранено';
+
+  @override
+  String get stars_statusNow => 'Сейчас';
+
+  @override
+  String get stars_statusUpcoming => 'Скоро';
+
+  @override
+  String get stars_howCollect => 'Как копятся звёзды';
+
+  @override
+  String get stars_guideIntro =>
+      'Каждая звезда появится здесь — по тому, откуда она.';
+
+  @override
+  String get stars_guidePhoto => 'Фото';
+
+  @override
+  String get stars_guideNote => 'Заметка';
+
+  @override
+  String get stars_guideQuest => 'Выполненный квест';
+
+  @override
+  String get stars_guideBonus => 'Бонусное задание';
+
+  @override
+  String get stars_footer =>
+      'Звёзды считают то, что вы сохранили. Их не тратят — это просто след ваших воспоминаний.';
 
   @override
   String toast_dareDone(int points) {

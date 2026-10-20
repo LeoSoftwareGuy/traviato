@@ -1939,23 +1939,215 @@ abstract class AppLocalizations {
   /// **'Bonus tasks'**
   String get bonus_eyebrow;
 
-  /// No description provided for @bonus_emptyTitle.
+  /// Mono eyebrow, uppercased in code.
   ///
   /// In en, this message translates to:
-  /// **'No active memory yet'**
-  String get bonus_emptyTitle;
+  /// **'Next memory'**
+  String get bonus_nextMemory;
 
-  /// No description provided for @bonus_emptyBody.
+  /// Headline line 1; line 2 is bonus_upcomingEmphasis in italic.
   ///
   /// In en, this message translates to:
-  /// **'Bonus tasks show up here once a memory is under way.'**
-  String get bonus_emptyBody;
+  /// **'Your next tray opens'**
+  String get bonus_upcomingLead;
 
-  /// No description provided for @bonus_backHome.
+  /// Italic headline line 2. weekday is mon…sun; date is the day and month, e.g. '21 October'.
   ///
   /// In en, this message translates to:
-  /// **'Back home'**
-  String get bonus_backHome;
+  /// **'{weekday, select, mon{Monday} tue{Tuesday} wed{Wednesday} thu{Thursday} fri{Friday} sat{Saturday} other{Sunday}}, {date}'**
+  String bonus_upcomingEmphasis(String weekday, String date);
+
+  /// days is 2 or more (1 uses bonus_upcomingBodyTomorrow); title is the memory's own name, unquoted.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{That\'s in 1 day, when {title} begins.} other{That\'s in {days} days, when {title} begins.}} Nothing to do before then.'**
+  String bonus_upcomingBody(int days, String title);
+
+  /// title is the memory's own name, unquoted.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s tomorrow, when {title} begins. Nothing to do before then.'**
+  String bonus_upcomingBodyTomorrow(String title);
+
+  /// Mono eyebrow, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'What a tray looks like'**
+  String get bonus_trayPreview;
+
+  /// No description provided for @bonus_trayCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Two small dares a day. Do one, both, or neither. They\'re never homework.'**
+  String get bonus_trayCaption;
+
+  /// Mono eyebrow, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing on the way'**
+  String get bonus_nothingEyebrow;
+
+  /// Headline line 1.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus tasks start'**
+  String get bonus_nothingLead;
+
+  /// Italic headline line 2 when the user already has stars.
+  ///
+  /// In en, this message translates to:
+  /// **'with your next memory'**
+  String get bonus_nothingEmphasisNext;
+
+  /// Italic headline line 2 for a brand-new user.
+  ///
+  /// In en, this message translates to:
+  /// **'with your first memory'**
+  String get bonus_nothingEmphasisFirst;
+
+  /// No description provided for @bonus_nothingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add one, even a rough one. Dares show up on its first day.'**
+  String get bonus_nothingBody;
+
+  /// No description provided for @bonus_brandNewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A wedding, a weekend away, a birthday dinner. Anything you\'d want to keep.'**
+  String get bonus_brandNewBody;
+
+  /// No description provided for @bonus_createMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a memory'**
+  String get bonus_createMemory;
+
+  /// Mono eyebrow, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Your stars'**
+  String get stars_yourStars;
+
+  /// Follows the big star total.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{across 1 memory} other{across {count} memories}}'**
+  String stars_acrossMemories(int count);
+
+  /// No description provided for @stars_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get stars_photos;
+
+  /// No description provided for @stars_notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get stars_notes;
+
+  /// No description provided for @stars_quests.
+  ///
+  /// In en, this message translates to:
+  /// **'Quests'**
+  String get stars_quests;
+
+  /// No description provided for @stars_bonusTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus tasks'**
+  String get stars_bonusTasks;
+
+  /// Mono detail on the Bonus tasks row.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 dare} other{{count} dares}}'**
+  String stars_bonusCount(int count);
+
+  /// Mono eyebrow, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'By memory'**
+  String get stars_byMemory;
+
+  /// No description provided for @stars_allMemories.
+  ///
+  /// In en, this message translates to:
+  /// **'All memories ›'**
+  String get stars_allMemories;
+
+  /// Title of the full stars-by-memory list.
+  ///
+  /// In en, this message translates to:
+  /// **'All memories'**
+  String get stars_allMemoriesTitle;
+
+  /// Stars from memories that no longer exist.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier memories'**
+  String get stars_earlierMemories;
+
+  /// Memory status in a mono meta line, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept'**
+  String get stars_statusKept;
+
+  /// Memory status in a mono meta line, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get stars_statusNow;
+
+  /// Memory status in a mono meta line, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get stars_statusUpcoming;
+
+  /// Mono eyebrow, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'How stars collect'**
+  String get stars_howCollect;
+
+  /// No description provided for @stars_guideIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Every star you earn shows up here, sorted by where it came from.'**
+  String get stars_guideIntro;
+
+  /// No description provided for @stars_guidePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'A photo'**
+  String get stars_guidePhoto;
+
+  /// No description provided for @stars_guideNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A note'**
+  String get stars_guideNote;
+
+  /// No description provided for @stars_guideQuest.
+  ///
+  /// In en, this message translates to:
+  /// **'A quest done'**
+  String get stars_guideQuest;
+
+  /// No description provided for @stars_guideBonus.
+  ///
+  /// In en, this message translates to:
+  /// **'A bonus task'**
+  String get stars_guideBonus;
+
+  /// No description provided for @stars_footer.
+  ///
+  /// In en, this message translates to:
+  /// **'Stars keep count of what you\'ve captured. They aren\'t points to spend, just a record of the memories you made.'**
+  String get stars_footer;
 
   /// Star award toast (spec format).
   ///
