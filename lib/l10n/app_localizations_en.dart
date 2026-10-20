@@ -1698,7 +1698,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'None of which is the reason you\'ll remember it.';
 
   @override
-  String get wrapUp_generating1 => 'Reliving your trip…';
+  String get wrapUp_generating1 => 'Reliving your memory…';
 
   @override
   String get wrapUp_generating2 => 'Finding the best moments…';

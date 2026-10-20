@@ -56,7 +56,7 @@
   "@error_freeTierPhotos": {
     "x-review": "pending"
   },
-  "error_questPlanningClosed": "Это событие добавлено после окончания поездки, поэтому планировать нечего.",
+  "error_questPlanningClosed": "Это событие добавлено после его окончания, поэтому планировать нечего.",
   "@error_questPlanningClosed": {
     "x-review": "pending"
   },
@@ -700,7 +700,7 @@
   "@manage_notSet": {
     "x-review": "pending"
   },
-  "checklist_title": "Соберитесь в поездку",
+  "checklist_title": "Соберитесь в дорогу",
   "@checklist_title": {
     "x-review": "pending"
   },
@@ -1148,7 +1148,7 @@
   "@compare_eyebrow": {
     "x-review": "pending"
   },
-  "compare_titleLead": "Какая поездка обошлась",
+  "compare_titleLead": "Какое событие обошлось",
   "@compare_titleLead": {
     "x-review": "pending"
   },
@@ -1192,23 +1192,23 @@
   "@compare_perDay": {
     "x-review": "pending"
   },
-  "compare_verdictSame": "Поездки «{a}» и «{b}» обошлись примерно одинаково.",
+  "compare_verdictSame": "События «{a}» и «{b}» обошлись примерно одинаково.",
   "@compare_verdictSame": {
     "x-review": "pending"
   },
-  "compare_verdictSameButPerDay": "Поездки «{a}» и «{b}» обошлись примерно одинаково, но в «{higher}» в день уходило на {perDay} больше. «{cheaper}» — дешевле в пересчёте на день.",
+  "compare_verdictSameButPerDay": "События «{a}» и «{b}» обошлись примерно одинаково, но в «{higher}» в день уходило на {perDay} больше. «{cheaper}» — дешевле в пересчёте на день.",
   "@compare_verdictSameButPerDay": {
     "x-review": "pending"
   },
-  "compare_verdictMore": "Поездка «{bigger}» обошлась на {total} дороже, чем «{smaller}».",
+  "compare_verdictMore": "Событие «{bigger}» обошлось на {total} дороже, чем «{smaller}».",
   "@compare_verdictMore": {
     "x-review": "pending"
   },
-  "compare_verdictMoreAndPerDay": "Поездка «{bigger}» обошлась на {total} дороже, и в день тоже уходило на {perDay} больше. «{cheaper}» — дешевле в пересчёте на день.",
+  "compare_verdictMoreAndPerDay": "Событие «{bigger}» обошлось на {total} дороже, и в день тоже уходило на {perDay} больше. «{cheaper}» — дешевле в пересчёте на день.",
   "@compare_verdictMoreAndPerDay": {
     "x-review": "pending"
   },
-  "compare_verdictMoreButPerDay": "Поездка «{bigger}» обошлась на {total} дороже, но в «{higher}» в день уходило на {perDay} больше. «{cheaper}» — дешевле в пересчёте на день.",
+  "compare_verdictMoreButPerDay": "Событие «{bigger}» обошлось на {total} дороже, но в «{higher}» в день уходило на {perDay} больше. «{cheaper}» — дешевле в пересчёте на день.",
   "@compare_verdictMoreButPerDay": {
     "x-review": "pending"
   },
@@ -1416,7 +1416,7 @@
   "@notif_eveningBody": {
     "x-review": "pending"
   },
-  "notif_arrivalTitle": "Ваша поездка начинается сегодня ✦",
+  "notif_arrivalTitle": "Ваше событие начинается сегодня ✦",
   "@notif_arrivalTitle": {
     "x-review": "pending"
   },
@@ -1428,7 +1428,7 @@
   "@notif_channelName": {
     "x-review": "pending"
   },
-  "notif_channelDescription": "Ежедневные напоминания о бонусных заданиях поездки.",
+  "notif_channelDescription": "Ежедневные напоминания о бонусных заданиях.",
   "@notif_channelDescription": {
     "x-review": "pending"
   },
@@ -1600,7 +1600,7 @@
   "@sub_cantOpenSettings": {
     "x-review": "pending"
   },
-  "paywall_subMemoryCap": "Три бесплатных события заняты. Перейдите на Pro, чтобы сохранять каждую поездку, а не только три.",
+  "paywall_subMemoryCap": "Три бесплатных события заняты. Перейдите на Pro, чтобы сохранять каждое событие, а не только три.",
   "@paywall_subMemoryCap": {
     "x-review": "pending"
   },
@@ -1632,7 +1632,7 @@
   "@paywall_perkMemories": {
     "x-review": "pending"
   },
-  "paywall_perkMemoriesDetail": "Сохраняйте каждую поездку, а не выбирайте три.",
+  "paywall_perkMemoriesDetail": "Сохраняйте каждое событие, а не выбирайте три.",
   "@paywall_perkMemoriesDetail": {
     "x-review": "pending"
   },
@@ -1728,7 +1728,7 @@
   "@wrapUp_footnoteClosing": {
     "x-review": "pending"
   },
-  "wrapUp_generating1": "Переживаем поездку заново…",
+  "wrapUp_generating1": "Переживаем событие заново…",
   "@wrapUp_generating1": {
     "x-review": "pending"
   },

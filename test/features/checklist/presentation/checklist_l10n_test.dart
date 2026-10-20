@@ -70,7 +70,7 @@ void main() {
     await _pump(tester, const Locale('ru'));
 
     expect(find.text('ЧЕК-ЛИСТ'), findsOneWidget);
-    expect(find.text('Соберитесь в поездку'), findsOneWidget);
+    expect(find.text('Соберитесь в дорогу'), findsOneWidget);
     expect(find.text('Самое нужное'), findsOneWidget);
     expect(find.text('Собрано 1 из 2'), findsOneWidget);
     expect(find.text('Важное'), findsOneWidget);

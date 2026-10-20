@@ -2710,7 +2710,7 @@ abstract class AppLocalizations {
   /// No description provided for @wrapUp_generating1.
   ///
   /// In en, this message translates to:
-  /// **'Reliving your trip…'**
+  /// **'Reliving your memory…'**
   String get wrapUp_generating1;
 
   /// No description provided for @wrapUp_generating2.
