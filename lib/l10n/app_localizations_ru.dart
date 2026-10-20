@@ -833,7 +833,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get journal_writeNote => 'Написать заметку';
 
   @override
-  String get journal_addNotesToday => '✎ Добавить заметку о сегодня';
+  String get journal_addNotesToday => '✎ Добавить заметку о сегодняшнем дне';
 
   @override
   String get journal_continueEntry => '✎ Продолжить запись';

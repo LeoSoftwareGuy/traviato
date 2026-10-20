@@ -848,7 +848,7 @@
   "@journal_writeNote": {
     "x-review": "pending"
   },
-  "journal_addNotesToday": "✎ Добавить заметку о сегодня",
+  "journal_addNotesToday": "✎ Добавить заметку о сегодняшнем дне",
   "@journal_addNotesToday": {
     "x-review": "pending"
   },
