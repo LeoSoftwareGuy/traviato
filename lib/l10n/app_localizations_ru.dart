@@ -56,7 +56,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get error_questPlanningClosed =>
-      'Это событие добавлено после окончания поездки, поэтому планировать нечего.';
+      'Это событие добавлено после его окончания, поэтому планировать нечего.';
 
   @override
   String get error_authLink =>
@@ -681,7 +681,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get manage_notSet => 'Не задано';
 
   @override
-  String get checklist_title => 'Соберитесь в поездку';
+  String get checklist_title => 'Соберитесь в дорогу';
 
   @override
   String get checklist_emptyCategory => 'В этой категории пока ничего нет.';
@@ -1109,7 +1109,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get compare_eyebrow => 'Сравнение';
 
   @override
-  String get compare_titleLead => 'Какая поездка обошлась';
+  String get compare_titleLead => 'Какое событие обошлось';
 
   @override
   String get compare_titleEmphasis => 'дороже на самом деле?';
@@ -1147,7 +1147,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String compare_verdictSame(String a, String b) {
-    return 'Поездки «$a» и «$b» обошлись примерно одинаково.';
+    return 'События «$a» и «$b» обошлись примерно одинаково.';
   }
 
   @override
@@ -1158,12 +1158,12 @@ class AppLocalizationsRu extends AppLocalizations {
     String perDay,
     String cheaper,
   ) {
-    return 'Поездки «$a» и «$b» обошлись примерно одинаково, но в «$higher» в день уходило на $perDay больше. «$cheaper» — дешевле в пересчёте на день.';
+    return 'События «$a» и «$b» обошлись примерно одинаково, но в «$higher» в день уходило на $perDay больше. «$cheaper» — дешевле в пересчёте на день.';
   }
 
   @override
   String compare_verdictMore(String bigger, String total, String smaller) {
-    return 'Поездка «$bigger» обошлась на $total дороже, чем «$smaller».';
+    return 'Событие «$bigger» обошлось на $total дороже, чем «$smaller».';
   }
 
   @override
@@ -1173,7 +1173,7 @@ class AppLocalizationsRu extends AppLocalizations {
     String perDay,
     String cheaper,
   ) {
-    return 'Поездка «$bigger» обошлась на $total дороже, и в день тоже уходило на $perDay больше. «$cheaper» — дешевле в пересчёте на день.';
+    return 'Событие «$bigger» обошлось на $total дороже, и в день тоже уходило на $perDay больше. «$cheaper» — дешевле в пересчёте на день.';
   }
 
   @override
@@ -1184,7 +1184,7 @@ class AppLocalizationsRu extends AppLocalizations {
     String perDay,
     String cheaper,
   ) {
-    return 'Поездка «$bigger» обошлась на $total дороже, но в «$higher» в день уходило на $perDay больше. «$cheaper» — дешевле в пересчёте на день.';
+    return 'Событие «$bigger» обошлось на $total дороже, но в «$higher» в день уходило на $perDay больше. «$cheaper» — дешевле в пересчёте на день.';
   }
 
   @override
@@ -1398,7 +1398,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get notif_eveningBody => 'Сегодняшние бонусные задания ждут вас.';
 
   @override
-  String get notif_arrivalTitle => 'Ваша поездка начинается сегодня ✦';
+  String get notif_arrivalTitle => 'Ваше событие начинается сегодня ✦';
 
   @override
   String get notif_arrivalBody =>
@@ -1409,7 +1409,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get notif_channelDescription =>
-      'Ежедневные напоминания о бонусных заданиях поездки.';
+      'Ежедневные напоминания о бонусных заданиях.';
 
   @override
   String get profile_eyebrow => 'Профиль';
@@ -1602,7 +1602,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get paywall_subMemoryCap =>
-      'Три бесплатных события заняты. Перейдите на Pro, чтобы сохранять каждую поездку, а не только три.';
+      'Три бесплатных события заняты. Перейдите на Pro, чтобы сохранять каждое событие, а не только три.';
 
   @override
   String get paywall_subPhotoCap =>
@@ -1631,7 +1631,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get paywall_perkMemoriesDetail =>
-      'Сохраняйте каждую поездку, а не выбирайте три.';
+      'Сохраняйте каждое событие, а не выбирайте три.';
 
   @override
   String get paywall_perkPhotos => 'Безлимит фото в событии';

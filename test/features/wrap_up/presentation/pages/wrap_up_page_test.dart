@@ -86,7 +86,7 @@ void main() {
     await _pump(tester, wrapUpRepo: wrapUpRepo);
 
     await tester.pump();
-    expect(find.text('Reliving your trip…'), findsOneWidget);
+    expect(find.text('Reliving your memory…'), findsOneWidget);
 
     await tester.pump(const Duration(milliseconds: 500));
     await _settle(tester);
