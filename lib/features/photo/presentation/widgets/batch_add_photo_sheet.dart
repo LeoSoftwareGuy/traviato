@@ -1,8 +1,10 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/errors/failure_message.dart';
+import '../../../../core/errors/failures.dart';
+import '../../../../core/errors/presentation_failure_exception.dart';
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -65,6 +67,10 @@ class _BatchAddPhotoSheetState extends ConsumerState<BatchAddPhotoSheet> {
       .toList();
   var _isRunning = false;
 
+  /// The most recent upload error, shown under the summary so a failed
+  /// batch says *why* (#262) instead of only "0 uploaded, N failed".
+  Object? _lastError;
+
   int get _successCount =>
       _items.where((i) => i.status == _BatchItemStatus.success).length;
   int get _failedCount =>
@@ -78,7 +84,10 @@ class _BatchAddPhotoSheetState extends ConsumerState<BatchAddPhotoSheet> {
   }
 
   Future<void> _run() async {
-    setState(() => _isRunning = true);
+    setState(() {
+      _isRunning = true;
+      _lastError = null;
+    });
     final locationGranted = await resolveLocationPermission(context);
     if (!mounted) return;
 
@@ -95,9 +104,19 @@ class _BatchAddPhotoSheetState extends ConsumerState<BatchAddPhotoSheet> {
         );
         if (!mounted) return;
         setState(() => item.status = _BatchItemStatus.success);
-      } catch (_) {
+      } catch (e) {
+        debugPrint('batch photo upload failed: $e');
         if (!mounted) return;
-        setState(() => item.status = _BatchItemStatus.failed);
+        setState(() {
+          item.status = _BatchItemStatus.failed;
+          _lastError = e;
+        });
+        // The photo cap rejects every remaining image the same way — stop
+        // instead of uploading (and rejecting) the rest one by one.
+        if (_isPhotoLimit(e)) {
+          setState(_failRemaining);
+          break;
+        }
       }
     }
     if (!mounted) return;
@@ -106,6 +125,18 @@ class _BatchAddPhotoSheetState extends ConsumerState<BatchAddPhotoSheet> {
       _finish();
     } else {
       setState(() => _isRunning = false);
+    }
+  }
+
+  static bool _isPhotoLimit(Object error) =>
+      error is PresentationFailureException &&
+      error.failure is PhotoLimitFailure;
+
+  void _failRemaining() {
+    for (final item in _items) {
+      if (item.status == _BatchItemStatus.pending) {
+        item.status = _BatchItemStatus.failed;
+      }
     }
   }
 
@@ -189,6 +220,14 @@ class _BatchAddPhotoSheetState extends ConsumerState<BatchAddPhotoSheet> {
           context.l10n.photo_uploadSummary(success, failed),
           style: AppTypography.bodyInput,
         ),
+        if (_lastError case final error?) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            presentationFailureMessage(error, context.l10n),
+            key: const Key('batch-photo-error'),
+            style: AppTypography.caption,
+          ),
+        ],
         const SizedBox(height: AppSpacing.xl),
         ElevatedButton(
           key: const Key('batch-photo-retry'),
