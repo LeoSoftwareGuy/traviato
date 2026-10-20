@@ -153,7 +153,9 @@ class _HomeContent extends ConsumerWidget {
           stars: stars,
           onAvatarTap: () => context.pushNamed(RouteNames.profile),
           hasOpenBonusTasks: hasOpenBonusTasks,
-          onStarsTap: () => hero != null
+          // The tray only while the hero memory is under way (local date);
+          // otherwise the no-tray page says when the next one opens (#219).
+          onStarsTap: () => hero != null && hero.isUnderwayOn(DateTime.now())
               ? context.pushNamed(
                   RouteNames.tripBonusTasks,
                   pathParameters: {'tripId': hero.id},

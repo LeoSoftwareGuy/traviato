@@ -154,6 +154,18 @@ class TripCardEntity extends Equatable {
   /// The trip's wrap-up has been "Kept forever" (M4-3).
   bool get isKeptForever => wrapUpPublishedAt != null;
 
+  /// Whether [day] (a local date) falls within the trip — the same rule the
+  /// bonus tray uses for "today" (#219), unlike [status], which the view
+  /// derives from the server's UTC `current_date`.
+  bool isUnderwayOn(DateTime day) {
+    final start = startDate;
+    final end = endDate;
+    if (start == null || end == null) return false;
+    final d = DateTime(day.year, day.month, day.day);
+    return !d.isBefore(DateTime(start.year, start.month, start.day)) &&
+        !d.isAfter(DateTime(end.year, end.month, end.day));
+  }
+
   /// The whole trip was already over on the (local) day the memory was
   /// created, so there was never a window to plan it (#164) — quest
   /// planning isn't offered. A trip created mid-way (day 3 of 5) or on its

@@ -9,6 +9,7 @@ import 'package:traviato/core/theme/app_colors.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/auth/domain/entities/user_entity.dart';
 import 'package:traviato/features/auth/presentation/providers/auth_providers.dart';
+import 'package:traviato/features/bonus/presentation/providers/bonus_task_providers.dart';
 import 'package:traviato/features/checklist/domain/entities/checklist_item_entity.dart';
 import 'package:traviato/features/checklist/presentation/providers/checklist_providers.dart';
 import 'package:traviato/features/expense/presentation/providers/expense_providers.dart';
@@ -23,6 +24,7 @@ import 'package:traviato/features/trip/domain/entities/trip_card_entity.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
 import '../../../auth/fakes/fake_auth_repository.dart';
+import '../../../bonus/fakes/fake_bonus_task_repository.dart';
 import '../../../checklist/fakes/fake_checklist_repository.dart';
 import '../../../expense/fakes/fake_expense_repository.dart';
 import '../../../journal/fakes/fake_day_note_repository.dart';
@@ -386,6 +388,84 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Bonus tasks'), findsOneWidget);
+  });
+
+  group('the stars badge with a hero memory (#219)', () {
+    Future<void> pumpWithHero(WidgetTester tester, TripCardEntity hero) async {
+      final tripRepo = FakeTripRepository()
+        ..tripsResult = Right([hero])
+        ..tripCardResult = Right(hero);
+      final router = GoRouter(
+        initialLocation: '/home',
+        routes: [
+          GoRoute(path: '/home', builder: (context, state) => const HomePage()),
+          GoRoute(
+            path: RoutePaths.bonusTasks,
+            name: RouteNames.bonusTasks,
+            builder: (context, state) =>
+                const Scaffold(body: Text('no-tray page')),
+          ),
+          GoRoute(
+            path: RoutePaths.tripBonusTasks,
+            name: RouteNames.tripBonusTasks,
+            builder: (context, state) => Scaffold(
+              body: Text('tray:${state.pathParameters['tripId']}'),
+            ),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+            tripRepositoryProvider.overrideWithValue(tripRepo),
+            questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
+            checklistRepositoryProvider.overrideWithValue(
+              FakeChecklistRepository(),
+            ),
+            bonusTaskRepositoryProvider.overrideWithValue(
+              FakeBonusTaskRepository(),
+            ),
+            dayNoteRepositoryProvider.overrideWithValue(
+              FakeDayNoteRepository(),
+            ),
+            photoRepositoryProvider.overrideWithValue(FakePhotoRepository()),
+          ],
+          child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('home-stars-badge')));
+      await tester.pumpAndSettle();
+    }
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    testWidgets('under way → its tray', (tester) async {
+      await pumpWithHero(
+        tester,
+        buildTripCard(
+          id: 'now',
+          startDate: today,
+          endDate: today.add(const Duration(days: 2)),
+          status: TripStatus.current,
+        ),
+      );
+      expect(find.text('tray:now'), findsOneWidget);
+    });
+
+    testWidgets('only upcoming → the no-tray page', (tester) async {
+      await pumpWithHero(
+        tester,
+        buildTripCard(
+          id: 'soon',
+          startDate: today.add(const Duration(days: 4)),
+          endDate: today.add(const Duration(days: 7)),
+        ),
+      );
+      expect(find.text('no-tray page'), findsOneWidget);
+    });
   });
 
   testWidgets(

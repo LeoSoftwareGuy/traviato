@@ -1216,16 +1216,144 @@
   "@bonus_eyebrow": {
     "x-review": "pending"
   },
-  "bonus_emptyTitle": "Пока нет текущего воспоминания",
-  "@bonus_emptyTitle": {
+  "bonus_nextMemory": "Следующее воспоминание",
+  "@bonus_nextMemory": {
     "x-review": "pending"
   },
-  "bonus_emptyBody": "Бонусные задания появятся здесь, когда начнётся воспоминание.",
-  "@bonus_emptyBody": {
+  "bonus_upcomingLead": "Новые задания —",
+  "@bonus_upcomingLead": {
     "x-review": "pending"
   },
-  "bonus_backHome": "На главную",
-  "@bonus_backHome": {
+  "bonus_upcomingEmphasis": "{weekday, select, mon{в понедельник} tue{во вторник} wed{в среду} thu{в четверг} fri{в пятницу} sat{в субботу} other{в воскресенье}}, {date}",
+  "@bonus_upcomingEmphasis": {
+    "x-review": "pending"
+  },
+  "bonus_upcomingBody": "{days, plural, one{Через {days} день, когда начнётся {title}.} few{Через {days} дня, когда начнётся {title}.} many{Через {days} дней, когда начнётся {title}.} other{Через {days} дня, когда начнётся {title}.}} До тех пор ничего делать не нужно.",
+  "@bonus_upcomingBody": {
+    "x-review": "pending"
+  },
+  "bonus_upcomingBodyTomorrow": "Завтра, когда начнётся {title}. До тех пор ничего делать не нужно.",
+  "@bonus_upcomingBodyTomorrow": {
+    "x-review": "pending"
+  },
+  "bonus_trayPreview": "Как выглядят задания",
+  "@bonus_trayPreview": {
+    "x-review": "pending"
+  },
+  "bonus_trayCaption": "Два маленьких вызова в день. Одно, оба или ни одного — это не домашка.",
+  "@bonus_trayCaption": {
+    "x-review": "pending"
+  },
+  "bonus_nothingEyebrow": "Ничего не запланировано",
+  "@bonus_nothingEyebrow": {
+    "x-review": "pending"
+  },
+  "bonus_nothingLead": "Бонусные задания начнутся",
+  "@bonus_nothingLead": {
+    "x-review": "pending"
+  },
+  "bonus_nothingEmphasisNext": "с вашим следующим воспоминанием",
+  "@bonus_nothingEmphasisNext": {
+    "x-review": "pending"
+  },
+  "bonus_nothingEmphasisFirst": "с вашим первым воспоминанием",
+  "@bonus_nothingEmphasisFirst": {
+    "x-review": "pending"
+  },
+  "bonus_nothingBody": "Добавьте хотя бы черновик. Задания появятся в первый день.",
+  "@bonus_nothingBody": {
+    "x-review": "pending"
+  },
+  "bonus_brandNewBody": "Свадьба, поездка на выходные, ужин в день рождения. Всё, что хочется сохранить.",
+  "@bonus_brandNewBody": {
+    "x-review": "pending"
+  },
+  "bonus_createMemory": "Создать воспоминание",
+  "@bonus_createMemory": {
+    "x-review": "pending"
+  },
+  "stars_yourStars": "Ваши звёзды",
+  "@stars_yourStars": {
+    "x-review": "pending"
+  },
+  "stars_acrossMemories": "{count, plural, one{в {count} воспоминании} few{в {count} воспоминаниях} many{в {count} воспоминаниях} other{в {count} воспоминаниях}}",
+  "@stars_acrossMemories": {
+    "x-review": "pending"
+  },
+  "stars_photos": "Фото",
+  "@stars_photos": {
+    "x-review": "pending"
+  },
+  "stars_notes": "Заметки",
+  "@stars_notes": {
+    "x-review": "pending"
+  },
+  "stars_quests": "Квесты",
+  "@stars_quests": {
+    "x-review": "pending"
+  },
+  "stars_bonusTasks": "Бонусные задания",
+  "@stars_bonusTasks": {
+    "x-review": "pending"
+  },
+  "stars_bonusCount": "{count, plural, other{{count} шт.}}",
+  "@stars_bonusCount": {
+    "x-review": "pending"
+  },
+  "stars_byMemory": "По воспоминаниям",
+  "@stars_byMemory": {
+    "x-review": "pending"
+  },
+  "stars_allMemories": "Все воспоминания ›",
+  "@stars_allMemories": {
+    "x-review": "pending"
+  },
+  "stars_allMemoriesTitle": "Все воспоминания",
+  "@stars_allMemoriesTitle": {
+    "x-review": "pending"
+  },
+  "stars_earlierMemories": "Прошлые воспоминания",
+  "@stars_earlierMemories": {
+    "x-review": "pending"
+  },
+  "stars_statusKept": "Сохранено",
+  "@stars_statusKept": {
+    "x-review": "pending"
+  },
+  "stars_statusNow": "Сейчас",
+  "@stars_statusNow": {
+    "x-review": "pending"
+  },
+  "stars_statusUpcoming": "Скоро",
+  "@stars_statusUpcoming": {
+    "x-review": "pending"
+  },
+  "stars_howCollect": "Как копятся звёзды",
+  "@stars_howCollect": {
+    "x-review": "pending"
+  },
+  "stars_guideIntro": "Каждая звезда появится здесь — по тому, откуда она.",
+  "@stars_guideIntro": {
+    "x-review": "pending"
+  },
+  "stars_guidePhoto": "Фото",
+  "@stars_guidePhoto": {
+    "x-review": "pending"
+  },
+  "stars_guideNote": "Заметка",
+  "@stars_guideNote": {
+    "x-review": "pending"
+  },
+  "stars_guideQuest": "Выполненный квест",
+  "@stars_guideQuest": {
+    "x-review": "pending"
+  },
+  "stars_guideBonus": "Бонусное задание",
+  "@stars_guideBonus": {
+    "x-review": "pending"
+  },
+  "stars_footer": "Звёзды считают то, что вы сохранили. Их не тратят — это просто след ваших воспоминаний.",
+  "@stars_footer": {
     "x-review": "pending"
   },
   "toast_dareDone": "+{points} ✦ · задание выполнено",

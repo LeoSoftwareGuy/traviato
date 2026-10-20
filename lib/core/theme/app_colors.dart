@@ -20,6 +20,11 @@ abstract class AppColors {
   // separates from the background instead of melting into it.
   static const Color surfaceElevated = Color(0xCC131736);
 
+  // Hairlines on the Bonus page (#219): card borders and dividers
+  // (#1D2248 @ 90%), and the softer row separators (@ 70%).
+  static const Color hairline = Color(0xE61D2248);
+  static const Color hairlineSoft = Color(0xB31D2248);
+
   static const Color textPrimary = Color(0xFFFBFAF6);
   static const Color textSecondary = Color(0xFFAEACB7);
   static const Color textTertiary = Color(0xFF6D6D7A);
