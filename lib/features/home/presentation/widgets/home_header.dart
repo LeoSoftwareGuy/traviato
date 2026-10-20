@@ -20,8 +20,9 @@ String homeDateEyebrow(AppLocalizations l10n) {
       .toUpperCase();
 }
 
-/// Header row: mono date eyebrow + "Hello, {name}", stars badge (→ Bonus
-/// tasks) and avatar (→ Profile). `docs/design/README.md` § 3.
+/// Header row: mono date eyebrow + "Hello, {name}" (just "Hello!" when
+/// there's no username), stars badge (→ Bonus tasks) and avatar (→ Profile).
+/// `docs/design/README.md` § 3.
 class HomeHeader extends StatelessWidget {
   const HomeHeader({
     required this.username,
@@ -32,7 +33,8 @@ class HomeHeader extends StatelessWidget {
     super.key,
   });
 
-  final String username;
+  /// Null or blank when the profile has no name (Apple sign-in can hide it).
+  final String? username;
   final int stars;
   final VoidCallback onAvatarTap;
   final VoidCallback onStarsTap;
@@ -43,7 +45,9 @@ class HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final name = username?.trim() ?? '';
     final greeting = splitAroundPlaceholder(context.l10n.home_greeting);
+    final greetingStyle = AppTypography.heroHeadline.copyWith(fontSize: 26);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -56,20 +60,27 @@ class HomeHeader extends StatelessWidget {
                 style: AppTypography.mono.copyWith(color: AppColors.primary),
               ),
               const SizedBox(height: AppSpacing.xs),
-              Text.rich(
-                key: const Key('home-greeting'),
-                TextSpan(
-                  style: AppTypography.heroHeadline.copyWith(fontSize: 26),
-                  children: [
-                    TextSpan(text: greeting.before),
-                    TextSpan(
-                      text: username,
-                      style: const TextStyle(color: AppColors.primary),
-                    ),
-                    TextSpan(text: greeting.after),
-                  ],
+              if (name.isEmpty)
+                Text(
+                  context.l10n.home_greetingNoName,
+                  key: const Key('home-greeting'),
+                  style: greetingStyle,
+                )
+              else
+                Text.rich(
+                  key: const Key('home-greeting'),
+                  TextSpan(
+                    style: greetingStyle,
+                    children: [
+                      TextSpan(text: greeting.before),
+                      TextSpan(
+                        text: name,
+                        style: const TextStyle(color: AppColors.primary),
+                      ),
+                      TextSpan(text: greeting.after),
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -80,7 +91,7 @@ class HomeHeader extends StatelessWidget {
           showDot: hasOpenBonusTasks,
         ),
         const SizedBox(width: AppSpacing.sm),
-        _Avatar(username: username, onTap: onAvatarTap),
+        _Avatar(username: name, onTap: onAvatarTap),
       ],
     );
   }

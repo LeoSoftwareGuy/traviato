@@ -620,11 +620,11 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 star} other{{count} stars}}'**
   String common_starCount(int count);
 
-  /// Greeting name when the profile has no username.
+  /// Greeting when the profile has no username (e.g. Apple sign-in hid the name).
   ///
   /// In en, this message translates to:
-  /// **'traveler'**
-  String get home_defaultName;
+  /// **'Hello!'**
+  String get home_greetingNoName;
 
   /// {name} is shown in the accent colour.
   ///
@@ -2272,7 +2272,7 @@ abstract class AppLocalizations {
   /// No description provided for @profile_defaultName.
   ///
   /// In en, this message translates to:
-  /// **'Traveler'**
+  /// **'Your name'**
   String get profile_defaultName;
 
   /// Mono line, uppercased in code; {date} is month + year.

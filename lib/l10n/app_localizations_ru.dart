@@ -333,7 +333,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get home_defaultName => 'путешественник';
+  String get home_greetingNoName => 'Привет!';
 
   @override
   String home_greeting(String name) {
@@ -1415,7 +1415,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profile_eyebrow => 'Профиль';
 
   @override
-  String get profile_defaultName => 'Путешественник';
+  String get profile_defaultName => 'Ваше имя';
 
   @override
   String profile_joined(String date) {

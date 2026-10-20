@@ -96,7 +96,8 @@ void main() {
     setScreenSize(tester, height: 2400);
     await _pump(tester, const Locale('ru'));
 
-    expect(find.textContaining('Привет, ', findRichText: true), findsOne);
+    // No username in this fixture: the greeting has no placeholder name.
+    expect(find.text('Привет!'), findsOne);
     expect(find.text('5'), findsWidgets);
     expect(find.text('СОБЫТИЙ'), findsOneWidget);
     expect(find.text('МЕСТА'), findsOneWidget);

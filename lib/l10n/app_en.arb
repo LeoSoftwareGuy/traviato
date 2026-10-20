@@ -211,9 +211,9 @@
       }
     }
   },
-  "home_defaultName": "traveler",
-  "@home_defaultName": {
-    "description": "Greeting name when the profile has no username."
+  "home_greetingNoName": "Hello!",
+  "@home_greetingNoName": {
+    "description": "Greeting when the profile has no username (e.g. Apple sign-in hid the name)."
   },
   "home_greeting": "Hello, {name}",
   "@home_greeting": {
@@ -1160,7 +1160,7 @@
   "@profile_eyebrow": {
     "description": "Mono eyebrow, uppercased in code."
   },
-  "profile_defaultName": "Traveler",
+  "profile_defaultName": "Your name",
   "profile_joined": "Joined {date}",
   "@profile_joined": {
     "description": "Mono line, uppercased in code; {date} is month + year.",

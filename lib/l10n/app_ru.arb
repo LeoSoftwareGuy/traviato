@@ -348,8 +348,8 @@
   "@common_starCount": {
     "x-review": "pending"
   },
-  "home_defaultName": "путешественник",
-  "@home_defaultName": {
+  "home_greetingNoName": "Привет!",
+  "@home_greetingNoName": {
     "x-review": "pending"
   },
   "home_greeting": "Привет, {name}",
@@ -1436,7 +1436,7 @@
   "@profile_eyebrow": {
     "x-review": "pending"
   },
-  "profile_defaultName": "Путешественник",
+  "profile_defaultName": "Ваше имя",
   "@profile_defaultName": {
     "x-review": "pending"
   },
