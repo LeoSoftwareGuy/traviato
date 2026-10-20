@@ -86,4 +86,25 @@ void main() {
       expect(card.status, TripStatus.finished);
     });
   });
+
+  group('TripCardEntity.isUnderwayOn (#219)', () {
+    final trip = buildTripCard(
+      startDate: DateTime(2026, 10, 21),
+      endDate: DateTime(2026, 10, 24),
+    );
+
+    test('includes the first and last day, ignoring the time of day', () {
+      expect(trip.isUnderwayOn(DateTime(2026, 10, 21)), isTrue);
+      expect(trip.isUnderwayOn(DateTime(2026, 10, 24, 23, 59)), isTrue);
+    });
+
+    test('is false the day before and the day after', () {
+      expect(trip.isUnderwayOn(DateTime(2026, 10, 20, 23, 59)), isFalse);
+      expect(trip.isUnderwayOn(DateTime(2026, 10, 25)), isFalse);
+    });
+
+    test('an undated trip is never under way', () {
+      expect(buildTripCard().isUnderwayOn(DateTime(2026, 10, 21)), isFalse);
+    });
+  });
 }
