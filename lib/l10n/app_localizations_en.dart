@@ -324,7 +324,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get home_defaultName => 'traveler';
+  String get home_greetingNoName => 'Hello!';
 
   @override
   String home_greeting(String name) {
@@ -1385,7 +1385,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profile_eyebrow => 'Profile';
 
   @override
-  String get profile_defaultName => 'Traveler';
+  String get profile_defaultName => 'Your name';
 
   @override
   String profile_joined(String date) {

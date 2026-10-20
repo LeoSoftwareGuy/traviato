@@ -52,7 +52,7 @@ class HomePage extends ConsumerWidget {
             onRetry: () => ref.invalidate(homeControllerProvider),
           ),
           data: (state) => _HomeContent(
-            username: username ?? context.l10n.home_defaultName,
+            username: username,
             stars: stats.stars,
             memories: stats.memories,
             places: stats.places,
@@ -75,7 +75,7 @@ class _HomeContent extends ConsumerWidget {
     required this.state,
   });
 
-  final String username;
+  final String? username;
   final int stars;
   final int memories;
   final int places;
