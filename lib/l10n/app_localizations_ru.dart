@@ -1744,7 +1744,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get wrapUp_footnoteClosing => 'Но запомните вы её совсем не поэтому.';
 
   @override
-  String get wrapUp_generating1 => 'Переживаем поездку заново…';
+  String get wrapUp_generating1 => 'Переживаем событие заново…';
 
   @override
   String get wrapUp_generating2 => 'Ищем лучшие моменты…';

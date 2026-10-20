@@ -1728,7 +1728,7 @@
   "@wrapUp_footnoteClosing": {
     "x-review": "pending"
   },
-  "wrapUp_generating1": "Переживаем поездку заново…",
+  "wrapUp_generating1": "Переживаем событие заново…",
   "@wrapUp_generating1": {
     "x-review": "pending"
   },
