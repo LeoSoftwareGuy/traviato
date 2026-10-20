@@ -186,4 +186,51 @@ void main() {
     expect(doneButton, findsNothing);
     expect(photoRepo.addPhotoCallCount, 2);
   });
+
+  testWidgets('a failed batch shows why under the summary', (tester) async {
+    final photoRepo = FakePhotoRepository()
+      ..addPhotoResultsQueue = [
+        const Left(NetworkFailure()),
+        const Left(NetworkFailure()),
+      ];
+    await _pump(tester, photoRepo, imageCount: 2);
+    await _pumpUntilVisible(tester, find.text('0 uploaded, 2 failed.'));
+
+    expect(find.byKey(const Key('batch-photo-error')), findsOneWidget);
+    expect(
+      find.text('Please check your connection.'),
+      findsOneWidget,
+    );
+
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets(
+    'a photo-limit rejection stops the batch instead of retrying every image',
+    (tester) async {
+      final photoRepo = FakePhotoRepository()
+        ..addPhotoResultsQueue = [
+          Right(buildPhotoEntity(id: 'p1')),
+          const Left(PhotoLimitFailure()),
+          Right(buildPhotoEntity(id: 'p3')),
+          Right(buildPhotoEntity(id: 'p4')),
+        ];
+      await _pump(tester, photoRepo, imageCount: 4);
+      await _pumpUntilVisible(tester, find.text('1 uploaded, 3 failed.'));
+
+      expect(photoRepo.addPhotoCallCount, 2);
+      expect(
+        find.text(
+          'Free plan is limited to 40 photos per memory. '
+          'Upgrade to Pro for unlimited photos.',
+        ),
+        findsOneWidget,
+      );
+      // Retrying can't get past the cap: the sheet offers Upgrade instead.
+      expect(find.byKey(const Key('batch-photo-upgrade')), findsOneWidget);
+      expect(find.byKey(const Key('batch-photo-retry')), findsNothing);
+
+      await tester.pumpAndSettle();
+    },
+  );
 }

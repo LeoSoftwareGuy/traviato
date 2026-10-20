@@ -48,7 +48,11 @@ final _onePixelPng = Uint8List.fromList([
 const _tripId = 't1';
 
 class _Harness extends ConsumerWidget {
-  const _Harness();
+  const _Harness({this.watchEntitlement = true});
+
+  /// False reproduces the Journal, where nothing keeps the auto-dispose
+  /// entitlement loaded before the mutation reads it (#262).
+  final bool watchEntitlement;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -56,7 +60,7 @@ class _Harness extends ConsumerWidget {
     // widget to rebuild once they settle) so the mutation's pre-check reads
     // real state instead of a still-loading AsyncValue.
     ref.watch(journalControllerProvider(_tripId));
-    ref.watch(entitlementControllerProvider);
+    if (watchEntitlement) ref.watch(entitlementControllerProvider);
     return MaterialApp(
       home: Scaffold(
         body: ElevatedButton(
@@ -84,6 +88,7 @@ Future<ProviderContainer> _pumpHarness(
   WidgetTester tester, {
   required FakePhotoRepository photoRepo,
   required FakeSubscriptionRepository subscriptionRepo,
+  bool watchEntitlement = true,
 }) async {
   late final ProviderContainer container;
   await tester.pumpWidget(
@@ -99,7 +104,7 @@ Future<ProviderContainer> _pumpHarness(
       child: Builder(
         builder: (context) {
           container = ProviderScope.containerOf(context);
-          return const _Harness();
+          return _Harness(watchEntitlement: watchEntitlement);
         },
       ),
     ),
@@ -180,6 +185,47 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(photoRepo.addPhotoCallCount, 1);
+    },
+  );
+
+  testWidgets(
+    'a Pro user is not blocked at the cap when nothing on screen has loaded '
+    'the entitlement yet (#262)',
+    (tester) async {
+      final photoRepo = _photoRepoWithCount(45);
+      final subscriptionRepo = FakeSubscriptionRepository()
+        ..entitlementResult = Right(buildProEntitlement());
+
+      await _pumpHarness(
+        tester,
+        photoRepo: photoRepo,
+        subscriptionRepo: subscriptionRepo,
+        watchEntitlement: false,
+      );
+      await tester.tap(find.text('Add'));
+      await tester.pumpAndSettle();
+
+      expect(photoRepo.addPhotoCallCount, 1);
+    },
+  );
+
+  testWidgets(
+    'a free user is still blocked at the cap when the entitlement was not '
+    'preloaded',
+    (tester) async {
+      final photoRepo = _photoRepoWithCount(40);
+      final subscriptionRepo = FakeSubscriptionRepository();
+
+      await _pumpHarness(
+        tester,
+        photoRepo: photoRepo,
+        subscriptionRepo: subscriptionRepo,
+        watchEntitlement: false,
+      );
+      await tester.tap(find.text('Add'));
+      await tester.pumpAndSettle();
+
+      expect(photoRepo.addPhotoCallCount, 0);
     },
   );
 }
