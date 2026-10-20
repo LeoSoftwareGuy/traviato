@@ -486,10 +486,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get trip_newMemory => 'Новое событие';
 
   @override
-  String get trip_createTitleLead => 'Что достойно';
+  String get trip_createTitleLead => 'Что за';
 
   @override
-  String get trip_createTitleEmphasis => 'воспоминания?';
+  String get trip_createTitleEmphasis => 'событие?';
 
   @override
   String get trip_nameLabel => 'Название';
@@ -529,7 +529,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String trip_rewardNudge(String stars) {
-    return 'За создание — $stars. Пишите заметку каждый день, и откроется значок «Рассказчик».';
+    return 'Пишите заметки, чтобы заработать $stars и открыть значок «Рассказчик».';
   }
 
   @override
@@ -716,11 +716,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get journal_eyebrow => 'Дневник';
 
   @override
-  String get journal_quietOne => 'Тихий день';
+  String get journal_quietOne => 'День 1';
 
   @override
   String journal_dayQuietOne(int day) {
-    return 'День $day — тихий день';
+    return 'День $day';
   }
 
   @override
@@ -815,16 +815,16 @@ class AppLocalizationsRu extends AppLocalizations {
       'Ничего покупать не нужно — на любом тарифе всё одинаково.';
 
   @override
-  String get journal_nothingYet => 'Здесь пока пусто';
+  String get journal_nothingYet => 'Как прошёл день?';
 
   @override
   String journal_nothingFromDay(int day) {
-    return 'Из дня $day пока ничего';
+    return 'Как прошёл день?';
   }
 
   @override
   String get journal_nudgeBody =>
-      'Даже одно фото поможет итогам. Тихие дни тоже попадают в фильм а этот просто промелькнёт.';
+      'Каждое фото и заметка помогут сделать финальный фильм красочнее.';
 
   @override
   String get journal_addAPhoto => '＋ Добавить фото';

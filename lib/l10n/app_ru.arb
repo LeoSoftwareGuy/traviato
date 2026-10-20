@@ -488,11 +488,11 @@
   "@trip_newMemory": {
     "x-review": "pending"
   },
-  "trip_createTitleLead": "Что достойно",
+  "trip_createTitleLead": "Что за",
   "@trip_createTitleLead": {
     "x-review": "pending"
   },
-  "trip_createTitleEmphasis": "воспоминания?",
+  "trip_createTitleEmphasis": "событие?",
   "@trip_createTitleEmphasis": {
     "x-review": "pending"
   },
@@ -540,7 +540,7 @@
   "@trip_createCta": {
     "x-review": "pending"
   },
-  "trip_rewardNudge": "За создание — {stars}. Пишите заметку каждый день, и откроется значок «Рассказчик».",
+  "trip_rewardNudge": "Пишите заметки, чтобы заработать {stars} и открыть значок «Рассказчик».",
   "@trip_rewardNudge": {
     "x-review": "pending"
   },
@@ -744,11 +744,11 @@
   "@journal_eyebrow": {
     "x-review": "pending"
   },
-  "journal_quietOne": "Тихий день",
+  "journal_quietOne": "День 1",
   "@journal_quietOne": {
     "x-review": "pending"
   },
-  "journal_dayQuietOne": "День {day} — тихий день",
+  "journal_dayQuietOne": "День {day}",
   "@journal_dayQuietOne": {
     "x-review": "pending"
   },
@@ -828,15 +828,15 @@
   "@journal_wrapUpFree": {
     "x-review": "pending"
   },
-  "journal_nothingYet": "Здесь пока пусто",
+  "journal_nothingYet": "Как прошёл день?",
   "@journal_nothingYet": {
     "x-review": "pending"
   },
-  "journal_nothingFromDay": "Из дня {day} пока ничего",
+  "journal_nothingFromDay": "Как прошёл день?",
   "@journal_nothingFromDay": {
     "x-review": "pending"
   },
-  "journal_nudgeBody": "Даже одно фото поможет итогам. Тихие дни тоже попадают в фильм а этот просто промелькнёт.",
+  "journal_nudgeBody": "Каждое фото и заметка помогут сделать финальный фильм красочнее.",
   "@journal_nudgeBody": {
     "x-review": "pending"
   },

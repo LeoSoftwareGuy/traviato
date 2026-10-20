@@ -32,7 +32,7 @@ void main() {
       await _pumpCreate(tester, const Locale('ru'));
 
       expect(find.text('НОВОЕ СОБЫТИЕ'), findsOneWidget);
-      expect(find.text('Что достойно'), findsOneWidget);
+      expect(find.text('Что за'), findsOneWidget);
       expect(find.text('Настроение'), findsOneWidget);
       expect(find.text('выбрано: 0'), findsOneWidget);
       expect(find.text('Автопутешествие'), findsOneWidget);
