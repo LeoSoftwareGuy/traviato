@@ -41,9 +41,13 @@ Future<PhotoEntity> runAddPhoto({
 
     // App-side pre-check (server-side enforcement is the real guard, #139)
     // — reuses the already-loaded journal state's photo count, no extra
-    // query. A not-yet-loaded/errored entitlement conservatively reads as
-    // free rather than blocking the network round-trip on it.
-    final isPro = tsx.get(entitlementControllerProvider).value?.isPro ?? false;
+    // query. The entitlement is awaited: it's auto-dispose and nothing on
+    // the Journal watches it, so reading `.value` here saw a fresh loading
+    // state and blocked Pro users at 40 (#262). If it can't load, skip the
+    // pre-check and let the server decide rather than block a paying user.
+    final isPro = await tsx
+        .get(entitlementControllerProvider.future)
+        .then((entitlement) => entitlement.isPro, onError: (_) => true);
     final currentPhotoCount =
         tsx.get(journalControllerProvider(tripId)).value?.photos.length ?? 0;
     if (!isPro && currentPhotoCount >= _freeTierPhotoLimit) {
@@ -65,15 +69,7 @@ Future<PhotoEntity> runAddPhoto({
       takenAt: exif.takenAt,
     );
     return result.fold(
-      (failure) {
-        // The server's `is_pro()` said no while this device thought the user
-        // was Pro (or the cap was reached since the last read) — refetch so
-        // the app stops trusting a stale tier (#262).
-        if (failure is PhotoLimitFailure) {
-          ref.invalidate(entitlementControllerProvider);
-        }
-        throw PresentationFailureException(failure);
-      },
+      (failure) => throw PresentationFailureException(failure),
       (
         photo,
       ) {

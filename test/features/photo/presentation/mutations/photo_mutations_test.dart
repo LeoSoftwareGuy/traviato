@@ -13,7 +13,6 @@ import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
 import 'package:traviato/features/photo/presentation/mutations/photo_mutations.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
-import 'package:traviato/features/subscription/domain/entities/entitlement_entity.dart';
 import 'package:traviato/features/subscription/presentation/controllers/entitlement_controller.dart';
 import 'package:traviato/features/subscription/presentation/providers/subscription_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
@@ -49,7 +48,11 @@ final _onePixelPng = Uint8List.fromList([
 const _tripId = 't1';
 
 class _Harness extends ConsumerWidget {
-  const _Harness();
+  const _Harness({this.watchEntitlement = true});
+
+  /// False reproduces the Journal, where nothing keeps the auto-dispose
+  /// entitlement loaded before the mutation reads it (#262).
+  final bool watchEntitlement;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -57,7 +60,7 @@ class _Harness extends ConsumerWidget {
     // widget to rebuild once they settle) so the mutation's pre-check reads
     // real state instead of a still-loading AsyncValue.
     ref.watch(journalControllerProvider(_tripId));
-    ref.watch(entitlementControllerProvider);
+    if (watchEntitlement) ref.watch(entitlementControllerProvider);
     return MaterialApp(
       home: Scaffold(
         body: ElevatedButton(
@@ -85,6 +88,7 @@ Future<ProviderContainer> _pumpHarness(
   WidgetTester tester, {
   required FakePhotoRepository photoRepo,
   required FakeSubscriptionRepository subscriptionRepo,
+  bool watchEntitlement = true,
 }) async {
   late final ProviderContainer container;
   await tester.pumpWidget(
@@ -100,7 +104,7 @@ Future<ProviderContainer> _pumpHarness(
       child: Builder(
         builder: (context) {
           container = ProviderScope.containerOf(context);
-          return const _Harness();
+          return _Harness(watchEntitlement: watchEntitlement);
         },
       ),
     ),
@@ -185,11 +189,10 @@ void main() {
   );
 
   testWidgets(
-    'a server-side photo-cap rejection refetches the entitlement, so a '
-    'stale Pro tier on the device gets corrected (#262)',
+    'a Pro user is not blocked at the cap when nothing on screen has loaded '
+    'the entitlement yet (#262)',
     (tester) async {
-      final photoRepo = _photoRepoWithCount(45)
-        ..addPhotoResult = const Left(PhotoLimitFailure());
+      final photoRepo = _photoRepoWithCount(45);
       final subscriptionRepo = FakeSubscriptionRepository()
         ..entitlementResult = Right(buildProEntitlement());
 
@@ -197,16 +200,32 @@ void main() {
         tester,
         photoRepo: photoRepo,
         subscriptionRepo: subscriptionRepo,
+        watchEntitlement: false,
       );
-      final callsBefore = subscriptionRepo.getEntitlementCallCount;
-
-      // The server now says free.
-      subscriptionRepo.entitlementResult = const Right(EntitlementEntity.free);
       await tester.tap(find.text('Add'));
       await tester.pumpAndSettle();
 
       expect(photoRepo.addPhotoCallCount, 1);
-      expect(subscriptionRepo.getEntitlementCallCount, callsBefore + 1);
+    },
+  );
+
+  testWidgets(
+    'a free user is still blocked at the cap when the entitlement was not '
+    'preloaded',
+    (tester) async {
+      final photoRepo = _photoRepoWithCount(40);
+      final subscriptionRepo = FakeSubscriptionRepository();
+
+      await _pumpHarness(
+        tester,
+        photoRepo: photoRepo,
+        subscriptionRepo: subscriptionRepo,
+        watchEntitlement: false,
+      );
+      await tester.tap(find.text('Add'));
+      await tester.pumpAndSettle();
+
+      expect(photoRepo.addPhotoCallCount, 0);
     },
   );
 }
