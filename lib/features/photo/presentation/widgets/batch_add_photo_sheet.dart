@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/presentation_failure_exception.dart';
@@ -140,6 +142,18 @@ class _BatchAddPhotoSheetState extends ConsumerState<BatchAddPhotoSheet> {
     }
   }
 
+  /// Same paywall entry as `showFailureSnackbar` uses for a photo-cap
+  /// failure in the single-photo flow (string must match the
+  /// `PaywallEntryPoint.photoCap` enum name in paywall_page.dart).
+  void _openUpgrade() {
+    final router = GoRouter.of(context);
+    _finish();
+    router.pushNamed(
+      RouteNames.subscriptionOfferings,
+      queryParameters: {'entry': 'photoCap'},
+    );
+  }
+
   Future<void> _retryFailed() async {
     for (final item in _items) {
       if (item.status == _BatchItemStatus.failed) {
@@ -229,14 +243,25 @@ class _BatchAddPhotoSheetState extends ConsumerState<BatchAddPhotoSheet> {
           ),
         ],
         const SizedBox(height: AppSpacing.xl),
-        ElevatedButton(
-          key: const Key('batch-photo-retry'),
-          onPressed: _retryFailed,
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size.fromHeight(48),
+        // Retrying can't get past the photo cap, so offer the way out instead.
+        if (_lastError case final error? when _isPhotoLimit(error))
+          ElevatedButton(
+            key: const Key('batch-photo-upgrade'),
+            onPressed: _openUpgrade,
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
+            child: Text(context.l10n.common_upgrade),
+          )
+        else
+          ElevatedButton(
+            key: const Key('batch-photo-retry'),
+            onPressed: _retryFailed,
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
+            child: Text(context.l10n.photo_retryFailed(failed)),
           ),
-          child: Text(context.l10n.photo_retryFailed(failed)),
-        ),
         const SizedBox(height: AppSpacing.sm),
         OutlinedButton(
           key: const Key('batch-photo-done'),

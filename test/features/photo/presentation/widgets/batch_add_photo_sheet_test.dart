@@ -226,6 +226,9 @@ void main() {
         ),
         findsOneWidget,
       );
+      // Retrying can't get past the cap: the sheet offers Upgrade instead.
+      expect(find.byKey(const Key('batch-photo-upgrade')), findsOneWidget);
+      expect(find.byKey(const Key('batch-photo-retry')), findsNothing);
 
       await tester.pumpAndSettle();
     },

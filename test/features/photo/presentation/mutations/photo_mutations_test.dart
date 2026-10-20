@@ -13,6 +13,7 @@ import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
 import 'package:traviato/features/photo/presentation/mutations/photo_mutations.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
+import 'package:traviato/features/subscription/domain/entities/entitlement_entity.dart';
 import 'package:traviato/features/subscription/presentation/controllers/entitlement_controller.dart';
 import 'package:traviato/features/subscription/presentation/providers/subscription_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
@@ -180,6 +181,32 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(photoRepo.addPhotoCallCount, 1);
+    },
+  );
+
+  testWidgets(
+    'a server-side photo-cap rejection refetches the entitlement, so a '
+    'stale Pro tier on the device gets corrected (#262)',
+    (tester) async {
+      final photoRepo = _photoRepoWithCount(45)
+        ..addPhotoResult = const Left(PhotoLimitFailure());
+      final subscriptionRepo = FakeSubscriptionRepository()
+        ..entitlementResult = Right(buildProEntitlement());
+
+      await _pumpHarness(
+        tester,
+        photoRepo: photoRepo,
+        subscriptionRepo: subscriptionRepo,
+      );
+      final callsBefore = subscriptionRepo.getEntitlementCallCount;
+
+      // The server now says free.
+      subscriptionRepo.entitlementResult = const Right(EntitlementEntity.free);
+      await tester.tap(find.text('Add'));
+      await tester.pumpAndSettle();
+
+      expect(photoRepo.addPhotoCallCount, 1);
+      expect(subscriptionRepo.getEntitlementCallCount, callsBefore + 1);
     },
   );
 }

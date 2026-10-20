@@ -65,7 +65,15 @@ Future<PhotoEntity> runAddPhoto({
       takenAt: exif.takenAt,
     );
     return result.fold(
-      (failure) => throw PresentationFailureException(failure),
+      (failure) {
+        // The server's `is_pro()` said no while this device thought the user
+        // was Pro (or the cap was reached since the last read) — refetch so
+        // the app stops trusting a stale tier (#262).
+        if (failure is PhotoLimitFailure) {
+          ref.invalidate(entitlementControllerProvider);
+        }
+        throw PresentationFailureException(failure);
+      },
       (
         photo,
       ) {
