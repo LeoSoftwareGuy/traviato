@@ -31,8 +31,8 @@ void main() {
       setScreenSize(tester, height: 2000);
       await _pumpCreate(tester, const Locale('ru'));
 
-      expect(find.text('НОВОЕ ВОСПОМИНАНИЕ'), findsOneWidget);
-      expect(find.text('Что достойно'), findsOneWidget);
+      expect(find.text('НОВОЕ СОБЫТИЕ'), findsOneWidget);
+      expect(find.text('Что за'), findsOneWidget);
       expect(find.text('Настроение'), findsOneWidget);
       expect(find.text('выбрано: 0'), findsOneWidget);
       expect(find.text('Автопутешествие'), findsOneWidget);
@@ -93,7 +93,7 @@ void main() {
     );
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Удалить воспоминание').last);
+    await tester.tap(find.text('Удалить событие').last);
     await tester.pumpAndSettle();
 
     expect(find.text('Да! Удалить навсегда'), findsOneWidget);

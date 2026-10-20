@@ -400,7 +400,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(AppTypography.serifIsLiterata, isTrue);
-        expect(find.text('СЛЕДУЮЩЕЕ ВОСПОМИНАНИЕ'), findsOneWidget);
+        expect(find.text('СЛЕДУЮЩЕЕ СОБЫТИЕ'), findsOneWidget);
         expect(
           find.text('Новые задания —\nв среду, 21 октября'),
           findsOneWidget,
@@ -412,7 +412,7 @@ void main() {
           ),
           findsOneWidget,
         );
-        expect(find.text('в 3 воспоминаниях'), findsOneWidget);
+        expect(find.text('в 3 событиях'), findsOneWidget);
         expect(find.text('5 шт.'), findsOneWidget);
         expect(tester.takeException(), isNull);
       });

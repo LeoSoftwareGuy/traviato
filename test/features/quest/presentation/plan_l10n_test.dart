@@ -101,7 +101,7 @@ void main() {
     await tester.tap(find.text('Изменить'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Изменить воспоминание'), findsOneWidget);
+    expect(find.text('Изменить событие'), findsOneWidget);
     expect(find.text('Переименовать'), findsOneWidget);
     expect(find.text('ОБЛОЖКА'), findsOneWidget);
     expect(find.text('НАЧАЛО'), findsOneWidget);

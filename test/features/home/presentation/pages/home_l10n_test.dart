@@ -98,7 +98,7 @@ void main() {
 
     expect(find.textContaining('Привет, ', findRichText: true), findsOne);
     expect(find.text('5'), findsWidgets);
-    expect(find.text('ВОСПОМИНАНИЙ'), findsOneWidget);
+    expect(find.text('СОБЫТИЙ'), findsOneWidget);
     expect(find.text('МЕСТА'), findsOneWidget);
     expect(find.text('ДЕНЬ'), findsOneWidget);
     expect(find.text('СЕЙЧАС'), findsOneWidget);

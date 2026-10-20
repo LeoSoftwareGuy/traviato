@@ -48,15 +48,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get error_freeTierMemories =>
-      'В бесплатном тарифе можно создать до 3 воспоминаний. Перейдите на Pro, чтобы снять ограничение.';
+      'В бесплатном тарифе можно создать до 3 событий. Перейдите на Pro, чтобы снять ограничение.';
 
   @override
   String get error_freeTierPhotos =>
-      'В бесплатном тарифе до 40 фото на одно воспоминание. Перейдите на Pro, чтобы снять ограничение.';
+      'В бесплатном тарифе до 40 фото на одно событие. Перейдите на Pro, чтобы снять ограничение.';
 
   @override
   String get error_questPlanningClosed =>
-      'Это воспоминание добавлено после окончания поездки, поэтому планировать нечего.';
+      'Это событие добавлено после окончания поездки, поэтому планировать нечего.';
 
   @override
   String get error_authLink =>
@@ -188,7 +188,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String auth_rewardTease(String stars) {
-    return 'Первое воспоминание принесёт $stars, а до значка «Рассказчик» всего три заметки.';
+    return 'Первое событие принесёт $stars, а до значка «Рассказчик» всего три заметки.';
   }
 
   @override
@@ -353,28 +353,28 @@ class AppLocalizationsRu extends AppLocalizations {
   String get home_recap => 'Итоги';
 
   @override
-  String get home_emptyTitle => 'Пока нет воспоминаний';
+  String get home_emptyTitle => 'Пока нет событий';
 
   @override
   String get home_emptyBody =>
-      'Начните первое воспоминание и оно превратится в дневник, который останется с вами навсегда.';
+      'Создайте событие, и оно превратится в дневник, который останется с вами навсегда.';
 
   @override
-  String get home_emptyCta => 'Создать первое воспоминание';
+  String get home_emptyCta => 'Создать первое событие';
 
   @override
   String get home_keptForeverEmpty =>
-      'Пока ничего нет, воспоминания появятся здесь, когда событие завершится.';
+      'Пока ничего нет. Завершённые события появятся здесь.';
 
   @override
   String home_statMemories(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'воспоминания',
-      many: 'воспоминаний',
-      few: 'воспоминания',
-      one: 'воспоминание',
+      other: 'события',
+      many: 'событий',
+      few: 'события',
+      one: 'событие',
     );
     return '$_temp0';
   }
@@ -483,13 +483,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get vibe_photography => 'Фотография';
 
   @override
-  String get trip_newMemory => 'Новое воспоминание';
+  String get trip_newMemory => 'Новое событие';
 
   @override
-  String get trip_createTitleLead => 'Что достойно';
+  String get trip_createTitleLead => 'Что за';
 
   @override
-  String get trip_createTitleEmphasis => 'воспоминания?';
+  String get trip_createTitleEmphasis => 'событие?';
 
   @override
   String get trip_nameLabel => 'Название';
@@ -498,7 +498,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get trip_nameHint => 'например, Лето в Токио';
 
   @override
-  String get trip_nameRequired => 'Дайте воспоминанию название.';
+  String get trip_nameRequired => 'Дайте событию название.';
 
   @override
   String get trip_whereLabel => 'Где это было?';
@@ -525,11 +525,11 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get trip_createCta => 'Создать воспоминание';
+  String get trip_createCta => 'Создать событие';
 
   @override
   String trip_rewardNudge(String stars) {
-    return 'За создание — $stars. Пишите заметку каждый день, и откроется значок «Рассказчик».';
+    return 'Пишите заметки, чтобы заработать $stars и открыть значок «Рассказчик».';
   }
 
   @override
@@ -559,7 +559,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get trip_chooseFromGallery => 'Выбрать из галереи';
 
   @override
-  String get trip_deleteTitle => 'Удалить воспоминание';
+  String get trip_deleteTitle => 'Удалить событие';
 
   @override
   String get trip_deleteConfirm => 'Да! Удалить навсегда';
@@ -662,7 +662,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get plan_detailHint => 'например, Холодильник, пледы, ботинки';
 
   @override
-  String get manage_title => 'Изменить воспоминание';
+  String get manage_title => 'Изменить событие';
 
   @override
   String get manage_nameLabel => 'Название';
@@ -716,11 +716,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get journal_eyebrow => 'Дневник';
 
   @override
-  String get journal_quietOne => 'Тихий день';
+  String get journal_quietOne => 'День 1';
 
   @override
   String journal_dayQuietOne(int day) {
-    return 'День $day — тихий день';
+    return 'День $day';
   }
 
   @override
@@ -805,7 +805,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Напишите одну заметку, чтобы открыть фильм.';
 
   @override
-  String get journal_wrapUpReqPhotos => 'Пять фото в этом воспоминании';
+  String get journal_wrapUpReqPhotos => 'Пять фото в этом событии';
 
   @override
   String get journal_wrapUpReqNote => 'Хотя бы одна заметка';
@@ -815,16 +815,16 @@ class AppLocalizationsRu extends AppLocalizations {
       'Ничего покупать не нужно — на любом тарифе всё одинаково.';
 
   @override
-  String get journal_nothingYet => 'Здесь пока пусто';
+  String get journal_nothingYet => 'Как прошёл день?';
 
   @override
   String journal_nothingFromDay(int day) {
-    return 'Из дня $day пока ничего';
+    return 'Как прошёл день?';
   }
 
   @override
   String get journal_nudgeBody =>
-      'Даже одно фото поможет итогам. Тихие дни тоже попадают в фильм а этот просто промелькнёт.';
+      'Каждое фото и заметка помогут сделать финальный фильм красочнее.';
 
   @override
   String get journal_addAPhoto => '＋ Добавить фото';
@@ -833,7 +833,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get journal_writeNote => 'Написать заметку';
 
   @override
-  String get journal_addNotesToday => '✎ Добавить заметку о сегодня';
+  String get journal_addNotesToday => '✎ Добавить заметку о сегодняшнем дне';
 
   @override
   String get journal_continueEntry => '✎ Продолжить запись';
@@ -971,7 +971,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get expense_compareLink => 'Сравнить';
 
   @override
-  String get expense_searchHint => 'Поиск воспоминаний';
+  String get expense_searchHint => 'Поиск событий';
 
   @override
   String get expense_sortLatest => 'Сначала новые';
@@ -980,7 +980,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get expense_sortBiggest => 'Самые затратные';
 
   @override
-  String get expense_memoriesHeader => 'Воспоминания';
+  String get expense_memoriesHeader => 'События';
 
   @override
   String expense_visibleOf(int visible, int total) {
@@ -1006,7 +1006,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get expense_emptyBody =>
-      'Сначала создайте воспоминание, а потом отмечайте, сколько тратите.';
+      'Сначала создайте событие, а потом отмечайте, сколько тратите.';
 
   @override
   String get expense_byCategory => 'По категориям';
@@ -1042,7 +1042,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get expense_biggestCategory => 'Главная статья';
 
   @override
-  String get expense_pickMemoryTitle => 'Выберите воспоминание выше';
+  String get expense_pickMemoryTitle => 'Выберите событие выше';
 
   @override
   String get expense_pickMemoryBody =>
@@ -1052,11 +1052,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get expense_newExpense => 'Новый расход';
 
   @override
-  String get expense_memoryLabel => 'Воспоминание';
+  String get expense_memoryLabel => 'Событие';
 
   @override
   String get expense_memoryRequired =>
-      'Выберите, к какому воспоминанию это относится.';
+      'Выберите, к какому событию это относится.';
 
   @override
   String get expense_descriptionLabel => 'Описание';
@@ -1116,7 +1116,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get compare_hintPickTwo =>
-      'Выберите два воспоминания, чтобы сравнить расходы.';
+      'Выберите два события, чтобы сравнить расходы.';
 
   @override
   String get compare_hintPickSecond => 'Теперь выберите второе.';
@@ -1128,7 +1128,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get compare_needTwo =>
-      'Создайте хотя бы два воспоминания, чтобы сравнить расходы.';
+      'Создайте хотя бы два события, чтобы сравнить расходы.';
 
   @override
   String get compare_doneComparing => '✕ Закончить';
@@ -1191,7 +1191,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get bonus_eyebrow => 'Бонусные задания';
 
   @override
-  String get bonus_nextMemory => 'Следующее воспоминание';
+  String get bonus_nextMemory => 'Следующее событие';
 
   @override
   String get bonus_upcomingLead => 'Новые задания —';
@@ -1245,10 +1245,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get bonus_nothingLead => 'Бонусные задания начнутся';
 
   @override
-  String get bonus_nothingEmphasisNext => 'с вашим следующим воспоминанием';
+  String get bonus_nothingEmphasisNext => 'с вашим следующим событием';
 
   @override
-  String get bonus_nothingEmphasisFirst => 'с вашим первым воспоминанием';
+  String get bonus_nothingEmphasisFirst => 'с вашим первым событием';
 
   @override
   String get bonus_nothingBody =>
@@ -1259,7 +1259,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Свадьба, поездка на выходные, ужин в день рождения. Всё, что хочется сохранить.';
 
   @override
-  String get bonus_createMemory => 'Создать воспоминание';
+  String get bonus_createMemory => 'Создать событие';
 
   @override
   String get stars_yourStars => 'Ваши звёзды';
@@ -1269,10 +1269,10 @@ class AppLocalizationsRu extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'в $count воспоминаниях',
-      many: 'в $count воспоминаниях',
-      few: 'в $count воспоминаниях',
-      one: 'в $count воспоминании',
+      other: 'в $count событиях',
+      many: 'в $count событиях',
+      few: 'в $count событиях',
+      one: 'в $count событии',
     );
     return '$_temp0';
   }
@@ -1300,16 +1300,16 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get stars_byMemory => 'По воспоминаниям';
+  String get stars_byMemory => 'По событиям';
 
   @override
-  String get stars_allMemories => 'Все воспоминания ›';
+  String get stars_allMemories => 'Все события ›';
 
   @override
-  String get stars_allMemoriesTitle => 'Все воспоминания';
+  String get stars_allMemoriesTitle => 'Все события';
 
   @override
-  String get stars_earlierMemories => 'Прошлые воспоминания';
+  String get stars_earlierMemories => 'Прошлые события';
 
   @override
   String get stars_statusKept => 'Сохранено';
@@ -1453,10 +1453,10 @@ class AppLocalizationsRu extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'воспоминания',
-      many: 'воспоминаний',
-      few: 'воспоминания',
-      one: 'воспоминание',
+      other: 'события',
+      many: 'событий',
+      few: 'события',
+      one: 'событие',
     );
     return '$_temp0';
   }
@@ -1525,7 +1525,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String sub_memoriesKeptMeta(int kept, int cap) {
-    return 'Сохранено воспоминаний: $kept из $cap. Перейдите на Pro, чтобы сохранять больше.';
+    return 'Сохранено событий: $kept из $cap. Перейдите на Pro, чтобы сохранять больше.';
   }
 
   @override
@@ -1556,7 +1556,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get sub_memoriesKept => 'Сохранено воспоминаний';
+  String get sub_memoriesKept => 'Сохранено событий';
 
   @override
   String get sub_unlimited => 'Без ограничений';
@@ -1567,7 +1567,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get sub_photosInMemory => 'Фото в этом воспоминании';
+  String get sub_photosInMemory => 'Фото в этом событии';
 
   @override
   String sub_noLimit(int count) {
@@ -1602,15 +1602,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get paywall_subMemoryCap =>
-      'Три бесплатных воспоминания заняты. Перейдите на Pro, чтобы сохранять каждую поездку, а не только три.';
+      'Три бесплатных события заняты. Перейдите на Pro, чтобы сохранять каждую поездку, а не только три.';
 
   @override
   String get paywall_subPhotoCap =>
-      'В этом воспоминании уже 40 фото. Перейдите на Pro, чтобы добавлять фото без ограничений.';
+      'В этом событии уже 40 фото. Перейдите на Pro, чтобы добавлять фото без ограничений.';
 
   @override
   String get paywall_subProfile =>
-      'Каждому воспоминанию нужно место. Перейдите на Pro в любой момент и места хватит на всё.';
+      'Каждому событию нужно место. Перейдите на Pro в любой момент и места хватит на всё.';
 
   @override
   String get paywall_trialStarted => 'Пробный период начат · 7 дней бесплатно';
@@ -1627,14 +1627,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywall_titleEmphasis => 'вашего воспоминания';
 
   @override
-  String get paywall_perkMemories => 'Безлимит воспоминаний';
+  String get paywall_perkMemories => 'Безлимит событий';
 
   @override
   String get paywall_perkMemoriesDetail =>
       'Сохраняйте каждую поездку, а не выбирайте три.';
 
   @override
-  String get paywall_perkPhotos => 'Безлимит фото в воспоминании';
+  String get paywall_perkPhotos => 'Безлимит фото в событии';
 
   @override
   String get paywall_perkPhotosDetail =>
@@ -1693,7 +1693,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get paywall_reassurance =>
-      'Три бесплатных воспоминания останутся с вами в любом случае — без Pro ничего не удалится и не заблокируется.';
+      'Три бесплатных события останутся с вами в любом случае — без Pro ничего не удалится и не заблокируется.';
 
   @override
   String get wrapUp_openJournal => 'Открыть дневник';
@@ -2185,7 +2185,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_achievement_first_adventure_description =>
-      'Создайте первое воспоминание.';
+      'Создайте первое событие.';
 
   @override
   String get content_achievement_globetrotter_title => 'Путешественник по миру';
@@ -2213,7 +2213,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_achievement_shutterbug_description =>
-      'Добавьте 50 фото в воспоминания.';
+      'Добавьте 50 фото в события.';
 
   @override
   String get content_achievement_storyteller_title => 'Рассказчик';
@@ -2226,8 +2226,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get content_achievement_jetsetter_title => 'Заядлый путешественник';
 
   @override
-  String get content_achievement_jetsetter_description =>
-      'Создайте 5 воспоминаний.';
+  String get content_achievement_jetsetter_description => 'Создайте 5 событий.';
 
   @override
   String get content_achievement_legend_title => 'Легенда';
