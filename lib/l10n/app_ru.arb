@@ -48,15 +48,15 @@
   "@error_unknown": {
     "x-review": "pending"
   },
-  "error_freeTierMemories": "В бесплатном тарифе можно создать до 3 воспоминаний. Перейдите на Pro, чтобы снять ограничение.",
+  "error_freeTierMemories": "В бесплатном тарифе можно создать до 3 событий. Перейдите на Pro, чтобы снять ограничение.",
   "@error_freeTierMemories": {
     "x-review": "pending"
   },
-  "error_freeTierPhotos": "В бесплатном тарифе до 40 фото на одно воспоминание. Перейдите на Pro, чтобы снять ограничение.",
+  "error_freeTierPhotos": "В бесплатном тарифе до 40 фото на одно событие. Перейдите на Pro, чтобы снять ограничение.",
   "@error_freeTierPhotos": {
     "x-review": "pending"
   },
-  "error_questPlanningClosed": "Это воспоминание добавлено после окончания поездки, поэтому планировать нечего.",
+  "error_questPlanningClosed": "Это событие добавлено после окончания поездки, поэтому планировать нечего.",
   "@error_questPlanningClosed": {
     "x-review": "pending"
   },
@@ -184,7 +184,7 @@
   "@auth_privacyNote": {
     "x-review": "pending"
   },
-  "auth_rewardTease": "Первое воспоминание принесёт {stars}, а до значка «Рассказчик» всего три заметки.",
+  "auth_rewardTease": "Первое событие принесёт {stars}, а до значка «Рассказчик» всего три заметки.",
   "@auth_rewardTease": {
     "x-review": "pending"
   },
@@ -372,23 +372,23 @@
   "@home_recap": {
     "x-review": "pending"
   },
-  "home_emptyTitle": "Пока нет воспоминаний",
+  "home_emptyTitle": "Пока нет событий",
   "@home_emptyTitle": {
     "x-review": "pending"
   },
-  "home_emptyBody": "Начните первое воспоминание и оно превратится в дневник, который останется с вами навсегда.",
+  "home_emptyBody": "Создайте событие, и оно превратится в дневник, который останется с вами навсегда.",
   "@home_emptyBody": {
     "x-review": "pending"
   },
-  "home_emptyCta": "Создать первое воспоминание",
+  "home_emptyCta": "Создать первое событие",
   "@home_emptyCta": {
     "x-review": "pending"
   },
-  "home_keptForeverEmpty": "Пока ничего нет, воспоминания появятся здесь, когда событие завершится.",
+  "home_keptForeverEmpty": "Пока ничего нет. Завершённые события появятся здесь.",
   "@home_keptForeverEmpty": {
     "x-review": "pending"
   },
-  "home_statMemories": "{count, plural, one{воспоминание} few{воспоминания} many{воспоминаний} other{воспоминания}}",
+  "home_statMemories": "{count, plural, one{событие} few{события} many{событий} other{события}}",
   "@home_statMemories": {
     "x-review": "pending"
   },
@@ -484,7 +484,7 @@
   "@vibe_photography": {
     "x-review": "pending"
   },
-  "trip_newMemory": "Новое воспоминание",
+  "trip_newMemory": "Новое событие",
   "@trip_newMemory": {
     "x-review": "pending"
   },
@@ -504,7 +504,7 @@
   "@trip_nameHint": {
     "x-review": "pending"
   },
-  "trip_nameRequired": "Дайте воспоминанию название.",
+  "trip_nameRequired": "Дайте событию название.",
   "@trip_nameRequired": {
     "x-review": "pending"
   },
@@ -536,7 +536,7 @@
   "@trip_vibesChosen": {
     "x-review": "pending"
   },
-  "trip_createCta": "Создать воспоминание",
+  "trip_createCta": "Создать событие",
   "@trip_createCta": {
     "x-review": "pending"
   },
@@ -576,7 +576,7 @@
   "@trip_chooseFromGallery": {
     "x-review": "pending"
   },
-  "trip_deleteTitle": "Удалить воспоминание",
+  "trip_deleteTitle": "Удалить событие",
   "@trip_deleteTitle": {
     "x-review": "pending"
   },
@@ -676,7 +676,7 @@
   "@plan_detailHint": {
     "x-review": "pending"
   },
-  "manage_title": "Изменить воспоминание",
+  "manage_title": "Изменить событие",
   "@manage_title": {
     "x-review": "pending"
   },
@@ -816,7 +816,7 @@
   "@journal_wrapUpAskNote": {
     "x-review": "pending"
   },
-  "journal_wrapUpReqPhotos": "Пять фото в этом воспоминании",
+  "journal_wrapUpReqPhotos": "Пять фото в этом событии",
   "@journal_wrapUpReqPhotos": {
     "x-review": "pending"
   },
@@ -992,7 +992,7 @@
   "@expense_compareLink": {
     "x-review": "pending"
   },
-  "expense_searchHint": "Поиск воспоминаний",
+  "expense_searchHint": "Поиск событий",
   "@expense_searchHint": {
     "x-review": "pending"
   },
@@ -1004,7 +1004,7 @@
   "@expense_sortBiggest": {
     "x-review": "pending"
   },
-  "expense_memoriesHeader": "Воспоминания",
+  "expense_memoriesHeader": "События",
   "@expense_memoriesHeader": {
     "x-review": "pending"
   },
@@ -1032,7 +1032,7 @@
   "@expense_emptyTitle": {
     "x-review": "pending"
   },
-  "expense_emptyBody": "Сначала создайте воспоминание, а потом отмечайте, сколько тратите.",
+  "expense_emptyBody": "Сначала создайте событие, а потом отмечайте, сколько тратите.",
   "@expense_emptyBody": {
     "x-review": "pending"
   },
@@ -1064,7 +1064,7 @@
   "@expense_biggestCategory": {
     "x-review": "pending"
   },
-  "expense_pickMemoryTitle": "Выберите воспоминание выше",
+  "expense_pickMemoryTitle": "Выберите событие выше",
   "@expense_pickMemoryTitle": {
     "x-review": "pending"
   },
@@ -1076,11 +1076,11 @@
   "@expense_newExpense": {
     "x-review": "pending"
   },
-  "expense_memoryLabel": "Воспоминание",
+  "expense_memoryLabel": "Событие",
   "@expense_memoryLabel": {
     "x-review": "pending"
   },
-  "expense_memoryRequired": "Выберите, к какому воспоминанию это относится.",
+  "expense_memoryRequired": "Выберите, к какому событию это относится.",
   "@expense_memoryRequired": {
     "x-review": "pending"
   },
@@ -1156,7 +1156,7 @@
   "@compare_titleEmphasis": {
     "x-review": "pending"
   },
-  "compare_hintPickTwo": "Выберите два воспоминания, чтобы сравнить расходы.",
+  "compare_hintPickTwo": "Выберите два события, чтобы сравнить расходы.",
   "@compare_hintPickTwo": {
     "x-review": "pending"
   },
@@ -1168,7 +1168,7 @@
   "@compare_hintReady": {
     "x-review": "pending"
   },
-  "compare_needTwo": "Создайте хотя бы два воспоминания, чтобы сравнить расходы.",
+  "compare_needTwo": "Создайте хотя бы два события, чтобы сравнить расходы.",
   "@compare_needTwo": {
     "x-review": "pending"
   },
@@ -1216,7 +1216,7 @@
   "@bonus_eyebrow": {
     "x-review": "pending"
   },
-  "bonus_nextMemory": "Следующее воспоминание",
+  "bonus_nextMemory": "Следующее событие",
   "@bonus_nextMemory": {
     "x-review": "pending"
   },
@@ -1252,11 +1252,11 @@
   "@bonus_nothingLead": {
     "x-review": "pending"
   },
-  "bonus_nothingEmphasisNext": "с вашим следующим воспоминанием",
+  "bonus_nothingEmphasisNext": "с вашим следующим событием",
   "@bonus_nothingEmphasisNext": {
     "x-review": "pending"
   },
-  "bonus_nothingEmphasisFirst": "с вашим первым воспоминанием",
+  "bonus_nothingEmphasisFirst": "с вашим первым событием",
   "@bonus_nothingEmphasisFirst": {
     "x-review": "pending"
   },
@@ -1268,7 +1268,7 @@
   "@bonus_brandNewBody": {
     "x-review": "pending"
   },
-  "bonus_createMemory": "Создать воспоминание",
+  "bonus_createMemory": "Создать событие",
   "@bonus_createMemory": {
     "x-review": "pending"
   },
@@ -1276,7 +1276,7 @@
   "@stars_yourStars": {
     "x-review": "pending"
   },
-  "stars_acrossMemories": "{count, plural, one{в {count} воспоминании} few{в {count} воспоминаниях} many{в {count} воспоминаниях} other{в {count} воспоминаниях}}",
+  "stars_acrossMemories": "{count, plural, one{в {count} событии} few{в {count} событиях} many{в {count} событиях} other{в {count} событиях}}",
   "@stars_acrossMemories": {
     "x-review": "pending"
   },
@@ -1300,19 +1300,19 @@
   "@stars_bonusCount": {
     "x-review": "pending"
   },
-  "stars_byMemory": "По воспоминаниям",
+  "stars_byMemory": "По событиям",
   "@stars_byMemory": {
     "x-review": "pending"
   },
-  "stars_allMemories": "Все воспоминания ›",
+  "stars_allMemories": "Все события ›",
   "@stars_allMemories": {
     "x-review": "pending"
   },
-  "stars_allMemoriesTitle": "Все воспоминания",
+  "stars_allMemoriesTitle": "Все события",
   "@stars_allMemoriesTitle": {
     "x-review": "pending"
   },
-  "stars_earlierMemories": "Прошлые воспоминания",
+  "stars_earlierMemories": "Прошлые события",
   "@stars_earlierMemories": {
     "x-review": "pending"
   },
@@ -1476,7 +1476,7 @@
   "@profile_bioHint": {
     "x-review": "pending"
   },
-  "profile_statMemories": "{count, plural, one{воспоминание} few{воспоминания} many{воспоминаний} other{воспоминания}}",
+  "profile_statMemories": "{count, plural, one{событие} few{события} many{событий} other{события}}",
   "@profile_statMemories": {
     "x-review": "pending"
   },
@@ -1520,7 +1520,7 @@
   "@sub_freePlan": {
     "x-review": "pending"
   },
-  "sub_memoriesKeptMeta": "Сохранено воспоминаний: {kept} из {cap}. Перейдите на Pro, чтобы сохранять больше.",
+  "sub_memoriesKeptMeta": "Сохранено событий: {kept} из {cap}. Перейдите на Pro, чтобы сохранять больше.",
   "@sub_memoriesKeptMeta": {
     "x-review": "pending"
   },
@@ -1548,7 +1548,7 @@
   "@sub_trialTermsYearly": {
     "x-review": "pending"
   },
-  "sub_memoriesKept": "Сохранено воспоминаний",
+  "sub_memoriesKept": "Сохранено событий",
   "@sub_memoriesKept": {
     "x-review": "pending"
   },
@@ -1560,7 +1560,7 @@
   "@sub_ofCap": {
     "x-review": "pending"
   },
-  "sub_photosInMemory": "Фото в этом воспоминании",
+  "sub_photosInMemory": "Фото в этом событии",
   "@sub_photosInMemory": {
     "x-review": "pending"
   },
@@ -1600,15 +1600,15 @@
   "@sub_cantOpenSettings": {
     "x-review": "pending"
   },
-  "paywall_subMemoryCap": "Три бесплатных воспоминания заняты. Перейдите на Pro, чтобы сохранять каждую поездку, а не только три.",
+  "paywall_subMemoryCap": "Три бесплатных события заняты. Перейдите на Pro, чтобы сохранять каждую поездку, а не только три.",
   "@paywall_subMemoryCap": {
     "x-review": "pending"
   },
-  "paywall_subPhotoCap": "В этом воспоминании уже 40 фото. Перейдите на Pro, чтобы добавлять фото без ограничений.",
+  "paywall_subPhotoCap": "В этом событии уже 40 фото. Перейдите на Pro, чтобы добавлять фото без ограничений.",
   "@paywall_subPhotoCap": {
     "x-review": "pending"
   },
-  "paywall_subProfile": "Каждому воспоминанию нужно место. Перейдите на Pro в любой момент и места хватит на всё.",
+  "paywall_subProfile": "Каждому событию нужно место. Перейдите на Pro в любой момент и места хватит на всё.",
   "@paywall_subProfile": {
     "x-review": "pending"
   },
@@ -1628,7 +1628,7 @@
   "@paywall_titleEmphasis": {
     "x-review": "pending"
   },
-  "paywall_perkMemories": "Безлимит воспоминаний",
+  "paywall_perkMemories": "Безлимит событий",
   "@paywall_perkMemories": {
     "x-review": "pending"
   },
@@ -1636,7 +1636,7 @@
   "@paywall_perkMemoriesDetail": {
     "x-review": "pending"
   },
-  "paywall_perkPhotos": "Безлимит фото в воспоминании",
+  "paywall_perkPhotos": "Безлимит фото в событии",
   "@paywall_perkPhotos": {
     "x-review": "pending"
   },
@@ -1700,7 +1700,7 @@
   "@paywall_startTrial": {
     "x-review": "pending"
   },
-  "paywall_reassurance": "Три бесплатных воспоминания останутся с вами в любом случае — без Pro ничего не удалится и не заблокируется.",
+  "paywall_reassurance": "Три бесплатных события останутся с вами в любом случае — без Pro ничего не удалится и не заблокируется.",
   "@paywall_reassurance": {
     "x-review": "pending"
   },
@@ -2116,7 +2116,7 @@
   "@content_achievement_first_adventure_title": {
     "x-review": "pending"
   },
-  "content_achievement_first_adventure_description": "Создайте первое воспоминание.",
+  "content_achievement_first_adventure_description": "Создайте первое событие.",
   "@content_achievement_first_adventure_description": {
     "x-review": "pending"
   },
@@ -2148,7 +2148,7 @@
   "@content_achievement_shutterbug_title": {
     "x-review": "pending"
   },
-  "content_achievement_shutterbug_description": "Добавьте 50 фото в воспоминания.",
+  "content_achievement_shutterbug_description": "Добавьте 50 фото в события.",
   "@content_achievement_shutterbug_description": {
     "x-review": "pending"
   },
@@ -2164,7 +2164,7 @@
   "@content_achievement_jetsetter_title": {
     "x-review": "pending"
   },
-  "content_achievement_jetsetter_description": "Создайте 5 воспоминаний.",
+  "content_achievement_jetsetter_description": "Создайте 5 событий.",
   "@content_achievement_jetsetter_description": {
     "x-review": "pending"
   },
