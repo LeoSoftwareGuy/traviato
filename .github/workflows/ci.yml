@@ -72,10 +72,41 @@ jobs:
         working-directory: supabase/functions/revenuecat_webhook
         run: deno test --allow-net
 
+  # Applies pending supabase/migrations/ to the hosted DB after a merge.
+  # db push only runs files the remote hasn't recorded, so it's a no-op
+  # when there's nothing new.
+  deploy-migrations:
+    name: Apply database migrations
+    if: github.event_name == 'push'
+    needs: verify
+    runs-on: ubuntu-latest
+    concurrency:
+      group: supabase-db-push
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link project
+        run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+      - name: Push migrations
+        run: supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
   deploy-functions:
     name: Deploy edge functions
     if: github.event_name == 'push'
-    needs: verify-edge-functions
+    needs: [verify-edge-functions, deploy-migrations]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
