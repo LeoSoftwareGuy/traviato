@@ -860,7 +860,7 @@
   "@journal_nothingFromDay": {
     "x-review": "pending"
   },
-  "journal_nudgeBody": "Каждое фото и заметка помогут сделать финальный фильм красочнее.",
+  "journal_nudgeBody": "Каждое фото, которое вы добавите, станет частью финального фильма.",
   "@journal_nudgeBody": {
     "x-review": "pending"
   },

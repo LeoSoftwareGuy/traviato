@@ -739,11 +739,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journal_eyebrow => 'Journal';
 
   @override
-  String get journal_quietOne => 'A quiet one';
+  String get journal_quietOne => 'Day 1';
 
   @override
   String journal_dayQuietOne(int day) {
-    return 'Day $day — a quiet one';
+    return 'Day $day';
   }
 
   @override
@@ -847,7 +847,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get journal_nudgeBody =>
-      'Even one photo helps your wrap-up. Quiet days still make the film, this one will just pass through it.';
+      'Every photo you add will contribute to the final wrap-up.';
 
   @override
   String get journal_addAPhoto => '＋ Add a photo';
