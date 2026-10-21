@@ -76,16 +76,24 @@ class MemoryDateRangeField extends StatelessWidget {
             ),
           ],
         ),
-        if (errorText != null) ...[
-          const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.xs),
+        // The error replaces the hint rather than stacking under it (#270).
+        if (errorText != null)
           Text(
             errorText!,
             style: AppTypography.caption.copyWith(
               color: AppColors.accentCoral,
               letterSpacing: 0,
             ),
+          )
+        else
+          Text(
+            context.l10n.trip_datesHint,
+            style: AppTypography.caption.copyWith(
+              color: AppColors.textSecondary,
+              letterSpacing: 0,
+            ),
           ),
-        ],
       ],
     );
   }

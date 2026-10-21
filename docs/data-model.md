@@ -34,7 +34,7 @@ RLS: select/update own; insert via trigger.
 
 ### `trips`
 `id uuid PK (client-generated), user_id FK, name, destination?, country_code?
-(ISO-3166-1 alpha-2), start_date?, end_date? (check >= start), vibes text[]
+(ISO-3166-1 alpha-2), start_date, end_date (required since #270; check >= start), vibes text[]
 default {}, cover_image_path?, created_at, updated_at`.
 RLS owner-only, all ops. Free-tier 3-memory limit app-side.
 **Manage sheet date-shift**: shifting dates re-dates child rows (quests, notes,

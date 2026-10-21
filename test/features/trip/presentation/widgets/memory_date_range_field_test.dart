@@ -62,4 +62,50 @@ void main() {
 
     expect(calls, 0);
   });
+
+  testWidgets('shows the best-guess hint under the dates (#270)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark,
+        home: Scaffold(
+          body: MemoryDateRangeField(
+            startDate: null,
+            endDate: null,
+            onStartDateChanged: (_) {},
+            onEndDateChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.text('Not sure yet? Pick your best guess you can change it later.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('an error replaces the hint', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark,
+        home: Scaffold(
+          body: MemoryDateRangeField(
+            startDate: null,
+            endDate: null,
+            onStartDateChanged: (_) {},
+            onEndDateChanged: (_) {},
+            errorText: 'Add a start and end date.',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Add a start and end date.'), findsOneWidget);
+    expect(
+      find.text('Not sure yet? Pick your best guess you can change it later.'),
+      findsNothing,
+    );
+  });
 }

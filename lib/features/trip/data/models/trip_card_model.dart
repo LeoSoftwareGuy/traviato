@@ -54,6 +54,7 @@ class TripCardModel extends TripCardEntity {
     'upcoming' => TripStatus.upcoming,
     'current' => TripStatus.current,
     'finished' => TripStatus.finished,
+    // 'undated' — unreachable since #270, see [TripStatus.undated].
     _ => TripStatus.undated,
   };
 }

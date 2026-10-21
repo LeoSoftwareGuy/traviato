@@ -2,6 +2,10 @@ import 'package:equatable/equatable.dart';
 
 import 'trip_entity.dart';
 
+/// [undated] is unreachable since #270 made `trips.start_date`/`end_date`
+/// `not null`. It's kept as a defensive fallback (the SQL views still have
+/// an `'undated'` branch, and dates stay nullable in Dart) rather than
+/// rewriting those views and every nullable-date call site.
 enum TripStatus { undated, upcoming, current, finished }
 
 class TripCardEntity extends Equatable {

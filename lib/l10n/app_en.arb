@@ -343,6 +343,8 @@
   "trip_startsLabel": "Starts",
   "trip_endsLabel": "Ends",
   "trip_endBeforeStart": "End date can't be before the start date.",
+  "trip_datesRequired": "Add a start and end date.",
+  "trip_datesHint": "Not sure yet? Pick your best guess you can change it later.",
   "trip_vibeLabel": "The vibe",
   "trip_vibesChosen": "{count} chosen",
   "@trip_vibesChosen": {

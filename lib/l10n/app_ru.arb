@@ -528,6 +528,14 @@
   "@trip_endBeforeStart": {
     "x-review": "pending"
   },
+  "trip_datesRequired": "Укажите даты начала и окончания.",
+  "@trip_datesRequired": {
+    "x-review": "pending"
+  },
+  "trip_datesHint": "Ещё не уверены? Выберите примерные даты их можно изменить позже.",
+  "@trip_datesHint": {
+    "x-review": "pending"
+  },
   "trip_vibeLabel": "Настроение",
   "@trip_vibeLabel": {
     "x-review": "pending"

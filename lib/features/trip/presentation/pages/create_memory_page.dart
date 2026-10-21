@@ -53,7 +53,13 @@ class _CreateMemoryPageState extends ConsumerState<CreateMemoryPage> {
   }
 
   bool _validateDates() {
-    final error = validateMemoryDates(context.l10n, _startDate, _endDate);
+    final error = validateMemoryDates(
+      context.l10n,
+      _startDate,
+      _endDate,
+      // Missing dates are only flagged once Create has been tapped.
+      requireBoth: _autovalidate == AutovalidateMode.always,
+    );
     setState(() => _dateError = error);
     return error == null;
   }
@@ -66,6 +72,9 @@ class _CreateMemoryPageState extends ConsumerState<CreateMemoryPage> {
 
     final coverId = _selectedCoverId ?? suggestedCover(_vibes).id;
 
+    // Both non-null here: a submit validates with requireBoth.
+    final startDate = _startDate!;
+    final endDate = _endDate!;
     try {
       await runCreateMemory(
         ref: ref,
@@ -73,8 +82,8 @@ class _CreateMemoryPageState extends ConsumerState<CreateMemoryPage> {
         destination: _destination.text.trim().isEmpty
             ? null
             : _destination.text.trim(),
-        startDate: _startDate,
-        endDate: _endDate,
+        startDate: startDate,
+        endDate: endDate,
         vibes: _vibes.toList(),
         // Always a sensible bundled fallback, even when a custom cover is
         // also given — runCreateMemory keeps it if the upload step fails,

@@ -7,10 +7,42 @@ final _en = lookupAppLocalizations(const Locale('en'));
 
 void main() {
   group('validateMemoryDates', () {
-    test('returns null when either date is missing', () {
-      expect(validateMemoryDates(_en, null, null), isNull);
-      expect(validateMemoryDates(_en, DateTime(2026, 1, 1), null), isNull);
-      expect(validateMemoryDates(_en, null, DateTime(2026, 1, 1)), isNull);
+    test('requires both dates (#270)', () {
+      const error = 'Add a start and end date.';
+      expect(validateMemoryDates(_en, null, null), error);
+      expect(validateMemoryDates(_en, DateTime(2026, 1, 1), null), error);
+      expect(validateMemoryDates(_en, null, DateTime(2026, 1, 1)), error);
+    });
+
+    test(
+      "doesn't flag a missing date while the form is still being filled in",
+      () {
+        expect(
+          validateMemoryDates(
+            _en,
+            DateTime(2026, 1, 1),
+            null,
+            requireBoth: false,
+          ),
+          isNull,
+        );
+        expect(
+          validateMemoryDates(_en, null, null, requireBoth: false),
+          isNull,
+        );
+      },
+    );
+
+    test('still flags end before start while filling in', () {
+      expect(
+        validateMemoryDates(
+          _en,
+          DateTime(2026, 8, 18),
+          DateTime(2026, 8, 10),
+          requireBoth: false,
+        ),
+        "End date can't be before the start date.",
+      );
     });
 
     test('returns null when end is on or after start', () {

@@ -71,11 +71,26 @@ Future<FakeTripRepository> _pumpWithRouter(WidgetTester tester) async {
   return tripRepo;
 }
 
+/// Picks a start then an end date through the real date sheet — required
+/// since #270. Days in the currently shown month, so the range is valid.
+Future<void> _pickDates(WidgetTester tester) async {
+  for (final day in ['10', '12']) {
+    final field = find.text('Pick a date').first;
+    await tester.ensureVisible(field);
+    await tester.tap(field);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(day).last);
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
+  }
+}
+
 Future<void> _nameAndSubmit(WidgetTester tester) async {
   await tester.enterText(
     find.byType(TextFormField).first,
     'Summer in Tokyo',
   );
+  await _pickDates(tester);
   final submitButton = find.widgetWithText(ElevatedButton, 'Create memory');
   await tester.ensureVisible(submitButton);
   await tester.tap(submitButton);
@@ -203,6 +218,62 @@ void main() {
     });
   });
 
+  group('dates are required (#270)', () {
+    testWidgets('submitting without dates shows an error and creates nothing', (
+      tester,
+    ) async {
+      final tripRepo = await _pump(tester);
+
+      await tester.enterText(
+        find.byType(TextFormField).first,
+        'Summer in Tokyo',
+      );
+      final submitButton = find.widgetWithText(
+        ElevatedButton,
+        'Create memory',
+      );
+      await tester.ensureVisible(submitButton);
+      await tester.tap(submitButton);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add a start and end date.'), findsOneWidget);
+      expect(tripRepo.createTripCallCount, 0);
+    });
+
+    testWidgets(
+      "picking only a start date doesn't flag the end before Create",
+      (tester) async {
+        await _pump(tester);
+        expect(
+          find.text(
+            'Not sure yet? Pick your best guess you can change it later.',
+          ),
+          findsOneWidget,
+        );
+
+        final field = find.text('Pick a date').first;
+        await tester.ensureVisible(field);
+        await tester.tap(field);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('10').last);
+        await tester.tap(find.text('Done'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Add a start and end date.'), findsNothing);
+      },
+    );
+
+    testWidgets('with both dates it creates the memory', (tester) async {
+      final tripRepo = await _pumpWithRouter(tester);
+
+      await _nameAndSubmit(tester);
+      await tester.pumpAndSettle();
+
+      expect(tripRepo.createTripCallCount, 1);
+      expect(find.text('Add a start and end date.'), findsNothing);
+    });
+  });
+
   testWidgets('submits successfully and pops the page', (tester) async {
     final tripRepo = FakeTripRepository()
       ..tripsResult = const Right([])
@@ -245,6 +316,7 @@ void main() {
       find.byType(TextFormField).first,
       'Summer in Tokyo',
     );
+    await _pickDates(tester);
     final submitButton = find.widgetWithText(ElevatedButton, 'Create memory');
     await tester.ensureVisible(submitButton);
     await tester.tap(submitButton);
@@ -288,6 +360,7 @@ void main() {
         find.byType(TextFormField).first,
         'One too many',
       );
+      await _pickDates(tester);
       final submitButton = find.widgetWithText(
         ElevatedButton,
         'Create memory',
@@ -343,6 +416,7 @@ void main() {
         find.byType(TextFormField).first,
         'One too many',
       );
+      await _pickDates(tester);
       final submitButton = find.widgetWithText(
         ElevatedButton,
         'Create memory',
