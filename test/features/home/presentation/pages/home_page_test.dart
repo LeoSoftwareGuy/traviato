@@ -5,6 +5,8 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/errors/failures.dart';
+import 'package:traviato/core/events/global_event.dart';
+import 'package:traviato/core/events/global_event_bus.dart';
 import 'package:traviato/core/theme/app_colors.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/auth/domain/entities/user_entity.dart';
@@ -19,6 +21,7 @@ import 'package:traviato/features/home/presentation/widgets/home_stats_bar.dart'
 import 'package:traviato/features/home/presentation/widgets/upcoming_hero_card.dart';
 import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
+import 'package:traviato/features/profile/presentation/providers/profile_providers.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/trip/domain/entities/trip_card_entity.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
@@ -29,6 +32,7 @@ import '../../../checklist/fakes/fake_checklist_repository.dart';
 import '../../../expense/fakes/fake_expense_repository.dart';
 import '../../../journal/fakes/fake_day_note_repository.dart';
 import '../../../photo/fakes/fake_photo_repository.dart';
+import '../../../profile/fakes/fake_profile_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
 import '../../fakes/fake_profile_stats_repository.dart';
@@ -37,10 +41,16 @@ Future<void> _pump(
   WidgetTester tester, {
   required FakeTripRepository tripRepo,
   FakeAuthRepository? authRepo,
+  FakeProfileRepository? profileRepo,
+  GlobalEventBus? bus,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        profileRepositoryProvider.overrideWithValue(
+          profileRepo ?? FakeProfileRepository(),
+        ),
+        if (bus != null) globalEventBusProvider.overrideWithValue(bus),
         authRepositoryProvider.overrideWithValue(
           authRepo ?? FakeAuthRepository(),
         ),
@@ -112,12 +122,24 @@ void main() {
     expect(find.byType(UpcomingHeroCard), findsOneWidget);
   });
 
-  testWidgets('renders the greeting from the authenticated user', (
+  // A named greeting is a Text.rich; "Hello!" is plain data.
+  String greetingText(WidgetTester tester) {
+    final text = tester.widget<Text>(find.byKey(const Key('home-greeting')));
+    return text.data ?? text.textSpan!.toPlainText();
+  }
+
+  testWidgets('greets with the Profile name, not the auth metadata (#266)', (
     tester,
   ) async {
     final authRepo = FakeAuthRepository();
     final tripRepo = FakeTripRepository()..tripsResult = const Right([]);
-    await _pump(tester, tripRepo: tripRepo, authRepo: authRepo);
+    await _pump(
+      tester,
+      tripRepo: tripRepo,
+      authRepo: authRepo,
+      profileRepo: FakeProfileRepository()
+        ..profileResult = Right(buildProfile(username: 'Leo')),
+    );
     // AuthController only subscribes to the stream once the widget tree
     // (and thus authControllerProvider) has built, so emit after pumping.
     authRepo.emit(
@@ -125,11 +147,59 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final greeting = tester.widget<Text>(
-      find.byKey(const Key('home-greeting')),
-    );
-    expect(greeting.textSpan?.toPlainText(), 'Hello, ada');
+    expect(greetingText(tester), 'Hello, Leo');
   });
+
+  testWidgets(
+    'falls back to the auth metadata name when the profile read fails',
+    (tester) async {
+      final authRepo = FakeAuthRepository();
+      final tripRepo = FakeTripRepository()..tripsResult = const Right([]);
+      await _pump(
+        tester,
+        tripRepo: tripRepo,
+        authRepo: authRepo,
+        profileRepo: FakeProfileRepository()
+          ..profileResult = const Left(NetworkFailure()),
+      );
+      authRepo.emit(
+        const UserEntity(id: 'u1', email: 'ada@example.com', username: 'ada'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(greetingText(tester), 'Hello, ada');
+    },
+  );
+
+  testWidgets(
+    'a name saved in Profile reaches the greeting and avatar without a '
+    'restart (#266)',
+    (tester) async {
+      final bus = GlobalEventBus();
+      addTearDown(bus.dispose);
+      final authRepo = FakeAuthRepository();
+      final tripRepo = FakeTripRepository()..tripsResult = const Right([]);
+      await _pump(
+        tester,
+        tripRepo: tripRepo,
+        authRepo: authRepo,
+        bus: bus,
+        // Apple sign-in: no name anywhere yet.
+        profileRepo: FakeProfileRepository()
+          ..profileResult = Right(buildProfile(username: null)),
+      );
+      authRepo.emit(const UserEntity(id: 'u1', email: 'x@privaterelay.com'));
+      await tester.pumpAndSettle();
+      expect(greetingText(tester), 'Hello!');
+      expect(find.text('?'), findsOneWidget);
+
+      bus.add(ProfileUpdatedDispatched(profile: buildProfile(username: 'Leo')));
+      await tester.pumpAndSettle();
+
+      expect(greetingText(tester), 'Hello, Leo');
+      expect(find.text('L'), findsOneWidget);
+    },
+  );
 
   testWidgets('the hero-card Checklist row navigates to the checklist '
       'route', (tester) async {

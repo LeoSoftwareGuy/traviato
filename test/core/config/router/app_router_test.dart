@@ -4,10 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/features/auth/domain/entities/user_entity.dart';
 import 'package:traviato/features/auth/presentation/providers/auth_providers.dart';
+import 'package:traviato/features/profile/presentation/providers/profile_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 import 'package:traviato/main.dart';
 
 import '../../../features/auth/fakes/fake_auth_repository.dart';
+import '../../../features/profile/fakes/fake_profile_repository.dart';
 import '../../../features/trip/fakes/fake_trip_repository.dart';
 
 void main() {
@@ -23,6 +25,10 @@ void main() {
           overrides: [
             authRepositoryProvider.overrideWithValue(repo),
             tripRepositoryProvider.overrideWithValue(tripRepo),
+            // Home greets with profiles.username (#266).
+            profileRepositoryProvider.overrideWithValue(
+              FakeProfileRepository(),
+            ),
           ],
           child: const TraviatoApp(),
         ),

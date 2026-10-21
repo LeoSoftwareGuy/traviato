@@ -10,7 +10,6 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
-import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../bonus/presentation/providers/bonus_badge_provider.dart';
 import '../../../expense/presentation/providers/expense_providers.dart';
 import '../../../expense/presentation/widgets/add_expense_sheet.dart';
@@ -20,6 +19,7 @@ import '../../../trip/presentation/widgets/delete_memory_sheet.dart';
 import '../../domain/entities/profile_stats_entity.dart';
 import '../controllers/home_controller.dart';
 import '../controllers/home_state.dart';
+import '../controllers/home_username_controller.dart';
 import '../controllers/profile_stats_controller.dart';
 import '../widgets/coming_up_section.dart';
 import '../widgets/home_header.dart';
@@ -32,7 +32,8 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final username = ref.watch(authControllerProvider).user?.username;
+    // A failed or in-flight read just greets without a name ("Hello!").
+    final username = ref.watch(homeUsernameControllerProvider).value;
     // Transient: a stats-fetch failure shouldn't block the whole Home
     // screen (guidelines doc 03) — falls back to zero until it resolves.
     final stats =

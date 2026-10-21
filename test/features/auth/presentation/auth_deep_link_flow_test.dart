@@ -5,9 +5,11 @@ import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/features/auth/domain/entities/user_entity.dart';
 import 'package:traviato/features/auth/presentation/providers/auth_providers.dart';
+import 'package:traviato/features/profile/presentation/providers/profile_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 import 'package:traviato/main.dart';
 
+import '../../profile/fakes/fake_profile_repository.dart';
 import '../../trip/fakes/fake_trip_repository.dart';
 import '../fakes/fake_auth_repository.dart';
 
@@ -27,6 +29,8 @@ Future<FakeAuthRepository> _pumpApp(WidgetTester tester) async {
       overrides: [
         authRepositoryProvider.overrideWithValue(repo),
         tripRepositoryProvider.overrideWithValue(tripRepo),
+        // Home greets with profiles.username (#266).
+        profileRepositoryProvider.overrideWithValue(FakeProfileRepository()),
       ],
       child: const TraviatoApp(),
     ),
