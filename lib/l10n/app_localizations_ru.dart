@@ -678,14 +678,57 @@ class AppLocalizationsRu extends AppLocalizations {
   String get manage_rename => 'Переименовать';
 
   @override
-  String get manage_shiftHint =>
-      'Нажмите на дату, чтобы сдвинуть её на день вперёд, удерживайте чтобы назад. Дела сдвинутся вместе с ней.';
+  String get manage_saveDates => 'Сохранить даты';
+
+  @override
+  String get manage_deleteAndSave => 'Удалить и сохранить';
+
+  @override
+  String manage_datesConsequence(String range, String items) {
+    return 'Вне дат $range: $items. Они будут удалены. Это нельзя отменить.';
+  }
+
+  @override
+  String manage_noteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count заметки',
+      many: '$count заметок',
+      few: '$count заметки',
+      one: '$count заметка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String manage_questCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count дела',
+      many: '$count дел',
+      few: '$count дела',
+      one: '$count дело',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String manage_bonusTaskCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count бонусного задания',
+      many: '$count бонусных заданий',
+      few: '$count бонусных задания',
+      one: '$count бонусное задание',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get manage_cover => 'Обложка';
-
-  @override
-  String get manage_notSet => 'Не задано';
 
   @override
   String get checklist_title => 'Соберитесь в дорогу';

@@ -1,19 +1,31 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/exceptions.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/features/trip/data/datasources/trip_remote_data_source.dart';
 import 'package:traviato/features/trip/data/models/trip_card_model.dart';
+import 'package:traviato/features/trip/data/models/trip_dates_change_model.dart';
 import 'package:traviato/features/trip/data/models/trip_model.dart';
 import 'package:traviato/features/trip/data/repositories/trip_repository_impl.dart';
 import 'package:traviato/features/trip/domain/entities/trip_card_entity.dart';
+import 'package:traviato/features/trip/domain/entities/trip_dates_change_entity.dart';
 
 class _FakeTripRemoteDataSource implements TripRemoteDataSource {
-  _FakeTripRemoteDataSource({this.exception, this.removeFilesException});
+  _FakeTripRemoteDataSource({
+    this.exception,
+    this.removeFilesException,
+    this.datesChange,
+  });
 
   Exception? exception;
   Exception? removeFilesException;
+
+  /// What `setTripDates` returns (#271).
+  TripDatesChangeModel? datesChange;
+  bool? lastDryRun;
+  final removedPhotoFiles = <String>[];
   String? lastCreateTripId;
   String? lastDeletedTripId;
 
@@ -113,20 +125,29 @@ class _FakeTripRemoteDataSource implements TripRemoteDataSource {
   }
 
   @override
-  Future<TripModel> shiftTripDates({
+  Future<TripDatesChangeModel> setTripDates({
     required String id,
-    required int deltaDays,
+    required DateTime startDate,
+    required DateTime endDate,
+    bool dryRun = false,
   }) async {
+    calls.add(dryRun ? 'preview:$id' : 'setDates:$id');
+    lastDryRun = dryRun;
     if (exception != null) throw exception!;
-    return TripModel(
-      id: id,
-      userId: 'u1',
-      name: 'Weekend in the woods',
-      startDate: DateTime(2026, 8, 22 + deltaDays),
-      endDate: DateTime(2026, 8, 26 + deltaDays),
-      createdAt: DateTime(2026, 1, 1),
-      updatedAt: DateTime(2026, 1, 1),
-    );
+    return datesChange ??
+        const TripDatesChangeModel(
+          quests: 0,
+          notes: 0,
+          photos: 0,
+          bonusTasks: 0,
+        );
+  }
+
+  @override
+  Future<void> removePhotoFiles(List<String> storagePaths) async {
+    calls.add('photoFiles:${storagePaths.length}');
+    if (removeFilesException != null) throw removeFilesException!;
+    removedPhotoFiles.addAll(storagePaths);
   }
 
   String? lastUploadCoverTripId;
@@ -315,6 +336,108 @@ void main() {
         );
       },
     );
+  });
+
+  group('TripRepositoryImpl dates (#271)', () {
+    final start = DateTime(2026, 7, 20);
+    final end = DateTime(2026, 7, 23);
+
+    test('previewTripDates is a dry run and never removes files', () async {
+      final remote = _FakeTripRemoteDataSource(
+        datesChange: const TripDatesChangeModel(
+          quests: 1,
+          notes: 6,
+          photos: 23,
+          bonusTasks: 2,
+          photoPaths: ['u1/t1/p1.jpg'],
+        ),
+      );
+      final repo = TripRepositoryImpl(remote: remote);
+
+      final result = await repo.previewTripDates(
+        id: 't1',
+        startDate: start,
+        endDate: end,
+      );
+
+      final impact = result.getOrElse((_) => throw StateError('Left'));
+      expect(remote.lastDryRun, isTrue);
+      expect(impact.notes, 6);
+      expect(impact.photos, 23);
+      expect(impact.removesAnything, isTrue);
+      expect(remote.calls, ['preview:t1']);
+    });
+
+    test(
+      'setTripDates saves, then removes the deleted photos\' files',
+      () async {
+        final remote = _FakeTripRemoteDataSource(
+          datesChange: const TripDatesChangeModel(
+            quests: 0,
+            notes: 1,
+            photos: 2,
+            bonusTasks: 0,
+            photoPaths: ['u1/t1/p1.jpg', 'u1/t1/p2.jpg'],
+          ),
+        );
+        final repo = TripRepositoryImpl(remote: remote);
+
+        final result = await repo.setTripDates(
+          id: 't1',
+          startDate: start,
+          endDate: end,
+        );
+
+        expect(result.isRight(), isTrue);
+        expect(remote.lastDryRun, isFalse);
+        // Rows first, files after — same order as photo delete.
+        expect(remote.calls, ['setDates:t1', 'photoFiles:2']);
+        expect(remote.removedPhotoFiles, ['u1/t1/p1.jpg', 'u1/t1/p2.jpg']);
+      },
+    );
+
+    test('a file-removal failure never fails the save', () async {
+      final remote = _FakeTripRemoteDataSource(
+        removeFilesException: const StorageServerException(message: 'down'),
+        datesChange: const TripDatesChangeModel(
+          quests: 0,
+          notes: 0,
+          photos: 1,
+          bonusTasks: 0,
+          photoPaths: ['u1/t1/p1.jpg'],
+        ),
+      );
+      final repo = TripRepositoryImpl(remote: remote);
+
+      final result = await repo.setTripDates(
+        id: 't1',
+        startDate: start,
+        endDate: end,
+      );
+
+      expect(result.isRight(), isTrue);
+    });
+
+    test('maps a permission error to PermissionFailure', () async {
+      final repo = TripRepositoryImpl(
+        remote: _FakeTripRemoteDataSource(
+          exception: const PermissionException(message: 'not yours'),
+        ),
+      );
+
+      final result = await repo.setTripDates(
+        id: 't1',
+        startDate: start,
+        endDate: end,
+      );
+
+      expect(
+        result,
+        const Left<Failure, TripDatesChangeEntity>(
+          PermissionFailure(message: 'not yours'),
+        ),
+      );
+    });
   });
 
   group('TripRepositoryImpl.deleteTrip', () {

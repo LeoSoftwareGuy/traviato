@@ -9,6 +9,7 @@ import 'package:traviato/core/events/global_event_bus.dart';
 import 'package:traviato/features/quest/presentation/controllers/plan_controller.dart';
 import 'package:traviato/features/quest/presentation/mutations/manage_memory_mutations.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
+import 'package:traviato/features/trip/domain/entities/trip_dates_change_entity.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
 import '../../../trip/fakes/fake_trip_repository.dart';
@@ -48,16 +49,17 @@ class _Harness extends ConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  await runShiftMemoryDates(
+                  await runEditMemoryDates(
                     ref: ref,
                     tripId: tripId,
-                    deltaDays: 1,
+                    startDate: DateTime(2026, 8, 19),
+                    endDate: DateTime(2026, 8, 20),
                   );
                 } catch (_) {
                   // Surfaced via the mutation's MutationError state instead.
                 }
               },
-              child: const Text('Shift'),
+              child: const Text('Edit dates'),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -159,43 +161,103 @@ void main() {
     },
   );
 
-  testWidgets('runShiftMemoryDates moves the trip and every quest together', (
-    tester,
-  ) async {
-    final tripRepo = FakeTripRepository()
-      ..tripCardResult = Right(
-        buildTripCard(
-          id: 't1',
-          startDate: DateTime(2026, 8, 18),
-          endDate: DateTime(2026, 8, 19),
-        ),
-      )
-      ..shiftTripDatesResult = Right(
-        buildTripEntity(
-          id: 't1',
-          startDate: DateTime(2026, 8, 19),
-          endDate: DateTime(2026, 8, 20),
-        ),
-      );
-    final quest = buildQuestEntity(id: 'q1', dayDate: DateTime(2026, 8, 18));
-    final questRepo = FakeQuestRepository()..questsResult = Right([quest]);
+  group('runEditMemoryDates (#271)', () {
+    FakeTripRepository tripRepoFor18th() =>
+        FakeTripRepository()
+          ..tripCardResult = Right(
+            buildTripCard(
+              id: 't1',
+              startDate: DateTime(2026, 8, 18),
+              endDate: DateTime(2026, 8, 19),
+            ),
+          );
 
-    final container = await _pumpHarness(
-      tester,
-      tripRepo: tripRepo,
-      questRepo: questRepo,
-      tripId: 't1',
+    testWidgets(
+      'moves quests with the start date and fires TripUpdatedDispatched only '
+      'when nothing was deleted',
+      (tester) async {
+        final tripRepo = tripRepoFor18th();
+        final quest = buildQuestEntity(
+          id: 'q1',
+          dayDate: DateTime(2026, 8, 18),
+        );
+        final questRepo = FakeQuestRepository()..questsResult = Right([quest]);
+        final bus = GlobalEventBus();
+        addTearDown(bus.dispose);
+        final events = <GlobalEvent>[];
+        final sub = bus.stream.listen(events.add);
+        addTearDown(sub.cancel);
+
+        final container = await _pumpHarness(
+          tester,
+          tripRepo: tripRepo,
+          questRepo: questRepo,
+          tripId: 't1',
+          bus: bus,
+        );
+
+        await tester.tap(find.text('Edit dates'));
+        await tester.pumpAndSettle();
+
+        expect(tripRepo.setTripDatesCallCount, 1);
+        expect(tripRepo.lastSetStartDate, DateTime(2026, 8, 19));
+        expect(tripRepo.lastSetEndDate, DateTime(2026, 8, 20));
+        final state = container.read(planControllerProvider('t1')).value!;
+        expect(state.trip.startDate, DateTime(2026, 8, 19));
+        expect(state.trip.endDate, DateTime(2026, 8, 20));
+        expect(state.quests.single.dayDate, DateTime(2026, 8, 19));
+        expect(events.single, isA<TripUpdatedDispatched>());
+      },
     );
 
-    await tester.tap(find.text('Shift'));
-    await tester.pumpAndSettle();
+    testWidgets(
+      'fires StarsAwardedDispatched when the save deleted something, so the '
+      'stars totals refetch, and the card drops the deleted photos',
+      (tester) async {
+        final tripRepo = FakeTripRepository()
+          ..tripCardResult = Right(
+            buildTripCard(
+              id: 't1',
+              startDate: DateTime(2026, 8, 18),
+              endDate: DateTime(2026, 8, 19),
+              photoCount: 5,
+            ),
+          )
+          ..setTripDatesResult = Right(
+            TripDatesChangeEntity(
+              quests: 0,
+              notes: 1,
+              photos: 2,
+              bonusTasks: 0,
+              trip: buildTripEntity(
+                id: 't1',
+                startDate: DateTime(2026, 8, 19),
+                endDate: DateTime(2026, 8, 20),
+              ),
+            ),
+          );
+        final bus = GlobalEventBus();
+        addTearDown(bus.dispose);
+        final events = <GlobalEvent>[];
+        final sub = bus.stream.listen(events.add);
+        addTearDown(sub.cancel);
 
-    expect(tripRepo.shiftTripDatesCallCount, 1);
-    expect(tripRepo.lastShiftDeltaDays, 1);
-    final state = container.read(planControllerProvider('t1')).value!;
-    expect(state.trip.startDate, DateTime(2026, 8, 19));
-    expect(state.trip.endDate, DateTime(2026, 8, 20));
-    expect(state.quests.single.dayDate, DateTime(2026, 8, 19));
+        await _pumpHarness(
+          tester,
+          tripRepo: tripRepo,
+          questRepo: FakeQuestRepository(),
+          tripId: 't1',
+          bus: bus,
+        );
+
+        await tester.tap(find.text('Edit dates'));
+        await tester.pumpAndSettle();
+
+        final updated = events.whereType<TripUpdatedDispatched>().single;
+        expect(updated.trip.photoCount, 3);
+        expect(events.whereType<StarsAwardedDispatched>(), hasLength(1));
+      },
+    );
   });
 
   testWidgets('runChangeCover updates the plan state', (tester) async {

@@ -11,6 +11,7 @@ import 'package:traviato/features/photo/presentation/providers/photo_providers.d
 import 'package:traviato/features/quest/presentation/pages/plan_page.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/quest/presentation/widgets/plan_images.dart';
+import 'package:traviato/features/trip/domain/entities/trip_dates_change_entity.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
 import '../../../journal/fakes/fake_day_note_repository.dart';
@@ -395,37 +396,114 @@ void main() {
       expect(tripRepo.lastUpdateName, 'New name');
     });
 
-    testWidgets('tapping a date shifts it and every quest forward a day', (
-      tester,
-    ) async {
-      final tripRepo = FakeTripRepository()
-        ..tripCardResult = Right(
-          buildTripCard(
-            id: 't1',
-            startDate: DateTime(2026, 8, 22),
-            endDate: DateTime(2026, 8, 26),
-          ),
-        )
-        ..shiftTripDatesResult = Right(
-          buildTripEntity(
-            id: 't1',
-            startDate: DateTime(2026, 8, 23),
-            endDate: DateTime(2026, 8, 27),
-          ),
-        );
-      final questRepo = FakeQuestRepository()..questsResult = const Right([]);
-      await _pump(tester, tripRepo: tripRepo, questRepo: questRepo);
-      await tester.pumpAndSettle();
+    group('edit dates (#271)', () {
+      FakeTripRepository tripRepoFor22nd() =>
+          FakeTripRepository()
+            ..tripCardResult = Right(
+              buildTripCard(
+                id: 't1',
+                startDate: DateTime(2026, 8, 22),
+                endDate: DateTime(2026, 8, 26),
+              ),
+            );
 
-      await tester.tap(find.byKey(const Key('plan-manage-action')));
-      await tester.pumpAndSettle();
+      Future<void> openManageAndPickStart(
+        WidgetTester tester,
+        FakeTripRepository tripRepo, {
+        String day = '24',
+      }) async {
+        final questRepo = FakeQuestRepository()..questsResult = const Right([]);
+        await _pump(tester, tripRepo: tripRepo, questRepo: questRepo);
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('plan-manage-action')));
+        await tester.pumpAndSettle();
+        await pickStart(tester, day: day);
+      }
 
-      await tester.tap(find.text('22 Aug 2026'));
-      await tester.pumpAndSettle();
+      testWidgets(
+        'tapping a date opens the picker instead of shifting it, and nothing '
+        'saves until Save dates',
+        (tester) async {
+          final tripRepo = tripRepoFor22nd();
+          await openManageAndPickStart(tester, tripRepo);
 
-      expect(tripRepo.shiftTripDatesCallCount, 1);
-      expect(tripRepo.lastShiftDeltaDays, 1);
-      expect(find.text('23 Aug 2026'), findsOneWidget);
+          expect(tripRepo.setTripDatesCallCount, 0);
+          expect(tripRepo.previewTripDatesCallCount, 0);
+          expect(find.text('24 Aug 2026'), findsOneWidget);
+          expect(find.text('Save dates'), findsOneWidget);
+        },
+      );
+
+      testWidgets('with nothing outside the new range it saves straight away', (
+        tester,
+      ) async {
+        final tripRepo = tripRepoFor22nd();
+        await openManageAndPickStart(tester, tripRepo);
+
+        await tapButton(tester, 'Save dates');
+
+        expect(tripRepo.previewTripDatesCallCount, 1);
+        expect(tripRepo.setTripDatesCallCount, 1);
+        expect(tripRepo.lastSetStartDate, DateTime(2026, 8, 24));
+        expect(tripRepo.lastSetEndDate, DateTime(2026, 8, 26));
+        expect(find.text('Save dates'), findsNothing); // saved, not dirty
+      });
+
+      testWidgets(
+        'content outside the range arms a two-step warning with the counts; '
+        'only the second tap saves',
+        (tester) async {
+          final tripRepo = tripRepoFor22nd()
+            ..previewTripDatesResult = const Right(
+              TripDatesChangeEntity(
+                quests: 4,
+                notes: 6,
+                photos: 23,
+                bonusTasks: 0,
+              ),
+            );
+          await openManageAndPickStart(tester, tripRepo);
+
+          await tapButton(tester, 'Save dates');
+
+          expect(tripRepo.setTripDatesCallCount, 0);
+          expect(
+            find.text(
+              'Outside 24 Aug 2026 – 26 Aug 2026: 6 notes, 23 photos, '
+              "4 quests. They'll be deleted. This can't be undone.",
+            ),
+            findsOneWidget,
+          );
+
+          await tapButton(tester, 'Delete and save');
+
+          expect(tripRepo.previewTripDatesCallCount, 1); // not re-asked
+          expect(tripRepo.setTripDatesCallCount, 1);
+        },
+      );
+
+      testWidgets('changing the dates again disarms the warning', (
+        tester,
+      ) async {
+        final tripRepo = tripRepoFor22nd()
+          ..previewTripDatesResult = const Right(
+            TripDatesChangeEntity(
+              quests: 0,
+              notes: 1,
+              photos: 0,
+              bonusTasks: 0,
+            ),
+          );
+        await openManageAndPickStart(tester, tripRepo);
+        await tapButton(tester, 'Save dates');
+        expect(find.text('Delete and save'), findsOneWidget);
+
+        await pickStart(tester, day: '23', current: '24 Aug 2026');
+
+        expect(find.text('Delete and save'), findsNothing);
+        expect(find.text('Save dates'), findsOneWidget);
+        expect(tripRepo.setTripDatesCallCount, 0);
+      });
     });
 
     testWidgets('delete arms on first tap, showing real photo/note counts', (
@@ -547,4 +625,26 @@ void main() {
       expect(find.textContaining('+ Add a quest'), findsOneWidget);
     });
   });
+}
+
+/// Opens the Manage sheet's Starts card picker and picks [day] in the
+/// month shown (#271).
+Future<void> pickStart(
+  WidgetTester tester, {
+  required String day,
+  String current = '22 Aug 2026',
+}) async {
+  await tester.tap(find.text(current));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(day).last);
+  // The Manage sheet has its own Done; the picker's is the topmost one.
+  await tester.tap(find.text('Done').last);
+  await tester.pumpAndSettle();
+}
+
+Future<void> tapButton(WidgetTester tester, String label) async {
+  final button = find.widgetWithText(ElevatedButton, label);
+  await tester.ensureVisible(button);
+  await tester.tap(button);
+  await tester.pumpAndSettle();
 }

@@ -66,10 +66,13 @@ set. Mockup copy showing other numbers is adjusted at implementation.
 
 ## 5. Manage memory ✅ — NEW (sheet, from Plan)
 
-- Rename; **shift start/end by a day — quests move with it** (app-side re-date);
-  change cover (same thumbnail strip); **two-step delete** (armed state shows
-  consequences: photos and notes are removed and **the memory's earned stars are
-  lost**, can't be undone — #247; unlocked badges stay).
+- Rename; **edit dates** — the Starts/Ends cards open the date picker; quests
+  move with the start date, notes/photos/bonus tasks keep their calendar date,
+  and anything left outside the new range is deleted after a two-step warning
+  with exact counts (#271; the old ±1-day tap is gone); change cover (same
+  thumbnail strip); **two-step delete** (armed state shows consequences:
+  photos and notes are removed and **the memory's earned stars are lost**,
+  can't be undone — #247; unlocked badges stay).
 
 ## 6. Plan (day quests) ✅ — redesigned
 

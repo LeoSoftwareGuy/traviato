@@ -275,10 +275,20 @@ RLS: select-own; update-own grant is **column-scoped to `published_at` only**
 - **`check_achievements() → text[]`** — SECURITY DEFINER. Computes all 8
   metrics for the caller, idempotently inserts newly-earned
   `user_achievements`, returns the newly-earned codes.
-- **`shift_trip_dates(p_trip_id, p_delta_days) → trips`** — SECURITY DEFINER.
-  Atomically shifts the trip's start/end dates and every quest's `day_date`
-  by the same delta. **Does not re-date `day_notes` or `photos`** — a known
-  gap, not yet scoped into an issue.
+- **`set_trip_dates(p_trip_id, p_start, p_end, p_dry_run = false) → jsonb`**
+  — SECURITY DEFINER, owner-only (`42501`), `22023` for a missing/inverted
+  range (#271; replaces the ±1-day `shift_trip_dates`, dropped).
+  - **Quests move with the start date** (`day_date += p_start − old start`).
+    **Notes, photos and bonus assignments keep their calendar date**: they
+    record a real day. This is intended, not a gap.
+  - Anything outside `[p_start, p_end]` afterwards is deleted. Photos with no
+    `day_date` are untouched; expenses aren't part of the day model.
+  - Stars: deleted notes lose their `note` ✦1 and deleted plain photos their
+    `photo` ✦2. A photo that completed a bonus task, completed bonus tasks
+    and quests keep theirs (same rules as `delete_photo`).
+  - Returns `{trip, quests, notes, photos, bonus_tasks, photo_paths}`. With
+    `p_dry_run` it only counts (the Manage sheet's two-step warning) and
+    `trip` is null. The client removes `photo_paths` from storage afterwards.
 
 ---
 
