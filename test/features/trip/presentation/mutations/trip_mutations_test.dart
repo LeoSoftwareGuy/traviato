@@ -29,7 +29,12 @@ class _Harness extends ConsumerWidget {
         body: ElevatedButton(
           onPressed: () async {
             try {
-              await runCreateMemory(ref: ref, name: 'Summer in Tokyo');
+              await runCreateMemory(
+                ref: ref,
+                name: 'Summer in Tokyo',
+                startDate: DateTime(2026, 7, 1),
+                endDate: DateTime(2026, 7, 7),
+              );
             } catch (_) {
               // Surfaced via the mutation's MutationError state instead.
             }
@@ -54,6 +59,8 @@ class _CreateWithCoverHarness extends ConsumerWidget {
               await runCreateMemory(
                 ref: ref,
                 name: 'Summer in Tokyo',
+                startDate: DateTime(2026, 7, 1),
+                endDate: DateTime(2026, 7, 7),
                 coverImagePath: 'asset:hero',
                 coverImageBytes: Uint8List.fromList([1, 2, 3]),
               );

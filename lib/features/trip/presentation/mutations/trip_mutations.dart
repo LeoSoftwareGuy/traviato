@@ -22,8 +22,9 @@ Future<TripCardEntity> runCreateMemory({
   required WidgetRef ref,
   required String name,
   String? destination,
-  DateTime? startDate,
-  DateTime? endDate,
+  // Required since #270: `trips.start_date`/`end_date` are `not null`.
+  required DateTime startDate,
+  required DateTime endDate,
   List<String> vibes = const [],
   String? coverImagePath,
   Uint8List? coverImageBytes,

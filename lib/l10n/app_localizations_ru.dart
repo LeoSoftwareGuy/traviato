@@ -517,6 +517,13 @@ class AppLocalizationsRu extends AppLocalizations {
       'Дата окончания не может быть раньше даты начала.';
 
   @override
+  String get trip_datesRequired => 'Укажите даты начала и окончания.';
+
+  @override
+  String get trip_datesHint =>
+      'Ещё не уверены? Выберите примерные даты их можно изменить позже.';
+
+  @override
   String get trip_vibeLabel => 'Настроение';
 
   @override

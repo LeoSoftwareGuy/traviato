@@ -499,6 +499,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trip_endBeforeStart => 'End date can\'t be before the start date.';
 
   @override
+  String get trip_datesRequired => 'Add a start and end date.';
+
+  @override
+  String get trip_datesHint =>
+      'Not sure yet? Pick your best guess you can change it later.';
+
+  @override
   String get trip_vibeLabel => 'The vibe';
 
   @override

@@ -890,6 +890,18 @@ abstract class AppLocalizations {
   /// **'End date can\'t be before the start date.'**
   String get trip_endBeforeStart;
 
+  /// No description provided for @trip_datesRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a start and end date.'**
+  String get trip_datesRequired;
+
+  /// No description provided for @trip_datesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sure yet? Pick your best guess you can change it later.'**
+  String get trip_datesHint;
+
   /// No description provided for @trip_vibeLabel.
   ///
   /// In en, this message translates to:
