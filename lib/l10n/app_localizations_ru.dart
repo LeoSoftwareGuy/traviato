@@ -874,7 +874,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get journal_nudgeBody =>
-      'Каждое фото и заметка помогут сделать финальный фильм красочнее.';
+      'Каждое фото, которое вы добавите, станет частью финального фильма.';
 
   @override
   String get journal_addAPhoto => '＋ Добавить фото';

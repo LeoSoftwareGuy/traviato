@@ -1253,13 +1253,13 @@ abstract class AppLocalizations {
   /// No description provided for @journal_quietOne.
   ///
   /// In en, this message translates to:
-  /// **'A quiet one'**
+  /// **'Day 1'**
   String get journal_quietOne;
 
   /// No description provided for @journal_dayQuietOne.
   ///
   /// In en, this message translates to:
-  /// **'Day {day} — a quiet one'**
+  /// **'Day {day}'**
   String journal_dayQuietOne(int day);
 
   /// Followed by · and journal_questsDone.
@@ -1391,7 +1391,7 @@ abstract class AppLocalizations {
   /// No description provided for @journal_nudgeBody.
   ///
   /// In en, this message translates to:
-  /// **'Even one photo helps your wrap-up. Quiet days still make the film, this one will just pass through it.'**
+  /// **'Every photo you add will contribute to the final wrap-up.'**
   String get journal_nudgeBody;
 
   /// No description provided for @journal_addAPhoto.

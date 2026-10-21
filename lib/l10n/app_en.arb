@@ -544,8 +544,8 @@
   "@journal_eyebrow": {
     "description": "Mono eyebrow, uppercased in code."
   },
-  "journal_quietOne": "A quiet one",
-  "journal_dayQuietOne": "Day {day} — a quiet one",
+  "journal_quietOne": "Day 1",
+  "journal_dayQuietOne": "Day {day}",
   "@journal_dayQuietOne": {
     "placeholders": {
       "day": {
@@ -648,7 +648,7 @@
       }
     }
   },
-  "journal_nudgeBody": "Even one photo helps your wrap-up. Quiet days still make the film, this one will just pass through it.",
+  "journal_nudgeBody": "Every photo you add will contribute to the final wrap-up.",
   "journal_addAPhoto": "＋ Add a photo",
   "journal_writeNote": "Write a note",
   "journal_addNotesToday": "✎ Add notes about today",

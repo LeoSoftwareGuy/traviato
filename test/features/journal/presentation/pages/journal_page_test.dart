@@ -716,8 +716,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('empty-day-nudge')), findsOneWidget);
-      // Single-day memory — no redundant "Day 1 —" prefix (#186).
-      expect(find.text('A quiet one'), findsOneWidget);
+      // Just the day, no "a quiet one" (#274).
+      expect(find.text('Day 1'), findsOneWidget);
+      expect(
+        find.text('Every photo you add will contribute to the final wrap-up.'),
+        findsOneWidget,
+      );
       expect(find.text('Nothing here yet'), findsOneWidget);
       expect(find.textContaining('No photos, no notes yet'), findsOneWidget);
       expect(find.byKey(const Key('journal-add-photo')), findsNothing);
