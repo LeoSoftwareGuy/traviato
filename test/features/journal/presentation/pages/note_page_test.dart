@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -163,19 +165,85 @@ void main() {
     expect(_host(tester).popped, isTrue);
   });
 
-  testWidgets('shows the existing entry read-only and counts only the draft', (
+  testWidgets('the existing entry is in the field, editable, and counted '
+      '(#276)', (tester) async {
+    await _pumpHost(tester);
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<TextField>(_field).controller!.text, _existing);
+    // Design 2a: the count always shows under the language chip.
+    expect(find.text('5 W'), findsOneWidget);
+
+    await tester.enterText(_field, 'Woke late.');
+    await tester.pump();
+    expect(find.text('2 W'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('note-page-done')));
+    await tester.pumpAndSettle();
+    expect(_host(tester).result, 'Woke late.');
+  });
+
+  group('clearing the entry (#276)', () {
+    testWidgets('Done asks before deleting; Keep note stays on the page', (
+      tester,
+    ) async {
+      await _pumpHost(tester);
+      await tester.pumpAndSettle();
+      await tester.enterText(_field, '   ');
+      await tester.tap(find.byKey(const Key('note-page-done')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Delete this note?'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('note-page-keep-note')));
+      await tester.pumpAndSettle();
+      expect(_host(tester).popped, isFalse);
+      expect(_field, findsOneWidget);
+    });
+
+    testWidgets('confirming Delete pops with an empty string', (tester) async {
+      await _pumpHost(tester);
+      await tester.pumpAndSettle();
+      await tester.enterText(_field, '');
+      await tester.tap(find.byKey(const Key('note-page-done')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('note-page-delete-note')));
+      await tester.pumpAndSettle();
+
+      expect(_host(tester).popped, isTrue);
+      expect(_host(tester).result, '');
+    });
+
+    testWidgets('with no saved entry, an empty Done just closes', (
+      tester,
+    ) async {
+      await _pumpHost(tester, existingText: '');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('note-page-done')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Delete this note?'), findsNothing);
+      expect(_host(tester).result, '');
+    });
+  });
+
+  testWidgets('Cancel only asks to discard when something changed', (
     tester,
   ) async {
     await _pumpHost(tester);
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('note-page-cancel')));
+    await tester.pumpAndSettle();
+    expect(find.text('Discard your changes?'), findsNothing);
+    expect(_host(tester).popped, isTrue);
 
-    expect(find.byKey(const Key('note-page-existing')), findsOneWidget);
-    // Design 2a: the count always shows under the language chip.
-    expect(find.text('0 W'), findsOneWidget);
-
-    await tester.enterText(_field, 'Then the buses came.');
-    await tester.pump();
-    expect(find.text('4 W'), findsOneWidget);
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.enterText(_field, 'Woke early.');
+    await tester.tap(find.byKey(const Key('note-page-cancel')));
+    await tester.pumpAndSettle();
+    expect(find.text('Discard your changes?'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('note-page-discard')));
+    await tester.pumpAndSettle();
+    expect(_host(tester).result, isNull);
   });
 
   testWidgets('Aa focuses the field with the caret at the end', (tester) async {
@@ -242,15 +310,13 @@ void main() {
       ),
     );
     final top = tester.getTopLeft(rules.first).dy;
-    final existing = tester.getRect(
-      find.byKey(const Key('note-page-existing')),
-    );
-    final field = tester.getTopLeft(_field).dy;
+    final field = tester.getRect(_field);
 
-    expect((existing.top - top) % 30, closeTo(0, .01));
-    expect(existing.height % 30, closeTo(0, .01));
-    expect(existing.height, greaterThanOrEqualTo(60));
-    expect((field - top) % 30, closeTo(0, .01));
+    // Distance to the nearest rule, so 29.9999… counts as on the grid.
+    double offGrid(double y) => math.min(y % 30, 30 - y % 30);
+    expect(offGrid(field.top - top), closeTo(0, .01));
+    expect(offGrid(field.height), closeTo(0, .01));
+    expect(field.height, greaterThan(239.9)); // 8 lines minimum
   });
 
   group('voice dictation (#206)', () {
@@ -260,7 +326,8 @@ void main() {
 
     Future<FakeDictationService> openListening(WidgetTester tester) async {
       final service = FakeDictationService();
-      await _pumpHost(tester, dictation: service);
+      // A fresh entry, so the field holds only what was heard.
+      await _pumpHost(tester, existingText: '', dictation: service);
       await tester.pumpAndSettle();
       await tester.tap(mic);
       await tester.pump();

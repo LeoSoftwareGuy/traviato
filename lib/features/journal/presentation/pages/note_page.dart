@@ -20,8 +20,9 @@ import '../widgets/note_page/page_turn_timeline.dart';
 
 /// Pushes the full-screen note page. The book turn is animated inside the
 /// page, not by the route transition (docs/design/JOURNAL_NOTE_PAGETURN_SPEC.md
-/// §1). Pops with the trimmed draft on Done — an empty string when nothing
-/// was added — and `null` on Cancel.
+/// §1). The day's entry is editable in full (#276): pops with the whole
+/// trimmed text on Done — an empty string means "no note" (when there was
+/// one, the user has already confirmed deleting it) — and `null` on Cancel.
 class NotePageRoute extends PageRouteBuilder<String> {
   NotePageRoute({
     required String stamp,
@@ -110,8 +111,12 @@ class _NotePageState extends ConsumerState<NotePage>
   @override
   void initState() {
     super.initState();
+    _text.text = widget.existingText.trim();
+    _draftWords = countNoteWords(_text.text);
     _text.addListener(_onTextChanged);
   }
+
+  bool get _hasChanges => _text.text.trim() != widget.existingText.trim();
 
   @override
   void didChangeDependencies() {
@@ -166,17 +171,47 @@ class _NotePageState extends ConsumerState<NotePage>
 
   /// Closing the book stops the recording first (§3), so whatever was
   /// heard is in the draft before it's read.
+  ///
+  /// Clearing a saved entry and tapping Done asks before deleting it (#276);
+  /// Keep leaves the page open.
   Future<void> _done() async {
     if (_phase != _Phase.open) return;
     await _dictation.stop();
-    await _close(_text.text.trim());
+    if (!mounted) return;
+    final text = _text.text.trim();
+    if (text.isEmpty && widget.existingText.trim().isNotEmpty) {
+      final delete = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(context.l10n.note_deleteTitle),
+          content: Text(context.l10n.note_deleteBody),
+          actions: [
+            TextButton(
+              key: const Key('note-page-keep-note'),
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(context.l10n.note_keepNote),
+            ),
+            TextButton(
+              key: const Key('note-page-delete-note'),
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.accentCoral,
+              ),
+              child: Text(context.l10n.common_delete),
+            ),
+          ],
+        ),
+      );
+      if (delete != true || !mounted) return;
+    }
+    await _close(text);
   }
 
   Future<void> _cancel() async {
     if (_phase != _Phase.open) return;
     await _dictation.stop();
     if (!mounted) return;
-    if (_text.text.trim().isNotEmpty) {
+    if (_hasChanges) {
       final discard = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
@@ -255,7 +290,6 @@ class _NotePageState extends ConsumerState<NotePage>
       child: NoteWritingPage(
         stamp: widget.stamp,
         title: widget.title,
-        existingText: widget.existingText,
         controller: _text,
         focusNode: _focus,
         draftWordCount: _draftWords,

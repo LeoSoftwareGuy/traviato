@@ -12,26 +12,4 @@ void main() {
       expect(countNoteWords('  \n '), 0);
     });
   });
-
-  group('appendNoteText', () {
-    test('joins the draft onto the entry with a single space', () {
-      expect(
-        appendNoteText('Great day.', 'Then the lake.'),
-        'Great day. Then the lake.',
-      );
-      expect(
-        appendNoteText('Great day.  \n', '  Then the lake. '),
-        'Great day. Then the lake.',
-      );
-    });
-
-    test('returns just the draft when there is no entry yet', () {
-      expect(appendNoteText('', ' First words '), 'First words');
-      expect(appendNoteText('   ', 'First words'), 'First words');
-    });
-
-    test('leaves the entry untouched for an empty draft', () {
-      expect(appendNoteText('Great day.', '   '), 'Great day.');
-    });
-  });
 }

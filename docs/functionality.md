@@ -92,7 +92,8 @@ set. Mockup copy showing other numbers is adjusted at implementation.
 ## 8. Journal ✅ — redesigned
 
 - Day tabs as photo tiles (active = primary border); day title + sub-line; note
-  card (italic serif body, "EDITED · N WORDS" footer, one note/day, ✦1 via RPC);
+  card (italic serif body, "EDITED · N WORDS" footer, one note/day, ✦1 via RPC; the whole note is editable in the note page, and
+  clearing it + confirming deletes it and takes back the ✦1 — #276);
   photos strip ("TODAY'S PHOTOS · N", **add tile awards ✦2** on successful photo,
   tiles → Photo detail); "To Do · N left" → Plan; **"View wrap-up ▸"** gradient
   button; achievement-nudge card with progress ring.

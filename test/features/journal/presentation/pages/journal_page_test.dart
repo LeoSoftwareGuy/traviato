@@ -215,15 +215,17 @@ void main() {
       expect(find.textContaining('3 WORDS'), findsOneWidget);
     });
 
-    testWidgets('Continue entry appends to the existing note, with no star', (
+    FakeDayNoteRepository noteRepoWithEntry() => FakeDayNoteRepository()
+      ..getNoteResult = Right(buildDayNoteEntity(content: 'Great day.'))
+      ..notesForTripResult = Right([
+        buildDayNoteEntity(dayDate: _today, content: 'Great day.'),
+      ]);
+
+    testWidgets('Continue entry edits the whole note, with no star (#276)', (
       tester,
     ) async {
       final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
-      final noteRepo = FakeDayNoteRepository()
-        ..getNoteResult = Right(buildDayNoteEntity(content: 'Great day.'))
-        ..notesForTripResult = Right([
-          buildDayNoteEntity(dayDate: _today, content: 'Great day.'),
-        ]);
+      final noteRepo = noteRepoWithEntry();
       await _pump(
         tester,
         tripRepo: threeDayTrip(),
@@ -232,19 +234,64 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await openAndType(
-        tester,
-        const Key('journal-note-continue'),
-        'Then the lake.',
-      );
-      // The existing entry is shown read-only above the field.
-      expect(find.byKey(const Key('note-page-existing')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('journal-note-continue')));
+      await tester.pumpAndSettle();
+      final field = find.byKey(const Key('note-page-field'));
+      expect(tester.widget<TextField>(field).controller!.text, 'Great day.');
+      await tester.enterText(field, 'Great day. Fixed a typo.');
       await tester.tap(find.byKey(const Key('note-page-done')));
       await tester.pumpAndSettle();
 
-      expect(noteRepo.lastUpsertedContent, 'Great day. Then the lake.');
-      expect(find.textContaining('✦ +1 star'), findsNothing);
-      expect(find.text('Great day. Then the lake.'), findsOneWidget);
+      expect(noteRepo.lastUpsertedContent, 'Great day. Fixed a typo.');
+      expect(find.textContaining('note saved'), findsNothing);
+      expect(find.text('Great day. Fixed a typo.'), findsOneWidget);
+    });
+
+    testWidgets('Done on an unchanged note saves nothing', (tester) async {
+      final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
+      final noteRepo = noteRepoWithEntry();
+      await _pump(
+        tester,
+        tripRepo: threeDayTrip(),
+        photoRepo: photoRepo,
+        noteRepo: noteRepo,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('journal-note-continue')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('note-page-done')));
+      await tester.pumpAndSettle();
+
+      expect(noteRepo.upsertNoteCallCount, 0);
+      expect(noteRepo.deleteNoteCallCount, 0);
+    });
+
+    testWidgets('clearing the note and confirming deletes it (#276)', (
+      tester,
+    ) async {
+      final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
+      final noteRepo = noteRepoWithEntry();
+      await _pump(
+        tester,
+        tripRepo: threeDayTrip(),
+        photoRepo: photoRepo,
+        noteRepo: noteRepo,
+      );
+      await tester.pumpAndSettle();
+
+      await openAndType(tester, const Key('journal-note-continue'), '');
+      await tester.tap(find.byKey(const Key('note-page-done')));
+      await tester.pumpAndSettle();
+      expect(find.text('Delete this note?'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('note-page-delete-note')));
+      await tester.pumpAndSettle();
+
+      expect(noteRepo.deleteNoteCallCount, 1);
+      expect(noteRepo.lastDeletedNoteId, 'n1');
+      expect(noteRepo.upsertNoteCallCount, 0);
+      expect(find.text('Great day.'), findsNothing);
+      expect(find.byKey(const Key('journal-note-add-prompt')), findsOneWidget);
     });
 
     testWidgets('Done with an empty draft writes nothing and shows no toast', (
@@ -289,7 +336,7 @@ void main() {
       );
       await tester.tap(find.byKey(const Key('note-page-cancel')));
       await tester.pumpAndSettle();
-      expect(find.text('Discard what you added?'), findsOneWidget);
+      expect(find.text('Discard your changes?'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('note-page-keep-writing')));
       await tester.pumpAndSettle();
@@ -322,7 +369,7 @@ void main() {
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
 
-      expect(find.text('Discard what you added?'), findsNothing);
+      expect(find.text('Discard your changes?'), findsNothing);
       expect(find.byKey(const Key('note-page-field')), findsNothing);
       expect(find.byKey(const Key('journal-note-add-prompt')), findsOneWidget);
     });

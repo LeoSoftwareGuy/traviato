@@ -138,6 +138,13 @@ void main() {
       state = container.read(journalControllerProvider('t1')).value!;
       expect(state.notes, hasLength(1));
       expect(state.wrapUpAvailability, WrapUpAvailability.unlocked);
+
+      // Deleting it (#276) clears the day and locks wrap-up again.
+      notifier.applyNoteDeleted(todayDate.subtract(const Duration(days: 1)));
+      state = container.read(journalControllerProvider('t1')).value!;
+      expect(state.notes, isEmpty);
+      expect(state.currentNote, isNull);
+      expect(state.wrapUpAvailability, WrapUpAvailability.locked);
     },
   );
 

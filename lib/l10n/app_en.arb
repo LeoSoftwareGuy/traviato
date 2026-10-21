@@ -674,7 +674,10 @@
   "@toast_noteSaved": {
     "description": "Star award toast (spec copy table)."
   },
-  "note_discardTitle": "Discard what you added?",
+  "note_discardTitle": "Discard your changes?",
+  "note_deleteTitle": "Delete this note?",
+  "note_deleteBody": "The note for this day and its ✦1 star will be removed. This can't be undone.",
+  "note_keepNote": "Keep note",
   "note_keepWriting": "Keep writing",
   "note_discard": "Discard",
   "note_bodyHint": "Keep going: type, or tap the mic and just talk.",

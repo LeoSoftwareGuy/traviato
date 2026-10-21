@@ -892,8 +892,20 @@
   "@toast_noteSaved": {
     "x-review": "pending"
   },
-  "note_discardTitle": "Удалить добавленное?",
+  "note_discardTitle": "Отменить изменения?",
   "@note_discardTitle": {
+    "x-review": "pending"
+  },
+  "note_deleteTitle": "Удалить эту заметку?",
+  "@note_deleteTitle": {
+    "x-review": "pending"
+  },
+  "note_deleteBody": "Заметка за этот день и её звезда ✦1 будут удалены. Это нельзя отменить.",
+  "@note_deleteBody": {
+    "x-review": "pending"
+  },
+  "note_keepNote": "Оставить",
+  "@note_keepNote": {
     "x-review": "pending"
   },
   "note_keepWriting": "Продолжить",

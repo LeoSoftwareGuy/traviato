@@ -42,6 +42,7 @@ abstract class DBFunctions {
   static const setTripDates = 'set_trip_dates';
   static const checkAchievements = 'check_achievements';
   static const deletePhoto = 'delete_photo';
+  static const deleteDayNote = 'delete_day_note';
 }
 
 /// Deno edge functions, invoked via `SupabaseClient.functions.invoke` rather

@@ -45,6 +45,14 @@ class _FakeDayNoteRemoteDataSource implements DayNoteRemoteDataSource {
       updatedAt: DateTime(2026, 1, 1),
     );
   }
+
+  String? lastDeletedId;
+
+  @override
+  Future<void> deleteNote(String id) async {
+    if (exception != null) throw exception!;
+    lastDeletedId = id;
+  }
 }
 
 void main() {
@@ -132,6 +140,36 @@ void main() {
             expect(failure, const AuthenticationFailure(message: 'no session')),
         (_) => fail('expected Left'),
       );
+    });
+  });
+
+  group('DayNoteRepositoryImpl.deleteNote (#276)', () {
+    test('deletes by note id', () async {
+      final remote = _FakeDayNoteRemoteDataSource();
+      final repo = DayNoteRepositoryImpl(remote: remote);
+      final result = await repo.deleteNote('n1');
+      expect(result.isRight(), isTrue);
+      expect(remote.lastDeletedId, 'n1');
+    });
+
+    test('maps a permission error to PermissionFailure', () async {
+      final repo = DayNoteRepositoryImpl(
+        remote: _FakeDayNoteRemoteDataSource(
+          exception: const PermissionException(message: 'nope'),
+        ),
+      );
+      final result = await repo.deleteNote('n1');
+      expect(result.getLeft().toNullable(), isA<PermissionFailure>());
+    });
+
+    test('maps a network error to NetworkFailure', () async {
+      final repo = DayNoteRepositoryImpl(
+        remote: _FakeDayNoteRemoteDataSource(
+          exception: const NetworkException(),
+        ),
+      );
+      final result = await repo.deleteNote('n1');
+      expect(result.getLeft().toNullable(), isA<NetworkFailure>());
     });
   });
 }

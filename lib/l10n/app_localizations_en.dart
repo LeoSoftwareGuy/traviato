@@ -881,7 +881,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toast_noteSaved => '+1 ✦ · note saved';
 
   @override
-  String get note_discardTitle => 'Discard what you added?';
+  String get note_discardTitle => 'Discard your changes?';
+
+  @override
+  String get note_deleteTitle => 'Delete this note?';
+
+  @override
+  String get note_deleteBody =>
+      'The note for this day and its ✦1 star will be removed. This can\'t be undone.';
+
+  @override
+  String get note_keepNote => 'Keep note';
 
   @override
   String get note_keepWriting => 'Keep writing';

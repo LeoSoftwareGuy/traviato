@@ -7,14 +7,3 @@ int countNoteWords(String text) {
   if (trimmed.isEmpty) return 0;
   return trimmed.split(_whitespace).length;
 }
-
-/// The note page only ever appends (docs/design/JOURNAL_NOTE_PAGETURN_SPEC.md
-/// §5): the existing entry is never edited there. Joins with a single space,
-/// or returns just [draft] when there's no entry yet.
-String appendNoteText(String existing, String draft) {
-  final base = existing.trimRight();
-  final addition = draft.trim();
-  if (addition.isEmpty) return existing;
-  if (base.isEmpty) return addition;
-  return '$base $addition';
-}
