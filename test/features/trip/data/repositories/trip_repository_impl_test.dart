@@ -293,6 +293,28 @@ void main() {
         );
       },
     );
+
+    test(
+      'a server-side not-null rejection (23502, undated trip since #270) '
+      'is a typed failure, not a raw exception',
+      () async {
+        // The data source maps any unrecognised PostgrestException code —
+        // 23502 included — to DatabaseException.
+        const message =
+            'null value in column "start_date" of relation "trips" violates '
+            'not-null constraint';
+        final repo = TripRepositoryImpl(
+          remote: _FakeTripRemoteDataSource(
+            exception: const DatabaseException(message: message),
+          ),
+        );
+        final result = await repo.createTrip(name: 'Summer in Tokyo');
+        result.fold(
+          (failure) => expect(failure, const UnknownFailure(message: message)),
+          (_) => fail('expected Left'),
+        );
+      },
+    );
   });
 
   group('TripRepositoryImpl.deleteTrip', () {
