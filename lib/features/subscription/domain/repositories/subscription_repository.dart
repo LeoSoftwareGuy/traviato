@@ -14,6 +14,12 @@ abstract interface class SubscriptionRepository {
   /// The caller's own `entitlements` row — the durable source of truth.
   Future<Either<Failure, EntitlementEntity>> getEntitlement();
 
+  /// Has the server re-check RevenueCat and repair the caller's
+  /// `entitlements` row if it's stale (#267), then returns it. Use when the
+  /// server's answer looks wrong — e.g. a free-tier limit error for a user
+  /// who just bought Pro. Falls back to [getEntitlement] if the sync fails.
+  Future<Either<Failure, EntitlementEntity>> refreshEntitlement();
+
   /// The store's available plans (monthly/annual), already localized.
   Future<Either<Failure, List<SubscriptionOfferingEntity>>> getOfferings();
 

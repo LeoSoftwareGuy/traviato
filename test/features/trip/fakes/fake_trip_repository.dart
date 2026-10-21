@@ -12,6 +12,10 @@ class FakeTripRepository implements TripRepository {
   Either<Failure, List<TripCardEntity>>? tripsResult;
   Either<Failure, TripCardEntity>? tripCardResult;
   Either<Failure, TripEntity>? createTripResult;
+
+  /// Consumed one per [createTrip] call before falling back to
+  /// [createTripResult] — e.g. a server rejection followed by a retry.
+  List<Either<Failure, TripEntity>> createTripResultQueue = [];
   Either<Failure, void>? deleteTripResult;
   Either<Failure, TripEntity>? updateTripResult;
   Either<Failure, TripEntity>? shiftTripDatesResult;
@@ -93,6 +97,9 @@ class FakeTripRepository implements TripRepository {
     createTripCallCount++;
     lastCreateTripCoverImagePath = coverImagePath;
     if (delay > Duration.zero) await Future<void>.delayed(delay);
+    if (createTripResultQueue.isNotEmpty) {
+      return createTripResultQueue.removeAt(0);
+    }
     return createTripResult ??
         Right(
           buildTripEntity(

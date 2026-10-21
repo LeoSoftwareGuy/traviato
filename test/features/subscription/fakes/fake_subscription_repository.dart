@@ -10,12 +10,14 @@ import 'package:traviato/features/subscription/domain/repositories/subscription_
 /// called, mirroring `FakeTripRepository`.
 class FakeSubscriptionRepository implements SubscriptionRepository {
   Either<Failure, EntitlementEntity>? entitlementResult;
+  Either<Failure, EntitlementEntity>? refreshEntitlementResult;
   Either<Failure, List<SubscriptionOfferingEntity>>? offeringsResult;
   Either<Failure, EntitlementEntity?>? purchaseResult;
   Either<Failure, EntitlementEntity>? restoreResult;
   Either<Failure, ActiveSubscriptionEntity>? activeSubscriptionResult;
 
   var getEntitlementCallCount = 0;
+  var refreshEntitlementCallCount = 0;
   var getOfferingsCallCount = 0;
   var purchaseCallCount = 0;
   var restoreCallCount = 0;
@@ -36,6 +38,14 @@ class FakeSubscriptionRepository implements SubscriptionRepository {
   Future<Either<Failure, EntitlementEntity>> getEntitlement() async {
     getEntitlementCallCount++;
     return entitlementResult ?? const Right(EntitlementEntity.free);
+  }
+
+  @override
+  Future<Either<Failure, EntitlementEntity>> refreshEntitlement() async {
+    refreshEntitlementCallCount++;
+    return refreshEntitlementResult ??
+        entitlementResult ??
+        const Right(EntitlementEntity.free);
   }
 
   @override

@@ -5,16 +5,24 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/theme/app_theme.dart';
+import 'package:traviato/features/subscription/presentation/providers/subscription_providers.dart';
 import 'package:traviato/features/trip/presentation/pages/create_memory_page.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
+import '../../../subscription/fakes/fake_subscription_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
 
 Future<FakeTripRepository> _pump(WidgetTester tester) async {
   final tripRepo = FakeTripRepository()..tripsResult = const Right([]);
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [tripRepositoryProvider.overrideWithValue(tripRepo)],
+      overrides: [
+        tripRepositoryProvider.overrideWithValue(tripRepo),
+        // Free by default — the memory-limit pre-check is tier-aware (#267).
+        subscriptionRepositoryProvider.overrideWithValue(
+          FakeSubscriptionRepository(),
+        ),
+      ],
       child: MaterialApp(
         theme: AppTheme.dark,
         home: const CreateMemoryPage(),
@@ -48,7 +56,13 @@ Future<FakeTripRepository> _pumpWithRouter(WidgetTester tester) async {
   );
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [tripRepositoryProvider.overrideWithValue(tripRepo)],
+      overrides: [
+        tripRepositoryProvider.overrideWithValue(tripRepo),
+        // Free by default — the memory-limit pre-check is tier-aware (#267).
+        subscriptionRepositoryProvider.overrideWithValue(
+          FakeSubscriptionRepository(),
+        ),
+      ],
       child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
     ),
   );
@@ -214,7 +228,13 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [tripRepositoryProvider.overrideWithValue(tripRepo)],
+        overrides: [
+          tripRepositoryProvider.overrideWithValue(tripRepo),
+          // Free by default — the memory-limit pre-check is tier-aware (#267).
+          subscriptionRepositoryProvider.overrideWithValue(
+            FakeSubscriptionRepository(),
+          ),
+        ],
         child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
       ),
     );
@@ -250,7 +270,13 @@ void main() {
         ]);
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [tripRepositoryProvider.overrideWithValue(tripRepo)],
+          overrides: [
+            tripRepositoryProvider.overrideWithValue(tripRepo),
+            // Free by default — the memory-limit pre-check is tier-aware (#267).
+            subscriptionRepositoryProvider.overrideWithValue(
+              FakeSubscriptionRepository(),
+            ),
+          ],
           child: MaterialApp(
             theme: AppTheme.dark,
             home: const CreateMemoryPage(),
@@ -302,7 +328,13 @@ void main() {
       );
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [tripRepositoryProvider.overrideWithValue(tripRepo)],
+          overrides: [
+            tripRepositoryProvider.overrideWithValue(tripRepo),
+            // Free by default — the memory-limit pre-check is tier-aware (#267).
+            subscriptionRepositoryProvider.overrideWithValue(
+              FakeSubscriptionRepository(),
+            ),
+          ],
           child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
         ),
       );

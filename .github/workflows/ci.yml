@@ -72,6 +72,18 @@ jobs:
         working-directory: supabase/functions/revenuecat_webhook
         run: deno test --allow-net
 
+      - name: Lint (sync_entitlement)
+        working-directory: supabase/functions/sync_entitlement
+        run: deno lint
+
+      - name: Type-check (sync_entitlement)
+        working-directory: supabase/functions/sync_entitlement
+        run: deno check index.ts handler.ts revenuecat.ts
+
+      - name: Run tests (sync_entitlement)
+        working-directory: supabase/functions/sync_entitlement
+        run: deno test --allow-net
+
   # Applies pending supabase/migrations/ to the hosted DB after a merge.
   # db push only runs files the remote hasn't recorded, so it's a no-op
   # when there's nothing new.
@@ -127,6 +139,13 @@ jobs:
       - name: Deploy revenuecat_webhook
         working-directory: supabase
         run: supabase functions deploy revenuecat_webhook --project-ref "$SUPABASE_PROJECT_ID"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+      - name: Deploy sync_entitlement
+        working-directory: supabase
+        run: supabase functions deploy sync_entitlement --project-ref "$SUPABASE_PROJECT_ID"
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}

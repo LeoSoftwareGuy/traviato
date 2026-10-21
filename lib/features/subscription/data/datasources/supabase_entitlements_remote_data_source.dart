@@ -46,4 +46,41 @@ class SupabaseEntitlementsRemoteDataSource
       throw UnknownException(message: e.toString());
     }
   }
+
+  @override
+  Future<EntitlementModel> syncEntitlement() async {
+    if (_client.auth.currentUser == null) {
+      throw const AuthenticationException(
+        message: 'User is not authenticated',
+      );
+    }
+    try {
+      final response = await _client.functions.invoke(
+        EdgeFunctions.syncEntitlement,
+      );
+      final data = response.data;
+      if (data is! Map) {
+        throw const ServerException(
+          message: 'Entitlement sync returned an unexpected response.',
+        );
+      }
+      return EntitlementModel.fromJson(Map<String, dynamic>.from(data));
+    } on ServerException {
+      rethrow;
+    } on FunctionException catch (e) {
+      throw switch (e.status) {
+        401 => AuthenticationException(
+          message: e.reasonPhrase ?? 'Invalid session',
+        ),
+        0 => const NetworkException(),
+        _ => ServerException(
+          message: e.reasonPhrase ?? 'Entitlement sync failed.',
+        ),
+      };
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
 }

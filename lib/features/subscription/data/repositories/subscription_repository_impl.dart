@@ -10,9 +10,10 @@ import '../datasources/entitlements_remote_data_source.dart';
 import '../datasources/purchases_remote_data_source.dart';
 import '../models/entitlement_model.dart';
 
-/// How many extra reads of `entitlements` to attempt after a purchase/
-/// restore, giving the RevenueCat webhook (#138) a short window to land
-/// before we settle for the SDK's own optimistic read.
+/// How many syncs/reads of `entitlements` to attempt after a purchase/
+/// restore, giving the server (sync_entitlement, #267, or the RevenueCat
+/// webhook, #138) a short window to confirm before we settle for the SDK's
+/// own optimistic read.
 const _defaultReconcileAttempts = 3;
 const _defaultReconcileDelay = Duration(seconds: 2);
 
@@ -54,6 +55,15 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   Future<Either<Failure, EntitlementEntity>> getEntitlement() async {
     try {
       return Right(await _entitlements.getEntitlement());
+    } on AppException catch (e) {
+      return Left(_mapException(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, EntitlementEntity>> refreshEntitlement() async {
+    try {
+      return Right(await _freshEntitlement());
     } on AppException catch (e) {
       return Left(_mapException(e));
     }
@@ -102,15 +112,16 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     }
   }
 
-  /// Tries a few short-delayed re-reads of `entitlements` so the UI reflects
-  /// the webhook-confirmed row when it lands quickly; otherwise keeps the
+  /// Tries a few short-delayed syncs of `entitlements` so the UI reflects
+  /// the server-confirmed row as soon as it's repaired; otherwise keeps the
   /// SDK's own optimistic entitlement rather than blocking on it (#138's
-  /// plan comment).
+  /// plan comment). The first attempt is immediate: sync_entitlement reads
+  /// RevenueCat directly instead of waiting on the webhook (#267).
   Future<EntitlementEntity> _reconcile(EntitlementModel optimistic) async {
     for (var attempt = 0; attempt < _reconcileAttempts; attempt++) {
-      await Future<void>.delayed(_reconcileDelay);
+      if (attempt > 0) await Future<void>.delayed(_reconcileDelay);
       try {
-        final confirmed = await _entitlements.getEntitlement();
+        final confirmed = await _freshEntitlement();
         if (confirmed.tier == optimistic.tier) return confirmed;
       } catch (_) {
         // Keep trying/falling back to optimistic — this is a best-effort
@@ -118,6 +129,17 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       }
     }
     return optimistic;
+  }
+
+  /// The server-repaired row via sync_entitlement (#267). Falls back to a
+  /// plain read if the sync itself fails (e.g. the function isn't deployed
+  /// yet, or RevenueCat is down) — a stale answer beats none.
+  Future<EntitlementModel> _freshEntitlement() async {
+    try {
+      return await _entitlements.syncEntitlement();
+    } on AppException {
+      return _entitlements.getEntitlement();
+    }
   }
 
   Failure _mapException(AppException e) => switch (e) {
