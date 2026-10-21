@@ -101,6 +101,58 @@ void main() {
     });
   });
 
+  group('refreshEntitlement (#267)', () {
+    test('returns the row repaired by sync_entitlement', () async {
+      final repaired = EntitlementModel(
+        tier: SubscriptionTier.pro,
+        expiresAt: DateTime(2099),
+      );
+      final entitlements = FakeEntitlementsRemoteDataSource()
+        ..results = [repaired];
+      final repo = _buildRepo(
+        purchases: FakePurchasesRemoteDataSource(),
+        entitlements: entitlements,
+      );
+
+      final result = await repo.refreshEntitlement();
+
+      expect(result, Right<Failure, EntitlementEntity>(repaired));
+      expect(entitlements.syncCallCount, 1);
+    });
+
+    test('falls back to a plain read when the sync fails', () async {
+      final entitlements = FakeEntitlementsRemoteDataSource()
+        ..syncError = const ServerException(message: 'not deployed');
+      final repo = _buildRepo(
+        purchases: FakePurchasesRemoteDataSource(),
+        entitlements: entitlements,
+      );
+
+      final result = await repo.refreshEntitlement();
+
+      expect(
+        result,
+        Right<Failure, EntitlementEntity>(EntitlementModel.free()),
+      );
+      expect(entitlements.syncCallCount, 1);
+      expect(entitlements.callCount, 1); // the fallback read
+    });
+
+    test('maps a failure of both to a Failure', () async {
+      final entitlements = FakeEntitlementsRemoteDataSource()
+        ..syncError = const NetworkException()
+        ..error = const NetworkException();
+      final repo = _buildRepo(
+        purchases: FakePurchasesRemoteDataSource(),
+        entitlements: entitlements,
+      );
+
+      final result = await repo.refreshEntitlement();
+
+      expect(result, const Left<Failure, EntitlementEntity>(NetworkFailure()));
+    });
+  });
+
   group('restore', () {
     test('reconciles like purchase', () async {
       final confirmed = EntitlementModel(
@@ -120,6 +172,33 @@ void main() {
 
       expect(result, Right<Failure, EntitlementEntity>(confirmed));
     });
+
+    test(
+      'syncs with RevenueCat via sync_entitlement rather than only waiting '
+      'on the webhook (#267)',
+      () async {
+        final repaired = EntitlementModel(
+          tier: SubscriptionTier.pro,
+          expiresAt: DateTime(2099),
+        );
+        final purchases = FakePurchasesRemoteDataSource()
+          ..restoreResult = EntitlementModel(
+            tier: SubscriptionTier.pro,
+            expiresAt: DateTime(2099),
+          );
+        final entitlements = FakeEntitlementsRemoteDataSource()
+          ..results = [repaired];
+        final repo = _buildRepo(
+          purchases: purchases,
+          entitlements: entitlements,
+        );
+
+        final result = await repo.restore();
+
+        expect(result, Right<Failure, EntitlementEntity>(repaired));
+        expect(entitlements.syncCallCount, 1); // confirmed on first attempt
+      },
+    );
 
     test('a free restore (nothing to restore) is not a failure', () async {
       final purchases = FakePurchasesRemoteDataSource()

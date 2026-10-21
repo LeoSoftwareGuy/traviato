@@ -48,6 +48,7 @@ abstract class DBFunctions {
 /// than `.rpc` (Postgres RPCs above).
 abstract class EdgeFunctions {
   static const generateWrapUp = 'generate_wrap_up';
+  static const syncEntitlement = 'sync_entitlement';
 }
 
 /// Postgres / PostgREST error codes surfaced via `PostgrestException.code`.
