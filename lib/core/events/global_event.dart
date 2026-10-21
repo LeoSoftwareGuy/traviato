@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../features/profile/domain/entities/profile_entity.dart';
 import '../../features/subscription/domain/entities/entitlement_entity.dart';
 import '../../features/trip/domain/entities/trip_card_entity.dart';
 
@@ -76,4 +77,15 @@ final class EntitlementUpdatedDispatched extends GlobalEvent {
 
   @override
   List<Object?> get props => [entitlement];
+}
+
+/// Fired after the profile edit sheet or an avatar upload saves (#266), so
+/// Home's greeting and avatar initial pick up a new name without a refetch.
+final class ProfileUpdatedDispatched extends GlobalEvent {
+  const ProfileUpdatedDispatched({required this.profile});
+
+  final ProfileEntity profile;
+
+  @override
+  List<Object?> get props => [profile];
 }

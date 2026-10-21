@@ -106,6 +106,7 @@ class ExpenseListController extends _$ExpenseListController {
       case StarsAwardedDispatched():
       case WrapUpPublishedDispatched():
       case EntitlementUpdatedDispatched():
+      case ProfileUpdatedDispatched():
       // Not relevant to expenses.
     }
   }

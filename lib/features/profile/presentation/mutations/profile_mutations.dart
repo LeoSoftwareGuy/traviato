@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/presentation_failure_exception.dart';
+import '../../../../core/events/global_event.dart';
+import '../../../../core/events/global_event_bus.dart';
 import '../../domain/entities/profile_entity.dart';
 import '../controllers/profile_controller.dart';
 import '../providers/profile_providers.dart';
@@ -28,6 +30,9 @@ Future<ProfileEntity> runUpdateProfile({
         tsx
             .get(profileControllerProvider.notifier)
             .applyProfileUpdated(profile);
+        tsx
+            .get(globalEventBusProvider)
+            .add(ProfileUpdatedDispatched(profile: profile));
         return profile;
       },
     );
@@ -58,6 +63,9 @@ Future<ProfileEntity> runUploadAvatar({
         tsx
             .get(profileControllerProvider.notifier)
             .applyProfileUpdated(profile);
+        tsx
+            .get(globalEventBusProvider)
+            .add(ProfileUpdatedDispatched(profile: profile));
         return profile;
       },
     );
