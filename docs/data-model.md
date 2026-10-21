@@ -37,8 +37,9 @@ RLS: select/update own; insert via trigger.
 (ISO-3166-1 alpha-2), start_date, end_date (required since #270; check >= start), vibes text[]
 default {}, cover_image_path?, created_at, updated_at`.
 RLS owner-only, all ops. Free-tier 3-memory limit app-side.
-**Manage sheet date-shift**: shifting dates re-dates child rows (quests, notes,
-photos day_date) app-side in the same operation — no schema support needed.
+**Manage sheet edit dates** (#271): `set_trip_dates` RPC — quests move with the
+start date; notes/photos/bonus assignments keep their `day_date`; rows outside
+the new range are deleted after a two-step warning. No schema change.
 
 ### `quests`
 `id, trip_id (cascade), day_date, time?, title, place_text?, position,
