@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/features/trip/domain/entities/trip_card_entity.dart';
+import 'package:traviato/features/trip/domain/entities/trip_dates_change_entity.dart';
 import 'package:traviato/features/trip/domain/entities/trip_entity.dart';
 import 'package:traviato/features/trip/domain/repositories/trip_repository.dart';
 
@@ -18,7 +19,8 @@ class FakeTripRepository implements TripRepository {
   List<Either<Failure, TripEntity>> createTripResultQueue = [];
   Either<Failure, void>? deleteTripResult;
   Either<Failure, TripEntity>? updateTripResult;
-  Either<Failure, TripEntity>? shiftTripDatesResult;
+  Either<Failure, TripDatesChangeEntity>? previewTripDatesResult;
+  Either<Failure, TripDatesChangeEntity>? setTripDatesResult;
   Either<Failure, String>? uploadCoverImageResult;
   Either<Failure, void>? deleteCoverImageResult;
   Either<Failure, String>? getCoverImageUrlResult;
@@ -27,7 +29,8 @@ class FakeTripRepository implements TripRepository {
   var createTripCallCount = 0;
   var deleteTripCallCount = 0;
   var updateTripCallCount = 0;
-  var shiftTripDatesCallCount = 0;
+  var previewTripDatesCallCount = 0;
+  var setTripDatesCallCount = 0;
   var uploadCoverImageCallCount = 0;
   var deleteCoverImageCallCount = 0;
   var getCoverImageUrlCallCount = 0;
@@ -36,8 +39,9 @@ class FakeTripRepository implements TripRepository {
   String? lastUpdateTripId;
   String? lastUpdateName;
   String? lastUpdateCoverImagePath;
-  String? lastShiftTripId;
-  int? lastShiftDeltaDays;
+  String? lastSetDatesTripId;
+  DateTime? lastSetStartDate;
+  DateTime? lastSetEndDate;
   String? lastUploadCoverTripId;
   Uint8List? lastUploadCoverBytes;
   String? lastDeleteCoverTripId;
@@ -142,16 +146,47 @@ class FakeTripRepository implements TripRepository {
         );
   }
 
+  /// Defaults to "nothing outside the new range".
   @override
-  Future<Either<Failure, TripEntity>> shiftTripDates({
+  Future<Either<Failure, TripDatesChangeEntity>> previewTripDates({
     required String id,
-    required int deltaDays,
+    required DateTime startDate,
+    required DateTime endDate,
   }) async {
-    shiftTripDatesCallCount++;
-    lastShiftTripId = id;
-    lastShiftDeltaDays = deltaDays;
+    previewTripDatesCallCount++;
     if (delay > Duration.zero) await Future<void>.delayed(delay);
-    return shiftTripDatesResult ?? Right(buildTripEntity(id: id));
+    return previewTripDatesResult ??
+        const Right(
+          TripDatesChangeEntity(quests: 0, notes: 0, photos: 0, bonusTasks: 0),
+        );
+  }
+
+  /// Defaults to a clean save that returns the trip with the new dates.
+  @override
+  Future<Either<Failure, TripDatesChangeEntity>> setTripDates({
+    required String id,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    setTripDatesCallCount++;
+    lastSetDatesTripId = id;
+    lastSetStartDate = startDate;
+    lastSetEndDate = endDate;
+    if (delay > Duration.zero) await Future<void>.delayed(delay);
+    return setTripDatesResult ??
+        Right(
+          TripDatesChangeEntity(
+            quests: 0,
+            notes: 0,
+            photos: 0,
+            bonusTasks: 0,
+            trip: buildTripEntity(
+              id: id,
+              startDate: startDate,
+              endDate: endDate,
+            ),
+          ),
+        );
   }
 }
 

@@ -1142,23 +1142,47 @@ abstract class AppLocalizations {
   /// **'Rename'**
   String get manage_rename;
 
-  /// No description provided for @manage_shiftHint.
+  /// No description provided for @manage_saveDates.
   ///
   /// In en, this message translates to:
-  /// **'Tap a date to shift it a day forward, hold to shift it back, quests move with it.'**
-  String get manage_shiftHint;
+  /// **'Save dates'**
+  String get manage_saveDates;
+
+  /// No description provided for @manage_deleteAndSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete and save'**
+  String get manage_deleteAndSave;
+
+  /// Two-step warning when new dates leave content outside the memory (#271). {range} is the new 'd MMM y – d MMM y' range; {items} is a comma-joined list of manage_noteCount / common_photoCount / manage_questCount / manage_bonusTaskCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Outside {range}: {items}. They\'ll be deleted. This can\'t be undone.'**
+  String manage_datesConsequence(String range, String items);
+
+  /// No description provided for @manage_noteCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 note} other{{count} notes}}'**
+  String manage_noteCount(int count);
+
+  /// No description provided for @manage_questCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 quest} other{{count} quests}}'**
+  String manage_questCount(int count);
+
+  /// No description provided for @manage_bonusTaskCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 bonus task} other{{count} bonus tasks}}'**
+  String manage_bonusTaskCount(int count);
 
   /// Mono eyebrow, uppercased in code.
   ///
   /// In en, this message translates to:
   /// **'Cover'**
   String get manage_cover;
-
-  /// No description provided for @manage_notSet.
-  ///
-  /// In en, this message translates to:
-  /// **'Not set'**
-  String get manage_notSet;
 
   /// No description provided for @checklist_title.
   ///

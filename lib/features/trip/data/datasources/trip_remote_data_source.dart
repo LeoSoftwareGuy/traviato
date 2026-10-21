@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import '../models/trip_card_model.dart';
+import '../models/trip_dates_change_model.dart';
 import '../models/trip_model.dart';
 
 abstract interface class TripRemoteDataSource {
@@ -31,10 +32,19 @@ abstract interface class TripRemoteDataSource {
     String? coverImagePath,
   });
 
-  Future<TripModel> shiftTripDates({
+  /// The `set_trip_dates` RPC (#271). With [dryRun] it only counts what
+  /// the change would delete; otherwise it applies it and returns the
+  /// updated trip plus the deleted photos' storage paths.
+  Future<TripDatesChangeModel> setTripDates({
     required String id,
-    required int deltaDays,
+    required DateTime startDate,
+    required DateTime endDate,
+    bool dryRun = false,
   });
+
+  /// Removes the given `trip-photos` objects — the files of photos a date
+  /// change deleted (#271).
+  Future<void> removePhotoFiles(List<String> storagePaths);
 
   Future<String> uploadCoverImage({
     required String tripId,

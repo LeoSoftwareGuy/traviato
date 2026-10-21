@@ -16,6 +16,7 @@ class MemoryDateRangeField extends StatelessWidget {
     required this.onStartDateChanged,
     required this.onEndDateChanged,
     this.errorText,
+    this.showHint = true,
     super.key,
   });
 
@@ -24,6 +25,10 @@ class MemoryDateRangeField extends StatelessWidget {
   final ValueChanged<DateTime?> onStartDateChanged;
   final ValueChanged<DateTime?> onEndDateChanged;
   final String? errorText;
+
+  /// The "best guess, change it later" hint (#270) — for Create memory.
+  /// Off in the Manage sheet, where the user is already changing them.
+  final bool showHint;
 
   Future<void> _pickDate(
     BuildContext context,
@@ -76,8 +81,9 @@ class MemoryDateRangeField extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.xs),
         // The error replaces the hint rather than stacking under it (#270).
+        if (errorText != null || showHint)
+          const SizedBox(height: AppSpacing.xs),
         if (errorText != null)
           Text(
             errorText!,
@@ -86,7 +92,7 @@ class MemoryDateRangeField extends StatelessWidget {
               letterSpacing: 0,
             ),
           )
-        else
+        else if (showHint)
           Text(
             context.l10n.trip_datesHint,
             style: AppTypography.caption.copyWith(

@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/supabase_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../models/trip_card_model.dart';
+import '../models/trip_dates_change_model.dart';
 import '../models/trip_model.dart';
 import 'trip_remote_data_source.dart';
 
@@ -181,9 +182,11 @@ class SupabaseTripRemoteDataSource implements TripRemoteDataSource {
   }
 
   @override
-  Future<TripModel> shiftTripDates({
+  Future<TripDatesChangeModel> setTripDates({
     required String id,
-    required int deltaDays,
+    required DateTime startDate,
+    required DateTime endDate,
+    bool dryRun = false,
   }) async {
     if (_client.auth.currentUser == null) {
       throw const AuthenticationException(
@@ -191,11 +194,18 @@ class SupabaseTripRemoteDataSource implements TripRemoteDataSource {
       );
     }
     try {
-      final row = await _client.rpc(
-        DBFunctions.shiftTripDates,
-        params: {'p_trip_id': id, 'p_delta_days': deltaDays},
+      final result = await _client.rpc(
+        DBFunctions.setTripDates,
+        params: {
+          'p_trip_id': id,
+          'p_start': _dateOnly(startDate),
+          'p_end': _dateOnly(endDate),
+          'p_dry_run': dryRun,
+        },
       );
-      return TripModel.fromJson(row as Map<String, dynamic>);
+      return TripDatesChangeModel.fromJson(
+        Map<String, dynamic>.from(result as Map),
+      );
     } on PostgrestException catch (e) {
       if (e.code == PostgresErrors.insufficientPrivilege) {
         throw PermissionException(message: e.message);
@@ -302,6 +312,26 @@ class SupabaseTripRemoteDataSource implements TripRemoteDataSource {
         if (files.isEmpty) return;
         await bucket.remove([for (final f in files) '$folder/${f.name}']);
         if (files.length < _removeBatchSize) return;
+      }
+    } on StorageException catch (e) {
+      throw StorageServerException(message: e.message);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<void> removePhotoFiles(List<String> storagePaths) async {
+    if (storagePaths.isEmpty) return;
+    try {
+      final bucket = _client.storage.from(Storage.tripPhotos);
+      for (var i = 0; i < storagePaths.length; i += _removeBatchSize) {
+        final end = i + _removeBatchSize < storagePaths.length
+            ? i + _removeBatchSize
+            : storagePaths.length;
+        await bucket.remove(storagePaths.sublist(i, end));
       }
     } on StorageException catch (e) {
       throw StorageServerException(message: e.message);

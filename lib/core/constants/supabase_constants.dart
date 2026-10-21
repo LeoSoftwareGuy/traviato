@@ -39,7 +39,7 @@ abstract class Storage {
 
 abstract class DBFunctions {
   static const awardPoints = 'award_points';
-  static const shiftTripDates = 'shift_trip_dates';
+  static const setTripDates = 'set_trip_dates';
   static const checkAchievements = 'check_achievements';
   static const deletePhoto = 'delete_photo';
 }

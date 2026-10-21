@@ -5,9 +5,11 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/trip_card_entity.dart';
+import '../../domain/entities/trip_dates_change_entity.dart';
 import '../../domain/entities/trip_entity.dart';
 import '../../domain/repositories/trip_repository.dart';
 import '../datasources/trip_remote_data_source.dart';
+import '../models/trip_dates_change_model.dart';
 
 class TripRepositoryImpl implements TripRepository {
   TripRepositoryImpl({required TripRemoteDataSource remote}) : _remote = remote;
@@ -98,21 +100,64 @@ class TripRepositoryImpl implements TripRepository {
   }
 
   @override
-  Future<Either<Failure, TripEntity>> shiftTripDates({
+  Future<Either<Failure, TripDatesChangeEntity>> previewTripDates({
     required String id,
-    required int deltaDays,
+    required DateTime startDate,
+    required DateTime endDate,
   }) async {
     try {
       return Right(
-        await _remote.shiftTripDates(id: id, deltaDays: deltaDays),
+        await _remote.setTripDates(
+          id: id,
+          startDate: startDate,
+          endDate: endDate,
+          dryRun: true,
+        ),
       );
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
+    } on PermissionException catch (e) {
+      return Left(PermissionFailure(message: e.message));
     } on NetworkException {
       return const Left(NetworkFailure());
     } on AppException catch (e) {
       return Left(UnknownFailure(message: e.message));
     }
+  }
+
+  @override
+  Future<Either<Failure, TripDatesChangeEntity>> setTripDates({
+    required String id,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final TripDatesChangeModel change;
+    try {
+      change = await _remote.setTripDates(
+        id: id,
+        startDate: startDate,
+        endDate: endDate,
+      );
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on PermissionException catch (e) {
+      return Left(PermissionFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+    // Rows first, files after (same order as photo delete): the worst case
+    // is an orphaned file nobody can see, never a broken photo.
+    try {
+      await _remote.removePhotoFiles(change.photoPaths);
+    } on AppException catch (e) {
+      debugPrint(
+        'Orphaned ${change.photoPaths.length} photo file(s) after a date '
+        'change: ${e.message}',
+      );
+    }
+    return Right(change);
   }
 
   @override

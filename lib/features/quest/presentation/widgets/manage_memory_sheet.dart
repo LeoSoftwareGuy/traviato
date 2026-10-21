@@ -3,12 +3,10 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/bottom_sheet_chrome.dart';
@@ -22,8 +20,9 @@ import '../../../trip/presentation/widgets/cover_picker.dart';
 import '../../../trip/presentation/widgets/create_memory_field.dart';
 import '../controllers/plan_controller.dart';
 import '../mutations/manage_memory_mutations.dart';
+import 'edit_memory_dates_section.dart';
 
-/// Rename, date-shift, cover-change, and two-step delete for a memory.
+/// Rename, edit dates, cover-change, and two-step delete for a memory.
 /// `docs/design/README.md` § Shared: Manage memory sheet.
 ///
 /// Resolves to `true` if the memory was deleted, so the caller can navigate
@@ -90,18 +89,6 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
     }
   }
 
-  Future<void> _shiftDates(int deltaDays) async {
-    try {
-      await runShiftMemoryDates(
-        ref: ref,
-        tripId: widget.tripId,
-        deltaDays: deltaDays,
-      );
-    } catch (_) {
-      // Surfaced via the mutation error listener below.
-    }
-  }
-
   Future<void> _changeCover(String coverId) async {
     try {
       await runChangeCover(
@@ -142,7 +129,8 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
     for (final mutation in [
       renameMemoryMutation,
       changeCoverMutation,
-      shiftMemoryDatesMutation,
+      previewMemoryDatesMutation,
+      editMemoryDatesMutation,
       deleteMemoryMutation,
     ]) {
       ref.listen<MutationState<dynamic>>(mutation, (previous, next) {
@@ -193,32 +181,7 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Row(
-            children: [
-              Expanded(
-                child: _ShiftDateCard(
-                  label: l10n.trip_startsLabel,
-                  date: trip?.startDate,
-                  onShiftForward: () => _shiftDates(1),
-                  onShiftBack: () => _shiftDates(-1),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: _ShiftDateCard(
-                  label: l10n.trip_endsLabel,
-                  date: trip?.endDate,
-                  onShiftForward: () => _shiftDates(1),
-                  onShiftBack: () => _shiftDates(-1),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            l10n.manage_shiftHint,
-            style: AppTypography.chipLabel.copyWith(color: AppColors.textMuted),
-          ),
+          EditMemoryDatesSection(tripId: widget.tripId),
           const SizedBox(height: AppSpacing.lg),
           Text(
             l10n.manage_cover.toUpperCase(),
@@ -274,63 +237,6 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-class _ShiftDateCard extends StatelessWidget {
-  const _ShiftDateCard({
-    required this.label,
-    required this.date,
-    required this.onShiftForward,
-    required this.onShiftBack,
-  });
-
-  final String label;
-  final DateTime? date;
-  final VoidCallback onShiftForward;
-  final VoidCallback onShiftBack;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: date == null ? null : onShiftForward,
-      onLongPress: date == null ? null : onShiftBack,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          border: Border.all(color: AppColors.surfaceBorder),
-          borderRadius: AppRadius.cardRadius,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label.toUpperCase(),
-              style: AppTypography.mono.copyWith(color: AppColors.textTertiary),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              date == null
-                  ? context.l10n.manage_notSet
-                  : DateFormat(
-                      'd MMM y',
-                      context.l10n.localeName,
-                    ).format(date!),
-              style: AppTypography.bodyInput.copyWith(
-                color: date == null
-                    ? AppColors.textTertiary
-                    : AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

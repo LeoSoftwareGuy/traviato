@@ -4,6 +4,7 @@ import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../entities/trip_card_entity.dart';
+import '../entities/trip_dates_change_entity.dart';
 import '../entities/trip_entity.dart';
 
 abstract interface class TripRepository {
@@ -30,13 +31,24 @@ abstract interface class TripRepository {
     String? coverImagePath,
   });
 
-  /// Shifts the trip's start/end dates and every one of its quests'
-  /// `day_date` by [deltaDays] in one transaction (the `shift_trip_dates`
-  /// RPC) — a client-side batched update across two tables risks a partial
-  /// failure leaving them out of sync.
-  Future<Either<Failure, TripEntity>> shiftTripDates({
+  /// What [setTripDates] with these dates would delete, without changing
+  /// anything — the same server-side rule, so the warning the user
+  /// confirms matches the save (#271).
+  Future<Either<Failure, TripDatesChangeEntity>> previewTripDates({
     required String id,
-    required int deltaDays,
+    required DateTime startDate,
+    required DateTime endDate,
+  });
+
+  /// Sets the trip's dates in one transaction (`set_trip_dates`, #271):
+  /// quests move with the start date; notes, photos and bonus tasks keep
+  /// their calendar date; anything outside the new range is deleted. The
+  /// result carries the updated trip and what was deleted. Deleted photos'
+  /// storage files are removed best-effort afterwards.
+  Future<Either<Failure, TripDatesChangeEntity>> setTripDates({
+    required String id,
+    required DateTime startDate,
+    required DateTime endDate,
   });
 
   /// Uploads [bytes] as [tripId]'s custom cover at a stable

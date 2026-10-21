@@ -475,12 +475,48 @@
     "description": "The memory's name field."
   },
   "manage_rename": "Rename",
-  "manage_shiftHint": "Tap a date to shift it a day forward, hold to shift it back, quests move with it.",
+  "manage_saveDates": "Save dates",
+  "manage_deleteAndSave": "Delete and save",
+  "manage_datesConsequence": "Outside {range}: {items}. They'll be deleted. This can't be undone.",
+  "@manage_datesConsequence": {
+    "description": "Two-step warning when new dates leave content outside the memory (#271). {range} is the new 'd MMM y – d MMM y' range; {items} is a comma-joined list of manage_noteCount / common_photoCount / manage_questCount / manage_bonusTaskCount.",
+    "placeholders": {
+      "range": {
+        "type": "String"
+      },
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "manage_noteCount": "{count, plural, =1{1 note} other{{count} notes}}",
+  "@manage_noteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "manage_questCount": "{count, plural, =1{1 quest} other{{count} quests}}",
+  "@manage_questCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "manage_bonusTaskCount": "{count, plural, =1{1 bonus task} other{{count} bonus tasks}}",
+  "@manage_bonusTaskCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "manage_cover": "Cover",
   "@manage_cover": {
     "description": "Mono eyebrow, uppercased in code."
   },
-  "manage_notSet": "Not set",
   "checklist_title": "Pack for the trip",
   "checklist_emptyCategory": "No items in this category yet.",
   "checklist_addHint": "Add something of your own...",

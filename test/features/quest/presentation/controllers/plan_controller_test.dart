@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:traviato/features/quest/domain/entities/quest_entity.dart';
 import 'package:traviato/features/quest/presentation/controllers/plan_controller.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
@@ -199,58 +200,109 @@ void main() {
     },
   );
 
-  test(
-    'applyDatesShifted moves the trip, every quest, and the current day '
-    'by the same delta — both directions',
-    () async {
+  group('applyDatesChanged (#271)', () {
+    Future<ProviderContainer> loaded(List<QuestEntity> quests) async {
       final tripRepo = FakeTripRepository()
         ..tripCardResult = Right(
           buildTripCard(
             id: 't1',
-            startDate: DateTime(2026, 8, 18),
-            endDate: DateTime(2026, 8, 19),
+            startDate: DateTime(2026, 7, 20),
+            endDate: DateTime(2026, 7, 29),
           ),
         );
-      final quest = buildQuestEntity(id: 'q1', dayDate: DateTime(2026, 8, 18));
-      final questRepo = FakeQuestRepository()..questsResult = Right([quest]);
+      final questRepo = FakeQuestRepository()..questsResult = Right(quests);
       final container = _buildContainer(
         tripRepo: tripRepo,
         questRepo: questRepo,
       );
       addTearDown(container.dispose);
       container.listen(planControllerProvider('t1'), (_, _) {});
-
       await container.read(planControllerProvider('t1').future);
-      final notifier = container.read(planControllerProvider('t1').notifier);
+      return container;
+    }
+
+    test('a pure move shifts every quest and the viewed day', () async {
+      final container = await loaded([
+        buildQuestEntity(id: 'q1', dayDate: DateTime(2026, 7, 20)),
+        buildQuestEntity(id: 'q2', dayDate: DateTime(2026, 7, 29)),
+      ]);
       final before = container.read(planControllerProvider('t1')).value!;
-      final beforeDay = before.currentDayDate!;
 
-      final shiftedForward = buildTripCard(
-        id: 't1',
-        startDate: DateTime(2026, 8, 19),
-        endDate: DateTime(2026, 8, 20),
-      );
-      notifier.applyDatesShifted(shiftedForward, 1);
-      final forwardState = container.read(planControllerProvider('t1')).value!;
-      expect(forwardState.trip.startDate, DateTime(2026, 8, 19));
-      expect(forwardState.trip.endDate, DateTime(2026, 8, 20));
-      expect(forwardState.quests.single.dayDate, DateTime(2026, 8, 19));
+      container
+          .read(planControllerProvider('t1').notifier)
+          .applyDatesChanged(
+            buildTripCard(
+              id: 't1',
+              startDate: DateTime(2026, 8, 20),
+              endDate: DateTime(2026, 8, 29),
+            ),
+            31,
+          );
+
+      final state = container.read(planControllerProvider('t1')).value!;
+      expect(state.trip.startDate, DateTime(2026, 8, 20));
       expect(
-        forwardState.currentDayDate,
-        beforeDay.add(const Duration(days: 1)),
+        [for (final q in state.quests) q.dayDate],
+        [
+          DateTime(2026, 8, 20),
+          DateTime(2026, 8, 29),
+        ],
       );
+      expect(
+        state.currentDayDate,
+        before.currentDayDate!.add(const Duration(days: 31)),
+      );
+    });
 
-      final shiftedBack = buildTripCard(
-        id: 't1',
-        startDate: DateTime(2026, 8, 18),
-        endDate: DateTime(2026, 8, 19),
-      );
-      notifier.applyDatesShifted(shiftedBack, -1);
-      final backState = container.read(planControllerProvider('t1')).value!;
-      expect(backState.trip.startDate, DateTime(2026, 8, 18));
-      expect(backState.trip.endDate, DateTime(2026, 8, 19));
-      expect(backState.quests.single.dayDate, DateTime(2026, 8, 18));
-      expect(backState.currentDayDate, beforeDay);
-    },
-  );
+    test('shortening drops quests that fall after the new end', () async {
+      final container = await loaded([
+        buildQuestEntity(id: 'q1', dayDate: DateTime(2026, 7, 21)),
+        buildQuestEntity(id: 'q2', dayDate: DateTime(2026, 7, 27)),
+      ]);
+
+      container
+          .read(planControllerProvider('t1').notifier)
+          .applyDatesChanged(
+            buildTripCard(
+              id: 't1',
+              startDate: DateTime(2026, 7, 20),
+              endDate: DateTime(2026, 7, 23),
+            ),
+            0,
+          );
+
+      final state = container.read(planControllerProvider('t1')).value!;
+      expect(state.quests.map((q) => q.id), ['q1']);
+      final day = state.currentDayDate!;
+      expect(day.isBefore(DateTime(2026, 7, 20)), isFalse);
+      expect(day.isAfter(DateTime(2026, 7, 23)), isFalse);
+    });
+
+    test(
+      'trimming the start moves quests with it and drops those pushed past '
+      'the end',
+      () async {
+        final container = await loaded([
+          buildQuestEntity(id: 'q1', dayDate: DateTime(2026, 7, 20)),
+          buildQuestEntity(id: 'q2', dayDate: DateTime(2026, 7, 28)),
+        ]);
+
+        container
+            .read(planControllerProvider('t1').notifier)
+            .applyDatesChanged(
+              buildTripCard(
+                id: 't1',
+                startDate: DateTime(2026, 7, 23),
+                endDate: DateTime(2026, 7, 29),
+              ),
+              3,
+            );
+
+        final state = container.read(planControllerProvider('t1')).value!;
+        // q1: 20 → 23 (kept); q2: 28 → 31 (past the 29th, dropped).
+        expect(state.quests.map((q) => q.id), ['q1']);
+        expect(state.quests.single.dayDate, DateTime(2026, 7, 23));
+      },
+    );
+  });
 }

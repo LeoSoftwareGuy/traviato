@@ -696,16 +696,32 @@
   "@manage_rename": {
     "x-review": "pending"
   },
-  "manage_shiftHint": "Нажмите на дату, чтобы сдвинуть её на день вперёд, удерживайте чтобы назад. Дела сдвинутся вместе с ней.",
-  "@manage_shiftHint": {
+  "manage_saveDates": "Сохранить даты",
+  "@manage_saveDates": {
+    "x-review": "pending"
+  },
+  "manage_deleteAndSave": "Удалить и сохранить",
+  "@manage_deleteAndSave": {
+    "x-review": "pending"
+  },
+  "manage_datesConsequence": "Вне дат {range}: {items}. Они будут удалены. Это нельзя отменить.",
+  "@manage_datesConsequence": {
+    "x-review": "pending"
+  },
+  "manage_noteCount": "{count, plural, one{{count} заметка} few{{count} заметки} many{{count} заметок} other{{count} заметки}}",
+  "@manage_noteCount": {
+    "x-review": "pending"
+  },
+  "manage_questCount": "{count, plural, one{{count} дело} few{{count} дела} many{{count} дел} other{{count} дела}}",
+  "@manage_questCount": {
+    "x-review": "pending"
+  },
+  "manage_bonusTaskCount": "{count, plural, one{{count} бонусное задание} few{{count} бонусных задания} many{{count} бонусных заданий} other{{count} бонусного задания}}",
+  "@manage_bonusTaskCount": {
     "x-review": "pending"
   },
   "manage_cover": "Обложка",
   "@manage_cover": {
-    "x-review": "pending"
-  },
-  "manage_notSet": "Не задано",
-  "@manage_notSet": {
     "x-review": "pending"
   },
   "checklist_title": "Соберитесь в дорогу",

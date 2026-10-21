@@ -102,23 +102,34 @@ class PlanController extends _$PlanController {
     state = AsyncData(current.copyWith(trip: trip));
   }
 
-  /// Called by the date-shift mutation after the `shift_trip_dates` RPC
-  /// succeeds — mirrors what it just did server-side by re-dating every
-  /// held quest (and the currently-viewed day) by the same delta, rather
-  /// than refetching.
-  void applyDatesShifted(TripCardEntity trip, int deltaDays) {
+  /// Called by the edit-dates mutation after the `set_trip_dates` RPC
+  /// succeeds (#271) — mirrors what it just did server-side rather than
+  /// refetching: every held quest moves by [deltaDays] (the start-date
+  /// change) and any that then fall outside the new range are dropped. The
+  /// viewed day keeps its day-of-trip, clamped into the new range.
+  void applyDatesChanged(TripCardEntity trip, int deltaDays) {
     final current = state.value;
-    if (current == null) return;
+    final start = trip.startDate;
+    final end = trip.endDate;
+    if (current == null || start == null || end == null) return;
     final shift = Duration(days: deltaDays);
+    bool inRange(DateTime day) => !day.isBefore(start) && !day.isAfter(end);
+    final viewed = current.currentDayDate?.add(shift);
     state = AsyncData(
       current.copyWith(
         trip: trip,
         quests: [
-          for (final q in current.quests) q.withDayDate(q.dayDate.add(shift)),
+          for (final q in current.quests)
+            if (inRange(q.dayDate.add(shift)))
+              q.withDayDate(q.dayDate.add(shift)),
         ],
-        currentDayDate: current.currentDayDate == null
-            ? null
-            : () => current.currentDayDate!.add(shift),
+        currentDayDate: () => viewed == null
+            ? _initialDayDate(start, end)
+            : viewed.isBefore(start)
+            ? start
+            : viewed.isAfter(end)
+            ? end
+            : viewed,
       ),
     );
   }

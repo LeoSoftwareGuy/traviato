@@ -657,14 +657,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manage_rename => 'Rename';
 
   @override
-  String get manage_shiftHint =>
-      'Tap a date to shift it a day forward, hold to shift it back, quests move with it.';
+  String get manage_saveDates => 'Save dates';
+
+  @override
+  String get manage_deleteAndSave => 'Delete and save';
+
+  @override
+  String manage_datesConsequence(String range, String items) {
+    return 'Outside $range: $items. They\'ll be deleted. This can\'t be undone.';
+  }
+
+  @override
+  String manage_noteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count notes',
+      one: '1 note',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String manage_questCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count quests',
+      one: '1 quest',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String manage_bonusTaskCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bonus tasks',
+      one: '1 bonus task',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get manage_cover => 'Cover';
-
-  @override
-  String get manage_notSet => 'Not set';
 
   @override
   String get checklist_title => 'Pack for the trip';

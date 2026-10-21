@@ -62,11 +62,18 @@ class TripCardEntity extends Equatable {
   }
 
   /// Rebuilds this card after a rename, cover change, or date shift — an
-  /// `updateTrip`/`shiftTripDates` call only ever returns the raw `trips`
+  /// `updateTrip`/`setTripDates` call only ever returns the raw `trips`
   /// row, not a fresh `trip_card_view` read. `status`/`durationDays` are
   /// recomputed from the new dates; `photoCount`/`stars`/`expenseTotal`
-  /// (derived from other tables `trips` doesn't touch) carry over unchanged.
-  TripCardEntity mergeUpdatedTrip(TripEntity trip) {
+  /// (derived from other tables `trips` doesn't touch) carry over unchanged,
+  /// minus [removedPhotos]/[removedQuests] when a date change deleted some
+  /// (#271 — the server reports exact counts; stars can't be derived the
+  /// same way and refresh with the next `trip_card_view` read).
+  TripCardEntity mergeUpdatedTrip(
+    TripEntity trip, {
+    int removedPhotos = 0,
+    int removedQuests = 0,
+  }) {
     final (status, durationDays) = _deriveStatusAndDuration(
       trip.startDate,
       trip.endDate,
@@ -85,8 +92,8 @@ class TripCardEntity extends Equatable {
       updatedAt: trip.updatedAt,
       status: status,
       durationDays: durationDays,
-      photoCount: photoCount,
-      questCount: questCount,
+      photoCount: photoCount - removedPhotos,
+      questCount: questCount - removedQuests,
       stars: stars,
       expenseTotal: expenseTotal,
       wrapUpPublishedAt: wrapUpPublishedAt,
