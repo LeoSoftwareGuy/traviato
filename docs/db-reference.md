@@ -313,6 +313,28 @@ Files: `index.ts` (bootstrap) · `handler.ts` (request logic) · `gather.ts`
 
 ---
 
+## Edge function: `sync_entitlement`
+
+Files: `index.ts` (bootstrap) · `handler.ts` (request logic) ·
+`revenuecat.ts` (RevenueCat REST read). Secret: `REVENUECAT_SECRET_API_KEY`
+(RevenueCat secret API key, v1).
+
+Repairs a stale `entitlements` row on demand (#267) — the webhook only fires
+on store events, so a missed delivery or a DB reset otherwise leaves a paying
+user "free" forever. Called by the app after purchase/restore and when a
+memory-limit error (TRV01) looks wrong.
+
+1. POST-only; requires `Authorization`; verifies the JWT via an anon-key
+   client. The user id comes only from the JWT.
+2. `GET /v1/subscribers/{user_id}` on RevenueCat (502 if that fails).
+3. If the `pro` entitlement is active (expiry, incl. grace period, in the
+   future or null) → upserts `tier = 'pro'` + `expires_at` via service
+   client. **Never downgrades** — that stays the webhook's EXPIRATION job.
+4. Returns the caller's row `{tier, revenuecat_customer_id, expires_at}`
+   (`{tier: 'free'}` if none).
+
+---
+
 ## Storage buckets
 
 Two buckets, both private, both RLS-gated purely on the first path segment
