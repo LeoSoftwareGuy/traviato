@@ -119,6 +119,19 @@ class JournalController extends _$JournalController {
     state = AsyncData(current.copyWith(notesByDay: updated, notes: notes));
   }
 
+  /// Called by the delete-note mutation (#276) — the day has no note again.
+  void applyNoteDeleted(DateTime day) {
+    final current = state.value;
+    if (current == null) return;
+    final updated = Map<DateTime, DayNoteEntity?>.from(current.notesByDay)
+      ..[day] = null;
+    final notes = [
+      for (final n in current.notes)
+        if (!_isSameDate(n.dayDate, day)) n,
+    ];
+    state = AsyncData(current.copyWith(notesByDay: updated, notes: notes));
+  }
+
   /// Called by the add-photo mutation after a successful upload.
   void applyPhotoAdded(PhotoEntity photo) {
     final current = state.value;

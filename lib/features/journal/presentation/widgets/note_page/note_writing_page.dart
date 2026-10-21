@@ -10,13 +10,12 @@ import 'ruled_lines_painter.dart';
 
 /// The page the user writes on, revealed when the title page turns away
 /// (docs/design/JOURNAL_NOTE_PAGETURN_SPEC.md §2, §4 typing): header with
-/// Cancel / stamp / Done, the title, the ruled scroll (existing entry in
-/// faded ink + the new-text field), and the dock with voice dictation.
+/// Cancel / stamp / Done, the title, the ruled scroll (the day's whole
+/// entry, editable — #276), and the dock with voice dictation.
 class NoteWritingPage extends StatelessWidget {
   const NoteWritingPage({
     required this.stamp,
     required this.title,
-    required this.existingText,
     required this.controller,
     required this.focusNode,
     required this.draftWordCount,
@@ -35,7 +34,6 @@ class NoteWritingPage extends StatelessWidget {
 
   final String stamp;
   final String title;
-  final String existingText;
   final TextEditingController controller;
   final FocusNode focusNode;
   final int draftWordCount;
@@ -83,7 +81,6 @@ class NoteWritingPage extends StatelessWidget {
                     hintText: isLanguageAvailable
                         ? context.l10n.note_bodyHint
                         : context.l10n.note_bodyHintUnavailable,
-                    existingText: existingText,
                     controller: controller,
                     focusNode: focusNode,
                     onFieldTap: onFieldTap,
@@ -166,14 +163,12 @@ class _Header extends StatelessWidget {
 class _RuledScroll extends StatelessWidget {
   const _RuledScroll({
     required this.hintText,
-    required this.existingText,
     required this.controller,
     required this.focusNode,
     required this.onFieldTap,
   });
 
   final String hintText;
-  final String existingText;
   final TextEditingController controller;
   final FocusNode focusNode;
   final VoidCallback onFieldTap;
@@ -204,36 +199,29 @@ class _RuledScroll extends StatelessWidget {
             ),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(30, 0, 22, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (existingText.trim().isNotEmpty)
-                    Text(
-                      existingText.trim(),
-                      key: const Key('note-page-existing'),
-                      strutStyle: AppTypography.noteBodyStrut,
-                      style: bodyStyle.copyWith(color: AppColors.paperInkOld),
-                    ),
-                  TextField(
-                    key: const Key('note-page-field'),
-                    controller: controller,
-                    focusNode: focusNode,
-                    onTap: onFieldTap,
-                    maxLines: null,
-                    minLines: _minFieldLines,
-                    keyboardType: TextInputType.multiline,
-                    textCapitalization: TextCapitalization.sentences,
-                    style: bodyStyle,
-                    strutStyle: AppTypography.noteBodyStrut,
-                    cursorColor: AppColors.paperInk,
-                    decoration: InputDecoration.collapsed(
-                      hintText: hintText,
-                      hintStyle: bodyStyle.copyWith(
-                        color: AppColors.tint(AppColors.paperInkMuted, .7),
-                      ),
+              // Keeps the field at its own height (on the rule grid) rather
+              // than stretched to the page's minHeight.
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: TextField(
+                  key: const Key('note-page-field'),
+                  controller: controller,
+                  focusNode: focusNode,
+                  onTap: onFieldTap,
+                  maxLines: null,
+                  minLines: _minFieldLines,
+                  keyboardType: TextInputType.multiline,
+                  textCapitalization: TextCapitalization.sentences,
+                  style: bodyStyle,
+                  strutStyle: AppTypography.noteBodyStrut,
+                  cursorColor: AppColors.paperInk,
+                  decoration: InputDecoration.collapsed(
+                    hintText: hintText,
+                    hintStyle: bodyStyle.copyWith(
+                      color: AppColors.tint(AppColors.paperInkMuted, .7),
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           ),

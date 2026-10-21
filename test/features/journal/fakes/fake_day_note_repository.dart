@@ -7,9 +7,12 @@ class FakeDayNoteRepository implements DayNoteRepository {
   Either<Failure, DayNoteEntity?>? getNoteResult;
   Either<Failure, List<DayNoteEntity>>? notesForTripResult;
   Either<Failure, DayNoteEntity>? upsertNoteResult;
+  Either<Failure, Unit>? deleteNoteResult;
   var getNoteCallCount = 0;
   var getNotesForTripCallCount = 0;
   var upsertNoteCallCount = 0;
+  var deleteNoteCallCount = 0;
+  String? lastDeletedNoteId;
   DateTime? lastGetNoteDay;
   String? lastUpsertedContent;
 
@@ -47,6 +50,13 @@ class FakeDayNoteRepository implements DayNoteRepository {
             content: content,
           ),
         );
+  }
+
+  @override
+  Future<Either<Failure, Unit>> deleteNote(String noteId) async {
+    deleteNoteCallCount++;
+    lastDeletedNoteId = noteId;
+    return deleteNoteResult ?? const Right(unit);
   }
 }
 

@@ -19,4 +19,8 @@ abstract interface class DayNoteRepository {
     required DateTime dayDate,
     required String content,
   });
+
+  /// Deletes the day's note and takes back the ✦1 it earned (#276) —
+  /// clearing the note page's text and confirming.
+  Future<Either<Failure, Unit>> deleteNote(String noteId);
 }

@@ -22,7 +22,6 @@ import '../../../photo/presentation/mutations/photo_mutations.dart';
 import '../../../photo/presentation/pages/photo_viewer_page.dart';
 import '../../../photo/presentation/widgets/add_photo_sheet.dart';
 import '../../../photo/presentation/widgets/storage_photo_image.dart';
-import '../../domain/note_text.dart';
 import '../controllers/journal_controller.dart';
 import '../controllers/journal_state.dart';
 import '../mutations/journal_mutations.dart';
@@ -45,6 +44,14 @@ class JournalPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen<MutationState<dynamic>>(upsertNoteMutation, (previous, next) {
+      if (next is MutationError) {
+        showErrorSnackbar(
+          context,
+          message: presentationFailureMessage(next.error, context.l10n),
+        );
+      }
+    });
+    ref.listen<MutationState<dynamic>>(deleteNoteMutation, (previous, next) {
       if (next is MutationError) {
         showErrorSnackbar(
           context,
@@ -259,9 +266,10 @@ class _JournalContent extends ConsumerWidget {
   }
 
   /// Opens the full-screen note page (docs/design/JOURNAL_NOTE_PAGETURN_SPEC.md
-  /// §1) and, once the book has closed, appends whatever was added to the
-  /// day's entry. Star behaviour is unchanged for now: the day's first note
-  /// earns the star, shown as a toast on the Journal after the close (§5).
+  /// §1) and, once the book has closed, saves the edited entry — or deletes
+  /// the note when it was cleared (#276). The day's first note earns the
+  /// star, shown as a toast on the Journal after the close (§5); deleting
+  /// takes it back.
   Future<void> _openNotePage(
     BuildContext context,
     WidgetRef ref,
@@ -287,7 +295,8 @@ class _JournalContent extends ConsumerWidget {
       if (!context.mounted) return;
     }
 
-    final existing = state.currentNote?.content ?? '';
+    final note = state.currentNote;
+    final existing = note?.content.trim() ?? '';
     final dateLabel = L10nDates.dayMonth(
       context.l10n.localeName,
     ).format(day);
@@ -305,20 +314,29 @@ class _JournalContent extends ConsumerWidget {
         photo: firstPhoto,
       ),
     );
-    if (draft == null || draft.isEmpty || !context.mounted) return;
+    if (draft == null || draft == existing || !context.mounted) return;
 
-    final isFirstNote = existing.trim().isEmpty;
-    // Fire-and-forget: failures surface via the upsertNoteMutation listener
-    // in JournalPage, and the toast lands while the save is in flight.
+    // Fire-and-forget: failures surface via the upsertNoteMutation /
+    // deleteNoteMutation listeners in JournalPage.
+    if (draft.isEmpty) {
+      // The note page already confirmed the delete (#276).
+      if (note != null) {
+        unawaited(
+          runDeleteNote(
+            ref: ref,
+            tripId: tripId,
+            dayDate: day,
+            noteId: note.id,
+          ),
+        );
+      }
+      return;
+    }
     unawaited(
-      runUpsertNote(
-        ref: ref,
-        tripId: tripId,
-        dayDate: day,
-        content: appendNoteText(existing, draft),
-      ),
+      runUpsertNote(ref: ref, tripId: tripId, dayDate: day, content: draft),
     );
-    if (isFirstNote) showStarToast(context, context.l10n.toast_noteSaved);
+    // The toast lands while the save is in flight.
+    if (note == null) showStarToast(context, context.l10n.toast_noteSaved);
   }
 }
 

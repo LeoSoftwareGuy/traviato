@@ -150,10 +150,9 @@ Android back / swipe-back = **Cancel** if the draft is empty. Otherwise show a s
 
 ### Page content
 - Scrollable column (padding `0 22 20 30`):
-  1. **Existing entry** — read-only, inkOld. Includes anything previously added.
-  2. **New text field** — multiline `TextField`, no border, transparent, ink, min height 240, placeholder:
+  1. **Text field** — multiline `TextField`, no border, transparent, ink, min height 240, **pre-filled with the day's entry**, placeholder (empty entry only):
      *"Keep going — type, or tap the mic and just talk."*
-- New text is **appended** to the entry. Existing text is never edited here.
+- **Changed in #276:** the entry is editable in full (was: existing text read-only in inkOld, new text appended). Typos can be fixed and text removed; dictation inserts at the caret.
 
 ### Dock (bg paperDock, top divider rule, padding `12 22 18 30`)
 
@@ -201,21 +200,19 @@ TYPING ── tap mic ──▶ dismiss keyboard ─▶ LISTENING
 ## 5. Saving & star award
 
 ### Done
-1. `draft = field.text.trim()`
-2. Run the close animation (§3).
-3. On route pop:
-   - **If draft is non-empty:**
-     - `entry.text = entry.text + ' ' + draft` (or just `draft` if the entry was empty)
-     - `entry.editedAt = now`, recompute `wordCount`
-     - Persist (local first, then sync)
-     - Award **+1 star** → `stars += 1`, show toast **"✦ +1 star · note saved"**
-   - **If empty:** no write, no star, no toast.
+1. `text = field.text.trim()`
+2. **If `text` is empty and the day had an entry:** confirm *"Delete this note?"* (Keep note / Delete). Keep stays on the page (#276).
+3. Run the close animation (§3).
+4. On route pop:
+   - **Unchanged:** no write.
+   - **Non-empty:** the entry becomes `text`; `editedAt = now`, recompute `wordCount`; persist. The day's **first** note awards **+1 star** with toast **"✦ +1 star · note saved"**.
+   - **Empty (confirmed):** `delete_day_note` removes the note and takes back its ✦1.
 
 ### Cancel
-Close animation. Discard the draft (with confirm if non-empty, §3). No star.
+Close animation. Discard the edits (with confirm *"Discard your changes?"* only if the text differs from the saved entry, §3). No star.
 
 ### Star rules
-- **One star per save that adds text.** Several saves in a day can each earn a star. Cap at **3 note-stars per day** to prevent farming — saves beyond the cap still save, with toast "Note saved" and no star.
+- **One star per day's note** (as built — the per-save rule with a 3/day cap was never implemented): ✦1 when the note is first saved, none for later edits, taken back if the note is deleted (#276).
 - Saved notes count toward:
   - the **Storyteller** progress (journal card "Two more notes and Storyteller is yours").
   - the wrap-up gate rule "≥1 note" (M6 monetization spec).
@@ -224,7 +221,7 @@ Close animation. Discard the draft (with confirm if non-empty, §3). No star.
 Existing star toast component: pill `rgba(242,149,32,.94)`, ink `#0C0F27`, Roboto 600 13, at top 104. Animation `awardPop` (rise 6px + scale .9 → 1.04 → 1, hold, fade), ~2.2s. Shown on the Journal page **after** the book closes, so the user sees it land.
 
 ### Journal page after save
-- The entry card shows the appended text immediately (optimistic).
+- The entry card shows the edited text immediately (optimistic); after a delete the day shows the empty-day state again.
 - Footer updates: `EDITED hh:mm · N WORDS`.
 
 ---

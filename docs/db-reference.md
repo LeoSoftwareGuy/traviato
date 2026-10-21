@@ -289,6 +289,10 @@ RLS: select-own; update-own grant is **column-scoped to `published_at` only**
   - Returns `{trip, quests, notes, photos, bonus_tasks, photo_paths}`. With
     `p_dry_run` it only counts (the Manage sheet's two-step warning) and
     `trip` is null. The client removes `photo_paths` from storage afterwards.
+- **`delete_day_note(p_note_id) → void`** — SECURITY DEFINER, owner-only
+  (`42501`). Deletes the note and its `note` ✦1 ledger row in one
+  transaction (#276: clearing a note's text and confirming). Idempotent, so
+  a missing note is a no-op. Same pattern as `delete_photo`.
 
 ---
 

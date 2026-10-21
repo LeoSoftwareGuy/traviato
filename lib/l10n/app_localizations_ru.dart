@@ -910,7 +910,17 @@ class AppLocalizationsRu extends AppLocalizations {
   String get toast_noteSaved => '+1 ✦ · заметка сохранена';
 
   @override
-  String get note_discardTitle => 'Удалить добавленное?';
+  String get note_discardTitle => 'Отменить изменения?';
+
+  @override
+  String get note_deleteTitle => 'Удалить эту заметку?';
+
+  @override
+  String get note_deleteBody =>
+      'Заметка за этот день и её звезда ✦1 будут удалены. Это нельзя отменить.';
+
+  @override
+  String get note_keepNote => 'Оставить';
 
   @override
   String get note_keepWriting => 'Продолжить';

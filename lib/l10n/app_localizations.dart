@@ -1439,8 +1439,26 @@ abstract class AppLocalizations {
   /// No description provided for @note_discardTitle.
   ///
   /// In en, this message translates to:
-  /// **'Discard what you added?'**
+  /// **'Discard your changes?'**
   String get note_discardTitle;
+
+  /// No description provided for @note_deleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this note?'**
+  String get note_deleteTitle;
+
+  /// No description provided for @note_deleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The note for this day and its ✦1 star will be removed. This can\'t be undone.'**
+  String get note_deleteBody;
+
+  /// No description provided for @note_keepNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep note'**
+  String get note_keepNote;
 
   /// No description provided for @note_keepWriting.
   ///

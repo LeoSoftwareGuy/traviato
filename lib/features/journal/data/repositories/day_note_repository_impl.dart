@@ -67,4 +67,20 @@ class DayNoteRepositoryImpl implements DayNoteRepository {
       return Left(UnknownFailure(message: e.message));
     }
   }
+
+  @override
+  Future<Either<Failure, Unit>> deleteNote(String noteId) async {
+    try {
+      await _remote.deleteNote(noteId);
+      return const Right(unit);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on PermissionException catch (e) {
+      return Left(PermissionFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+  }
 }

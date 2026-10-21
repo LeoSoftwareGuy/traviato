@@ -113,6 +113,20 @@ class SupabaseDayNoteRemoteDataSource implements DayNoteRemoteDataSource {
     }
   }
 
+  @override
+  Future<void> deleteNote(String id) async {
+    _guardAuthenticated();
+    try {
+      await _client.rpc(DBFunctions.deleteDayNote, params: {'p_note_id': id});
+    } on PostgrestException catch (e) {
+      throw _mapPostgrestException(e);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
   /// Awards ✦1 for the note. Never throws — a ledger hiccup must not fail
   /// an already-saved note (mirrors #64/#30's award).
   Future<void> _awardPointsQuietly({
