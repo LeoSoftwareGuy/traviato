@@ -23,6 +23,11 @@ abstract interface class TripRepository {
 
   Future<Either<Failure, void>> deleteTrip(String id);
 
+  /// Records that the kept wrap-up film was watched through (#279) — sets
+  /// `trips.film_seen_at` only if it isn't set yet, so it's safe to call
+  /// more than once.
+  Future<Either<Failure, void>> markFilmSeen(String tripId);
+
   /// Plain authenticated update — used for both a rename and a cover
   /// change. Pass only the field(s) being changed.
   Future<Either<Failure, TripEntity>> updateTrip({

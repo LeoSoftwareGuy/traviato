@@ -1762,6 +1762,70 @@ class AppLocalizationsRu extends AppLocalizations {
   String get wrapUp_keepForever => 'Сохранить навсегда';
 
   @override
+  String get wrapUp_openMemory => 'Открыть воспоминание';
+
+  @override
+  String get wrapUp_backToMemory => 'Назад к воспоминанию';
+
+  @override
+  String keptMemory_noteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count заметки',
+      many: '$count заметок',
+      few: '$count заметки',
+      one: '$count заметка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get keptMemory_playFilm => 'Смотреть фильм';
+
+  @override
+  String get keptMemory_slideshow => 'Слайд-шоу';
+
+  @override
+  String get keptMemory_pause => 'Пауза';
+
+  @override
+  String keptMemory_day(int day) {
+    return 'День $day';
+  }
+
+  @override
+  String get keptMemory_plan => 'План';
+
+  @override
+  String keptMemory_planDone(int done, int total) {
+    return '$done из $total выполнено';
+  }
+
+  @override
+  String keptMemory_planDay(int day) {
+    return 'Д$day';
+  }
+
+  @override
+  String keptMemory_since(String date) {
+    return 'Сохранено навсегда · с $date';
+  }
+
+  @override
+  String get keptMemory_more => 'Ещё';
+
+  @override
+  String keptMemory_viewerPosition(int day, int position, int total) {
+    return 'День $day · $position / $total';
+  }
+
+  @override
+  String keptMemory_bonusTag(String prompt, int stars) {
+    return 'Вызов · $prompt · ✦$stars';
+  }
+
+  @override
   String wrapUp_photographs(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

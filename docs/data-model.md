@@ -35,7 +35,10 @@ RLS: select/update own; insert via trigger.
 ### `trips`
 `id uuid PK (client-generated), user_id FK, name, destination?, country_code?
 (ISO-3166-1 alpha-2), start_date, end_date (required since #270; check >= start), vibes text[]
-default {}, cover_image_path?, created_at, updated_at`.
+default {}, cover_image_path?, created_at, updated_at, film_seen_at?`.
+`film_seen_at` (#279): when the kept memory's film was first watched through
+— null means Home's next tap plays the film, set means it opens the Kept
+Memory page. "Kept" itself stays `wrap_ups.published_at`.
 RLS owner-only, all ops. Free-tier 3-memory limit app-side.
 **Manage sheet edit dates** (#271): `set_trip_dates` RPC — quests move with the
 start date; notes/photos/bonus assignments keep their `day_date`; rows outside

@@ -89,16 +89,26 @@ class _HomeContent extends ConsumerWidget {
         pathParameters: {'tripId': trip.id},
       );
 
-  // Journal, not Wrap-up (issue #101) — Wrap-up generation is a network
-  // call to an edge function that calls Anthropic, and can fail (project
-  // paused, rate limit, transient outage). Being able to open a past
-  // memory to add photos/notes can't depend on that succeeding; Wrap-up
-  // stays one tap away via Journal's "View wrap-up ▸" button.
-  void _openMemory(BuildContext context, TripCardEntity trip) =>
-      context.pushNamed(
-        RouteNames.tripJournal,
-        pathParameters: {'tripId': trip.id},
-      );
+  // A finished memory that isn't kept yet opens Journal, not Wrap-up (issue
+  // #101) — Wrap-up generation is a network call to an edge function that
+  // calls Anthropic, and can fail (project paused, rate limit, transient
+  // outage). Being able to open a past memory to add photos/notes can't
+  // depend on that succeeding; Wrap-up stays one tap away via Journal's
+  // "View wrap-up ▸" button.
+  //
+  // A kept memory's film is frozen (no generation), so its first open plays
+  // it; once watched through, every open lands on the Kept Memory page
+  // (#279).
+  void _openMemory(BuildContext context, TripCardEntity trip) {
+    final pathParameters = {'tripId': trip.id};
+    if (!trip.isKeptForever) {
+      context.pushNamed(RouteNames.tripJournal, pathParameters: pathParameters);
+    } else if (trip.playsFilmFirst) {
+      context.pushNamed(RouteNames.tripWrapUp, pathParameters: pathParameters);
+    } else {
+      context.pushNamed(RouteNames.keptMemory, pathParameters: pathParameters);
+    }
+  }
 
   // Long-press on a current/upcoming card (issue #115) — same sheet Plan's
   // ⋯/Edit button opens. HomeController already updates live off the

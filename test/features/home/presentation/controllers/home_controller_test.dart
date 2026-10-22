@@ -154,6 +154,35 @@ void main() {
     },
   );
 
+  test('a watched film marks its card seen via the event bus (#279)', () async {
+    final existing = buildTripCard(
+      id: 't1',
+      wrapUpPublishedAt: DateTime(2026, 2, 1),
+    );
+    final fakeRepo = FakeTripRepository()..tripsResult = Right([existing]);
+    final bus = GlobalEventBus();
+    addTearDown(bus.dispose);
+    final container = ProviderContainer(
+      overrides: [
+        tripRepositoryProvider.overrideWithValue(fakeRepo),
+        globalEventBusProvider.overrideWithValue(bus),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.listen(homeControllerProvider, (_, _) {});
+
+    await container.read(homeControllerProvider.future);
+    expect(existing.playsFilmFirst, isTrue);
+
+    final seenAt = DateTime(2026, 2, 2);
+    bus.add(FilmSeenDispatched(tripId: 't1', seenAt: seenAt));
+    await Future<void>.delayed(Duration.zero);
+
+    final trip = container.read(homeControllerProvider).value?.trips.single;
+    expect(trip?.filmSeenAt, seenAt);
+    expect(trip?.playsFilmFirst, isFalse);
+  });
+
   test('removes a trip deleted elsewhere via the event bus', () async {
     final existing = buildTripCard(id: 't1');
     final fakeRepo = FakeTripRepository()..tripsResult = Right([existing]);

@@ -66,6 +66,7 @@ dependencies:
   # Renders the hand-drawn balloon doodles on the Journal note page's title
   # page (#205) from the design's exported SVGs.
   flutter_svg: ^2.3.0
+  wakelock_plus: ^1.8.1
 
 dev_dependencies:
   flutter_test:

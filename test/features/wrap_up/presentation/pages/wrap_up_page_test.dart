@@ -25,13 +25,39 @@ Future<void> _pump(
   FakePhotoRepository? photoRepo,
   FakeTripRepository? tripRepo,
   GlobalEventBus? eventBus,
+  String initialLocation = '/wrap-up',
 }) async {
   final router = GoRouter(
-    initialLocation: '/wrap-up',
+    initialLocation: initialLocation,
     routes: [
       GoRoute(
         path: '/wrap-up',
-        builder: (context, state) => const WrapUpPage(tripId: 't1'),
+        builder: (context, state) => WrapUpPage(
+          tripId: 't1',
+          openedFromMemory:
+              state.uri.queryParameters[RouteQuery.from] ==
+              RouteQuery.fromMemory,
+        ),
+      ),
+      // Where the film was opened from, for the close/back tests (#279).
+      GoRoute(
+        path: '/opener',
+        builder: (context, state) => Scaffold(
+          body: TextButton(
+            onPressed: () => context.push('/wrap-up'),
+            child: const Text('Opener'),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/memory/:tripId',
+        name: RouteNames.keptMemory,
+        builder: (context, state) => Scaffold(
+          body: TextButton(
+            onPressed: () => context.push('/wrap-up?from=memory'),
+            child: const Text('Memory page'),
+          ),
+        ),
       ),
       GoRoute(
         path: '/home',
@@ -121,7 +147,7 @@ void main() {
     },
   );
 
-  testWidgets('tapping Keep forever publishes and shows the kept badge', (
+  testWidgets('tapping Keep forever publishes and returns Home', (
     tester,
   ) async {
     final wrapUpRepo = FakeWrapUpRepository();
@@ -135,7 +161,136 @@ void main() {
     await _settle(tester);
 
     expect(wrapUpRepo.publishCallCount, 1);
-    expect(find.text('✦ Kept forever'), findsOneWidget);
+    expect(find.text('Home'), findsOneWidget);
+  });
+
+  group('kept film (#279)', () {
+    FakeWrapUpRepository keptRepo() =>
+        FakeWrapUpRepository()
+          ..getOrGenerateResult = Right(
+            buildWrapUpEntity(
+              coverPhoto: const WrapUpCoverPhoto(),
+              publishedAt: DateTime(2026, 8, 17),
+            ),
+          );
+
+    testWidgets('Open memory replaces the film with the memory page', (
+      tester,
+    ) async {
+      await _pump(tester, wrapUpRepo: keptRepo());
+      await _settle(tester);
+
+      expect(find.text('Keep forever'), findsNothing);
+      await tester.tap(find.text('Open memory'));
+      await _settle(tester, iterations: 30);
+
+      expect(find.text('Memory page'), findsOneWidget);
+      expect(find.byType(WrapUpPage), findsNothing);
+    });
+
+    testWidgets('opened from the memory page, it leads back there', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        wrapUpRepo: keptRepo(),
+        initialLocation: '/memory/t1',
+      );
+      await tester.tap(find.text('Memory page'));
+      await _settle(tester);
+
+      expect(find.text('Open memory'), findsNothing);
+      await tester.tap(find.text('Back to memory'));
+      await _settle(tester, iterations: 30);
+
+      expect(find.text('Memory page'), findsOneWidget);
+      expect(find.byType(WrapUpPage), findsNothing);
+    });
+
+    testWidgets('close returns to wherever the film was opened from', (
+      tester,
+    ) async {
+      await _pump(tester, wrapUpRepo: keptRepo(), initialLocation: '/opener');
+      await tester.tap(find.text('Opener'));
+      await _settle(tester);
+
+      await tester.tap(find.byIcon(Icons.close));
+      await _settle(tester);
+
+      expect(find.text('Opener'), findsOneWidget);
+    });
+
+    /// Mounts the canvas (see the content test above for why runAsync),
+    /// then plays [seconds] of film one second at a time — one big pump
+    /// would wrap the looping controller past the halfway check.
+    Future<void> playFilm(WidgetTester tester, {int seconds = 120}) async {
+      await _settle(tester);
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)),
+      );
+      await _settle(tester);
+      expect(find.byType(WrapUpFilmCanvas), findsOneWidget);
+      for (var i = 0; i < seconds; i++) {
+        await tester.pump(const Duration(seconds: 1));
+      }
+    }
+
+    testWidgets('watching half the film marks it seen and tells Home', (
+      tester,
+    ) async {
+      final tripRepo = FakeTripRepository();
+      final bus = GlobalEventBus();
+      addTearDown(bus.dispose);
+      final events = <GlobalEvent>[];
+      final sub = bus.stream.listen(events.add);
+      addTearDown(sub.cancel);
+
+      await _pump(
+        tester,
+        wrapUpRepo: keptRepo(),
+        tripRepo: tripRepo,
+        eventBus: bus,
+      );
+      await playFilm(tester);
+
+      expect(tripRepo.markFilmSeenTripIds, ['t1']);
+      expect(
+        events.whereType<FilmSeenDispatched>().single.tripId,
+        't1',
+      );
+    });
+
+    testWidgets('a film that is not kept yet is not marked seen', (
+      tester,
+    ) async {
+      final tripRepo = FakeTripRepository();
+      await _pump(
+        tester,
+        wrapUpRepo: FakeWrapUpRepository()
+          ..getOrGenerateResult = Right(
+            buildWrapUpEntity(coverPhoto: const WrapUpCoverPhoto()),
+          ),
+        tripRepo: tripRepo,
+      );
+      await playFilm(tester);
+
+      expect(tripRepo.markFilmSeenTripIds, isEmpty);
+    });
+
+    testWidgets('a replay from the memory page is not recorded again', (
+      tester,
+    ) async {
+      final tripRepo = FakeTripRepository();
+      await _pump(
+        tester,
+        wrapUpRepo: keptRepo(),
+        tripRepo: tripRepo,
+        initialLocation: '/wrap-up?from=memory',
+      );
+      await playFilm(tester);
+
+      expect(tripRepo.markFilmSeenTripIds, isEmpty);
+    });
   });
 
   testWidgets(

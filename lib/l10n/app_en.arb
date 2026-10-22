@@ -1447,6 +1447,103 @@
   "paywall_reassurance": "Your three free memories stay yours either way: nothing is deleted or locked if you don't upgrade.",
   "wrapUp_openJournal": "Open journal",
   "wrapUp_keepForever": "Keep forever",
+  "wrapUp_openMemory": "Open memory",
+  "@wrapUp_openMemory": {
+    "description": "Film HUD primary button on a kept memory: replaces the film with the Kept Memory page (#279)."
+  },
+  "wrapUp_backToMemory": "Back to memory",
+  "@wrapUp_backToMemory": {
+    "description": "Film HUD primary button when the film was opened from the Kept Memory page (#279)."
+  },
+  "keptMemory_noteCount": "{count, plural, =1{1 note} other{{count} notes}}",
+  "@keptMemory_noteCount": {
+    "description": "Kept Memory hero meta segment (#279); shown uppercase.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "keptMemory_playFilm": "Play the film",
+  "keptMemory_slideshow": "Slideshow",
+  "@keptMemory_slideshow": {
+    "description": "Kept Memory page button and photo viewer toggle: plays every photo automatically."
+  },
+  "keptMemory_pause": "Pause",
+  "@keptMemory_pause": {
+    "description": "Photo viewer toggle while the slideshow plays."
+  },
+  "keptMemory_day": "Day {day}",
+  "@keptMemory_day": {
+    "description": "Day chapter header, followed by · and the date; shown uppercase.",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "keptMemory_plan": "The plan",
+  "keptMemory_planDone": "{done} of {total} done",
+  "@keptMemory_planDone": {
+    "description": "Plan card header count; shown uppercase.",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "keptMemory_planDay": "D{day}",
+  "@keptMemory_planDay": {
+    "description": "Short day label at the end of a plan row (D2 = day 2).",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "keptMemory_since": "Kept forever · since {date}",
+  "@keptMemory_since": {
+    "description": "Kept Memory page footer; shown uppercase.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "keptMemory_more": "More",
+  "@keptMemory_more": {
+    "description": "Semantics label for the hero's ⋯ button."
+  },
+  "keptMemory_viewerPosition": "Day {day} · {position} / {total}",
+  "@keptMemory_viewerPosition": {
+    "description": "Photo viewer top bar; shown uppercase.",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "position": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "keptMemory_bonusTag": "Dare · {prompt} · ✦{stars}",
+  "@keptMemory_bonusTag": {
+    "description": "Photo viewer pill on a photo that completed a bonus task. {prompt} is the task's title.",
+    "placeholders": {
+      "prompt": {
+        "type": "String"
+      },
+      "stars": {
+        "type": "int"
+      }
+    }
+  },
   "wrapUp_photographs": "{count, plural, =1{photograph} other{photographs}}",
   "@wrapUp_photographs": {
     "description": "Film footnote label under a number.",

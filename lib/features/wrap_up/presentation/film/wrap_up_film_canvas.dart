@@ -32,6 +32,7 @@ class WrapUpFilmCanvas extends StatefulWidget {
     required this.coverImage,
     required this.grainImage,
     this.collages = true,
+    this.onHalfWatched,
     super.key,
   });
 
@@ -49,6 +50,12 @@ class WrapUpFilmCanvas extends StatefulWidget {
   /// nothing ever repeats.
   final bool collages;
 
+  /// Fired once, when the first pass crosses its halfway point — "watched"
+  /// for the Kept Memory page's first-open rule (#279). Leaving after more
+  /// than half counts as seen, and so does the end of the pass, so the two
+  /// collapse into this one moment. Doesn't affect what the film shows.
+  final VoidCallback? onHalfWatched;
+
   @override
   State<WrapUpFilmCanvas> createState() => _WrapUpFilmCanvasState();
 }
@@ -59,6 +66,7 @@ class _WrapUpFilmCanvasState extends State<WrapUpFilmCanvas>
   late final WrapUpFilmScenes _scenes;
   late final List<String?> _flurry1Urls;
   late final List<String?> _flurry2Urls;
+  var _halfWatchedFired = false;
 
   @override
   void initState() {
@@ -73,10 +81,19 @@ class _WrapUpFilmCanvasState extends State<WrapUpFilmCanvas>
       vsync: this,
       duration: Duration(milliseconds: (_scenes.total * 1000).round()),
     )..repeat();
+    if (widget.onHalfWatched != null) _controller.addListener(_checkHalfway);
+  }
+
+  void _checkHalfway() {
+    if (_halfWatchedFired || _controller.value < .5) return;
+    _halfWatchedFired = true;
+    _controller.removeListener(_checkHalfway);
+    widget.onHalfWatched?.call();
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_checkHalfway);
     _controller.dispose();
     super.dispose();
   }

@@ -206,6 +206,20 @@ class TripRepositoryImpl implements TripRepository {
   }
 
   @override
+  Future<Either<Failure, void>> markFilmSeen(String tripId) async {
+    try {
+      await _remote.markFilmSeen(tripId);
+      return const Right(null);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> deleteTrip(String id) async {
     // Row first (its cascade takes photos, notes, quests, ...), then the
     // trip's storage files (#170). Files first would leave a memory with

@@ -1748,6 +1748,62 @@
   "@wrapUp_keepForever": {
     "x-review": "pending"
   },
+  "wrapUp_openMemory": "Открыть воспоминание",
+  "@wrapUp_openMemory": {
+    "x-review": "pending"
+  },
+  "wrapUp_backToMemory": "Назад к воспоминанию",
+  "@wrapUp_backToMemory": {
+    "x-review": "pending"
+  },
+  "keptMemory_noteCount": "{count, plural, one{{count} заметка} few{{count} заметки} many{{count} заметок} other{{count} заметки}}",
+  "@keptMemory_noteCount": {
+    "x-review": "pending"
+  },
+  "keptMemory_playFilm": "Смотреть фильм",
+  "@keptMemory_playFilm": {
+    "x-review": "pending"
+  },
+  "keptMemory_slideshow": "Слайд-шоу",
+  "@keptMemory_slideshow": {
+    "x-review": "pending"
+  },
+  "keptMemory_pause": "Пауза",
+  "@keptMemory_pause": {
+    "x-review": "pending"
+  },
+  "keptMemory_day": "День {day}",
+  "@keptMemory_day": {
+    "x-review": "pending"
+  },
+  "keptMemory_plan": "План",
+  "@keptMemory_plan": {
+    "x-review": "pending"
+  },
+  "keptMemory_planDone": "{done} из {total} выполнено",
+  "@keptMemory_planDone": {
+    "x-review": "pending"
+  },
+  "keptMemory_planDay": "Д{day}",
+  "@keptMemory_planDay": {
+    "x-review": "pending"
+  },
+  "keptMemory_since": "Сохранено навсегда · с {date}",
+  "@keptMemory_since": {
+    "x-review": "pending"
+  },
+  "keptMemory_more": "Ещё",
+  "@keptMemory_more": {
+    "x-review": "pending"
+  },
+  "keptMemory_viewerPosition": "День {day} · {position} / {total}",
+  "@keptMemory_viewerPosition": {
+    "x-review": "pending"
+  },
+  "keptMemory_bonusTag": "Вызов · {prompt} · ✦{stars}",
+  "@keptMemory_bonusTag": {
+    "x-review": "pending"
+  },
   "wrapUp_photographs": "{count, plural, one{фотография} few{фотографии} many{фотографий} other{фотографии}}",
   "@wrapUp_photographs": {
     "x-review": "pending"

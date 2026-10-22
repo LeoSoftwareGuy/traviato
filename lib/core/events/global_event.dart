@@ -67,6 +67,19 @@ final class WrapUpPublishedDispatched extends GlobalEvent {
   List<Object?> get props => [tripId, publishedAt];
 }
 
+/// Fired once a kept memory's wrap-up film has been watched through
+/// (#279), so Home's next tap on that card opens the Kept Memory page
+/// instead of replaying the film.
+final class FilmSeenDispatched extends GlobalEvent {
+  const FilmSeenDispatched({required this.tripId, required this.seenAt});
+
+  final String tripId;
+  final DateTime seenAt;
+
+  @override
+  List<Object?> get props => [tripId, seenAt];
+}
+
 /// Fired after a purchase/restore resolves the user's tier (issue #138), so
 /// any screen gating on Pro status (paywall, locked wrap-up entry, usage
 /// meters) updates without re-fetching `entitlements` itself.

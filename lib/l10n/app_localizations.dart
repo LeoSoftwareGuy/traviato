@@ -2737,6 +2737,90 @@ abstract class AppLocalizations {
   /// **'Keep forever'**
   String get wrapUp_keepForever;
 
+  /// Film HUD primary button on a kept memory: replaces the film with the Kept Memory page (#279).
+  ///
+  /// In en, this message translates to:
+  /// **'Open memory'**
+  String get wrapUp_openMemory;
+
+  /// Film HUD primary button when the film was opened from the Kept Memory page (#279).
+  ///
+  /// In en, this message translates to:
+  /// **'Back to memory'**
+  String get wrapUp_backToMemory;
+
+  /// Kept Memory hero meta segment (#279); shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 note} other{{count} notes}}'**
+  String keptMemory_noteCount(int count);
+
+  /// No description provided for @keptMemory_playFilm.
+  ///
+  /// In en, this message translates to:
+  /// **'Play the film'**
+  String get keptMemory_playFilm;
+
+  /// Kept Memory page button and photo viewer toggle: plays every photo automatically.
+  ///
+  /// In en, this message translates to:
+  /// **'Slideshow'**
+  String get keptMemory_slideshow;
+
+  /// Photo viewer toggle while the slideshow plays.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get keptMemory_pause;
+
+  /// Day chapter header, followed by · and the date; shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day}'**
+  String keptMemory_day(int day);
+
+  /// No description provided for @keptMemory_plan.
+  ///
+  /// In en, this message translates to:
+  /// **'The plan'**
+  String get keptMemory_plan;
+
+  /// Plan card header count; shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} done'**
+  String keptMemory_planDone(int done, int total);
+
+  /// Short day label at the end of a plan row (D2 = day 2).
+  ///
+  /// In en, this message translates to:
+  /// **'D{day}'**
+  String keptMemory_planDay(int day);
+
+  /// Kept Memory page footer; shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept forever · since {date}'**
+  String keptMemory_since(String date);
+
+  /// Semantics label for the hero's ⋯ button.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get keptMemory_more;
+
+  /// Photo viewer top bar; shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day} · {position} / {total}'**
+  String keptMemory_viewerPosition(int day, int position, int total);
+
+  /// Photo viewer pill on a photo that completed a bonus task. {prompt} is the task's title.
+  ///
+  /// In en, this message translates to:
+  /// **'Dare · {prompt} · ✦{stars}'**
+  String keptMemory_bonusTag(String prompt, int stars);
+
   /// Film footnote label under a number.
   ///
   /// In en, this message translates to:

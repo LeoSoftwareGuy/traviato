@@ -339,47 +339,94 @@ void main() {
     expect(find.text('plan page t2'), findsOneWidget);
   });
 
-  testWidgets('a Kept-forever card navigates to Journal, not Wrap-up (#101)', (
-    tester,
-  ) async {
-    final finished = buildTripCard(
-      id: 't1',
-      name: 'Atlas high road',
-      startDate: DateTime(2025, 1, 1),
-      endDate: DateTime(2025, 1, 9),
-      status: TripStatus.finished,
-    );
-    final tripRepo = FakeTripRepository()..tripsResult = Right([finished]);
-    final router = GoRouter(
-      initialLocation: '/home',
-      routes: [
-        GoRoute(path: '/home', builder: (context, state) => const HomePage()),
-        GoRoute(
-          path: '/memory/:tripId/journal',
-          name: RouteNames.tripJournal,
-          builder: (context, state) => const Scaffold(body: Text('Journal')),
-        ),
-      ],
-    );
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
-          tripRepositoryProvider.overrideWithValue(tripRepo),
-          questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
-          checklistRepositoryProvider.overrideWithValue(
-            FakeChecklistRepository(),
+  group('a Kept-forever card', () {
+    /// Taps the finished memory's card and returns the destination's label.
+    Future<void> tapCard(WidgetTester tester, TripCardEntity finished) async {
+      final tripRepo = FakeTripRepository()..tripsResult = Right([finished]);
+      Widget label(String text) => Scaffold(body: Text(text));
+      final router = GoRouter(
+        initialLocation: '/home',
+        routes: [
+          GoRoute(path: '/home', builder: (context, state) => const HomePage()),
+          GoRoute(
+            path: '/memory/:tripId/journal',
+            name: RouteNames.tripJournal,
+            builder: (context, state) => label('Journal'),
+          ),
+          GoRoute(
+            path: '/memory/:tripId/wrap-up',
+            name: RouteNames.tripWrapUp,
+            builder: (context, state) => label('Film'),
+          ),
+          GoRoute(
+            path: '/memory/:tripId',
+            name: RouteNames.keptMemory,
+            builder: (context, state) => label('Memory page'),
           ),
         ],
-        child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+            tripRepositoryProvider.overrideWithValue(tripRepo),
+            questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
+            checklistRepositoryProvider.overrideWithValue(
+              FakeChecklistRepository(),
+            ),
+          ],
+          child: MaterialApp.router(
+            theme: AppTheme.dark,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Atlas high road'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Atlas high road'));
+      await tester.pumpAndSettle();
+    }
 
-    expect(find.text('Journal'), findsOneWidget);
+    TripCardEntity finished({DateTime? keptAt, DateTime? filmSeenAt}) =>
+        buildTripCard(
+          id: 't1',
+          name: 'Atlas high road',
+          startDate: DateTime(2025, 1, 1),
+          endDate: DateTime(2025, 1, 9),
+          status: TripStatus.finished,
+          wrapUpPublishedAt: keptAt,
+          filmSeenAt: filmSeenAt,
+        );
+
+    testWidgets('not kept yet: opens Journal, not Wrap-up (#101)', (
+      tester,
+    ) async {
+      await tapCard(tester, finished());
+
+      expect(find.text('Journal'), findsOneWidget);
+    });
+
+    testWidgets('kept, film not seen yet: plays the film first (#279)', (
+      tester,
+    ) async {
+      await tapCard(tester, finished(keptAt: DateTime(2025, 1, 10)));
+
+      expect(find.text('Film'), findsOneWidget);
+    });
+
+    testWidgets('kept, film seen: opens the memory page (#279)', (
+      tester,
+    ) async {
+      await tapCard(
+        tester,
+        finished(
+          keptAt: DateTime(2025, 1, 10),
+          filmSeenAt: DateTime(2025, 1, 10),
+        ),
+      );
+
+      expect(find.text('Memory page'), findsOneWidget);
+    });
   });
 
   testWidgets(

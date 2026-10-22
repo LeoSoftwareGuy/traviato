@@ -45,6 +45,8 @@ class FakeTripRepository implements TripRepository {
   String? lastUploadCoverTripId;
   Uint8List? lastUploadCoverBytes;
   String? lastDeleteCoverTripId;
+  Either<Failure, void>? markFilmSeenResult;
+  final markFilmSeenTripIds = <String>[];
   Duration delay = Duration.zero;
 
   @override
@@ -115,6 +117,12 @@ class FakeTripRepository implements TripRepository {
             coverImagePath: coverImagePath,
           ),
         );
+  }
+
+  @override
+  Future<Either<Failure, void>> markFilmSeen(String tripId) async {
+    markFilmSeenTripIds.add(tripId);
+    return markFilmSeenResult ?? const Right(null);
   }
 
   @override
@@ -231,6 +239,7 @@ TripCardEntity buildTripCard({
   int stars = 0,
   double expenseTotal = 0,
   DateTime? wrapUpPublishedAt,
+  DateTime? filmSeenAt,
   DateTime? createdAt,
 }) {
   final now = DateTime(2026, 1, 1);
@@ -252,5 +261,6 @@ TripCardEntity buildTripCard({
     stars: stars,
     expenseTotal: expenseTotal,
     wrapUpPublishedAt: wrapUpPublishedAt,
+    filmSeenAt: filmSeenAt,
   );
 }

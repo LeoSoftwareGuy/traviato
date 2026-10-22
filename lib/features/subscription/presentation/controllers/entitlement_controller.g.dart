@@ -40,7 +40,7 @@ final class EntitlementControllerProvider
 }
 
 String _$entitlementControllerHash() =>
-    r'd7d2bbcd5280b58f02598e1b43304ee9ea47dac9';
+    r'93a095b8582e1ccab556cca264a6d6f131aeeb2a';
 
 /// The shared read of the caller's tier — M6-3/M6-4/M6-5/M6-6 gate their UI
 /// on this rather than each re-fetching `entitlements` themselves.

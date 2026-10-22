@@ -10,6 +10,7 @@ abstract class RoutePaths {
   static const bonusTasks = '/bonus-tasks';
   static const bonusStarsByMemory = '/bonus-tasks/memories';
   static const createMemory = '/create-memory';
+  static const keptMemory = '/memory/:tripId';
   static const tripPlan = '/memory/:tripId/plan';
   static const tripChecklist = '/memory/:tripId/checklist';
   static const tripJournal = '/memory/:tripId/journal';
@@ -30,10 +31,19 @@ abstract class RouteNames {
   static const bonusTasks = 'bonusTasks';
   static const bonusStarsByMemory = 'bonusStarsByMemory';
   static const createMemory = 'createMemory';
+  static const keptMemory = 'keptMemory';
   static const tripPlan = 'tripPlan';
   static const tripChecklist = 'tripChecklist';
   static const tripJournal = 'tripJournal';
   static const tripBonusTasks = 'tripBonusTasks';
   static const tripWrapUp = 'tripWrapUp';
   static const subscriptionOfferings = 'subscriptionOfferings';
+}
+
+/// Query parameters shared between routes.
+abstract class RouteQuery {
+  /// On [RouteNames.tripWrapUp]: `from=memory` when the film was opened
+  /// from the Kept Memory page, so it ends on "Back to memory" (#279).
+  static const from = 'from';
+  static const fromMemory = 'memory';
 }
