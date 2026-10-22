@@ -103,7 +103,6 @@ Table trips {
   cover_image_path varchar [note: "asset:<id> (bundled) OR trip-photos:{user_id}/{trip_id}/cover.jpg (custom upload, signed URL)"]
   created_at timestamp
   updated_at timestamp [note: 'auto-set via trigger']
-  film_seen_at timestamp [note: 'first full watch of the kept wrap-up film (#279)']
 
   indexes {
     user_id [name: 'trips_user_id_idx']
