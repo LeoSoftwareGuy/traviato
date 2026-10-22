@@ -60,6 +60,8 @@ schema addition from the redesign (generator prioritizes flagged photos).
 ### `checklist_items` / `checklist_suggestions`
 As v2: category check over `travel_essentials, clothing_shoes, toiletries_health,
 gadgets_tech, nice_to_haves`; `is_essential`; suggestions seeded per category.
+Items seeded from a suggestion carry its `suggestion_code` (#285) and render in
+the current UI language; custom items (code null) keep their `title`.
 
 ### `expenses`
 As v2: `amount numeric(10,2) > 0`, category check (`food_drinks, transport,

@@ -1,0 +1,135 @@
+-- #285: default checklist items stayed in the language they were seeded in
+-- (#243 wrote the UI language's text once). Items now keep the suggestion
+-- code they came from, and the app renders a coded item in the current UI
+-- language; custom items (code null) keep the user's text.
+--
+-- Backfill: existing rows whose title is a known translation of a
+-- suggestion — English (= the seeded titles), Russian, or the Estonian UI
+-- that shipped until #245 — in that suggestion's category. Anything else
+-- stays null and keeps rendering its stored title.
+--
+-- RLS/grants unchanged: the column rides the existing owner-only policies
+-- and table grants on checklist_items.
+--
+-- Revert: alter table public.checklist_items drop column suggestion_code;
+
+alter table public.checklist_items add column suggestion_code text;
+
+update public.checklist_items as i
+set suggestion_code = s.code
+from (values
+  ('Passport', 'passport'),
+  ('Паспорт', 'passport'),
+  ('Pass', 'passport'),
+  ('Visa documents', 'visa_documents'),
+  ('Визовые документы', 'visa_documents'),
+  ('Viisadokumendid', 'visa_documents'),
+  ('Travel insurance', 'travel_insurance'),
+  ('Туристическая страховка', 'travel_insurance'),
+  ('Reisikindlustus', 'travel_insurance'),
+  ('Boarding passes / tickets', 'boarding_passes_tickets'),
+  ('Посадочные талоны / билеты', 'boarding_passes_tickets'),
+  ('Pardakaardid / piletid', 'boarding_passes_tickets'),
+  ('ID card', 'id_card'),
+  ('Удостоверение личности', 'id_card'),
+  ('ID-kaart', 'id_card'),
+  ('Local currency cash', 'local_currency_cash'),
+  ('Наличные в местной валюте', 'local_currency_cash'),
+  ('Kohalik sularaha', 'local_currency_cash'),
+  ('Credit / debit cards', 'credit_debit_cards'),
+  ('Кредитные / дебетовые карты', 'credit_debit_cards'),
+  ('Krediit- / deebetkaardid', 'credit_debit_cards'),
+  ('Phone charger', 'phone_charger'),
+  ('Зарядка для телефона', 'phone_charger'),
+  ('Telefonilaadija', 'phone_charger'),
+  ('Underwear', 'underwear'),
+  ('Нижнее бельё', 'underwear'),
+  ('Aluspesu', 'underwear'),
+  ('Comfortable walking shoes', 'comfortable_walking_shoes'),
+  ('Удобная обувь для прогулок', 'comfortable_walking_shoes'),
+  ('Mugavad jalutusjalanõud', 'comfortable_walking_shoes'),
+  ('T-shirts', 't_shirts'),
+  ('Футболки', 't_shirts'),
+  ('T-särgid', 't_shirts'),
+  ('Jacket', 'jacket'),
+  ('Куртка', 'jacket'),
+  ('Jope', 'jacket'),
+  ('Swimsuit', 'swimsuit'),
+  ('Купальник / плавки', 'swimsuit'),
+  ('Ujumisriided', 'swimsuit'),
+  ('Sleepwear', 'sleepwear'),
+  ('Одежда для сна', 'sleepwear'),
+  ('Ööriided', 'sleepwear'),
+  ('Sunglasses', 'sunglasses'),
+  ('Солнцезащитные очки', 'sunglasses'),
+  ('Päikeseprillid', 'sunglasses'),
+  ('Toothbrush & toothpaste', 'toothbrush_toothpaste'),
+  ('Зубная щётка и паста', 'toothbrush_toothpaste'),
+  ('Hambahari ja -pasta', 'toothbrush_toothpaste'),
+  ('Prescription medications', 'prescription_medications'),
+  ('Рецептурные лекарства', 'prescription_medications'),
+  ('Retseptiravimid', 'prescription_medications'),
+  ('First aid kit', 'first_aid_kit'),
+  ('Аптечка', 'first_aid_kit'),
+  ('Esmaabikomplekt', 'first_aid_kit'),
+  ('Sunscreen', 'sunscreen'),
+  ('Солнцезащитный крем', 'sunscreen'),
+  ('Päikesekreem', 'sunscreen'),
+  ('Deodorant', 'deodorant'),
+  ('Дезодорант', 'deodorant'),
+  ('Hand sanitizer', 'hand_sanitizer'),
+  ('Антисептик для рук', 'hand_sanitizer'),
+  ('Kätepuhastusvahend', 'hand_sanitizer'),
+  ('Shampoo & conditioner', 'shampoo_conditioner'),
+  ('Шампунь и кондиционер', 'shampoo_conditioner'),
+  ('Šampoon ja palsam', 'shampoo_conditioner'),
+  ('Contact lenses or glasses', 'contact_lenses_or_glasses'),
+  ('Контактные линзы или очки', 'contact_lenses_or_glasses'),
+  ('Kontaktläätsed või prillid', 'contact_lenses_or_glasses'),
+  ('Phone', 'phone'),
+  ('Телефон', 'phone'),
+  ('Telefon', 'phone'),
+  ('Charging cables', 'charging_cables'),
+  ('Зарядные кабели', 'charging_cables'),
+  ('Laadimiskaablid', 'charging_cables'),
+  ('Power adapter', 'power_adapter'),
+  ('Переходник для розетки', 'power_adapter'),
+  ('Pistikuadapter', 'power_adapter'),
+  ('Portable battery pack', 'portable_battery_pack'),
+  ('Пауэрбанк', 'portable_battery_pack'),
+  ('Akupank', 'portable_battery_pack'),
+  ('Headphones', 'headphones'),
+  ('Наушники', 'headphones'),
+  ('Kõrvaklapid', 'headphones'),
+  ('Camera', 'camera'),
+  ('Фотоаппарат', 'camera'),
+  ('Kaamera', 'camera'),
+  ('SIM card or eSIM', 'sim_card_or_esim'),
+  ('SIM-карта или eSIM', 'sim_card_or_esim'),
+  ('SIM-kaart või eSIM', 'sim_card_or_esim'),
+  ('Travel pillow', 'travel_pillow'),
+  ('Подушка для путешествий', 'travel_pillow'),
+  ('Reisipadi', 'travel_pillow'),
+  ('Reusable water bottle', 'reusable_water_bottle'),
+  ('Многоразовая бутылка для воды', 'reusable_water_bottle'),
+  ('Korduvkasutatav veepudel', 'reusable_water_bottle'),
+  ('Snacks', 'snacks'),
+  ('Перекусы', 'snacks'),
+  ('Suupisted', 'snacks'),
+  ('Packing cubes', 'packing_cubes'),
+  ('Органайзеры для вещей', 'packing_cubes'),
+  ('Pakkimiskuubikud', 'packing_cubes'),
+  ('Earplugs & eye mask', 'earplugs_eye_mask'),
+  ('Беруши и маска для сна', 'earplugs_eye_mask'),
+  ('Kõrvatropid ja unemask', 'earplugs_eye_mask'),
+  ('Travel journal', 'travel_journal'),
+  ('Дневник путешествий', 'travel_journal'),
+  ('Reisipäevik', 'travel_journal'),
+  ('Umbrella', 'umbrella'),
+  ('Зонт', 'umbrella'),
+  ('Vihmavari', 'umbrella')
+) as v (title, code)
+join public.checklist_suggestions as s on s.code = v.code
+where i.suggestion_code is null
+  and i.title = v.title
+  and i.category = s.category;
