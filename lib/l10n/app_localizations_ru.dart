@@ -1762,65 +1762,67 @@ class AppLocalizationsRu extends AppLocalizations {
   String get wrapUp_keepForever => 'Сохранить навсегда';
 
   @override
-  String get wrapUp_openMemory => 'Open memory';
+  String get wrapUp_openMemory => 'Открыть воспоминание';
 
   @override
-  String get wrapUp_backToMemory => 'Back to memory';
+  String get wrapUp_backToMemory => 'Назад к воспоминанию';
 
   @override
   String keptMemory_noteCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count notes',
-      one: '1 note',
+      other: '$count заметки',
+      many: '$count заметок',
+      few: '$count заметки',
+      one: '$count заметка',
     );
     return '$_temp0';
   }
 
   @override
-  String get keptMemory_playFilm => 'Play the film';
+  String get keptMemory_playFilm => 'Смотреть фильм';
 
   @override
-  String get keptMemory_slideshow => 'Slideshow';
+  String get keptMemory_slideshow => 'Слайд-шоу';
 
   @override
-  String get keptMemory_pause => 'Pause';
+  String get keptMemory_pause => 'Пауза';
 
   @override
   String keptMemory_day(int day) {
-    return 'Day $day';
+    return 'День $day';
   }
 
   @override
-  String get keptMemory_plan => 'The plan';
+  String get keptMemory_plan => 'План';
 
   @override
   String keptMemory_planDone(int done, int total) {
-    return '$done of $total done';
+    return '$done из $total выполнено';
   }
 
   @override
   String keptMemory_planDay(int day) {
-    return 'D$day';
+    return 'Д$day';
   }
 
   @override
   String keptMemory_since(String date) {
-    return 'Kept forever · since $date';
+    return 'Сохранено навсегда · с $date';
   }
 
   @override
-  String get keptMemory_more => 'More';
+  String get keptMemory_more => 'Ещё';
 
   @override
   String keptMemory_viewerPosition(int day, int position, int total) {
-    return 'Day $day · $position / $total';
+    return 'День $day · $position / $total';
   }
 
   @override
   String keptMemory_bonusTag(String prompt, int stars) {
-    return 'Dare · $prompt · ✦$stars';
+    return 'Вызов · $prompt · ✦$stars';
   }
 
   @override
