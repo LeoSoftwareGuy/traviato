@@ -208,6 +208,9 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   **Play the film** (ends on "Back to memory") and **Slideshow**.
 - One chapter per day with content: photo strip (bonus-task photos marked
   ✦) and every note in full. The plan, read-only and collapsed, at the end.
+- Full-screen viewer over all photos: swipe / tap zones, pinch, swipe down
+  to close, progress split by day, caption + bonus task; slideshow every
+  3.2s with crossfade and slow zoom (no zoom under reduced motion).
 - First open plays the film (its HUD offers "Open memory");
   `trips.film_seen_at` is set once half of it has played, and every open
   after that lands here. Read-only — no editing from this page.

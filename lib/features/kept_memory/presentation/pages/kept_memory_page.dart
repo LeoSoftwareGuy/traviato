@@ -19,6 +19,7 @@ import '../widgets/kept_memory_actions.dart';
 import '../widgets/kept_memory_day_chapter.dart';
 import '../widgets/kept_memory_hero.dart';
 import '../widgets/kept_memory_plan_card.dart';
+import 'kept_memory_viewer_page.dart';
 
 const _sidePadding = 22.0;
 
@@ -84,8 +85,13 @@ class _KeptMemoryScroll extends ConsumerWidget {
     queryParameters: {RouteQuery.from: RouteQuery.fromMemory},
   );
 
-  // The full-screen viewer lands with spec phase 4.
-  void _openViewer(BuildContext context, int index, {bool autoplay = false}) {}
+  void _openViewer(BuildContext context, int index, {bool autoplay = false}) =>
+      KeptMemoryViewerPage.show(
+        context,
+        memory: memory,
+        initialIndex: index,
+        autoplay: autoplay,
+      );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -1738,6 +1738,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get keptMemory_slideshow => 'Slideshow';
 
   @override
+  String get keptMemory_pause => 'Pause';
+
+  @override
   String keptMemory_day(int day) {
     return 'Day $day';
   }
@@ -1762,6 +1765,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get keptMemory_more => 'More';
+
+  @override
+  String keptMemory_viewerPosition(int day, int position, int total) {
+    return 'Day $day · $position / $total';
+  }
+
+  @override
+  String keptMemory_bonusTag(String prompt, int stars) {
+    return 'Dare · $prompt · ✦$stars';
+  }
 
   @override
   String wrapUp_photographs(int count) {

@@ -2767,6 +2767,12 @@ abstract class AppLocalizations {
   /// **'Slideshow'**
   String get keptMemory_slideshow;
 
+  /// Photo viewer toggle while the slideshow plays.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get keptMemory_pause;
+
   /// Day chapter header, followed by · and the date; shown uppercase.
   ///
   /// In en, this message translates to:
@@ -2802,6 +2808,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More'**
   String get keptMemory_more;
+
+  /// Photo viewer top bar; shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day} · {position} / {total}'**
+  String keptMemory_viewerPosition(int day, int position, int total);
+
+  /// Photo viewer pill on a photo that completed a bonus task. {prompt} is the task's title.
+  ///
+  /// In en, this message translates to:
+  /// **'Dare · {prompt} · ✦{stars}'**
+  String keptMemory_bonusTag(String prompt, int stars);
 
   /// Film footnote label under a number.
   ///

@@ -10,6 +10,7 @@ import 'package:traviato/features/bonus/presentation/providers/bonus_task_provid
 import 'package:traviato/features/journal/domain/entities/day_note_entity.dart';
 import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
 import 'package:traviato/features/kept_memory/presentation/pages/kept_memory_page.dart';
+import 'package:traviato/features/kept_memory/presentation/pages/kept_memory_viewer_page.dart';
 import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/domain/entities/quest_entity.dart';
@@ -207,6 +208,29 @@ void main() {
     await _pump(tester);
 
     expect(find.text('The plan'), findsNothing);
+  });
+
+  testWidgets('tapping a thumb opens the viewer on that photo', (
+    tester,
+  ) async {
+    await _pump(tester);
+
+    await tester.tap(find.byKey(const ValueKey('kept-memory-thumb-p3')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(KeptMemoryViewerPage), findsOneWidget);
+    expect(find.text('DAY 2 · 3 / 3'), findsOneWidget);
+  });
+
+  testWidgets('a day\'s photos link opens the viewer at its first photo', (
+    tester,
+  ) async {
+    await _pump(tester);
+
+    await tester.tap(find.byKey(const ValueKey('kept-memory-day-photos-2')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('DAY 2 · 2 / 3'), findsOneWidget);
   });
 
   testWidgets('Play the film opens it so it leads back here', (tester) async {

@@ -60,6 +60,9 @@ abstract class AppColors {
   // Day-note body text — a warm off-white a step softer than textPrimary,
   // so long notes read as quoted voice rather than UI.
   static const Color noteText = Color(0xFFE8E5DD);
+  // Full-screen photo viewer ground — darker than filmBackground, so photos
+  // pop with no visible frame.
+  static const Color viewerBackground = Color(0xFF05060F);
 
   // --- Paper (Journal note page, docs/design/JOURNAL_NOTE_PAGETURN_SPEC.md
   // §2, #205) ------------------------------------------------------------

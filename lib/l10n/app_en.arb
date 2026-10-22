@@ -1469,6 +1469,10 @@
   "@keptMemory_slideshow": {
     "description": "Kept Memory page button and photo viewer toggle: plays every photo automatically."
   },
+  "keptMemory_pause": "Pause",
+  "@keptMemory_pause": {
+    "description": "Photo viewer toggle while the slideshow plays."
+  },
   "keptMemory_day": "Day {day}",
   "@keptMemory_day": {
     "description": "Day chapter header, followed by · and the date; shown uppercase.",
@@ -1512,6 +1516,33 @@
   "keptMemory_more": "More",
   "@keptMemory_more": {
     "description": "Semantics label for the hero's ⋯ button."
+  },
+  "keptMemory_viewerPosition": "Day {day} · {position} / {total}",
+  "@keptMemory_viewerPosition": {
+    "description": "Photo viewer top bar; shown uppercase.",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "position": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "keptMemory_bonusTag": "Dare · {prompt} · ✦{stars}",
+  "@keptMemory_bonusTag": {
+    "description": "Photo viewer pill on a photo that completed a bonus task. {prompt} is the task's title.",
+    "placeholders": {
+      "prompt": {
+        "type": "String"
+      },
+      "stars": {
+        "type": "int"
+      }
+    }
   },
   "wrapUp_photographs": "{count, plural, =1{photograph} other{photographs}}",
   "@wrapUp_photographs": {
