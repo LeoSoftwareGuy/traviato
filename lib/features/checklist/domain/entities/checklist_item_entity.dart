@@ -13,6 +13,7 @@ class ChecklistItemEntity extends Equatable {
     required this.isEssential,
     required this.isChecked,
     required this.position,
+    this.suggestionCode,
   });
 
   final String id;
@@ -23,6 +24,10 @@ class ChecklistItemEntity extends Equatable {
   final bool isChecked;
   final int position;
 
+  /// The suggestion this item was seeded from (#285) — its title follows
+  /// the UI language. Null for the user's own items, which keep [title].
+  final String? suggestionCode;
+
   @override
   List<Object?> get props => [
     id,
@@ -32,5 +37,6 @@ class ChecklistItemEntity extends Equatable {
     isEssential,
     isChecked,
     position,
+    suggestionCode,
   ];
 }

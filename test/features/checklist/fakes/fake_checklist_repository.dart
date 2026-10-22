@@ -96,6 +96,7 @@ ChecklistItemEntity buildChecklistItemEntity({
   bool isEssential = false,
   bool isChecked = false,
   int position = 0,
+  String? suggestionCode,
 }) {
   return ChecklistItemEntity(
     id: id,
@@ -105,5 +106,6 @@ ChecklistItemEntity buildChecklistItemEntity({
     isEssential: isEssential,
     isChecked: isChecked,
     position: position,
+    suggestionCode: suggestionCode,
   );
 }

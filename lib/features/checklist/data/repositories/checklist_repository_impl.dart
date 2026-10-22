@@ -116,6 +116,7 @@ class ChecklistRepositoryImpl implements ChecklistRepository {
             title: titleFor?.call(suggestion) ?? suggestion.title,
             category: suggestion.category,
             isEssential: suggestion.isEssential,
+            suggestionCode: suggestion.code.isEmpty ? null : suggestion.code,
             position: positionByCategory.update(
               suggestion.category,
               (value) => value + 1,

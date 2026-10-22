@@ -13,6 +13,7 @@ class ChecklistItemDraft {
     required this.category,
     required this.isEssential,
     required this.position,
+    this.suggestionCode,
   });
 
   final String id;
@@ -21,6 +22,7 @@ class ChecklistItemDraft {
   final ChecklistCategory category;
   final bool isEssential;
   final int position;
+  final String? suggestionCode;
 }
 
 abstract interface class ChecklistRemoteDataSource {

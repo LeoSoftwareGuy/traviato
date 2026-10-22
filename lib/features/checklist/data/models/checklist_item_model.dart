@@ -10,6 +10,7 @@ class ChecklistItemModel extends ChecklistItemEntity {
     required super.isEssential,
     required super.isChecked,
     required super.position,
+    super.suggestionCode,
   });
 
   factory ChecklistItemModel.fromJson(Map<String, dynamic> json) =>
@@ -21,5 +22,6 @@ class ChecklistItemModel extends ChecklistItemEntity {
         isEssential: json['is_essential'] as bool,
         isChecked: json['is_checked'] as bool,
         position: (json['position'] as num).toInt(),
+        suggestionCode: json['suggestion_code'] as String?,
       );
 }
