@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -16,13 +17,22 @@ import '../film/wrap_up_film_canvas.dart';
 import '../film/wrap_up_film_hud.dart';
 import '../film/wrap_up_film_photo.dart';
 import '../film/wrap_up_film_photo_pins.dart';
+import '../mutations/mark_film_seen.dart';
 import '../widgets/wrap_up_generating_view.dart';
 import '../../../../core/l10n/context_l10n.dart';
 
 class WrapUpPage extends ConsumerWidget {
-  const WrapUpPage({required this.tripId, super.key});
+  const WrapUpPage({
+    required this.tripId,
+    this.openedFromMemory = false,
+    super.key,
+  });
 
   final String tripId;
+
+  /// Opened from the Kept Memory page's "Play the film" (#279) — the film
+  /// then leads back there, and isn't a first watch worth recording.
+  final bool openedFromMemory;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,6 +56,9 @@ class WrapUpPage extends ConsumerWidget {
                 // change.
                 key: ValueKey(state.wrapUp.generatedAt),
                 state: state,
+                onHalfWatched: openedFromMemory
+                    ? null
+                    : () => _onHalfWatched(ref),
               ),
             ),
             // Independent of asset prep — closing the film or publishing
@@ -53,11 +66,25 @@ class WrapUpPage extends ConsumerWidget {
             WrapUpFilmHud(
               tripId: tripId,
               isPublished: state.wrapUp.isPublished,
+              openedFromMemory: openedFromMemory,
             ),
           ],
         ),
       ),
     );
+  }
+
+  /// Only a kept film counts (read now, not at open — "Keep forever" may
+  /// have been tapped mid-film): a memory kept a moment ago still plays its
+  /// film on the next open, then lands on the Kept Memory page (#279).
+  void _onHalfWatched(WidgetRef ref) {
+    final isKept =
+        ref.read(wrapUpControllerProvider(tripId)).value?.wrapUp.isPublished ??
+        false;
+    if (!isKept) return;
+    // Fire-and-forget: a lost "seen" marker only means the film plays once
+    // more — never worth interrupting the film for.
+    unawaited(markFilmSeen(ref: ref, tripId: tripId));
   }
 }
 
@@ -69,9 +96,14 @@ class _ResolvedFilmAssets {
 }
 
 class _WrapUpFilmReady extends ConsumerStatefulWidget {
-  const _WrapUpFilmReady({required this.state, super.key});
+  const _WrapUpFilmReady({
+    required this.state,
+    this.onHalfWatched,
+    super.key,
+  });
 
   final WrapUpState state;
+  final VoidCallback? onHalfWatched;
 
   @override
   ConsumerState<_WrapUpFilmReady> createState() => _WrapUpFilmReadyState();
@@ -177,6 +209,7 @@ class _WrapUpFilmReadyState extends ConsumerState<_WrapUpFilmReady> {
           photoUrlById: widget.state.photoUrlById,
           coverImage: assets.coverImage,
           grainImage: assets.grainImage,
+          onHalfWatched: widget.onHalfWatched,
         );
       },
     );

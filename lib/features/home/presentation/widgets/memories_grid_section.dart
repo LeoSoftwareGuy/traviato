@@ -10,9 +10,9 @@ import '../../../trip/domain/entities/trip_card_entity.dart';
 import '../../../trip/presentation/widgets/trip_cover_image.dart';
 import 'trip_card_pill.dart';
 
-/// "Kept forever" grid: finished trips, tapping into Journal — not
-/// Wrap-up directly, since generating it is a network call that can fail
-/// (issue #101); Wrap-up is one tap away from there instead.
+/// "Kept forever" grid: finished trips. Where a tap goes is the page's
+/// call — Journal for a memory not kept yet (#101), the film or the Kept
+/// Memory page for a kept one (#279).
 /// `docs/design/README.md` § 3.
 class MemoriesGridSection extends StatelessWidget {
   const MemoriesGridSection({

@@ -46,7 +46,7 @@ final class HomeUsernameControllerProvider
 }
 
 String _$homeUsernameControllerHash() =>
-    r'f4e3aa98a810d2dd3992927e7da29fa272dd4ee4';
+    r'691b1321c27c28504c0161c8a963c175749c7c07';
 
 /// The name Home greets with (#266): `profiles.username`, the same field
 /// the Profile screen edits. The auth user's metadata name only exists for

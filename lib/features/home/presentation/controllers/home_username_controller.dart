@@ -39,6 +39,7 @@ class HomeUsernameController extends _$HomeUsernameController {
       case TripUpdatedDispatched():
       case StarsAwardedDispatched():
       case WrapUpPublishedDispatched():
+      case FilmSeenDispatched():
       case EntitlementUpdatedDispatched():
       // Not relevant to the greeting.
     }

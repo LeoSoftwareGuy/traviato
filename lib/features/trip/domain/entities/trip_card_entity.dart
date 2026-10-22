@@ -28,6 +28,7 @@ class TripCardEntity extends Equatable {
     required this.stars,
     required this.expenseTotal,
     this.wrapUpPublishedAt,
+    this.filmSeenAt,
   });
 
   /// Synthesizes a card for a trip that was just created — no photos, stars
@@ -97,6 +98,7 @@ class TripCardEntity extends Equatable {
       stars: stars,
       expenseTotal: expenseTotal,
       wrapUpPublishedAt: wrapUpPublishedAt,
+      filmSeenAt: filmSeenAt,
     );
   }
 
@@ -123,7 +125,32 @@ class TripCardEntity extends Equatable {
         stars: stars,
         expenseTotal: expenseTotal,
         wrapUpPublishedAt: publishedAt,
+        filmSeenAt: filmSeenAt,
       );
+
+  /// Applied when [FilmSeenDispatched] arrives — the film was just watched
+  /// through, so Home's next tap opens the Kept Memory page (#279).
+  TripCardEntity copyWithFilmSeen(DateTime seenAt) => TripCardEntity(
+    id: id,
+    userId: userId,
+    name: name,
+    destination: destination,
+    countryCode: countryCode,
+    startDate: startDate,
+    endDate: endDate,
+    vibes: vibes,
+    coverImagePath: coverImagePath,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    status: status,
+    durationDays: durationDays,
+    photoCount: photoCount,
+    questCount: questCount,
+    stars: stars,
+    expenseTotal: expenseTotal,
+    wrapUpPublishedAt: wrapUpPublishedAt,
+    filmSeenAt: seenAt,
+  );
 
   static (TripStatus, int?) _deriveStatusAndDuration(
     DateTime? start,
@@ -162,8 +189,17 @@ class TripCardEntity extends Equatable {
   final double expenseTotal;
   final DateTime? wrapUpPublishedAt;
 
+  /// When the kept wrap-up film was first watched through (#279) — null
+  /// until then, so Home's next tap plays the film instead of opening the
+  /// Kept Memory page.
+  final DateTime? filmSeenAt;
+
   /// The trip's wrap-up has been "Kept forever" (M4-3).
   bool get isKeptForever => wrapUpPublishedAt != null;
+
+  /// A kept memory whose film hasn't been watched through yet — its next
+  /// open plays the film first (#279).
+  bool get playsFilmFirst => isKeptForever && filmSeenAt == null;
 
   /// Whether [day] (a local date) falls within the trip — the same rule the
   /// bonus tray uses for "today" (#219), unlike [status], which the view
@@ -211,5 +247,6 @@ class TripCardEntity extends Equatable {
     stars,
     expenseTotal,
     wrapUpPublishedAt,
+    filmSeenAt,
   ];
 }

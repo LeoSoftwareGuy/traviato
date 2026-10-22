@@ -1447,6 +1447,14 @@
   "paywall_reassurance": "Your three free memories stay yours either way: nothing is deleted or locked if you don't upgrade.",
   "wrapUp_openJournal": "Open journal",
   "wrapUp_keepForever": "Keep forever",
+  "wrapUp_openMemory": "Open memory",
+  "@wrapUp_openMemory": {
+    "description": "Film HUD primary button on a kept memory: replaces the film with the Kept Memory page (#279)."
+  },
+  "wrapUp_backToMemory": "Back to memory",
+  "@wrapUp_backToMemory": {
+    "description": "Film HUD primary button when the film was opened from the Kept Memory page (#279)."
+  },
   "wrapUp_photographs": "{count, plural, =1{photograph} other{photographs}}",
   "@wrapUp_photographs": {
     "description": "Film footnote label under a number.",

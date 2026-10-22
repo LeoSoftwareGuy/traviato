@@ -343,6 +343,33 @@ class SupabaseTripRemoteDataSource implements TripRemoteDataSource {
   }
 
   @override
+  Future<void> markFilmSeen(String tripId) async {
+    if (_client.auth.currentUser == null) {
+      throw const AuthenticationException(
+        message: 'User is not authenticated',
+      );
+    }
+    try {
+      // `now()` server-side would need an RPC; the client clock is fine
+      // for a "seen" marker that's only ever compared against null.
+      await _client
+          .from(Tables.trips)
+          .update({'film_seen_at': DateTime.now().toUtc().toIso8601String()})
+          .eq('id', tripId)
+          .isFilter('film_seen_at', null);
+    } on PostgrestException catch (e) {
+      if (e.code == PostgresErrors.insufficientPrivilege) {
+        throw PermissionException(message: e.message);
+      }
+      throw DatabaseException(message: e.message);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
   Future<void> deleteTrip(String id) async {
     if (_client.auth.currentUser == null) {
       throw const AuthenticationException(

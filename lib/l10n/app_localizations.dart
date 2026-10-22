@@ -2737,6 +2737,18 @@ abstract class AppLocalizations {
   /// **'Keep forever'**
   String get wrapUp_keepForever;
 
+  /// Film HUD primary button on a kept memory: replaces the film with the Kept Memory page (#279).
+  ///
+  /// In en, this message translates to:
+  /// **'Open memory'**
+  String get wrapUp_openMemory;
+
+  /// Film HUD primary button when the film was opened from the Kept Memory page (#279).
+  ///
+  /// In en, this message translates to:
+  /// **'Back to memory'**
+  String get wrapUp_backToMemory;
+
   /// Film footnote label under a number.
   ///
   /// In en, this message translates to:

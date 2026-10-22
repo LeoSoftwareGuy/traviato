@@ -50,8 +50,9 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   full-width **Checklist** row with packed count.
 - **Coming up**: cards with countdown badge, planning state ("6 quests planned" /
   "Nothing planned yet"), **whole card taps into Plan** (plan months ahead).
-- **Kept forever**: finished-memory grid, ▸ Recap badge, days + photo count,
-  tap → Wrap-up.
+- **Kept forever**: finished-memory grid, ▸ Recap badge, days + photo count.
+  Tap: a memory not kept yet → Journal (#101); a kept one → its film the
+  first time, then the **Kept Memory page** (#279) every time after.
 - Bottom nav: Home · **FAB ➕** · Expenses.
 
 ## 4. Create memory ✅ — redesigned, + cover picker

@@ -101,6 +101,12 @@ class _FakeTripRemoteDataSource implements TripRemoteDataSource {
   }
 
   @override
+  Future<void> markFilmSeen(String tripId) async {
+    calls.add('filmSeen:$tripId');
+    if (exception != null) throw exception!;
+  }
+
+  @override
   Future<void> deleteTrip(String id) async {
     calls.add('row:$id');
     if (exception != null) throw exception!;
@@ -491,6 +497,26 @@ void main() {
             expect(failure, const AuthenticationFailure(message: 'no session')),
         (_) => fail('expected Left'),
       );
+    });
+  });
+
+  group('TripRepositoryImpl.markFilmSeen (#279)', () {
+    test('returns Right on success', () async {
+      final remote = _FakeTripRemoteDataSource();
+      final result = await TripRepositoryImpl(
+        remote: remote,
+      ).markFilmSeen('t1');
+
+      expect(result.isRight(), isTrue);
+      expect(remote.calls, ['filmSeen:t1']);
+    });
+
+    test('maps NetworkException to NetworkFailure', () async {
+      final result = await TripRepositoryImpl(
+        remote: _FakeTripRemoteDataSource(exception: const NetworkException()),
+      ).markFilmSeen('t1');
+
+      expect(result.getLeft().toNullable(), isA<NetworkFailure>());
     });
   });
 

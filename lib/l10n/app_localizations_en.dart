@@ -1715,6 +1715,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wrapUp_keepForever => 'Keep forever';
 
   @override
+  String get wrapUp_openMemory => 'Open memory';
+
+  @override
+  String get wrapUp_backToMemory => 'Back to memory';
+
+  @override
   String wrapUp_photographs(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

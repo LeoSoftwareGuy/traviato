@@ -8,7 +8,6 @@ import '../../../../core/errors/failure_message.dart';
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../mutations/wrap_up_mutations.dart';
 
@@ -17,15 +16,42 @@ import '../mutations/wrap_up_mutations.dart';
 /// outside the 1080×1920 canvas carrying the two things the app still needs
 /// reachable: leaving the film, and "Keep forever" (`published_at`, M4-3).
 /// Same copy/behaviour as the pre-#126 close section, repositioned.
+///
+/// Once kept, the "Keep forever" slot becomes the way into the Kept Memory
+/// page (#279): "Open memory" replaces the film with it, or "Back to memory"
+/// when the film was opened from there.
 class WrapUpFilmHud extends ConsumerWidget {
   const WrapUpFilmHud({
     required this.tripId,
     required this.isPublished,
+    this.openedFromMemory = false,
     super.key,
   });
 
   final String tripId;
   final bool isPublished;
+  final bool openedFromMemory;
+
+  /// Back to wherever the film was opened from (#279) — Home when there's
+  /// nothing to pop (e.g. a deep link).
+  void _close(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.goNamed(RouteNames.home);
+    }
+  }
+
+  void _toMemory(BuildContext context) {
+    if (openedFromMemory) {
+      _close(context);
+    } else {
+      context.pushReplacementNamed(
+        RouteNames.keptMemory,
+        pathParameters: {'tripId': tripId},
+      );
+    }
+  }
 
   Future<void> _tapKeepForever(BuildContext context, WidgetRef ref) async {
     try {
@@ -60,7 +86,7 @@ class WrapUpFilmHud extends ConsumerWidget {
               child: _HudScrim(
                 child: IconButton(
                   icon: const Icon(Icons.close, color: AppColors.textOnPhoto),
-                  onPressed: () => context.goNamed(RouteNames.home),
+                  onPressed: () => _close(context),
                 ),
               ),
             ),
@@ -92,7 +118,15 @@ class WrapUpFilmHud extends ConsumerWidget {
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: isPublished
-                      ? const _KeptForeverBadge()
+                      ? ElevatedButton(
+                          key: const Key('wrap-up-hud-memory'),
+                          onPressed: () => _toMemory(context),
+                          child: Text(
+                            openedFromMemory
+                                ? context.l10n.wrapUp_backToMemory
+                                : context.l10n.wrapUp_openMemory,
+                          ),
+                        )
                       : ElevatedButton(
                           onPressed: isPublishing
                               ? null
@@ -132,27 +166,6 @@ class _HudScrim extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       child: child,
-    );
-  }
-}
-
-class _KeptForeverBadge extends StatelessWidget {
-  const _KeptForeverBadge();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 48,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: AppColors.tint(AppColors.primary, .16),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.tint(AppColors.primary, .35)),
-      ),
-      child: Text(
-        '✦ ${context.l10n.home_keptForever}',
-        style: AppTypography.chipLabel.copyWith(color: AppColors.primary),
-      ),
     );
   }
 }

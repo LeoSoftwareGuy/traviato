@@ -16,6 +16,7 @@ import '../../../features/expense/presentation/pages/expenses_page.dart';
 import '../../../features/home/presentation/pages/home_page.dart';
 import '../../../features/home/presentation/widgets/home_shell_scaffold.dart';
 import '../../../features/journal/presentation/pages/journal_page.dart';
+import '../../../features/kept_memory/presentation/pages/kept_memory_page.dart';
 import '../../../features/profile/presentation/pages/profile_page.dart';
 import '../../../features/quest/presentation/pages/plan_page.dart';
 import '../../../features/subscription/presentation/pages/paywall_page.dart';
@@ -132,6 +133,12 @@ GoRouter router(Ref ref) {
         builder: (context, state) => const ExpenseComparePage(),
       ),
       GoRoute(
+        path: RoutePaths.keptMemory,
+        name: RouteNames.keptMemory,
+        builder: (context, state) =>
+            KeptMemoryPage(tripId: state.pathParameters['tripId']!),
+      ),
+      GoRoute(
         path: RoutePaths.tripPlan,
         name: RouteNames.tripPlan,
         builder: (context, state) =>
@@ -152,8 +159,12 @@ GoRouter router(Ref ref) {
       GoRoute(
         path: RoutePaths.tripWrapUp,
         name: RouteNames.tripWrapUp,
-        builder: (context, state) =>
-            WrapUpPage(tripId: state.pathParameters['tripId']!),
+        builder: (context, state) => WrapUpPage(
+          tripId: state.pathParameters['tripId']!,
+          openedFromMemory:
+              state.uri.queryParameters[RouteQuery.from] ==
+              RouteQuery.fromMemory,
+        ),
       ),
       GoRoute(
         path: RoutePaths.subscriptionOfferings,
