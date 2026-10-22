@@ -96,19 +96,13 @@ class _HomeContent extends ConsumerWidget {
   // depend on that succeeding; Wrap-up stays one tap away via Journal's
   // "View wrap-up ▸" button.
   //
-  // A kept memory's film is frozen (no generation), so its first open plays
-  // it; once watched through, every open lands on the Kept Memory page
-  // (#279).
-  void _openMemory(BuildContext context, TripCardEntity trip) {
-    final pathParameters = {'tripId': trip.id};
-    if (!trip.isKeptForever) {
-      context.pushNamed(RouteNames.tripJournal, pathParameters: pathParameters);
-    } else if (trip.playsFilmFirst) {
-      context.pushNamed(RouteNames.tripWrapUp, pathParameters: pathParameters);
-    } else {
-      context.pushNamed(RouteNames.keptMemory, pathParameters: pathParameters);
-    }
-  }
+  // A kept memory opens the Kept Memory page (#279, #281) — its film is one
+  // tap away there.
+  void _openMemory(BuildContext context, TripCardEntity trip) =>
+      context.pushNamed(
+        trip.isKeptForever ? RouteNames.keptMemory : RouteNames.tripJournal,
+        pathParameters: {'tripId': trip.id},
+      );
 
   // Long-press on a current/upcoming card (issue #115) — same sheet Plan's
   // ⋯/Edit button opens. HomeController already updates live off the

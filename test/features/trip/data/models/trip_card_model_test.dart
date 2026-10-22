@@ -23,8 +23,6 @@ void main() {
         'quest_count': 6,
         'stars': 7,
         'expense_total': 120.5,
-        'wrap_up_published_at': '2026-08-23T10:00:00Z',
-        'film_seen_at': '2026-08-23T10:05:00Z',
       });
 
       expect(model.id, 't1');
@@ -34,10 +32,6 @@ void main() {
       expect(model.durationDays, 5);
       expect(model.questCount, 6);
       expect(model.expenseTotal, 120.5);
-      expect(model.isKeptForever, isTrue);
-      // Film seen (#279): the next tap opens the Kept Memory page.
-      expect(model.filmSeenAt, DateTime.parse('2026-08-23T10:05:00Z'));
-      expect(model.playsFilmFirst, isFalse);
     });
 
     test('parses null dates and an unknown status as undated', () {

@@ -21,9 +21,6 @@ abstract interface class TripRemoteDataSource {
 
   Future<void> deleteTrip(String id);
 
-  /// Sets `trips.film_seen_at = now()` where it's still null (#279).
-  Future<void> markFilmSeen(String tripId);
-
   /// Removes every file under the trip's `trip-photos` folder
   /// (`{user_id}/{trip_id}/` — journal photos and a custom cover). The row
   /// cascade can't do this: Postgres can't delete storage objects (#170).

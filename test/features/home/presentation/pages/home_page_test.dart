@@ -354,11 +354,6 @@ void main() {
             builder: (context, state) => label('Journal'),
           ),
           GoRoute(
-            path: '/memory/:tripId/wrap-up',
-            name: RouteNames.tripWrapUp,
-            builder: (context, state) => label('Film'),
-          ),
-          GoRoute(
             path: '/memory/:tripId',
             name: RouteNames.keptMemory,
             builder: (context, state) => label('Memory page'),
@@ -387,16 +382,14 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    TripCardEntity finished({DateTime? keptAt, DateTime? filmSeenAt}) =>
-        buildTripCard(
-          id: 't1',
-          name: 'Atlas high road',
-          startDate: DateTime(2025, 1, 1),
-          endDate: DateTime(2025, 1, 9),
-          status: TripStatus.finished,
-          wrapUpPublishedAt: keptAt,
-          filmSeenAt: filmSeenAt,
-        );
+    TripCardEntity finished({DateTime? keptAt}) => buildTripCard(
+      id: 't1',
+      name: 'Atlas high road',
+      startDate: DateTime(2025, 1, 1),
+      endDate: DateTime(2025, 1, 9),
+      status: TripStatus.finished,
+      wrapUpPublishedAt: keptAt,
+    );
 
     testWidgets('not kept yet: opens Journal, not Wrap-up (#101)', (
       tester,
@@ -406,24 +399,10 @@ void main() {
       expect(find.text('Journal'), findsOneWidget);
     });
 
-    testWidgets('kept, film not seen yet: plays the film first (#279)', (
+    testWidgets('kept: opens the memory page straight away (#281)', (
       tester,
     ) async {
       await tapCard(tester, finished(keptAt: DateTime(2025, 1, 10)));
-
-      expect(find.text('Film'), findsOneWidget);
-    });
-
-    testWidgets('kept, film seen: opens the memory page (#279)', (
-      tester,
-    ) async {
-      await tapCard(
-        tester,
-        finished(
-          keptAt: DateTime(2025, 1, 10),
-          filmSeenAt: DateTime(2025, 1, 10),
-        ),
-      );
 
       expect(find.text('Memory page'), findsOneWidget);
     });

@@ -160,10 +160,7 @@ by the `handle_new_user()` trigger.
 `country_code` (ISO-3166-1 alpha-2) · `start_date`/`end_date` (check end≥start) ·
 `vibes text[]` default `{}` · `cover_image_path` (`asset:<id>` bundled cover,
 or a `trip-photos` storage path — see Storage section) ·
-`created_at`/`updated_at` (auto via trigger) · `film_seen_at` (#279 — when
-the kept memory's wrap-up film was first watched through; null = Home's next
-tap plays the film, set = it opens the Kept Memory page. Backfilled for
-memories kept before it existed).
+`created_at`/`updated_at` (auto via trigger).
 RLS: full owner-only CRUD. Index: `trips_user_id_idx` on `user_id` (#131 —
 added 2026-09-13; every RLS-filtered read of this table was previously an
 unindexed sequential scan, unlike every child table).
@@ -254,8 +251,7 @@ RLS: select-own; update-own grant is **column-scoped to `published_at` only**
   — #131, added at the end since `create or replace view` can't insert a
   column mid-list without renaming every column after it; replaced Home's
   per-card `questCountForTripProvider`, which fetched every full quest row
-  just to count them) + `film_seen_at` (#279, appended last for the same
-  reason).
+  just to count them).
 - **`profile_stats_view`** — per profile: `memories_count`, `places_count`
   (distinct place_text across quests ∪ photos), `countries_count`,
   `days_logged` (distinct day_date across day_notes ∪ photos), `stars_total`,
