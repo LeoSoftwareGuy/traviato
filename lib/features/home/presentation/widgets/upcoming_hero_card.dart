@@ -34,15 +34,19 @@ class UpcomingHeroCard extends ConsumerWidget {
   final VoidCallback onChecklistTap;
   final VoidCallback onJournalTap;
   final VoidCallback onAddExpenseTap;
-  // Opens the Manage-memory sheet (issue #115) — the card has no tap
-  // navigation of its own, only a long-press one, so this doesn't compete
-  // with the action buttons' or checklist row's own taps in the gesture
-  // arena.
+  // Opens the Manage-memory sheet (issue #115). The cover, buttons and
+  // checklist row each own a tap; the long-press is the card's only
+  // gesture, so it doesn't compete with them in the gesture arena.
   final VoidCallback onLongPress;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final progress = ref.watch(checklistProgressForTripProvider(trip.id)).value;
+    // Before the start day there's nothing to journal yet, so the cover is
+    // the way into Plan and the Plan/Journal buttons go away. From the
+    // start day on, the cover opens Journal and all three buttons show
+    // (#287).
+    final isUnderway = trip.status == TripStatus.current;
 
     return GestureDetector(
       onLongPress: () {
@@ -66,9 +70,11 @@ class UpcomingHeroCard extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              height: 206,
-              width: double.infinity,
+            _CoverTapTarget(
+              label: isUnderway
+                  ? context.l10n.home_coverOpenJournal
+                  : context.l10n.home_coverOpenPlan,
+              onTap: isUnderway ? onJournalTap : onPlanTap,
               child: PhotoScrim(
                 warm: true,
                 image: TripCoverImage(imagePath: trip.coverImagePath),
@@ -100,31 +106,33 @@ class UpcomingHeroCard extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      Expanded(
-                        child: _ActionButton(
-                          label: context.l10n.home_actionPlan,
-                          onTap: onPlanTap,
+                      if (isUnderway) ...[
+                        Expanded(
+                          child: _ActionButton(
+                            label: context.l10n.home_actionPlan,
+                            onTap: onPlanTap,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 7),
+                        const SizedBox(width: 7),
+                      ],
                       Expanded(
                         child: _ActionButton(
                           label: context.l10n.home_actionExpenses,
                           onTap: onAddExpenseTap,
                         ),
                       ),
-                      const SizedBox(width: 7),
-                      Expanded(
-                        // Primary only while the memory is happening —
-                        // that's when the journal is the day's main action
-                        // (functionality.md § 3). An upcoming memory shows
-                        // all three at rest alike (#177).
-                        child: _ActionButton(
-                          label: context.l10n.home_actionJournal,
-                          onTap: onJournalTap,
-                          primary: trip.status == TripStatus.current,
+                      if (isUnderway) ...[
+                        const SizedBox(width: 7),
+                        Expanded(
+                          // The day's main action while the memory is
+                          // happening (functionality.md § 3).
+                          child: _ActionButton(
+                            label: context.l10n.home_actionJournal,
+                            onTap: onJournalTap,
+                            primary: true,
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: AppSpacing.sm),
@@ -134,6 +142,48 @@ class UpcomingHeroCard extends ConsumerWidget {
                     onTap: onChecklistTap,
                   ),
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The 206-tall cover, tappable with an ink overlay painted above the
+/// photo — an InkWell under the opaque image would never show.
+class _CoverTapTarget extends StatelessWidget {
+  const _CoverTapTarget({
+    required this.label,
+    required this.onTap,
+    required this.child,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      child: SizedBox(
+        height: 206,
+        width: double.infinity,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            child,
+            Positioned.fill(
+              child: Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  onTap: onTap,
+                  splashColor: AppColors.tint(AppColors.primary, .18),
+                  highlightColor: AppColors.tint(AppColors.background, .12),
+                ),
               ),
             ),
           ],

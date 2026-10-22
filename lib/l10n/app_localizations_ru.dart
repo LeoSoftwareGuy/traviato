@@ -445,6 +445,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get home_actionJournal => 'Дневник';
 
   @override
+  String get home_coverOpenPlan => 'Открыть план';
+
+  @override
+  String get home_coverOpenJournal => 'Открыть дневник';
+
+  @override
   String get home_checklist => 'Чек-лист';
 
   @override

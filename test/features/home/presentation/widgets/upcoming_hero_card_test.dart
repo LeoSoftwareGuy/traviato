@@ -13,6 +13,12 @@ import '../../../trip/fakes/fake_trip_repository.dart';
 
 const _labels = ['Plan', 'Expenses', 'Journal'];
 
+/// The action buttons each state shows (#287).
+const _labelsFor = {
+  TripStatus.upcoming: ['Expenses'],
+  TripStatus.current: _labels,
+};
+
 Future<List<String>> _pump(WidgetTester tester, TripStatus status) async {
   final taps = <String>[];
   await tester.pumpWidget(
@@ -68,17 +74,38 @@ PaintPattern _paintsHighlightOf(Color tint) =>
     });
 
 void main() {
-  testWidgets('upcoming memory: Journal rests in the same neutral fill as '
-      'Plan and Expenses, not the accent', (tester) async {
+  testWidgets('upcoming memory: only Expenses shows, in the neutral fill — '
+      'no Plan or Journal button (#287)', (tester) async {
     await _pump(tester, TripStatus.upcoming);
 
-    for (final label in _labels) {
-      expect(
-        _buttonMaterial(tester, label).color,
-        AppColors.surfaceDisabled,
-        reason: '$label resting fill',
-      );
-    }
+    expect(find.text('Plan'), findsNothing);
+    expect(find.text('Journal'), findsNothing);
+    expect(
+      _buttonMaterial(tester, 'Expenses').color,
+      AppColors.surfaceDisabled,
+    );
+  });
+
+  testWidgets('upcoming memory: tapping the cover opens Plan (#287)', (
+    tester,
+  ) async {
+    final taps = await _pump(tester, TripStatus.upcoming);
+
+    await tester.tap(find.bySemanticsLabel(RegExp('^Open plan')));
+    await tester.pumpAndSettle();
+
+    expect(taps, ['Plan']);
+  });
+
+  testWidgets('current memory: tapping the cover opens Journal (#287)', (
+    tester,
+  ) async {
+    final taps = await _pump(tester, TripStatus.current);
+
+    await tester.tap(find.bySemanticsLabel(RegExp('^Open journal')));
+    await tester.pumpAndSettle();
+
+    expect(taps, ['Journal']);
   });
 
   testWidgets('current memory: Journal stays the primary action', (
@@ -95,7 +122,7 @@ void main() {
   });
 
   for (final status in [TripStatus.upcoming, TripStatus.current]) {
-    for (final label in _labels) {
+    for (final label in _labelsFor[status]!) {
       testWidgets('${status.name}: pressing $label paints a visible highlight '
           'and the tap still fires', (tester) async {
         final taps = await _pump(tester, status);
@@ -109,8 +136,6 @@ void main() {
         final gesture = await tester.startGesture(
           tester.getCenter(find.text(label)),
         );
-        // Tap-down waits out the press timeout (the card sits in a
-        // scrollable); then the highlight fades in over its own duration.
         // Tap-down waits out the press timeout (the card sits in a
         // scrollable), then the highlight fades in. Both land well inside
         // the card's long-press timeout, which would cancel the tap.

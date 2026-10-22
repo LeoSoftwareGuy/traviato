@@ -307,6 +307,14 @@
   "@home_actionJournal": {
     "description": "Hero action button. @maxLength 10"
   },
+  "home_coverOpenPlan": "Open plan",
+  "@home_coverOpenPlan": {
+    "description": "Screen-reader label for the hero card cover tap."
+  },
+  "home_coverOpenJournal": "Open journal",
+  "@home_coverOpenJournal": {
+    "description": "Screen-reader label for the hero card cover tap."
+  },
   "home_checklist": "Checklist",
   "home_packedProgress": "{packed} of {total} packed →",
   "@home_packedProgress": {

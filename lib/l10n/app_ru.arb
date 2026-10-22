@@ -436,6 +436,14 @@
   "@home_actionJournal": {
     "x-review": "pending"
   },
+  "home_coverOpenPlan": "Открыть план",
+  "@home_coverOpenPlan": {
+    "x-review": "pending"
+  },
+  "home_coverOpenJournal": "Открыть дневник",
+  "@home_coverOpenJournal": {
+    "x-review": "pending"
+  },
   "home_checklist": "Чек-лист",
   "@home_checklist": {
     "x-review": "pending"
