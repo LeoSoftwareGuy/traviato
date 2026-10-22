@@ -56,6 +56,11 @@ abstract class AppColors {
   // `scrim`'s base color, used pervasively across the film's chrome.
   static const Color filmBackground = Color(0xFF07091A);
 
+  // --- Kept Memory page (#279, docs/design/kept-memory) -----------------
+  // Day-note body text — a warm off-white a step softer than textPrimary,
+  // so long notes read as quoted voice rather than UI.
+  static const Color noteText = Color(0xFFE8E5DD);
+
   // --- Paper (Journal note page, docs/design/JOURNAL_NOTE_PAGETURN_SPEC.md
   // §2, #205) ------------------------------------------------------------
   // The notebook is a light island in the dark app; the full-screen

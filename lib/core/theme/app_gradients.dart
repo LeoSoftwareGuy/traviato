@@ -4,7 +4,8 @@ import 'app_colors.dart';
 
 /// The three gradient recipes used across the redesign — screen ground,
 /// photo scrim, and the primary→coral CTA fill. See
-/// `docs/design/README.md` § Gradients. Nothing else is a gradient.
+/// `docs/design/README.md` § Gradients — plus the Kept Memory hero scrim
+/// (#279). Nothing else is a gradient.
 abstract class AppGradients {
   // Screen-ground top colors, per screen group.
   static const Color groundTopHome = Color(0xFF1E1B45);
@@ -48,6 +49,20 @@ abstract class AppGradients {
       AppColors.background.withValues(alpha: .1),
       warm ? const Color(0x28FFC88C) : Colors.transparent,
     ],
+  );
+
+  /// Kept Memory hero scrim (#279): solid [AppColors.background] at the
+  /// bottom edge, .55 by the middle, a light .15 veil at the top — deeper
+  /// than [photoScrim] so the title sits on the cover like a book jacket.
+  static LinearGradient get keptMemoryHeroScrim => LinearGradient(
+    begin: Alignment.bottomCenter,
+    end: Alignment.topCenter,
+    colors: [
+      AppColors.background,
+      AppColors.background.withValues(alpha: .55),
+      AppColors.background.withValues(alpha: .15),
+    ],
+    stops: const [.04, .46, 1],
   );
 
   /// Primary CTA / star-bar gradient — FAB, packing-progress bar, "View

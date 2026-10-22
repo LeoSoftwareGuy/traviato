@@ -52,7 +52,7 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   "Nothing planned yet"), **whole card taps into Plan** (plan months ahead).
 - **Kept forever**: finished-memory grid, ▸ Recap badge, days + photo count.
   Tap: a memory not kept yet → Journal (#101); a kept one → its film the
-  first time, then the **Kept Memory page** (#279) every time after.
+  first time, then the **Kept Memory page** (§17) every time after (#279).
 - Bottom nav: Home · **FAB ➕** · Expenses.
 
 ## 4. Create memory ✅ — redesigned, + cover picker
@@ -199,6 +199,18 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   Countries · Days · Stars); achievements 2-col grid — earned vs locked with
   progress bar + mono progress line ("9 OF 14 DAYS"). Canonical badge set: our
   seeded 8 (design's sample names are placeholders where they differ).
+
+## 17. Kept Memory page — NEW (#279)
+
+- `/memory/:tripId`, design `docs/design/kept-memory/` (option 1b). Every
+  photo and note of a kept memory, day by day, with the film on top.
+- Hero (cover, KEPT FOREVER · dates, title, days · photos · notes · ✦),
+  **Play the film** (ends on "Back to memory") and **Slideshow**.
+- One chapter per day with content: photo strip (bonus-task photos marked
+  ✦) and every note in full. The plan, read-only and collapsed, at the end.
+- First open plays the film (its HUD offers "Open memory");
+  `trips.film_seen_at` is set once half of it has played, and every open
+  after that lands here. Read-only — no editing from this page.
 
 ## Out of scope for MVP
 

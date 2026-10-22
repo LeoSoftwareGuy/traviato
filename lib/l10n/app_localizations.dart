@@ -2749,6 +2749,60 @@ abstract class AppLocalizations {
   /// **'Back to memory'**
   String get wrapUp_backToMemory;
 
+  /// Kept Memory hero meta segment (#279); shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 note} other{{count} notes}}'**
+  String keptMemory_noteCount(int count);
+
+  /// No description provided for @keptMemory_playFilm.
+  ///
+  /// In en, this message translates to:
+  /// **'Play the film'**
+  String get keptMemory_playFilm;
+
+  /// Kept Memory page button and photo viewer toggle: plays every photo automatically.
+  ///
+  /// In en, this message translates to:
+  /// **'Slideshow'**
+  String get keptMemory_slideshow;
+
+  /// Day chapter header, followed by · and the date; shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day}'**
+  String keptMemory_day(int day);
+
+  /// No description provided for @keptMemory_plan.
+  ///
+  /// In en, this message translates to:
+  /// **'The plan'**
+  String get keptMemory_plan;
+
+  /// Plan card header count; shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} done'**
+  String keptMemory_planDone(int done, int total);
+
+  /// Short day label at the end of a plan row (D2 = day 2).
+  ///
+  /// In en, this message translates to:
+  /// **'D{day}'**
+  String keptMemory_planDay(int day);
+
+  /// Kept Memory page footer; shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept forever · since {date}'**
+  String keptMemory_since(String date);
+
+  /// Semantics label for the hero's ⋯ button.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get keptMemory_more;
+
   /// Film footnote label under a number.
   ///
   /// In en, this message translates to:

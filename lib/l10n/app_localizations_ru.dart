@@ -1768,6 +1768,49 @@ class AppLocalizationsRu extends AppLocalizations {
   String get wrapUp_backToMemory => 'Back to memory';
 
   @override
+  String keptMemory_noteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count notes',
+      one: '1 note',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get keptMemory_playFilm => 'Play the film';
+
+  @override
+  String get keptMemory_slideshow => 'Slideshow';
+
+  @override
+  String keptMemory_day(int day) {
+    return 'Day $day';
+  }
+
+  @override
+  String get keptMemory_plan => 'The plan';
+
+  @override
+  String keptMemory_planDone(int done, int total) {
+    return '$done of $total done';
+  }
+
+  @override
+  String keptMemory_planDay(int day) {
+    return 'D$day';
+  }
+
+  @override
+  String keptMemory_since(String date) {
+    return 'Kept forever · since $date';
+  }
+
+  @override
+  String get keptMemory_more => 'More';
+
+  @override
   String wrapUp_photographs(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
