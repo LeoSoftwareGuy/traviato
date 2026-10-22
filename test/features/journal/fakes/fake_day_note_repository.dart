@@ -65,8 +65,9 @@ DayNoteEntity buildDayNoteEntity({
   String tripId = 't1',
   DateTime? dayDate,
   String content = 'Great day.',
+  DateTime? createdAt,
 }) {
-  final now = DateTime(2026, 1, 1);
+  final now = createdAt ?? DateTime(2026, 1, 1);
   return DayNoteEntity(
     id: id,
     tripId: tripId,
