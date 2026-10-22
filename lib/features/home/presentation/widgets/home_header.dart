@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../profile/presentation/widgets/profile_avatar.dart';
 
 /// "MON · 24 AUG" — today's date as the header's mono eyebrow, in the UI
 /// language: "ПН · 24 АВГ.", "E · 24. AUG" (#220).
@@ -26,6 +27,7 @@ String homeDateEyebrow(AppLocalizations l10n) {
 class HomeHeader extends StatelessWidget {
   const HomeHeader({
     required this.username,
+    this.avatarUrl,
     required this.stars,
     required this.onAvatarTap,
     required this.onStarsTap,
@@ -35,6 +37,9 @@ class HomeHeader extends StatelessWidget {
 
   /// Null or blank when the profile has no name (Apple sign-in can hide it).
   final String? username;
+
+  /// The profile photo (#283) — null shows the name's initial.
+  final String? avatarUrl;
   final int stars;
   final VoidCallback onAvatarTap;
   final VoidCallback onStarsTap;
@@ -91,7 +96,7 @@ class HomeHeader extends StatelessWidget {
           showDot: hasOpenBonusTasks,
         ),
         const SizedBox(width: AppSpacing.sm),
-        _Avatar(username: name, onTap: onAvatarTap),
+        _Avatar(username: name, avatarUrl: avatarUrl, onTap: onAvatarTap),
       ],
     );
   }
@@ -167,33 +172,33 @@ class _StarsBadge extends StatelessWidget {
   }
 }
 
+/// The profile photo — the same [ProfileAvatar] the Profile screen shows
+/// (#283) — falling back to the name's initial.
 class _Avatar extends StatelessWidget {
-  const _Avatar({required this.username, required this.onTap});
+  const _Avatar({
+    required this.username,
+    required this.avatarUrl,
+    required this.onTap,
+  });
 
   final String username;
+  final String? avatarUrl;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final initial = username.isEmpty ? '?' : username[0].toUpperCase();
     return InkWell(
+      key: const Key('home-avatar'),
       onTap: onTap,
       customBorder: const CircleBorder(),
-      child: Container(
-        width: 38,
-        height: 38,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: AppColors.tint(AppColors.primary, .5),
-            width: 1.5,
-          ),
-        ),
-        child: Text(
-          initial,
-          style: AppTypography.bodyInput.copyWith(fontWeight: FontWeight.w600),
+      child: ProfileAvatar(
+        avatarUrl: avatarUrl,
+        username: username,
+        size: 38,
+        borderWidth: 1.5,
+        borderColor: AppColors.tint(AppColors.primary, .5),
+        initialsStyle: AppTypography.bodyInput.copyWith(
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

@@ -9,18 +9,29 @@ import '../providers/profile_providers.dart';
 /// The profile avatar — either an external OAuth picture URL, this app's
 /// own `avatars`-bucket upload (signed for display, a private bucket), or
 /// initials over a plain fill when neither is set. `docs/design/README.md`
-/// § 11.
+/// § 11. Also Home's header avatar (#283), smaller and with Home's own ring
+/// and initial styling.
 class ProfileAvatar extends ConsumerWidget {
   const ProfileAvatar({
     required this.avatarUrl,
     required this.username,
     this.size = 86,
+    this.borderWidth = 2,
+    this.borderColor,
+    this.initialsStyle,
     super.key,
   });
 
   final String? avatarUrl;
   final String? username;
   final double size;
+  final double borderWidth;
+
+  /// Defaults to primary at 55%.
+  final Color? borderColor;
+
+  /// Defaults to the Profile screen's big primary serif initial.
+  final TextStyle? initialsStyle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -32,8 +43,8 @@ class ProfileAvatar extends ConsumerWidget {
         shape: BoxShape.circle,
         color: AppColors.surface,
         border: Border.all(
-          color: AppColors.tint(AppColors.primary, .55),
-          width: 2,
+          color: borderColor ?? AppColors.tint(AppColors.primary, .55),
+          width: borderWidth,
         ),
       ),
       child: _image(ref),
@@ -42,7 +53,9 @@ class ProfileAvatar extends ConsumerWidget {
 
   Widget _image(WidgetRef ref) {
     final url = avatarUrl;
-    if (url == null || url.isEmpty) return _Initials(username: username);
+    if (url == null || url.isEmpty) {
+      return _Initials(username: username, style: initialsStyle);
+    }
 
     // An OAuth provider's picture is already a full external URL — the
     // avatars bucket is private, so anything else is our own storage path
@@ -54,30 +67,33 @@ class ProfileAvatar extends ConsumerWidget {
         placeholder: (context, url) => const ColoredBox(
           color: AppColors.surface,
         ),
-        errorWidget: (context, url, error) => _Initials(username: username),
+        errorWidget: (context, url, error) =>
+            _Initials(username: username, style: initialsStyle),
       );
     }
 
     final signedUrl = ref.watch(avatarImageUrlProvider(url));
     return signedUrl.when(
       loading: () => const ColoredBox(color: AppColors.surface),
-      error: (_, _) => _Initials(username: username),
+      error: (_, _) => _Initials(username: username, style: initialsStyle),
       data: (resolvedUrl) => CachedNetworkImage(
         imageUrl: resolvedUrl,
         fit: BoxFit.cover,
         placeholder: (context, url) => const ColoredBox(
           color: AppColors.surface,
         ),
-        errorWidget: (context, url, error) => _Initials(username: username),
+        errorWidget: (context, url, error) =>
+            _Initials(username: username, style: initialsStyle),
       ),
     );
   }
 }
 
 class _Initials extends StatelessWidget {
-  const _Initials({required this.username});
+  const _Initials({required this.username, this.style});
 
   final String? username;
+  final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +106,9 @@ class _Initials extends StatelessWidget {
       child: Center(
         child: Text(
           initial,
-          style: AppTypography.bigNumber.copyWith(color: AppColors.primary),
+          style:
+              style ??
+              AppTypography.bigNumber.copyWith(color: AppColors.primary),
         ),
       ),
     );
