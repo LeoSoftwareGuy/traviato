@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,6 +17,7 @@ import '../../../settings/presentation/widgets/language_settings_row.dart';
 import '../../../subscription/domain/entities/subscription_offering_entity.dart';
 import '../controllers/profile_controller.dart';
 import '../controllers/profile_state.dart';
+import '../mutations/profile_mutations.dart';
 import '../widgets/achievements_grid.dart';
 import '../widgets/profile_edit_sheet.dart';
 import '../widgets/profile_header.dart';
@@ -115,6 +118,7 @@ class _ProfileContent extends ConsumerWidget {
           profile: state.profile,
           stars: state.stats.stars,
           onEdit: () => ProfileEditSheet.show(context),
+          onAvatarPicked: (bytes) => _uploadAvatar(context, ref, bytes),
           entitlement: state.entitlement,
           periodLabel: periodLabel,
         ),
@@ -148,6 +152,25 @@ class _ProfileContent extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _uploadAvatar(
+    BuildContext context,
+    WidgetRef ref,
+    Uint8List bytes,
+  ) async {
+    // Caught here rather than via a page-level ref.listen on the mutation:
+    // the edit sheet already listens to it, and a second listener would
+    // show its uploads' errors twice.
+    try {
+      await runUploadAvatar(ref: ref, bytes: bytes);
+    } catch (error) {
+      if (!context.mounted) return;
+      showErrorSnackbar(
+        context,
+        message: presentationFailureMessage(error, context.l10n),
+      );
+    }
   }
 
   Future<void> _logout(WidgetRef ref) async {

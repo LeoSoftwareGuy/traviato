@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -8,11 +10,11 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../subscription/domain/entities/entitlement_entity.dart';
 import '../../domain/entities/profile_entity.dart';
-import 'profile_avatar.dart';
+import 'avatar_upload_tile.dart';
 import 'tier_pill.dart';
 
 /// Centred avatar + stars pill, name/@handle, bio, joined date, and the Edit
-/// entry point (`docs/design/README.md` § 11). `username` is the app's only
+/// entry point. Tapping the avatar replaces it straight away (#286) (`docs/design/README.md` § 11). `username` is the app's only
 /// identity field — rendered once plain as the name, once `@`-prefixed as
 /// the handle (issue #96's plan comment; the mockup's separate name/handle
 /// fields don't exist in the schema).
@@ -21,6 +23,7 @@ class ProfileHeader extends StatelessWidget {
     required this.profile,
     required this.stars,
     required this.onEdit,
+    required this.onAvatarPicked,
     required this.entitlement,
     this.periodLabel,
     super.key,
@@ -29,6 +32,7 @@ class ProfileHeader extends StatelessWidget {
   final ProfileEntity profile;
   final int stars;
   final VoidCallback onEdit;
+  final Future<void> Function(Uint8List bytes) onAvatarPicked;
   final EntitlementEntity entitlement;
 
   /// e.g. "ANNUAL" — see [TierPill].
@@ -52,7 +56,13 @@ class ProfileHeader extends StatelessWidget {
         Stack(
           clipBehavior: Clip.none,
           children: [
-            ProfileAvatar(avatarUrl: profile.avatarUrl, username: username),
+            AvatarUploadTile(
+              avatarUrl: profile.avatarUrl,
+              username: username,
+              onPicked: onAvatarPicked,
+              size: 86,
+              showBadge: false,
+            ),
             Positioned(
               right: -8,
               bottom: -6,
