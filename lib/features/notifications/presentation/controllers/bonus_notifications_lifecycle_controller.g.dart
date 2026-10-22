@@ -69,7 +69,7 @@ final class BonusNotificationsLifecycleControllerProvider
 }
 
 String _$bonusNotificationsLifecycleControllerHash() =>
-    r'10b07307b13524d3558cc6cbac6836b6b8de5078';
+    r'7270b49a6f53b7dad0a090a9af364ceb579cd5d5';
 
 /// Owns the whole local-notification lifecycle for the bonus daily-tray
 /// loop (issue #65): plugin init, the arrival-notification reaction to

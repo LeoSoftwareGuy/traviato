@@ -57,15 +57,6 @@ class HomeController extends _$HomeController {
             ],
           ),
         );
-      case FilmSeenDispatched(:final tripId, :final seenAt):
-        state = AsyncData(
-          current.copyWith(
-            trips: [
-              for (final t in current.trips)
-                if (t.id == tripId) t.copyWithFilmSeen(seenAt) else t,
-            ],
-          ),
-        );
       case StarsAwardedDispatched():
       case EntitlementUpdatedDispatched():
       case ProfileUpdatedDispatched():

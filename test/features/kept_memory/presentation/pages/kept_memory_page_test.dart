@@ -34,7 +34,6 @@ final _trip = buildTripCard(
   status: TripStatus.finished,
   stars: 46,
   wrapUpPublishedAt: DateTime(2026, 8, 17, 12),
-  filmSeenAt: DateTime(2026, 8, 17, 12),
 );
 
 // imageUrl stays null throughout: thumbs render their placeholder, so no

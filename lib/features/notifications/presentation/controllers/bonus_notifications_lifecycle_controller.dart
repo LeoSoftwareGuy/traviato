@@ -98,7 +98,6 @@ class BonusNotificationsLifecycleController
         );
       case StarsAwardedDispatched():
       case WrapUpPublishedDispatched():
-      case FilmSeenDispatched():
       case EntitlementUpdatedDispatched():
       case ProfileUpdatedDispatched():
       // Not relevant to the notification schedule directly — the next

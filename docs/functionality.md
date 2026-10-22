@@ -51,8 +51,8 @@ set. Mockup copy showing other numbers is adjusted at implementation.
 - **Coming up**: cards with countdown badge, planning state ("6 quests planned" /
   "Nothing planned yet"), **whole card taps into Plan** (plan months ahead).
 - **Kept forever**: finished-memory grid, ▸ Recap badge, days + photo count.
-  Tap: a memory not kept yet → Journal (#101); a kept one → its film the
-  first time, then the **Kept Memory page** (§17) every time after (#279).
+  Tap: a memory not kept yet → Journal (#101); a kept one → the **Kept
+  Memory page** (§17, #279, #281).
 - Bottom nav: Home · **FAB ➕** · Expenses.
 
 ## 4. Create memory ✅ — redesigned, + cover picker
@@ -211,9 +211,9 @@ set. Mockup copy showing other numbers is adjusted at implementation.
 - Full-screen viewer over all photos: swipe / tap zones, pinch, swipe down
   to close, progress split by day, caption + bonus task; slideshow every
   3.2s with crossfade and slow zoom (no zoom under reduced motion).
-- First open plays the film (its HUD offers "Open memory");
-  `trips.film_seen_at` is set once half of it has played, and every open
-  after that lands here. Read-only — no editing from this page.
+- Home opens it directly for every kept memory (#281). A kept film opened
+  elsewhere (Journal → View wrap-up) offers "Open memory" in its HUD.
+  Read-only — no editing from this page.
 
 ## Out of scope for MVP
 

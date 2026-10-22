@@ -118,7 +118,6 @@ class ProfileController extends _$ProfileController {
       case TripCreatedDispatched():
       case TripUpdatedDispatched():
       case WrapUpPublishedDispatched():
-      case FilmSeenDispatched():
       // Published by this feature's own mutations, which already apply the
       // new profile via applyProfileUpdated.
       case ProfileUpdatedDispatched():
