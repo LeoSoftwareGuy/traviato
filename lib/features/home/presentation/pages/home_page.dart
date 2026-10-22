@@ -19,7 +19,7 @@ import '../../../trip/presentation/widgets/delete_memory_sheet.dart';
 import '../../domain/entities/profile_stats_entity.dart';
 import '../controllers/home_controller.dart';
 import '../controllers/home_state.dart';
-import '../controllers/home_username_controller.dart';
+import '../controllers/home_profile_controller.dart';
 import '../controllers/profile_stats_controller.dart';
 import '../widgets/coming_up_section.dart';
 import '../widgets/home_header.dart';
@@ -33,7 +33,7 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // A failed or in-flight read just greets without a name ("Hello!").
-    final username = ref.watch(homeUsernameControllerProvider).value;
+    final profile = ref.watch(homeProfileControllerProvider).value;
     // Transient: a stats-fetch failure shouldn't block the whole Home
     // screen (guidelines doc 03) — falls back to zero until it resolves.
     final stats =
@@ -53,7 +53,8 @@ class HomePage extends ConsumerWidget {
             onRetry: () => ref.invalidate(homeControllerProvider),
           ),
           data: (state) => _HomeContent(
-            username: username,
+            username: profile?.username,
+            avatarUrl: profile?.avatarUrl,
             stars: stats.stars,
             memories: stats.memories,
             places: stats.places,
@@ -69,6 +70,7 @@ class HomePage extends ConsumerWidget {
 class _HomeContent extends ConsumerWidget {
   const _HomeContent({
     required this.username,
+    required this.avatarUrl,
     required this.stars,
     required this.memories,
     required this.places,
@@ -77,6 +79,7 @@ class _HomeContent extends ConsumerWidget {
   });
 
   final String? username;
+  final String? avatarUrl;
   final int stars;
   final int memories;
   final int places;
@@ -155,6 +158,7 @@ class _HomeContent extends ConsumerWidget {
       children: [
         HomeHeader(
           username: username,
+          avatarUrl: avatarUrl,
           stars: stars,
           onAvatarTap: () => context.pushNamed(RouteNames.profile),
           hasOpenBonusTasks: hasOpenBonusTasks,
