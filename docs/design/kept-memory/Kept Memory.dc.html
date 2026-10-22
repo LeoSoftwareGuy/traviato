@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Roboto:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#07091A;color:#FBFAF6;font-family:Roboto,sans-serif}
+a{color:#F29520;text-decoration:none}a:hover{color:#FFB055}
+@keyframes kmFade{from{opacity:0}to{opacity:1}}
+@keyframes kmKb{from{transform:scale(1.02)}to{transform:scale(1.12)}}
+</style>
+</helmet>
+
+<section style="padding:56px 64px 80px;display:flex;flex-direction:column;gap:28px">
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:880px">
+    <div style="font:500 11px 'JetBrains Mono',monospace;letter-spacing:.15em;color:#6D6D7A">TURN 1 · KEPT MEMORY PAGE</div>
+    <div style="font:400 40px/1.1 Fraunces,serif">Everything from a memory, <em style="color:#F2A65A">with the film on top</em></div>
+    <div style="font:400 14px/1.65 Roboto;color:#92909E;text-wrap:pretty">Tap a kept memory on Home. The <strong style="color:#FBFAF6;font-weight:500">first time</strong>, the film plays straight away and ends on "Open memory". <strong style="color:#FBFAF6;font-weight:500">After that</strong>, the tap opens this page. Play the film, or tap any photo to open the full-screen viewer (tap the left or right side to move; "Slideshow" plays them automatically).</div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:56px;align-items:flex-start">
+
+    <!-- ═════ 1a TABS ═════ -->
+    <div id="1a" style="display:flex;flex-direction:column;gap:16px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="padding:4px 10px;border-radius:999px;background:#F29520;color:#0C0F27;font:600 12px 'JetBrains Mono',monospace">1a</span>
+        <span style="font:400 19px Fraunces,serif">Tabs: Photos · Journal · Plan</span>
+      </div>
+      <div style="font:400 12.5px/1.55 Roboto;color:#92909E">Sorted by type. Photos open first: every photo, grouped by day. Fastest way to find one picture.</div>
+
+      <div style="position:relative;width:390px;height:844px;border-radius:46px;overflow:hidden;border:1px solid rgba(174,172,183,.18);box-shadow:0 30px 80px rgba(0,0,0,.5);background:radial-gradient(110% 40% at 50% 0%,#241C4E 0%,#0F1230 44%,#0C0F27 100%)">
+        <div style="height:100%;overflow-y:auto">
+          <div style="position:relative;height:330px">
+            <img src="journal/balloon_1.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,#0C0F27 4%,rgba(12,15,39,.55) 46%,rgba(12,15,39,.15) 100%)"></div>
+            <div style="position:absolute;top:54px;left:18px;right:18px;display:flex;justify-content:space-between">
+              <span style="width:38px;height:38px;border-radius:50%;background:rgba(12,15,39,.6);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font:500 17px Roboto;cursor:pointer">←</span>
+              <span style="width:38px;height:38px;border-radius:50%;background:rgba(12,15,39,.6);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font:600 15px Roboto;cursor:pointer">⋯</span>
+            </div>
+            <div style="position:absolute;left:22px;right:22px;bottom:16px;display:flex;flex-direction:column;gap:6px">
+              <div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.15em;color:#F2A65A">KEPT FOREVER · 12–16 AUG 2026</div>
+              <div style="font:400 34px/1.05 Fraunces,serif">One long road</div>
+              <div style="font:500 10px 'JetBrains Mono',monospace;color:#AEACB7;letter-spacing:.04em">5 DAYS · {{ photoCount }} PHOTOS · {{ noteCount }} NOTES · ✦46</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;padding:14px 22px 0">
+            <a href="Wrap-Up Film.dc.html" style="flex:1;display:flex;align-items:center;justify-content:center;gap:9px;padding:14px;border-radius:16px;background:#F29520;color:#0C0F27;font:600 14px Roboto" style-hover="filter:brightness(1.08);color:#0C0F27">▶ Play the film <span style="font:500 10.5px 'JetBrains Mono',monospace;opacity:.7">1:19</span></a>
+            <div onClick="{{ slideA }}" style="display:flex;align-items:center;gap:7px;padding:14px 16px;border-radius:16px;border:1px solid rgba(174,172,183,.28);font:600 13px Roboto;color:#FBFAF6;cursor:pointer" style-hover="border-color:#F29520">Slideshow</div>
+          </div>
+
+          <div style="position:sticky;top:0;z-index:5;padding:16px 22px 12px;background:#0C0F27">
+            <div style="display:flex;gap:4px;padding:4px;border-radius:14px;background:rgba(19,23,54,.8);border:1px solid rgba(29,34,72,.9)">
+              <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+                <div onClick="{{ t.go }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 4px;border-radius:10px;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }};font:600 12.5px Roboto">{{ t.label }}<span style="font:500 9.5px 'JetBrains Mono',monospace;opacity:.65">{{ t.n }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+
+          <sc-if value="{{ isPhotos }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:22px;padding:4px 0 40px">
+              <sc-for list="{{ days }}" as="day" hint-placeholder-count="2">
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <div style="padding:0 22px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                    <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+                      <span style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.14em;color:#6D6D7A">DAY {{ day.d }} · {{ day.date }}</span>
+                      <span style="font:400 16px Fraunces,serif;color:#FBFAF6">{{ day.title }}</span>
+                    </div>
+                    <span style="flex:none;font:500 10px 'JetBrains Mono',monospace;color:#6D6D7A">{{ day.n }}</span>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px">
+                    <sc-for list="{{ day.photos }}" as="p" hint-placeholder-count="6">
+                      <div onClick="{{ p.openA }}" style="position:relative;aspect-ratio:1;overflow:hidden;cursor:pointer;background:#131736">
+                        <img src="{{ p.src }}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block">
+                        <sc-if value="{{ p.tag }}">
+                          <span style="position:absolute;top:5px;right:5px;padding:2px 6px;border-radius:999px;background:rgba(12,15,39,.72);font:600 9px Roboto;color:#F29520">✦</span>
+                        </sc-if>
+                        <sc-if value="{{ p.note }}">
+                          <span style="position:absolute;bottom:5px;left:5px;padding:2px 6px;border-radius:999px;background:rgba(12,15,39,.72);font:400 italic 11px/1 Fraunces,serif;color:#FBFAF6">“</span>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isJournal }}">
+            <div style="display:flex;flex-direction:column;gap:10px;padding:4px 22px 40px">
+              <sc-for list="{{ notes }}" as="n" hint-placeholder-count="3">
+                <div onClick="{{ n.openA }}" style="display:flex;gap:12px;padding:14px;border-radius:18px;background:rgba(19,23,54,.7);border:1px solid rgba(29,34,72,.9);cursor:pointer" style-hover="border-color:rgba(242,149,32,.5)">
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+                    <span style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.12em;color:#6D6D7A">DAY {{ n.d }} · {{ n.time }}</span>
+                    <span style="font:400 italic 15px/1.45 Fraunces,serif;color:#FBFAF6;text-wrap:pretty">{{ n.text }}</span>
+                  </div>
+                  <img src="{{ n.src }}" alt="" style="flex:none;width:58px;height:58px;border-radius:12px;object-fit:cover">
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isPlan }}">
+            <div style="display:flex;flex-direction:column;gap:12px;padding:4px 22px 40px">
+              <div style="font:400 13px/1.5 Roboto;color:#92909E">{{ planDone }} of {{ planTotal }} done. The plan is read-only now.</div>
+              <div style="border-radius:18px;background:rgba(19,23,54,.7);border:1px solid rgba(29,34,72,.9);overflow:hidden">
+                <sc-for list="{{ plan }}" as="pl" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid {{ pl.bd }}">
+                    <span style="flex:none;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:600 11px Roboto;background:{{ pl.dotBg }};color:{{ pl.dotFg }};border:1.5px solid {{ pl.dotBd }}">{{ pl.mark }}</span>
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                      <span style="font:500 13px Roboto;color:{{ pl.fg }}">{{ pl.name }}</span>
+                      <span style="font:500 9.5px 'JetBrains Mono',monospace;color:#6D6D7A">DAY {{ pl.day }}{{ pl.sub }}</span>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{ vA }}">
+          <div style="position:absolute;inset:0;z-index:20;background:#05060F;display:flex;flex-direction:column;animation:kmFade .2s ease both">
+            <div style="padding:54px 18px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <span onClick="{{ close }}" style="width:38px;height:38px;border-radius:50%;background:rgba(251,250,246,.08);display:flex;align-items:center;justify-content:center;font:500 15px Roboto;cursor:pointer">✕</span>
+              <span style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.12em;color:#AEACB7">DAY {{ v.d }} · {{ v.pos }} / {{ photoCount }}</span>
+              <span onClick="{{ togglePlay }}" style="padding:9px 13px;border-radius:999px;background:{{ playBg }};color:{{ playFg }};font:600 11.5px Roboto;cursor:pointer">{{ playLabel }}</span>
+            </div>
+            <div style="display:flex;gap:3px;padding:0 18px">
+              <sc-for list="{{ progress }}" as="pg" hint-placeholder-count="5">
+                <span style="flex:{{ pg.n }};height:2px;border-radius:2px;background:rgba(251,250,246,.14);overflow:hidden"><span style="display:block;height:100%;width:{{ pg.w }};background:#F29520"></span></span>
+              </sc-for>
+            </div>
+            <div style="flex:1;position:relative;overflow:hidden;margin-top:12px">
+              {{ slideImg }}
+              <div onClick="{{ prev }}" style="position:absolute;left:0;top:0;bottom:0;width:35%;cursor:w-resize"></div>
+              <div onClick="{{ next }}" style="position:absolute;right:0;top:0;bottom:0;width:65%;cursor:e-resize"></div>
+            </div>
+            <div style="min-height:120px;padding:16px 24px 38px;display:flex;flex-direction:column;gap:9px;box-sizing:border-box">
+              <sc-if value="{{ v.tag }}">
+                <span style="align-self:flex-start;padding:4px 10px;border-radius:999px;background:rgba(79,176,216,.14);border:1px solid rgba(79,176,216,.35);font:600 10.5px Roboto;color:#4FB0D8">{{ v.tag }}</span>
+              </sc-if>
+              <sc-if value="{{ v.note }}">
+                <span style="font:400 italic 17px/1.45 Fraunces,serif;color:#FBFAF6;text-wrap:pretty">{{ v.note }}</span>
+              </sc-if>
+              <span style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.1em;color:#6D6D7A">{{ v.date }} · {{ v.dayTitle }}</span>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <!-- ═════ 1b SINGLE SCROLL ═════ -->
+    <div id="1b" style="display:flex;flex-direction:column;gap:16px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="padding:4px 10px;border-radius:999px;background:#F29520;color:#0C0F27;font:600 12px 'JetBrains Mono',monospace">1b</span>
+        <span style="font:400 19px Fraunces,serif">One scroll, a chapter per day</span>
+      </div>
+      <div style="font:400 12.5px/1.55 Roboto;color:#92909E">Sorted by day. Each day shows its photos as a strip with its notes below, so it reads like the trip itself. The plan is folded up at the end.</div>
+
+      <div style="position:relative;width:390px;height:844px;border-radius:46px;overflow:hidden;border:1px solid rgba(174,172,183,.18);box-shadow:0 30px 80px rgba(0,0,0,.5);background:radial-gradient(110% 40% at 50% 0%,#241C4E 0%,#0F1230 44%,#0C0F27 100%)">
+        <div style="height:100%;overflow-y:auto">
+          <div style="position:relative;height:330px">
+            <img src="journal/balloon_1.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,#0C0F27 4%,rgba(12,15,39,.55) 46%,rgba(12,15,39,.15) 100%)"></div>
+            <div style="position:absolute;top:54px;left:18px;right:18px;display:flex;justify-content:space-between">
+              <span style="width:38px;height:38px;border-radius:50%;background:rgba(12,15,39,.6);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font:500 17px Roboto;cursor:pointer">←</span>
+              <span style="width:38px;height:38px;border-radius:50%;background:rgba(12,15,39,.6);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font:600 15px Roboto;cursor:pointer">⋯</span>
+            </div>
+            <div style="position:absolute;left:22px;right:22px;bottom:16px;display:flex;flex-direction:column;gap:6px">
+              <div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.15em;color:#F2A65A">KEPT FOREVER · 12–16 AUG 2026</div>
+              <div style="font:400 34px/1.05 Fraunces,serif">One long road</div>
+              <div style="font:500 10px 'JetBrains Mono',monospace;color:#AEACB7;letter-spacing:.04em">5 DAYS · {{ photoCount }} PHOTOS · {{ noteCount }} NOTES · ✦46</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;padding:14px 22px 0">
+            <a href="Wrap-Up Film.dc.html" style="flex:1;display:flex;align-items:center;justify-content:center;gap:9px;padding:14px;border-radius:16px;background:#F29520;color:#0C0F27;font:600 14px Roboto" style-hover="filter:brightness(1.08);color:#0C0F27">▶ Play the film <span style="font:500 10.5px 'JetBrains Mono',monospace;opacity:.7">1:19</span></a>
+            <div onClick="{{ slideB }}" style="display:flex;align-items:center;gap:7px;padding:14px 16px;border-radius:16px;border:1px solid rgba(174,172,183,.28);font:600 13px Roboto;color:#FBFAF6;cursor:pointer" style-hover="border-color:#F29520">Slideshow</div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:34px;padding:30px 0 0">
+            <sc-for list="{{ days }}" as="day" hint-placeholder-count="2">
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <div style="padding:0 22px;display:flex;flex-direction:column;gap:4px">
+                  <div style="display:flex;justify-content:space-between;gap:10px">
+                    <span style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.14em;color:#6D6D7A">DAY {{ day.d }} · {{ day.date }}</span>
+                    <span onClick="{{ day.openB }}" style="font:500 10px 'JetBrains Mono',monospace;color:#F29520;cursor:pointer">{{ day.n }} PHOTOS ›</span>
+                  </div>
+                  <span style="font:400 22px/1.2 Fraunces,serif;color:#FBFAF6">{{ day.title }}</span>
+                </div>
+                <div style="display:flex;gap:5px;overflow-x:auto;padding:0 22px;scroll-snap-type:x mandatory;scroll-padding:0 22px">
+                  <sc-for list="{{ day.photos }}" as="p" hint-placeholder-count="4">
+                    <div onClick="{{ p.openB }}" style="position:relative;flex:none;width:{{ p.w }};height:168px;border-radius:14px;overflow:hidden;cursor:pointer;scroll-snap-align:start;background:#131736">
+                      <img src="{{ p.src }}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block">
+                      <sc-if value="{{ p.tag }}">
+                        <span style="position:absolute;top:7px;right:7px;padding:2px 7px;border-radius:999px;background:rgba(12,15,39,.72);font:600 9.5px Roboto;color:#F29520">✦</span>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:14px;padding:2px 22px 0">
+                  <sc-for list="{{ day.notes }}" as="n" hint-placeholder-count="1">
+                    <div style="display:flex;flex-direction:column;gap:5px">
+                      <span style="font:500 9px 'JetBrains Mono',monospace;letter-spacing:.12em;color:#6D6D7A">{{ n.time }}</span>
+                      <span style="font:400 italic 16px/1.5 Fraunces,serif;color:#E8E5DD;text-wrap:pretty">“{{ n.text }}”</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="padding:34px 22px 0">
+            <div style="border-radius:18px;background:rgba(19,23,54,.7);border:1px solid rgba(29,34,72,.9);overflow:hidden">
+              <div onClick="{{ togglePlanB }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 16px;cursor:pointer">
+                <div style="display:flex;flex-direction:column;gap:3px">
+                  <span style="font:400 17px Fraunces,serif">The plan</span>
+                  <span style="font:500 9.5px 'JetBrains Mono',monospace;color:#6D6D7A">{{ planDone }} OF {{ planTotal }} DONE</span>
+                </div>
+                <span style="font:500 13px Roboto;color:#AEACB7;transform:rotate({{ planRot }});transition:transform .2s">⌄</span>
+              </div>
+              <sc-if value="{{ planOpenB }}">
+                <sc-for list="{{ plan }}" as="pl" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-top:1px solid rgba(29,34,72,.7)">
+                    <span style="flex:none;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:600 10px Roboto;background:{{ pl.dotBg }};color:{{ pl.dotFg }};border:1.5px solid {{ pl.dotBd }}">{{ pl.mark }}</span>
+                    <span style="flex:1;min-width:0;font:500 12.5px Roboto;color:{{ pl.fg }}">{{ pl.name }}</span>
+                    <span style="font:500 9.5px 'JetBrains Mono',monospace;color:#6D6D7A">D{{ pl.day }}</span>
+                  </div>
+                </sc-for>
+              </sc-if>
+            </div>
+          </div>
+          <div style="padding:26px 22px 48px;text-align:center;font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.14em;color:#6D6D7A">KEPT FOREVER · SINCE 17 AUG 2026</div>
+        </div>
+
+        <sc-if value="{{ vB }}">
+          <div style="position:absolute;inset:0;z-index:20;background:#05060F;display:flex;flex-direction:column;animation:kmFade .2s ease both">
+            <div style="padding:54px 18px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <span onClick="{{ close }}" style="width:38px;height:38px;border-radius:50%;background:rgba(251,250,246,.08);display:flex;align-items:center;justify-content:center;font:500 15px Roboto;cursor:pointer">✕</span>
+              <span style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.12em;color:#AEACB7">DAY {{ v.d }} · {{ v.pos }} / {{ photoCount }}</span>
+              <span onClick="{{ togglePlay }}" style="padding:9px 13px;border-radius:999px;background:{{ playBg }};color:{{ playFg }};font:600 11.5px Roboto;cursor:pointer">{{ playLabel }}</span>
+            </div>
+            <div style="display:flex;gap:3px;padding:0 18px">
+              <sc-for list="{{ progress }}" as="pg" hint-placeholder-count="5">
+                <span style="flex:{{ pg.n }};height:2px;border-radius:2px;background:rgba(251,250,246,.14);overflow:hidden"><span style="display:block;height:100%;width:{{ pg.w }};background:#F29520"></span></span>
+              </sc-for>
+            </div>
+            <div style="flex:1;position:relative;overflow:hidden;margin-top:12px">
+              {{ slideImg }}
+              <div onClick="{{ prev }}" style="position:absolute;left:0;top:0;bottom:0;width:35%;cursor:w-resize"></div>
+              <div onClick="{{ next }}" style="position:absolute;right:0;top:0;bottom:0;width:65%;cursor:e-resize"></div>
+            </div>
+            <div style="min-height:120px;padding:16px 24px 38px;display:flex;flex-direction:column;gap:9px;box-sizing:border-box">
+              <sc-if value="{{ v.tag }}">
+                <span style="align-self:flex-start;padding:4px 10px;border-radius:999px;background:rgba(79,176,216,.14);border:1px solid rgba(79,176,216,.35);font:600 10.5px Roboto;color:#4FB0D8">{{ v.tag }}</span>
+              </sc-if>
+              <sc-if value="{{ v.note }}">
+                <span style="font:400 italic 17px/1.45 Fraunces,serif;color:#FBFAF6;text-wrap:pretty">{{ v.note }}</span>
+              </sc-if>
+              <span style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.1em;color:#6D6D7A">{{ v.date }} · {{ v.dayTitle }}</span>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const POOL = [
+  'journal/balloon_1.jpg', 'journal/balloon_2.jpg', 'journal/balloon_3.jpg', 'journal/balloons_wide.png',
+  'guest/hero.png', 'guest/honeymoon_escape.png', 'guest/solo_getaway.png', 'guest/food_lovers_weekend.png',
+  'guest/family_adventure.png', 'guest/bucket_list_moment.png', 'guest/epic_milestone.png',
+  'trip/new_memory.png', 'trip/planner.png',
+];
+const DAYS = [
+  { d: 1, date: 'TUE 12 AUG', title: 'Before either of us was awake', n: 18 },
+  { d: 2, date: 'WED 13 AUG', title: 'The loch, then the bakery', n: 17 },
+  { d: 3, date: 'THU 14 AUG', title: 'Up to the saddle', n: 19 },
+  { d: 4, date: 'FRI 15 AUG', title: 'A routine, almost', n: 14 },
+  { d: 5, date: 'SAT 16 AUG', title: 'The last road down', n: 16 },
+];
+const MARKED = {
+  '1-0': { src: 'journal/balloon_2.jpg', note: 'Up at five for it. Worth it.', tag: 'Dare · before the sun · ✦2', time: '05:48' },
+  '1-5': { src: 'trip/planner.png', note: 'Blurred, both of us blinking. Keeping it anyway.', tag: 'Dare · one photo, both of you · ✦1', time: '19:12' },
+  '2-2': { src: 'journal/balloon_3.jpg', note: 'Sam rowed badly. We went in a circle for a while and neither of us minded.', time: '10:30' },
+  '2-8': { src: 'guest/food_lovers_weekend.png', note: 'A puddle outside the bakery. Counts double, apparently.', tag: 'Dare · something that reflects · ✦2', time: '15:04' },
+  '3-1': { src: 'guest/hero.png', note: 'Ten kilometres and one sandwich. Too windy to talk, so we just laughed.', time: '13:20' },
+  '3-9': { src: 'guest/solo_getaway.png', note: 'The thermos. Carried it the whole way and never once filled it.', time: '17:45' },
+  '4-3': { src: 'guest/honeymoon_escape.png', note: 'Same café, same table. The owner remembered our order.', time: '09:10' },
+  '5-2': { src: 'guest/epic_milestone.png', note: 'Stopped the car in the middle of the pass. Nobody was coming.', time: '18:52' },
+  '5-7': { src: 'guest/family_adventure.png', note: 'He pushed us out of the mud and waved us off. We never got his name.', time: '20:15' },
+};
+const PLAN = [
+  { name: 'Sunrise at the balloon field', day: 1, done: true },
+  { name: 'Row across the loch', day: 2, done: true },
+  { name: 'Bakery on Mill Street', day: 2, done: true },
+  { name: 'Walk to the saddle', day: 3, done: true },
+  { name: 'Hot springs', day: 3, done: false },
+  { name: 'Market morning', day: 4, done: true },
+  { name: 'Castle ruins', day: 4, done: false },
+  { name: 'Drive the pass at last light', day: 5, done: true },
+  { name: 'Last breakfast in town', day: 5, done: true },
+];
+const WIDTHS = ['200px', '124px', '124px', '168px', '124px', '200px'];
+
+const FLAT = [];
+DAYS.forEach((day) => {
+  for (let i = 0; i < day.n; i++) {
+    const m = MARKED[day.d + '-' + i];
+    FLAT.push({ d: day.d, i, date: day.date, dayTitle: day.title,
+      src: m ? m.src : POOL[(FLAT.length * 5 + day.d) % POOL.length],
+      note: m ? m.note : '', tag: m && m.tag ? m.tag : '', time: m ? m.time : '' });
+  }
+});
+FLAT.forEach((p, k) => (p.k = k));
+
+class Component extends DCLogic {
+  state = { tab: 'photos', opt: null, idx: 0, playing: false, planOpenB: false };
+  componentWillUnmount() { clearInterval(this.timer); }
+  open = (opt, idx, play) => {
+    clearInterval(this.timer);
+    this.setState({ opt, idx, playing: !!play }, () => play && this.startTimer());
+  };
+  startTimer() { clearInterval(this.timer); this.timer = setInterval(() => this.setState((s) => ({ idx: (s.idx + 1) % FLAT.length })), 3200); }
+  renderVals() {
+    const s = this.state;
+    const cur = FLAT[s.idx];
+    const tabs = [['photos', 'Photos', FLAT.length], ['journal', 'Journal', FLAT.filter((p) => p.note).length], ['plan', 'Plan', PLAN.length]]
+      .map(([id, label, n]) => ({ label, n, go: () => this.setState({ tab: id }),
+        bg: s.tab === id ? '#F29520' : 'transparent', fg: s.tab === id ? '#0C0F27' : '#AEACB7' }));
+    const days = DAYS.map((day) => {
+      const photos = FLAT.filter((p) => p.d === day.d).map((p, j) => ({ ...p,
+        w: WIDTHS[j % WIDTHS.length],
+        openA: () => this.open('a', p.k), openB: () => this.open('b', p.k) }));
+      return { ...day, photos, notes: photos.filter((p) => p.note).map((p) => ({ time: p.time, text: p.note })),
+        openB: () => this.open('b', photos[0].k) };
+    });
+    const notes = FLAT.filter((p) => p.note).map((p) => ({ d: p.d, time: p.time, text: p.note, src: p.src, openA: () => this.open('a', p.k) }));
+    const planDone = PLAN.filter((p) => p.done).length;
+    const plan = PLAN.map((p, j) => ({ ...p, bd: j ? 'rgba(29,34,72,.7)' : 'transparent',
+      mark: p.done ? '✓' : '', sub: p.done ? '' : ' · SKIPPED',
+      dotBg: p.done ? 'rgba(242,149,32,.16)' : 'transparent', dotFg: '#F29520',
+      dotBd: p.done ? 'rgba(242,149,32,.5)' : 'rgba(174,172,183,.3)', fg: p.done ? '#FBFAF6' : '#6D6D7A' }));
+    let before = 0;
+    const progress = DAYS.map((day) => {
+      const start = before; before += day.n;
+      const w = s.idx >= before ? 100 : s.idx < start ? 0 : ((s.idx - start + 1) / day.n) * 100;
+      return { n: day.n, w: w + '%' };
+    });
+    const slideImg = React.createElement('img', {
+      key: s.idx + (s.playing ? 'p' : 's'), src: cur.src, alt: '',
+      style: { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: s.playing ? 'cover' : 'contain',
+        animation: s.playing ? 'kmFade .8s ease both, kmKb 3.4s ease-out both' : 'kmFade .22s ease both' },
+    });
+    return {
+      tabs, days, notes, plan, planDone, planTotal: PLAN.length, progress, slideImg,
+      photoCount: FLAT.length, noteCount: notes.length,
+      isPhotos: s.tab === 'photos', isJournal: s.tab === 'journal', isPlan: s.tab === 'plan',
+      vA: s.opt === 'a', vB: s.opt === 'b',
+      v: { ...cur, pos: s.idx + 1 },
+      slideA: () => this.open('a', 0, true), slideB: () => this.open('b', 0, true),
+      close: () => { clearInterval(this.timer); this.setState({ opt: null, playing: false }); },
+      prev: () => this.setState((st) => ({ idx: (st.idx - 1 + FLAT.length) % FLAT.length }), () => s.playing && this.startTimer()),
+      next: () => this.setState((st) => ({ idx: (st.idx + 1) % FLAT.length }), () => this.state.playing && this.startTimer()),
+      togglePlay: () => {
+        if (s.playing) { clearInterval(this.timer); this.setState({ playing: false }); }
+        else this.setState({ playing: true }, () => this.startTimer());
+      },
+      playLabel: s.playing ? '❚❚ Pause' : '▶ Slideshow',
+      playBg: s.playing ? '#F29520' : 'rgba(251,250,246,.08)', playFg: s.playing ? '#0C0F27' : '#FBFAF6',
+      planOpenB: s.planOpenB, planRot: s.planOpenB ? '180deg' : '0deg',
+      togglePlanB: () => this.setState((st) => ({ planOpenB: !st.planOpenB })),
+    };
+  }
+}
+</script>
+</body>
+</html>
