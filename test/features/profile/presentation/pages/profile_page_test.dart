@@ -200,6 +200,28 @@ void main() {
     expect(find.widgetWithText(TextFormField, 'ada'), findsOneWidget);
   });
 
+  testWidgets('tapping the avatar opens the photo picker directly (#286)', (
+    tester,
+  ) async {
+    final profileRepo = FakeProfileRepository()
+      ..profileResult = Right(buildProfile(username: 'ada'));
+    await _pump(tester, profileRepo: profileRepo);
+
+    expect(
+      find.bySemanticsLabel(RegExp('^Update your photo')),
+      findsWidgets,
+      reason: 'the avatar announces itself as a button to screen readers',
+    );
+    await tester.tap(find.byKey(const Key('avatar-upload-tile')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Update your photo'), findsOneWidget);
+    expect(find.text('Take a photo'), findsOneWidget);
+    expect(find.text('Choose from gallery'), findsOneWidget);
+    // Straight to the picker — not via the edit sheet.
+    expect(find.text('Edit your profile'), findsNothing);
+  });
+
   testWidgets('saving the username in the edit sheet calls updateProfile', (
     tester,
   ) async {

@@ -12,20 +12,26 @@ import '../../../../core/widgets/bottom_sheet_chrome.dart';
 import '../../../photo/data/services/photo_compressor.dart';
 import 'profile_avatar.dart';
 
-/// The edit sheet's avatar tile — tap to pick (camera/gallery), pick +
-/// compress (M3-6's pipeline), then [onPicked] uploads. Circular version of
-/// `CoverUploadTile`'s pattern.
+/// An avatar you tap to replace — pick (camera/gallery), compress (M3-6's
+/// pipeline), then [onPicked] uploads. Circular version of
+/// `CoverUploadTile`'s pattern. The edit sheet's tile, and the Profile
+/// header's big avatar (#286) without the badge — its corner is the stars
+/// pill's.
 class AvatarUploadTile extends StatefulWidget {
   const AvatarUploadTile({
     required this.avatarUrl,
     required this.username,
     required this.onPicked,
+    this.size = 72,
+    this.showBadge = true,
     super.key,
   });
 
   final String? avatarUrl;
   final String? username;
   final Future<void> Function(Uint8List bytes) onPicked;
+  final double size;
+  final bool showBadge;
 
   @override
   State<AvatarUploadTile> createState() => _AvatarUploadTileState();
@@ -59,53 +65,57 @@ class _AvatarUploadTileState extends State<AvatarUploadTile> {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      key: const Key('avatar-upload-tile'),
-      onTap: _isBusy ? null : _openSourcePicker,
-      customBorder: const CircleBorder(),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          ProfileAvatar(
-            avatarUrl: widget.avatarUrl,
-            username: widget.username,
-            size: 72,
-          ),
-          if (_isBusy)
-            Container(
-              width: 72,
-              height: 72,
-              decoration: const BoxDecoration(
-                color: AppColors.scrim,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            )
-          else
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: Container(
-                width: 24,
-                height: 24,
-                alignment: Alignment.center,
+    return Semantics(
+      button: true,
+      label: context.l10n.profile_updatePhoto,
+      child: InkWell(
+        key: const Key('avatar-upload-tile'),
+        onTap: _isBusy ? null : _openSourcePicker,
+        customBorder: const CircleBorder(),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            ProfileAvatar(
+              avatarUrl: widget.avatarUrl,
+              username: widget.username,
+              size: widget.size,
+            ),
+            if (_isBusy)
+              Container(
+                width: widget.size,
+                height: widget.size,
                 decoration: const BoxDecoration(
-                  color: AppColors.primary,
+                  color: AppColors.scrim,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.add_photo_alternate_outlined,
-                  size: 14,
-                  color: AppColors.background,
+                alignment: Alignment.center,
+                child: const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              )
+            else if (widget.showBadge)
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.add_photo_alternate_outlined,
+                    size: 14,
+                    color: AppColors.background,
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
