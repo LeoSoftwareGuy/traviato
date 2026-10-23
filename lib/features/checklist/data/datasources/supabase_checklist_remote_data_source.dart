@@ -150,6 +150,7 @@ class SupabaseChecklistRemoteDataSource implements ChecklistRemoteDataSource {
             'category': item.category.dbValue,
             'is_essential': item.isEssential,
             'position': item.position,
+            'suggestion_code': item.suggestionCode,
           },
       ]).select();
       return rows

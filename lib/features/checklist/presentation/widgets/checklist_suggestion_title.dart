@@ -1,15 +1,26 @@
 import '../../../../core/l10n/context_l10n.dart';
+import '../../domain/entities/checklist_item_entity.dart';
 import '../../domain/entities/checklist_suggestion_entity.dart';
 
 // Generated from the seeded `checklist_suggestions` (#243). An unknown code
 // falls back to the DB text.
 
-/// A suggestion's title in the UI language, used once when a memory's
-/// checklist is first created — the item is the user's own from then on.
+/// A suggestion's title in the UI language — the text a new checklist is
+/// written with.
 String checklistSuggestionTitle(
   AppLocalizations l10n,
   ChecklistSuggestionEntity suggestion,
-) => switch (suggestion.code) {
+) => _titleForCode(l10n, suggestion.code) ?? suggestion.title;
+
+/// An item's title as shown: a seeded item follows the UI language (#285);
+/// the user's own items, and codes this build doesn't know, keep the stored
+/// text.
+String checklistItemTitle(AppLocalizations l10n, ChecklistItemEntity item) {
+  final code = item.suggestionCode;
+  return (code == null ? null : _titleForCode(l10n, code)) ?? item.title;
+}
+
+String? _titleForCode(AppLocalizations l10n, String code) => switch (code) {
   'passport' => l10n.content_checklist_passport,
   'visa_documents' => l10n.content_checklist_visa_documents,
   'travel_insurance' => l10n.content_checklist_travel_insurance,
@@ -49,5 +60,5 @@ String checklistSuggestionTitle(
   'earplugs_eye_mask' => l10n.content_checklist_earplugs_eye_mask,
   'travel_journal' => l10n.content_checklist_travel_journal,
   'umbrella' => l10n.content_checklist_umbrella,
-  _ => suggestion.title,
+  _ => null,
 };

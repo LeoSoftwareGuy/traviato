@@ -28,8 +28,8 @@ class ChecklistController extends _$ChecklistController {
 
     // First open of an empty checklist: seed it from the suggestions catalog.
     if (items.isEmpty) {
-      // Written in the UI language (#243); the items are the user's own
-      // from here on, like anything they add themselves.
+      // Written in the UI language (#243) and tagged with their suggestion
+      // code, so the tile re-translates them if the language changes (#285).
       final l10n = lookupAppLocalizations(ref.read(appLocaleProvider));
       final populateResult = await repo.populateFromSuggestions(
         tripId,

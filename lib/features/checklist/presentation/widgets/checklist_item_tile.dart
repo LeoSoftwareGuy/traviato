@@ -6,6 +6,7 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/checklist_item_entity.dart';
+import 'checklist_suggestion_title.dart';
 
 class ChecklistItemTile extends StatelessWidget {
   const ChecklistItemTile({
@@ -58,7 +59,7 @@ class ChecklistItemTile extends StatelessWidget {
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
-                    item.title,
+                    checklistItemTitle(context.l10n, item),
                     style: AppTypography.bodyInput.copyWith(
                       fontSize: 13.5,
                       fontWeight: FontWeight.w500,

@@ -213,6 +213,36 @@ void main() {
       expect(remote.lastInsertedItems!.single.isEssential, isTrue);
     });
 
+    test('tags each item with its suggestion code, so the title can follow '
+        'the UI language later (#285)', () async {
+      final remote = _FakeChecklistRemoteDataSource(
+        suggestions: [
+          const ChecklistSuggestionModel(
+            id: 1,
+            code: 'passport',
+            title: 'Passport',
+            category: ChecklistCategory.travelEssentials,
+            isEssential: true,
+          ),
+          // A catalog row without a code (pre-#243 data) stays untagged.
+          const ChecklistSuggestionModel(
+            id: 2,
+            title: 'Socks',
+            category: ChecklistCategory.clothingShoes,
+            isEssential: false,
+          ),
+        ],
+      );
+      final repo = ChecklistRepositoryImpl(remote: remote);
+
+      await repo.populateFromSuggestions('t1');
+
+      expect(remote.lastInsertedItems!.map((d) => d.suggestionCode), [
+        'passport',
+        null,
+      ]);
+    });
+
     test(
       'assigns a fresh id and a sequential per-category position to each '
       'suggestion',
