@@ -428,6 +428,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get home_actionJournal => 'Journal';
 
   @override
+  String get home_coverOpenPlan => 'Open plan';
+
+  @override
+  String get home_coverOpenJournal => 'Open journal';
+
+  @override
   String get home_checklist => 'Checklist';
 
   @override

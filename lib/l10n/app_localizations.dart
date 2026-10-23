@@ -752,6 +752,18 @@ abstract class AppLocalizations {
   /// **'Journal'**
   String get home_actionJournal;
 
+  /// Screen-reader label for the hero card cover tap.
+  ///
+  /// In en, this message translates to:
+  /// **'Open plan'**
+  String get home_coverOpenPlan;
+
+  /// Screen-reader label for the hero card cover tap.
+  ///
+  /// In en, this message translates to:
+  /// **'Open journal'**
+  String get home_coverOpenJournal;
+
   /// No description provided for @home_checklist.
   ///
   /// In en, this message translates to:

@@ -87,6 +87,32 @@ void main() {
     });
   });
 
+  group('TripCardEntity status around the start day (#287)', () {
+    TripCardEntity startingIn(int days) {
+      final now = DateTime.now();
+      final start = DateTime(now.year, now.month, now.day + days);
+      return TripCardEntity.fromNewTrip(
+        TripEntity(
+          id: 't1',
+          userId: 'u1',
+          name: 'Rome',
+          startDate: start,
+          endDate: DateTime(start.year, start.month, start.day + 4),
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+    }
+
+    test('a memory starting today is current — Home shows Journal', () {
+      expect(startingIn(0).status, TripStatus.current);
+    });
+
+    test('a memory starting tomorrow is still upcoming', () {
+      expect(startingIn(1).status, TripStatus.upcoming);
+    });
+  });
+
   group('TripCardEntity.isUnderwayOn (#219)', () {
     final trip = buildTripCard(
       startDate: DateTime(2026, 10, 21),
