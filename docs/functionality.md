@@ -96,8 +96,15 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   card (italic serif body, "EDITED · N WORDS" footer, one note/day, ✦1 via RPC; the whole note is editable in the note page, and
   clearing it + confirming deletes it and takes back the ✦1 — #276);
   photos strip ("TODAY'S PHOTOS · N", **add tile awards ✦2** on successful photo,
-  tiles → Photo detail); "To Do · N left" → Plan; **"View wrap-up ▸"** gradient
-  button; achievement-nudge card with progress ring.
+  tiles → Photo detail; "▸ N IN THE FILM" + per-thumb film badges, #294);
+  "To Do · N left" → Plan; **"View wrap-up ▸"** gradient button;
+  achievement-nudge card with progress ring.
+- **In the film** (#294, `docs/design/photo-pick/`): the day's photo viewer
+  has an Auto · Always · Leave out control per photo, saved at once. Always
+  photos get a main moment first; Leave out photos appear nowhere in the
+  film. Never an AI call. A kept film whose photos changed offers "Photos
+  changed · Rebuild film" (film HUD + Kept Memory page) — rebuilt on tap,
+  keeping its AI lines. The all-days "Choose photos" screen is #294 part 2.
 - Days where `day_date > today` are locked (no note/photo entry, blurred
   balloon thumbnail); `day_date <= today` are open/bright. (Reinstated — see
   issue #118.)

@@ -54,8 +54,11 @@ unique (trip_id, day_date).
 `id (client-generated), trip_id (cascade), day_date?, storage_path, caption?,
 lat?, lng?, place_text?, people_tags text[] default {}, taken_at?, created_at`.
 Photo detail's tagging edits `place_text` / `people_tags` / `caption` — no new
-columns. **"Use in wrap-up"**: add `use_in_wrap_up bool default false` — the only
-schema addition from the redesign (generator prioritizes flagged photos).
+columns. **Film pick** (#294): `use_in_wrap_up bool?` — null = Auto (the
+generator decides), true = Always (a main moment first), false = Leave out
+(never in the film) — plus `use_in_wrap_up_set_at timestamptz?`, stamped by a
+trigger when the pick changes; newer than a kept film's `generated_at` means
+"Photos changed · Rebuild film".
 
 ### `checklist_items` / `checklist_suggestions`
 As v2: category check over `travel_essentials, clothing_shoes, toiletries_health,
