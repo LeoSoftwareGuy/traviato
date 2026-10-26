@@ -122,15 +122,20 @@ not hardcoded.
 ### Moment slot rules
 
 ```
-M1, M3, M4   → bonus-task photos, in completion order,
+up to 3      → bonus-task photos (first 3 completed),
                badged "Dare · {task name} · ✦{stars}" in `dare` blue
-M2, M5–M8    → journal photographs not already used
+the rest     → journal photographs spread evenly over the whole trip
+M1 → M8      → played in time order: by day, then by capture time (#292)
 ```
 
-**Fallback:** with fewer completed bonus tasks than slots, the unfilled slots
+Badges have no fixed slot — a bonus photo plays where it falls in the trip.
+A badged moment is never a collage, so a bonus photo landing on M2/M5/M7/M8
+keeps that moment a card flip.
+
+**Fallback:** with fewer completed bonus tasks than 3, the freed moments
 become ordinary journal photographs — same frame, no badge. Zero tasks
-completed ⇒ all eight slots are journal photos. Never show an empty badge and
-never skip a slot.
+completed ⇒ all eight moments are journal photos. Never show an empty badge
+and never skip a moment.
 
 **Captions:** if a photo has no note, use the frame without a caption rather
 than generating one. The traveller's voice is the point.

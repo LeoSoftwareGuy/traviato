@@ -41,6 +41,7 @@ export const validTripData: TripData = {
     {
       id: "p1",
       day_date: "2026-06-01",
+      taken_at: null,
       created_at: "2026-06-01T09:00:00Z",
       storage_path: "u/t/p1.jpg",
       caption: "Golden hour",
@@ -48,6 +49,7 @@ export const validTripData: TripData = {
     {
       id: "p2",
       day_date: "2026-06-01",
+      taken_at: null,
       created_at: "2026-06-01T10:00:00Z",
       storage_path: "u/t/p2.jpg",
       caption: null,
@@ -55,6 +57,7 @@ export const validTripData: TripData = {
     {
       id: "p3",
       day_date: "2026-06-02",
+      taken_at: null,
       created_at: "2026-06-02T09:00:00Z",
       storage_path: "u/t/p3.jpg",
       caption: "Best pastry of the trip",
@@ -62,6 +65,7 @@ export const validTripData: TripData = {
     {
       id: "p4",
       day_date: "2026-06-02",
+      taken_at: null,
       created_at: "2026-06-02T10:00:00Z",
       storage_path: "u/t/p4.jpg",
       caption: "Miradouro views",
@@ -69,6 +73,7 @@ export const validTripData: TripData = {
     {
       id: "p5",
       day_date: "2026-06-03",
+      taken_at: null,
       created_at: "2026-06-03T09:00:00Z",
       storage_path: "u/t/p5.jpg",
       caption: "Fresh catch",
@@ -76,6 +81,7 @@ export const validTripData: TripData = {
     {
       id: "p6",
       day_date: "2026-06-03",
+      taken_at: null,
       created_at: "2026-06-03T10:00:00Z",
       storage_path: "u/t/p6.jpg",
       caption: null,
@@ -83,6 +89,7 @@ export const validTripData: TripData = {
     {
       id: "p7",
       day_date: "2026-06-04",
+      taken_at: null,
       created_at: "2026-06-04T09:00:00Z",
       storage_path: "u/t/p7.jpg",
       caption: "Sunset walk",
@@ -90,6 +97,7 @@ export const validTripData: TripData = {
     {
       id: "p8",
       day_date: "2026-06-04",
+      taken_at: null,
       created_at: "2026-06-04T10:00:00Z",
       storage_path: "u/t/p8.jpg",
       caption: "Late night gelato",
@@ -97,6 +105,7 @@ export const validTripData: TripData = {
     {
       id: "p9",
       day_date: "2026-06-05",
+      taken_at: null,
       created_at: "2026-06-05T09:00:00Z",
       storage_path: "u/t/p9.jpg",
       caption: "Last tram ride",
@@ -104,6 +113,7 @@ export const validTripData: TripData = {
     {
       id: "p10",
       day_date: "2026-06-05",
+      taken_at: null,
       created_at: "2026-06-05T10:00:00Z",
       storage_path: "u/t/p10.jpg",
       caption: "Airport goodbye",

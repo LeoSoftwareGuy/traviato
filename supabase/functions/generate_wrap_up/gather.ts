@@ -32,6 +32,8 @@ export interface TripData {
   photos: {
     id: string;
     day_date: string | null;
+    // Capture time when known; assemble.ts falls back to created_at.
+    taken_at: string | null;
     created_at: string;
     storage_path: string;
     caption: string | null;
@@ -72,7 +74,7 @@ export async function gatherTripData(
         .order("day_date"),
       client
         .from("photos")
-        .select("id, day_date, created_at, storage_path, caption")
+        .select("id, day_date, taken_at, created_at, storage_path, caption")
         .eq("trip_id", tripId)
         .order("day_date")
         .order("created_at")
@@ -131,6 +133,7 @@ export async function gatherTripData(
     photos: (photosRes.data ?? []).map((p: Record<string, unknown>) => ({
       id: p.id as string,
       day_date: (p.day_date as string | null) ?? null,
+      taken_at: (p.taken_at as string | null) ?? null,
       created_at: p.created_at as string,
       storage_path: p.storage_path as string,
       caption: (p.caption as string | null) ?? null,

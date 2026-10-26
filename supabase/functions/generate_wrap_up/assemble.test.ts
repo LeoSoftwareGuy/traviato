@@ -4,7 +4,9 @@ import {
   formatDateRange,
   invitationLine1,
   selectCut,
+  sortPhotosChronologically,
   splitKeepsakeTitle,
+  spreadEvenly,
 } from "./assemble.ts";
 import { validateWrapUpContent } from "./content.ts";
 import type { WrapUpContent } from "./content.ts";
@@ -19,9 +21,20 @@ Deno.test("assembleWrapUpContent produces the expected shape for the happy-path 
   const content = assembleWrapUpContent(validTripData, validAiFields);
   assertEquals(validateWrapUpContent(content), true);
   assertEquals(content.moments.length, 8);
-  assertEquals(content.flurry_leftovers.photos.map((p) => p.photo_id), [
+  // Bonus p1 + p3, journal moments spread over p2, p4..p10.
+  assertEquals(content.moments.map((m) => m.photo_id), [
+    "p1",
+    "p2",
+    "p3",
+    "p5",
+    "p6",
+    "p7",
     "p9",
     "p10",
+  ]);
+  assertEquals(content.flurry_leftovers.photos.map((p) => p.photo_id), [
+    "p4",
+    "p8",
   ]);
 });
 
@@ -78,6 +91,7 @@ function photos(count: number, prefix = "c"): TripData["photos"] {
   return Array.from({ length: count }, (_, i) => ({
     id: `${prefix}${i}`,
     day_date: `2026-06-${String(1 + Math.floor(i / 4)).padStart(2, "0")}`,
+    taken_at: null,
     created_at: `2026-06-01T00:00:00Z`,
     storage_path: `u/t/${prefix}${i}.jpg`,
     caption: null,
@@ -251,10 +265,11 @@ Deno.test("big trips label only the photos shown nowhere", () => {
 
 Deno.test("collage extras are the photos nearest in time to the moment", () => {
   const content = planFor(15);
-  // M2 is c1; the pool is c8..c14, so its two extras are c8 and c9.
+  // Moments are c0, c2, .., c14; M2 is c2, so its extras are c1 and c3.
+  assertEquals(content.moments[1].photo_id, "c2");
   assertEquals(
     content.moments[1].collage_extras.map((p) => p.photo_id),
-    ["c8", "c9"],
+    ["c1", "c3"],
   );
 });
 
@@ -333,4 +348,107 @@ Deno.test("splitKeepsakeTitle splits multi-word names and leaves single words al
     title_line1: "Reykjavik",
     title_line2: "",
   });
+});
+
+// --- #292: the film follows the trip in time order ----------------------
+
+function photo(
+  id: string,
+  day_date: string | null,
+  taken_at: string | null,
+  created_at = "2026-06-10T00:00:00Z",
+): TripData["photos"][number] {
+  return {
+    id,
+    day_date,
+    taken_at,
+    created_at,
+    storage_path: `u/t/${id}.jpg`,
+    caption: `caption ${id}`,
+  };
+}
+
+Deno.test("sortPhotosChronologically: by day, then capture time, undated last", () => {
+  const sorted = sortPhotosChronologically([
+    photo("undated", null, "2026-06-01T08:00:00Z"),
+    photo("d3", "2026-06-03", "2026-06-03T09:00:00Z"),
+    photo("d1-late", "2026-06-01", "2026-06-01T18:00:00Z"),
+    // No capture time: falls back to upload time.
+    photo("d2-upload", "2026-06-02", null, "2026-06-02T12:00:00Z"),
+    photo("d1-early", "2026-06-01", "2026-06-01T07:00:00Z"),
+    photo("d2-taken", "2026-06-02", "2026-06-02T11:00:00+02:00"),
+  ]);
+  assertEquals(sorted.map((p) => p.id), [
+    "d1-early",
+    "d1-late",
+    "d2-taken",
+    "d2-upload",
+    "d3",
+    "undated",
+  ]);
+});
+
+Deno.test("spreadEvenly keeps order and covers the whole list", () => {
+  const list = Array.from({ length: 15 }, (_, i) => i);
+  assertEquals(spreadEvenly(list, 8), [0, 2, 4, 6, 8, 10, 12, 14]);
+  assertEquals(spreadEvenly(list, 3), [2, 7, 12]);
+  assertEquals(spreadEvenly([1, 2], 8), [1, 2]);
+  assertEquals(spreadEvenly(list, 0), []);
+});
+
+Deno.test("moments play in day order even when bonus photos come late", () => {
+  // 3-day trip, photos fed in scrambled order; the bonus tasks were done
+  // on days 3 and 2, and bonus completion order is day 3 first.
+  const days = ["2026-06-01", "2026-06-02", "2026-06-03"];
+  const list = days.flatMap((day, d) =>
+    Array.from(
+      { length: 6 },
+      (_, i) => photo(`d${d + 1}-${i}`, day, `${day}T${10 + i}:00:00Z`),
+    )
+  ).reverse();
+  const content = assembleWrapUpContent(
+    tripData({
+      photos: list,
+      completedBonusTasks: [
+        {
+          completed_at: "2026-06-03T12:00:00Z",
+          photo_id: "d3-2",
+          title: "Late dare",
+          points: 2,
+        },
+        {
+          completed_at: "2026-06-02T12:00:00Z",
+          photo_id: "d2-1",
+          title: "Middle dare",
+          points: 1,
+        },
+      ],
+    }),
+    validAiFields,
+  );
+
+  const moments = content.moments;
+  assertEquals(moments.length, 8);
+  for (let i = 1; i < moments.length; i++) {
+    assertEquals(
+      moments[i - 1].day_date! <= moments[i].day_date!,
+      true,
+      `M${i} (${moments[i - 1].day_date}) after M${i + 1} (${
+        moments[i].day_date
+      })`,
+    );
+  }
+  // Every day of the trip gets moments, not just the first one.
+  assertEquals(new Set(moments.map((m) => m.day_date)).size, 3);
+  // A moment's caption is always its own photo's, so always its day.
+  const byId = new Map(list.map((p) => [p.id, p]));
+  for (const m of moments) {
+    assertEquals(m.note, byId.get(m.photo_id)!.caption);
+    assertEquals(m.day_date, byId.get(m.photo_id)!.day_date);
+  }
+  // Badges stay on their bonus photos.
+  assertEquals(
+    moments.filter((m) => m.badge !== null).map((m) => m.photo_id),
+    ["d2-1", "d3-2"],
+  );
 });
