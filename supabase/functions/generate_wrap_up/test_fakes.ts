@@ -3,7 +3,7 @@
 // shapes. Not a real query engine — filters (.eq/.gte/.order/.limit) are
 // accepted but not applied; each table's fixture rows are returned as-is.
 // Writes (insert/update/upsert) are recorded on the returned `writes` array,
-// along with the .eq/.is filters applied to them, so tests can assert what
+// along with the .eq/.is/.not filters applied to them, so tests can assert what
 // was saved and under which guard.
 
 // deno-lint-ignore no-explicit-any
@@ -53,7 +53,8 @@ export function fakeSupabaseClient(
         gte() {
           return builder;
         },
-        not() {
+        not(column: string, _operator: string, value: unknown) {
+          write?.filters.push(["not", column, value]);
           return builder;
         },
         order() {

@@ -3,6 +3,7 @@ import {
   assembleWrapUpContent,
   formatDateRange,
   invitationLine1,
+  pickMomentPhotos,
   selectCut,
   sortPhotosChronologically,
   splitKeepsakeTitle,
@@ -95,6 +96,7 @@ function photos(count: number, prefix = "c"): TripData["photos"] {
     created_at: `2026-06-01T00:00:00Z`,
     storage_path: `u/t/${prefix}${i}.jpg`,
     caption: null,
+    use_in_wrap_up: null,
   }));
 }
 
@@ -357,6 +359,7 @@ function photo(
   day_date: string | null,
   taken_at: string | null,
   created_at = "2026-06-10T00:00:00Z",
+  use_in_wrap_up: boolean | null = null,
 ): TripData["photos"][number] {
   return {
     id,
@@ -365,6 +368,7 @@ function photo(
     created_at,
     storage_path: `u/t/${id}.jpg`,
     caption: `caption ${id}`,
+    use_in_wrap_up,
   };
 }
 
@@ -451,4 +455,159 @@ Deno.test("moments play in day order even when bonus photos come late", () => {
     moments.filter((m) => m.badge !== null).map((m) => m.photo_id),
     ["d2-1", "d3-2"],
   );
+});
+
+// --- #294: the user's per-photo picks ------------------------------------
+
+// 20 photos over 5 days, c0..c19 in time order; [picks] maps index → pick.
+function pickedPhotos(
+  picks: Record<number, boolean>,
+): TripData["photos"] {
+  return photos(20).map((p, i) => ({
+    ...p,
+    taken_at: `${p.day_date}T${String(8 + (i % 4)).padStart(2, "0")}:00:00Z`,
+    use_in_wrap_up: picks[i] ?? null,
+  }));
+}
+
+function momentIds(list: TripData["photos"], bonusIds: string[] = []) {
+  return pickMomentPhotos(list, bonusIds).map((p) => p.id).sort((a, b) =>
+    Number(a.slice(1)) - Number(b.slice(1))
+  );
+}
+
+function shownIds(content: WrapUpContent) {
+  return [
+    ...content.moments.flatMap((m) => [
+      m.photo_id,
+      ...m.collage_extras.map((p) => p.photo_id),
+    ]),
+    ...content.flurry_leftovers.flurry1.map((p) => p.photo_id),
+    ...content.flurry_leftovers.flurry2.map((p) => p.photo_id),
+    ...content.flurry_leftovers.photos.map((p) => p.photo_id),
+  ];
+}
+
+Deno.test("picks: all on Auto spreads the moments over the trip", () => {
+  assertEquals(momentIds(pickedPhotos({})), [
+    "c1",
+    "c3",
+    "c6",
+    "c8",
+    "c11",
+    "c13",
+    "c16",
+    "c18",
+  ]);
+});
+
+Deno.test("picks: 3 Always photos all get moments, Auto fills the rest", () => {
+  const ids = momentIds(pickedPhotos({ 0: true, 9: true, 19: true }));
+  assertEquals(ids.length, 8);
+  for (const id of ["c0", "c9", "c19"]) {
+    assertEquals(ids.includes(id), true, `${id} missing`);
+  }
+});
+
+Deno.test("picks: 10 Always photos fill all 8 moments, the 2 extra go to the Flurries", () => {
+  const always: Record<number, boolean> = Object.fromEntries(
+    Array.from({ length: 10 }, (_, i) => [i * 2, true]),
+  );
+  const list = pickedPhotos(always);
+  const ids = momentIds(list);
+  assertEquals(ids.length, 8);
+  assertEquals(ids.every((id) => always[Number(id.slice(1))] === true), true);
+
+  const content = assembleWrapUpContent(
+    tripData({ photos: list, completedBonusTasks: [] }),
+    validAiFields,
+  );
+  const shown = new Set(shownIds(content));
+  // Never dropped: every Always photo is somewhere in the film.
+  for (const index of Object.keys(always)) {
+    assertEquals(shown.has(`c${index}`), true, `c${index} dropped`);
+  }
+});
+
+Deno.test("picks: Leave out photos appear nowhere, moments or Flurries", () => {
+  // All but 4 left out.
+  const leftOut: Record<number, boolean> = Object.fromEntries(
+    Array.from({ length: 16 }, (_, i) => [i + 2, false]),
+  );
+  const content = assembleWrapUpContent(
+    tripData({ photos: pickedPhotos(leftOut), completedBonusTasks: [] }),
+    validAiFields,
+  );
+  assertEquals(validateWrapUpContent(content), true);
+  assertEquals(content.moments.map((m) => m.photo_id), [
+    "c0",
+    "c1",
+    "c18",
+    "c19",
+  ]);
+  assertEquals(shownIds(content).sort(), ["c0", "c1", "c18", "c19"]);
+  // The cut follows what can be shown, not what was taken.
+  assertEquals(content.cut, "highlight");
+  assertEquals(content.footnote.photo_count, 20);
+});
+
+Deno.test("picks: a left-out bonus photo loses its badge slot", () => {
+  const content = assembleWrapUpContent(
+    tripData({
+      photos: pickedPhotos({ 5: false }),
+      completedBonusTasks: [{
+        completed_at: "2026-06-02T12:00:00Z",
+        photo_id: "c5",
+        title: "Dare",
+        points: 2,
+      }],
+    }),
+    validAiFields,
+  );
+  assertEquals(content.moments.some((m) => m.badge !== null), false);
+  assertEquals(shownIds(content).includes("c5"), false);
+});
+
+Deno.test("picks: bonus slots fall back to Auto picks, and an Always bonus photo keeps its badge", () => {
+  // No Always photos: a bonus photo still takes a moment ahead of Auto ones.
+  assertEquals(momentIds(pickedPhotos({}), ["c4"]).includes("c4"), true);
+
+  // 7 Always + 2 bonus: only one moment is left, the first bonus gets it.
+  const always: Record<number, boolean> = Object.fromEntries(
+    [0, 3, 6, 9, 12, 15, 18].map((i) => [i, true]),
+  );
+  assertEquals(
+    momentIds(pickedPhotos(always), ["c10", "c11"]).filter((id) =>
+      !always[Number(id.slice(1))]
+    ),
+    ["c10"],
+  );
+
+  const content = assembleWrapUpContent(
+    tripData({
+      photos: pickedPhotos({ 7: true }),
+      completedBonusTasks: [{
+        completed_at: "2026-06-02T12:00:00Z",
+        photo_id: "c7",
+        title: "Dare",
+        points: 2,
+      }],
+    }),
+    validAiFields,
+  );
+  const moment = content.moments.find((m) => m.photo_id === "c7");
+  assertEquals(moment?.badge, "Dare · Dare · ✦2");
+  assertEquals(moment?.layout, null);
+});
+
+Deno.test("picks: moments stay in time order with Always photos late in the trip", () => {
+  const content = assembleWrapUpContent(
+    tripData({
+      photos: pickedPhotos({ 19: true, 18: true, 0: true }).reverse(),
+      completedBonusTasks: [],
+    }),
+    validAiFields,
+  );
+  const days = content.moments.map((m) => m.day_date!);
+  assertEquals([...days].sort(), days);
 });
