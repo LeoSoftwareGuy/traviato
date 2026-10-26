@@ -19,9 +19,6 @@ class KeptMemoryPhoto extends Equatable {
   final int dayIndex;
   final BonusTaskTemplateEntity? bonusTask;
 
-  /// When the photo was taken — or, without EXIF, when it was added.
-  DateTime get sortTime => photo.takenAt ?? photo.createdAt;
-
   @override
   List<Object?> get props => [photo, dayIndex, bonusTask];
 }

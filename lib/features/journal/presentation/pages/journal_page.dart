@@ -232,6 +232,7 @@ class _JournalContent extends ConsumerWidget {
               ),
             const SizedBox(height: AppSpacing.xl),
             PhotosStrip(
+              key: ValueKey(currentDay),
               photos: state.photosForCurrentDay,
               onAddTap: () => AddPhotoSheet.show(
                 context,

@@ -279,4 +279,44 @@ void main() {
       expect(state.showsToDo, isTrue);
     });
   });
+
+  group('photosForDay (#291)', () {
+    test('lists a day of photos oldest first, whatever the load order', () {
+      final day = DateTime(2026, 6, 1);
+      final state = JournalState(
+        trip: buildTripCard(id: 't1', startDate: day, endDate: day),
+        currentDayDate: day,
+        // Newest first, as a gallery picker hands them over.
+        photos: [
+          buildPhotoEntity(
+            id: 'evening',
+            dayDate: day,
+            takenAt: DateTime(2026, 6, 1, 18),
+          ),
+          buildPhotoEntity(
+            id: 'noon',
+            dayDate: day,
+            takenAt: DateTime(2026, 6, 1, 12),
+          ),
+          buildPhotoEntity(
+            id: 'morning',
+            dayDate: day,
+            takenAt: DateTime(2026, 6, 1, 9),
+          ),
+          buildPhotoEntity(
+            id: 'other-day',
+            dayDate: DateTime(2026, 6, 2),
+            takenAt: DateTime(2026, 6, 2, 7),
+          ),
+        ],
+      );
+
+      expect(state.photosForCurrentDay.map((p) => p.id), [
+        'morning',
+        'noon',
+        'evening',
+      ]);
+      expect(state.thumbnailForDay(day)?.id, 'morning');
+    });
+  });
 }

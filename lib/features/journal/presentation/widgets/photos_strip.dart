@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/l10n/l10n_dates.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -20,8 +21,10 @@ const _photoTileRadius = AppRadius.badgeRadius;
 /// "Photos" section: count + one horizontally scrolling row of thumbnails,
 /// led by the "Add" tile. Tiles keep a fixed 80×100 size (never squeezed)
 /// and snap to the row's leading edge (#149). Tapping a thumbnail opens the
-/// day-scoped swipeable viewer at that photo's index.
-class PhotosStrip extends StatelessWidget {
+/// day-scoped swipeable viewer at that photo's index. [photos] come oldest
+/// first (#291); when one is added the row scrolls to bring it into view.
+/// Key the strip by day so switching days doesn't read as an addition.
+class PhotosStrip extends StatefulWidget {
   const PhotosStrip({
     required this.photos,
     required this.onAddTap,
@@ -34,7 +37,41 @@ class PhotosStrip extends StatelessWidget {
   final ValueChanged<int> onPhotoTap;
 
   @override
+  State<PhotosStrip> createState() => _PhotosStripState();
+}
+
+class _PhotosStripState extends State<PhotosStrip> {
+  final _scrollController = ScrollController();
+
+  @override
+  void didUpdateWidget(PhotosStrip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldIds = {for (final p in oldWidget.photos) p.id};
+    final addedIndex = widget.photos.indexWhere((p) => !oldIds.contains(p.id));
+    if (addedIndex == -1) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) return;
+      final position = _scrollController.position;
+      // +1 for the leading Add tile.
+      final target = ((addedIndex + 1) * (_photoTileWidth + _photoTileGap))
+          .clamp(position.minScrollExtent, position.maxScrollExtent);
+      _scrollController.animateTo(
+        target,
+        duration: AppMotion.progressDuration,
+        curve: AppMotion.progressCurve,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final photos = widget.photos;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -65,6 +102,7 @@ class PhotosStrip extends StatelessWidget {
           height: _photoTileHeight,
           child: ListView.separated(
             key: const Key('journal-photo-strip'),
+            controller: _scrollController,
             scrollDirection: Axis.horizontal,
             physics: const _SnapToTilePhysics(
               extent: _photoTileWidth + _photoTileGap,
@@ -72,11 +110,11 @@ class PhotosStrip extends StatelessWidget {
             itemCount: photos.length + 1,
             separatorBuilder: (_, _) => const SizedBox(width: _photoTileGap),
             itemBuilder: (context, index) {
-              if (index == 0) return _AddPhotoTile(onTap: onAddTap);
+              if (index == 0) return _AddPhotoTile(onTap: widget.onAddTap);
               final photoIndex = index - 1;
               return _PhotoTile(
                 photo: photos[photoIndex],
-                onTap: () => onPhotoTap(photoIndex),
+                onTap: () => widget.onPhotoTap(photoIndex),
               );
             },
           ),
