@@ -81,6 +81,7 @@ PhotoEntity buildPhotoEntity({
   double? lat,
   double? lng,
   DateTime? takenAt,
+  DateTime? createdAt,
 }) {
   return PhotoEntity(
     id: id,
@@ -92,7 +93,7 @@ PhotoEntity buildPhotoEntity({
     lat: lat,
     lng: lng,
     takenAt: takenAt,
-    createdAt: DateTime(2026, 1, 1),
+    createdAt: createdAt ?? DateTime(2026, 1, 1),
     imageUrl: imageUrl,
   );
 }

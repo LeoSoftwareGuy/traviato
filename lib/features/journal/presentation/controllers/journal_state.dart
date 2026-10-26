@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../photo/domain/entities/photo_entity.dart';
+import '../../../photo/domain/photo_order.dart';
 import '../../../quest/domain/entities/quest_entity.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
 import '../../domain/entities/day_note_entity.dart';
@@ -89,9 +90,13 @@ class JournalState extends Equatable {
   DayNoteEntity? get currentNote =>
       currentDayDate == null ? null : notesByDay[currentDayDate];
 
-  List<PhotoEntity> photosForDay(DateTime day) => photos
-      .where((p) => p.dayDate != null && _isSameDate(p.dayDate!, day))
-      .toList();
+  /// The day's photos as they happened, oldest first (#291) — the order the
+  /// strip, the day-tab thumbnail and the viewer all share.
+  List<PhotoEntity> photosForDay(DateTime day) =>
+      photos
+          .where((p) => p.dayDate != null && _isSameDate(p.dayDate!, day))
+          .toList()
+        ..sort(comparePhotosByTime);
 
   List<PhotoEntity> get photosForCurrentDay {
     final day = currentDayDate;

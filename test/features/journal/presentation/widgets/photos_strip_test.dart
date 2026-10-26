@@ -123,4 +123,47 @@ void main() {
     expect(find.text('9:05 AM'), findsOneWidget);
     expect(find.byKey(const Key('journal-photo-time-pill')), findsOneWidget);
   });
+
+  testWidgets('a newly added photo scrolls into view (#291)', (tester) async {
+    final photos = [
+      for (var i = 0; i < 8; i++) buildPhotoEntity(id: 'p$i'),
+    ];
+    await _pumpStrip(tester, photos: photos);
+    final strip = find.byKey(const Key('journal-photo-strip'));
+    expect(find.byKey(const Key('journal-photo-tile-p8')), findsNothing);
+
+    await _pumpStrip(
+      tester,
+      photos: [
+        ...photos,
+        buildPhotoEntity(id: 'p8'),
+      ],
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('journal-photo-tile-p8')), findsOneWidget);
+    final scrollable = tester.state<ScrollableState>(
+      find.descendant(of: strip, matching: find.byType(Scrollable)),
+    );
+    expect(scrollable.position.pixels, greaterThan(0));
+  });
+
+  testWidgets('a rebuild without new photos leaves the scroll alone', (
+    tester,
+  ) async {
+    final photos = [
+      for (var i = 0; i < 8; i++) buildPhotoEntity(id: 'p$i'),
+    ];
+    await _pumpStrip(tester, photos: photos);
+    await _pumpStrip(tester, photos: [...photos]);
+    await tester.pumpAndSettle();
+
+    final scrollable = tester.state<ScrollableState>(
+      find.descendant(
+        of: find.byKey(const Key('journal-photo-strip')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    expect(scrollable.position.pixels, 0);
+  });
 }

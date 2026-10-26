@@ -2,6 +2,7 @@ import '../../bonus/domain/entities/bonus_task_assignment_entity.dart';
 import '../../bonus/domain/entities/bonus_task_template_entity.dart';
 import '../../journal/domain/entities/day_note_entity.dart';
 import '../../photo/domain/entities/photo_entity.dart';
+import '../../photo/domain/photo_order.dart';
 import '../../quest/domain/entities/quest_entity.dart';
 import '../../trip/domain/entities/trip_card_entity.dart';
 import 'entities/kept_memory.dart';
@@ -92,10 +93,8 @@ KeptMemory buildKeptMemory({
   );
 }
 
-int _byTime(KeptMemoryPhoto a, KeptMemoryPhoto b) {
-  final byTime = a.sortTime.compareTo(b.sortTime);
-  return byTime != 0 ? byTime : a.photo.id.compareTo(b.photo.id);
-}
+int _byTime(KeptMemoryPhoto a, KeptMemoryPhoto b) =>
+    comparePhotosByTime(a.photo, b.photo);
 
 int _planOrder(KeptMemoryPlanItem a, KeptMemoryPlanItem b) {
   final byDay = a.dayIndex.compareTo(b.dayIndex);
