@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/constants/supabase_constants.dart';
 import '../../../../core/errors/exceptions.dart';
+import '../../domain/entities/film_pick.dart';
 import '../models/photo_model.dart';
 import 'photo_remote_data_source.dart';
 
@@ -132,6 +133,27 @@ class SupabasePhotoRemoteDataSource implements PhotoRemoteDataSource {
       await _client.storage.from(Storage.tripPhotos).remove([storagePath]);
     } on StorageException catch (e) {
       throw StorageServerException(message: e.message);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<DateTime?> setFilmPick(String photoId, FilmPick pick) async {
+    _guardAuthenticated();
+    try {
+      final row = await _client
+          .from(Tables.photos)
+          .update({'use_in_wrap_up': pick.columnValue})
+          .eq('id', photoId)
+          .select('use_in_wrap_up_set_at')
+          .single();
+      final setAt = row['use_in_wrap_up_set_at'];
+      return setAt == null ? null : DateTime.parse(setAt as String);
+    } on PostgrestException catch (e) {
+      throw _mapPostgrestException(e);
     } on SocketException {
       throw const NetworkException();
     } catch (e) {

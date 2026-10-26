@@ -23,6 +23,14 @@ class _FakeWrapUpRemoteDataSource implements WrapUpRemoteDataSource {
     publishCallCount++;
     if (exception != null) throw exception!;
   }
+
+  var rebuildCallCount = 0;
+
+  @override
+  Future<void> rebuildKept(String tripId, {required String language}) async {
+    rebuildCallCount++;
+    if (exception != null) throw exception!;
+  }
 }
 
 void main() {
@@ -54,6 +62,29 @@ void main() {
         (result as Left<Failure, void>).value,
         isA<AuthenticationFailure>(),
       );
+    });
+  });
+
+  group('rebuildKept (#294)', () {
+    test('succeeds when the function does', () async {
+      final dataSource = _FakeWrapUpRemoteDataSource();
+      final repo = WrapUpRepositoryImpl(remote: dataSource);
+
+      final result = await repo.rebuildKept('t1', language: 'en');
+
+      expect(result, const Right<Failure, void>(null));
+      expect(dataSource.rebuildCallCount, 1);
+    });
+
+    test('maps a server error to ServerFailure', () async {
+      final repo = WrapUpRepositoryImpl(
+        remote: _FakeWrapUpRemoteDataSource()
+          ..exception = const ServerException(message: 'boom'),
+      );
+
+      final result = await repo.rebuildKept('t1', language: 'en');
+
+      expect(result, const Left<Failure, void>(ServerFailure(message: 'boom')));
     });
   });
 }

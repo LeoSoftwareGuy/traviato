@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/l10n/context_l10n.dart';
@@ -11,11 +14,21 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
+import '../../../journal/presentation/controllers/journal_controller.dart';
+import '../../../wrap_up/presentation/providers/film_pick_providers.dart';
+import '../../domain/entities/film_pick.dart';
 import '../../domain/entities/photo_entity.dart';
+import '../mutations/photo_mutations.dart';
+import '../widgets/film_pick_panel.dart';
 import '../widgets/storage_photo_image.dart';
 
 const _fadeInDuration = Duration(milliseconds: 350);
+const _leftOutFadeDuration = Duration(milliseconds: 200);
+
+/// A left-out photo stays visible but recedes (#294).
+const _leftOutOpacity = .45;
 const _snapDuration = Duration(milliseconds: 300);
 const _snapCurve = Cubic(.22, 1, .36, 1);
 
@@ -53,14 +66,19 @@ int wrappedPhotoIndex(int page, int photoCount) =>
 /// several photos stays one tap each. The viewer moves on to the next photo,
 /// closes once none are left, and puts the photo back if [onDelete] throws.
 ///
+/// When [filmTripId] is given, an "▸ IN THE FILM" panel under the photo
+/// sets its Wrap-Up Film pick (#294) — saved at once, read back from that
+/// memory's Journal state — and a left-out photo is dimmed with a pill.
+///
 /// Otherwise deliberately minimal: no place row, people tagging, caption
-/// editing, or Set-as-cover/Use-in-wrap-up actions — those belong to the
-/// M3-8 detail screen.
-class PhotoViewerPage extends StatefulWidget {
+/// editing, or Set-as-cover actions — those belong to the M3-8 detail
+/// screen.
+class PhotoViewerPage extends ConsumerStatefulWidget {
   const PhotoViewerPage({
     required this.photos,
     required this.initialIndex,
     this.onDelete,
+    this.filmTripId,
     super.key,
   }) : assert(photos.length > 0, 'PhotoViewerPage needs at least one photo');
 
@@ -70,11 +88,16 @@ class PhotoViewerPage extends StatefulWidget {
   /// Deletes a photo; throws on failure. `null` hides the trash button.
   final Future<void> Function(PhotoEntity photo)? onDelete;
 
+  /// The memory whose film the photos' picks belong to; `null` hides the
+  /// film-pick panel.
+  final String? filmTripId;
+
   static Future<void> show(
     BuildContext context, {
     required List<PhotoEntity> photos,
     required int initialIndex,
     Future<void> Function(PhotoEntity photo)? onDelete,
+    String? filmTripId,
   }) {
     return showGeneralDialog<void>(
       context: context,
@@ -86,6 +109,7 @@ class PhotoViewerPage extends StatefulWidget {
         photos: photos,
         initialIndex: initialIndex,
         onDelete: onDelete,
+        filmTripId: filmTripId,
       ),
       transitionBuilder: (_, animation, _, child) => FadeTransition(
         opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
@@ -95,10 +119,10 @@ class PhotoViewerPage extends StatefulWidget {
   }
 
   @override
-  State<PhotoViewerPage> createState() => _PhotoViewerPageState();
+  ConsumerState<PhotoViewerPage> createState() => _PhotoViewerPageState();
 }
 
-class _PhotoViewerPageState extends State<PhotoViewerPage>
+class _PhotoViewerPageState extends ConsumerState<PhotoViewerPage>
     with SingleTickerProviderStateMixin {
   /// Track position in (unbounded) page units: the committed [_page] at
   /// rest, fractional while dragging or snapping.
@@ -115,6 +139,12 @@ class _PhotoViewerPageState extends State<PhotoViewerPage>
   /// Context under the viewer's own [ScaffoldMessenger] — the Journal's
   /// messenger sits behind this overlay, so its snackbars wouldn't show.
   late BuildContext _overlayContext;
+
+  /// Live film picks by photo id, and the photos the film gives a main
+  /// moment to — read from the Journal each build, so a change shows at
+  /// once (the viewer's own [_photos] copy keeps the picks it opened with).
+  Map<String, FilmPick> _filmPicks = const {};
+  Set<String> _filmMomentIds = const {};
 
   double _dragStartValue = 0;
   double _dragDx = 0;
@@ -220,8 +250,42 @@ class _PhotoViewerPageState extends State<PhotoViewerPage>
     }
   }
 
+  FilmPick _filmPickOf(PhotoEntity photo) =>
+      _filmPicks[photo.id] ?? photo.filmPick;
+
+  Future<void> _setFilmPick(FilmPick pick) async {
+    final tripId = widget.filmTripId;
+    if (tripId == null) return;
+    final photo = _photos[_currentIndex];
+    final l10n = context.l10n;
+    // Fire-and-forget: a missing haptic engine must never block the save.
+    unawaited(HapticFeedback.lightImpact());
+    showAppSnackbar(_overlayContext, switch (pick) {
+      FilmPick.auto => l10n.film_toastAuto,
+      FilmPick.always => l10n.film_toastAlways,
+      FilmPick.never => l10n.film_toastNever,
+    });
+    try {
+      await runSetFilmPick(ref: ref, tripId: tripId, photo: photo, pick: pick);
+    } catch (error) {
+      if (!mounted) return;
+      showErrorSnackbar(
+        _overlayContext,
+        message: presentationFailureMessage(error, context.l10n),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final filmTripId = widget.filmTripId;
+    if (filmTripId != null) {
+      final journalPhotos =
+          ref.watch(journalControllerProvider(filmTripId)).value?.photos ??
+          const <PhotoEntity>[];
+      _filmPicks = {for (final p in journalPhotos) p.id: p.filmPick};
+      _filmMomentIds = ref.watch(filmMomentIdsProvider(filmTripId));
+    }
     // A general-dialog route has no Material of its own — the transparent
     // Scaffold supplies the default text style and ink surface, and its
     // messenger lets a failed delete's snackbar show above the overlay.
@@ -279,6 +343,17 @@ class _PhotoViewerPageState extends State<PhotoViewerPage>
                       index: _currentIndex,
                       total: _count,
                     ),
+                    if (widget.filmTripId != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 14),
+                        child: FilmPickPanel(
+                          pick: _filmPickOf(_photos[_currentIndex]),
+                          isAutoPicked: _filmMomentIds.contains(
+                            _photos[_currentIndex].id,
+                          ),
+                          onChanged: _setFilmPick,
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -422,6 +497,9 @@ class _PhotoViewerPageState extends State<PhotoViewerPage>
             child: _Slide(
               photo: _photos[wrappedPhotoIndex(page, _count)],
               maxImageHeight: maxImageHeight,
+              isLeftOut:
+                  _filmPickOf(_photos[wrappedPhotoIndex(page, _count)]) ==
+                  FilmPick.never,
             ),
           ),
       ],
@@ -430,41 +508,93 @@ class _PhotoViewerPageState extends State<PhotoViewerPage>
 }
 
 class _Slide extends StatelessWidget {
-  const _Slide({required this.photo, required this.maxImageHeight});
+  const _Slide({
+    required this.photo,
+    required this.maxImageHeight,
+    this.isLeftOut = false,
+  });
 
   final PhotoEntity photo;
   final double maxImageHeight;
 
+  /// Left out of the film (#294): dimmed, with a pill saying so.
+  final bool isLeftOut;
+
   @override
   Widget build(BuildContext context) {
-    final url = photo.imageUrl;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: _slidePadding),
       child: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: maxImageHeight),
-          // Under loose constraints the image sizes itself to its own
-          // aspect ratio, so the rounded clip hugs the photo, not the slide.
-          child: ClipRRect(
-            borderRadius: AppRadius.cardRadius,
-            child: url == null
-                ? const SizedBox.square(
-                    dimension: 160,
-                    child: ColoredBox(
-                      color: AppColors.surface,
-                      child: Icon(
-                        Icons.photo_outlined,
-                        color: AppColors.textMuted,
-                        size: 40,
-                      ),
-                    ),
-                  )
-                : StoragePhotoImage(
-                    url: url,
-                    storagePath: photo.storagePath,
-                    fit: BoxFit.contain,
-                    gaplessPlayback: true,
-                  ),
+          child: Stack(
+            alignment: Alignment.topCenter,
+            children: [
+              AnimatedOpacity(
+                opacity: isLeftOut ? _leftOutOpacity : 1,
+                duration: _leftOutFadeDuration,
+                child: _image(),
+              ),
+              if (isLeftOut) const Positioned(top: 110, child: _LeftOutPill()),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Under loose constraints the image sizes itself to its own aspect
+  /// ratio, so the rounded clip hugs the photo, not the slide.
+  Widget _image() {
+    final url = photo.imageUrl;
+    return ClipRRect(
+      borderRadius: AppRadius.cardRadius,
+      child: url == null
+          ? const SizedBox.square(
+              dimension: 160,
+              child: ColoredBox(
+                color: AppColors.surface,
+                child: Icon(
+                  Icons.photo_outlined,
+                  color: AppColors.textMuted,
+                  size: 40,
+                ),
+              ),
+            )
+          : StoragePhotoImage(
+              url: url,
+              storagePath: photo.storagePath,
+              fit: BoxFit.contain,
+              gaplessPlayback: true,
+            ),
+    );
+  }
+}
+
+/// "Left out of the film" over a left-out photo (#294). Not tappable.
+class _LeftOutPill extends StatelessWidget {
+  const _LeftOutPill();
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        key: const Key('photo-viewer-left-out-pill'),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppColors.tint(AppColors.filmBackground, .7),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: AppColors.tint(AppColors.textSecondary, .3),
+          ),
+        ),
+        child: Text(
+          context.l10n.film_leftOutPill,
+          style: AppTypography.caption.copyWith(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0,
+            color: AppColors.textSecondary,
           ),
         ),
       ),

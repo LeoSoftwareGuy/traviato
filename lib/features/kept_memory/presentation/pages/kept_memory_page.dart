@@ -12,6 +12,7 @@ import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../trip/presentation/widgets/delete_memory_sheet.dart';
 import '../../../wrap_up/presentation/controllers/wrap_up_controller.dart';
 import '../../../wrap_up/presentation/film/wrap_up_film_scenes.dart';
+import '../../../wrap_up/presentation/widgets/film_out_of_date_chip.dart';
 import '../../domain/entities/kept_memory.dart';
 import '../kept_memory_labels.dart';
 import '../providers/kept_memory_provider.dart';
@@ -25,7 +26,8 @@ const _sidePadding = 22.0;
 
 /// Every photo and note from a kept memory, day by day, with the film on
 /// top (#279, docs/design/kept-memory/KEPT_MEMORY_PAGE_SPEC.md option 1b).
-/// Read-only: nothing here edits the memory.
+/// Read-only: nothing here edits the memory — except offering to rebuild
+/// the film once its photos changed (#294).
 class KeptMemoryPage extends ConsumerWidget {
   const KeptMemoryPage({required this.tripId, super.key});
 
@@ -128,6 +130,18 @@ class _KeptMemoryScroll extends ConsumerWidget {
             ),
           ),
         ),
+        if (film?.isOutOfDate ?? false)
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
+              _sidePadding,
+              12,
+              _sidePadding,
+              0,
+            ),
+            sliver: SliverToBoxAdapter(
+              child: Center(child: FilmOutOfDateChip(tripId: _tripId)),
+            ),
+          ),
         SliverList.builder(
           itemCount: memory.days.length,
           itemBuilder: (context, index) => Padding(

@@ -210,7 +210,7 @@ final class BonusTripCardsProvider
   }
 }
 
-String _$bonusTripCardsHash() => r'01422e53ff021940fc066b1810cf832967742ef4';
+String _$bonusTripCardsHash() => r'59ee1ec26b13ec34ef499ab76ada5df11020f89b';
 
 /// Stars by type and by memory (frames 1a/1b, and the All memories list).
 

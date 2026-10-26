@@ -18,4 +18,12 @@ abstract interface class WrapUpRepository {
   /// the `published_at`-scoped column grant from #93 (content/generated_at
   /// stay service-role-only).
   Future<Either<Failure, void>> publish(String tripId);
+
+  /// "Photos changed · Rebuild film" (#294): re-assembles a kept film from
+  /// the current photos and picks, keeping its AI lines — no AI call — and
+  /// keeping it kept. [language] is passed along as on every request.
+  Future<Either<Failure, void>> rebuildKept(
+    String tripId, {
+    required String language,
+  });
 }

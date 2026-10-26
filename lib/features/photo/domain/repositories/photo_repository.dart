@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/errors/failures.dart';
+import '../entities/film_pick.dart';
 import '../entities/photo_entity.dart';
 
 abstract interface class PhotoRepository {
@@ -28,4 +29,11 @@ abstract interface class PhotoRepository {
   /// gone the photo is gone for the user, so a failed file removal is
   /// logged rather than surfaced.
   Future<Either<Failure, void>> deletePhoto(PhotoEntity photo);
+
+  /// Saves the photo's Wrap-Up Film pick (#294). Returns when the server
+  /// stamped it, for telling a kept film that its photos changed.
+  Future<Either<Failure, DateTime?>> setFilmPick(
+    String photoId,
+    FilmPick pick,
+  );
 }

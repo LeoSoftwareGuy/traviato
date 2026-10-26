@@ -37,4 +37,13 @@ void main() {
   test('the generate_wrap_up body carries the UI language (#250)', () {
     expect(generateWrapUpBody('t1', 'ru'), {'trip_id': 't1', 'language': 'ru'});
   });
+
+  test('a rebuild request asks the function to re-assemble a kept film '
+      '(#294)', () {
+    expect(generateWrapUpBody('t1', 'en', rebuild: true), {
+      'trip_id': 't1',
+      'language': 'en',
+      'rebuild': true,
+    });
+  });
 }

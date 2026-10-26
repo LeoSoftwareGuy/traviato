@@ -19,6 +19,9 @@ class FakeWrapUpRepository implements WrapUpRepository {
   String? lastLanguage;
   var publishCallCount = 0;
 
+  Either<Failure, void>? rebuildKeptResult;
+  var rebuildKeptCallCount = 0;
+
   /// Delays [getOrGenerate] so tests can observe the loading state.
   Duration delay = Duration.zero;
 
@@ -37,6 +40,15 @@ class FakeWrapUpRepository implements WrapUpRepository {
   Future<Either<Failure, void>> publish(String tripId) async {
     publishCallCount++;
     return publishResult ?? const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, void>> rebuildKept(
+    String tripId, {
+    required String language,
+  }) async {
+    rebuildKeptCallCount++;
+    return rebuildKeptResult ?? const Right(null);
   }
 }
 

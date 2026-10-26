@@ -22,6 +22,7 @@ import '../../../photo/presentation/mutations/photo_mutations.dart';
 import '../../../photo/presentation/pages/photo_viewer_page.dart';
 import '../../../photo/presentation/widgets/add_photo_sheet.dart';
 import '../../../photo/presentation/widgets/storage_photo_image.dart';
+import '../../../wrap_up/presentation/providers/film_pick_providers.dart';
 import '../controllers/journal_controller.dart';
 import '../controllers/journal_state.dart';
 import '../mutations/journal_mutations.dart';
@@ -234,6 +235,7 @@ class _JournalContent extends ConsumerWidget {
             PhotosStrip(
               key: ValueKey(currentDay),
               photos: state.photosForCurrentDay,
+              filmMomentIds: ref.watch(filmMomentIdsProvider(tripId)),
               onAddTap: () => AddPhotoSheet.show(
                 context,
                 tripId: tripId,
@@ -245,6 +247,7 @@ class _JournalContent extends ConsumerWidget {
                 initialIndex: index,
                 onDelete: (photo) =>
                     runDeletePhoto(ref: ref, tripId: tripId, photo: photo),
+                filmTripId: tripId,
               ),
             ),
           ],

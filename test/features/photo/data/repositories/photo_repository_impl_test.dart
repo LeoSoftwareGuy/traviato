@@ -7,6 +7,7 @@ import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/features/photo/data/datasources/photo_remote_data_source.dart';
 import 'package:traviato/features/photo/data/models/photo_model.dart';
 import 'package:traviato/features/photo/data/repositories/photo_repository_impl.dart';
+import 'package:traviato/features/photo/domain/entities/film_pick.dart';
 
 import '../../fakes/fake_photo_repository.dart';
 
@@ -28,6 +29,15 @@ class _FakePhotoRemoteDataSource implements PhotoRemoteDataSource {
 
   /// Every delete call, in order — `row:<id>` / `file:<path>`.
   final calls = <String>[];
+
+  final filmPicks = <(String, FilmPick)>[];
+
+  @override
+  Future<DateTime?> setFilmPick(String photoId, FilmPick pick) async {
+    if (exception != null) throw exception!;
+    filmPicks.add((photoId, pick));
+    return DateTime.utc(2026, 7, 1, 12);
+  }
 
   @override
   Future<void> deletePhotoRow(String id) async {
@@ -247,6 +257,28 @@ void main() {
 
       expect(result.isRight(), isTrue);
       expect(remote.rows, isEmpty);
+    });
+  });
+
+  group('PhotoRepositoryImpl.setFilmPick (#294)', () {
+    test('passes the pick through and returns the server stamp', () async {
+      final remote = _FakePhotoRemoteDataSource();
+      final repo = PhotoRepositoryImpl(remote: remote);
+
+      final result = await repo.setFilmPick('p1', FilmPick.never);
+
+      expect(result, Right<Failure, DateTime?>(DateTime.utc(2026, 7, 1, 12)));
+      expect(remote.filmPicks, [('p1', FilmPick.never)]);
+    });
+
+    test('maps a network error to NetworkFailure', () async {
+      final repo = PhotoRepositoryImpl(
+        remote: _FakePhotoRemoteDataSource(exception: const NetworkException()),
+      );
+
+      final result = await repo.setFilmPick('p1', FilmPick.always);
+
+      expect(result, const Left<Failure, DateTime?>(NetworkFailure()));
     });
   });
 }

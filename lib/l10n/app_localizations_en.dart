@@ -2436,4 +2436,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_checklist_umbrella => 'Umbrella';
+
+  @override
+  String get film_inTheFilm => 'In the film';
+
+  @override
+  String get film_pickAuto => 'Auto';
+
+  @override
+  String get film_pickAlways => 'Always';
+
+  @override
+  String get film_pickNever => 'Leave out';
+
+  @override
+  String get film_hintAutoPicked => 'Film chose this one';
+
+  @override
+  String get film_hintAutoNot => 'Not picked right now';
+
+  @override
+  String get film_hintAlways => 'Your pick · gets a main moment';
+
+  @override
+  String get film_hintNever => 'Won\'t appear anywhere';
+
+  @override
+  String get film_toastAlways => 'Always in the film';
+
+  @override
+  String get film_toastNever => 'Left out of the film';
+
+  @override
+  String get film_toastAuto => 'Film picks this one';
+
+  @override
+  String get film_leftOutPill => 'Left out of the film';
+
+  @override
+  String film_stripCount(int count) {
+    return '$count in the film';
+  }
+
+  @override
+  String get film_badgeYourPick => 'Your pick';
+
+  @override
+  String get film_badgeLeftOut => 'Left out';
+
+  @override
+  String get film_outOfDate => 'Photos changed · Rebuild film';
 }

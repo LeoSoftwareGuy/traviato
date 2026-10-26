@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../../domain/entities/film_pick.dart';
 import '../models/photo_model.dart';
 
 abstract interface class PhotoRemoteDataSource {
@@ -25,4 +26,8 @@ abstract interface class PhotoRemoteDataSource {
 
   /// Removes the photo's file from the `trip-photos` bucket.
   Future<void> removePhotoFile(String storagePath);
+
+  /// Writes the photo's Wrap-Up Film pick (#294) and returns when it was
+  /// stamped — `use_in_wrap_up_set_at` is set server-side by a trigger.
+  Future<DateTime?> setFilmPick(String photoId, FilmPick pick);
 }

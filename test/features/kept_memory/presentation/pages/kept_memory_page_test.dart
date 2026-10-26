@@ -17,6 +17,7 @@ import 'package:traviato/features/quest/domain/entities/quest_entity.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/trip/domain/entities/trip_card_entity.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_moment.dart';
 import 'package:traviato/features/wrap_up/presentation/providers/wrap_up_providers.dart';
 
 import '../../../bonus/fakes/fake_bonus_task_repository.dart';
@@ -91,6 +92,7 @@ Future<void> _pump(
   List<DayNoteEntity>? notes,
   List<QuestEntity> quests = const [],
   Failure? tripFailure,
+  FakeWrapUpRepository? wrapUpRepo,
 }) async {
   tester.view.physicalSize = const Size(420, 3000);
   tester.view.devicePixelRatio = 1;
@@ -136,7 +138,9 @@ Future<void> _pump(
         bonusTaskRepositoryProvider.overrideWithValue(
           FakeBonusTaskRepository(),
         ),
-        wrapUpRepositoryProvider.overrideWithValue(FakeWrapUpRepository()),
+        wrapUpRepositoryProvider.overrideWithValue(
+          wrapUpRepo ?? FakeWrapUpRepository(),
+        ),
       ],
       child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
     ),
@@ -260,5 +264,30 @@ void main() {
     );
 
     expect(find.text('Retry'), findsOneWidget);
+  });
+
+  testWidgets('a kept film whose photos changed offers a rebuild (#294)', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      wrapUpRepo: FakeWrapUpRepository()
+        ..getOrGenerateResult = Right(
+          buildWrapUpEntity(
+            generatedAt: DateTime.utc(2026, 8, 17),
+            publishedAt: DateTime.utc(2026, 8, 17, 12),
+            // p9 was deleted after the film was kept.
+            moments: const [WrapUpMoment(photoId: 'p9')],
+          ),
+        ),
+    );
+
+    expect(find.text('Photos changed · Rebuild film'), findsOneWidget);
+  });
+
+  testWidgets('an up-to-date kept film offers no rebuild', (tester) async {
+    await _pump(tester);
+
+    expect(find.byKey(const Key('film-out-of-date-chip')), findsNothing);
   });
 }

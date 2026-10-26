@@ -41,7 +41,10 @@ DateTime Function() bonusClock(Ref ref) => DateTime.now;
 @riverpod
 Future<List<TripCardEntity>> bonusTripCards(Ref ref) async {
   final sub = ref.watch(globalEventBusProvider).stream.listen((event) {
-    if (event is! EntitlementUpdatedDispatched) ref.invalidateSelf();
+    if (event is! EntitlementUpdatedDispatched &&
+        event is! FilmPhotosChangedDispatched) {
+      ref.invalidateSelf();
+    }
   });
   ref.onDispose(sub.cancel);
 

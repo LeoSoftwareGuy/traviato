@@ -2423,5 +2423,69 @@
   "content_checklist_umbrella": "Зонт",
   "@content_checklist_umbrella": {
     "x-review": "pending"
+  },
+  "film_inTheFilm": "В фильме",
+  "@film_inTheFilm": {
+    "x-review": "pending"
+  },
+  "film_pickAuto": "Авто",
+  "@film_pickAuto": {
+    "x-review": "pending"
+  },
+  "film_pickAlways": "Всегда",
+  "@film_pickAlways": {
+    "x-review": "pending"
+  },
+  "film_pickNever": "Не брать",
+  "@film_pickNever": {
+    "x-review": "pending"
+  },
+  "film_hintAutoPicked": "Фильм выбрал это фото",
+  "@film_hintAutoPicked": {
+    "x-review": "pending"
+  },
+  "film_hintAutoNot": "Сейчас не выбрано",
+  "@film_hintAutoNot": {
+    "x-review": "pending"
+  },
+  "film_hintAlways": "Ваш выбор · главный момент",
+  "@film_hintAlways": {
+    "x-review": "pending"
+  },
+  "film_hintNever": "Не появится нигде",
+  "@film_hintNever": {
+    "x-review": "pending"
+  },
+  "film_toastAlways": "Всегда в фильме",
+  "@film_toastAlways": {
+    "x-review": "pending"
+  },
+  "film_toastNever": "Убрано из фильма",
+  "@film_toastNever": {
+    "x-review": "pending"
+  },
+  "film_toastAuto": "Фильм выберет сам",
+  "@film_toastAuto": {
+    "x-review": "pending"
+  },
+  "film_leftOutPill": "Не войдёт в фильм",
+  "@film_leftOutPill": {
+    "x-review": "pending"
+  },
+  "film_stripCount": "{count} в фильме",
+  "@film_stripCount": {
+    "x-review": "pending"
+  },
+  "film_badgeYourPick": "Ваш выбор",
+  "@film_badgeYourPick": {
+    "x-review": "pending"
+  },
+  "film_badgeLeftOut": "Убрано",
+  "@film_badgeLeftOut": {
+    "x-review": "pending"
+  },
+  "film_outOfDate": "Фото изменились · Пересобрать фильм",
+  "@film_outOfDate": {
+    "x-review": "pending"
   }
 }
