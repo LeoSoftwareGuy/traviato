@@ -18,6 +18,7 @@ import 'wrap_up_unlock.dart';
 class WrapUpEntity extends Equatable {
   const WrapUpEntity({
     this.cut,
+    this.momentSlots = 8,
     required this.dates,
     required this.coverPhoto,
     required this.invitation,
@@ -34,6 +35,10 @@ class WrapUpEntity extends Equatable {
   /// The generator's resolved film plan (#151); `null` for a wrap-up
   /// generated before cuts existed, which plays exactly as it always did.
   final WrapUpFilmCut? cut;
+
+  /// The moment layout the film was built for (#304): 16, or 8 for a film
+  /// made before it (or for an older app build). Places the bridges.
+  final int momentSlots;
 
   final WrapUpDates dates;
   final WrapUpCoverPhoto coverPhoto;
@@ -71,6 +76,7 @@ class WrapUpEntity extends Equatable {
     DateTime? Function()? publishedAt,
   }) => WrapUpEntity(
     cut: cut,
+    momentSlots: momentSlots,
     dates: dates ?? this.dates,
     coverPhoto: coverPhoto,
     invitation: invitation ?? this.invitation,
@@ -87,6 +93,7 @@ class WrapUpEntity extends Equatable {
   @override
   List<Object?> get props => [
     cut,
+    momentSlots,
     dates,
     coverPhoto,
     invitation,

@@ -32,6 +32,9 @@ export interface Moment extends PhotoRef {
 
 export interface WrapUpContent {
   cut: FilmCut;
+  // The moment layout the film was built for (#304): 16, or absent = 8.
+  // The player places the bridges and paces the film by it.
+  moment_slots?: 16;
   dates: {
     start_date: string | null;
     end_date: string | null;
@@ -96,6 +99,7 @@ export function validateWrapUpContent(data: unknown): data is WrapUpContent {
   const d = data as Record<string, unknown>;
 
   if (!isString(d.cut) || !FILM_CUTS.includes(d.cut)) return false;
+  if (d.moment_slots !== undefined && d.moment_slots !== 16) return false;
 
   const dates = d.dates as Record<string, unknown> | undefined;
   if (typeof dates !== "object" || dates === null) return false;

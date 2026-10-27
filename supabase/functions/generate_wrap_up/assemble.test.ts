@@ -4,6 +4,7 @@ import {
   formatDateRange,
   invitationLine1,
   noteExcerpts,
+  parseMomentSlots,
   pickMomentPhotos,
   selectCut,
   sortPhotosChronologically,

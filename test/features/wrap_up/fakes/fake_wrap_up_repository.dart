@@ -54,6 +54,7 @@ class FakeWrapUpRepository implements WrapUpRepository {
 
 WrapUpEntity buildWrapUpEntity({
   WrapUpFilmCut? cut,
+  int momentSlots = 8,
   WrapUpDates? dates,
   WrapUpCoverPhoto? coverPhoto,
   WrapUpInvitation? invitation,
@@ -68,6 +69,7 @@ WrapUpEntity buildWrapUpEntity({
 }) {
   return WrapUpEntity(
     cut: cut,
+    momentSlots: momentSlots,
     dates: dates ?? const WrapUpDates(formatted: '1–5 June 2026'),
     coverPhoto: coverPhoto ?? const WrapUpCoverPhoto(imagePath: 'asset:hero'),
     invitation:

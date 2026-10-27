@@ -272,5 +272,18 @@ void main() {
       expect(model.cut, isNull);
       expect(model.moments[0].layout, isNull);
     });
+
+    test('moment_slots 16 marks the 16-moment film; absent or odd is 8 '
+        '(#304)', () {
+      WrapUpModel parse(Object? slots) => WrapUpModel.fromRow({
+        'content': {'moment_slots': ?slots},
+        'generated_at': '2026-06-06T00:00:00Z',
+      });
+
+      expect(parse(16).momentSlots, 16);
+      expect(parse(null).momentSlots, 8);
+      expect(parse(12).momentSlots, 8);
+      expect(parse('16').momentSlots, 8);
+    });
   });
 }

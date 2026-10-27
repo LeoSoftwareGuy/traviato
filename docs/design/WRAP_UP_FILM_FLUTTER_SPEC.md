@@ -15,6 +15,18 @@ token names differ from `lib/core/theme/`, the theme wins, not the prototype.
 
 ## 1. Canvas and playback
 
+> **#304 — 16 quick moments.** The film now has **16** main moments
+> (M1–M16; older app builds still get 8). A moment's length depends on what
+> it shows: bare card flip **2.5s**, with a caption or badge **3.5s**,
+> collage **4.0s** (each was ~5s). The card toss, flip (0.45s from +0.15),
+> caption rise (+0.6) and exit to the pile (0.6s) are retimed to fit.
+> Bridges fall after **M6 and M12** (6 / 6 / 4). Collage slots: M4, M10
+> (core), M14, M16 (late). Cut thresholds: highlight ≤ 19, compact ≤ 31
+> shown photos. The app sends `moment_slots: 16`; the film's content then
+> carries `moment_slots: 16` (absent = the 8-moment layout below). Totals
+> and per-moment times in the tables below describe the original 8-moment
+> film.
+
 | | |
 |---|---|
 | Design canvas | **1080 × 1920** logical px (9:16) |
@@ -122,12 +134,12 @@ not hardcoded.
 ### Moment slot rules
 
 ```
-first        → the user's "Always" photos (#294); more than 8 → spread over
+first        → the user's "Always" photos (#294); more than 16 → spread over
                the trip, the rest go to the Flurries (never dropped)
 then up to 3 → bonus-task photos on Auto (first 3 completed),
                badged "Dare · {task name} · ✦{stars}" in `dare` blue
 the rest     → Auto journal photographs spread evenly over the whole trip
-M1 → M8      → played in time order: by day, then by capture time (#292)
+M1 → M16     → played in time order: by day, then by capture time (#292)
 ```
 
 "Leave out" photos (#294) appear nowhere — not in moments, collages or

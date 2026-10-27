@@ -47,6 +47,7 @@ WrapUpEntity pruneMissingPhotos(
 
   return WrapUpEntity(
     cut: wrapUp.cut,
+    momentSlots: wrapUp.momentSlots,
     dates: wrapUp.dates,
     coverPhoto: wrapUp.coverPhoto,
     invitation: wrapUp.invitation,
