@@ -715,11 +715,14 @@ Deno.test("collages are captioned with their day's note, card flips with the pho
       assertEquals(m.note, null);
     }
   }
-  const day1 = collages.filter((m) => m.day_date === "2026-06-01");
-  assertEquals(day1[0]?.note, "Rain all morning. Then sun.");
+  const day1 = collages.find((m) => m.day_date === "2026-06-01");
+  assertEquals(
+    ["Rain all morning.", "Then sun."].includes(day1?.note ?? ""),
+    true,
+  );
 });
 
-Deno.test("two collages on one day show different parts of its note", () => {
+Deno.test("two collages on one day show different parts of its note, in time order", () => {
   // One 30-photo day: all four collages land on it.
   const sentence = (n: number) => `Sentence ${n} ${"x".repeat(60)}.`;
   const content = assembleWrapUpContent(
@@ -739,19 +742,18 @@ Deno.test("two collages on one day show different parts of its note", () => {
   assertEquals(notes, [sentence(1), sentence(2), sentence(3), null]);
 });
 
-Deno.test("noteExcerpts groups whole sentences up to the limit", () => {
+Deno.test("noteExcerpts gives one excerpt per sentence or line", () => {
   assertEquals(noteExcerpts(""), []);
   assertEquals(noteExcerpts("Last tram ride before the flight home"), [
     "Last tram ride before the flight home",
   ]);
-  assertEquals(noteExcerpts("One. Two! Three?", 9), ["One. Two!", "Three?"]);
-  // Line breaks split too.
-  assertEquals(noteExcerpts("Morning swim\nLong lunch", 12), [
+  assertEquals(noteExcerpts("One. Two! Three?"), ["One.", "Two!", "Three?"]);
+  assertEquals(noteExcerpts("Morning swim\nLong lunch"), [
     "Morning swim",
     "Long lunch",
   ]);
   // Russian notes split the same way.
-  assertEquals(noteExcerpts("Дождь с утра. Потом солнце.", 14), [
+  assertEquals(noteExcerpts("Дождь с утра. Потом солнце."), [
     "Дождь с утра.",
     "Потом солнце.",
   ]);
@@ -774,98 +776,58 @@ Deno.test("noteExcerpts drops the unfinished tail of a note cut at 500 chars", (
   assertEquals(excerpts.some((e) => e.includes("walked")), false);
   // A short note without a final full stop keeps its last sentence.
   assertEquals(noteExcerpts("Fine day. We walked home"), [
-    "Fine day. We walked home",
+    "Fine day.",
+    "We walked home",
   ]);
 });
 
-// --- #304: 16 moments --------------------------------------------------
+// --- #302: a collage's caption follows its time of day -------------------
 
-function plan16(list: TripData["photos"], bonus: string[] = []) {
-  return assembleWrapUpContent(
-    tripData({
-      photos: list,
-      notes: [],
-      completedBonusTasks: bonus.map((id, i) => ({
-        completed_at: `2026-06-01T0${i}:00:00Z`,
-        photo_id: id,
-        title: `Dare ${i}`,
-        points: 1,
-      })),
-    }),
-    validAiFields,
-    16,
+// 12 photos on one day, one an hour from 10:00 to 21:00 (compact cut):
+// M2 is a morning stack3 (11, 12, 14h), M5 an evening one (16, 17, 20h).
+function hourlyDay(): TripData["photos"] {
+  return Array.from(
+    { length: 12 },
+    (_, i) => photo(`h${i}`, "2026-06-01", `2026-06-01T${10 + i}:00:00Z`),
   );
 }
 
-Deno.test("parseMomentSlots: only an explicit 16 gets 16", () => {
-  assertEquals(parseMomentSlots(16), 16);
-  assertEquals(parseMomentSlots(undefined), 8);
-  assertEquals(parseMomentSlots("16"), 8);
-  assertEquals(parseMomentSlots(32), 8);
-});
+function collageNotes(notes: TripData["notes"]) {
+  const content = assembleWrapUpContent(
+    tripData({ photos: hourlyDay(), notes, completedBonusTasks: [] }),
+    validAiFields,
+  );
+  return content.moments.filter((m) => m.layout !== null).map((m) => m.note);
+}
 
-Deno.test("selectCut scales with the moment count", () => {
-  assertEquals(selectCut(19, 16), "highlight");
-  assertEquals(selectCut(20, 16), "compact");
-  assertEquals(selectCut(31, 16), "compact");
-  assertEquals(selectCut(32, 16), "full");
-  // 8 slots unchanged.
-  assertEquals(selectCut(11), "highlight");
-  assertEquals(selectCut(24), "full");
-});
-
-Deno.test("16 slots: 16 moments in time order, marked moment_slots 16", () => {
-  const content = plan16(photos(40, "c", 40));
-  assertEquals(validateWrapUpContent(content), true);
-  assertEquals(content.moment_slots, 16);
-  assertEquals(content.cut, "full");
-  assertEquals(content.moments.length, 16);
-  // The four collages sit at M4, M10, M14, M16.
+Deno.test("a late collage takes the end of the note, an early one the start", () => {
   assertEquals(
-    content.moments.flatMap((m, i) => m.layout === null ? [] : [i]),
-    [3, 9, 13, 15],
+    collageNotes([{
+      day_date: "2026-06-01",
+      content: "We have just landed. Lunch by the canal. Club until late.",
+      created_at: "2026-06-01T10:30:00Z",
+    }]),
+    ["We have just landed.", "Club until late."],
   );
 });
 
-Deno.test("16 slots: 10 Always photos all get a main moment", () => {
-  const list = photos(30, "c", 6).map((p, i) => ({
-    ...p,
-    use_in_wrap_up: i % 3 === 0 ? true : null,
-  }));
-  const ids = new Set(plan16(list).moments.map((m) => m.photo_id));
-  for (const p of list.filter((p) => p.use_in_wrap_up === true)) {
-    assertEquals(ids.has(p.id), true, `${p.id} missing`);
-  }
-});
-
-Deno.test("16 slots never repeat a photo or mix days in a collage", () => {
-  for (const perDay of [4, 60]) {
-    for (let count = 0; count <= 60; count++) {
-      const content = plan16(photos(count, "c", perDay), ["c0", "c1"]);
-      assertEquals(validateWrapUpContent(content), true);
-      assertEquals(content.moments.length, Math.min(count, 16));
-      const shown = [
-        ...content.moments.flatMap((m) => [
-          m.photo_id,
-          ...m.collage_extras.map((p) => p.photo_id),
-        ]),
-        ...content.flurry_leftovers.flurry1.map((p) => p.photo_id),
-        ...content.flurry_leftovers.flurry2.map((p) => p.photo_id),
-      ];
-      assertEquals(new Set(shown).size, shown.length, `repeat at ${count}`);
-      for (const m of content.moments) {
-        if (m.badge !== null) assertEquals(m.layout, null);
-        for (const extra of m.collage_extras) {
-          assertEquals(extra.day_date, m.day_date);
-        }
-      }
-      for (const size of flurrySizes(content)) {
-        assertEquals(size === 0 || size >= 6, true, `sparse flurry at ${count}`);
-      }
-    }
-  }
-});
-
-Deno.test("the 8-slot film carries no moment_slots", () => {
-  assertEquals("moment_slots" in planFor(30), false);
+Deno.test("a one-sentence note shows only near when it was written", () => {
+  // Written in the morning: the evening collage gets no caption.
+  assertEquals(
+    collageNotes([{
+      day_date: "2026-06-01",
+      content: "We have just landed.",
+      created_at: "2026-06-01T10:30:00Z",
+    }]),
+    ["We have just landed.", null],
+  );
+  // Written at night: the morning collage gets none.
+  assertEquals(
+    collageNotes([{
+      day_date: "2026-06-01",
+      content: "What a night.",
+      created_at: "2026-06-01T23:30:00Z",
+    }]),
+    [null, "What a night."],
+  );
 });

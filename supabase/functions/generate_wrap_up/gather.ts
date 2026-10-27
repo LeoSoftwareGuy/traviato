@@ -27,7 +27,9 @@ export interface TripData {
     vibes: string[];
     cover_image_path: string | null;
   };
-  notes: { day_date: string; content: string }[];
+  // created_at: when the note was first written — places a one-sentence
+  // note in its day for collage captions (#302). Never sent to the AI.
+  notes: { day_date: string; content: string; created_at?: string | null }[];
   photos: {
     id: string;
     day_date: string | null;
@@ -69,7 +71,7 @@ export async function gatherTripData(
     await Promise.all([
       client
         .from("day_notes")
-        .select("day_date, content")
+        .select("day_date, content, created_at")
         .eq("trip_id", tripId)
         .order("day_date"),
       client
@@ -131,6 +133,7 @@ export async function gatherTripData(
     notes: (notesRes.data ?? []).map((n: Record<string, unknown>) => ({
       day_date: n.day_date as string,
       content: (n.content as string).slice(0, MAX_NOTE_CHARS),
+      created_at: (n.created_at as string | null) ?? null,
     })),
     photos: (photosRes.data ?? []).map((p: Record<string, unknown>) => ({
       id: p.id as string,

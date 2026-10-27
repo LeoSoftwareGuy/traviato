@@ -142,9 +142,10 @@ export function splitKeepsakeTitle(
 // (WRAP_UP_FILM_COLLAGE_SPEC.md §7: 50px serif over 864px).
 const COLLAGE_CAPTION_MAX_CHARS = 120;
 
-// Splits a day's note into collage captions (#298): whole sentences
-// grouped in order, each excerpt at most [maxChars]. A sentence longer
-// than that is cut at a word boundary and ends in "…". The user's own
+// Splits a day's note into collage captions (#298): one per sentence (or
+// line), in order — sentence-sized so a collage can take the part of the
+// note that matches its time of day (#302). A sentence longer than
+// [maxChars] is cut at a word boundary and ends in "…". The user's own
 // words, never AI. A note gather.ts cut at MAX_NOTE_CHARS drops its last,
 // unfinished sentence rather than showing it chopped.
 export function noteExcerpts(
@@ -162,25 +163,9 @@ export function noteExcerpts(
     sentences.pop();
   }
 
-  const excerpts: string[] = [];
-  let current = "";
-  for (const sentence of sentences) {
-    const joined = current ? `${current} ${sentence}` : sentence;
-    if (joined.length <= maxChars) {
-      current = joined;
-      continue;
-    }
-    if (current) excerpts.push(current);
-    if (sentence.length <= maxChars) {
-      current = sentence;
-    } else {
-      // Never followed by the next sentence after its "…".
-      excerpts.push(cutAtWord(sentence, maxChars));
-      current = "";
-    }
-  }
-  if (current) excerpts.push(current);
-  return excerpts;
+  return sentences.map((s) =>
+    s.length <= maxChars ? s : cutAtWord(s, maxChars)
+  );
 }
 
 function cutAtWord(text: string, maxChars: number): string {
@@ -275,15 +260,94 @@ interface PlannedMoment {
 export function sortPhotosChronologically(
   photos: TripData["photos"],
 ): TripData["photos"] {
-  const time = (p: TripData["photos"][number]) =>
-    Date.parse(p.taken_at ?? p.created_at);
   return [...photos].sort((a, b) => {
     if (a.day_date !== b.day_date) {
       if (a.day_date === null) return 1;
       if (b.day_date === null) return -1;
       return a.day_date < b.day_date ? -1 : 1;
     }
-    return time(a) - time(b);
+    return photoTime(a) - photoTime(b);
+  });
+}
+
+// When a photo was taken; upload time when it has no capture time.
+function photoTime(p: TripData["photos"][number]): number {
+  return Date.parse(p.taken_at ?? p.created_at);
+}
+
+// A one-sentence note shows on a collage only when the collage is within
+// this share of the day of when the note was written (#302).
+const SINGLE_NOTE_REACH = 0.5;
+
+// Where [time] falls in a day's photos: 0 = its first, 1 = its last; 0.5
+// when they were all taken at once. Clamped, so a note written after the
+// last photo sits at 1.
+function dayFraction(
+  time: number,
+  span: { start: number; end: number },
+): number {
+  if (span.end <= span.start) return 0.5;
+  const fraction = (time - span.start) / (span.end - span.start);
+  return Math.min(1, Math.max(0, fraction));
+}
+
+// Moment captions (#298, #302). A card flip shows its photo's own caption.
+// A collage shows the sentence of its day's note that matches where its
+// photos fall in the day — a late collage gets the end of the note, an
+// early one the start — or the nearest one not used yet, so two collages
+// on one day never repeat. A one-sentence note shows only on a collage
+// near the time it was written (or anywhere, when that time is unknown).
+// No note, or nothing that fits → no caption, never a stand-in.
+function momentCaptions(
+  planned: PlannedMoment[],
+  photos: Photo[],
+  notes: TripData["notes"],
+): (string | null)[] {
+  const spanByDay = new Map<string | null, { start: number; end: number }>();
+  for (const p of photos) {
+    const t = photoTime(p);
+    const span = spanByDay.get(p.day_date);
+    spanByDay.set(p.day_date, {
+      start: Math.min(span?.start ?? t, t),
+      end: Math.max(span?.end ?? t, t),
+    });
+  }
+  const noteByDay = new Map(notes.map((n) => [n.day_date, {
+    excerpts: noteExcerpts(n.content),
+    writtenAt: n.created_at ? Date.parse(n.created_at) : null,
+    used: new Set<number>(),
+  }]));
+
+  return planned.map((m) => {
+    if (m.layout === null) return m.entry.photo.caption;
+    const day = m.entry.photo.day_date;
+    const note = day === null ? undefined : noteByDay.get(day);
+    const span = spanByDay.get(day);
+    if (!note || !span || note.excerpts.length === 0) return null;
+
+    const tiles = [m.entry.photo, ...m.extras.map((e) => e.photo)];
+    const at = dayFraction(
+      tiles.reduce((sum, p) => sum + photoTime(p), 0) / tiles.length,
+      span,
+    );
+    const count = note.excerpts.length;
+    if (count === 1) {
+      const nearNote = note.writtenAt === null ||
+        Math.abs(at - dayFraction(note.writtenAt, span)) <= SINGLE_NOTE_REACH;
+      if (!nearNote || note.used.has(0)) return null;
+      note.used.add(0);
+      return note.excerpts[0];
+    }
+    const preferred = Math.min(count - 1, Math.floor(at * count));
+    for (let d = 0; d < count; d++) {
+      for (const i of [preferred + d, preferred - d]) {
+        if (i >= 0 && i < count && !note.used.has(i)) {
+          note.used.add(i);
+          return note.excerpts[i];
+        }
+      }
+    }
+    return null;
   });
 }
 
@@ -461,17 +525,8 @@ function planFilm(tripData: TripData, slots: MomentSlots): FilmPlan {
 
   const unshown = leftovers.length - flurry1.length - flurry2.length;
 
-  // 6. Captions (#298): a card flip shows its photo's own caption; a
-  // collage shows an excerpt of its day's note — the next unused one, so
-  // two collages on one day never repeat it — or nothing.
-  const excerptsByDay = new Map(
-    tripData.notes.map((n) => [n.day_date, noteExcerpts(n.content)]),
-  );
-  const captions = planned.map((m) =>
-    m.layout === null
-      ? m.entry.photo.caption
-      : excerptsByDay.get(m.entry.photo.day_date ?? "")?.shift() ?? null
-  );
+  // 6. Captions (#298, #302).
+  const captions = momentCaptions(planned, photos, tripData.notes);
 
   return {
     cut,
