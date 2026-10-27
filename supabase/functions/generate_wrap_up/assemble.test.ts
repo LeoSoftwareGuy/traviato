@@ -831,3 +831,95 @@ Deno.test("a one-sentence note shows only near when it was written", () => {
     [null, "What a night."],
   );
 });
+
+// --- #304: 16 moments --------------------------------------------------
+
+function plan16(list: TripData["photos"], bonus: string[] = []) {
+  return assembleWrapUpContent(
+    tripData({
+      photos: list,
+      notes: [],
+      completedBonusTasks: bonus.map((id, i) => ({
+        completed_at: `2026-06-01T0${i}:00:00Z`,
+        photo_id: id,
+        title: `Dare ${i}`,
+        points: 1,
+      })),
+    }),
+    validAiFields,
+    16,
+  );
+}
+
+Deno.test("parseMomentSlots: only an explicit 16 gets 16", () => {
+  assertEquals(parseMomentSlots(16), 16);
+  assertEquals(parseMomentSlots(undefined), 8);
+  assertEquals(parseMomentSlots("16"), 8);
+  assertEquals(parseMomentSlots(32), 8);
+});
+
+Deno.test("selectCut scales with the moment count", () => {
+  assertEquals(selectCut(19, 16), "highlight");
+  assertEquals(selectCut(20, 16), "compact");
+  assertEquals(selectCut(31, 16), "compact");
+  assertEquals(selectCut(32, 16), "full");
+  // 8 slots unchanged.
+  assertEquals(selectCut(11), "highlight");
+  assertEquals(selectCut(24), "full");
+});
+
+Deno.test("16 slots: 16 moments in time order, marked moment_slots 16", () => {
+  const content = plan16(photos(40, "c", 40));
+  assertEquals(validateWrapUpContent(content), true);
+  assertEquals(content.moment_slots, 16);
+  assertEquals(content.cut, "full");
+  assertEquals(content.moments.length, 16);
+  // The four collages sit at M4, M10, M14, M16.
+  assertEquals(
+    content.moments.flatMap((m, i) => m.layout === null ? [] : [i]),
+    [3, 9, 13, 15],
+  );
+});
+
+Deno.test("16 slots: 10 Always photos all get a main moment", () => {
+  const list = photos(30, "c", 6).map((p, i) => ({
+    ...p,
+    use_in_wrap_up: i % 3 === 0 ? true : null,
+  }));
+  const ids = new Set(plan16(list).moments.map((m) => m.photo_id));
+  for (const p of list.filter((p) => p.use_in_wrap_up === true)) {
+    assertEquals(ids.has(p.id), true, `${p.id} missing`);
+  }
+});
+
+Deno.test("16 slots never repeat a photo or mix days in a collage", () => {
+  for (const perDay of [4, 60]) {
+    for (let count = 0; count <= 60; count++) {
+      const content = plan16(photos(count, "c", perDay), ["c0", "c1"]);
+      assertEquals(validateWrapUpContent(content), true);
+      assertEquals(content.moments.length, Math.min(count, 16));
+      const shown = [
+        ...content.moments.flatMap((m) => [
+          m.photo_id,
+          ...m.collage_extras.map((p) => p.photo_id),
+        ]),
+        ...content.flurry_leftovers.flurry1.map((p) => p.photo_id),
+        ...content.flurry_leftovers.flurry2.map((p) => p.photo_id),
+      ];
+      assertEquals(new Set(shown).size, shown.length, `repeat at ${count}`);
+      for (const m of content.moments) {
+        if (m.badge !== null) assertEquals(m.layout, null);
+        for (const extra of m.collage_extras) {
+          assertEquals(extra.day_date, m.day_date);
+        }
+      }
+      for (const size of flurrySizes(content)) {
+        assertEquals(size === 0 || size >= 6, true, `sparse flurry at ${count}`);
+      }
+    }
+  }
+});
+
+Deno.test("the 8-slot film carries no moment_slots", () => {
+  assertEquals("moment_slots" in planFor(30), false);
+});
