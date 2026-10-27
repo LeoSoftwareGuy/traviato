@@ -82,14 +82,32 @@ class SupabaseWrapUpRemoteDataSource implements WrapUpRemoteDataSource {
       throw UnknownException(message: e.toString());
     }
   }
+
+  @override
+  Future<void> rebuildKept(String tripId, {required String language}) async {
+    _guardAuthenticated();
+    try {
+      await _client.functions.invoke(
+        EdgeFunctions.generateWrapUp,
+        body: generateWrapUpBody(tripId, language, rebuild: true),
+      );
+    } on FunctionException catch (e) {
+      throw _mapFunctionException(e);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
 }
 
 /// The `generate_wrap_up` request: the trip, and the UI language the AI
-/// writes in (#250).
-Map<String, String> generateWrapUpBody(String tripId, String language) => {
-  'trip_id': tripId,
-  'language': language,
-};
+/// writes in (#250). [rebuild] asks it to re-assemble a kept film (#294).
+Map<String, Object> generateWrapUpBody(
+  String tripId,
+  String language, {
+  bool rebuild = false,
+}) => {'trip_id': tripId, 'language': language, if (rebuild) 'rebuild': true};
 
 /// A kept-forever wrap-up with stored content — played exactly as stored.
 /// Anything else (a draft, or no film yet) goes through `generate_wrap_up`.

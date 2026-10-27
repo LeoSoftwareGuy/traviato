@@ -2,12 +2,15 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/errors/presentation_failure_exception.dart';
+import '../../../../core/events/global_event.dart';
+import '../../../../core/events/global_event_bus.dart';
 import '../../../photo/presentation/providers/photo_providers.dart';
 import '../../../settings/presentation/controllers/app_language_controller.dart';
 import '../../../trip/presentation/providers/trip_providers.dart';
 import '../../domain/entities/wrap_up_dates.dart';
 import '../../domain/entities/wrap_up_entity.dart';
 import '../../domain/entities/wrap_up_invitation.dart';
+import '../../domain/kept_film_staleness.dart';
 import '../../domain/wrap_up_date_labels.dart';
 import '../../domain/wrap_up_photo_pruning.dart';
 import '../providers/wrap_up_providers.dart';
@@ -19,6 +22,15 @@ part 'wrap_up_controller.g.dart';
 class WrapUpController extends _$WrapUpController {
   @override
   Future<WrapUpState> build(String tripId) async {
+    // A pick changed or a photo was deleted (#294): reload, so a draft
+    // plays the new picks and a kept film rechecks whether it's stale.
+    final sub = ref.watch(globalEventBusProvider).stream.listen((event) {
+      if (event is FilmPhotosChangedDispatched && event.tripId == tripId) {
+        ref.invalidateSelf();
+      }
+    });
+    ref.onDispose(sub.cancel);
+
     final wrapUpRepo = ref.watch(wrapUpRepositoryProvider);
     final photoRepo = ref.watch(photoRepositoryProvider);
     final tripRepo = ref.watch(tripRepositoryProvider);
@@ -72,8 +84,15 @@ class WrapUpController extends _$WrapUpController {
         photoUrlById.keys.toSet(),
       ),
       photoUrlById: photoUrlById,
+      // Checked before pruning: a deleted photo the film shows is exactly
+      // what makes it stale.
+      isOutOfDate: isKeptFilmOutOfDate(wrapUp, photos),
     );
   }
+
+  /// Reloads after "Photos changed · Rebuild film" (#294) rewrote the kept
+  /// film server-side — it's read back as stored, so no AI call.
+  void reloadRebuilt() => ref.invalidateSelf();
 
   WrapUpEntity _withLiveDates(
     WrapUpEntity wrapUp, {

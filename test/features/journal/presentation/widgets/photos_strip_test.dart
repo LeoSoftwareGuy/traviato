@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/journal/presentation/widgets/photos_strip.dart';
+import 'package:traviato/features/photo/domain/entities/film_pick.dart';
 import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
 
 import '../../../photo/fakes/fake_photo_repository.dart';
@@ -10,6 +11,7 @@ Future<void> _pumpStrip(
   required List<PhotoEntity> photos,
   VoidCallback? onAddTap,
   ValueChanged<int>? onPhotoTap,
+  Set<String> filmMomentIds = const {},
 }) {
   return tester.pumpWidget(
     MaterialApp(
@@ -18,6 +20,7 @@ Future<void> _pumpStrip(
           photos: photos,
           onAddTap: onAddTap ?? () {},
           onPhotoTap: onPhotoTap ?? (_) {},
+          filmMomentIds: filmMomentIds,
         ),
       ),
     ),
@@ -165,5 +168,71 @@ void main() {
       ),
     );
     expect(scrollable.position.pixels, 0);
+  });
+
+  group('film markers (#294)', () {
+    final photos = [
+      buildPhotoEntity(id: 'picked'),
+      buildPhotoEntity(id: 'skipped'),
+      buildPhotoEntity(id: 'mine', filmPick: FilmPick.always),
+      buildPhotoEntity(id: 'out', filmPick: FilmPick.never),
+    ];
+
+    Finder badge(String photoId, String kind) => find.descendant(
+      of: find.byKey(Key('journal-photo-tile-$photoId')),
+      matching: find.byKey(Key('journal-photo-film-badge-$kind')),
+    );
+
+    testWidgets('each thumb shows its film state', (tester) async {
+      await _pumpStrip(
+        tester,
+        photos: photos,
+        // The generator never picks a left-out photo, but even if the set
+        // said so, Leave out wins.
+        filmMomentIds: {'picked', 'out'},
+      );
+
+      expect(badge('picked', 'autoPicked'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('journal-photo-tile-skipped')),
+          matching: find.byKey(
+            const Key('journal-photo-film-badge-autoPicked'),
+          ),
+        ),
+        findsNothing,
+      );
+      expect(badge('mine', 'yourPick'), findsOneWidget);
+      expect(find.text('▸ Your pick'), findsOneWidget);
+      expect(badge('out', 'leftOut'), findsOneWidget);
+      expect(find.text('Left out'), findsOneWidget);
+
+      final outOpacity = tester.widget<Opacity>(
+        find
+            .descendant(
+              of: find.byKey(const Key('journal-photo-tile-out')),
+              matching: find.byType(Opacity),
+            )
+            .first,
+      );
+      expect(outOpacity.opacity, .45);
+    });
+
+    testWidgets('the header counts Always plus Auto-and-picked', (
+      tester,
+    ) async {
+      await _pumpStrip(tester, photos: photos, filmMomentIds: {'picked'});
+
+      expect(find.text('▸ 2 IN THE FILM'), findsOneWidget);
+    });
+
+    testWidgets('the header count hides at zero', (tester) async {
+      await _pumpStrip(tester, photos: [buildPhotoEntity(id: 'a')]);
+
+      expect(
+        find.byKey(const Key('journal-photo-strip-film-count')),
+        findsNothing,
+      );
+    });
   });
 }

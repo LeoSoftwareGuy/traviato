@@ -308,4 +308,12 @@ void main() {
       expect(find.text(const NetworkFailure().message), findsOneWidget);
     });
   });
+
+  testWidgets('without a film memory there is no film-pick panel (#294)', (
+    tester,
+  ) async {
+    await _openViewer(tester, photos: _photos(2), initialIndex: 0);
+
+    expect(find.byKey(const Key('film-pick-panel')), findsNothing);
+  });
 }

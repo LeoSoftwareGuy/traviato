@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
+import '../../domain/entities/film_pick.dart';
 import '../../domain/entities/photo_entity.dart';
 import '../../domain/repositories/photo_repository.dart';
 import '../datasources/photo_remote_data_source.dart';
@@ -89,5 +90,23 @@ class PhotoRepositoryImpl implements PhotoRepository {
       debugPrint('Orphaned photo file ${photo.storagePath}: ${e.message}');
     }
     return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, DateTime?>> setFilmPick(
+    String photoId,
+    FilmPick pick,
+  ) async {
+    try {
+      return Right(await _remote.setFilmPick(photoId, pick));
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on PermissionException catch (e) {
+      return Left(PermissionFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
   }
 }

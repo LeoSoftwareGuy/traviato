@@ -50,10 +50,12 @@ const NUMBER_WORDS = [
   "Twenty",
 ];
 
-// The film has 8 moment frames (WRAP_UP_FILM_FLUTTER_SPEC.md §4). Up to 3
-// of them are badged bonus-task photos; the rest are journal photos spread
-// across the whole trip. All 8 play in chronological order (#292) — badges
-// land wherever their photo falls in time, not on fixed slots.
+// The film has 8 moment frames (WRAP_UP_FILM_FLUTTER_SPEC.md §4), filled in
+// this order of priority (#294): the user's "Always" photos, then up to 3
+// badged bonus-task photos, then automatic picks spread across the whole
+// trip. All 8 play in chronological order (#292) — badges land wherever
+// their photo falls in time, not on fixed slots. "Leave out" photos appear
+// nowhere.
 const MOMENT_COUNT = 8;
 const MAX_BONUS_MOMENTS = 3;
 
@@ -261,54 +263,73 @@ interface FilmPlan {
   totalRemainingLabel: string | null;
 }
 
+type Photo = TripData["photos"][number];
+
+// Which photos get the 8 moments (#294), in priority order: "Always"
+// photos (more than 8 → spread over the trip, the rest go to the Flurries,
+// never dropped), then up to 3 bonus-task photos on Auto, then Auto photos
+// spread over the whole trip so every day gets a share and the bridges
+// (written from the notes in thirds) line up. [photos] must already be
+// chronological and free of "Leave out" photos; [bonusPhotoIds] are the
+// badged bonus photos in completion order. lib/features/wrap_up/domain/
+// film_moment_picks.dart mirrors this for the app's "Film chose this" hint
+// — keep the two in step.
+export function pickMomentPhotos(
+  photos: Photo[],
+  bonusPhotoIds: string[],
+): Photo[] {
+  const always = spreadEvenly(
+    photos.filter((p) => p.use_in_wrap_up === true),
+    MOMENT_COUNT,
+  );
+  const bonusIds = new Set(bonusPhotoIds);
+  const bonus = bonusPhotoIds
+    .map((id) => photos.find((p) => p.id === id))
+    .filter((p): p is Photo => p !== undefined && p.use_in_wrap_up === null)
+    .slice(0, MOMENT_COUNT - always.length);
+  const auto = spreadEvenly(
+    photos.filter((p) => p.use_in_wrap_up === null && !bonusIds.has(p.id)),
+    MOMENT_COUNT - always.length - bonus.length,
+  );
+  return [...always, ...bonus, ...auto];
+}
+
 // Resolves the whole film (#151): which photo each moment shows, which
 // moments become collages and with which extra tiles, and what each Flurry
 // shows. Every photo is used at most once across all of it.
 function planFilm(tripData: TripData): FilmPlan {
-  const photos = sortPhotosChronologically(tripData.photos);
+  // "Leave out" photos (#294) are dropped from every pool up front.
+  const photos = sortPhotosChronologically(tripData.photos)
+    .filter((p) => p.use_in_wrap_up !== false);
   const photosById = new Map(photos.map((p) => [p.id, p]));
   const orderById = new Map(photos.map((p, i) => [p.id, i]));
   const cut = selectCut(photos.length);
 
   // Only the first 3 completed bonus tasks (completion order) with a photo
   // get a badge — a fixed count regardless of how many were completed.
-  const bonusEntries: QueueEntry[] = tripData.completedBonusTasks
-    .filter((b) => b.photo_id !== null && photosById.has(b.photo_id))
-    .slice(0, MAX_BONUS_MOMENTS)
-    .map((b) => ({
-      photo: photosById.get(b.photo_id!)!,
-      badge: `Dare · ${b.title} · ✦${b.points}`,
-    }));
-
-  const badgedIds = new Set(bonusEntries.map((entry) => entry.photo.id));
-  const journalQueue: QueueEntry[] = photos
-    .filter((p) => !badgedIds.has(p.id))
-    .map((photo) => ({ photo, badge: null }));
-
-  // 1. One photo per moment: the bonus photos plus journal photos spread
-  // over the whole trip, so every day gets a share of the moments and the
-  // bridges (written from the notes in thirds) line up with them. Played
-  // in time order (#292). Fewer than 8 photos ends the array short.
-  const journalPicks = spreadEvenly(
-    journalQueue,
-    MOMENT_COUNT - bonusEntries.length,
+  const badgeById = new Map(
+    tripData.completedBonusTasks
+      .filter((b) => b.photo_id !== null && photosById.has(b.photo_id))
+      .slice(0, MAX_BONUS_MOMENTS)
+      .map((b) => [b.photo_id!, `Dare · ${b.title} · ✦${b.points}`]),
   );
-  const pickedIds = new Set(journalPicks.map((entry) => entry.photo.id));
-  const planned: PlannedMoment[] = [...bonusEntries, ...journalPicks]
-    .map((entry) => ({
-      entry,
-      order: orderById.get(entry.photo.id)!,
+
+  // 1. One photo per moment, played in time order (#292). Fewer than 8
+  // photos ends the array short.
+  const picks = pickMomentPhotos(photos, [...badgeById.keys()]);
+  const pickedIds = new Set(picks.map((p) => p.id));
+  const planned: PlannedMoment[] = picks
+    .map((photo) => ({
+      entry: { photo, badge: badgeById.get(photo.id) ?? null },
+      order: orderById.get(photo.id)!,
       layout: null,
       extras: [],
     }))
     .sort((a, b) => a.order - b.order);
 
-  const pool: PoolEntry[] = journalQueue.filter((entry) =>
-    !pickedIds.has(entry.photo.id)
-  ).map((entry) => ({
-    photo: entry.photo,
-    order: orderById.get(entry.photo.id)!,
-  }));
+  const pool: PoolEntry[] = photos
+    .filter((p) => !pickedIds.has(p.id))
+    .map((photo) => ({ photo, order: orderById.get(photo.id)! }));
 
   const fundCollage = (
     slot: (typeof COLLAGE_SLOTS)[number],

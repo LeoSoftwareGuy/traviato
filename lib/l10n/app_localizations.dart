@@ -3750,6 +3750,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Umbrella'**
   String get content_checklist_umbrella;
+
+  /// Eyebrow over the photo viewer's film-pick panel (#294); shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'In the film'**
+  String get film_inTheFilm;
+
+  /// Film-pick segment: the generator decides whether the photo is in the film (#294).
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get film_pickAuto;
+
+  /// Film-pick segment: the photo always gets a main moment (#294).
+  ///
+  /// In en, this message translates to:
+  /// **'Always'**
+  String get film_pickAlways;
+
+  /// Film-pick segment: the photo never appears in the film (#294).
+  ///
+  /// In en, this message translates to:
+  /// **'Leave out'**
+  String get film_pickNever;
+
+  /// Film-pick hint: on Auto, and the film gives it a main moment (#294).
+  ///
+  /// In en, this message translates to:
+  /// **'Film chose this one'**
+  String get film_hintAutoPicked;
+
+  /// Film-pick hint: on Auto, but not one of the film's main moments (#294).
+  ///
+  /// In en, this message translates to:
+  /// **'Not picked right now'**
+  String get film_hintAutoNot;
+
+  /// Film-pick hint for Always (#294).
+  ///
+  /// In en, this message translates to:
+  /// **'Your pick · gets a main moment'**
+  String get film_hintAlways;
+
+  /// Film-pick hint for Leave out (#294).
+  ///
+  /// In en, this message translates to:
+  /// **'Won\'t appear anywhere'**
+  String get film_hintNever;
+
+  /// Toast after switching a photo to Always (#294).
+  ///
+  /// In en, this message translates to:
+  /// **'Always in the film'**
+  String get film_toastAlways;
+
+  /// Toast after switching a photo to Leave out (#294).
+  ///
+  /// In en, this message translates to:
+  /// **'Left out of the film'**
+  String get film_toastNever;
+
+  /// Toast after switching a photo back to Auto (#294).
+  ///
+  /// In en, this message translates to:
+  /// **'Film picks this one'**
+  String get film_toastAuto;
+
+  /// Pill over a left-out photo in the photo viewer (#294).
+  ///
+  /// In en, this message translates to:
+  /// **'Left out of the film'**
+  String get film_leftOutPill;
+
+  /// Journal photo strip, right of the header: that day's photos in the film (#294); shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} in the film'**
+  String film_stripCount(int count);
+
+  /// Journal thumbnail badge for an Always photo (#294).
+  ///
+  /// In en, this message translates to:
+  /// **'Your pick'**
+  String get film_badgeYourPick;
+
+  /// Journal thumbnail badge for a left-out photo (#294).
+  ///
+  /// In en, this message translates to:
+  /// **'Left out'**
+  String get film_badgeLeftOut;
+
+  /// Chip on a kept film after its photos or picks changed; tapping rebuilds it (#294).
+  ///
+  /// In en, this message translates to:
+  /// **'Photos changed · Rebuild film'**
+  String get film_outOfDate;
 }
 
 class _AppLocalizationsDelegate

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/failures.dart';
+import 'package:traviato/features/photo/domain/entities/film_pick.dart';
 import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
 import 'package:traviato/features/photo/domain/repositories/photo_repository.dart';
 
@@ -22,6 +23,9 @@ class FakePhotoRepository implements PhotoRepository {
 
   Either<Failure, void>? deletePhotoResult;
   final deletedPhotoIds = <String>[];
+
+  Either<Failure, DateTime?>? setFilmPickResult;
+  final filmPickCalls = <(String, FilmPick)>[];
 
   @override
   Future<Either<Failure, List<PhotoEntity>>> getPhotosForTrip(
@@ -68,6 +72,15 @@ class FakePhotoRepository implements PhotoRepository {
     deletedPhotoIds.add(photo.id);
     return deletePhotoResult ?? const Right(null);
   }
+
+  @override
+  Future<Either<Failure, DateTime?>> setFilmPick(
+    String photoId,
+    FilmPick pick,
+  ) async {
+    filmPickCalls.add((photoId, pick));
+    return setFilmPickResult ?? Right(DateTime.utc(2026, 7, 1));
+  }
 }
 
 PhotoEntity buildPhotoEntity({
@@ -82,6 +95,8 @@ PhotoEntity buildPhotoEntity({
   double? lng,
   DateTime? takenAt,
   DateTime? createdAt,
+  FilmPick filmPick = FilmPick.auto,
+  DateTime? filmPickSetAt,
 }) {
   return PhotoEntity(
     id: id,
@@ -95,5 +110,7 @@ PhotoEntity buildPhotoEntity({
     takenAt: takenAt,
     createdAt: createdAt ?? DateTime(2026, 1, 1),
     imageUrl: imageUrl,
+    filmPick: filmPick,
+    filmPickSetAt: filmPickSetAt,
   );
 }

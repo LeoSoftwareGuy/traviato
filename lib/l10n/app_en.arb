@@ -2205,5 +2205,74 @@
   "content_checklist_umbrella": "Umbrella",
   "@content_checklist_umbrella": {
     "description": "Checklist suggestion, written into a new checklist in the UI language."
+  },
+  "film_inTheFilm": "In the film",
+  "@film_inTheFilm": {
+    "description": "Eyebrow over the photo viewer's film-pick panel (#294); shown uppercase."
+  },
+  "film_pickAuto": "Auto",
+  "@film_pickAuto": {
+    "description": "Film-pick segment: the generator decides whether the photo is in the film (#294)."
+  },
+  "film_pickAlways": "Always",
+  "@film_pickAlways": {
+    "description": "Film-pick segment: the photo always gets a main moment (#294)."
+  },
+  "film_pickNever": "Leave out",
+  "@film_pickNever": {
+    "description": "Film-pick segment: the photo never appears in the film (#294)."
+  },
+  "film_hintAutoPicked": "Film chose this one",
+  "@film_hintAutoPicked": {
+    "description": "Film-pick hint: on Auto, and the film gives it a main moment (#294)."
+  },
+  "film_hintAutoNot": "Not picked right now",
+  "@film_hintAutoNot": {
+    "description": "Film-pick hint: on Auto, but not one of the film's main moments (#294)."
+  },
+  "film_hintAlways": "Your pick · gets a main moment",
+  "@film_hintAlways": {
+    "description": "Film-pick hint for Always (#294)."
+  },
+  "film_hintNever": "Won't appear anywhere",
+  "@film_hintNever": {
+    "description": "Film-pick hint for Leave out (#294)."
+  },
+  "film_toastAlways": "Always in the film",
+  "@film_toastAlways": {
+    "description": "Toast after switching a photo to Always (#294)."
+  },
+  "film_toastNever": "Left out of the film",
+  "@film_toastNever": {
+    "description": "Toast after switching a photo to Leave out (#294)."
+  },
+  "film_toastAuto": "Film picks this one",
+  "@film_toastAuto": {
+    "description": "Toast after switching a photo back to Auto (#294)."
+  },
+  "film_leftOutPill": "Left out of the film",
+  "@film_leftOutPill": {
+    "description": "Pill over a left-out photo in the photo viewer (#294)."
+  },
+  "film_stripCount": "{count} in the film",
+  "@film_stripCount": {
+    "description": "Journal photo strip, right of the header: that day's photos in the film (#294); shown uppercase.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "film_badgeYourPick": "Your pick",
+  "@film_badgeYourPick": {
+    "description": "Journal thumbnail badge for an Always photo (#294)."
+  },
+  "film_badgeLeftOut": "Left out",
+  "@film_badgeLeftOut": {
+    "description": "Journal thumbnail badge for a left-out photo (#294)."
+  },
+  "film_outOfDate": "Photos changed · Rebuild film",
+  "@film_outOfDate": {
+    "description": "Chip on a kept film after its photos or picks changed; tapping rebuilds it (#294)."
   }
 }

@@ -9,6 +9,7 @@ import '../../../../core/events/global_event.dart';
 import '../../../../core/events/global_event_bus.dart';
 import '../../../journal/presentation/controllers/journal_controller.dart';
 import '../../../subscription/presentation/controllers/entitlement_controller.dart';
+import '../../domain/entities/film_pick.dart';
 import '../../domain/entities/photo_entity.dart';
 import '../providers/photo_providers.dart';
 
@@ -16,6 +17,7 @@ const _freeTierPhotoLimit = 40;
 
 final addPhotoMutation = Mutation<PhotoEntity>();
 final deletePhotoMutation = Mutation<void>();
+final setFilmPickMutation = Mutation<void>();
 
 /// Reads EXIF, compresses, uploads, inserts the row, and awards ✦2.
 ///
@@ -102,8 +104,47 @@ Future<void> runDeletePhoto({
         if (index != -1) controller.applyPhotoRestored(photo, index);
         throw PresentationFailureException(failure);
       },
-      (_) =>
-          tsx.get(globalEventBusProvider).add(const StarsAwardedDispatched()),
+      (_) => tsx.get(globalEventBusProvider)
+        ..add(const StarsAwardedDispatched())
+        // A deleted photo drops its pick, and may leave a kept film out of
+        // date (#294).
+        ..add(FilmPhotosChangedDispatched(tripId: tripId)),
+    );
+  });
+}
+
+/// Saves a photo's Wrap-Up Film pick (#294) at once, no save button: the
+/// Journal's strip markers and the viewer's panel update optimistically,
+/// and the pick is put back — then this throws — if the write fails.
+/// Never an AI call; a kept film only learns of it through the
+/// "Photos changed · Rebuild film" check.
+Future<void> runSetFilmPick({
+  required WidgetRef ref,
+  required String tripId,
+  required PhotoEntity photo,
+  required FilmPick pick,
+}) {
+  return setFilmPickMutation.run(ref, (tsx) async {
+    final repo = tsx.get(photoRepositoryProvider);
+    final controller = tsx.get(journalControllerProvider(tripId).notifier);
+
+    final previous = controller.applyPhotoFilmPick(photo.id, pick);
+    final result = await repo.setFilmPick(photo.id, pick);
+    result.fold(
+      (failure) {
+        controller.applyPhotoFilmPickSettled(
+          photo.id,
+          pick,
+          previous: previous,
+        );
+        throw PresentationFailureException(failure);
+      },
+      (setAt) {
+        controller.applyPhotoFilmPickSettled(photo.id, pick, setAt: setAt);
+        tsx
+            .get(globalEventBusProvider)
+            .add(FilmPhotosChangedDispatched(tripId: tripId));
+      },
     );
   });
 }

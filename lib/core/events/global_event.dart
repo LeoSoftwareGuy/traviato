@@ -67,6 +67,18 @@ final class WrapUpPublishedDispatched extends GlobalEvent {
   List<Object?> get props => [tripId, publishedAt];
 }
 
+/// Fired after a photo's Wrap-Up Film pick changes or a photo is deleted
+/// (#294), so an open film reloads: a draft rebuilds with the new picks, a
+/// kept one rechecks "Photos changed · Rebuild film".
+final class FilmPhotosChangedDispatched extends GlobalEvent {
+  const FilmPhotosChangedDispatched({required this.tripId});
+
+  final String tripId;
+
+  @override
+  List<Object?> get props => [tripId];
+}
+
 /// Fired after a purchase/restore resolves the user's tier (issue #138), so
 /// any screen gating on Pro status (paywall, locked wrap-up entry, usage
 /// meters) updates without re-fetching `entitlements` itself.

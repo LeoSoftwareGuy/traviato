@@ -41,6 +41,7 @@ class HomeProfileController extends _$HomeProfileController {
       case StarsAwardedDispatched():
       case WrapUpPublishedDispatched():
       case EntitlementUpdatedDispatched():
+      case FilmPhotosChangedDispatched():
       // Not relevant to the header.
     }
   }

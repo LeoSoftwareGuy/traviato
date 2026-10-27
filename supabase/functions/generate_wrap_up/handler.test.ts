@@ -152,6 +152,100 @@ Deno.test("a published wrap-up is frozen: returned as stored, nothing read or ge
   assertEquals(client.writes, []);
 });
 
+function keptClient() {
+  return fakeSupabaseClient({
+    trips: [{
+      id: TRIP_ID,
+      user_id: OWNER_ID,
+      name: "Lisbon",
+      start_date: "2026-06-01",
+      end_date: "2026-06-03",
+      cover_image_path: null,
+      vibes: [],
+    }],
+    wrap_ups: [{
+      content: validWrapUpContent,
+      generated_at: "2026-06-06T00:00:00Z",
+      published_at: "2026-06-07T00:00:00Z",
+      ai_fields: validAiFields,
+      ai_input_hash: "old",
+      ai_generation_count: 1,
+    }],
+    day_notes: [{ day_date: "2026-06-01", content: "Changed after keeping." }],
+    photos: [
+      {
+        id: "kept",
+        day_date: "2026-06-01",
+        taken_at: null,
+        created_at: "2026-06-01T10:00:00Z",
+        storage_path: "u/t/kept.jpg",
+        caption: null,
+        use_in_wrap_up: true,
+      },
+      {
+        id: "left-out",
+        day_date: "2026-06-02",
+        taken_at: null,
+        created_at: "2026-06-02T10:00:00Z",
+        storage_path: "u/t/left-out.jpg",
+        caption: null,
+        use_in_wrap_up: false,
+      },
+    ],
+    bonus_task_assignments: [],
+    points_ledger: [],
+    user_achievements: [],
+  });
+}
+
+Deno.test("rebuild on a kept wrap-up re-assembles the film with its stored AI lines (#294)", async () => {
+  let generateCalled = false;
+  const client = keptClient();
+  const deps = baseDeps({
+    serviceClient: client,
+    generateAiFields: () => {
+      generateCalled = true;
+      return Promise.resolve(validAiFields);
+    },
+  });
+
+  const res = await handleRequest(
+    request({ trip_id: TRIP_ID, rebuild: true }),
+    deps,
+  );
+  const json = await res.json();
+
+  assertEquals(res.status, 200);
+  // Notes changed since keeping, yet no AI call: kept lines are reused.
+  assertEquals(generateCalled, false);
+  assertEquals(json.content.bridges, validAiFields.bridges);
+  assertEquals(
+    json.content.moments.map((m: { photo_id: string }) => m.photo_id),
+    ["kept"],
+  );
+  assertEquals(client.writes.length, 1);
+  const write = client.writes[0];
+  assertEquals(write.op, "update");
+  assertEquals(Object.keys(write.values).sort(), ["content", "generated_at"]);
+  assertEquals(write.filters, [
+    ["eq", "trip_id", TRIP_ID],
+    ["not", "published_at", null],
+  ]);
+});
+
+Deno.test("a kept wrap-up without rebuild stays frozen even when picks changed", async () => {
+  const client = keptClient();
+  const res = await handleRequest(
+    request({ trip_id: TRIP_ID }),
+    baseDeps({ serviceClient: client }),
+  );
+  const json = await res.json();
+
+  assertEquals(res.status, 200);
+  assertEquals(json.content, validWrapUpContent);
+  assertEquals(client.writes, []);
+});
+
 Deno.test("handleRequest generates, assembles, saves and returns new content", async () => {
   const res = await handleRequest(request({ trip_id: TRIP_ID }), baseDeps());
   const json = await res.json();

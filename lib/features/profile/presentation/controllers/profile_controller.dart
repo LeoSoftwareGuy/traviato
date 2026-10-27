@@ -121,6 +121,7 @@ class ProfileController extends _$ProfileController {
       // Published by this feature's own mutations, which already apply the
       // new profile via applyProfileUpdated.
       case ProfileUpdatedDispatched():
+      case FilmPhotosChangedDispatched():
       // Not relevant to profile/stats/subscription display.
     }
   }

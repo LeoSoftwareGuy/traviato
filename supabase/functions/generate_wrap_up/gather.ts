@@ -7,9 +7,8 @@
 // Quests are deliberately not fetched — the film has no route chapter (no
 // Mapbox, ever; see the #94 memory note), so they never feed this content.
 //
-// photos.use_in_wrap_up doesn't exist yet — it's scoped to the Photo detail
-// issue (M3-8), not this one. The moments/flurry assembly here uses every
-// trip photo, matching the earlier #93 decision to not filter by it.
+// photos.use_in_wrap_up is the user's per-photo pick (#294): null = Auto,
+// true = Always, false = Leave out. assemble.ts applies it.
 
 // deno-lint-ignore no-explicit-any
 type SupabaseClient = any;
@@ -37,6 +36,7 @@ export interface TripData {
     created_at: string;
     storage_path: string;
     caption: string | null;
+    use_in_wrap_up: boolean | null;
   }[];
   completedBonusTasks: {
     completed_at: string;
@@ -74,7 +74,9 @@ export async function gatherTripData(
         .order("day_date"),
       client
         .from("photos")
-        .select("id, day_date, taken_at, created_at, storage_path, caption")
+        .select(
+          "id, day_date, taken_at, created_at, storage_path, caption, use_in_wrap_up",
+        )
         .eq("trip_id", tripId)
         .order("day_date")
         .order("created_at")
@@ -137,6 +139,7 @@ export async function gatherTripData(
       created_at: p.created_at as string,
       storage_path: p.storage_path as string,
       caption: (p.caption as string | null) ?? null,
+      use_in_wrap_up: (p.use_in_wrap_up as boolean | null) ?? null,
     })),
     completedBonusTasks: (bonusRes.data ?? []).map(
       (b: Record<string, unknown>) => {

@@ -37,6 +37,7 @@ class EntitlementController extends _$EntitlementController {
       case StarsAwardedDispatched():
       case WrapUpPublishedDispatched():
       case ProfileUpdatedDispatched():
+      case FilmPhotosChangedDispatched():
       // Not relevant to entitlement state.
     }
   }

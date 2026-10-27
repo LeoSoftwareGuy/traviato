@@ -60,6 +60,7 @@ class HomeController extends _$HomeController {
       case StarsAwardedDispatched():
       case EntitlementUpdatedDispatched():
       case ProfileUpdatedDispatched():
+      case FilmPhotosChangedDispatched():
       // Not relevant to the trips list.
     }
   }

@@ -7,6 +7,12 @@
 // when the AI's inputs (ai_input_hash.ts) changed — at most
 // MAX_AI_GENERATIONS times per memory, after which the last AI text is
 // reused.
+//
+// Rebuild (#294): `rebuild: true` on a kept wrap-up re-assembles its film
+// from the current photos and picks, keeping its stored AI lines (no AI
+// call — the lines are written from notes, never photos) and its
+// published_at. It's the user's explicit "Photos changed · Rebuild film";
+// nothing else ever rewrites a kept film.
 
 import { gatherTripData, type TripData } from "./gather.ts";
 import { assembleWrapUpContent } from "./assemble.ts";
@@ -65,6 +71,7 @@ export async function handleRequest(
   const language = parseWrapUpLanguage(
     (body as Record<string, unknown>).language,
   );
+  const rebuild = (body as Record<string, unknown>).rebuild === true;
 
   const { data: userData, error: userError } = await deps.authClient(authHeader)
     .auth.getUser();
@@ -100,8 +107,12 @@ export async function handleRequest(
       500,
     );
   }
-  // Kept forever → frozen: never rebuilt, never regenerated (#187).
+  // Kept forever → frozen: never regenerated (#187), only rebuilt on the
+  // user's explicit request (#294).
   if (existing?.published_at && existing.content) {
+    if (rebuild && validateAiGeneratedFields(existing.ai_fields)) {
+      return await rebuildKept(deps, tripId, existing.ai_fields);
+    }
     return json({
       content: existing.content,
       generated_at: existing.generated_at,
@@ -206,6 +217,34 @@ export async function handleRequest(
     );
   }
 
+  return json({ content, generated_at: generatedAt }, 200);
+}
+
+// Re-assembles a kept film with its stored AI lines (#294). Only ever
+// writes over a row that is still kept.
+async function rebuildKept(
+  deps: Deps,
+  tripId: string,
+  aiFields: AiGeneratedFields,
+): Promise<Response> {
+  let tripData: TripData;
+  try {
+    tripData = await gatherTripData(deps.serviceClient, tripId);
+  } catch (err) {
+    return json({
+      error: `failed to gather trip data: ${(err as Error).message}`,
+    }, 500);
+  }
+  const content = assembleWrapUpContent(tripData, aiFields);
+  const generatedAt = new Date().toISOString();
+  const { error } = await deps.serviceClient
+    .from("wrap_ups")
+    .update({ content, generated_at: generatedAt })
+    .eq("trip_id", tripId)
+    .not("published_at", "is", null);
+  if (error) {
+    return json({ error: `failed to save wrap-up: ${error.message}` }, 500);
+  }
   return json({ content, generated_at: generatedAt }, 200);
 }
 

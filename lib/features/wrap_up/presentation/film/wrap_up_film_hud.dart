@@ -10,6 +10,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../mutations/wrap_up_mutations.dart';
+import '../widgets/film_out_of_date_chip.dart';
 
 /// The film itself is an ambient, non-interactive loop (docs/design/
 /// WRAP_UP_FILM_FLUTTER_SPEC.md has no CTAs at all) — this is a persistent overlay
@@ -19,18 +20,21 @@ import '../mutations/wrap_up_mutations.dart';
 ///
 /// Once kept, the "Keep forever" slot becomes the way into the Kept Memory
 /// page (#279): "Open memory" replaces the film with it, or "Back to memory"
-/// when the film was opened from there.
+/// when the film was opened from there. A kept film whose photos changed
+/// also offers "Photos changed · Rebuild film" (#294) beside close.
 class WrapUpFilmHud extends ConsumerWidget {
   const WrapUpFilmHud({
     required this.tripId,
     required this.isPublished,
     this.openedFromMemory = false,
+    this.isOutOfDate = false,
     super.key,
   });
 
   final String tripId;
   final bool isPublished;
   final bool openedFromMemory;
+  final bool isOutOfDate;
 
   /// Back to wherever the film was opened from (#279) — Home when there's
   /// nothing to pop (e.g. a deep link).
@@ -79,16 +83,23 @@ class WrapUpFilmHud extends ConsumerWidget {
     return SafeArea(
       child: Column(
         children: [
-          Align(
-            alignment: Alignment.topLeft,
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: _HudScrim(
-                child: IconButton(
-                  icon: const Icon(Icons.close, color: AppColors.textOnPhoto),
-                  onPressed: () => _close(context),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Row(
+              children: [
+                _HudScrim(
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: AppColors.textOnPhoto),
+                    onPressed: () => _close(context),
+                  ),
                 ),
-              ),
+                const Spacer(),
+                if (isPublished && isOutOfDate)
+                  Flexible(
+                    flex: 6,
+                    child: FilmOutOfDateChip(tripId: tripId),
+                  ),
+              ],
             ),
           ),
           const Spacer(),

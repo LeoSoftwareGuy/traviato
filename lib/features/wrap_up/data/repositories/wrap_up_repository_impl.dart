@@ -47,4 +47,25 @@ class WrapUpRepositoryImpl implements WrapUpRepository {
       return Left(UnknownFailure(message: e.message));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> rebuildKept(
+    String tripId, {
+    required String language,
+  }) async {
+    try {
+      await _remote.rebuildKept(tripId, language: language);
+      return const Right(null);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on PermissionException catch (e) {
+      return Left(PermissionFailure(message: e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on AppException catch (e) {
+      return Left(UnknownFailure(message: e.message));
+    }
+  }
 }

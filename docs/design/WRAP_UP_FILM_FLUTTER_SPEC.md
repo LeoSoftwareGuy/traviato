@@ -122,11 +122,17 @@ not hardcoded.
 ### Moment slot rules
 
 ```
-up to 3      → bonus-task photos (first 3 completed),
+first        → the user's "Always" photos (#294); more than 8 → spread over
+               the trip, the rest go to the Flurries (never dropped)
+then up to 3 → bonus-task photos on Auto (first 3 completed),
                badged "Dare · {task name} · ✦{stars}" in `dare` blue
-the rest     → journal photographs spread evenly over the whole trip
+the rest     → Auto journal photographs spread evenly over the whole trip
 M1 → M8      → played in time order: by day, then by capture time (#292)
 ```
+
+"Leave out" photos (#294) appear nowhere — not in moments, collages or
+Flurries — and the cut is chosen from the photos that can be shown. An
+"Always" photo that is also a bonus photo keeps its badge.
 
 Badges have no fixed slot — a bonus photo plays where it falls in the trip.
 A badged moment is never a collage, so a bonus photo landing on M2/M5/M7/M8

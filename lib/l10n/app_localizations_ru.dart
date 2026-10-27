@@ -2482,4 +2482,54 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_checklist_umbrella => 'Зонт';
+
+  @override
+  String get film_inTheFilm => 'В фильме';
+
+  @override
+  String get film_pickAuto => 'Авто';
+
+  @override
+  String get film_pickAlways => 'Всегда';
+
+  @override
+  String get film_pickNever => 'Не брать';
+
+  @override
+  String get film_hintAutoPicked => 'Фильм выбрал это фото';
+
+  @override
+  String get film_hintAutoNot => 'Сейчас не выбрано';
+
+  @override
+  String get film_hintAlways => 'Ваш выбор · главный момент';
+
+  @override
+  String get film_hintNever => 'Не появится нигде';
+
+  @override
+  String get film_toastAlways => 'Всегда в фильме';
+
+  @override
+  String get film_toastNever => 'Убрано из фильма';
+
+  @override
+  String get film_toastAuto => 'Фильм выберет сам';
+
+  @override
+  String get film_leftOutPill => 'Не войдёт в фильм';
+
+  @override
+  String film_stripCount(int count) {
+    return '$count в фильме';
+  }
+
+  @override
+  String get film_badgeYourPick => 'Ваш выбор';
+
+  @override
+  String get film_badgeLeftOut => 'Убрано';
+
+  @override
+  String get film_outOfDate => 'Фото изменились · Пересобрать фильм';
 }

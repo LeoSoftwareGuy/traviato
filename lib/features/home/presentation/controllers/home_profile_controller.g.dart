@@ -49,7 +49,7 @@ final class HomeProfileControllerProvider
 }
 
 String _$homeProfileControllerHash() =>
-    r'0218ae4c4fcbbf60fc4639aac719a9bb0e7745d1';
+    r'1be8bbfc0b9a9bc50a07779dc7d6b4aa26513382';
 
 /// The name Home greets with (#266) and the avatar beside it (#283) —
 /// `profiles.username` and `profiles.avatar_url`, the fields the Profile

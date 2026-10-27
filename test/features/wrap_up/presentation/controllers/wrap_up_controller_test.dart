@@ -2,6 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/failures.dart';
+import 'package:traviato/core/events/global_event.dart';
+import 'package:traviato/core/events/global_event_bus.dart';
+import 'package:traviato/features/photo/domain/entities/film_pick.dart';
 import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_entity.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_moment.dart';
@@ -122,5 +125,81 @@ void main() {
     ).read(wrapUpControllerProvider('t1').future);
 
     expect(wrapUpRepo.lastLanguage, 'ru');
+  });
+
+  group('kept film out of date (#294)', () {
+    final builtAt = DateTime.utc(2026, 8, 20, 12);
+    final kept = buildWrapUpEntity(
+      generatedAt: builtAt,
+      publishedAt: DateTime.utc(2026, 8, 20, 13),
+      moments: const [WrapUpMoment(photoId: 'p1')],
+    );
+
+    test('is flagged when a pick changed after the film was built', () async {
+      final c = container(
+        FakeTripRepository(),
+        wrapUp: kept,
+        photos: [
+          buildPhotoEntity(
+            id: 'p1',
+            filmPick: FilmPick.never,
+            filmPickSetAt: builtAt.add(const Duration(hours: 1)),
+          ),
+        ],
+      );
+
+      final state = await c.read(wrapUpControllerProvider('t1').future);
+
+      expect(state.isOutOfDate, isTrue);
+    });
+
+    test('is flagged when a photo the film shows was deleted', () async {
+      final c = container(FakeTripRepository(), wrapUp: kept);
+
+      final state = await c.read(wrapUpControllerProvider('t1').future);
+
+      expect(state.isOutOfDate, isTrue);
+      // ...and the film itself still never plays the gone photo.
+      expect(state.wrapUp.moments, isEmpty);
+    });
+
+    test('an untouched kept film is up to date', () async {
+      final c = container(
+        FakeTripRepository(),
+        wrapUp: kept,
+        photos: [buildPhotoEntity(id: 'p1')],
+      );
+
+      final state = await c.read(wrapUpControllerProvider('t1').future);
+
+      expect(state.isOutOfDate, isFalse);
+    });
+
+    test("reloads when this memory's film photos change", () async {
+      final wrapUpRepo = FakeWrapUpRepository();
+      final c = container(
+        FakeTripRepository(),
+        wrapUp: kept,
+        photos: [buildPhotoEntity(id: 'p1')],
+        wrapUpRepo: wrapUpRepo,
+      );
+      c.listen(wrapUpControllerProvider('t1'), (_, _) {});
+      await c.read(wrapUpControllerProvider('t1').future);
+      expect(wrapUpRepo.getOrGenerateCallCount, 1);
+
+      c
+          .read(globalEventBusProvider)
+          .add(const FilmPhotosChangedDispatched(tripId: 'other'));
+      await Future<void>.delayed(Duration.zero);
+      await c.read(wrapUpControllerProvider('t1').future);
+      expect(wrapUpRepo.getOrGenerateCallCount, 1);
+
+      c
+          .read(globalEventBusProvider)
+          .add(const FilmPhotosChangedDispatched(tripId: 't1'));
+      await Future<void>.delayed(Duration.zero);
+      await c.read(wrapUpControllerProvider('t1').future);
+      expect(wrapUpRepo.getOrGenerateCallCount, 2);
+    });
   });
 }

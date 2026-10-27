@@ -1,3 +1,4 @@
+import '../../domain/entities/film_pick.dart';
 import '../../domain/entities/photo_entity.dart';
 
 class PhotoModel extends PhotoEntity {
@@ -14,6 +15,8 @@ class PhotoModel extends PhotoEntity {
     super.takenAt,
     required super.createdAt,
     super.imageUrl,
+    super.filmPick,
+    super.filmPickSetAt,
   });
 
   factory PhotoModel.fromJson(Map<String, dynamic> json) => PhotoModel(
@@ -33,6 +36,10 @@ class PhotoModel extends PhotoEntity {
         ? null
         : DateTime.parse(json['taken_at'] as String),
     createdAt: DateTime.parse(json['created_at'] as String),
+    filmPick: FilmPick.fromColumn(json['use_in_wrap_up']),
+    filmPickSetAt: json['use_in_wrap_up_set_at'] == null
+        ? null
+        : DateTime.parse(json['use_in_wrap_up_set_at'] as String),
   );
 
   /// The row carries no `image_url` column — this attaches the signed URL
@@ -50,5 +57,7 @@ class PhotoModel extends PhotoEntity {
     takenAt: takenAt,
     createdAt: createdAt,
     imageUrl: imageUrl,
+    filmPick: filmPick,
+    filmPickSetAt: filmPickSetAt,
   );
 }

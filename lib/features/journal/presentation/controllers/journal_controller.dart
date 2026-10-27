@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/errors/presentation_failure_exception.dart';
+import '../../../photo/domain/entities/film_pick.dart';
 import '../../../photo/domain/entities/photo_entity.dart';
 import '../../../photo/presentation/providers/photo_providers.dart';
 import '../../../quest/presentation/providers/quest_providers.dart';
@@ -151,6 +152,42 @@ class JournalController extends _$JournalController {
       current.copyWith(photos: [...current.photos]..removeAt(index)),
     );
     return index;
+  }
+
+  /// Optimistically sets a photo's Wrap-Up Film pick (#294) and returns the
+  /// photo as it was, for rolling back; `null` when it isn't loaded.
+  PhotoEntity? applyPhotoFilmPick(String photoId, FilmPick pick) {
+    final current = state.value;
+    if (current == null) return null;
+    final index = current.photos.indexWhere((p) => p.id == photoId);
+    if (index == -1) return null;
+    final previous = current.photos[index];
+    final photos = [...current.photos]
+      ..[index] = previous.copyWith(filmPick: pick);
+    state = AsyncData(current.copyWith(photos: photos));
+    return previous;
+  }
+
+  /// After a pick saved: records the server's stamp, and — when the save
+  /// failed — puts [previous] back. Either only while the photo still holds
+  /// [pick], so a newer tap made meanwhile is never overwritten.
+  void applyPhotoFilmPickSettled(
+    String photoId,
+    FilmPick pick, {
+    DateTime? setAt,
+    PhotoEntity? previous,
+  }) {
+    final current = state.value;
+    if (current == null) return;
+    final index = current.photos.indexWhere((p) => p.id == photoId);
+    if (index == -1 || current.photos[index].filmPick != pick) return;
+    final settled =
+        previous ??
+        current.photos[index].copyWith(
+          filmPickSetAt: setAt,
+        );
+    final photos = [...current.photos]..[index] = settled;
+    state = AsyncData(current.copyWith(photos: photos));
   }
 
   /// Rolls back [applyPhotoDeleted] after a failed delete.

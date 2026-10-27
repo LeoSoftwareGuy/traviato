@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'film_pick.dart';
+
 /// A photo attached to a memory, optionally tagged to a day/place/people.
 /// [imageUrl] is a signed URL resolved at fetch time (the `trip-photos`
 /// bucket is private) — it is not a persisted column.
@@ -17,6 +19,8 @@ class PhotoEntity extends Equatable {
     this.takenAt,
     required this.createdAt,
     this.imageUrl,
+    this.filmPick = FilmPick.auto,
+    this.filmPickSetAt,
   });
 
   final String id;
@@ -32,6 +36,31 @@ class PhotoEntity extends Equatable {
   final DateTime createdAt;
   final String? imageUrl;
 
+  /// The user's Wrap-Up Film pick (#294).
+  final FilmPick filmPick;
+
+  /// When [filmPick] last changed (server time) — newer than a kept film's
+  /// `generated_at` means the film is out of date.
+  final DateTime? filmPickSetAt;
+
+  PhotoEntity copyWith({FilmPick? filmPick, DateTime? filmPickSetAt}) =>
+      PhotoEntity(
+        id: id,
+        tripId: tripId,
+        dayDate: dayDate,
+        storagePath: storagePath,
+        caption: caption,
+        lat: lat,
+        lng: lng,
+        placeText: placeText,
+        peopleTags: peopleTags,
+        takenAt: takenAt,
+        createdAt: createdAt,
+        imageUrl: imageUrl,
+        filmPick: filmPick ?? this.filmPick,
+        filmPickSetAt: filmPickSetAt ?? this.filmPickSetAt,
+      );
+
   @override
   List<Object?> get props => [
     id,
@@ -46,5 +75,7 @@ class PhotoEntity extends Equatable {
     takenAt,
     createdAt,
     imageUrl,
+    filmPick,
+    filmPickSetAt,
   ];
 }

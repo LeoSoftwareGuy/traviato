@@ -11,6 +11,7 @@ import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_cover_photo.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_moment.dart';
 import 'package:traviato/features/wrap_up/presentation/film/wrap_up_film_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/pages/wrap_up_page.dart';
 import 'package:traviato/features/wrap_up/presentation/providers/wrap_up_providers.dart';
@@ -266,5 +267,52 @@ void main() {
 
     expect(find.text('Session expired.'), findsOneWidget);
     expect(find.text('Retry'), findsOneWidget);
+  });
+
+  group('Photos changed · Rebuild film (#294)', () {
+    FakeWrapUpRepository keptRepo() =>
+        FakeWrapUpRepository()
+          ..getOrGenerateResult = Right(
+            buildWrapUpEntity(
+              coverPhoto: const WrapUpCoverPhoto(),
+              generatedAt: DateTime.utc(2026, 8, 17),
+              publishedAt: DateTime.utc(2026, 8, 17, 1),
+              moments: const [WrapUpMoment(photoId: 'gone')],
+            ),
+          );
+
+    testWidgets('a kept film whose photos changed offers a rebuild', (
+      tester,
+    ) async {
+      final wrapUpRepo = keptRepo();
+      await _pump(tester, wrapUpRepo: wrapUpRepo);
+      await _settle(tester);
+
+      expect(find.text('Photos changed · Rebuild film'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('film-out-of-date-chip')));
+      await _settle(tester);
+
+      expect(wrapUpRepo.rebuildKeptCallCount, 1);
+      // Reloaded after the rebuild.
+      expect(wrapUpRepo.getOrGenerateCallCount, 2);
+    });
+
+    testWidgets('an up-to-date kept film shows no rebuild chip', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        wrapUpRepo: FakeWrapUpRepository()
+          ..getOrGenerateResult = Right(
+            buildWrapUpEntity(
+              coverPhoto: const WrapUpCoverPhoto(),
+              publishedAt: DateTime(2026, 8, 17),
+            ),
+          ),
+      );
+      await _settle(tester);
+
+      expect(find.byKey(const Key('film-out-of-date-chip')), findsNothing);
+    });
   });
 }

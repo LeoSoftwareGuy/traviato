@@ -62,6 +62,7 @@ class WrapUpPage extends ConsumerWidget {
               tripId: tripId,
               isPublished: state.wrapUp.isPublished,
               openedFromMemory: openedFromMemory,
+              isOutOfDate: state.isOutOfDate,
             ),
           ],
         ),
