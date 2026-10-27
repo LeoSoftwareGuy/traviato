@@ -100,7 +100,11 @@ export function buildPrompt(
       })
     }\n`,
     `Day count: ${dayCount ?? "unknown"}\n`,
-    `Day notes, in chronological order: ${JSON.stringify(notes)}\n`,
+    `Day notes, in chronological order: ${
+      JSON.stringify(
+        notes.map(({ day_date, content }) => ({ day_date, content })),
+      )
+    }\n`,
     `Achievement earned during this trip, or null: ${
       JSON.stringify(latestAchievement)
     }\n\n`,

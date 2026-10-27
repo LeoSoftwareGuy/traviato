@@ -165,7 +165,7 @@ photos = [m.src] + journalPool.without(m.src) rotated by (momentIndex × 3), tak
 - **Fallback:** if the journal has fewer photos than the layout needs, downgrade: `torn6/tilt6 → torn4 → stack3 → card flip`. With < 3 photos, always card flip.
 - Never repeat a photo within one collage.
 - **One day per collage (#298):** extra tiles come only from the main photo's day, nearest in time first. Too few → step down the ladder above.
-- **Caption (#298):** an excerpt of that day's note — whole sentences, ≤ ~120 chars, cut at a word with "…" when one sentence is longer. No note → no caption. A second collage on the same day takes the next excerpt.
+- **Caption (#298, #302):** one sentence of that day's note (≤ ~120 chars, cut at a word with "…" when longer), chosen by **time of day**: where the collage's photos fall between the day's first and last photo picks the same share of the note — a late collage gets its end, an early one its start. A second collage on the same day takes the nearest unused sentence. A one-sentence note shows only on a collage within half the day of when it was written (`day_notes.created_at`). No note, or nothing that fits → no caption.
 
 ---
 

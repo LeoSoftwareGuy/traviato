@@ -714,11 +714,14 @@ Deno.test("collages are captioned with their day's note, card flips with the pho
       assertEquals(m.note, null);
     }
   }
-  const day1 = collages.filter((m) => m.day_date === "2026-06-01");
-  assertEquals(day1[0]?.note, "Rain all morning. Then sun.");
+  const day1 = collages.find((m) => m.day_date === "2026-06-01");
+  assertEquals(
+    ["Rain all morning.", "Then sun."].includes(day1?.note ?? ""),
+    true,
+  );
 });
 
-Deno.test("two collages on one day show different parts of its note", () => {
+Deno.test("two collages on one day show different parts of its note, in time order", () => {
   // One 30-photo day: all four collages land on it.
   const sentence = (n: number) => `Sentence ${n} ${"x".repeat(60)}.`;
   const content = assembleWrapUpContent(
@@ -738,19 +741,18 @@ Deno.test("two collages on one day show different parts of its note", () => {
   assertEquals(notes, [sentence(1), sentence(2), sentence(3), null]);
 });
 
-Deno.test("noteExcerpts groups whole sentences up to the limit", () => {
+Deno.test("noteExcerpts gives one excerpt per sentence or line", () => {
   assertEquals(noteExcerpts(""), []);
   assertEquals(noteExcerpts("Last tram ride before the flight home"), [
     "Last tram ride before the flight home",
   ]);
-  assertEquals(noteExcerpts("One. Two! Three?", 9), ["One. Two!", "Three?"]);
-  // Line breaks split too.
-  assertEquals(noteExcerpts("Morning swim\nLong lunch", 12), [
+  assertEquals(noteExcerpts("One. Two! Three?"), ["One.", "Two!", "Three?"]);
+  assertEquals(noteExcerpts("Morning swim\nLong lunch"), [
     "Morning swim",
     "Long lunch",
   ]);
   // Russian notes split the same way.
-  assertEquals(noteExcerpts("Дождь с утра. Потом солнце.", 14), [
+  assertEquals(noteExcerpts("Дождь с утра. Потом солнце."), [
     "Дождь с утра.",
     "Потом солнце.",
   ]);
@@ -773,6 +775,58 @@ Deno.test("noteExcerpts drops the unfinished tail of a note cut at 500 chars", (
   assertEquals(excerpts.some((e) => e.includes("walked")), false);
   // A short note without a final full stop keeps its last sentence.
   assertEquals(noteExcerpts("Fine day. We walked home"), [
-    "Fine day. We walked home",
+    "Fine day.",
+    "We walked home",
   ]);
+});
+
+// --- #302: a collage's caption follows its time of day -------------------
+
+// 12 photos on one day, one an hour from 10:00 to 21:00 (compact cut):
+// M2 is a morning stack3 (11, 12, 14h), M5 an evening one (16, 17, 20h).
+function hourlyDay(): TripData["photos"] {
+  return Array.from(
+    { length: 12 },
+    (_, i) => photo(`h${i}`, "2026-06-01", `2026-06-01T${10 + i}:00:00Z`),
+  );
+}
+
+function collageNotes(notes: TripData["notes"]) {
+  const content = assembleWrapUpContent(
+    tripData({ photos: hourlyDay(), notes, completedBonusTasks: [] }),
+    validAiFields,
+  );
+  return content.moments.filter((m) => m.layout !== null).map((m) => m.note);
+}
+
+Deno.test("a late collage takes the end of the note, an early one the start", () => {
+  assertEquals(
+    collageNotes([{
+      day_date: "2026-06-01",
+      content: "We have just landed. Lunch by the canal. Club until late.",
+      created_at: "2026-06-01T10:30:00Z",
+    }]),
+    ["We have just landed.", "Club until late."],
+  );
+});
+
+Deno.test("a one-sentence note shows only near when it was written", () => {
+  // Written in the morning: the evening collage gets no caption.
+  assertEquals(
+    collageNotes([{
+      day_date: "2026-06-01",
+      content: "We have just landed.",
+      created_at: "2026-06-01T10:30:00Z",
+    }]),
+    ["We have just landed.", null],
+  );
+  // Written at night: the morning collage gets none.
+  assertEquals(
+    collageNotes([{
+      day_date: "2026-06-01",
+      content: "What a night.",
+      created_at: "2026-06-01T23:30:00Z",
+    }]),
+    [null, "What a night."],
+  );
 });
