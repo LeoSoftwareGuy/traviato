@@ -14,7 +14,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../journal/presentation/controllers/journal_controller.dart';
 import '../../../wrap_up/presentation/providers/film_pick_providers.dart';
@@ -257,14 +256,10 @@ class _PhotoViewerPageState extends ConsumerState<PhotoViewerPage>
     final tripId = widget.filmTripId;
     if (tripId == null) return;
     final photo = _photos[_currentIndex];
-    final l10n = context.l10n;
     // Fire-and-forget: a missing haptic engine must never block the save.
+    // No confirmation snackbar (#300) — the control itself shows the new
+    // pick; only a failed save speaks up.
     unawaited(HapticFeedback.lightImpact());
-    showAppSnackbar(_overlayContext, switch (pick) {
-      FilmPick.auto => l10n.film_toastAuto,
-      FilmPick.always => l10n.film_toastAlways,
-      FilmPick.never => l10n.film_toastNever,
-    });
     try {
       await runSetFilmPick(ref: ref, tripId: tripId, photo: photo, pick: pick);
     } catch (error) {

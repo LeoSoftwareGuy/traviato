@@ -62,10 +62,7 @@ Sits above the page dots and below the photo. Everything already in the carousel
   - Selected Auto / Always: bg primary `#F29520`, text `#0C0F27`.
   - Selected Leave out: bg `rgba(174,172,183,.22)`, text `#FBFAF6`.
   - Unselected: transparent, text `#AEACB7`. Background transition 150ms.
-- **On change:** save immediately (no save button) + light haptic + toast:
-  - Always → `Always in the film`
-  - Leave out → `Left out of the film`
-  - Auto → `Film picks this one`
+- **On change:** save immediately (no save button) + light haptic. **No confirmation toast** (#300 — the selected segment already shows it); only a failed save shows an error.
 - **Leave-out state in the carousel:** the photo renders at **45% opacity** (200ms fade) and a centred pill shows 110 from the top: `Left out of the film`, Roboto 600 11, `#AEACB7` on `rgba(7,9,26,.7)`, 1px `rgba(174,172,183,.3)`, radius 999. It isn't tappable.
 - The panel shows the state of the **current page**. Swiping updates it with no animation.
 - Swiping between photos still works over the panel area? **No.** The panel absorbs horizontal drags so the segments are easy to hit. Swiping works everywhere else.
@@ -118,9 +115,6 @@ Keep your existing delete behaviour and confirmation exactly as they are. Extra 
 | film_hintAutoNot | Not picked right now |
 | film_hintAlways | Your pick · gets a main moment |
 | film_hintNever | Won't appear anywhere |
-| film_toastAlways | Always in the film |
-| film_toastNever | Left out of the film |
-| film_toastAuto | Film picks this one |
 | film_leftOutPill | Left out of the film |
 | film_stripCount | {n} in the film |
 | film_badgeYourPick | Your pick |
@@ -133,7 +127,7 @@ RU/ET go into ARB marked `"x-review": "pending"`. Eyebrows are uppercased in cod
 
 ## Acceptance checklist
 - [ ] The existing carousel layout is unchanged (✕ left, delete right, swipe, dots). Only the panel and the Leave-out pill are added.
-- [ ] The segmented control saves immediately, updates optimistically, shows a toast, and fires a haptic.
+- [ ] The segmented control saves immediately, updates optimistically and fires a haptic (no toast, #300).
 - [ ] Migration: `use_in_wrap_up` is nullable and three-state, and `use_in_wrap_up_set_at` exists. Existing data is mapped as described.
 - [ ] Generator: false photos are excluded everywhere, true photos fill M1–M8 first in chronological order, overflow goes to the flurries, and bonus-slot fallback is kept.
 - [ ] Strip header count and thumb badges match the carousel state, and update when the carousel closes.

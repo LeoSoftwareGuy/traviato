@@ -2462,15 +2462,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get film_hintNever => 'Won\'t appear anywhere';
 
   @override
-  String get film_toastAlways => 'Always in the film';
-
-  @override
-  String get film_toastNever => 'Left out of the film';
-
-  @override
-  String get film_toastAuto => 'Film picks this one';
-
-  @override
   String get film_leftOutPill => 'Left out of the film';
 
   @override

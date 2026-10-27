@@ -2456,18 +2456,6 @@
   "@film_hintNever": {
     "x-review": "pending"
   },
-  "film_toastAlways": "Всегда в фильме",
-  "@film_toastAlways": {
-    "x-review": "pending"
-  },
-  "film_toastNever": "Убрано из фильма",
-  "@film_toastNever": {
-    "x-review": "pending"
-  },
-  "film_toastAuto": "Фильм выберет сам",
-  "@film_toastAuto": {
-    "x-review": "pending"
-  },
   "film_leftOutPill": "Не войдёт в фильм",
   "@film_leftOutPill": {
     "x-review": "pending"

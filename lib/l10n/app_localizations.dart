@@ -3799,24 +3799,6 @@ abstract class AppLocalizations {
   /// **'Won\'t appear anywhere'**
   String get film_hintNever;
 
-  /// Toast after switching a photo to Always (#294).
-  ///
-  /// In en, this message translates to:
-  /// **'Always in the film'**
-  String get film_toastAlways;
-
-  /// Toast after switching a photo to Leave out (#294).
-  ///
-  /// In en, this message translates to:
-  /// **'Left out of the film'**
-  String get film_toastNever;
-
-  /// Toast after switching a photo back to Auto (#294).
-  ///
-  /// In en, this message translates to:
-  /// **'Film picks this one'**
-  String get film_toastAuto;
-
   /// Pill over a left-out photo in the photo viewer (#294).
   ///
   /// In en, this message translates to:
