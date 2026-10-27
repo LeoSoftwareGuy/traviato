@@ -15,7 +15,7 @@ type SupabaseClient = any;
 
 const MAX_PHOTOS = 500;
 const MAX_BONUS_ASSIGNMENTS = 500;
-const MAX_NOTE_CHARS = 500;
+export const MAX_NOTE_CHARS = 500;
 
 export interface TripData {
   trip: {

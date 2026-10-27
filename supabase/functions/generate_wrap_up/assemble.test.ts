@@ -3,6 +3,7 @@ import {
   assembleWrapUpContent,
   formatDateRange,
   invitationLine1,
+  noteExcerpts,
   pickMomentPhotos,
   selectCut,
   sortPhotosChronologically,
@@ -88,10 +89,14 @@ Deno.test("flurry label is suppressed under the 10-leftover threshold", () => {
 
 // --- #151: photo-count-aware cuts ---------------------------------------
 
-function photos(count: number, prefix = "c"): TripData["photos"] {
+function photos(
+  count: number,
+  prefix = "c",
+  perDay = 4,
+): TripData["photos"] {
   return Array.from({ length: count }, (_, i) => ({
     id: `${prefix}${i}`,
-    day_date: `2026-06-${String(1 + Math.floor(i / 4)).padStart(2, "0")}`,
+    day_date: `2026-06-${String(1 + Math.floor(i / perDay)).padStart(2, "0")}`,
     taken_at: null,
     created_at: `2026-06-01T00:00:00Z`,
     storage_path: `u/t/${prefix}${i}.jpg`,
@@ -100,8 +105,10 @@ function photos(count: number, prefix = "c"): TripData["photos"] {
   }));
 }
 
-function planFor(count: number, withBonus = false) {
-  const list = photos(count);
+// All on one day by default, so the cut tests below measure the photo
+// budget alone — same-day collage limits (#298) have their own tests.
+function planFor(count: number, withBonus = false, perDay = count || 1) {
+  const list = photos(count, "c", perDay);
   const completedBonusTasks = withBonus
     ? list.slice(0, 3).map((p, i) => ({
       completed_at: `2026-06-01T0${i}:00:00Z`,
@@ -276,9 +283,13 @@ Deno.test("collage extras are the photos nearest in time to the moment", () => {
 });
 
 Deno.test("no cut at any photo count ever repeats a photo", () => {
-  for (const withBonus of [false, true]) {
+  for (const [withBonus, perDay] of [[false, 0], [true, 0], [false, 4]]) {
     for (let count = 0; count <= 60; count++) {
-      const content = planFor(count, withBonus);
+      const content = planFor(
+        count,
+        withBonus as boolean,
+        (perDay as number) || count || 1,
+      );
       assertEquals(validateWrapUpContent(content), true);
 
       const shown = [
@@ -294,6 +305,9 @@ Deno.test("no cut at any photo count ever repeats a photo", () => {
       for (const m of content.moments) {
         if (m.badge !== null) assertEquals(m.layout, null);
         if (m.layout === null) assertEquals(m.collage_extras.length, 0);
+        for (const extra of m.collage_extras) {
+          assertEquals(extra.day_date, m.day_date, `mixed days at ${count}`);
+        }
       }
       if (content.cut === "highlight") {
         assertEquals(layouts(content).every((l) => l === null), true);
@@ -444,11 +458,20 @@ Deno.test("moments play in day order even when bonus photos come late", () => {
   }
   // Every day of the trip gets moments, not just the first one.
   assertEquals(new Set(moments.map((m) => m.day_date)).size, 3);
-  // A moment's caption is always its own photo's, so always its day.
+  // A card flip's caption is its own photo's; a collage's comes from its
+  // day's note (#298). Either way it belongs to the moment's day.
   const byId = new Map(list.map((p) => [p.id, p]));
+  const noteByDay = new Map(
+    validTripData.notes.map((n) => [n.day_date, n.content]),
+  );
   for (const m of moments) {
-    assertEquals(m.note, byId.get(m.photo_id)!.caption);
     assertEquals(m.day_date, byId.get(m.photo_id)!.day_date);
+    assertEquals(
+      m.note,
+      m.layout === null
+        ? byId.get(m.photo_id)!.caption
+        : noteByDay.get(m.day_date!) ?? null,
+    );
   }
   // Badges stay on their bonus photos.
   assertEquals(
@@ -610,4 +633,146 @@ Deno.test("picks: moments stay in time order with Always photos late in the trip
   );
   const days = content.moments.map((m) => m.day_date!);
   assertEquals([...days].sort(), days);
+});
+
+// --- #298: a collage is one day, captioned with that day's note ----------
+
+// [perDay] photos on each of [days] days, d{day}-{i} in time order.
+function dayPhotos(days: number, perDay: number): TripData["photos"] {
+  return Array.from({ length: days }, (_, d) => `2026-06-0${d + 1}`).flatMap(
+    (day, d) =>
+      Array.from(
+        { length: perDay },
+        (_, i) =>
+          photo(
+            `d${d + 1}-${i}`,
+            day,
+            `${day}T10:${String(i).padStart(2, "0")}:00Z`,
+          ),
+      ),
+  );
+}
+
+Deno.test("collage tiles never come from another day", () => {
+  // 24 photos (full cut) over 3 days of 8.
+  const content = assembleWrapUpContent(
+    tripData({ photos: dayPhotos(3, 8), notes: [], completedBonusTasks: [] }),
+    validAiFields,
+  );
+  assertEquals(content.cut, "full");
+  assertEquals(content.moments.some((m) => m.layout !== null), true);
+  for (const m of content.moments) {
+    for (const extra of m.collage_extras) {
+      assertEquals(extra.day_date, m.day_date);
+    }
+  }
+});
+
+Deno.test("a day with too few photos steps the collage down, then to a card flip", () => {
+  // 12 photos, one per day: no moment has a same-day partner.
+  const content = assembleWrapUpContent(
+    tripData({
+      photos: Array.from(
+        { length: 12 },
+        (_, i) =>
+          photo(
+            `s${i}`,
+            `2026-06-${String(i + 1).padStart(2, "0")}`,
+            `2026-06-${String(i + 1).padStart(2, "0")}T10:00:00Z`,
+          ),
+      ),
+      notes: [],
+      completedBonusTasks: [],
+    }),
+    validAiFields,
+  );
+  assertEquals(content.cut, "compact");
+  assertEquals(content.moments.every((m) => m.layout === null), true);
+  // Nothing is lost: the unused photos are still leftovers.
+  assertEquals(content.flurry_leftovers.photos.length, 4);
+});
+
+Deno.test("collages are captioned with their day's note, card flips with the photo's caption", () => {
+  const content = assembleWrapUpContent(
+    tripData({
+      photos: dayPhotos(3, 8),
+      notes: [
+        { day_date: "2026-06-01", content: "Rain all morning. Then sun." },
+        { day_date: "2026-06-03", content: "Last swim." },
+      ],
+      completedBonusTasks: [],
+    }),
+    validAiFields,
+  );
+  const collages = content.moments.filter((m) => m.layout !== null);
+  assertEquals(collages.length > 0, true);
+  for (const m of content.moments) {
+    if (m.layout === null) {
+      assertEquals(m.note, `caption ${m.photo_id}`);
+    } else if (m.day_date === "2026-06-02") {
+      // No note that day: no caption, never a photo's caption.
+      assertEquals(m.note, null);
+    }
+  }
+  const day1 = collages.filter((m) => m.day_date === "2026-06-01");
+  assertEquals(day1[0]?.note, "Rain all morning. Then sun.");
+});
+
+Deno.test("two collages on one day show different parts of its note", () => {
+  // One 30-photo day: all four collages land on it.
+  const sentence = (n: number) => `Sentence ${n} ${"x".repeat(60)}.`;
+  const content = assembleWrapUpContent(
+    tripData({
+      photos: dayPhotos(1, 30),
+      notes: [{
+        day_date: "2026-06-01",
+        content: [1, 2, 3].map(sentence).join(" "),
+      }],
+      completedBonusTasks: [],
+    }),
+    validAiFields,
+  );
+  const notes = content.moments
+    .filter((m) => m.layout !== null)
+    .map((m) => m.note);
+  assertEquals(notes, [sentence(1), sentence(2), sentence(3), null]);
+});
+
+Deno.test("noteExcerpts groups whole sentences up to the limit", () => {
+  assertEquals(noteExcerpts(""), []);
+  assertEquals(noteExcerpts("Last tram ride before the flight home"), [
+    "Last tram ride before the flight home",
+  ]);
+  assertEquals(noteExcerpts("One. Two! Three?", 9), ["One. Two!", "Three?"]);
+  // Line breaks split too.
+  assertEquals(noteExcerpts("Morning swim\nLong lunch", 12), [
+    "Morning swim",
+    "Long lunch",
+  ]);
+  // Russian notes split the same way.
+  assertEquals(noteExcerpts("Дождь с утра. Потом солнце.", 14), [
+    "Дождь с утра.",
+    "Потом солнце.",
+  ]);
+});
+
+Deno.test("noteExcerpts cuts an over-long sentence at a word, on its own", () => {
+  assertEquals(
+    noteExcerpts("We walked along the canals, all the way. Then bed.", 24),
+    ["We walked along the…", "Then bed."],
+  );
+  // No space to cut at: a hard cut, still marked.
+  assertEquals(noteExcerpts("Supercalifragilistic", 6), ["Super…"]);
+});
+
+Deno.test("noteExcerpts drops the unfinished tail of a note cut at 500 chars", () => {
+  const head = `${"Fine day. ".repeat(48)}`; // 480 chars
+  const note = `${head}We walked to the old harbour and`.slice(0, 500);
+  assertEquals(note.length, 500);
+  const excerpts = noteExcerpts(note);
+  assertEquals(excerpts.some((e) => e.includes("walked")), false);
+  // A short note without a final full stop keeps its last sentence.
+  assertEquals(noteExcerpts("Fine day. We walked home"), [
+    "Fine day. We walked home",
+  ]);
 });

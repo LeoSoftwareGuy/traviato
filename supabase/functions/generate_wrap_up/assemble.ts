@@ -3,7 +3,7 @@
 // always produces the same output, which is what keeps this idempotent
 // alongside handler.ts's existing "return existing content as-is" guard.
 
-import type { TripData } from "./gather.ts";
+import { MAX_NOTE_CHARS, type TripData } from "./gather.ts";
 import type { AiGeneratedFields } from "./ai_fields.ts";
 import type {
   CollageLayout,
@@ -131,6 +131,58 @@ export function splitKeepsakeTitle(
   };
 }
 
+// A collage caption (#298) fits the caption box in about three lines
+// (WRAP_UP_FILM_COLLAGE_SPEC.md §7: 50px serif over 864px).
+const COLLAGE_CAPTION_MAX_CHARS = 120;
+
+// Splits a day's note into collage captions (#298): whole sentences
+// grouped in order, each excerpt at most [maxChars]. A sentence longer
+// than that is cut at a word boundary and ends in "…". The user's own
+// words, never AI. A note gather.ts cut at MAX_NOTE_CHARS drops its last,
+// unfinished sentence rather than showing it chopped.
+export function noteExcerpts(
+  note: string,
+  maxChars = COLLAGE_CAPTION_MAX_CHARS,
+): string[] {
+  const sentences = note
+    .split(/(?<=[.!?…])\s+|\n+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (
+    note.length >= MAX_NOTE_CHARS && sentences.length > 1 &&
+    !/[.!?…]$/.test(sentences[sentences.length - 1])
+  ) {
+    sentences.pop();
+  }
+
+  const excerpts: string[] = [];
+  let current = "";
+  for (const sentence of sentences) {
+    const joined = current ? `${current} ${sentence}` : sentence;
+    if (joined.length <= maxChars) {
+      current = joined;
+      continue;
+    }
+    if (current) excerpts.push(current);
+    if (sentence.length <= maxChars) {
+      current = sentence;
+    } else {
+      // Never followed by the next sentence after its "…".
+      excerpts.push(cutAtWord(sentence, maxChars));
+      current = "";
+    }
+  }
+  if (current) excerpts.push(current);
+  return excerpts;
+}
+
+function cutAtWord(text: string, maxChars: number): string {
+  const head = text.slice(0, maxChars - 1);
+  const lastSpace = head.lastIndexOf(" ");
+  const cut = lastSpace > 0 ? head.slice(0, lastSpace) : head;
+  return `${cut.replace(/[\s,;:–—-]+$/, "")}…`;
+}
+
 export function selectCut(photoCount: number): FilmCut {
   if (photoCount <= HIGHLIGHT_MAX_PHOTOS) return "highlight";
   if (photoCount <= COMPACT_MAX_PHOTOS) return "compact";
@@ -234,15 +286,22 @@ function toPhotoRef(photo: TripData["photos"][number]): PhotoRef {
   };
 }
 
-// Removes and returns the [count] pool photos nearest in time to [anchor]
-// (ties go to the earlier photo), so a collage reads as one stretch of the
-// trip. Deterministic — same pool, same pick.
+// The pool photos a collage around [photo] may use: only its own day's
+// (#298), so the tiles and the day's note caption tell one day.
+function sameDay(pool: PoolEntry[], photo: Photo): PoolEntry[] {
+  return pool.filter((p) => p.photo.day_date === photo.day_date);
+}
+
+// Removes and returns the [count] same-day pool photos nearest in time to
+// [moment] (ties go to the earlier photo), so a collage reads as one
+// stretch of one day. Deterministic — same pool, same pick.
 function takeNearest(
   pool: PoolEntry[],
-  anchor: number,
+  moment: PlannedMoment,
   count: number,
 ): PoolEntry[] {
-  const picked = [...pool]
+  const anchor = moment.order;
+  const picked = sameDay(pool, moment.entry.photo)
     .sort((a, b) =>
       Math.abs(a.order - anchor) - Math.abs(b.order - anchor) ||
       a.order - b.order
@@ -338,11 +397,17 @@ function planFilm(tripData: TripData): FilmPlan {
     const moment = planned[slot.index];
     // Bonus-task moments always stay card flips (collage spec §1).
     if (!moment || moment.entry.badge !== null) return;
+    // A day with too few other photos steps down the ladder (#298) — a
+    // collage never borrows tiles from another day.
+    const available = Math.min(
+      budget,
+      sameDay(pool, moment.entry.photo).length,
+    );
     for (const layout of layoutLadder(slot.layout, cut)) {
       const needed = COLLAGE_TILE_COUNT[layout] - 1;
-      if (needed <= budget) {
+      if (needed <= available) {
         moment.layout = layout;
-        moment.extras = takeNearest(pool, moment.order, needed);
+        moment.extras = takeNearest(pool, moment, needed);
         return;
       }
     }
@@ -375,11 +440,23 @@ function planFilm(tripData: TripData): FilmPlan {
 
   const unshown = leftovers.length - flurry1.length - flurry2.length;
 
+  // 6. Captions (#298): a card flip shows its photo's own caption; a
+  // collage shows an excerpt of its day's note — the next unused one, so
+  // two collages on one day never repeat it — or nothing.
+  const excerptsByDay = new Map(
+    tripData.notes.map((n) => [n.day_date, noteExcerpts(n.content)]),
+  );
+  const captions = planned.map((m) =>
+    m.layout === null
+      ? m.entry.photo.caption
+      : excerptsByDay.get(m.entry.photo.day_date ?? "")?.shift() ?? null
+  );
+
   return {
     cut,
-    moments: planned.map((m) => ({
+    moments: planned.map((m, i) => ({
       ...toPhotoRef(m.entry.photo),
-      note: m.entry.photo.caption,
+      note: captions[i],
       badge: m.entry.badge,
       layout: m.layout,
       collage_extras: m.extras.map((e) => toPhotoRef(e.photo)),

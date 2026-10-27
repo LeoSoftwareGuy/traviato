@@ -31,7 +31,7 @@ class FilmMoment {
   final String cue;        // 'M2'
   final String to;         // next cue, e.g. 'M3'
   final String src;        // primary photo
-  final String note;       // traveller's caption
+  final String note;       // excerpt of that day's journal note (#298)
   final CollageLayout? layout; // null = card flip
 }
 enum CollageLayout { stack3, torn4, tilt6, torn6 }
@@ -164,6 +164,8 @@ photos = [m.src] + journalPool.without(m.src) rotated by (momentIndex × 3), tak
 - Tile 0 always gets the moment's own photo.
 - **Fallback:** if the journal has fewer photos than the layout needs, downgrade: `torn6/tilt6 → torn4 → stack3 → card flip`. With < 3 photos, always card flip.
 - Never repeat a photo within one collage.
+- **One day per collage (#298):** extra tiles come only from the main photo's day, nearest in time first. Too few → step down the ladder above.
+- **Caption (#298):** an excerpt of that day's note — whole sentences, ≤ ~120 chars, cut at a word with "…" when one sentence is longer. No note → no caption. A second collage on the same day takes the next excerpt.
 
 ---
 
