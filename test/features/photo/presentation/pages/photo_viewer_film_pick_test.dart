@@ -110,7 +110,7 @@ void main() {
       expect(_hint(tester), 'Not picked right now'); // p2
     });
 
-    testWidgets('Leave out saves at once, toasts, and dims the photo', (
+    testWidgets('Leave out saves at once and dims the photo, no snackbar', (
       tester,
     ) async {
       final repo = FakePhotoRepository()..photosResult = Right(_photos);
@@ -120,7 +120,9 @@ void main() {
       await tester.pump();
 
       expect(repo.filmPickCalls, [('p0', FilmPick.never)]);
-      expect(find.text('Left out of the film'), findsWidgets); // toast + pill
+      // Only the pill says it — no confirmation snackbar (#300).
+      expect(find.text('Left out of the film'), findsOneWidget);
+      expect(find.byType(SnackBar), findsNothing);
       expect(
         find.byKey(const Key('photo-viewer-left-out-pill')),
         findsOneWidget,
@@ -136,14 +138,14 @@ void main() {
       expect(journalPhoto.filmPick, FilmPick.never);
     });
 
-    testWidgets('Always shows its own hint and toast', (tester) async {
+    testWidgets('Always shows its own hint, no snackbar', (tester) async {
       final repo = FakePhotoRepository()..photosResult = Right(_photos);
       await _open(tester, photoRepo: repo, initialIndex: 7);
 
       await tester.tap(find.byKey(const Key('film-pick-always')));
       await tester.pump();
 
-      expect(find.text('Always in the film'), findsOneWidget);
+      expect(find.byType(SnackBar), findsNothing);
       expect(_hint(tester), 'Your pick · gets a main moment');
       expect(find.byKey(const Key('photo-viewer-left-out-pill')), findsNothing);
       await tester.pumpAndSettle();

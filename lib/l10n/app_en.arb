@@ -2238,18 +2238,6 @@
   "@film_hintNever": {
     "description": "Film-pick hint for Leave out (#294)."
   },
-  "film_toastAlways": "Always in the film",
-  "@film_toastAlways": {
-    "description": "Toast after switching a photo to Always (#294)."
-  },
-  "film_toastNever": "Left out of the film",
-  "@film_toastNever": {
-    "description": "Toast after switching a photo to Leave out (#294)."
-  },
-  "film_toastAuto": "Film picks this one",
-  "@film_toastAuto": {
-    "description": "Toast after switching a photo back to Auto (#294)."
-  },
   "film_leftOutPill": "Left out of the film",
   "@film_leftOutPill": {
     "description": "Pill over a left-out photo in the photo viewer (#294)."

@@ -2508,15 +2508,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get film_hintNever => 'Не появится нигде';
 
   @override
-  String get film_toastAlways => 'Всегда в фильме';
-
-  @override
-  String get film_toastNever => 'Убрано из фильма';
-
-  @override
-  String get film_toastAuto => 'Фильм выберет сам';
-
-  @override
   String get film_leftOutPill => 'Не войдёт в фильм';
 
   @override
