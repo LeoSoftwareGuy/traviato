@@ -2,8 +2,9 @@ import '../../photo/domain/entities/film_pick.dart';
 import '../../photo/domain/entities/photo_entity.dart';
 import '../../photo/domain/photo_order.dart';
 
-/// How many main moments (M1–M8) the Wrap-Up Film has.
-const filmMomentCount = 8;
+/// How many main moments (M1–M16) the Wrap-Up Film has (#304). Sent to
+/// `generate_wrap_up` as `moment_slots`.
+const filmMomentCount = 16;
 
 /// At most this many bonus-task photos get a badged moment.
 const filmMaxBonusMoments = 3;
@@ -16,11 +17,13 @@ const filmMaxBonusMoments = 3;
 /// Always photos come first (more than [filmMomentCount] → spread over the
 /// trip), then up to [filmMaxBonusMoments] bonus-task photos on Auto, then
 /// Auto photos spread over the whole trip. [bonusPhotoIds] are the photos
-/// of completed bonus tasks, in completion order. Local only — no network,
-/// no AI.
+/// of completed bonus tasks, in completion order. [momentCount] is the
+/// film's slots — 16 for the film this build asks for (#304). Local only —
+/// no network, no AI.
 Set<String> filmMomentPhotoIds({
   required List<PhotoEntity> photos,
   required List<String> bonusPhotoIds,
+  int momentCount = filmMomentCount,
 }) {
   final eligible = photos.where((p) => p.filmPick != FilmPick.never).toList()
     ..sort(_chronological);
@@ -32,19 +35,19 @@ Set<String> filmMomentPhotoIds({
       .toList();
   final always = spreadEvenly(
     eligible.where((p) => p.filmPick == FilmPick.always).toList(),
-    filmMomentCount,
+    momentCount,
   );
   final bonus = badged
       .map((id) => byId[id]!)
       .where((p) => p.filmPick == FilmPick.auto)
-      .take(filmMomentCount - always.length)
+      .take(momentCount - always.length)
       .toList();
   final badgedIds = badged.toSet();
   final auto = spreadEvenly(
     eligible
         .where((p) => p.filmPick == FilmPick.auto && !badgedIds.contains(p.id))
         .toList(),
-    filmMomentCount - always.length - bonus.length,
+    momentCount - always.length - bonus.length,
   );
   return {
     for (final p in [...always, ...bonus, ...auto]) p.id,

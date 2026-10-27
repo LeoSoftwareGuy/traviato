@@ -25,7 +25,11 @@ List<String> _ids(Set<String> ids) =>
 void main() {
   group('filmMomentPhotoIds (#294)', () {
     test('all on Auto spreads the moments over the trip', () {
-      final ids = filmMomentPhotoIds(photos: _photos(), bonusPhotoIds: []);
+      final ids = filmMomentPhotoIds(
+        photos: _photos(),
+        bonusPhotoIds: [],
+        momentCount: 8,
+      );
       expect(_ids(ids), ['c1', 'c3', 'c6', 'c8', 'c11', 'c13', 'c16', 'c18']);
     });
 
@@ -33,6 +37,7 @@ void main() {
       final ids = filmMomentPhotoIds(
         photos: _photos().reversed.toList(),
         bonusPhotoIds: [],
+        momentCount: 8,
       );
       expect(_ids(ids), ['c1', 'c3', 'c6', 'c8', 'c11', 'c13', 'c16', 'c18']);
     });
@@ -45,6 +50,7 @@ void main() {
           19: FilmPick.always,
         }),
         bonusPhotoIds: [],
+        momentCount: 8,
       );
       expect(ids, hasLength(8));
       expect(ids, containsAll(['c0', 'c9', 'c19']));
@@ -55,6 +61,7 @@ void main() {
       final ids = filmMomentPhotoIds(
         photos: _photos(always),
         bonusPhotoIds: [],
+        momentCount: 8,
       );
       expect(ids, hasLength(8));
       expect(
@@ -67,6 +74,7 @@ void main() {
       final ids = filmMomentPhotoIds(
         photos: _photos({for (var i = 2; i < 18; i++) i: FilmPick.never}),
         bonusPhotoIds: ['c5'],
+        momentCount: 8,
       );
       expect(_ids(ids), ['c0', 'c1', 'c18', 'c19']);
     });
@@ -74,7 +82,11 @@ void main() {
     test('bonus photos take moments ahead of Auto ones, up to the slots '
         'Always leaves', () {
       expect(
-        filmMomentPhotoIds(photos: _photos(), bonusPhotoIds: ['c4']),
+        filmMomentPhotoIds(
+          photos: _photos(),
+          bonusPhotoIds: ['c4'],
+          momentCount: 8,
+        ),
         contains('c4'),
       );
 
@@ -84,6 +96,7 @@ void main() {
       final ids = filmMomentPhotoIds(
         photos: _photos(always),
         bonusPhotoIds: ['c10', 'c11'],
+        momentCount: 8,
       );
       expect(
         ids.where((id) => !always.containsKey(int.parse(id.substring(1)))),
@@ -95,12 +108,20 @@ void main() {
       final ids = filmMomentPhotoIds(
         photos: _photos().take(4).toList(),
         bonusPhotoIds: ['c0', 'c1', 'c2', 'c3'],
+        momentCount: 8,
       );
       expect(_ids(ids), ['c0', 'c1', 'c2', 'c3']);
     });
 
     test('no photos, no picks', () {
-      expect(filmMomentPhotoIds(photos: [], bonusPhotoIds: ['x']), isEmpty);
+      expect(
+        filmMomentPhotoIds(
+          photos: [],
+          bonusPhotoIds: ['x'],
+          momentCount: 8,
+        ),
+        isEmpty,
+      );
     });
   });
 
@@ -110,5 +131,18 @@ void main() {
     expect(spreadEvenly(list, 3), [2, 7, 12]);
     expect(spreadEvenly([1, 2], 8), [1, 2]);
     expect(spreadEvenly(list, 0), isEmpty);
+  });
+
+  test('the 16-moment film (#304) gives 16 photos a moment, '
+      'and 10 Always photos all get one', () {
+    expect(
+      filmMomentPhotoIds(photos: _photos(), bonusPhotoIds: []),
+      hasLength(16),
+    );
+    final always = {for (var i = 0; i < 20; i += 2) i: FilmPick.always};
+    final ids = filmMomentPhotoIds(photos: _photos(always), bonusPhotoIds: []);
+    for (final i in always.keys) {
+      expect(ids, contains('c$i'));
+    }
   });
 }

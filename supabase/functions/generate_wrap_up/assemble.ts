@@ -13,11 +13,12 @@ import type {
   WrapUpContent,
 } from "./content.ts";
 
-// Photo-count thresholds for the film's cut (#151). Highlight = every
+// Photo-count thresholds for the film's cut (#151), above the moment
+// count (#304: 11 / 23 for 8 moments, 19 / 31 for 16). Highlight = every
 // moment a card flip, no Flurry; compact = collages capped at torn4, at
 // most one Flurry; full = the whole collage ladder, up to two Flurries.
-const HIGHLIGHT_MAX_PHOTOS = 11;
-const COMPACT_MAX_PHOTOS = 23;
+const HIGHLIGHT_EXTRA_PHOTOS = 3;
+const COMPACT_EXTRA_PHOTOS = 15;
 // A Flurry with fewer cards than this is cut entirely, never shown sparse.
 const FLURRY_MIN = 6;
 // Player shows up to 15 cards per Flurry (WRAP_UP_FILM_FLUTTER_SPEC.md §4).
@@ -50,14 +51,20 @@ const NUMBER_WORDS = [
   "Twenty",
 ];
 
-// The film has 8 moment frames (WRAP_UP_FILM_FLUTTER_SPEC.md §4), filled in
-// this order of priority (#294): the user's "Always" photos, then up to 3
-// badged bonus-task photos, then automatic picks spread across the whole
-// trip. All 8 play in chronological order (#292) — badges land wherever
-// their photo falls in time, not on fixed slots. "Leave out" photos appear
-// nowhere.
-const MOMENT_COUNT = 8;
+// The film has 16 moment frames (#304; 8 for app builds that predate it —
+// WRAP_UP_FILM_FLUTTER_SPEC.md §4), filled in this order of priority
+// (#294): the user's "Always" photos, then up to 3 badged bonus-task
+// photos, then automatic picks spread across the whole trip. All play in
+// chronological order (#292) — badges land wherever their photo falls in
+// time, not on fixed slots. "Leave out" photos appear nowhere.
+export type MomentSlots = 8 | 16;
 const MAX_BONUS_MOMENTS = 3;
+
+// The app says it plays 16 moments (#304); anything else gets the 8 an
+// older build can play.
+export function parseMomentSlots(value: unknown): MomentSlots {
+  return value === 16 ? 16 : 8;
+}
 
 function parseDateParts(
   dateStr: string,
@@ -183,9 +190,12 @@ function cutAtWord(text: string, maxChars: number): string {
   return `${cut.replace(/[\s,;:–—-]+$/, "")}…`;
 }
 
-export function selectCut(photoCount: number): FilmCut {
-  if (photoCount <= HIGHLIGHT_MAX_PHOTOS) return "highlight";
-  if (photoCount <= COMPACT_MAX_PHOTOS) return "compact";
+export function selectCut(
+  photoCount: number,
+  slots: MomentSlots = 8,
+): FilmCut {
+  if (photoCount <= slots + HIGHLIGHT_EXTRA_PHOTOS) return "highlight";
+  if (photoCount <= slots + COMPACT_EXTRA_PHOTOS) return "compact";
   return "full";
 }
 
@@ -199,16 +209,26 @@ const COLLAGE_TILE_COUNT: Record<CollageLayout, number> = {
 // Which moments may become collages (WRAP_UP_FILM_COLLAGE_SPEC.md §1), in
 // allocation order. "core" slots are funded before the Flurry floor is held
 // back, "late" slots only from what's left after it (#151, tiered plan).
-const COLLAGE_SLOTS: Array<{
+// The 16-moment film (#304) spreads the same four over its length.
+type CollageSlot = {
   index: number;
   layout: CollageLayout;
   tier: "core" | "late";
-}> = [
-  { index: 1, layout: "stack3", tier: "core" }, // M2
-  { index: 4, layout: "torn4", tier: "core" }, // M5
-  { index: 6, layout: "tilt6", tier: "late" }, // M7
-  { index: 7, layout: "torn6", tier: "late" }, // M8
-];
+};
+const COLLAGE_SLOTS: Record<MomentSlots, CollageSlot[]> = {
+  8: [
+    { index: 1, layout: "stack3", tier: "core" }, // M2
+    { index: 4, layout: "torn4", tier: "core" }, // M5
+    { index: 6, layout: "tilt6", tier: "late" }, // M7
+    { index: 7, layout: "torn6", tier: "late" }, // M8
+  ],
+  16: [
+    { index: 3, layout: "stack3", tier: "core" }, // M4
+    { index: 9, layout: "torn4", tier: "core" }, // M10
+    { index: 13, layout: "tilt6", tier: "late" }, // M14
+    { index: 15, layout: "torn6", tier: "late" }, // M16
+  ],
+};
 
 // Largest-first downgrade ladder for a slot's preferred layout, after the
 // cut's cap (compact never goes above torn4, highlight has no collages).
@@ -336,19 +356,20 @@ type Photo = TripData["photos"][number];
 export function pickMomentPhotos(
   photos: Photo[],
   bonusPhotoIds: string[],
+  slots: MomentSlots = 8,
 ): Photo[] {
   const always = spreadEvenly(
     photos.filter((p) => p.use_in_wrap_up === true),
-    MOMENT_COUNT,
+    slots,
   );
   const bonusIds = new Set(bonusPhotoIds);
   const bonus = bonusPhotoIds
     .map((id) => photos.find((p) => p.id === id))
     .filter((p): p is Photo => p !== undefined && p.use_in_wrap_up === null)
-    .slice(0, MOMENT_COUNT - always.length);
+    .slice(0, slots - always.length);
   const auto = spreadEvenly(
     photos.filter((p) => p.use_in_wrap_up === null && !bonusIds.has(p.id)),
-    MOMENT_COUNT - always.length - bonus.length,
+    slots - always.length - bonus.length,
   );
   return [...always, ...bonus, ...auto];
 }
@@ -356,13 +377,13 @@ export function pickMomentPhotos(
 // Resolves the whole film (#151): which photo each moment shows, which
 // moments become collages and with which extra tiles, and what each Flurry
 // shows. Every photo is used at most once across all of it.
-function planFilm(tripData: TripData): FilmPlan {
+function planFilm(tripData: TripData, slots: MomentSlots): FilmPlan {
   // "Leave out" photos (#294) are dropped from every pool up front.
   const photos = sortPhotosChronologically(tripData.photos)
     .filter((p) => p.use_in_wrap_up !== false);
   const photosById = new Map(photos.map((p) => [p.id, p]));
   const orderById = new Map(photos.map((p, i) => [p.id, i]));
-  const cut = selectCut(photos.length);
+  const cut = selectCut(photos.length, slots);
 
   // Only the first 3 completed bonus tasks (completion order) with a photo
   // get a badge — a fixed count regardless of how many were completed.
@@ -373,9 +394,9 @@ function planFilm(tripData: TripData): FilmPlan {
       .map((b) => [b.photo_id!, `Dare · ${b.title} · ✦${b.points}`]),
   );
 
-  // 1. One photo per moment, played in time order (#292). Fewer than 8
-  // photos ends the array short.
-  const picks = pickMomentPhotos(photos, [...badgeById.keys()]);
+  // 1. One photo per moment, played in time order (#292). Fewer photos
+  // than slots ends the array short.
+  const picks = pickMomentPhotos(photos, [...badgeById.keys()], slots);
   const pickedIds = new Set(picks.map((p) => p.id));
   const planned: PlannedMoment[] = picks
     .map((photo) => ({
@@ -391,7 +412,7 @@ function planFilm(tripData: TripData): FilmPlan {
     .map((photo) => ({ photo, order: orderById.get(photo.id)! }));
 
   const fundCollage = (
-    slot: (typeof COLLAGE_SLOTS)[number],
+    slot: CollageSlot,
     budget: number,
   ) => {
     const moment = planned[slot.index];
@@ -414,7 +435,7 @@ function planFilm(tripData: TripData): FilmPlan {
   };
 
   // 2. Core collages (M2, M5).
-  for (const slot of COLLAGE_SLOTS.filter((s) => s.tier === "core")) {
+  for (const slot of COLLAGE_SLOTS[slots].filter((s) => s.tier === "core")) {
     fundCollage(slot, pool.length);
   }
   // 3. Hold back one Flurry's worth, when a Flurry is possible at all.
@@ -422,7 +443,7 @@ function planFilm(tripData: TripData): FilmPlan {
     ? FLURRY_MIN
     : 0;
   // 4. Late collages (M7, M8), never eating into the held-back floor.
-  for (const slot of COLLAGE_SLOTS.filter((s) => s.tier === "late")) {
+  for (const slot of COLLAGE_SLOTS[slots].filter((s) => s.tier === "late")) {
     fundCollage(slot, pool.length - flurryFloor);
   }
 
@@ -473,12 +494,16 @@ function planFilm(tripData: TripData): FilmPlan {
 export function assembleWrapUpContent(
   tripData: TripData,
   aiFields: AiGeneratedFields,
+  slots: MomentSlots = 8,
 ): WrapUpContent {
   const { trip } = tripData;
-  const plan = planFilm(tripData);
+  const plan = planFilm(tripData, slots);
 
   return {
     cut: plan.cut,
+    // Only written for the 16-moment film (#304); absent = 8, so an
+    // 8-moment film is byte-for-byte what it always was.
+    ...(slots === 16 ? { moment_slots: 16 as const } : {}),
     dates: {
       start_date: trip.start_date,
       end_date: trip.end_date,

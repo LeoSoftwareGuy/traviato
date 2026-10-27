@@ -8,8 +8,12 @@ import 'wrap_up_film_plate.dart';
 
 /// One Moment: thrown in, held centre-frame while its caption is read, then
 /// it slides down into the pile and stays there for the rest of the middle
-/// section (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md § Moments). Index 0..7 maps to
-/// scenes M1..M8 via [WrapUpFilmScenes.momentStarts].
+/// section (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md § Moments). Index 0..15
+/// maps to scenes M1..M16 via [WrapUpFilmScenes.momentStarts].
+///
+/// Quick (#304): ~2.5s for a bare flip, ~3.5s with a caption — the toss,
+/// flip, caption and exit are all tightened to fit, so a short moment
+/// still flips fully and holds face-up before it goes.
 class WrapUpFilmMoment extends StatelessWidget {
   const WrapUpFilmMoment({
     required this.t,
@@ -28,41 +32,43 @@ class WrapUpFilmMoment extends StatelessWidget {
   final String? imageUrl;
   final double pileFade;
 
-  double get _dur => WrapUpFilmScenes.momentDurations[index];
+  double get _dur => scenes.momentDurations[index];
 
   @override
   Widget build(BuildContext context) {
     final at = scenes.momentStarts[index];
-    final inAt = at - 0.45;
+    final inAt = at - 0.35;
     final to = at + _dur;
-    final goAt = to - 0.85;
+    final goAt = to - 0.6;
 
     if (t < inAt || t > scenes.footnoteStart + 0.2) {
       return const SizedBox.shrink();
     }
 
-    final thrown = toss(t, inAt, 0.75);
-    final gone = fade(t, goAt, 0.85, 0, 1);
+    final thrown = toss(t, inAt, 0.55);
+    final gone = fade(t, goAt, 0.6, 0, 1);
 
-    final pileCx = (300 + (index % 5) * 118 + (index > 4 ? 26 : 0)).toDouble();
+    // Up to 16 cards: rows of 5, each row nudged right so cards don't sit
+    // exactly on top of each other.
+    final pileCx = (300 + (index % 5) * 118 + (index ~/ 5) * 26).toDouble();
     final pileCy = (1824 + (index % 3) * 7).toDouble();
     final pileRot = (rnd(index, 9) - 0.5) * 22;
 
     final cx = mix(540, pileCx, gone);
     final cy = mix(mix(880, 782, thrown), pileCy, gone);
-    final swellPush = swell(t, at - 0.5, 5.4, 1, 1.035);
+    final swellPush = swell(t, at - 0.4, _dur + 0.4, 1, 1.035);
     final scale = mix(mix(0.86, 1, thrown) * swellPush, 0.4, gone);
     final rot = mix((1 - thrown) * -5, pileRot, gone);
     final lift = mix(thrown, 0.35, gone);
 
     final flip = Curves.easeInOutCubic.transform(
-      ((t - (at + 0.3)) / 0.58).clamp(0.0, 1.0),
+      ((t - (at + 0.15)) / 0.45).clamp(0.0, 1.0),
     );
 
     final live = 1 - gone;
-    final tagRise = rise(t, at + 0.82, 1.0, lift: 22);
-    final noteRise = rise(t, at + 1.0, 1.25, lift: 28);
-    final capOut = fade(t, goAt - 0.15, 0.6, 1, 0);
+    final tagRise = rise(t, at + 0.5, 0.7, lift: 22);
+    final noteRise = rise(t, at + 0.6, 0.8, lift: 28);
+    final capOut = fade(t, goAt - 0.15, 0.45, 1, 0);
     final captionOpacity = (live * capOut * pileFade).clamp(0.0, 1.0);
 
     return Stack(

@@ -19,6 +19,7 @@ import '../../domain/entities/wrap_up_unlock.dart';
 class WrapUpModel extends WrapUpEntity {
   const WrapUpModel({
     super.cut,
+    super.momentSlots,
     required super.dates,
     required super.coverPhoto,
     required super.invitation,
@@ -42,6 +43,8 @@ class WrapUpModel extends WrapUpEntity {
 
     return WrapUpModel(
       cut: _parseEnum(WrapUpFilmCut.values, contentMap['cut']),
+      // Absent (or anything unexpected) = the 8-moment film (#304).
+      momentSlots: contentMap['moment_slots'] == 16 ? 16 : 8,
       dates: _parseDates(contentMap['dates']),
       coverPhoto: _parseCoverPhoto(contentMap['cover_photo']),
       invitation: _parseInvitation(contentMap['invitation']),

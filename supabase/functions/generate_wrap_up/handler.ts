@@ -15,7 +15,11 @@
 // nothing else ever rewrites a kept film.
 
 import { gatherTripData, type TripData } from "./gather.ts";
-import { assembleWrapUpContent } from "./assemble.ts";
+import {
+  assembleWrapUpContent,
+  type MomentSlots,
+  parseMomentSlots,
+} from "./assemble.ts";
 import {
   type AiGeneratedFields,
   validateAiGeneratedFields,
@@ -72,6 +76,10 @@ export async function handleRequest(
     (body as Record<string, unknown>).language,
   );
   const rebuild = (body as Record<string, unknown>).rebuild === true;
+  // App builds that play 16 moments say so (#304); older ones get 8.
+  const slots = parseMomentSlots(
+    (body as Record<string, unknown>).moment_slots,
+  );
 
   const { data: userData, error: userError } = await deps.authClient(authHeader)
     .auth.getUser();
@@ -111,7 +119,7 @@ export async function handleRequest(
   // user's explicit request (#294).
   if (existing?.published_at && existing.content) {
     if (rebuild && validateAiGeneratedFields(existing.ai_fields)) {
-      return await rebuildKept(deps, tripId, existing.ai_fields);
+      return await rebuildKept(deps, tripId, existing.ai_fields, slots);
     }
     return json({
       content: existing.content,
@@ -187,7 +195,7 @@ export async function handleRequest(
     newCount = generationCount + 1;
   }
 
-  const content = assembleWrapUpContent(tripData, aiFields);
+  const content = assembleWrapUpContent(tripData, aiFields, slots);
   const generatedAt = new Date().toISOString();
   const row = {
     content,
@@ -226,6 +234,7 @@ async function rebuildKept(
   deps: Deps,
   tripId: string,
   aiFields: AiGeneratedFields,
+  slots: MomentSlots,
 ): Promise<Response> {
   let tripData: TripData;
   try {
@@ -235,7 +244,7 @@ async function rebuildKept(
       error: `failed to gather trip data: ${(err as Error).message}`,
     }, 500);
   }
-  const content = assembleWrapUpContent(tripData, aiFields);
+  const content = assembleWrapUpContent(tripData, aiFields, slots);
   const generatedAt = new Date().toISOString();
   const { error } = await deps.serviceClient
     .from("wrap_ups")

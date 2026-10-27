@@ -1,4 +1,5 @@
 import '../../domain/entities/wrap_up_entity.dart';
+import '../../domain/entities/wrap_up_moment.dart';
 
 /// The Wrap-Up Film's scene timeline (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §1).
 ///
@@ -8,21 +9,29 @@ import '../../domain/entities/wrap_up_entity.dart';
 /// empty frame for its full allotted time. Every scene that does play
 /// keeps its fixed duration regardless of trip/library size: a 20-photo
 /// trip and a 200-photo trip run at the same pace, just different
-/// densities.
+/// densities. A moment's length depends only on what it shows (#304): a
+/// bare card flip is quick, a caption or a collage gets reading time.
 ///
 /// Persistent chrome (specks, washes, vignette, grain, letterbox) is
 /// anchored to scene starts, not absolute times, so it follows whatever
 /// schedule this produces.
 class WrapUpFilmScenes {
+  /// [momentDurations] has one entry per moment that plays (default: 8
+  /// bare card flips); [momentSlots] is the film's layout (8 or 16), which
+  /// decides where the bridges fall between them.
   factory WrapUpFilmScenes({
     required bool hasFlurry2,
     required bool hasUnlock,
     bool hasFlurry1 = true,
-    int momentCount = 8,
+    List<double>? momentDurations,
+    int momentSlots = 8,
     bool hasBridge2 = true,
     bool hasBridge3 = true,
   }) {
-    assert(momentCount >= 0 && momentCount <= 8, 'at most 8 moments');
+    final durations =
+        momentDurations ?? List.filled(8, flipMomentDur, growable: false);
+    assert(durations.length <= momentSlots, 'more moments than slots');
+    final (end1, end2) = groupEndsFor(momentSlots);
     var cursor = 0.0;
     double take(double duration) {
       final start = cursor;
@@ -38,21 +47,21 @@ class WrapUpFilmScenes {
 
     final momentStarts = <double>[];
     void takeMoments(int from, int to) {
-      for (var i = from; i < to && i < momentCount; i++) {
-        momentStarts.add(take(momentDurations[i]));
+      for (var i = from; i < to && i < durations.length; i++) {
+        momentStarts.add(take(durations[i]));
       }
     }
 
     final dustStart = take(dustDur);
     final invitationStart = take(invitationDur);
     final bridge1Start = take(bridge1Dur);
-    takeMoments(0, 3);
+    takeMoments(0, end1);
     final flurry1Start = takeIf(hasFlurry1, flurry1Dur);
     final bridge2Start = takeIf(hasBridge2, bridge2Dur);
-    takeMoments(3, 6);
+    takeMoments(end1, end2);
     final flurry2Start = takeIf(hasFlurry2, flurry2Dur);
     final bridge3Start = takeIf(hasBridge3, bridge3Dur);
-    takeMoments(6, 8);
+    takeMoments(end2, momentSlots);
     final footnoteStart = take(footnoteDur);
     final unlockStart = takeIf(hasUnlock, unlockDur);
     final keepsakeStart = take(keepsakeDur);
@@ -68,6 +77,7 @@ class WrapUpFilmScenes {
       invitationStart: invitationStart,
       bridge1Start: bridge1Start,
       momentStarts: List.unmodifiable(momentStarts),
+      momentDurations: List.unmodifiable(durations),
       flurry1Start: flurry1Start,
       bridge2Start: bridge2Start,
       flurry2Start: flurry2Start,
@@ -79,24 +89,41 @@ class WrapUpFilmScenes {
   }
 
   /// The schedule for [wrapUp]'s resolved plan (#151): one slot per moment
-  /// that exists, a Flurry only when it has photos, and Bridge2/Bridge3
-  /// only when moments follow them (M4 / M7). A pre-#151 wrap-up
-  /// (`cut == null`) keeps the original schedule: 8 moment slots, Flurry1
+  /// that exists, timed by what it shows (#304), a Flurry only when it has
+  /// photos, and Bridge2/Bridge3 only when moments follow them (M4 / M7 in
+  /// the 8-moment film, M7 / M13 in the 16-moment one). A pre-#151 wrap-up
+  /// (`cut == null`) keeps the original shape: 8 moment slots, Flurry1
   /// always, all three bridges.
   factory WrapUpFilmScenes.forWrapUp(WrapUpEntity wrapUp) {
     final hasUnlock = wrapUp.unlock != null;
     final hasFlurry2 = wrapUp.flurry2Photos.isNotEmpty;
+    final slots = wrapUp.momentSlots == 16 ? 16 : 8;
+    final durations = [
+      for (final moment in wrapUp.moments.take(slots))
+        momentDurationFor(
+          moment,
+          isCollage: moment.layout != null && wrapUp.cut != null,
+        ),
+    ];
     if (wrapUp.cut == null) {
-      return WrapUpFilmScenes(hasFlurry2: hasFlurry2, hasUnlock: hasUnlock);
+      return WrapUpFilmScenes(
+        hasFlurry2: hasFlurry2,
+        hasUnlock: hasUnlock,
+        momentDurations: [
+          ...durations.take(8),
+          for (var i = durations.length; i < 8; i++) flipMomentDur,
+        ],
+      );
     }
-    final momentCount = wrapUp.moments.length.clamp(0, 8);
+    final (end1, end2) = groupEndsFor(slots);
     return WrapUpFilmScenes(
       hasFlurry1: wrapUp.flurry1Photos.isNotEmpty,
       hasFlurry2: hasFlurry2,
       hasUnlock: hasUnlock,
-      momentCount: momentCount,
-      hasBridge2: momentCount > 3,
-      hasBridge3: momentCount > 6,
+      momentDurations: durations,
+      momentSlots: slots,
+      hasBridge2: durations.length > end1,
+      hasBridge3: durations.length > end2,
     );
   }
 
@@ -111,6 +138,7 @@ class WrapUpFilmScenes {
     required this.invitationStart,
     required this.bridge1Start,
     required this.momentStarts,
+    required this.momentDurations,
     required this.flurry1Start,
     required this.bridge2Start,
     required this.flurry2Start,
@@ -119,6 +147,24 @@ class WrapUpFilmScenes {
     required this.unlockStart,
     required this.keepsakeStart,
   });
+
+  /// Where the first two moment groups end — Bridge2 and Bridge3 fall
+  /// there: 3 / 3 / 2 in the 8-moment film, 6 / 6 / 4 in the 16 (#304).
+  static (int, int) groupEndsFor(int momentSlots) =>
+      momentSlots == 16 ? (6, 12) : (3, 6);
+
+  /// How long [moment] is on screen (#304): a bare card flip is quick, a
+  /// caption or badge needs reading time, a collage's tiles need to land.
+  static double momentDurationFor(
+    WrapUpMoment moment, {
+    required bool isCollage,
+  }) {
+    if (isCollage) return collageMomentDur;
+    if (moment.note != null || moment.badge != null) {
+      return captionedMomentDur;
+    }
+    return flipMomentDur;
+  }
 
   // Fixed durations (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §1), same for every
   // wrap-up. Bridges run +4.0s over the spec's original 3.4/3.2/4.2 —
@@ -132,19 +178,11 @@ class WrapUpFilmScenes {
   static const double bridge2Dur = 7.2;
   static const double bridge3Dur = 8.2;
 
-  /// M1–M8 durations, in order — `momentDurations[i]` is the on-screen
-  /// duration for `content.moments[i]`. Never compressed: a moment needs
-  /// its full length for the flip and a readable caption (#151).
-  static const List<double> momentDurations = [
-    5.5, // M1
-    5.2, // M2
-    5.1, // M3
-    5.0, // M4
-    5.0, // M5
-    5.0, // M6
-    5.0, // M7
-    5.0, // M8
-  ];
+  /// Moment lengths (#304; ~5s each before): a bare card flip, one with a
+  /// caption or badge to read, and a collage.
+  static const double flipMomentDur = 2.5;
+  static const double captionedMomentDur = 3.5;
+  static const double collageMomentDur = 4.0;
 
   static const double flurry1Dur = 6.3;
   static const double flurry2Dur = 7.0;
@@ -176,6 +214,10 @@ class WrapUpFilmScenes {
   /// is the `at` for `content.moments[i]`. Up to 8; a pre-#151 wrap-up
   /// always gets all 8 slots.
   final List<double> momentStarts;
+
+  /// How long each moment that plays is on screen — `momentDurations[i]`
+  /// pairs with `momentStarts[i]`.
+  final List<double> momentDurations;
 
   final double flurry1Start;
   final double bridge2Start;

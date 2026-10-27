@@ -188,7 +188,7 @@ class _WrapUpFilmCanvasState extends State<WrapUpFilmCanvas>
       return WrapUpFilmCollage(
         t: t,
         at: at,
-        to: at + WrapUpFilmScenes.momentDurations[index],
+        to: at + _scenes.momentDurations[index],
         layout: layout,
         imageUrls: [
           for (final ref in moment.allPhotoRefs.take(layout.tileCount))

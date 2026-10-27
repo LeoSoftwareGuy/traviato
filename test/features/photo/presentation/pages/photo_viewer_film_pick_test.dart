@@ -20,15 +20,15 @@ import '../../fakes/fake_photo_repository.dart';
 
 const _tripId = 't1';
 
-/// 10 Auto photos on one day: the film picks 8 of them, so two are "Not
-/// picked right now".
+/// 20 Auto photos on one day: the film picks 16 of them (#304), so four
+/// are "Not picked right now".
 final _photos = [
-  for (var i = 0; i < 10; i++)
+  for (var i = 0; i < 20; i++)
     buildPhotoEntity(
       id: 'p$i',
       tripId: _tripId,
       dayDate: DateTime(2026, 6, 1),
-      takenAt: DateTime.utc(2026, 6, 1, 8 + i),
+      takenAt: DateTime.utc(2026, 6, 1, 8, i),
     ),
 ];
 
@@ -98,7 +98,7 @@ void main() {
       tester,
     ) async {
       final repo = FakePhotoRepository()..photosResult = Right(_photos);
-      // Spread over 10, the film picks p0, p1, p3, p4, p5, p6, p8, p9.
+      // Spread over 20, the film skips p2, p7, p12 and p17.
       await _open(tester, photoRepo: repo);
       expect(find.byKey(const Key('film-pick-panel')), findsOneWidget);
       expect(_hint(tester), 'Film chose this one');

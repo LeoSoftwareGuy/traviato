@@ -50,46 +50,46 @@ void main() {
         (
           'M1',
           scenes.momentStarts[0],
-          WrapUpFilmScenes.momentDurations[0],
+          scenes.momentDurations[0],
         ),
         (
           'M2',
           scenes.momentStarts[1],
-          WrapUpFilmScenes.momentDurations[1],
+          scenes.momentDurations[1],
         ),
         (
           'M3',
           scenes.momentStarts[2],
-          WrapUpFilmScenes.momentDurations[2],
+          scenes.momentDurations[2],
         ),
         ('Flurry1', scenes.flurry1Start, WrapUpFilmScenes.flurry1Dur),
         ('Bridge2', scenes.bridge2Start, WrapUpFilmScenes.bridge2Dur),
         (
           'M4',
           scenes.momentStarts[3],
-          WrapUpFilmScenes.momentDurations[3],
+          scenes.momentDurations[3],
         ),
         (
           'M5',
           scenes.momentStarts[4],
-          WrapUpFilmScenes.momentDurations[4],
+          scenes.momentDurations[4],
         ),
         (
           'M6',
           scenes.momentStarts[5],
-          WrapUpFilmScenes.momentDurations[5],
+          scenes.momentDurations[5],
         ),
         ('Flurry2', scenes.flurry2Start, WrapUpFilmScenes.flurry2Dur),
         ('Bridge3', scenes.bridge3Start, WrapUpFilmScenes.bridge3Dur),
         (
           'M7',
           scenes.momentStarts[6],
-          WrapUpFilmScenes.momentDurations[6],
+          scenes.momentDurations[6],
         ),
         (
           'M8',
           scenes.momentStarts[7],
-          WrapUpFilmScenes.momentDurations[7],
+          scenes.momentDurations[7],
         ),
         ('Footnote', scenes.footnoteStart, WrapUpFilmScenes.footnoteDur),
         ('Unlock', scenes.unlockStart, WrapUpFilmScenes.unlockDur),
@@ -117,7 +117,7 @@ void main() {
     test('exposes exactly 8 moment start times', () {
       final scenes = WrapUpFilmScenes(hasFlurry2: true, hasUnlock: true);
       expect(scenes.momentStarts, hasLength(8));
-      expect(WrapUpFilmScenes.momentDurations, hasLength(8));
+      expect(scenes.momentDurations, hasLength(8));
     });
 
     test('cutting Flurry2 shortens the total by exactly flurry2Dur and '
@@ -171,7 +171,7 @@ void main() {
   });
 
   group('WrapUpFilmScenes.forWrapUp (#151 cuts)', () {
-    test('highlight with 5 moments: no Flurries, no Bridge3, 63.4s', () {
+    test('highlight with 5 moments: no Flurries, no Bridge3, 50.1s', () {
       final scenes = _scenesFor(cut: WrapUpFilmCut.highlight, moments: 5);
 
       expect(scenes.momentStarts, hasLength(5));
@@ -179,7 +179,7 @@ void main() {
       expect(scenes.hasFlurry2, isFalse);
       expect(scenes.hasBridge2, isTrue);
       expect(scenes.hasBridge3, isFalse);
-      expect(scenes.total, closeTo(63.4, 0.001));
+      expect(scenes.total, closeTo(50.1, 0.001));
       // M4 follows Bridge2 directly, and Footnote follows M5 directly.
       expect(
         scenes.momentStarts[3],
@@ -188,19 +188,19 @@ void main() {
       expect(
         scenes.footnoteStart,
         closeTo(
-          scenes.momentStarts[4] + WrapUpFilmScenes.momentDurations[4],
+          scenes.momentStarts[4] + scenes.momentDurations[4],
           0.001,
         ),
       );
     });
 
-    test('highlight with 8 moments keeps Bridge3: 86.6s', () {
+    test('highlight with 8 moments keeps Bridge3: 65.8s', () {
       final scenes = _scenesFor(cut: WrapUpFilmCut.highlight, moments: 8);
       expect(scenes.hasBridge3, isTrue);
-      expect(scenes.total, closeTo(86.6, 0.001));
+      expect(scenes.total, closeTo(65.8, 0.001));
     });
 
-    test('compact with its one Flurry: 92.9s, Flurry1 slot only', () {
+    test('compact with its one Flurry: 72.1s, Flurry1 slot only', () {
       final scenes = _scenesFor(
         cut: WrapUpFilmCut.compact,
         moments: 8,
@@ -208,17 +208,17 @@ void main() {
       );
       expect(scenes.hasFlurry1, isTrue);
       expect(scenes.hasFlurry2, isFalse);
-      expect(scenes.total, closeTo(92.9, 0.001));
+      expect(scenes.total, closeTo(72.1, 0.001));
     });
 
-    test('full with both Flurries is the whole 99.9s film', () {
+    test('full with both Flurries is the whole 79.1s film', () {
       final scenes = _scenesFor(
         cut: WrapUpFilmCut.full,
         moments: 8,
         flurry1: 11,
         flurry2: 6,
       );
-      expect(scenes.total, closeTo(99.9, 0.001));
+      expect(scenes.total, closeTo(79.1, 0.001));
     });
 
     test('no achievement drops Unlock from any cut', () {
@@ -227,7 +227,7 @@ void main() {
         moments: 5,
         unlock: false,
       );
-      expect(scenes.total, closeTo(63.4 - WrapUpFilmScenes.unlockDur, 0.001));
+      expect(scenes.total, closeTo(50.1 - WrapUpFilmScenes.unlockDur, 0.001));
     });
 
     test('a pre-#151 wrap-up keeps the original schedule', () {
@@ -254,6 +254,73 @@ void main() {
           closeTo(scenes.total, 0.001),
         );
       }
+    });
+  });
+
+  group('16 quick moments (#304)', () {
+    test('a moment lasts by what it shows: flip, caption/badge, collage', () {
+      double durationOf(WrapUpMoment m, {bool collage = false}) =>
+          WrapUpFilmScenes.momentDurationFor(m, isCollage: collage);
+
+      expect(durationOf(const WrapUpMoment(photoId: 'p')), 2.5);
+      expect(durationOf(const WrapUpMoment(photoId: 'p', note: 'n')), 3.5);
+      expect(durationOf(const WrapUpMoment(photoId: 'p', badge: 'b')), 3.5);
+      expect(
+        durationOf(const WrapUpMoment(photoId: 'p', note: 'n'), collage: true),
+        4.0,
+      );
+    });
+
+    test('a 16-slot film plays 16 moments with bridges after M6 and M12', () {
+      final scenes = WrapUpFilmScenes.forWrapUp(
+        buildWrapUpEntity(
+          cut: WrapUpFilmCut.highlight,
+          momentSlots: 16,
+          moments: [
+            for (var i = 0; i < 16; i++)
+              WrapUpMoment(photoId: 'm$i', note: i.isEven ? 'note' : null),
+          ],
+        ),
+      );
+
+      expect(scenes.momentStarts, hasLength(16));
+      expect(scenes.hasBridge2, isTrue);
+      expect(scenes.hasBridge3, isTrue);
+      expect(
+        scenes.bridge2Start,
+        closeTo(scenes.momentStarts[5] + scenes.momentDurations[5], 0.001),
+      );
+      expect(
+        scenes.momentStarts[6],
+        closeTo(scenes.bridge2Start + WrapUpFilmScenes.bridge2Dur, 0.001),
+      );
+      expect(
+        scenes.momentStarts[12],
+        closeTo(scenes.bridge3Start + WrapUpFilmScenes.bridge3Dur, 0.001),
+      );
+      // 8 × 3.5 + 8 × 2.5 of moments, plus every fixed scene but the
+      // Flurries and Unlock (none here).
+      expect(scenes.total, closeTo(41.2 + 48, 0.001));
+    });
+
+    test('a 16-slot film with 7 moments has no Bridge3', () {
+      final scenes = WrapUpFilmScenes.forWrapUp(
+        buildWrapUpEntity(
+          cut: WrapUpFilmCut.highlight,
+          momentSlots: 16,
+          moments: [for (var i = 0; i < 7; i++) WrapUpMoment(photoId: 'm$i')],
+        ),
+      );
+      expect(scenes.hasBridge2, isTrue);
+      expect(scenes.hasBridge3, isFalse);
+    });
+
+    test('an 8-slot film keeps its 3 / 3 / 2 groups', () {
+      final scenes = _scenesFor(cut: WrapUpFilmCut.highlight, moments: 8);
+      expect(
+        scenes.momentStarts[3],
+        closeTo(scenes.bridge2Start + WrapUpFilmScenes.bridge2Dur, 0.001),
+      );
     });
   });
 }

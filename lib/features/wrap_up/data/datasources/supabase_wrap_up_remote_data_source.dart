@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/constants/supabase_constants.dart';
 import '../../../../core/errors/exceptions.dart';
+import '../../domain/film_moment_picks.dart';
 import '../models/wrap_up_model.dart';
 import 'wrap_up_remote_data_source.dart';
 
@@ -101,13 +102,20 @@ class SupabaseWrapUpRemoteDataSource implements WrapUpRemoteDataSource {
   }
 }
 
-/// The `generate_wrap_up` request: the trip, and the UI language the AI
-/// writes in (#250). [rebuild] asks it to re-assemble a kept film (#294).
+/// The `generate_wrap_up` request: the trip, the UI language the AI writes
+/// in (#250), and that this build plays the 16-moment film (#304 — without
+/// it the function builds the 8 an older build can play). [rebuild] asks it
+/// to re-assemble a kept film (#294).
 Map<String, Object> generateWrapUpBody(
   String tripId,
   String language, {
   bool rebuild = false,
-}) => {'trip_id': tripId, 'language': language, if (rebuild) 'rebuild': true};
+}) => {
+  'trip_id': tripId,
+  'language': language,
+  'moment_slots': filmMomentCount,
+  if (rebuild) 'rebuild': true,
+};
 
 /// A kept-forever wrap-up with stored content — played exactly as stored.
 /// Anything else (a draft, or no film yet) goes through `generate_wrap_up`.

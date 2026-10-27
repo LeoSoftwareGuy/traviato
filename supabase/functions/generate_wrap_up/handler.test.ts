@@ -545,3 +545,33 @@ Deno.test("a failed first generation returns 502 and saves nothing", async () =>
   assertEquals(res.status, 502);
   assertEquals(client.writes, []);
 });
+
+// ---- 16 moments (#304) -------------------------------------------------
+
+Deno.test("moment_slots: 16 builds the 16-moment film; without it the 8-moment one, unmarked", async () => {
+  const photos = Array.from({ length: 20 }, (_, i) => ({
+    id: `p${i}`,
+    day_date: "2026-06-01",
+    created_at: `2026-06-01T10:${String(i).padStart(2, "0")}:00Z`,
+    storage_path: `u/t/p${i}.jpg`,
+    caption: null,
+  }));
+  const deps = () =>
+    baseDeps({
+      serviceClient: fakeSupabaseClient({ ...DRAFT_TABLES, photos, wrap_ups: [] }),
+    });
+
+  const sixteen = await (await handleRequest(
+    request({ trip_id: TRIP_ID, moment_slots: 16 }),
+    deps(),
+  )).json();
+  assertEquals(sixteen.content.moment_slots, 16);
+  assertEquals(sixteen.content.moments.length, 16);
+
+  const eight = await (await handleRequest(
+    request({ trip_id: TRIP_ID }),
+    deps(),
+  )).json();
+  assertEquals("moment_slots" in eight.content, false);
+  assertEquals(eight.content.moments.length, 8);
+});
