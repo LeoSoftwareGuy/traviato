@@ -10,16 +10,17 @@ import '../../../../core/events/global_event_bus.dart';
 import '../../../settings/presentation/controllers/app_language_controller.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
 import '../../../trip/presentation/providers/trip_providers.dart';
+import '../../domain/entities/planned_reminder_entity.dart';
 import '../../domain/rules/bonus_notification_rules.dart';
 import '../providers/notification_providers.dart';
 
 part 'bonus_notifications_lifecycle_controller.g.dart';
 
-/// Owns the whole local-notification lifecycle for the bonus daily-tray
-/// loop (issue #65): plugin init, the arrival-notification reaction to
-/// trip create/edit/delete, the app-open/close-driven re-evaluation of
-/// today's morning/evening nudges, and routing a tapped notification to the
-/// tray. `keepAlive` — this must survive for the whole app session, exactly
+/// Owns the whole local-notification lifecycle for the memory reminders
+/// (issues #65, #307): plugin init, the arrival-notification reaction to
+/// trip create/edit/delete, the app-open/close-driven re-plan of the
+/// active memory's reminders, and routing a tapped notification to the
+/// tray or the Journal. `keepAlive` — this must survive for the whole app session, exactly
 /// like the global event bus it subscribes to (guidelines doc 02).
 /// Instantiated once by `ref.watch`ing this provider from
 /// `TraviatoApp.build()` in `main.dart`.
@@ -48,15 +49,16 @@ class BonusNotificationsLifecycleController
     // Pending reminders carry the language they were scheduled in, so a
     // switch re-schedules them all in the new one (#252).
     ref.listen(appLocaleProvider, (previous, next) {
-      if (previous != next) unawaited(_rescheduleAll());
+      if (previous != next) unawaited(rescheduleAll());
     });
 
     unawaited(_evaluate());
   }
 
-  /// Re-evaluates today's morning/evening pair and re-schedules every
-  /// memory's arrival reminder (or cancels it if its day has passed).
-  Future<void> _rescheduleAll() async {
+  /// Re-plans the active memory's reminders and re-schedules every
+  /// memory's arrival reminder (or cancels it if its day has passed, or
+  /// reminders are off). Also called by the Settings toggle (#307).
+  Future<void> rescheduleAll() async {
     await _evaluate();
     try {
       final trips = await ref.read(tripRepositoryProvider).getTripCards();
@@ -88,16 +90,23 @@ class BonusNotificationsLifecycleController
 
   void _onGlobalEvent(GlobalEvent event) {
     switch (event) {
+      // Dates or the name may have changed which memory is planned, or
+      // what its reminders say.
       case TripCreatedDispatched(:final trip):
         unawaited(_scheduleOrCancelArrival(trip));
+        unawaited(_evaluate());
       case TripUpdatedDispatched(:final trip):
         unawaited(_scheduleOrCancelArrival(trip));
+        unawaited(_evaluate());
       case TripDeletedDispatched(:final tripId):
         unawaited(
           ref.read(bonusNotificationRepositoryProvider).cancelArrival(tripId),
         );
-      case StarsAwardedDispatched():
+        unawaited(_evaluate());
+      // A kept memory drops its after-end reminder on the next evaluation.
       case WrapUpPublishedDispatched():
+        unawaited(_evaluate());
+      case StarsAwardedDispatched():
       case EntitlementUpdatedDispatched():
       case ProfileUpdatedDispatched():
       case FilmPhotosChangedDispatched():
@@ -108,8 +117,10 @@ class BonusNotificationsLifecycleController
 
   Future<void> _scheduleOrCancelArrival(TripCardEntity trip) async {
     final repo = ref.read(bonusNotificationRepositoryProvider);
+    final prefs = await ref.read(notificationPrefsStoreProvider).load();
     final start = trip.startDate;
-    if (start == null ||
+    if (!prefs.remindersEnabled ||
+        start == null ||
         !BonusNotificationRules.shouldScheduleArrival(
           now: DateTime.now(),
           startDate: start,
@@ -125,8 +136,14 @@ class BonusNotificationsLifecycleController
 
   void _onNotificationTap(String? payload) {
     final router = ref.read(routerProvider);
+    const journalPrefix = PlannedReminderEntity.journalPayloadPrefix;
     try {
-      if (payload != null && payload.isNotEmpty) {
+      if (payload != null && payload.startsWith(journalPrefix)) {
+        router.pushNamed(
+          RouteNames.tripJournal,
+          pathParameters: {'tripId': payload.substring(journalPrefix.length)},
+        );
+      } else if (payload != null && payload.isNotEmpty) {
         router.pushNamed(
           RouteNames.tripBonusTasks,
           pathParameters: {'tripId': payload},

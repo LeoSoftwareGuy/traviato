@@ -1436,20 +1436,28 @@
   "@bonus_newOnesTomorrow": {
     "x-review": "pending"
   },
-  "notif_promptTitle": "Напоминать о ежедневных заданиях?",
+  "notif_promptTitle": "Напоминать, пока идёт воспоминание?",
   "@notif_promptTitle": {
     "x-review": "pending"
   },
-  "notif_promptBody": "{appName} может напомнить утром и вечером, если бонусное задание ещё не выполнено, не чаще, и это легко отключить.",
+  "notif_promptBody": "{appName} напомнит утром и вечером, пока идет воспоминание, чтобы ни один день не остался пустым, но никогда после 21:00. Отключить можно в любой момент в настройках.",
   "@notif_promptBody": {
     "x-review": "pending"
   },
-  "notif_morningTitle": "Два маленьких задания на сегодня ✦",
-  "@notif_morningTitle": {
+  "notif_dayMorningTitle": "День {day} · {name} ✦",
+  "@notif_dayMorningTitle": {
     "x-review": "pending"
   },
-  "notif_morningBody": "Загляните — посмотрите, что приготовил сегодняшний день.",
-  "@notif_morningBody": {
+  "notif_dayMorningBody": "Вас ждут два маленьких задания. Одного фото хватит, чтобы сохранить этот день.",
+  "@notif_dayMorningBody": {
+    "x-review": "pending"
+  },
+  "notif_lastDayMorningTitle": "Последний день · {name} ✦",
+  "@notif_lastDayMorningTitle": {
+    "x-review": "pending"
+  },
+  "notif_lastDayMorningBody": "Проведите его на полную, ведь сегодня последние задания.",
+  "@notif_lastDayMorningBody": {
     "x-review": "pending"
   },
   "notif_eveningTitle": "Ещё есть время для задания",
@@ -1460,7 +1468,31 @@
   "@notif_eveningBody": {
     "x-review": "pending"
   },
-  "notif_arrivalTitle": "Ваше событие начинается сегодня ✦",
+  "notif_nothingLoggedTitle": "За сегодня пока ничего",
+  "@notif_nothingLoggedTitle": {
+    "x-review": "pending"
+  },
+  "notif_nothingLoggedBody": "Одно фото или пара строк о «{name}» — это десять секунд.",
+  "@notif_nothingLoggedBody": {
+    "x-review": "pending"
+  },
+  "notif_lastDayEveningTitle": "Бонусные задания закончатся сегодня",
+  "@notif_lastDayEveningTitle": {
+    "x-review": "pending"
+  },
+  "notif_lastDayEveningBody": "Сохраните последний день «{name}», пока он не прошёл.",
+  "@notif_lastDayEveningBody": {
+    "x-review": "pending"
+  },
+  "notif_afterEndTitle": "Воспоминание «{name}» завершено",
+  "@notif_afterEndTitle": {
+    "x-review": "pending"
+  },
+  "notif_afterEndBody": "Добавьте последние заметки и сохраните его навсегда.",
+  "@notif_afterEndBody": {
+    "x-review": "pending"
+  },
+  "notif_arrivalTitle": "Ваше воспоминание начинается сегодня ✦",
   "@notif_arrivalTitle": {
     "x-review": "pending"
   },
@@ -1468,11 +1500,11 @@
   "@notif_arrivalBody": {
     "x-review": "pending"
   },
-  "notif_channelName": "Бонусные задания",
+  "notif_channelName": "Напоминания",
   "@notif_channelName": {
     "x-review": "pending"
   },
-  "notif_channelDescription": "Ежедневные напоминания о бонусных заданиях.",
+  "notif_channelDescription": "Утром и вечером, пока идёт воспоминание.",
   "@notif_channelDescription": {
     "x-review": "pending"
   },
@@ -1850,6 +1882,14 @@
   },
   "settings_language": "Язык",
   "@settings_language": {
+    "x-review": "pending"
+  },
+  "settings_memoryReminders": "Напоминания",
+  "@settings_memoryReminders": {
+    "x-review": "pending"
+  },
+  "settings_memoryRemindersSubtitle": "Утром и вечером, пока идёт воспоминание",
+  "@settings_memoryRemindersSubtitle": {
     "x-review": "pending"
   },
   "language_systemDefault": "Как в системе",

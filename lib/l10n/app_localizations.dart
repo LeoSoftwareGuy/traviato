@@ -2272,28 +2272,40 @@ abstract class AppLocalizations {
   /// No description provided for @notif_promptTitle.
   ///
   /// In en, this message translates to:
-  /// **'Get a gentle nudge for your daily dares?'**
+  /// **'Remind you while a memory is happening?'**
   String get notif_promptTitle;
 
   /// No description provided for @notif_promptBody.
   ///
   /// In en, this message translates to:
-  /// **'{appName} can remind you once in the morning and once in the evening when a bonus task is still open — never more than that, and easy to turn off later.'**
+  /// **'{appName} can nudge you in the morning and in the evening while a memory is happening, so no day slips by unlogged but never after 9 pm. Turn it off any time in Settings.'**
   String notif_promptBody(String appName);
 
-  /// Local notification, ~9:00 on a memory day after an active day.
+  /// Local notification, ~9:00 on a middle day of a memory.
   ///
   /// In en, this message translates to:
-  /// **'Two little dares today ✦'**
-  String get notif_morningTitle;
+  /// **'Day {day} of {name} ✦'**
+  String notif_dayMorningTitle(int day, String name);
 
-  /// No description provided for @notif_morningBody.
+  /// No description provided for @notif_dayMorningBody.
   ///
   /// In en, this message translates to:
-  /// **'Open the tray and see what today\'s got.'**
-  String get notif_morningBody;
+  /// **'Two little dares are waiting. One photo is enough to keep today.'**
+  String get notif_dayMorningBody;
 
-  /// Local notification, ~19:00 while a bonus task is still open.
+  /// Local notification, ~9:00 on a memory's last day.
+  ///
+  /// In en, this message translates to:
+  /// **'Last day of {name} ✦'**
+  String notif_lastDayMorningTitle(String name);
+
+  /// No description provided for @notif_lastDayMorningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Make it count since today\'s dares are the last ones.'**
+  String get notif_lastDayMorningBody;
+
+  /// Local notification, ~19:00 when something was logged today but a bonus task is still open.
   ///
   /// In en, this message translates to:
   /// **'Still time for a dare'**
@@ -2305,10 +2317,46 @@ abstract class AppLocalizations {
   /// **'Today\'s bonus tasks are waiting.'**
   String get notif_eveningBody;
 
+  /// Local notification, ~19:00 on a memory day with nothing logged.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing from today yet'**
+  String get notif_nothingLoggedTitle;
+
+  /// No description provided for @notif_nothingLoggedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'One photo or a line about {name} — it takes ten seconds.'**
+  String notif_nothingLoggedBody(String name);
+
+  /// Local notification, ~18:00 on a memory's last day.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus tasks end tonight'**
+  String get notif_lastDayEveningTitle;
+
+  /// No description provided for @notif_lastDayEveningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Log the last day of {name} before it\'s gone.'**
+  String notif_lastDayEveningBody(String name);
+
+  /// Local notification, ~10:00 the day after a memory ends.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has ended'**
+  String notif_afterEndTitle(String name);
+
+  /// No description provided for @notif_afterEndBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your last notes and keep it forever.'**
+  String get notif_afterEndBody;
+
   /// Local notification on the morning a memory starts.
   ///
   /// In en, this message translates to:
-  /// **'Your trip starts today ✦'**
+  /// **'Your memory starts today ✦'**
   String get notif_arrivalTitle;
 
   /// No description provided for @notif_arrivalBody.
@@ -2320,13 +2368,13 @@ abstract class AppLocalizations {
   /// Android notification channel name, shown in system settings.
   ///
   /// In en, this message translates to:
-  /// **'Bonus dares'**
+  /// **'Memory reminders'**
   String get notif_channelName;
 
   /// No description provided for @notif_channelDescription.
   ///
   /// In en, this message translates to:
-  /// **'Daily nudges for your trip\'s bonus tasks.'**
+  /// **'Morning and evening nudges while a memory is happening.'**
   String get notif_channelDescription;
 
   /// Mono eyebrow, uppercased in code.
@@ -2892,6 +2940,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get settings_language;
+
+  /// No description provided for @settings_memoryReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory reminders'**
+  String get settings_memoryReminders;
+
+  /// No description provided for @settings_memoryRemindersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning and evening while a memory is happening'**
+  String get settings_memoryRemindersSubtitle;
 
   /// No description provided for @language_systemDefault.
   ///

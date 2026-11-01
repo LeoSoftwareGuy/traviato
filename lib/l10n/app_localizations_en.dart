@@ -1408,18 +1408,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bonus_newOnesTomorrow => 'New ones tomorrow.';
 
   @override
-  String get notif_promptTitle => 'Get a gentle nudge for your daily dares?';
+  String get notif_promptTitle => 'Remind you while a memory is happening?';
 
   @override
   String notif_promptBody(String appName) {
-    return '$appName can remind you once in the morning and once in the evening when a bonus task is still open — never more than that, and easy to turn off later.';
+    return '$appName can nudge you in the morning and in the evening while a memory is happening, so no day slips by unlogged but never after 9 pm. Turn it off any time in Settings.';
   }
 
   @override
-  String get notif_morningTitle => 'Two little dares today ✦';
+  String notif_dayMorningTitle(int day, String name) {
+    return 'Day $day of $name ✦';
+  }
 
   @override
-  String get notif_morningBody => 'Open the tray and see what today\'s got.';
+  String get notif_dayMorningBody =>
+      'Two little dares are waiting. One photo is enough to keep today.';
+
+  @override
+  String notif_lastDayMorningTitle(String name) {
+    return 'Last day of $name ✦';
+  }
+
+  @override
+  String get notif_lastDayMorningBody =>
+      'Make it count since today\'s dares are the last ones.';
 
   @override
   String get notif_eveningTitle => 'Still time for a dare';
@@ -1428,18 +1440,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notif_eveningBody => 'Today\'s bonus tasks are waiting.';
 
   @override
-  String get notif_arrivalTitle => 'Your trip starts today ✦';
+  String get notif_nothingLoggedTitle => 'Nothing from today yet';
+
+  @override
+  String notif_nothingLoggedBody(String name) {
+    return 'One photo or a line about $name — it takes ten seconds.';
+  }
+
+  @override
+  String get notif_lastDayEveningTitle => 'Bonus tasks end tonight';
+
+  @override
+  String notif_lastDayEveningBody(String name) {
+    return 'Log the last day of $name before it\'s gone.';
+  }
+
+  @override
+  String notif_afterEndTitle(String name) {
+    return '$name has ended';
+  }
+
+  @override
+  String get notif_afterEndBody => 'Add your last notes and keep it forever.';
+
+  @override
+  String get notif_arrivalTitle => 'Your memory starts today ✦';
 
   @override
   String get notif_arrivalBody =>
       'Log the first moment and see what\'s waiting.';
 
   @override
-  String get notif_channelName => 'Bonus dares';
+  String get notif_channelName => 'Memory reminders';
 
   @override
   String get notif_channelDescription =>
-      'Daily nudges for your trip\'s bonus tasks.';
+      'Morning and evening nudges while a memory is happening.';
 
   @override
   String get profile_eyebrow => 'Profile';
@@ -1836,6 +1872,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_language => 'Language';
+
+  @override
+  String get settings_memoryReminders => 'Memory reminders';
+
+  @override
+  String get settings_memoryRemindersSubtitle =>
+      'Morning and evening while a memory is happening';
 
   @override
   String get language_systemDefault => 'System default';
