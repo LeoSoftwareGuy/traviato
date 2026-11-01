@@ -4,10 +4,10 @@ import '../providers/notification_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Shows the local-notification rationale dialog once, the first time it's
-/// called after the user's first completed bonus task (issue #65 AC — "not
-/// at install"). Called from `bonus_tasks_page.dart`'s completion success
-/// path. A no-op on every call after the first.
+/// Shows the local-notification rationale dialog once (issue #65 AC — "not
+/// at install"). Called after the first memory is created (#307) and, as a
+/// fallback for memories created before that, after a completed bonus task.
+/// A no-op on every call after the first.
 class NotificationPermissionPrompt {
   const NotificationPermissionPrompt._();
 

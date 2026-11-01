@@ -8,11 +8,11 @@ part of 'bonus_notifications_lifecycle_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Owns the whole local-notification lifecycle for the bonus daily-tray
-/// loop (issue #65): plugin init, the arrival-notification reaction to
-/// trip create/edit/delete, the app-open/close-driven re-evaluation of
-/// today's morning/evening nudges, and routing a tapped notification to the
-/// tray. `keepAlive` — this must survive for the whole app session, exactly
+/// Owns the whole local-notification lifecycle for the memory reminders
+/// (issues #65, #307): plugin init, the arrival-notification reaction to
+/// trip create/edit/delete, the app-open/close-driven re-plan of the
+/// active memory's reminders, and routing a tapped notification to the
+/// tray or the Journal. `keepAlive` — this must survive for the whole app session, exactly
 /// like the global event bus it subscribes to (guidelines doc 02).
 /// Instantiated once by `ref.watch`ing this provider from
 /// `TraviatoApp.build()` in `main.dart`.
@@ -21,21 +21,21 @@ part of 'bonus_notifications_lifecycle_controller.dart';
 final bonusNotificationsLifecycleControllerProvider =
     BonusNotificationsLifecycleControllerProvider._();
 
-/// Owns the whole local-notification lifecycle for the bonus daily-tray
-/// loop (issue #65): plugin init, the arrival-notification reaction to
-/// trip create/edit/delete, the app-open/close-driven re-evaluation of
-/// today's morning/evening nudges, and routing a tapped notification to the
-/// tray. `keepAlive` — this must survive for the whole app session, exactly
+/// Owns the whole local-notification lifecycle for the memory reminders
+/// (issues #65, #307): plugin init, the arrival-notification reaction to
+/// trip create/edit/delete, the app-open/close-driven re-plan of the
+/// active memory's reminders, and routing a tapped notification to the
+/// tray or the Journal. `keepAlive` — this must survive for the whole app session, exactly
 /// like the global event bus it subscribes to (guidelines doc 02).
 /// Instantiated once by `ref.watch`ing this provider from
 /// `TraviatoApp.build()` in `main.dart`.
 final class BonusNotificationsLifecycleControllerProvider
     extends $NotifierProvider<BonusNotificationsLifecycleController, void> {
-  /// Owns the whole local-notification lifecycle for the bonus daily-tray
-  /// loop (issue #65): plugin init, the arrival-notification reaction to
-  /// trip create/edit/delete, the app-open/close-driven re-evaluation of
-  /// today's morning/evening nudges, and routing a tapped notification to the
-  /// tray. `keepAlive` — this must survive for the whole app session, exactly
+  /// Owns the whole local-notification lifecycle for the memory reminders
+  /// (issues #65, #307): plugin init, the arrival-notification reaction to
+  /// trip create/edit/delete, the app-open/close-driven re-plan of the
+  /// active memory's reminders, and routing a tapped notification to the
+  /// tray or the Journal. `keepAlive` — this must survive for the whole app session, exactly
   /// like the global event bus it subscribes to (guidelines doc 02).
   /// Instantiated once by `ref.watch`ing this provider from
   /// `TraviatoApp.build()` in `main.dart`.
@@ -69,13 +69,13 @@ final class BonusNotificationsLifecycleControllerProvider
 }
 
 String _$bonusNotificationsLifecycleControllerHash() =>
-    r'16e6dde3457f2e8b2639874809acb47768142662';
+    r'410a3758648747d121fbb18a98ae6174de0bd947';
 
-/// Owns the whole local-notification lifecycle for the bonus daily-tray
-/// loop (issue #65): plugin init, the arrival-notification reaction to
-/// trip create/edit/delete, the app-open/close-driven re-evaluation of
-/// today's morning/evening nudges, and routing a tapped notification to the
-/// tray. `keepAlive` — this must survive for the whole app session, exactly
+/// Owns the whole local-notification lifecycle for the memory reminders
+/// (issues #65, #307): plugin init, the arrival-notification reaction to
+/// trip create/edit/delete, the app-open/close-driven re-plan of the
+/// active memory's reminders, and routing a tapped notification to the
+/// tray or the Journal. `keepAlive` — this must survive for the whole app session, exactly
 /// like the global event bus it subscribes to (guidelines doc 02).
 /// Instantiated once by `ref.watch`ing this provider from
 /// `TraviatoApp.build()` in `main.dart`.

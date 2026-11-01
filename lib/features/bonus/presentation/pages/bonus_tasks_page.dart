@@ -114,8 +114,8 @@ class _BonusTrayContent extends ConsumerWidget {
           context,
           context.l10n.toast_dareDone(task.template.points),
         );
-        // First-completion moment for the notification rationale (#65 AC —
-        // "not at install"). No-ops after the first time it's shown.
+        // Fallback moment for the notification rationale — it's normally
+        // shown at memory creation (#307). No-ops after the first time.
         await NotificationPermissionPrompt.maybeShow(context, ref);
       },
     );

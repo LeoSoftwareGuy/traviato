@@ -13,6 +13,7 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/show_failure_snackbar.dart';
+import '../../../notifications/presentation/widgets/notification_permission_prompt.dart';
 import '../mutations/trip_mutations.dart';
 import '../widgets/cover_options.dart';
 import '../widgets/cover_picker.dart';
@@ -95,6 +96,10 @@ class _CreateMemoryPageState extends ConsumerState<CreateMemoryPage> {
       // Surfaced to the user via the mutation's MutationError state below.
       return;
     }
+    if (!mounted) return;
+    // The memory's reminders are what the permission is for (#307), so ask
+    // here, once. A no-op after the first time it's shown.
+    await NotificationPermissionPrompt.maybeShow(context, ref);
     if (!mounted) return;
     context.pop();
   }

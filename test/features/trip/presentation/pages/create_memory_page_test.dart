@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/theme/app_theme.dart';
+import 'package:traviato/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:traviato/features/subscription/presentation/providers/subscription_providers.dart';
 import 'package:traviato/features/trip/presentation/pages/create_memory_page.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
+import '../../../notifications/fakes/fake_bonus_notification_repository.dart';
 import '../../../subscription/fakes/fake_subscription_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
 
@@ -297,10 +300,14 @@ void main() {
       ],
     );
 
+    SharedPreferences.setMockInitialValues({});
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           tripRepositoryProvider.overrideWithValue(tripRepo),
+          bonusNotificationRepositoryProvider.overrideWithValue(
+            FakeBonusNotificationRepository(),
+          ),
           // Free by default — the memory-limit pre-check is tier-aware (#267).
           subscriptionRepositoryProvider.overrideWithValue(
             FakeSubscriptionRepository(),
@@ -327,6 +334,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tripRepo.createTripCallCount, 1);
+    // The first memory asks about reminders before closing (#307).
+    expect(find.byType(AlertDialog), findsOneWidget);
+    await tester.tap(find.text('Not now'));
+    await tester.pumpAndSettle();
     expect(find.byType(CreateMemoryPage), findsNothing);
   });
 
