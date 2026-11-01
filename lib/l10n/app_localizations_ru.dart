@@ -1443,19 +1443,30 @@ class AppLocalizationsRu extends AppLocalizations {
   String get bonus_newOnesTomorrow => 'Новые завтра.';
 
   @override
-  String get notif_promptTitle => 'Напоминать о ежедневных заданиях?';
+  String get notif_promptTitle => 'Напоминать, пока идёт воспоминание?';
 
   @override
   String notif_promptBody(String appName) {
-    return '$appName может напомнить утром и вечером, если бонусное задание ещё не выполнено, не чаще, и это легко отключить.';
+    return '$appName напомнит утром и вечером, пока идёт воспоминание, чтобы ни один день не остался пустым, — никогда после 21:00. Отключить можно в любой момент в настройках.';
   }
 
   @override
-  String get notif_morningTitle => 'Два маленьких задания на сегодня ✦';
+  String notif_dayMorningTitle(int day, String name) {
+    return 'День $day · $name ✦';
+  }
 
   @override
-  String get notif_morningBody =>
-      'Загляните — посмотрите, что приготовил сегодняшний день.';
+  String get notif_dayMorningBody =>
+      'Вас ждут два маленьких задания — одного фото хватит, чтобы сохранить этот день.';
+
+  @override
+  String notif_lastDayMorningTitle(String name) {
+    return 'Последний день · $name ✦';
+  }
+
+  @override
+  String get notif_lastDayMorningBody =>
+      'Проведите его на полную — сегодня последние задания.';
 
   @override
   String get notif_eveningTitle => 'Ещё есть время для задания';
@@ -1464,18 +1475,43 @@ class AppLocalizationsRu extends AppLocalizations {
   String get notif_eveningBody => 'Сегодняшние бонусные задания ждут вас.';
 
   @override
-  String get notif_arrivalTitle => 'Ваше событие начинается сегодня ✦';
+  String get notif_nothingLoggedTitle => 'За сегодня пока ничего';
+
+  @override
+  String notif_nothingLoggedBody(String name) {
+    return 'Одно фото или пара строк о «$name» — это десять секунд.';
+  }
+
+  @override
+  String get notif_lastDayEveningTitle => 'Бонусные задания закончатся сегодня';
+
+  @override
+  String notif_lastDayEveningBody(String name) {
+    return 'Сохраните последний день «$name», пока он не прошёл.';
+  }
+
+  @override
+  String notif_afterEndTitle(String name) {
+    return 'Воспоминание «$name» завершено';
+  }
+
+  @override
+  String get notif_afterEndBody =>
+      'Добавьте последние заметки и сохраните его навсегда.';
+
+  @override
+  String get notif_arrivalTitle => 'Ваше воспоминание начинается сегодня ✦';
 
   @override
   String get notif_arrivalBody =>
       'Сохраните первый момент и посмотрите, что вас ждёт.';
 
   @override
-  String get notif_channelName => 'Бонусные задания';
+  String get notif_channelName => 'Напоминания';
 
   @override
   String get notif_channelDescription =>
-      'Ежедневные напоминания о бонусных заданиях.';
+      'Утром и вечером, пока идёт воспоминание.';
 
   @override
   String get profile_eyebrow => 'Профиль';
@@ -1890,6 +1926,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settings_language => 'Язык';
+
+  @override
+  String get settings_memoryReminders => 'Напоминания';
+
+  @override
+  String get settings_memoryRemindersSubtitle =>
+      'Утром и вечером, пока идёт воспоминание';
 
   @override
   String get language_systemDefault => 'Как в системе';

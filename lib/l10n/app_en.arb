@@ -1176,8 +1176,8 @@
     }
   },
   "bonus_newOnesTomorrow": "New ones tomorrow.",
-  "notif_promptTitle": "Get a gentle nudge for your daily dares?",
-  "notif_promptBody": "{appName} can remind you once in the morning and once in the evening when a bonus task is still open — never more than that, and easy to turn off later.",
+  "notif_promptTitle": "Remind you while a memory is happening?",
+  "notif_promptBody": "{appName} can nudge you in the morning and in the evening while a memory is happening, so no day slips by unlogged — never after 9 pm. Turn it off any time in Settings.",
   "@notif_promptBody": {
     "placeholders": {
       "appName": {
@@ -1185,26 +1185,78 @@
       }
     }
   },
-  "notif_morningTitle": "Two little dares today ✦",
-  "@notif_morningTitle": {
-    "description": "Local notification, ~9:00 on a memory day after an active day."
+  "notif_dayMorningTitle": "Day {day} of {name} ✦",
+  "@notif_dayMorningTitle": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    },
+    "description": "Local notification, ~9:00 on a middle day of a memory."
   },
-  "notif_morningBody": "Open the tray and see what today's got.",
+  "notif_dayMorningBody": "Two little dares are waiting — one photo is enough to keep today.",
+  "notif_lastDayMorningTitle": "Last day of {name} ✦",
+  "@notif_lastDayMorningTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    },
+    "description": "Local notification, ~9:00 on a memory's last day."
+  },
+  "notif_lastDayMorningBody": "Make it count — today's dares are the last ones.",
   "notif_eveningTitle": "Still time for a dare",
   "@notif_eveningTitle": {
-    "description": "Local notification, ~19:00 while a bonus task is still open."
+    "description": "Local notification, ~19:00 when something was logged today but a bonus task is still open."
   },
   "notif_eveningBody": "Today's bonus tasks are waiting.",
-  "notif_arrivalTitle": "Your trip starts today ✦",
+  "notif_nothingLoggedTitle": "Nothing from today yet",
+  "@notif_nothingLoggedTitle": {
+    "description": "Local notification, ~19:00 on a memory day with nothing logged."
+  },
+  "notif_nothingLoggedBody": "One photo or a line about {name} — it takes ten seconds.",
+  "@notif_nothingLoggedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_lastDayEveningTitle": "Bonus tasks end tonight",
+  "@notif_lastDayEveningTitle": {
+    "description": "Local notification, ~18:00 on a memory's last day."
+  },
+  "notif_lastDayEveningBody": "Log the last day of {name} before it's gone.",
+  "@notif_lastDayEveningBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_afterEndTitle": "{name} has ended",
+  "@notif_afterEndTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    },
+    "description": "Local notification, ~10:00 the day after a memory ends."
+  },
+  "notif_afterEndBody": "Add your last notes and keep it forever.",
+  "notif_arrivalTitle": "Your memory starts today ✦",
   "@notif_arrivalTitle": {
     "description": "Local notification on the morning a memory starts."
   },
   "notif_arrivalBody": "Log the first moment and see what's waiting.",
-  "notif_channelName": "Bonus dares",
+  "notif_channelName": "Memory reminders",
   "@notif_channelName": {
     "description": "Android notification channel name, shown in system settings."
   },
-  "notif_channelDescription": "Daily nudges for your trip's bonus tasks.",
+  "notif_channelDescription": "Morning and evening nudges while a memory is happening.",
   "profile_eyebrow": "Profile",
   "@profile_eyebrow": {
     "description": "Mono eyebrow, uppercased in code."
@@ -1589,6 +1641,8 @@
     "description": "Mono header on You, uppercased in code."
   },
   "settings_language": "Language",
+  "settings_memoryReminders": "Memory reminders",
+  "settings_memoryRemindersSubtitle": "Morning and evening while a memory is happening",
   "language_systemDefault": "System default",
   "language_sheetSubtitle": "Changes apply right away.",
   "language_footer": "Only the app's labels change. Your notes, titles and captions stay exactly as you wrote them.",
