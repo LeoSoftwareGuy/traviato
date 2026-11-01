@@ -11,17 +11,17 @@ import '../../../trip/domain/entities/trip_card_entity.dart';
 import '../../../trip/domain/repositories/trip_repository.dart';
 import '../repositories/bonus_notification_repository.dart';
 import '../repositories/notification_prefs_store.dart';
-import '../rules/bonus_notification_rules.dart';
-import '../rules/notification_mute_rules.dart';
+import '../rules/memory_reminder_plan.dart';
 
-/// Orchestrates the whole bonus-notification decision for "now": which trip
-/// (if any) is active, whether it had activity yesterday, whether today's
-/// tray is fully done, the mute-streak transition, and the resulting
-/// schedule/cancel calls. Run from app lifecycle events (resume/pause) —
-/// see guidelines doc 05, this is exactly the "orchestrates multiple
-/// repositories" case a use case is for. Reuses [EnsureDailyTrayUseCase]
-/// (#64) so today's tray exists even if the user never opened the Bonus
-/// screen — the same guarantee Home's badge-dot provider relies on.
+/// Orchestrates the memory-reminder decision for "now" (#65, reworked in
+/// #307): which memory (if any) is underway or ended yesterday, what was
+/// logged today, whether today's tray is done, and the resulting
+/// [MemoryReminderPlan] — which replaces every pending reminder. Run from
+/// app lifecycle events (resume/pause) and memory changes — see guidelines
+/// doc 05, this is exactly the "orchestrates multiple repositories" case a
+/// use case is for. Reuses [EnsureDailyTrayUseCase] (#64) so today's tray
+/// exists even if the user never opened the Bonus screen — the same
+/// guarantee Home's badge-dot provider relies on.
 class EvaluateBonusNotificationsUseCase {
   EvaluateBonusNotificationsUseCase({
     required TripRepository tripRepository,
@@ -50,81 +50,73 @@ class EvaluateBonusNotificationsUseCase {
   Future<Either<Failure, void>> call({required DateTime now}) async {
     try {
       final today = _dateOnly(now);
-      var prefs = NotificationMuteRules.updateIgnoreStreak(
-        prefs: await _prefsStore.load(),
-        today: today,
-      );
-
-      final trips = await _require(_tripRepo.getTripCards());
-      final currentTrips = trips.where((t) => t.status == TripStatus.current);
-      final activeTrip = currentTrips.isEmpty ? null : currentTrips.first;
-
-      if (activeTrip == null) {
-        await _require(_notificationRepo.cancelMorning());
-        await _require(_notificationRepo.cancelEvening());
-        await _prefsStore.save(prefs);
+      final prefs = await _prefsStore.load();
+      if (!prefs.remindersEnabled) {
+        await _require(_notificationRepo.replaceReminders(const []));
         return const Right(null);
       }
 
-      final activityDates = await _activityDatesForTrip(activeTrip.id);
-      final yesterday = today.subtract(const Duration(days: 1));
-      final yesterdayHadActivity = activityDates.contains(yesterday);
+      final trip = _memoryToPlan(
+        await _require(_tripRepo.getTripCards()),
+        today,
+      );
+      if (trip == null) {
+        await _require(_notificationRepo.replaceReminders(const []));
+        return const Right(null);
+      }
 
-      final tray = await _require(
-        _ensureDailyTray(
-          trip: activeTrip,
+      var loggedToday = false;
+      var trayDoneToday = false;
+      // On the day after the end there's no tray and only the after-end
+      // reminder, which doesn't depend on either.
+      if (trip.isUnderwayOn(today)) {
+        final activityDates = await _activityDatesForTrip(trip.id);
+        loggedToday = activityDates.contains(today);
+        final tray = await _require(
+          _ensureDailyTray(
+            trip: trip,
+            today: today,
+            activityDates: activityDates,
+          ),
+        );
+        trayDoneToday = _dailiesDoneToday(
+          templates: tray.templates,
+          assignments: tray.assignments,
           today: today,
-          activityDates: activityDates,
-        ),
-      );
-      final taskUndone = !_dailiesDoneToday(
-        templates: tray.templates,
-        assignments: tray.assignments,
-        today: today,
-      );
-
-      final morningTarget = BonusNotificationRules.morningFireTime(
-        now: now,
-        yesterdayHadActivity: yesterdayHadActivity,
-        isMuted: prefs.isMuted,
-      );
-      final eveningTarget = BonusNotificationRules.eveningFireTime(
-        now: now,
-        taskUndone: taskUndone,
-        isMuted: prefs.isMuted,
-      );
-
-      if (morningTarget != null) {
-        await _require(
-          _notificationRepo.scheduleMorning(
-            fireAt: morningTarget,
-            tripId: activeTrip.id,
-          ),
         );
-      } else {
-        await _require(_notificationRepo.cancelMorning());
       }
 
-      if (eveningTarget != null) {
-        await _require(
-          _notificationRepo.scheduleEvening(
-            fireAt: eveningTarget,
-            tripId: activeTrip.id,
-          ),
-        );
-      } else {
-        await _require(_notificationRepo.cancelEvening());
-      }
-
-      if (morningTarget != null || eveningTarget != null) {
-        prefs = prefs.copyWith(lastNotificationScheduledDate: () => today);
-      }
-
-      await _prefsStore.save(prefs);
+      final plan = MemoryReminderPlan.build(
+        now: now,
+        tripId: trip.id,
+        tripName: trip.name,
+        startDate: trip.startDate!,
+        endDate: trip.endDate!,
+        isKeptForever: trip.isKeptForever,
+        loggedToday: loggedToday,
+        trayDoneToday: trayDoneToday,
+      );
+      await _require(_notificationRepo.replaceReminders(plan));
       return const Right(null);
     } on _FailureSignal catch (e) {
       return Left(e.failure);
     }
+  }
+
+  /// The memory underway on the local [today] (the first one, if several
+  /// overlap), else one that ended yesterday and isn't kept yet. Uses the
+  /// local date rather than [TripCardEntity.status], which the view derives
+  /// from the server's UTC date (#219).
+  TripCardEntity? _memoryToPlan(List<TripCardEntity> trips, DateTime today) {
+    final dated = trips.where((t) => t.startDate != null && t.endDate != null);
+    for (final t in dated) {
+      if (t.isUnderwayOn(today)) return t;
+    }
+    final yesterday = DateTime(today.year, today.month, today.day - 1);
+    for (final t in dated) {
+      if (_sameDate(t.endDate!, yesterday) && !t.isKeptForever) return t;
+    }
+    return null;
   }
 
   bool _dailiesDoneToday({

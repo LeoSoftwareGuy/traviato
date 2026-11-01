@@ -14,15 +14,13 @@ void main() {
     final ds = NotificationPrefsSharedPrefsDataSource();
     final prefs = await ds.load();
     expect(prefs, const NotificationPrefsEntity());
+    expect(prefs.remindersEnabled, isTrue);
   });
 
   test('save then load round-trips every field', () async {
     final ds = NotificationPrefsSharedPrefsDataSource();
-    final saved = NotificationPrefsEntity(
-      ignoreStreak: 2,
-      isMuted: true,
-      lastAppOpenDate: DateTime(2026, 8, 10),
-      lastNotificationScheduledDate: DateTime(2026, 8, 9),
+    const saved = NotificationPrefsEntity(
+      remindersEnabled: false,
       hasShownPermissionRationale: true,
     );
 
@@ -32,14 +30,17 @@ void main() {
     expect(loaded, saved);
   });
 
-  test('save with null dates clears previously stored ones', () async {
+  test('save clears the old sticky mute from #65 (#307)', () async {
+    SharedPreferences.setMockInitialValues({
+      'notif_is_muted': true,
+      'notif_ignore_streak': 3,
+    });
     final ds = NotificationPrefsSharedPrefsDataSource();
-    await ds.save(
-      NotificationPrefsEntity(lastAppOpenDate: DateTime(2026, 8, 10)),
-    );
-    await ds.save(const NotificationPrefsEntity());
 
-    final loaded = await ds.load();
-    expect(loaded.lastAppOpenDate, isNull);
+    await ds.save(await ds.load());
+
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.containsKey('notif_is_muted'), isFalse);
+    expect(prefs.containsKey('notif_ignore_streak'), isFalse);
   });
 }

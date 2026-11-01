@@ -4,16 +4,26 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../../domain/entities/planned_reminder_entity.dart';
 import 'bonus_notification_copy.dart';
 import 'bonus_notification_local_data_source.dart';
 
 const _androidChannelId = 'bonus_tasks';
 
-/// Fixed ids — there is only ever one active trip's morning/evening pair at
-/// a time (see #65's plan comment). Arrival ids are derived per-trip so
-/// scheduling a new one on edit naturally replaces the previous pending one.
-const _morningId = 1001;
-const _eveningId = 1002;
+/// The memory reminder plan (#307) takes ids `_planBaseId + index`; there
+/// is only ever one memory's plan at a time. The fixed morning/evening ids
+/// from #65 are still cancelled on every replace, so a reminder scheduled
+/// by an older build can't linger. Arrival ids are derived per-trip (2000+)
+/// so scheduling a new one on edit naturally replaces the previous one.
+const _legacyMorningId = 1001;
+const _legacyEveningId = 1002;
+const _planBaseId = 1100;
+const _planMaxSize = 100;
+
+bool _isPlanId(int id) =>
+    id == _legacyMorningId ||
+    id == _legacyEveningId ||
+    (id >= _planBaseId && id < _planBaseId + _planMaxSize);
 
 /// The `timezone` package's bundled data only carries canonical IANA zone
 /// names, not the legacy aliases some devices still report (e.g. Android's
@@ -134,35 +144,23 @@ class FlutterLocalNotificationsDataSource
   }
 
   @override
-  Future<void> scheduleMorning({
-    required DateTime fireAt,
-    required String tripId,
-  }) {
+  Future<void> replaceReminders(List<PlannedReminderEntity> reminders) async {
+    final pending = await _plugin.pendingNotificationRequests();
+    for (final request in pending) {
+      if (_isPlanId(request.id)) await _plugin.cancel(id: request.id);
+    }
     final copy = _copy();
-    return _schedule(
-      id: _morningId,
-      fireAt: fireAt,
-      payload: tripId,
-      title: copy.morningTitle,
-      body: copy.morningBody,
-      copy: copy,
-    );
-  }
-
-  @override
-  Future<void> scheduleEvening({
-    required DateTime fireAt,
-    required String tripId,
-  }) {
-    final copy = _copy();
-    return _schedule(
-      id: _eveningId,
-      fireAt: fireAt,
-      payload: tripId,
-      title: copy.eveningTitle,
-      body: copy.eveningBody,
-      copy: copy,
-    );
+    for (final (index, reminder) in reminders.take(_planMaxSize).indexed) {
+      final text = copy.forReminder(reminder);
+      await _schedule(
+        id: _planBaseId + index,
+        fireAt: reminder.fireAt,
+        payload: reminder.payload,
+        title: text.title,
+        body: text.body,
+        copy: copy,
+      );
+    }
   }
 
   @override
@@ -180,12 +178,6 @@ class FlutterLocalNotificationsDataSource
       copy: copy,
     );
   }
-
-  @override
-  Future<void> cancelMorning() => _plugin.cancel(id: _morningId);
-
-  @override
-  Future<void> cancelEvening() => _plugin.cancel(id: _eveningId);
 
   @override
   Future<void> cancelArrival(String tripId) =>
@@ -221,7 +213,7 @@ class FlutterLocalNotificationsDataSource
   }
 
   /// djb2 over the trip id, folded into a small positive range that can't
-  /// collide with the fixed morning/evening ids.
+  /// collide with the plan ids.
   int _arrivalId(String tripId) {
     var hash = 5381;
     for (final unit in tripId.codeUnits) {

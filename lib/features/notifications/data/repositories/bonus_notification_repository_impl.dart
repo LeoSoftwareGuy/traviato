@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
+import '../../domain/entities/planned_reminder_entity.dart';
 import '../../domain/repositories/bonus_notification_repository.dart';
 import '../datasources/bonus_notification_local_data_source.dart';
 
@@ -25,28 +26,15 @@ class BonusNotificationRepositoryImpl implements BonusNotificationRepository {
       _run(_local.requestPermission);
 
   @override
-  Future<Either<Failure, void>> scheduleMorning({
-    required DateTime fireAt,
-    required String tripId,
-  }) => _run(() => _local.scheduleMorning(fireAt: fireAt, tripId: tripId));
-
-  @override
-  Future<Either<Failure, void>> scheduleEvening({
-    required DateTime fireAt,
-    required String tripId,
-  }) => _run(() => _local.scheduleEvening(fireAt: fireAt, tripId: tripId));
+  Future<Either<Failure, void>> replaceReminders(
+    List<PlannedReminderEntity> reminders,
+  ) => _run(() => _local.replaceReminders(reminders));
 
   @override
   Future<Either<Failure, void>> scheduleArrival({
     required DateTime fireAt,
     required String tripId,
   }) => _run(() => _local.scheduleArrival(fireAt: fireAt, tripId: tripId));
-
-  @override
-  Future<Either<Failure, void>> cancelMorning() => _run(_local.cancelMorning);
-
-  @override
-  Future<Either<Failure, void>> cancelEvening() => _run(_local.cancelEvening);
 
   @override
   Future<Either<Failure, void>> cancelArrival(String tripId) =>

@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/failures.dart';
+import 'package:traviato/features/notifications/domain/entities/planned_reminder_entity.dart';
 import 'package:traviato/features/notifications/domain/repositories/bonus_notification_repository.dart';
 
 /// Records every schedule/cancel call so use-case tests can assert on
@@ -8,11 +9,10 @@ class FakeBonusNotificationRepository implements BonusNotificationRepository {
   bool permissionGranted = false;
   Either<Failure, void>? nextResult;
 
-  final scheduledMorning = <DateTime>[];
-  final scheduledEvening = <DateTime>[];
+  /// Every `replaceReminders` call, in order; the last one is what's
+  /// pending now.
+  final replacedReminders = <List<PlannedReminderEntity>>[];
   final scheduledArrival = <(DateTime, String)>[];
-  var cancelMorningCallCount = 0;
-  var cancelEveningCallCount = 0;
   final cancelledArrivalTripIds = <String>[];
 
   @override
@@ -31,20 +31,10 @@ class FakeBonusNotificationRepository implements BonusNotificationRepository {
   }
 
   @override
-  Future<Either<Failure, void>> scheduleMorning({
-    required DateTime fireAt,
-    required String tripId,
-  }) async {
-    scheduledMorning.add(fireAt);
-    return nextResult ?? const Right(null);
-  }
-
-  @override
-  Future<Either<Failure, void>> scheduleEvening({
-    required DateTime fireAt,
-    required String tripId,
-  }) async {
-    scheduledEvening.add(fireAt);
+  Future<Either<Failure, void>> replaceReminders(
+    List<PlannedReminderEntity> reminders,
+  ) async {
+    replacedReminders.add(reminders);
     return nextResult ?? const Right(null);
   }
 
@@ -54,18 +44,6 @@ class FakeBonusNotificationRepository implements BonusNotificationRepository {
     required String tripId,
   }) async {
     scheduledArrival.add((fireAt, tripId));
-    return nextResult ?? const Right(null);
-  }
-
-  @override
-  Future<Either<Failure, void>> cancelMorning() async {
-    cancelMorningCallCount++;
-    return nextResult ?? const Right(null);
-  }
-
-  @override
-  Future<Either<Failure, void>> cancelEvening() async {
-    cancelEveningCallCount++;
     return nextResult ?? const Right(null);
   }
 
