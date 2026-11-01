@@ -1440,7 +1440,7 @@
   "@notif_promptTitle": {
     "x-review": "pending"
   },
-  "notif_promptBody": "{appName} напомнит утром и вечером, пока идёт воспоминание, чтобы ни один день не остался пустым, — никогда после 21:00. Отключить можно в любой момент в настройках.",
+  "notif_promptBody": "{appName} напомнит утром и вечером, пока идет воспоминание, чтобы ни один день не остался пустым, но никогда после 21:00. Отключить можно в любой момент в настройках.",
   "@notif_promptBody": {
     "x-review": "pending"
   },
@@ -1448,7 +1448,7 @@
   "@notif_dayMorningTitle": {
     "x-review": "pending"
   },
-  "notif_dayMorningBody": "Вас ждут два маленьких задания — одного фото хватит, чтобы сохранить этот день.",
+  "notif_dayMorningBody": "Вас ждут два маленьких задания. Одного фото хватит, чтобы сохранить этот день.",
   "@notif_dayMorningBody": {
     "x-review": "pending"
   },
@@ -1456,7 +1456,7 @@
   "@notif_lastDayMorningTitle": {
     "x-review": "pending"
   },
-  "notif_lastDayMorningBody": "Проведите его на полную — сегодня последние задания.",
+  "notif_lastDayMorningBody": "Проведите его на полную, ведь сегодня последние задания.",
   "@notif_lastDayMorningBody": {
     "x-review": "pending"
   },

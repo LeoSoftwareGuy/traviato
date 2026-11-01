@@ -2278,7 +2278,7 @@ abstract class AppLocalizations {
   /// No description provided for @notif_promptBody.
   ///
   /// In en, this message translates to:
-  /// **'{appName} can nudge you in the morning and in the evening while a memory is happening, so no day slips by unlogged — never after 9 pm. Turn it off any time in Settings.'**
+  /// **'{appName} can nudge you in the morning and in the evening while a memory is happening, so no day slips by unlogged but never after 9 pm. Turn it off any time in Settings.'**
   String notif_promptBody(String appName);
 
   /// Local notification, ~9:00 on a middle day of a memory.
@@ -2290,7 +2290,7 @@ abstract class AppLocalizations {
   /// No description provided for @notif_dayMorningBody.
   ///
   /// In en, this message translates to:
-  /// **'Two little dares are waiting — one photo is enough to keep today.'**
+  /// **'Two little dares are waiting. One photo is enough to keep today.'**
   String get notif_dayMorningBody;
 
   /// Local notification, ~9:00 on a memory's last day.
@@ -2302,7 +2302,7 @@ abstract class AppLocalizations {
   /// No description provided for @notif_lastDayMorningBody.
   ///
   /// In en, this message translates to:
-  /// **'Make it count — today\'s dares are the last ones.'**
+  /// **'Make it count since today\'s dares are the last ones.'**
   String get notif_lastDayMorningBody;
 
   /// Local notification, ~19:00 when something was logged today but a bonus task is still open.

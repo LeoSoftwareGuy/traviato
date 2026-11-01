@@ -1447,7 +1447,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String notif_promptBody(String appName) {
-    return '$appName напомнит утром и вечером, пока идёт воспоминание, чтобы ни один день не остался пустым, — никогда после 21:00. Отключить можно в любой момент в настройках.';
+    return '$appName напомнит утром и вечером, пока идет воспоминание, чтобы ни один день не остался пустым, но никогда после 21:00. Отключить можно в любой момент в настройках.';
   }
 
   @override
@@ -1457,7 +1457,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get notif_dayMorningBody =>
-      'Вас ждут два маленьких задания — одного фото хватит, чтобы сохранить этот день.';
+      'Вас ждут два маленьких задания. Одного фото хватит, чтобы сохранить этот день.';
 
   @override
   String notif_lastDayMorningTitle(String name) {
@@ -1466,7 +1466,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get notif_lastDayMorningBody =>
-      'Проведите его на полную — сегодня последние задания.';
+      'Проведите его на полную, ведь сегодня последние задания.';
 
   @override
   String get notif_eveningTitle => 'Ещё есть время для задания';

@@ -1412,7 +1412,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String notif_promptBody(String appName) {
-    return '$appName can nudge you in the morning and in the evening while a memory is happening, so no day slips by unlogged — never after 9 pm. Turn it off any time in Settings.';
+    return '$appName can nudge you in the morning and in the evening while a memory is happening, so no day slips by unlogged but never after 9 pm. Turn it off any time in Settings.';
   }
 
   @override
@@ -1422,7 +1422,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notif_dayMorningBody =>
-      'Two little dares are waiting — one photo is enough to keep today.';
+      'Two little dares are waiting. One photo is enough to keep today.';
 
   @override
   String notif_lastDayMorningTitle(String name) {
@@ -1431,7 +1431,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notif_lastDayMorningBody =>
-      'Make it count — today\'s dares are the last ones.';
+      'Make it count since today\'s dares are the last ones.';
 
   @override
   String get notif_eveningTitle => 'Still time for a dare';
