@@ -167,14 +167,27 @@ set. Mockup copy showing other numbers is adjusted at implementation.
 - **Star economy note:** no daily bonus cap in MVP (stars aren't spendable);
   revisit when redemption exists.
 
-### Notifications (local, no push infrastructure)
+### Notifications (local, no push infrastructure) — reworked (#307)
 
-- Morning ~9:00 local: "Two little dares today ✦" — only if yesterday had
-  activity. Evening ~19:00: only if a task is undone AND the app was opened
-  today. Arrival-day notification triggered by the memory's start date.
-- Silence rules: never after 21:00, none when both tasks are done, hard mute
-  after 3 consecutively ignored (ignored = approximated client-side:
-  scheduled but app not opened).
+- **Planned ahead**, not only from app opens: every evaluation (app open/
+  close, memory create/edit/delete) schedules the next 14 days of the
+  memory that's underway, so a day the app is never opened still gets
+  reminders. Today's entries follow what was actually logged.
+- **Each day of a memory, at most 2:** ~9:00 "Day N of {name} ✦" (day one
+  uses the arrival reminder instead); ~19:00 "Nothing from today yet" — or
+  "Still time for a dare" if something was logged but a task is open; none
+  if something was logged **and** the tray is done.
+- **Last day:** ~9:00 "Last day of {name} ✦" and ~18:00 "Bonus tasks end
+  tonight".
+- **Day after the end:** one ~10:00 "{name} has ended — keep it forever"
+  (opens the Journal; skipped once kept).
+- Silence rules: never after 21:00; times already past are skipped. After
+  three days without the app being opened, only the evening reminder is
+  left (last-day and after-end ones stay) — opening the app resets it. The
+  old sticky "mute after 3 ignored" is gone.
+- **You → Settings → Memory reminders** on/off (default on); off cancels
+  everything, arrival reminders included. The permission rationale is shown
+  once, after the first memory is created.
 
 ## 13. Stars ✅
 
