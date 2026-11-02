@@ -2319,10 +2319,22 @@
   },
   "share_metaFilm": "A film",
   "share_ownerShared": "{name} shared this",
-  "@share_ownerShared": {"placeholders": {"name": {"type": "String"}}},
+  "@share_ownerShared": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "share_someone": "Someone",
   "share_inapp_headline": "{name} kept this one.",
-  "@share_inapp_headline": {"placeholders": {"name": {"type": "String"}}},
+  "@share_inapp_headline": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "share_inapp_headlineEmphasis": "Make an account to see all of it.",
   "share_inapp_body": "The photos, the notes, and the film they made at the end. Free.",
   "share_createAccount": "Create an account",
@@ -2337,5 +2349,46 @@
   "share_haveLinkBody": "Paste the Storyni link someone sent you.",
   "share_linkHint": "storyni.app/m/…",
   "share_linkInvalid": "That isn't a Storyni memory link",
-  "share_linkOpen": "Open"
+  "share_linkOpen": "Open",
+  "share_entry": "Share memory",
+  "share_title": "Share “{title}”",
+  "@share_title": {
+    "description": "Share sheet header (#311).",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "share_subLive": "Anyone with the link can see a preview",
+  "share_subNone": "No link right now",
+  "share_copy": "Copy",
+  "share_copied": "Copied ✓",
+  "share_toastCopied": "Link copied",
+  "share_system": "Share…",
+  "share_qr": "QR code",
+  "share_story": "Story card",
+  "share_whatSee": "What people see",
+  "share_seeCover": "Cover, title, place and dates",
+  "share_seePhotos": "6 photos, starting with your film picks",
+  "share_seeNever": "Never your notes, map spots, expenses or quests",
+  "share_turnOff": "Turn off link",
+  "share_turnOffTitle": "Turn off this link?",
+  "share_turnOffBody": "Anyone who has it, including QR codes and story cards you've posted, will see “This link was turned off.” You can make a new one at any time.",
+  "share_keep": "Keep it",
+  "share_turnOffConfirm": "Turn off",
+  "share_toastOff": "Link turned off",
+  "share_revokedLine": "People who open it now see “This link was turned off.”",
+  "share_newLink": "Make a new link",
+  "share_toastNew": "New link ready",
+  "share_error": "Couldn't make a link. Try again",
+  "share_saveFailed": "Couldn't save. Let Storyni add to your photos in Settings.",
+  "qr_eyebrow": "Scan to see",
+  "qr_save": "Save image",
+  "qr_copyLink": "Copy link",
+  "story_eyebrow": "Story card",
+  "story_badge": "A kept memory",
+  "story_instagram": "Share to Instagram Stories",
+  "story_save": "Save to Photos",
+  "story_toastSaved": "Saved to Photos"
 }

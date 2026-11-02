@@ -4002,6 +4002,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open'**
   String get share_linkOpen;
+
+  /// No description provided for @share_entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Share memory'**
+  String get share_entry;
+
+  /// Share sheet header (#311).
+  ///
+  /// In en, this message translates to:
+  /// **'Share “{title}”'**
+  String share_title(String title);
+
+  /// No description provided for @share_subLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone with the link can see a preview'**
+  String get share_subLive;
+
+  /// No description provided for @share_subNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No link right now'**
+  String get share_subNone;
+
+  /// No description provided for @share_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get share_copy;
+
+  /// No description provided for @share_copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied ✓'**
+  String get share_copied;
+
+  /// No description provided for @share_toastCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get share_toastCopied;
+
+  /// No description provided for @share_system.
+  ///
+  /// In en, this message translates to:
+  /// **'Share…'**
+  String get share_system;
+
+  /// No description provided for @share_qr.
+  ///
+  /// In en, this message translates to:
+  /// **'QR code'**
+  String get share_qr;
+
+  /// No description provided for @share_story.
+  ///
+  /// In en, this message translates to:
+  /// **'Story card'**
+  String get share_story;
+
+  /// No description provided for @share_whatSee.
+  ///
+  /// In en, this message translates to:
+  /// **'What people see'**
+  String get share_whatSee;
+
+  /// No description provided for @share_seeCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover, title, place and dates'**
+  String get share_seeCover;
+
+  /// No description provided for @share_seePhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'6 photos, starting with your film picks'**
+  String get share_seePhotos;
+
+  /// No description provided for @share_seeNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never your notes, map spots, expenses or quests'**
+  String get share_seeNever;
+
+  /// No description provided for @share_turnOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off link'**
+  String get share_turnOff;
+
+  /// No description provided for @share_turnOffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off this link?'**
+  String get share_turnOffTitle;
+
+  /// No description provided for @share_turnOffBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone who has it, including QR codes and story cards you\'ve posted, will see “This link was turned off.” You can make a new one at any time.'**
+  String get share_turnOffBody;
+
+  /// No description provided for @share_keep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it'**
+  String get share_keep;
+
+  /// No description provided for @share_turnOffConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off'**
+  String get share_turnOffConfirm;
+
+  /// No description provided for @share_toastOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Link turned off'**
+  String get share_toastOff;
+
+  /// No description provided for @share_revokedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'People who open it now see “This link was turned off.”'**
+  String get share_revokedLine;
+
+  /// No description provided for @share_newLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Make a new link'**
+  String get share_newLink;
+
+  /// No description provided for @share_toastNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New link ready'**
+  String get share_toastNew;
+
+  /// No description provided for @share_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t make a link. Try again'**
+  String get share_error;
+
+  /// No description provided for @share_saveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save. Let Storyni add to your photos in Settings.'**
+  String get share_saveFailed;
+
+  /// No description provided for @qr_eyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to see'**
+  String get qr_eyebrow;
+
+  /// No description provided for @qr_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save image'**
+  String get qr_save;
+
+  /// No description provided for @qr_copyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get qr_copyLink;
+
+  /// No description provided for @story_eyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Story card'**
+  String get story_eyebrow;
+
+  /// No description provided for @story_badge.
+  ///
+  /// In en, this message translates to:
+  /// **'A kept memory'**
+  String get story_badge;
+
+  /// No description provided for @story_instagram.
+  ///
+  /// In en, this message translates to:
+  /// **'Share to Instagram Stories'**
+  String get story_instagram;
+
+  /// No description provided for @story_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Photos'**
+  String get story_save;
+
+  /// No description provided for @story_toastSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to Photos'**
+  String get story_toastSaved;
 }
 
 class _AppLocalizationsDelegate

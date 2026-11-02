@@ -2631,4 +2631,107 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get share_linkOpen => 'Открыть';
+
+  @override
+  String get share_entry => 'Поделиться воспоминанием';
+
+  @override
+  String share_title(String title) {
+    return 'Поделиться «$title»';
+  }
+
+  @override
+  String get share_subLive => 'По ссылке видно только превью';
+
+  @override
+  String get share_subNone => 'Ссылки пока нет';
+
+  @override
+  String get share_copy => 'Копировать';
+
+  @override
+  String get share_copied => 'Скопировано ✓';
+
+  @override
+  String get share_toastCopied => 'Ссылка скопирована';
+
+  @override
+  String get share_system => 'Поделиться…';
+
+  @override
+  String get share_qr => 'QR-код';
+
+  @override
+  String get share_story => 'Карточка для сторис';
+
+  @override
+  String get share_whatSee => 'Что увидят другие';
+
+  @override
+  String get share_seeCover => 'Обложка, название, место и даты';
+
+  @override
+  String get share_seePhotos => '6 фото, сначала выбранные для фильма';
+
+  @override
+  String get share_seeNever => 'Без заметок, мест на карте, расходов и квестов';
+
+  @override
+  String get share_turnOff => 'Отключить ссылку';
+
+  @override
+  String get share_turnOffTitle => 'Отключить ссылку?';
+
+  @override
+  String get share_turnOffBody =>
+      'Все, у кого она есть, включая опубликованные QR-коды и сторис, увидят «Ссылка отключена». Новую можно создать в любой момент.';
+
+  @override
+  String get share_keep => 'Оставить';
+
+  @override
+  String get share_turnOffConfirm => 'Отключить';
+
+  @override
+  String get share_toastOff => 'Ссылка отключена';
+
+  @override
+  String get share_revokedLine => 'Теперь по ней видно «Ссылка отключена».';
+
+  @override
+  String get share_newLink => 'Создать новую ссылку';
+
+  @override
+  String get share_toastNew => 'Новая ссылка готова';
+
+  @override
+  String get share_error => 'Не удалось создать ссылку. Повторить';
+
+  @override
+  String get share_saveFailed =>
+      'Не удалось сохранить. Разрешите Storyni добавлять фото в Настройках.';
+
+  @override
+  String get qr_eyebrow => 'Наведите камеру';
+
+  @override
+  String get qr_save => 'Сохранить';
+
+  @override
+  String get qr_copyLink => 'Копировать ссылку';
+
+  @override
+  String get story_eyebrow => 'Карточка для сторис';
+
+  @override
+  String get story_badge => 'Сохранённое воспоминание';
+
+  @override
+  String get story_instagram => 'Поделиться в Instagram Stories';
+
+  @override
+  String get story_save => 'Сохранить в Фото';
+
+  @override
+  String get story_toastSaved => 'Сохранено в Фото';
 }

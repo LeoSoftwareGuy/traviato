@@ -2591,5 +2591,137 @@
   "share_linkOpen": "Открыть",
   "@share_linkOpen": {
     "x-review": "pending"
+  },
+  "share_entry": "Поделиться воспоминанием",
+  "@share_entry": {
+    "x-review": "pending"
+  },
+  "share_title": "Поделиться «{title}»",
+  "@share_title": {
+    "x-review": "pending"
+  },
+  "share_subLive": "По ссылке видно только превью",
+  "@share_subLive": {
+    "x-review": "pending"
+  },
+  "share_subNone": "Ссылки пока нет",
+  "@share_subNone": {
+    "x-review": "pending"
+  },
+  "share_copy": "Копировать",
+  "@share_copy": {
+    "x-review": "pending"
+  },
+  "share_copied": "Скопировано ✓",
+  "@share_copied": {
+    "x-review": "pending"
+  },
+  "share_toastCopied": "Ссылка скопирована",
+  "@share_toastCopied": {
+    "x-review": "pending"
+  },
+  "share_system": "Поделиться…",
+  "@share_system": {
+    "x-review": "pending"
+  },
+  "share_qr": "QR-код",
+  "@share_qr": {
+    "x-review": "pending"
+  },
+  "share_story": "Карточка для сторис",
+  "@share_story": {
+    "x-review": "pending"
+  },
+  "share_whatSee": "Что увидят другие",
+  "@share_whatSee": {
+    "x-review": "pending"
+  },
+  "share_seeCover": "Обложка, название, место и даты",
+  "@share_seeCover": {
+    "x-review": "pending"
+  },
+  "share_seePhotos": "6 фото, сначала выбранные для фильма",
+  "@share_seePhotos": {
+    "x-review": "pending"
+  },
+  "share_seeNever": "Без заметок, мест на карте, расходов и квестов",
+  "@share_seeNever": {
+    "x-review": "pending"
+  },
+  "share_turnOff": "Отключить ссылку",
+  "@share_turnOff": {
+    "x-review": "pending"
+  },
+  "share_turnOffTitle": "Отключить ссылку?",
+  "@share_turnOffTitle": {
+    "x-review": "pending"
+  },
+  "share_turnOffBody": "Все, у кого она есть, включая опубликованные QR-коды и сторис, увидят «Ссылка отключена». Новую можно создать в любой момент.",
+  "@share_turnOffBody": {
+    "x-review": "pending"
+  },
+  "share_keep": "Оставить",
+  "@share_keep": {
+    "x-review": "pending"
+  },
+  "share_turnOffConfirm": "Отключить",
+  "@share_turnOffConfirm": {
+    "x-review": "pending"
+  },
+  "share_toastOff": "Ссылка отключена",
+  "@share_toastOff": {
+    "x-review": "pending"
+  },
+  "share_revokedLine": "Теперь по ней видно «Ссылка отключена».",
+  "@share_revokedLine": {
+    "x-review": "pending"
+  },
+  "share_newLink": "Создать новую ссылку",
+  "@share_newLink": {
+    "x-review": "pending"
+  },
+  "share_toastNew": "Новая ссылка готова",
+  "@share_toastNew": {
+    "x-review": "pending"
+  },
+  "share_error": "Не удалось создать ссылку. Повторить",
+  "@share_error": {
+    "x-review": "pending"
+  },
+  "share_saveFailed": "Не удалось сохранить. Разрешите Storyni добавлять фото в Настройках.",
+  "@share_saveFailed": {
+    "x-review": "pending"
+  },
+  "qr_eyebrow": "Наведите камеру",
+  "@qr_eyebrow": {
+    "x-review": "pending"
+  },
+  "qr_save": "Сохранить",
+  "@qr_save": {
+    "x-review": "pending"
+  },
+  "qr_copyLink": "Копировать ссылку",
+  "@qr_copyLink": {
+    "x-review": "pending"
+  },
+  "story_eyebrow": "Карточка для сторис",
+  "@story_eyebrow": {
+    "x-review": "pending"
+  },
+  "story_badge": "Сохранённое воспоминание",
+  "@story_badge": {
+    "x-review": "pending"
+  },
+  "story_instagram": "Поделиться в Instagram Stories",
+  "@story_instagram": {
+    "x-review": "pending"
+  },
+  "story_save": "Сохранить в Фото",
+  "@story_save": {
+    "x-review": "pending"
+  },
+  "story_toastSaved": "Сохранено в Фото",
+  "@story_toastSaved": {
+    "x-review": "pending"
   }
 }

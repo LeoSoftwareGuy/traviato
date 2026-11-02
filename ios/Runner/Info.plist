@@ -58,6 +58,10 @@
 	     also pushing them to go_router as routes (#157). -->
 	<key>FlutterDeepLinkingEnabled</key>
 	<false/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>instagram-stories</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
@@ -66,6 +70,8 @@
 	<string>Storyni saves where a photo was taken so it shows up in your journal and wrap-up.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Storyni uses the microphone so you can speak your journal notes instead of typing them.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Storyni saves your story cards and QR codes to your photos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Storyni lets you add photos from your library to your memories.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
