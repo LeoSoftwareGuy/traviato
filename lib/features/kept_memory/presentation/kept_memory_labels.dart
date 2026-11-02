@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 
+import '../../../core/l10n/l10n_dates.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/entities/kept_memory.dart';
 
@@ -7,18 +8,8 @@ import '../domain/entities/kept_memory.dart';
 /// UI language. Callers uppercase eyebrows themselves.
 abstract class KeptMemoryLabels {
   /// `12–16 Aug 2026` · `30 Jul – 2 Aug 2026` · `30 Dec 2026 – 2 Jan 2027`.
-  static String dateRange(DateTime start, DateTime end, String locale) {
-    final dayMonthYear = DateFormat('d MMM y', locale);
-    if (start.year == end.year && start.month == end.month) {
-      if (start.day == end.day) return dayMonthYear.format(start);
-      return '${start.day}–${dayMonthYear.format(end)}';
-    }
-    if (start.year == end.year) {
-      return '${DateFormat('d MMM', locale).format(start)} – '
-          '${dayMonthYear.format(end)}';
-    }
-    return '${dayMonthYear.format(start)} – ${dayMonthYear.format(end)}';
-  }
+  static String dateRange(DateTime start, DateTime end, String locale) =>
+      L10nDates.dateRange(start, end, locale);
 
   /// `Tue 12 Aug` — a day chapter's date and the viewer's caption line.
   static String weekdayDate(DateTime date, String locale) =>
