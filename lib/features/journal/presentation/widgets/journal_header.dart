@@ -15,12 +15,16 @@ class JournalHeader extends StatelessWidget {
     required this.stars,
     required this.onBack,
     required this.onStarsTap,
+    this.onShare,
     super.key,
   });
 
   final int stars;
   final VoidCallback onBack;
   final VoidCallback onStarsTap;
+
+  /// Opens the share sheet (#311).
+  final VoidCallback? onShare;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +41,14 @@ class JournalHeader extends StatelessWidget {
             ),
           ),
         ),
+        if (onShare case final onShare?) ...[
+          const SizedBox(width: AppSpacing.sm),
+          _CircleIconButton(
+            key: const ValueKey('journal-share'),
+            icon: Icons.ios_share,
+            onTap: onShare,
+          ),
+        ],
         const SizedBox(width: AppSpacing.sm),
         _StarsBadge(stars: stars, onTap: onStarsTap),
       ],
@@ -45,7 +57,11 @@ class JournalHeader extends StatelessWidget {
 }
 
 class _CircleIconButton extends StatelessWidget {
-  const _CircleIconButton({required this.icon, required this.onTap});
+  const _CircleIconButton({
+    required this.icon,
+    required this.onTap,
+    super.key,
+  });
 
   final IconData icon;
   final VoidCallback onTap;

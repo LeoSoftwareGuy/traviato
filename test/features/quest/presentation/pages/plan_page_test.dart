@@ -366,6 +366,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Edit this memory'), findsOneWidget);
+      // Share memory (#311) sits above the name field.
+      expect(find.text('Share memory'), findsOneWidget);
       expect(find.text('Dolomites, slowly'), findsWidgets);
       expect(find.text('22 Aug 2026'), findsOneWidget);
       expect(find.text('26 Aug 2026'), findsOneWidget);

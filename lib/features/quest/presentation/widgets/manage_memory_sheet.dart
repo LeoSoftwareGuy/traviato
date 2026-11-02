@@ -13,6 +13,7 @@ import '../../../../core/widgets/bottom_sheet_chrome.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../journal/presentation/providers/day_note_providers.dart';
 import '../../../photo/presentation/providers/photo_providers.dart';
+import '../../../share/presentation/widgets/share_memory_sheet.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
 import '../../../trip/presentation/mutations/trip_mutations.dart';
 import '../../../trip/presentation/widgets/cover_options.dart';
@@ -146,7 +147,9 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
     final trip = ref.watch(planControllerProvider(widget.tripId)).value?.trip;
     final isDeleting = ref.watch(deleteMemoryMutation) is MutationPending;
 
-    return Padding(
+    // Scrolls once the dates warning or delete step makes it taller than
+    // a small screen.
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.xl,
         AppSpacing.sm,
@@ -170,6 +173,10 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
                 child: Text(l10n.common_done),
               ),
             ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          _ShareMemoryRow(
+            onTap: () => ShareMemorySheet.show(context, tripId: widget.tripId),
           ),
           const SizedBox(height: AppSpacing.lg),
           CreateMemoryField(
@@ -237,6 +244,57 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// "Share memory" (#311) — opens the share sheet over this one.
+class _ShareMemoryRow extends StatelessWidget {
+  const _ShareMemoryRow({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    const radius = BorderRadius.all(Radius.circular(14));
+    return Material(
+      color: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: radius,
+        side: BorderSide(color: AppColors.surfaceBorder),
+      ),
+      child: InkWell(
+        key: const ValueKey('manage-share-memory'),
+        onTap: onTap,
+        borderRadius: radius,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.base,
+            vertical: 14,
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.ios_share,
+                size: 18,
+                color: AppColors.primaryLight,
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  context.l10n.share_entry,
+                  style: AppTypography.bodyEmphasis.copyWith(fontSize: 14),
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right,
+                size: 18,
+                color: AppColors.textTertiary,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
