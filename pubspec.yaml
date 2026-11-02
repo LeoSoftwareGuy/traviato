@@ -75,6 +75,21 @@ dependencies:
   # referrer (storyni_slug=…) on first launch. A thin wrapper over Google's
   # Install Referrer library — no service SDK, no network calls.
   play_install_referrer: ^0.6.0
+  # Share sheet (#311). qr_flutter: pure-Dart QR renderer that paints as a
+  # widget, so the QR goes into the story card's RepaintBoundary capture.
+  qr_flutter: ^4.1.0
+  # The system share sheet for links and story-card PNGs (Flutter
+  # Community; also the Instagram Stories fallback).
+  share_plus: ^13.3.1
+  # "Save image" / "Save to Photos" for the QR and story card — add-only
+  # photo-library access, no full-library permission.
+  gal: ^2.3.3
+  # Full brightness while the QR is on screen, restored on close
+  # (app-level brightness only; no system permission).
+  screen_brightness: ^2.1.11
+  # Temp file for the story card handed to Instagram / the share sheet.
+  # Already in the lockfile through other plugins.
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:

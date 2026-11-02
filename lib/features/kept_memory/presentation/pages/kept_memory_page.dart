@@ -9,6 +9,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
+import '../../../share/presentation/widgets/share_memory_sheet.dart';
 import '../../../trip/presentation/widgets/delete_memory_sheet.dart';
 import '../../../wrap_up/presentation/controllers/wrap_up_controller.dart';
 import '../../../wrap_up/presentation/film/wrap_up_film_scenes.dart';
@@ -19,6 +20,7 @@ import '../providers/kept_memory_provider.dart';
 import '../widgets/kept_memory_actions.dart';
 import '../widgets/kept_memory_day_chapter.dart';
 import '../widgets/kept_memory_hero.dart';
+import '../widgets/kept_memory_more_sheet.dart';
 import '../widgets/kept_memory_plan_card.dart';
 import 'kept_memory_viewer_page.dart';
 
@@ -73,6 +75,18 @@ class _KeptMemoryScroll extends ConsumerWidget {
   }
 
   Future<void> _more(BuildContext context) async {
+    final action = await KeptMemoryMoreSheet.show(context);
+    if (!context.mounted) return;
+    switch (action) {
+      case KeptMemoryMoreAction.share:
+        await ShareMemorySheet.show(context, tripId: _tripId);
+      case KeptMemoryMoreAction.delete:
+        await _delete(context);
+      case null:
+    }
+  }
+
+  Future<void> _delete(BuildContext context) async {
     final deleted = await DeleteMemorySheet.show(
       context,
       tripId: _tripId,

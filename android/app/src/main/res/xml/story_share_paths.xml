@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Story card PNGs handed to Instagram Stories (#311): the app writes
+     them to cache/story_share/ before sharing. -->
+<paths>
+    <cache-path name="story_share" path="story_share/" />
+</paths>

@@ -243,3 +243,55 @@ final class InitialPendingShareSlugProvider
 
 String _$initialPendingShareSlugHash() =>
     r'54541a46813ea197444c72085b7a19fa51fb57bd';
+
+/// The share sheet's ways out (#311). `FACEBOOK_APP_ID` (Meta App ID) in
+/// `.env` turns on Instagram Stories; without it the story card goes to
+/// the system share sheet.
+
+@ProviderFor(shareOutlets)
+final shareOutletsProvider = ShareOutletsProvider._();
+
+/// The share sheet's ways out (#311). `FACEBOOK_APP_ID` (Meta App ID) in
+/// `.env` turns on Instagram Stories; without it the story card goes to
+/// the system share sheet.
+
+final class ShareOutletsProvider
+    extends $FunctionalProvider<ShareOutlets, ShareOutlets, ShareOutlets>
+    with $Provider<ShareOutlets> {
+  /// The share sheet's ways out (#311). `FACEBOOK_APP_ID` (Meta App ID) in
+  /// `.env` turns on Instagram Stories; without it the story card goes to
+  /// the system share sheet.
+  ShareOutletsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'shareOutletsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$shareOutletsHash();
+
+  @$internal
+  @override
+  $ProviderElement<ShareOutlets> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ShareOutlets create(Ref ref) {
+    return shareOutlets(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ShareOutlets value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ShareOutlets>(value),
+    );
+  }
+}
+
+String _$shareOutletsHash() => r'66a97c10d5ce6743f3610ccec7a490229c0e34b3';

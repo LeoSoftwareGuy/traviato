@@ -22,6 +22,7 @@ import '../../../photo/presentation/mutations/photo_mutations.dart';
 import '../../../photo/presentation/pages/photo_viewer_page.dart';
 import '../../../photo/presentation/widgets/add_photo_sheet.dart';
 import '../../../photo/presentation/widgets/storage_photo_image.dart';
+import '../../../share/presentation/widgets/share_memory_sheet.dart';
 import '../../../wrap_up/presentation/providers/film_pick_providers.dart';
 import '../controllers/journal_controller.dart';
 import '../controllers/journal_state.dart';
@@ -157,6 +158,7 @@ class _JournalContent extends ConsumerWidget {
             RouteNames.tripBonusTasks,
             pathParameters: {'tripId': tripId},
           ),
+          onShare: () => ShareMemorySheet.show(context, tripId: tripId),
         ),
         const SizedBox(height: AppSpacing.lg),
         if (!state.hasDateRange || currentDay == null)

@@ -49,4 +49,6 @@ dependencies {
     // Required by flutter_local_notifications (#65) alongside
     // isCoreLibraryDesugaringEnabled above.
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    // FileProvider for the Instagram Stories story card (#311).
+    implementation("androidx.core:core:1.13.1")
 }

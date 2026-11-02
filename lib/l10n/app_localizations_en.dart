@@ -2584,4 +2584,109 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get share_linkOpen => 'Open';
+
+  @override
+  String get share_entry => 'Share memory';
+
+  @override
+  String share_title(String title) {
+    return 'Share “$title”';
+  }
+
+  @override
+  String get share_subLive => 'Anyone with the link can see a preview';
+
+  @override
+  String get share_subNone => 'No link right now';
+
+  @override
+  String get share_copy => 'Copy';
+
+  @override
+  String get share_copied => 'Copied ✓';
+
+  @override
+  String get share_toastCopied => 'Link copied';
+
+  @override
+  String get share_system => 'Share…';
+
+  @override
+  String get share_qr => 'QR code';
+
+  @override
+  String get share_story => 'Story card';
+
+  @override
+  String get share_whatSee => 'What people see';
+
+  @override
+  String get share_seeCover => 'Cover, title, place and dates';
+
+  @override
+  String get share_seePhotos => '6 photos, starting with your film picks';
+
+  @override
+  String get share_seeNever =>
+      'Never your notes, map spots, expenses or quests';
+
+  @override
+  String get share_turnOff => 'Turn off link';
+
+  @override
+  String get share_turnOffTitle => 'Turn off this link?';
+
+  @override
+  String get share_turnOffBody =>
+      'Anyone who has it, including QR codes and story cards you\'ve posted, will see “This link was turned off.” You can make a new one at any time.';
+
+  @override
+  String get share_keep => 'Keep it';
+
+  @override
+  String get share_turnOffConfirm => 'Turn off';
+
+  @override
+  String get share_toastOff => 'Link turned off';
+
+  @override
+  String get share_revokedLine =>
+      'People who open it now see “This link was turned off.”';
+
+  @override
+  String get share_newLink => 'Make a new link';
+
+  @override
+  String get share_toastNew => 'New link ready';
+
+  @override
+  String get share_error => 'Couldn\'t make a link. Try again';
+
+  @override
+  String get share_saveFailed =>
+      'Couldn\'t save. Let Storyni add to your photos in Settings.';
+
+  @override
+  String get qr_eyebrow => 'Scan to see';
+
+  @override
+  String get qr_save => 'Save image';
+
+  @override
+  String get qr_copyLink => 'Copy link';
+
+  @override
+  String get story_eyebrow => 'Story card';
+
+  @override
+  String get story_badge => 'A kept memory';
+
+  @override
+  String get story_instagram => 'Share to Instagram Stories';
+
+  @override
+  String get story_save => 'Save to Photos';
+
+  @override
+  String get story_toastSaved => 'Saved to Photos';
 }
