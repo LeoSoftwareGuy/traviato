@@ -18,7 +18,7 @@ abstract class AppConstants {
 
   /// The share-link web host (#309, #310): `https://storyni.app/m/{slug}`
   /// opens a shared memory — in the app when installed (universal / app
-  /// links), otherwise the web teaser. Keep `web/`, the iOS Associated
+  /// links), otherwise the web teaser. Keep `share_web/`, the iOS Associated
   /// Domains entitlement and the Android intent filter in sync.
   static const shareHost = 'storyni.app';
 

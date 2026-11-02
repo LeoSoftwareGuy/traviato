@@ -13,7 +13,10 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/app_typography.dart';
 import 'features/auth/presentation/widgets/auth_link_failure_listener.dart';
 import 'features/notifications/presentation/controllers/bonus_notifications_lifecycle_controller.dart';
+import 'features/share/data/prefs/pending_share_slug_prefs.dart';
+import 'features/share/presentation/controllers/share_link_intake_controller.dart';
 import 'features/share/presentation/controllers/share_preview_builder.dart';
+import 'features/share/presentation/providers/share_providers.dart';
 import 'features/settings/data/app_language_prefs.dart';
 import 'features/settings/data/dictation_language_prefs.dart';
 import 'features/settings/presentation/controllers/app_language_controller.dart';
@@ -44,6 +47,9 @@ Future<void> main() async {
   // language (#236).
   final initialLanguage = await const AppLanguagePrefs().read();
   final initialDictationLanguage = await const DictationLanguagePrefs().read();
+  // The shared memory a deferred link is holding (#310), so the router's
+  // first redirect already knows it.
+  final initialPendingShareSlug = await const PendingShareSlugPrefs().read();
   // Disable Riverpod's silent auto-retry; retries are handled explicitly with
   // Retry buttons (guidelines doc 02).
   runApp(
@@ -54,6 +60,9 @@ Future<void> main() async {
         initialAppLanguageProvider.overrideWithValue(initialLanguage),
         initialDictationLanguageProvider.overrideWithValue(
           initialDictationLanguage,
+        ),
+        initialPendingShareSlugProvider.overrideWithValue(
+          initialPendingShareSlug,
         ),
       ],
       child: const TraviatoApp(),
@@ -101,6 +110,9 @@ class TraviatoApp extends ConsumerWidget {
     // keepAlive — rebuilds shared memories' public previews in the
     // background when their photos or picks change (#309).
     ref.watch(sharePreviewBuilderProvider);
+    // keepAlive — routes storyni.app/m/{slug} links and the Play install
+    // referrer to the shared-memory preview (#310).
+    ref.watch(shareLinkIntakeControllerProvider);
     final locale = ref.watch(appLocaleProvider);
     // Serif per UI language (Literata for Russian, #239) — set before the
     // theme and tree build below read it.

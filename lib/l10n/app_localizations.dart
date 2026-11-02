@@ -3888,6 +3888,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Photos changed · Rebuild film'**
   String get film_outOfDate;
+
+  /// No description provided for @share_metaFilm.
+  ///
+  /// In en, this message translates to:
+  /// **'A film'**
+  String get share_metaFilm;
+
+  /// No description provided for @share_ownerShared.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} shared this'**
+  String share_ownerShared(String name);
+
+  /// No description provided for @share_someone.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone'**
+  String get share_someone;
+
+  /// No description provided for @share_inapp_headline.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} kept this one.'**
+  String share_inapp_headline(String name);
+
+  /// No description provided for @share_inapp_headlineEmphasis.
+  ///
+  /// In en, this message translates to:
+  /// **'Make an account to see all of it.'**
+  String get share_inapp_headlineEmphasis;
+
+  /// No description provided for @share_inapp_body.
+  ///
+  /// In en, this message translates to:
+  /// **'The photos, the notes, and the film they made at the end. Free.'**
+  String get share_inapp_body;
+
+  /// No description provided for @share_createAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account'**
+  String get share_createAccount;
+
+  /// No description provided for @share_login.
+  ///
+  /// In en, this message translates to:
+  /// **'I already have one · Log in'**
+  String get share_login;
+
+  /// No description provided for @share_unavailable_eyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Link unavailable'**
+  String get share_unavailable_eyebrow;
+
+  /// No description provided for @share_unavailable_title.
+  ///
+  /// In en, this message translates to:
+  /// **'This memory '**
+  String get share_unavailable_title;
+
+  /// No description provided for @share_unavailable_titleEmphasis.
+  ///
+  /// In en, this message translates to:
+  /// **'isn\'t shared anymore'**
+  String get share_unavailable_titleEmphasis;
+
+  /// No description provided for @share_unavailable_body.
+  ///
+  /// In en, this message translates to:
+  /// **'The link was turned off, or it was never right. If someone sent it to you, ask them for a new one.'**
+  String get share_unavailable_body;
+
+  /// No description provided for @share_startOwn.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your own memory'**
+  String get share_startOwn;
+
+  /// No description provided for @share_pasteCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening a shared memory?'**
+  String get share_pasteCard;
+
+  /// No description provided for @share_haveLink.
+  ///
+  /// In en, this message translates to:
+  /// **'I have a link'**
+  String get share_haveLink;
+
+  /// No description provided for @share_haveLinkBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the Storyni link someone sent you.'**
+  String get share_haveLinkBody;
+
+  /// No description provided for @share_linkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'storyni.app/m/…'**
+  String get share_linkHint;
+
+  /// No description provided for @share_linkInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That isn\'t a Storyni memory link'**
+  String get share_linkInvalid;
+
+  /// No description provided for @share_linkOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get share_linkOpen;
 }
 
 class _AppLocalizationsDelegate

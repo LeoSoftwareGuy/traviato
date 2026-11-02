@@ -37,6 +37,23 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="com.leo.storyni" android:host="login-callback"/>
             </intent-filter>
+            <!-- Shared-memory links (#310): storyni.app/m/{slug} App Links,
+                 verified against share_web/public/.well-known/assetlinks.json;
+                 keep in sync with AppConstants.shareHost. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="storyni.app" android:pathPrefix="/m/"/>
+            </intent-filter>
+            <!-- The share web page's "Open in the app" fallback for in-app
+                 browsers, where App Links don't fire (#310). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="com.leo.storyni" android:host="m"/>
+            </intent-filter>
             <!-- supabase_flutter (via app_links) handles incoming links; stop
                  Flutter also pushing them to go_router as routes (#157). -->
             <meta-data

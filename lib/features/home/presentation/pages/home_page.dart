@@ -14,6 +14,7 @@ import '../../../bonus/presentation/providers/bonus_badge_provider.dart';
 import '../../../expense/presentation/providers/expense_providers.dart';
 import '../../../expense/presentation/widgets/add_expense_sheet.dart';
 import '../../../quest/presentation/widgets/manage_memory_sheet.dart';
+import '../../../share/presentation/widgets/share_paste_offer.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
 import '../../../trip/presentation/widgets/delete_memory_sheet.dart';
 import '../../domain/entities/profile_stats_entity.dart';
@@ -40,6 +41,10 @@ class HomePage extends ConsumerWidget {
         ref.watch(profileStatsControllerProvider).value ??
         const ProfileStatsEntity.zero();
     final homeAsync = ref.watch(homeControllerProvider);
+    // A brand-new account (stats loaded, no memories yet) — when the iOS
+    // shared-link paste offer may show (#310).
+    final isNewAccount =
+        ref.watch(profileStatsControllerProvider).value?.memories == 0;
 
     return Scaffold(
       // Flat theme color for the whole screen (#111) — cards keep their own
@@ -52,14 +57,17 @@ class HomePage extends ConsumerWidget {
             message: presentationFailureMessage(error, context.l10n),
             onRetry: () => ref.invalidate(homeControllerProvider),
           ),
-          data: (state) => _HomeContent(
-            username: profile?.username,
-            avatarUrl: profile?.avatarUrl,
-            stars: stats.stars,
-            memories: stats.memories,
-            places: stats.places,
-            days: stats.days,
-            state: state,
+          data: (state) => SharePasteOffer(
+            isNewAccount: isNewAccount,
+            child: _HomeContent(
+              username: profile?.username,
+              avatarUrl: profile?.avatarUrl,
+              stars: stats.stars,
+              memories: stats.memories,
+              places: stats.places,
+              days: stats.days,
+              state: state,
+            ),
           ),
         ),
       ),

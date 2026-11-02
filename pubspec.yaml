@@ -67,6 +67,14 @@ dependencies:
   # page (#205) from the design's exported SVGs.
   flutter_svg: ^2.3.0
   wakelock_plus: ^1.8.1
+  # Share links (#310): routes storyni.app/m/{slug} universal / app links
+  # to the in-app preview. Already in the lockfile through supabase_flutter,
+  # which uses it for auth links; declared to import it directly.
+  app_links: ^7.2.1
+  # Android deferred deep link (#310): reads the Play Store install
+  # referrer (storyni_slug=…) on first launch. A thin wrapper over Google's
+  # Install Referrer library — no service SDK, no network calls.
+  play_install_referrer: ^0.6.0
 
 dev_dependencies:
   flutter_test:

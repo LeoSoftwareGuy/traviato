@@ -6,6 +6,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../photo/domain/entities/photo_entity.dart';
 import '../../domain/entities/og_card_content.dart';
 import '../../domain/entities/share_link.dart';
+import '../../domain/entities/shared_memory_preview.dart';
 import '../../domain/repositories/share_repository.dart';
 import '../../domain/share_teaser_photos.dart';
 import '../datasources/share_remote_data_source.dart';
@@ -48,6 +49,15 @@ class ShareRepositoryImpl implements ShareRepository {
   @override
   Future<Either<Failure, ShareLink?>> getActiveLink(String tripId) =>
       _run(() => _remote.getActiveLink(tripId));
+
+  @override
+  Future<Either<Failure, SharedMemoryPreview?>> getSharedPreview(
+    String slug,
+  ) => _run(() => _remote.getSharedPreview(slug));
+
+  @override
+  Future<Either<Failure, String?>> findOwnTripIdForSlug(String slug) =>
+      _run(() => _remote.findOwnTripIdForSlug(slug));
 
   @override
   Future<Either<Failure, void>> revokeLink(ShareLink link) async {

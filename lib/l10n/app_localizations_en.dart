@@ -2520,4 +2520,68 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get film_outOfDate => 'Photos changed · Rebuild film';
+
+  @override
+  String get share_metaFilm => 'A film';
+
+  @override
+  String share_ownerShared(String name) {
+    return '$name shared this';
+  }
+
+  @override
+  String get share_someone => 'Someone';
+
+  @override
+  String share_inapp_headline(String name) {
+    return '$name kept this one.';
+  }
+
+  @override
+  String get share_inapp_headlineEmphasis =>
+      'Make an account to see all of it.';
+
+  @override
+  String get share_inapp_body =>
+      'The photos, the notes, and the film they made at the end. Free.';
+
+  @override
+  String get share_createAccount => 'Create an account';
+
+  @override
+  String get share_login => 'I already have one · Log in';
+
+  @override
+  String get share_unavailable_eyebrow => 'Link unavailable';
+
+  @override
+  String get share_unavailable_title => 'This memory ';
+
+  @override
+  String get share_unavailable_titleEmphasis => 'isn\'t shared anymore';
+
+  @override
+  String get share_unavailable_body =>
+      'The link was turned off, or it was never right. If someone sent it to you, ask them for a new one.';
+
+  @override
+  String get share_startOwn => 'Start your own memory';
+
+  @override
+  String get share_pasteCard => 'Opening a shared memory?';
+
+  @override
+  String get share_haveLink => 'I have a link';
+
+  @override
+  String get share_haveLinkBody => 'Paste the Storyni link someone sent you.';
+
+  @override
+  String get share_linkHint => 'storyni.app/m/…';
+
+  @override
+  String get share_linkInvalid => 'That isn\'t a Storyni memory link';
+
+  @override
+  String get share_linkOpen => 'Open';
 }

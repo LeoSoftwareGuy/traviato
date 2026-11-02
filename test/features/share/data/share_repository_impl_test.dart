@@ -5,6 +5,7 @@ import 'package:traviato/core/errors/exceptions.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/features/share/data/datasources/share_remote_data_source.dart';
 import 'package:traviato/features/share/data/models/share_link_model.dart';
+import 'package:traviato/features/share/data/models/shared_memory_preview_model.dart';
 import 'package:traviato/features/share/data/repositories/share_repository_impl.dart';
 import 'package:traviato/features/share/data/services/share_image_service.dart';
 import 'package:traviato/features/share/domain/entities/og_card_content.dart';
@@ -47,6 +48,12 @@ class _FakeRemote implements ShareRemoteDataSource {
     if (removeError != null) throw removeError!;
     removed.addAll(paths);
   }
+
+  @override
+  Future<SharedMemoryPreviewModel?> getSharedPreview(String slug) async => null;
+
+  @override
+  Future<String?> findOwnTripIdForSlug(String slug) async => null;
 
   @override
   Future<void> markPreviewBuilt(String linkId, int photoCount) async {
