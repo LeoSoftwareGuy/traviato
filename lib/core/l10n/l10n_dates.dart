@@ -24,4 +24,18 @@ abstract final class L10nDates {
           '${DateFormat.jm(locale).pattern}',
           locale,
         );
+
+  /// `12–16 Aug 2026` · `30 Jul – 2 Aug 2026` · `30 Dec 2026 – 2 Jan 2027`.
+  static String dateRange(DateTime start, DateTime end, String locale) {
+    final dayMonthYear = DateFormat('d MMM y', locale);
+    if (start.year == end.year && start.month == end.month) {
+      if (start.day == end.day) return dayMonthYear.format(start);
+      return '${start.day}–${dayMonthYear.format(end)}';
+    }
+    if (start.year == end.year) {
+      return '${DateFormat('d MMM', locale).format(start)} – '
+          '${dayMonthYear.format(end)}';
+    }
+    return '${dayMonthYear.format(start)} – ${dayMonthYear.format(end)}';
+  }
 }

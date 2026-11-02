@@ -26,7 +26,7 @@ Set<String> filmMomentPhotoIds({
   int momentCount = filmMomentCount,
 }) {
   final eligible = photos.where((p) => p.filmPick != FilmPick.never).toList()
-    ..sort(_chronological);
+    ..sort(comparePhotosChronologically);
   final byId = {for (final p in eligible) p.id: p};
 
   final badged = bonusPhotoIds
@@ -65,7 +65,7 @@ List<T> spreadEvenly<T>(List<T> list, int count) {
 }
 
 /// By day (undated last), then by when each photo was taken.
-int _chronological(PhotoEntity a, PhotoEntity b) {
+int comparePhotosChronologically(PhotoEntity a, PhotoEntity b) {
   final dayA = a.dayDate;
   final dayB = b.dayDate;
   if (dayA != dayB) {

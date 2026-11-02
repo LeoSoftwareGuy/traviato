@@ -23,6 +23,7 @@ abstract class Tables {
   static const achievementTemplates = 'achievement_templates';
   static const userAchievements = 'user_achievements';
   static const entitlements = 'entitlements';
+  static const tripShareLinks = 'trip_share_links';
 }
 
 abstract class Views {
@@ -35,6 +36,9 @@ abstract class Views {
 abstract class Storage {
   static const tripPhotos = 'trip-photos';
   static const avatars = 'avatars';
+
+  /// Public: downscaled teaser copies of shared memories (#309).
+  static const sharePreviews = 'share-previews';
 }
 
 abstract class DBFunctions {
@@ -43,6 +47,10 @@ abstract class DBFunctions {
   static const checkAchievements = 'check_achievements';
   static const deletePhoto = 'delete_photo';
   static const deleteDayNote = 'delete_day_note';
+  static const createShareLink = 'create_share_link';
+  static const revokeShareLink = 'revoke_share_link';
+  static const markSharePreviewBuilt = 'mark_share_preview_built';
+  static const getSharedMemoryPreview = 'get_shared_memory_preview';
 }
 
 /// Deno edge functions, invoked via `SupabaseClient.functions.invoke` rather

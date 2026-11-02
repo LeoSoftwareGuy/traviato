@@ -15,4 +15,13 @@ abstract class AppConstants {
   /// be allow-listed under Auth → URL Configuration → Redirect URLs (hosted)
   /// and `additional_redirect_urls` in `supabase/config.toml` (local).
   static const authRedirectUrl = '$authRedirectScheme://login-callback';
+
+  /// The share-link web host (#309, #310): `https://storyni.app/m/{slug}`
+  /// opens a shared memory — in the app when installed (universal / app
+  /// links), otherwise the web teaser. Keep `web/`, the iOS Associated
+  /// Domains entitlement and the Android intent filter in sync.
+  static const shareHost = 'storyni.app';
+
+  /// A share link's public URL.
+  static String shareUrl(String slug) => 'https://$shareHost/m/$slug';
 }

@@ -13,6 +13,7 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/app_typography.dart';
 import 'features/auth/presentation/widgets/auth_link_failure_listener.dart';
 import 'features/notifications/presentation/controllers/bonus_notifications_lifecycle_controller.dart';
+import 'features/share/presentation/controllers/share_preview_builder.dart';
 import 'features/settings/data/app_language_prefs.dart';
 import 'features/settings/data/dictation_language_prefs.dart';
 import 'features/settings/presentation/controllers/app_language_controller.dart';
@@ -97,6 +98,9 @@ class TraviatoApp extends ConsumerWidget {
     // keepAlive — mirrors the language choice to/from the profile on
     // sign-in (#236).
     ref.watch(languageProfileSyncControllerProvider);
+    // keepAlive — rebuilds shared memories' public previews in the
+    // background when their photos or picks change (#309).
+    ref.watch(sharePreviewBuilderProvider);
     final locale = ref.watch(appLocaleProvider);
     // Serif per UI language (Literata for Russian, #239) — set before the
     // theme and tree build below read it.
