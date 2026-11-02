@@ -2515,5 +2515,81 @@
   "film_outOfDate": "Фото изменились · Пересобрать фильм",
   "@film_outOfDate": {
     "x-review": "pending"
+  },
+  "share_metaFilm": "Фильм",
+  "@share_metaFilm": {
+    "x-review": "pending"
+  },
+  "share_ownerShared": "{name} делится этим",
+  "@share_ownerShared": {
+    "x-review": "pending"
+  },
+  "share_someone": "Кто-то",
+  "@share_someone": {
+    "x-review": "pending"
+  },
+  "share_inapp_headline": "{name} сохранил(а) это.",
+  "@share_inapp_headline": {
+    "x-review": "pending"
+  },
+  "share_inapp_headlineEmphasis": "Создайте аккаунт, чтобы увидеть всё.",
+  "@share_inapp_headlineEmphasis": {
+    "x-review": "pending"
+  },
+  "share_inapp_body": "Фото, заметки и фильм, который получился в конце. Бесплатно.",
+  "@share_inapp_body": {
+    "x-review": "pending"
+  },
+  "share_createAccount": "Создать аккаунт",
+  "@share_createAccount": {
+    "x-review": "pending"
+  },
+  "share_login": "Уже есть аккаунт · Войти",
+  "@share_login": {
+    "x-review": "pending"
+  },
+  "share_unavailable_eyebrow": "Ссылка недоступна",
+  "@share_unavailable_eyebrow": {
+    "x-review": "pending"
+  },
+  "share_unavailable_title": "Этим воспоминанием ",
+  "@share_unavailable_title": {
+    "x-review": "pending"
+  },
+  "share_unavailable_titleEmphasis": "больше не делятся",
+  "@share_unavailable_titleEmphasis": {
+    "x-review": "pending"
+  },
+  "share_unavailable_body": "Ссылку отключили или она неверная. Попросите у отправителя новую.",
+  "@share_unavailable_body": {
+    "x-review": "pending"
+  },
+  "share_startOwn": "Начать своё воспоминание",
+  "@share_startOwn": {
+    "x-review": "pending"
+  },
+  "share_pasteCard": "Открываете общее воспоминание?",
+  "@share_pasteCard": {
+    "x-review": "pending"
+  },
+  "share_haveLink": "У меня есть ссылка",
+  "@share_haveLink": {
+    "x-review": "pending"
+  },
+  "share_haveLinkBody": "Вставьте ссылку Storyni, которую вам прислали.",
+  "@share_haveLinkBody": {
+    "x-review": "pending"
+  },
+  "share_linkHint": "storyni.app/m/…",
+  "@share_linkHint": {
+    "x-review": "pending"
+  },
+  "share_linkInvalid": "Это не ссылка на воспоминание Storyni",
+  "@share_linkInvalid": {
+    "x-review": "pending"
+  },
+  "share_linkOpen": "Открыть",
+  "@share_linkOpen": {
+    "x-review": "pending"
   }
 }

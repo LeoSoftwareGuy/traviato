@@ -145,3 +145,101 @@ final class ShareRepositoryProvider
 }
 
 String _$shareRepositoryHash() => r'6d4513987e2b7896df5c21eaa39c8255b153bfef';
+
+@ProviderFor(pendingShareSlugPrefs)
+final pendingShareSlugPrefsProvider = PendingShareSlugPrefsProvider._();
+
+final class PendingShareSlugPrefsProvider
+    extends
+        $FunctionalProvider<
+          PendingShareSlugPrefs,
+          PendingShareSlugPrefs,
+          PendingShareSlugPrefs
+        >
+    with $Provider<PendingShareSlugPrefs> {
+  PendingShareSlugPrefsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'pendingShareSlugPrefsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$pendingShareSlugPrefsHash();
+
+  @$internal
+  @override
+  $ProviderElement<PendingShareSlugPrefs> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  PendingShareSlugPrefs create(Ref ref) {
+    return pendingShareSlugPrefs(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(PendingShareSlugPrefs value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<PendingShareSlugPrefs>(value),
+    );
+  }
+}
+
+String _$pendingShareSlugPrefsHash() =>
+    r'94d0e497bc30bd1fcad4d40261115a5677aab134';
+
+/// The stored pending slug (#310), read in `main()` before `runApp` and
+/// overridden there, so the router sees it on the first redirect.
+
+@ProviderFor(initialPendingShareSlug)
+final initialPendingShareSlugProvider = InitialPendingShareSlugProvider._();
+
+/// The stored pending slug (#310), read in `main()` before `runApp` and
+/// overridden there, so the router sees it on the first redirect.
+
+final class InitialPendingShareSlugProvider
+    extends $FunctionalProvider<String?, String?, String?>
+    with $Provider<String?> {
+  /// The stored pending slug (#310), read in `main()` before `runApp` and
+  /// overridden there, so the router sees it on the first redirect.
+  InitialPendingShareSlugProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'initialPendingShareSlugProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$initialPendingShareSlugHash();
+
+  @$internal
+  @override
+  $ProviderElement<String?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  String? create(Ref ref) {
+    return initialPendingShareSlug(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String?>(value),
+    );
+  }
+}
+
+String _$initialPendingShareSlugHash() =>
+    r'54541a46813ea197444c72085b7a19fa51fb57bd';

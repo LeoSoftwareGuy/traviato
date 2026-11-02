@@ -4,6 +4,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../photo/domain/entities/photo_entity.dart';
 import '../entities/og_card_content.dart';
 import '../entities/share_link.dart';
+import '../entities/shared_memory_preview.dart';
 
 abstract interface class ShareRepository {
   /// The memory's active link, made if there is none (idempotent).
@@ -25,4 +26,11 @@ abstract interface class ShareRepository {
     required List<PhotoEntity> photos,
     required OgCardContent og,
   });
+
+  /// The public teaser behind [slug]; null when the link is unknown,
+  /// revoked or its memory deleted (all three look the same).
+  Future<Either<Failure, SharedMemoryPreview?>> getSharedPreview(String slug);
+
+  /// The caller's own memory behind [slug], or null when it isn't theirs.
+  Future<Either<Failure, String?>> findOwnTripIdForSlug(String slug);
 }

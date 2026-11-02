@@ -2316,5 +2316,26 @@
   "film_outOfDate": "Photos changed · Rebuild film",
   "@film_outOfDate": {
     "description": "Chip on a kept film after its photos or picks changed; tapping rebuilds it (#294)."
-  }
+  },
+  "share_metaFilm": "A film",
+  "share_ownerShared": "{name} shared this",
+  "@share_ownerShared": {"placeholders": {"name": {"type": "String"}}},
+  "share_someone": "Someone",
+  "share_inapp_headline": "{name} kept this one.",
+  "@share_inapp_headline": {"placeholders": {"name": {"type": "String"}}},
+  "share_inapp_headlineEmphasis": "Make an account to see all of it.",
+  "share_inapp_body": "The photos, the notes, and the film they made at the end. Free.",
+  "share_createAccount": "Create an account",
+  "share_login": "I already have one · Log in",
+  "share_unavailable_eyebrow": "Link unavailable",
+  "share_unavailable_title": "This memory ",
+  "share_unavailable_titleEmphasis": "isn't shared anymore",
+  "share_unavailable_body": "The link was turned off, or it was never right. If someone sent it to you, ask them for a new one.",
+  "share_startOwn": "Start your own memory",
+  "share_pasteCard": "Opening a shared memory?",
+  "share_haveLink": "I have a link",
+  "share_haveLinkBody": "Paste the Storyni link someone sent you.",
+  "share_linkHint": "storyni.app/m/…",
+  "share_linkInvalid": "That isn't a Storyni memory link",
+  "share_linkOpen": "Open"
 }

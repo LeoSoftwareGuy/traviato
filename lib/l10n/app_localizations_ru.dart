@@ -2566,4 +2566,69 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get film_outOfDate => 'Фото изменились · Пересобрать фильм';
+
+  @override
+  String get share_metaFilm => 'Фильм';
+
+  @override
+  String share_ownerShared(String name) {
+    return '$name делится этим';
+  }
+
+  @override
+  String get share_someone => 'Кто-то';
+
+  @override
+  String share_inapp_headline(String name) {
+    return '$name сохранил(а) это.';
+  }
+
+  @override
+  String get share_inapp_headlineEmphasis =>
+      'Создайте аккаунт, чтобы увидеть всё.';
+
+  @override
+  String get share_inapp_body =>
+      'Фото, заметки и фильм, который получился в конце. Бесплатно.';
+
+  @override
+  String get share_createAccount => 'Создать аккаунт';
+
+  @override
+  String get share_login => 'Уже есть аккаунт · Войти';
+
+  @override
+  String get share_unavailable_eyebrow => 'Ссылка недоступна';
+
+  @override
+  String get share_unavailable_title => 'Этим воспоминанием ';
+
+  @override
+  String get share_unavailable_titleEmphasis => 'больше не делятся';
+
+  @override
+  String get share_unavailable_body =>
+      'Ссылку отключили или она неверная. Попросите у отправителя новую.';
+
+  @override
+  String get share_startOwn => 'Начать своё воспоминание';
+
+  @override
+  String get share_pasteCard => 'Открываете общее воспоминание?';
+
+  @override
+  String get share_haveLink => 'У меня есть ссылка';
+
+  @override
+  String get share_haveLinkBody =>
+      'Вставьте ссылку Storyni, которую вам прислали.';
+
+  @override
+  String get share_linkHint => 'storyni.app/m/…';
+
+  @override
+  String get share_linkInvalid => 'Это не ссылка на воспоминание Storyni';
+
+  @override
+  String get share_linkOpen => 'Открыть';
 }

@@ -17,6 +17,12 @@ abstract class RoutePaths {
   static const tripBonusTasks = '/memory/:tripId/bonus-tasks';
   static const tripWrapUp = '/memory/:tripId/wrap-up';
   static const subscriptionOfferings = '/subscription/offerings';
+
+  /// A shared memory's teaser (#310) — the same path as the public link,
+  /// `storyni.app/m/{slug}`.
+  static const sharedMemory = '/m/:slug';
+  static const sharedMemoryPrefix = '/m/';
+  static String sharedMemoryFor(String slug) => '$sharedMemoryPrefix$slug';
 }
 
 abstract class RouteNames {
@@ -38,6 +44,7 @@ abstract class RouteNames {
   static const tripBonusTasks = 'tripBonusTasks';
   static const tripWrapUp = 'tripWrapUp';
   static const subscriptionOfferings = 'subscriptionOfferings';
+  static const sharedMemory = 'sharedMemory';
 }
 
 /// Query parameters shared between routes.

@@ -19,6 +19,8 @@ import '../../../features/journal/presentation/pages/journal_page.dart';
 import '../../../features/kept_memory/presentation/pages/kept_memory_page.dart';
 import '../../../features/profile/presentation/pages/profile_page.dart';
 import '../../../features/quest/presentation/pages/plan_page.dart';
+import '../../../features/share/presentation/controllers/pending_share_slug_controller.dart';
+import '../../../features/share/presentation/pages/shared_memory_preview_page.dart';
 import '../../../features/subscription/presentation/pages/paywall_page.dart';
 import '../../../features/trip/presentation/pages/create_memory_page.dart';
 import '../../../features/wrap_up/presentation/pages/wrap_up_page.dart';
@@ -42,16 +44,27 @@ GoRouter router(Ref ref) {
       final isSplash = loc == RoutePaths.splash;
       final isAuthRoute = loc == RoutePaths.login || loc == RoutePaths.signup;
       final isGuestLanding = loc == RoutePaths.guestLanding;
+      // Open to everyone, like the public web page (#310).
+      final isSharedMemory = loc.startsWith(RoutePaths.sharedMemoryPrefix);
+      // A shared memory someone arrived from (#310): where the splash,
+      // sign-up and log-in lead until it has been seen signed in.
+      final pendingSlug = ref.read(pendingShareSlugControllerProvider);
+      final sharedLanding = pendingSlug == null
+          ? null
+          : RoutePaths.sharedMemoryFor(pendingSlug);
 
       if (status == AuthStatus.unknown) {
         return isSplash ? null : RoutePaths.splash;
       }
       if (status == AuthStatus.authenticated) {
-        if (isSplash || isAuthRoute || isGuestLanding) return RoutePaths.home;
+        if (isSplash || isAuthRoute || isGuestLanding) {
+          return sharedLanding ?? RoutePaths.home;
+        }
         return null;
       }
       // unauthenticated
-      if (isGuestLanding || isAuthRoute) return null;
+      if (isGuestLanding || isAuthRoute || isSharedMemory) return null;
+      if (isSplash && sharedLanding != null) return sharedLanding;
       return RoutePaths.guestLanding;
     },
     routes: [
@@ -165,6 +178,12 @@ GoRouter router(Ref ref) {
               state.uri.queryParameters[RouteQuery.from] ==
               RouteQuery.fromMemory,
         ),
+      ),
+      GoRoute(
+        path: RoutePaths.sharedMemory,
+        name: RouteNames.sharedMemory,
+        builder: (context, state) =>
+            SharedMemoryPreviewPage(slug: state.pathParameters['slug']!),
       ),
       GoRoute(
         path: RoutePaths.subscriptionOfferings,

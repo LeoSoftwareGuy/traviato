@@ -14,6 +14,7 @@ import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../auth/presentation/mutations/auth_mutations.dart';
 import '../../../notifications/presentation/widgets/memory_reminders_settings_row.dart';
+import '../../../share/presentation/widgets/have_link_settings_row.dart';
 import '../../../settings/presentation/widgets/language_settings_row.dart';
 import '../../../subscription/domain/entities/subscription_offering_entity.dart';
 import '../controllers/profile_controller.dart';
@@ -139,6 +140,8 @@ class _ProfileContent extends ConsumerWidget {
         const LanguageSettingsSection(),
         const SizedBox(height: AppSpacing.sm),
         const MemoryRemindersSettingsRow(),
+        const SizedBox(height: AppSpacing.sm),
+        const HaveLinkSettingsRow(),
         const SizedBox(height: AppSpacing.xl),
         SizedBox(
           width: double.infinity,

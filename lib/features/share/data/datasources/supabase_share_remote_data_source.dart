@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/supabase_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../models/share_link_model.dart';
+import '../models/shared_memory_preview_model.dart';
 import 'share_remote_data_source.dart';
 
 /// Chat apps cache link-preview images for days anyway; a short CDN cache
@@ -26,8 +27,11 @@ class SupabaseShareRemoteDataSource implements ShareRemoteDataSource {
     }
   }
 
-  Future<T> _guard<T>(Future<T> Function() body) async {
-    _guardAuthenticated();
+  Future<T> _guard<T>(
+    Future<T> Function() body, {
+    bool requireAuth = true,
+  }) async {
+    if (requireAuth) _guardAuthenticated();
     try {
       return await body();
     } on PostgrestException catch (e) {
@@ -102,6 +106,34 @@ class SupabaseShareRemoteDataSource implements ShareRemoteDataSource {
       params: {'p_link_id': linkId, 'p_photo_count': photoCount},
     ),
   );
+
+  @override
+  Future<SharedMemoryPreviewModel?> getSharedPreview(String slug) => _guard(
+    () async {
+      final json = await _client.rpc<Map<String, dynamic>?>(
+        DBFunctions.getSharedMemoryPreview,
+        params: {'p_slug': slug},
+      );
+      if (json == null) return null;
+      final bucket = _client.storage.from(Storage.sharePreviews);
+      return SharedMemoryPreviewModel.fromJson(
+        json,
+        publicUrl: bucket.getPublicUrl,
+      );
+    },
+    requireAuth: false,
+  );
+
+  @override
+  Future<String?> findOwnTripIdForSlug(String slug) => _guard(() async {
+    final row = await _client
+        .from(Tables.tripShareLinks)
+        .select('trip_id')
+        .eq('slug', slug)
+        .isFilter('revoked_at', null)
+        .maybeSingle();
+    return row?['trip_id'] as String?;
+  });
 }
 
 AppException _mapPostgrestException(PostgrestException e) {

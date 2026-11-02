@@ -1,0 +1,7 @@
+# Cloudflare Pages project for storyni.app (#310). Deploy with
+# `npx wrangler pages deploy public` from this folder (functions/ is picked
+# up automatically). Secrets/vars are set in the Pages dashboard — see
+# README.md; never commit keys here.
+name = "storyni-share"
+pages_build_output_dir = "public"
+compatibility_date = "2026-10-01"
