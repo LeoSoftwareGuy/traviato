@@ -1,6 +1,6 @@
 # Wrap-Up Film v2 — Director + Renderer (design)
 
-Status: **proposal, not started** · Date: 2026-11-08 · Owner: Leo
+Status: **Part 1 (director) shipped behind a flag** (#328, fixes #332–#338); Part 2 not started · Date: 2026-11-08 · Owner: Leo
 Replaces: Milestone 7 "themes" in `issue-backlog.md` (the director picks a recipe; the user can override).
 Related issues: #291, #292 (ordering bugs), #293 (AI lines), #294 (choose photos).
 
@@ -70,6 +70,83 @@ Opening (dust/invitation), stats footnote, badge unlock and keepsake stay fixed 
 | outdoors | camping, hiking, fishing | slow-medium | ken_burns (wide), polaroid | folk/acoustic | earthy, self-deprecating |
 | city_break | city trips | medium | collage, split, card_flip | upbeat indie | curious, light |
 | warm_family | birthdays, family | medium | polaroid_drop, collage_3 | gentle, cheerful | warm |
+
+### Proposal: recipe = rhythm, theme = look (2026-11-08, #342)
+Status: **proposal**, to be decided before build-order step 4.
+
+**Problem.** One recipe per occasion grows linearly. Every new occasion (fishing, safari, sports event…)
+would need its own pace, scene mix, look and music, all built and licensed again.
+
+**Proposal.** Split a film's style into two independent layers that the director picks separately:
+
+| Layer | Decides | Cost to add one |
+|---|---|---|
+| **Rhythm** (today's `recipe`) | pace, scene types it may use, scene length, bursts, line tone | high: scene code + validation rules |
+| **Theme** (new) | colours, colour grade, overlays (grain, light leaks, frames), fonts, music pool | low: design assets + tracks, no scene code |
+
+Every theme works with every rhythm, so 3 rhythms × 4 themes gives 12 distinct-looking films for about 7
+pieces of work, instead of 12 recipes.
+
+**Rhythms (first set).** This replaces the six-recipe table above:
+
+| Rhythm | Pace | Scene bias | Replaces |
+|---|---|---|---|
+| `keepsake` | slow, 4–6s | card_flip, collage, ken_burns | keepsake, city_break |
+| `rave` | fast, beat-cut, 1.5–4s | burst, split, collage_6 | rave |
+| `epic` (new) | slow-medium | ken_burns (wide landscapes), polaroid_drop | outdoors |
+| `warm` (new) | medium | polaroid_drop, collage_3/4 | celebration, warm_family |
+
+**Themes (first set).** `classic` (today's look, the default), `nature`, `celebration`, `night`.
+Later: `city`, `sea`, `snow`, `stadium`.
+
+**Occasions.** These only steer the director's reasoning and line tone, so the list is cheap to extend:
+
+| Occasion | Default rhythm | Default theme |
+|---|---|---|
+| wedding | warm | celebration |
+| birthday | warm | celebration |
+| family | warm | classic |
+| party | rave | night |
+| festival_concert | rave | night |
+| sports_event | rave | classic → `stadium` later |
+| camping_hiking | epic | nature |
+| fishing_hunting | epic | nature |
+| safari_wildlife | epic | nature |
+| beach | keepsake | classic → `sea` later |
+| road_trip | epic | nature |
+| city | keepsake | classic → `city` later |
+| other | keepsake | classic |
+
+These are *defaults*: the director may deviate when the photo analysis says otherwise (a wedding
+after-party can be `rave` + `night`) and says why in `reasoning`.
+
+**Vibes as hints.** The memory's vibes are already in the plan input. They nudge the theme, never force it:
+
+| Vibe | Theme hint |
+|---|---|
+| Adventure, Wildlife, Road trip | nature |
+| Nightlife | night |
+| Romantic | celebration |
+| Cultural, Foodie | classic (`city` later) |
+| Chill, Wellness | classic (`sea` later) |
+| Photography | none: favour `epic` / ken_burns heroes |
+
+**Schema.** Add `"theme"` next to `"recipe"` in the plan, and add the new occasion values. A plan without
+`theme` plays `classic`, so stored v2 plans stay valid. Validation checks the theme against the enabled
+list, as with recipes.
+
+**What the user sees.** One **"Change style"** picker (step 7) showing curated rhythm + theme
+combinations with a preview, rather than two technical controls. Pro gating fits themes naturally
+(free: `classic` + one more).
+
+**Build-order impact.** Step 4 becomes "2 rhythms + 2 themes first" (e.g. `keepsake`/`rave` ×
+`classic`/`nature`). The director only offers rhythms and themes the player can render, as today with
+recipes.
+
+**Open questions.**
+1. Which 2 rhythms + 2 themes ship first?
+2. Music: one pool per theme, or per theme × energy? This drives how many tracks need licensing.
+3. Does `epic` need `ken_burns` (step 3) before it can ship? Probably yes.
 
 ### Cost & privacy
 - Vision input costs more than text; with ~512px images and one film per memory, expect cents to tens of
