@@ -390,7 +390,7 @@ export async function runDirector(
         problems = [`plan call failed: ${(err as Error).message}`];
         continue;
       }
-      toolInput = repairFilmPlan(toolInput);
+      toolInput = repairFilmPlan(toolInput, context);
       problems = describeFilmPlanProblems(toolInput, context);
       if (problems.length === 0) {
         record.status = "planned";
