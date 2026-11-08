@@ -117,7 +117,9 @@ export const SCENE_PHOTO_COUNT: Record<SceneType, [number, number]> = {
   text_card: [0, 0],
 };
 
-export const MIN_TOTAL_SECONDS = 45;
+// Lowered from 45s (#334): a shorter plan that fits the memory beats the
+// template fallback. To be tuned per photo count after real films.
+export const MIN_TOTAL_SECONDS = 30;
 export const MAX_TOTAL_SECONDS = 100;
 export const MIN_CHAPTERS = 2;
 export const MAX_CHAPTERS = 3;
@@ -494,7 +496,11 @@ const COLLAGES: readonly string[] = ["collage_3", "collage_4", "collage_6"];
 // - a collage with only 1–2 photos becomes that many card_flip scenes (the
 //   keepsake recipe has no 2-photo scene, so a leftover pair otherwise ends
 //   up in a collage_3). Each keeps the collage's duration, emphasis and
-//   order; the caption stays on the first.
+//   order; the caption stays on the first;
+// - a burst with only 2 photos becomes a split (#334);
+// - a film shorter than MIN_TOTAL_SECONDS has every scene stretched by the
+//   same factor, each capped at its recipe's maximum (#334). If the caps
+//   stop it short, validation still reports the total.
 // Never throws; input that isn't plan-shaped is returned as is for
 // describeFilmPlanProblems to report.
 export function repairFilmPlan(data: unknown): unknown {
@@ -512,6 +518,9 @@ export function repairFilmPlan(data: unknown): unknown {
       if (typeof scene !== "object" || scene === null) return [scene];
       const sc = scene as Record<string, unknown>;
       const ids = sc.photo_ids;
+      if (sc.type === "burst" && Array.isArray(ids) && ids.length === 2) {
+        return [{ ...sc, type: "split" }];
+      }
       if (
         !COLLAGES.includes(sc.type as string) || !Array.isArray(ids) ||
         ids.length === 0 || ids.length > 2
@@ -526,7 +535,39 @@ export function repairFilmPlan(data: unknown): unknown {
       }));
     });
   }
+  stretchToMinimum(plan);
   return plan;
+}
+
+function stretchToMinimum(plan: Record<string, unknown>): void {
+  if (!isOneOf(RECIPES, plan.recipe)) return;
+  const { maxDuration } = RECIPE_RULES[plan.recipe];
+  const scenes = (plan.chapters as unknown[]).flatMap((c) =>
+    typeof c === "object" && c !== null &&
+      Array.isArray((c as Record<string, unknown>).scenes)
+      ? (c as { scenes: unknown[] }).scenes
+      : []
+  ) as Record<string, unknown>[];
+  if (
+    !scenes.every((sc) =>
+      typeof sc === "object" && sc !== null &&
+      typeof sc.duration_s === "number" && isFinite(sc.duration_s) &&
+      sc.duration_s > 0
+    )
+  ) {
+    return;
+  }
+  const total = scenes.reduce((sum, sc) => sum + (sc.duration_s as number), 0);
+  if (total === 0 || total >= MIN_TOTAL_SECONDS) return;
+  const factor = MIN_TOTAL_SECONDS / total;
+  for (const sc of scenes) {
+    const d = sc.duration_s as number;
+    // Rounded up to 0.1s so the stretched total doesn't land just short.
+    sc.duration_s = Math.min(
+      Math.max(d, maxDuration),
+      Math.ceil(d * factor * 10) / 10,
+    );
+  }
 }
 
 export function totalSceneSeconds(plan: FilmPlan): number {

@@ -162,7 +162,9 @@ function recipeLines(): string {
     const r = RECIPE_RULES[recipe];
     return `- ${recipe}: fits ${r.fits}. Scenes: ${
       r.scenes.join(", ")
-    }. Each scene ${r.minDuration}–${r.maxDuration}s.${
+    }. Each scene ${r.minDuration}–${r.maxDuration}s, so at least ${
+      Math.ceil(MIN_TOTAL_SECONDS / r.maxDuration)
+    } scenes.${
       r.minBursts > 0 ? ` At least ${r.minBursts} bursts.` : ""
     } Tone: ${r.tone}.`;
   }).join("\n");
