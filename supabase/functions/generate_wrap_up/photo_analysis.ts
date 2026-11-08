@@ -1,10 +1,11 @@
 // Director call 1 (#328): what is visible in each photo, cached per photo in
 // public.photo_analysis so a rebuild only analyses new or changed photos.
 //
-// Photos are downscaled to ~512px before they're sent (Storage image
-// transforms). Where transforms aren't available (hosted projects without
-// them) the stored JPEG is sent as-is — Anthropic resizes it, at a higher
-// token cost.
+// Photos go to Anthropic as signed Storage URLs that Anthropic fetches
+// itself (#332): the function never holds image bytes, so its memory and
+// CPU don't grow with the number of photos. Where Storage image transforms
+// work (Pro / local) the URLs point at a ~512px render; otherwise at the
+// stored file, which Anthropic resizes at a higher token cost.
 //
 // The model only describes what it sees. It never guesses names,
 // identities, ages, ethnicity or relationships — `people` is a count.
@@ -68,10 +69,10 @@ export interface PhotoAnalysisRow extends PhotoAnalysis {
 
 type Photo = TripData["photos"][number];
 
-export interface EncodedImage {
-  mediaType: string;
-  base64: string;
-}
+// Signed URLs for [storagePaths], in order; null where signing failed.
+export type ImageUrlSigner = (
+  storagePaths: string[],
+) => Promise<(string | null)[]>;
 
 export const photoAnalysisToolSchema: ToolDefinition = {
   name: "emit_photo_analysis",
@@ -256,55 +257,67 @@ export async function loadCachedAnalysis(
   );
 }
 
-export function encodeBase64(bytes: Uint8Array): string {
-  let binary = "";
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+const TRANSFORM = {
+  width: IMAGE_SIZE,
+  height: IMAGE_SIZE,
+  resize: "contain",
+  quality: 70,
+} as const;
+
+// Whether Storage serves ~512px renders on this project: one small fetch of
+// [samplePath]'s render. Off on hosted projects without image transforms.
+export async function imageTransformsWork(
+  client: SupabaseClient,
+  samplePath: string,
+  fetchImpl: FetchLike = fetch,
+): Promise<boolean> {
+  try {
+    const { data } = await client.storage.from(PHOTO_BUCKET).createSignedUrl(
+      samplePath,
+      SIGNED_URL_SECONDS,
+      { transform: TRANSFORM },
+    );
+    if (!data?.signedUrl) return false;
+    const response = await fetchImpl(data.signedUrl);
+    const type = response.headers.get("content-type") ?? "";
+    await response.body?.cancel();
+    return response.ok && type.startsWith("image/");
+  } catch {
+    return false;
   }
-  return btoa(binary);
 }
 
-// A ~512px JPEG of the photo: Storage's image transform, or the stored file
-// when transforms aren't available.
-export async function fetchPhotoImage(
+// Signs URLs Anthropic can fetch for a few minutes — the ~512px render
+// when [useTransform], else the stored file.
+export function storageImageUrlSigner(
   client: SupabaseClient,
-  storagePath: string,
-  fetchImpl: FetchLike = fetch,
-): Promise<EncodedImage> {
+  useTransform: boolean,
+): ImageUrlSigner {
   const bucket = client.storage.from(PHOTO_BUCKET);
-  const { data: signed } = await bucket.createSignedUrl(
-    storagePath,
-    SIGNED_URL_SECONDS,
-    {
-      transform: {
-        width: IMAGE_SIZE,
-        height: IMAGE_SIZE,
-        resize: "contain",
-        quality: 70,
-      },
-    },
-  );
-  if (signed?.signedUrl) {
-    try {
-      const response = await fetchImpl(signed.signedUrl);
-      if (response.ok) {
-        const type = response.headers.get("content-type") ?? "image/jpeg";
-        const bytes = new Uint8Array(await response.arrayBuffer());
-        if (bytes.length > 0 && type.startsWith("image/")) {
-          return { mediaType: type.split(";")[0], base64: encodeBase64(bytes) };
-        }
-      }
-    } catch {
-      // Fall through to the stored file.
-    }
+  if (useTransform) {
+    return (paths) =>
+      Promise.all(paths.map(async (path) => {
+        const { data } = await bucket.createSignedUrl(
+          path,
+          SIGNED_URL_SECONDS,
+          { transform: TRANSFORM },
+        );
+        return data?.signedUrl ?? null;
+      }));
   }
-  const { data: blob, error } = await bucket.download(storagePath);
-  if (error || !blob) {
-    throw new Error(`photo download failed: ${error?.message ?? "no data"}`);
-  }
-  const bytes = new Uint8Array(await blob.arrayBuffer());
-  return { mediaType: blob.type || "image/jpeg", base64: encodeBase64(bytes) };
+  return async (paths) => {
+    const { data, error } = await bucket.createSignedUrls(
+      paths,
+      SIGNED_URL_SECONDS,
+    );
+    if (error || !data) return paths.map(() => null);
+    const byPath = new Map<string, string | null>(
+      (data as { path: string | null; signedUrl: string | null }[]).map(
+        (row) => [row.path ?? "", row.signedUrl ?? null],
+      ),
+    );
+    return paths.map((path) => byPath.get(path) ?? null);
+  };
 }
 
 export interface AnalysisDeps {
@@ -313,20 +326,22 @@ export interface AnalysisDeps {
   model: string;
   fetchImpl?: FetchLike;
   log?: LogLike;
-  // Overridable in tests.
-  loadImage?: (storagePath: string) => Promise<EncodedImage>;
+  // Overridable in tests; by default Storage signed URLs, 512px renders
+  // when the project supports them.
+  signImageUrls?: ImageUrlSigner;
 }
 
 export interface AnalysisRun {
   analysed: PhotoAnalysis[];
   usage: TokenUsage[];
-  // Photos that couldn't be analysed (download or model failure) — left
+  // Photos that couldn't be analysed (signing or model failure) — left
   // out of the plan rather than failing the film.
   failedIds: string[];
 }
 
 async function analyseBatch(
   deps: AnalysisDeps,
+  signImageUrls: ImageUrlSigner,
   batch: Photo[],
   batchIndex: number,
 ): Promise<AnalysisRun> {
@@ -334,26 +349,17 @@ async function analyseBatch(
   const content: unknown[] = [];
   const sent: string[] = [];
   const failedIds: string[] = [];
-  const loadImage = deps.loadImage ??
-    ((path: string) => fetchPhotoImage(deps.client, path, deps.fetchImpl));
-  const images = await Promise.allSettled(
-    batch.map((p) => loadImage(p.storage_path)),
+  const urls = await signImageUrls(batch.map((p) => p.storage_path)).catch(
+    () => batch.map(() => null),
   );
-  images.forEach((result, i) => {
-    const photo = batch[i];
-    if (result.status === "rejected") {
+  batch.forEach((photo, i) => {
+    const url = urls[i];
+    if (!url) {
       failedIds.push(photo.id);
       return;
     }
     content.push({ type: "text", text: `Photo id: ${photo.id}` });
-    content.push({
-      type: "image",
-      source: {
-        type: "base64",
-        media_type: result.value.mediaType,
-        data: result.value.base64,
-      },
-    });
+    content.push({ type: "image", source: { type: "url", url } });
     sent.push(photo.id);
   });
   if (sent.length === 0) return { analysed: [], usage, failedIds };
@@ -413,13 +419,23 @@ export async function analysePhotos(
     batches.push(photos.slice(i, i + ANALYSIS_BATCH_SIZE));
   }
   const run: AnalysisRun = { analysed: [], usage: [], failedIds: [] };
+  if (photos.length === 0) return run;
+  const signImageUrls = deps.signImageUrls ??
+    storageImageUrlSigner(
+      deps.client,
+      await imageTransformsWork(
+        deps.client,
+        photos[0].storage_path,
+        deps.fetchImpl,
+      ),
+    );
   // Batch tags are unique per run, so dup groups never collide with a
   // cached row's tag from an earlier run.
   const stamp = Date.now().toString(36);
   for (let i = 0; i < batches.length; i += ANALYSIS_CONCURRENCY) {
     const results = await Promise.all(
       batches.slice(i, i + ANALYSIS_CONCURRENCY).map((batch, j) =>
-        analyseBatch(deps, batch, i + j).then((r) => ({
+        analyseBatch(deps, signImageUrls, batch, i + j).then((r) => ({
           ...r,
           analysed: r.analysed.map((a) => ({
             ...a,

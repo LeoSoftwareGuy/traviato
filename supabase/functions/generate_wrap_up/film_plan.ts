@@ -486,6 +486,49 @@ export function describeFilmPlanProblems(
   return problems;
 }
 
+const COLLAGES: readonly string[] = ["collage_3", "collage_4", "collage_6"];
+
+// Fixes, before validation, what the model gets wrong but code can put
+// right without guessing (#332):
+// - plan_version is always PLAN_VERSION;
+// - a collage with only 1–2 photos becomes that many card_flip scenes (the
+//   keepsake recipe has no 2-photo scene, so a leftover pair otherwise ends
+//   up in a collage_3). Each keeps the collage's duration, emphasis and
+//   order; the caption stays on the first.
+// Never throws; input that isn't plan-shaped is returned as is for
+// describeFilmPlanProblems to report.
+export function repairFilmPlan(data: unknown): unknown {
+  if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    return data;
+  }
+  const plan = structuredClone(data) as Record<string, unknown>;
+  plan.plan_version = PLAN_VERSION;
+  if (!Array.isArray(plan.chapters)) return plan;
+  for (const chapter of plan.chapters) {
+    if (typeof chapter !== "object" || chapter === null) continue;
+    const c = chapter as Record<string, unknown>;
+    if (!Array.isArray(c.scenes)) continue;
+    c.scenes = c.scenes.flatMap((scene) => {
+      if (typeof scene !== "object" || scene === null) return [scene];
+      const sc = scene as Record<string, unknown>;
+      const ids = sc.photo_ids;
+      if (
+        !COLLAGES.includes(sc.type as string) || !Array.isArray(ids) ||
+        ids.length === 0 || ids.length > 2
+      ) {
+        return [scene];
+      }
+      return ids.map((id, i) => ({
+        ...sc,
+        type: "card_flip",
+        photo_ids: [id],
+        caption_note_id: i === 0 ? sc.caption_note_id ?? null : null,
+      }));
+    });
+  }
+  return plan;
+}
+
 export function totalSceneSeconds(plan: FilmPlan): number {
   return plan.chapters.reduce(
     (sum, chapter) =>

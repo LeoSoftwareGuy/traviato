@@ -16,6 +16,7 @@ import {
   DIRECTOR_PHOTO_IDS,
   directorTripData,
   keepsakePlan,
+  keepsakePlanWithFixableFaults,
   toolResponse,
 } from "./director_fixtures.ts";
 import type { TripData } from "./gather.ts";
@@ -69,8 +70,8 @@ function deps(
       fetchImpl,
       log: (line: string) => logs.push(line),
       now: () => new Date("2026-11-08T12:00:00Z"),
-      loadImage: () =>
-        Promise.resolve({ mediaType: "image/jpeg", base64: "AA" }),
+      signImageUrls: (paths: string[]) =>
+        Promise.resolve(paths.map((p) => `https://signed.test/${p}`)),
     },
   };
 }
@@ -269,4 +270,59 @@ Deno.test("currentPlan drops a plan once its photos or picks changed", () => {
     null,
   );
   assertEquals(currentPlan(null, directorTripData(), "en"), null);
+});
+
+Deno.test("runDirector repairs fixable plan faults instead of retrying", async () => {
+  const anthropic = fakeAnthropic([keepsakePlanWithFixableFaults()]);
+  const { deps: d } = deps(anthropic.fetchImpl);
+
+  const record = await runDirector(d, TRIP_ID, directorTripData(), "en");
+
+  assertEquals(record.status, "planned");
+  assertEquals(record.attempts, 1);
+  assertEquals(record.plan?.plan_version, 2);
+  assertEquals(
+    anthropic.sent.filter((s) => s.tool === "emit_film_plan").length,
+    1,
+  );
+});
+
+Deno.test("runDirector sends strict tools: closed objects, no unsupported keywords", async () => {
+  const anthropic = fakeAnthropic([keepsakePlan()]);
+  const { deps: d } = deps(anthropic.fetchImpl);
+
+  await runDirector(d, TRIP_ID, directorTripData(), "en");
+
+  const unsupported = [
+    "minimum",
+    "maximum",
+    "minItems",
+    "maxItems",
+    "minLength",
+    "maxLength",
+  ];
+  for (const { body } of anthropic.sent) {
+    const tool = (body.tools as Record<string, unknown>[])[0];
+    assertEquals(tool.strict, true);
+    const walk = (node: unknown, path: string): void => {
+      if (Array.isArray(node)) {
+        return node.forEach((n, i) => walk(n, `${path}[${i}]`));
+      }
+      if (typeof node !== "object" || node === null) return;
+      const o = node as Record<string, unknown>;
+      for (const key of unsupported) {
+        assert(!(key in o), `${path}.${key} sent to a strict tool`);
+      }
+      const type = o.type;
+      if (
+        type === "object" || (Array.isArray(type) && type.includes("object"))
+      ) {
+        assertEquals(o.additionalProperties, false, `${path} is not closed`);
+      }
+      for (const [k, v] of Object.entries(o)) {
+        if (k !== "enum" && k !== "required") walk(v, `${path}.${k}`);
+      }
+    };
+    walk(tool.input_schema, tool.name as string);
+  }
 });

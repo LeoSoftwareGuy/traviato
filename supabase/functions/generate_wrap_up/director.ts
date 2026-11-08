@@ -28,11 +28,12 @@ import {
   type PlanContext,
   RECIPE_RULES,
   RECIPES,
+  repairFilmPlan,
   SCENE_PHOTO_COUNT,
 } from "./film_plan.ts";
 import {
   analysePhotos,
-  type EncodedImage,
+  type ImageUrlSigner,
   loadCachedAnalysis,
   type PhotoAnalysis,
   photosNeedingAnalysis,
@@ -89,7 +90,7 @@ export interface DirectorDeps {
   log?: LogLike;
   now?: () => Date;
   // Overridable in tests.
-  loadImage?: (storagePath: string) => Promise<EncodedImage>;
+  signImageUrls?: ImageUrlSigner;
 }
 
 type Photo = TripData["photos"][number];
@@ -191,7 +192,9 @@ export function buildPlanSystemPrompt(language: WrapUpLanguage): string {
     recipeLines(),
     "\n\nPhotos per scene type:\n",
     sceneLines(),
-    "\n- text_card: shows its `text` line instead of photos.\n\n",
+    "\n- text_card: shows its `text` line instead of photos.\n",
+    "- A collage takes exactly its number of photos. Two photos left over ",
+    "make two card_flip scenes, never a collage.\n\n",
     "Rules:\n",
     "- Use only photo_ids and note_ids from the input. Never invent people, ",
     "places or events.\n",
@@ -311,7 +314,7 @@ export async function runDirector(
       model: DIRECTOR_MODEL,
       fetchImpl: deps.fetchImpl,
       log,
-      loadImage: deps.loadImage,
+      signImageUrls: deps.signImageUrls,
     }, toAnalyse);
     calls.push(...run.usage.map((u) => ({ ...u, call: "analysis" as const })));
     try {
@@ -385,6 +388,7 @@ export async function runDirector(
         problems = [`plan call failed: ${(err as Error).message}`];
         continue;
       }
+      toolInput = repairFilmPlan(toolInput);
       problems = describeFilmPlanProblems(toolInput, context);
       if (problems.length === 0) {
         record.status = "planned";
