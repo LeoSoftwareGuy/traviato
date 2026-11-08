@@ -20,6 +20,7 @@ abstract class Tables {
   static const expenses = 'expenses';
   static const memories = 'memories';
   static const wrapUps = 'wrap_ups';
+  static const photoAnalysis = 'photo_analysis';
   static const achievementTemplates = 'achievement_templates';
   static const userAchievements = 'user_achievements';
   static const entitlements = 'entitlements';
