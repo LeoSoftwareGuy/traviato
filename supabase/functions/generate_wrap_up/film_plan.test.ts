@@ -5,6 +5,7 @@ import {
 import {
   bannedPhraseIn,
   describeFilmPlanProblems,
+  MIN_TOTAL_SECONDS,
   repairFilmPlan,
 } from "./film_plan.ts";
 import {
@@ -79,14 +80,14 @@ Deno.test("photo counts per scene type are enforced", () => {
   hasProblem(problemsOf(split), "a split takes 2–3");
 });
 
-Deno.test("scene durations follow the recipe and the total is 45–100s", () => {
+Deno.test("scene durations follow the recipe and the total is 30–100s", () => {
   const slow = ravePlan();
   slow.chapters[0].scenes[0].duration_s = 5;
   hasProblem(problemsOf(slow), "rave scenes last 1.5–4s");
 
   const short = keepsakePlan();
-  short.chapters[1].scenes.splice(3, 3);
-  hasProblem(problemsOf(short), "scenes total 35s");
+  short.chapters[1].scenes.splice(1, 5);
+  hasProblem(problemsOf(short), "scenes total 25s");
 });
 
 Deno.test("a rave needs at least two bursts", () => {
@@ -203,4 +204,67 @@ Deno.test("repairFilmPlan leaves full collages and non-plans alone", () => {
   assertEquals(repairFilmPlan("plan"), "plan");
   const noChapters = repairFilmPlan({ recipe: "keepsake" });
   assertEquals(noChapters, { recipe: "keepsake", plan_version: 2 });
+});
+
+Deno.test("repairFilmPlan turns a 2-photo burst into a split", () => {
+  const plan = ravePlan();
+  const burst = plan.chapters.flatMap((c) => c.scenes).find((s) =>
+    s.type === "burst"
+  )!;
+  burst.photo_ids = burst.photo_ids.slice(0, 2);
+  assert(
+    describeFilmPlanProblems(plan, planContext()).some((p) =>
+      p.includes("a burst takes 3–6")
+    ),
+  );
+
+  const repaired = repairFilmPlan(plan) as ReturnType<typeof ravePlan>;
+
+  const split = repaired.chapters.flatMap((c) => c.scenes).find((s) =>
+    s.photo_ids.join() === burst.photo_ids.join()
+  )!;
+  assertEquals(split.type, "split");
+  assert(
+    !describeFilmPlanProblems(repaired, planContext()).some((p) =>
+      p.includes("photo_ids:")
+    ),
+  );
+});
+
+Deno.test("repairFilmPlan stretches a short film to the minimum, within the recipe max", () => {
+  const plan = ravePlan();
+  const scenes = plan.chapters.flatMap((c) => c.scenes);
+  scenes.forEach((s, i) => (s.duration_s = i === 0 ? 4 : 1.6));
+  const before = scenes.reduce((sum, s) => sum + s.duration_s, 0);
+  assert(before < MIN_TOTAL_SECONDS);
+
+  const repaired = repairFilmPlan(plan) as ReturnType<typeof ravePlan>;
+
+  const after = repaired.chapters.flatMap((c) => c.scenes);
+  const total = after.reduce((sum, s) => sum + s.duration_s, 0);
+  assert(total >= MIN_TOTAL_SECONDS, `total ${total}s`);
+  assert(after.every((s) => s.duration_s <= 4), "a scene went past 4s");
+  assertEquals(after[0].duration_s, 4);
+  assertEquals(
+    describeFilmPlanProblems(repaired, planContext()).filter((p) =>
+      p.startsWith("duration")
+    ),
+    [],
+  );
+});
+
+Deno.test("repairFilmPlan leaves a film the caps can't save to validation", () => {
+  const plan = ravePlan();
+  plan.chapters[0].scenes.splice(1);
+  plan.chapters[1].scenes.splice(1);
+  if (plan.chapters[2]) plan.chapters[2].scenes.splice(1);
+  const repaired = repairFilmPlan(plan) as ReturnType<typeof ravePlan>;
+  assert(
+    repaired.chapters.flatMap((c) => c.scenes).every((s) => s.duration_s <= 4),
+  );
+  assert(
+    describeFilmPlanProblems(repaired, planContext()).some((p) =>
+      p.startsWith("duration")
+    ),
+  );
 });

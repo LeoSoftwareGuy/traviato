@@ -33,7 +33,7 @@ an AI that **decides how each film is told**, not AI-generated video.
 4. **Call 2 — film plan**: analysis + notes + trip facts + recipe definitions → plan JSON via **tool use /
    structured output** (schema below).
 5. **Validate** in code: known scene types only, real photo ids only, no excluded photos, chronological
-   order, total length 45–100s, text length limits, language = UI language (#250). Invalid → one retry →
+   order, total length 30–100s (was 45, #334), text length limits, language = UI language (#250). Invalid → one retry →
    fall back to the current template.
 6. **Save** to `wrap_ups.content` (versioned: `plan_version: 2`).
 
