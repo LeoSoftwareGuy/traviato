@@ -13,6 +13,13 @@
 // call — the lines are written from notes, never photos) and its
 // published_at. It's the user's explicit "Photos changed · Rebuild film";
 // nothing else ever rewrites a kept film.
+//
+// Director (#328): when WRAP_UP_DIRECTOR_USER_IDS enables it for the caller,
+// a draft's first build also runs the director (director.ts) and stores the
+// run in wrap_ups.director; a still-valid plan is merged into the draft's
+// content as `plan_version: 2` + `plan`. `director: "rerun"` runs it again
+// (the dev Plan inspector). On a kept film a rerun writes only
+// wrap_ups.director — a kept film's content is never touched by it.
 
 import { gatherTripData, type TripData } from "./gather.ts";
 import {
@@ -27,6 +34,11 @@ import {
 import { computeAiInputHash } from "./ai_input_hash.ts";
 import { parseWrapUpLanguage, type WrapUpLanguage } from "./language.ts";
 import { logEvent, type LogLike, WrapUpGenerationError } from "./anthropic.ts";
+import {
+  currentPlan,
+  type DirectorRecord,
+  isDirectorRecord,
+} from "./director.ts";
 
 // deno-lint-ignore no-explicit-any
 type SupabaseClient = any;
@@ -44,6 +56,15 @@ export interface Deps {
   // Defaults to `console.error` — see anthropic.ts's `[generate_wrap_up]`
   // log lines (#166).
   log?: LogLike;
+  // The director (#328). Absent = off.
+  director?: {
+    isEnabledFor: (userId: string) => boolean;
+    run: (
+      tripId: string,
+      tripData: TripData,
+      language: WrapUpLanguage,
+    ) => Promise<DirectorRecord>;
+  };
 }
 
 function json(body: unknown, status: number): Response {
@@ -80,6 +101,8 @@ export async function handleRequest(
   const slots = parseMomentSlots(
     (body as Record<string, unknown>).moment_slots,
   );
+  // The dev Plan inspector's "Re-run director" (#328).
+  const directorRerun = (body as Record<string, unknown>).director === "rerun";
 
   const { data: userData, error: userError } = await deps.authClient(authHeader)
     .auth.getUser();
@@ -101,11 +124,18 @@ export async function handleRequest(
   if (trip.user_id !== userData.user.id) {
     return json({ error: "forbidden" }, 403);
   }
+  const directorOn = deps.director?.isEnabledFor(userData.user.id) ?? false;
+  if (directorRerun && !directorOn) {
+    return json({
+      error: "the director is not enabled for this account",
+      code: "director_disabled",
+    }, 403);
+  }
 
   const { data: existing, error: existingError } = await deps.serviceClient
     .from("wrap_ups")
     .select(
-      "content, generated_at, published_at, ai_fields, ai_input_hash, ai_generation_count",
+      "content, generated_at, published_at, ai_fields, ai_input_hash, ai_generation_count, director",
     )
     .eq("trip_id", tripId)
     .maybeSingle();
@@ -118,6 +148,9 @@ export async function handleRequest(
   // Kept forever → frozen: never regenerated (#187), only rebuilt on the
   // user's explicit request (#294).
   if (existing?.published_at && existing.content) {
+    if (directorRerun) {
+      return await rerunKeptDirector(deps, tripId, language, existing);
+    }
     if (rebuild && validateAiGeneratedFields(existing.ai_fields)) {
       return await rebuildKept(deps, tripId, existing.ai_fields, slots);
     }
@@ -195,7 +228,20 @@ export async function handleRequest(
     newCount = generationCount + 1;
   }
 
-  const content = assembleWrapUpContent(tripData, aiFields, slots);
+  // The director runs once per memory on its own, then only on a rerun.
+  let director: unknown = existing?.director ?? null;
+  let directorRan = false;
+  if (directorOn && (directorRerun || !isDirectorRecord(director))) {
+    director = await deps.director!.run(tripId, tripData, language);
+    directorRan = true;
+  }
+
+  const template = assembleWrapUpContent(tripData, aiFields, slots);
+  // Next to everything the current player reads, so it keeps playing.
+  const plan = directorOn ? currentPlan(director, tripData, language) : null;
+  const content = plan
+    ? { ...template, plan_version: 2 as const, plan }
+    : template;
   const generatedAt = new Date().toISOString();
   const row = {
     content,
@@ -205,6 +251,7 @@ export async function handleRequest(
     // retries — counted again, so still bounded by the cap.
     ai_input_hash: fieldsMatchInputs ? inputHash : storedHash,
     ai_generation_count: newCount,
+    ...(directorRan ? { director } : {}),
   };
 
   // Never delete-and-recreate (that would reset the counter), and never
@@ -225,7 +272,43 @@ export async function handleRequest(
     );
   }
 
-  return json({ content, generated_at: generatedAt }, 200);
+  return json({
+    content,
+    generated_at: generatedAt,
+    ...(directorRan ? { director } : {}),
+  }, 200);
+}
+
+// Runs the director again for a kept film (#328): only wrap_ups.director is
+// written, the kept content stays exactly as it was.
+async function rerunKeptDirector(
+  deps: Deps,
+  tripId: string,
+  language: WrapUpLanguage,
+  existing: { content: unknown; generated_at: string | null },
+): Promise<Response> {
+  let tripData: TripData;
+  try {
+    tripData = await gatherTripData(deps.serviceClient, tripId);
+  } catch (err) {
+    return json({
+      error: `failed to gather trip data: ${(err as Error).message}`,
+    }, 500);
+  }
+  const director = await deps.director!.run(tripId, tripData, language);
+  const { error } = await deps.serviceClient
+    .from("wrap_ups")
+    .update({ director })
+    .eq("trip_id", tripId)
+    .not("published_at", "is", null);
+  if (error) {
+    return json({ error: `failed to save wrap-up: ${error.message}` }, 500);
+  }
+  return json({
+    content: existing.content,
+    generated_at: existing.generated_at,
+    director,
+  }, 200);
 }
 
 // Re-assembles a kept film with its stored AI lines (#294). Only ever

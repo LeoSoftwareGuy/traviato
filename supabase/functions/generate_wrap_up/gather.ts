@@ -29,7 +29,13 @@ export interface TripData {
   };
   // created_at: when the note was first written — places a one-sentence
   // note in its day for collage captions (#302). Never sent to the AI.
-  notes: { day_date: string; content: string; created_at?: string | null }[];
+  // id: lets the director (#328) point a scene at a note.
+  notes: {
+    id?: string;
+    day_date: string;
+    content: string;
+    created_at?: string | null;
+  }[];
   photos: {
     id: string;
     day_date: string | null;
@@ -39,6 +45,9 @@ export interface TripData {
     storage_path: string;
     caption: string | null;
     use_in_wrap_up: boolean | null;
+    // Tagged on Photo detail; given to the director (#328) as facts.
+    place_text?: string | null;
+    people_tags?: string[];
   }[];
   completedBonusTasks: {
     completed_at: string;
@@ -71,13 +80,13 @@ export async function gatherTripData(
     await Promise.all([
       client
         .from("day_notes")
-        .select("day_date, content, created_at")
+        .select("id, day_date, content, created_at")
         .eq("trip_id", tripId)
         .order("day_date"),
       client
         .from("photos")
         .select(
-          "id, day_date, taken_at, created_at, storage_path, caption, use_in_wrap_up",
+          "id, day_date, taken_at, created_at, storage_path, caption, use_in_wrap_up, place_text, people_tags",
         )
         .eq("trip_id", tripId)
         .order("day_date")
@@ -131,6 +140,7 @@ export async function gatherTripData(
       cover_image_path: trip.cover_image_path ?? null,
     },
     notes: (notesRes.data ?? []).map((n: Record<string, unknown>) => ({
+      ...(typeof n.id === "string" ? { id: n.id } : {}),
       day_date: n.day_date as string,
       content: (n.content as string).slice(0, MAX_NOTE_CHARS),
       created_at: (n.created_at as string | null) ?? null,
@@ -143,6 +153,8 @@ export async function gatherTripData(
       storage_path: p.storage_path as string,
       caption: (p.caption as string | null) ?? null,
       use_in_wrap_up: (p.use_in_wrap_up as boolean | null) ?? null,
+      place_text: (p.place_text as string | null) ?? null,
+      people_tags: (p.people_tags as string[] | null) ?? [],
     })),
     completedBonusTasks: (bonusRes.data ?? []).map(
       (b: Record<string, unknown>) => {

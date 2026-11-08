@@ -6,6 +6,8 @@ import { gatherTripData } from "./gather.ts";
 import { computeAiInputHash } from "./ai_input_hash.ts";
 import type { AiGeneratedFields } from "./ai_fields.ts";
 import { validAiFields, validWrapUpContent } from "./test_fixtures.ts";
+import type { DirectorRecord } from "./director.ts";
+import { directorTripData, keepsakePlan } from "./director_fixtures.ts";
 
 const TRIP_ID = "trip-1";
 const OWNER_ID = "user-1";
@@ -558,7 +560,11 @@ Deno.test("moment_slots: 16 builds the 16-moment film; without it the 8-moment o
   }));
   const deps = () =>
     baseDeps({
-      serviceClient: fakeSupabaseClient({ ...DRAFT_TABLES, photos, wrap_ups: [] }),
+      serviceClient: fakeSupabaseClient({
+        ...DRAFT_TABLES,
+        photos,
+        wrap_ups: [],
+      }),
     });
 
   const sixteen = await (await handleRequest(
@@ -574,4 +580,192 @@ Deno.test("moment_slots: 16 builds the 16-moment film; without it the 8-moment o
   )).json();
   assertEquals("moment_slots" in eight.content, false);
   assertEquals(eight.content.moments.length, 8);
+});
+
+// --- Director (#328) ---
+
+function plannedRecord(): DirectorRecord {
+  return {
+    status: "planned",
+    plan: keepsakePlan(),
+    problems: [],
+    attempts: 1,
+    model: "claude-sonnet-5",
+    ran_at: "2026-11-08T12:00:00Z",
+    photos: { plannable: 12, analysed_now: 12, cached: 0, failed: 0 },
+    failed_ids: [],
+    photo_paths: {},
+    usage: { calls: [], input_tokens: 10, output_tokens: 5, estimated_usd: 0 },
+  };
+}
+
+// A draft memory whose photos and notes fit keepsakePlan().
+function directorClient(wrapUps: Record<string, unknown>[] = []) {
+  const data = directorTripData();
+  return fakeSupabaseClient({
+    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+    wrap_ups: wrapUps,
+    day_notes: data.notes,
+    photos: data.photos,
+    bonus_task_assignments: [],
+    points_ledger: [],
+    user_achievements: [],
+  });
+}
+
+function directorDeps(
+  client: ReturnType<typeof fakeSupabaseClient>,
+  { enabled = true, record = plannedRecord() } = {},
+) {
+  const runs: string[] = [];
+  return {
+    runs,
+    deps: baseDeps({
+      serviceClient: client,
+      director: {
+        isEnabledFor: (userId) => enabled && userId === OWNER_ID,
+        run: (tripId) => {
+          runs.push(tripId);
+          return Promise.resolve(record);
+        },
+      },
+    }),
+  };
+}
+
+Deno.test("director off: no run, no plan in the film, no director column written", async () => {
+  const client = directorClient();
+  const { runs, deps } = directorDeps(client, { enabled: false });
+
+  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
+  const json = await res.json();
+
+  assertEquals(res.status, 200);
+  assertEquals(runs, []);
+  assertEquals("plan" in json.content, false);
+  assertEquals("director" in client.writes[0].values, false);
+});
+
+Deno.test("director on: the first build runs it, stores the run and merges the plan", async () => {
+  const client = directorClient();
+  const { runs, deps } = directorDeps(client);
+
+  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
+  const json = await res.json();
+
+  assertEquals(res.status, 200);
+  assertEquals(runs, [TRIP_ID]);
+  assertEquals(json.content.plan_version, 2);
+  assertEquals(json.content.plan, keepsakePlan());
+  // Everything the current player reads is still there.
+  assertEquals(json.content.bridges, validAiFields.bridges);
+  assertEquals(json.content.moments.length > 0, true);
+  assertEquals(client.writes[0].values.director, plannedRecord());
+});
+
+Deno.test("director on, already run: no second run, the stored plan is still merged", async () => {
+  const client = directorClient([{
+    content: validWrapUpContent,
+    generated_at: "2026-11-01T00:00:00Z",
+    published_at: null,
+    ai_fields: validAiFields,
+    ai_input_hash: null,
+    ai_generation_count: 1,
+    director: plannedRecord(),
+  }]);
+  const { runs, deps } = directorDeps(client);
+
+  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
+  const json = await res.json();
+
+  assertEquals(runs, []);
+  assertEquals(json.content.plan, keepsakePlan());
+  assertEquals("director" in client.writes[0].values, false);
+});
+
+Deno.test("a fallback run leaves today's template film", async () => {
+  const client = directorClient();
+  const { deps } = directorDeps(client, {
+    record: { ...plannedRecord(), status: "fallback", plan: null },
+  });
+
+  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
+  const json = await res.json();
+
+  assertEquals(res.status, 200);
+  assertEquals("plan" in json.content, false);
+  assertEquals(client.writes[0].values.director.status, "fallback");
+});
+
+Deno.test("rerun is refused when the director isn't enabled for the caller", async () => {
+  const client = directorClient();
+  const { runs, deps } = directorDeps(client, { enabled: false });
+
+  const res = await handleRequest(
+    request({ trip_id: TRIP_ID, director: "rerun" }),
+    deps,
+  );
+  const json = await res.json();
+
+  assertEquals(res.status, 403);
+  assertEquals(json.code, "director_disabled");
+  assertEquals(runs, []);
+  assertEquals(client.writes, []);
+});
+
+Deno.test("rerun on a draft runs again even with a stored run", async () => {
+  const client = directorClient([{
+    content: validWrapUpContent,
+    generated_at: "2026-11-01T00:00:00Z",
+    published_at: null,
+    ai_fields: validAiFields,
+    ai_input_hash: null,
+    ai_generation_count: 1,
+    director: { ...plannedRecord(), status: "fallback", plan: null },
+  }]);
+  const { runs, deps } = directorDeps(client);
+
+  const res = await handleRequest(
+    request({ trip_id: TRIP_ID, director: "rerun" }),
+    deps,
+  );
+  const json = await res.json();
+
+  assertEquals(runs, [TRIP_ID]);
+  assertEquals(json.director.status, "planned");
+  assertEquals(json.content.plan_version, 2);
+});
+
+Deno.test("rerun on a kept film writes only wrap_ups.director, content untouched", async () => {
+  const client = keptClient();
+  const { runs, deps } = directorDeps(client);
+
+  const res = await handleRequest(
+    request({ trip_id: TRIP_ID, director: "rerun" }),
+    deps,
+  );
+  const json = await res.json();
+
+  assertEquals(res.status, 200);
+  assertEquals(runs, [TRIP_ID]);
+  assertEquals(json.content, validWrapUpContent);
+  assertEquals(json.director, plannedRecord());
+  assertEquals(client.writes.length, 1);
+  assertEquals(Object.keys(client.writes[0].values), ["director"]);
+  assertEquals(client.writes[0].filters, [
+    ["eq", "trip_id", TRIP_ID],
+    ["not", "published_at", null],
+  ]);
+});
+
+Deno.test("a kept film is never planned by an ordinary open", async () => {
+  const client = keptClient();
+  const { runs, deps } = directorDeps(client);
+
+  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
+  const json = await res.json();
+
+  assertEquals(runs, []);
+  assertEquals(json.content, validWrapUpContent);
+  assertEquals(client.writes, []);
 });

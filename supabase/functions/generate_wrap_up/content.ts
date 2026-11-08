@@ -6,6 +6,12 @@
 // Only four fields are genuinely AI-generated (invitation.line2, bridges,
 // unlock.reason, keepsake.closing_quote) — see ai_fields.ts. Everything else
 // here is assembled deterministically in assemble.ts from plain queries.
+//
+// plan_version + plan (#328): the director's film plan, present on a draft
+// when the director ran for the memory and its plan still fits. The current
+// player ignores both; the plan-driven player reads them.
+
+import type { FilmPlan } from "./film_plan.ts";
 
 export interface PhotoRef {
   photo_id: string;
@@ -69,6 +75,8 @@ export interface WrapUpContent {
     title_line2: string;
     closing_quote: string;
   };
+  plan_version?: 2;
+  plan?: FilmPlan;
 }
 
 function isString(v: unknown): v is string {
