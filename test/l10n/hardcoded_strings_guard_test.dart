@@ -16,6 +16,13 @@ const _allowed = {
   'Aa', // note page "type" button (localization spec 2a)
 };
 
+/// Debug-build-only screens, never routed in release — dev tooling, not UI
+/// copy, so they stay in plain English.
+const _debugOnlyFiles = {
+  // The wrap-up director's Plan inspector (#328).
+  'lib/features/wrap_up/presentation/pages/film_plan_inspector_page.dart',
+};
+
 Iterable<String> _copyLiterals(String source) => _textLiteral
     .allMatches(source)
     .map((m) => m.group(2)!)
@@ -28,7 +35,10 @@ void main() {
     final files = Directory('lib/features')
         .listSync(recursive: true)
         .whereType<File>()
-        .where((f) => f.path.endsWith('.dart'));
+        .where((f) => f.path.endsWith('.dart'))
+        .where(
+          (f) => !_debugOnlyFiles.contains(f.path.replaceAll('\\', '/')),
+        );
     for (final file in files) {
       for (final literal in _copyLiterals(file.readAsStringSync())) {
         offenders.add("${file.path.replaceAll('\\', '/')}: '$literal'");
