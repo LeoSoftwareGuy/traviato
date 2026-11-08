@@ -268,3 +268,70 @@ Deno.test("repairFilmPlan leaves a film the caps can't save to validation", () =
     ),
   );
 });
+
+Deno.test("repairFilmPlan nulls caption ids that aren't the memory's notes", () => {
+  const plan = keepsakePlan();
+  plan.chapters[0].scenes[0].caption_note_id = "n-invented";
+  plan.chapters[1].scenes[0].caption_note_id = "n2";
+  assert(
+    describeFilmPlanProblems(plan, planContext()).some((p) =>
+      p.includes("not a note id from the input")
+    ),
+  );
+
+  const repaired = repairFilmPlan(plan, planContext()) as ReturnType<
+    typeof keepsakePlan
+  >;
+
+  assertEquals(repaired.chapters[0].scenes[0].caption_note_id, null);
+  assertEquals(repaired.chapters[1].scenes[0].caption_note_id, "n2");
+  assertEquals(describeFilmPlanProblems(repaired, planContext()), []);
+});
+
+Deno.test("repairFilmPlan puts photos back in order, keeping the scene shape", () => {
+  const ids = DIRECTOR_PHOTO_IDS;
+  const plan = keepsakePlan();
+  // Swap the hero card_flip's photo with the next card_flip's: p04 before p00.
+  plan.chapters[0].scenes[0].photo_ids = [ids[4]];
+  plan.chapters[0].scenes[2].photo_ids = [ids[0]];
+  // And shuffle inside the collage_4.
+  plan.chapters[1].scenes[1].photo_ids = [ids[9], ids[6], ids[8], ids[7]];
+  assert(
+    describeFilmPlanProblems(plan, planContext()).some((p) =>
+      p.includes("out of chronological order")
+    ),
+  );
+  const shape = (p: ReturnType<typeof keepsakePlan>) =>
+    p.chapters.map((c) =>
+      c.scenes.map((s) => `${s.type}:${s.photo_ids.length}:${s.emphasis}`)
+    );
+
+  const repaired = repairFilmPlan(plan, planContext()) as ReturnType<
+    typeof keepsakePlan
+  >;
+
+  assertEquals(shape(repaired), shape(keepsakePlan()));
+  assertEquals(
+    repaired.chapters.flatMap((c) => c.scenes.flatMap((s) => s.photo_ids)),
+    ids,
+  );
+  assertEquals(describeFilmPlanProblems(repaired, planContext()), []);
+});
+
+Deno.test("repairFilmPlan leaves unknown and left-out ids where they are", () => {
+  const ids = DIRECTOR_PHOTO_IDS;
+  const plan = keepsakePlan();
+  plan.chapters[0].scenes[0].photo_ids = ["ghost"];
+  plan.chapters[0].scenes[2].photo_ids = [ids[0]];
+  const context = planContext({ excludedIds: new Set([ids[1]]) });
+
+  const repaired = repairFilmPlan(plan, context) as ReturnType<
+    typeof keepsakePlan
+  >;
+
+  assertEquals(repaired.chapters[0].scenes[0].photo_ids, ["ghost"]);
+  assertEquals(repaired.chapters[0].scenes[1].photo_ids[0], ids[1]);
+  const problems = describeFilmPlanProblems(repaired, context);
+  assert(problems.some((p) => p.includes('"ghost" is not a photo id')));
+  assert(problems.some((p) => p.includes("left out by the user")));
+});

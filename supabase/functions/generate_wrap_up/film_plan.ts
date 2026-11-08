@@ -501,9 +501,17 @@ const COLLAGES: readonly string[] = ["collage_3", "collage_4", "collage_6"];
 // - a film shorter than MIN_TOTAL_SECONDS has every scene stretched by the
 //   same factor, each capped at its recipe's maximum (#334). If the caps
 //   stop it short, validation still reports the total.
+// With [context] (#336):
+// - a caption_note_id that isn't one of the memory's notes becomes null;
+// - the plan's photos are put back in chronological order across the same
+//   slots: scene types, photo counts and durations stay, a photo may move
+//   to a neighbouring scene. Unknown or left-out ids keep their slot.
 // Never throws; input that isn't plan-shaped is returned as is for
 // describeFilmPlanProblems to report.
-export function repairFilmPlan(data: unknown): unknown {
+export function repairFilmPlan(
+  data: unknown,
+  context?: PlanContext,
+): unknown {
   if (typeof data !== "object" || data === null || Array.isArray(data)) {
     return data;
   }
@@ -535,22 +543,67 @@ export function repairFilmPlan(data: unknown): unknown {
       }));
     });
   }
+  if (context) {
+    dropUnknownCaptions(plan, context);
+    restoreChronology(plan, context);
+  }
   stretchToMinimum(plan);
   return plan;
+}
+
+function planScenes(plan: Record<string, unknown>): Record<string, unknown>[] {
+  if (!Array.isArray(plan.chapters)) return [];
+  return plan.chapters.flatMap((c) =>
+    typeof c === "object" && c !== null &&
+      Array.isArray((c as Record<string, unknown>).scenes)
+      ? (c as { scenes: unknown[] }).scenes
+      : []
+  ).filter((sc): sc is Record<string, unknown> =>
+    typeof sc === "object" && sc !== null
+  );
+}
+
+function dropUnknownCaptions(
+  plan: Record<string, unknown>,
+  context: PlanContext,
+): void {
+  for (const scene of planScenes(plan)) {
+    const id = scene.caption_note_id;
+    if (id !== null && id !== undefined && !context.noteIds.has(id as string)) {
+      scene.caption_note_id = null;
+    }
+  }
+}
+
+function restoreChronology(
+  plan: Record<string, unknown>,
+  context: PlanContext,
+): void {
+  const order = new Map(context.photoOrder.map((id, i) => [id, i]));
+  const isPlannable = (id: unknown): id is string =>
+    typeof id === "string" && order.has(id) && !context.excludedIds.has(id);
+  // Every slot holding a plannable photo, in plan order.
+  const slots: { ids: unknown[]; index: number }[] = [];
+  for (const scene of planScenes(plan)) {
+    if (!Array.isArray(scene.photo_ids)) continue;
+    scene.photo_ids.forEach((id, index) => {
+      if (isPlannable(id)) {
+        slots.push({ ids: scene.photo_ids as unknown[], index });
+      }
+    });
+  }
+  const sorted = slots
+    .map((slot) => slot.ids[slot.index] as string)
+    .sort((a, b) => order.get(a)! - order.get(b)!);
+  slots.forEach((slot, i) => (slot.ids[slot.index] = sorted[i]));
 }
 
 function stretchToMinimum(plan: Record<string, unknown>): void {
   if (!isOneOf(RECIPES, plan.recipe)) return;
   const { maxDuration } = RECIPE_RULES[plan.recipe];
-  const scenes = (plan.chapters as unknown[]).flatMap((c) =>
-    typeof c === "object" && c !== null &&
-      Array.isArray((c as Record<string, unknown>).scenes)
-      ? (c as { scenes: unknown[] }).scenes
-      : []
-  ) as Record<string, unknown>[];
+  const scenes = planScenes(plan);
   if (
     !scenes.every((sc) =>
-      typeof sc === "object" && sc !== null &&
       typeof sc.duration_s === "number" && isFinite(sc.duration_s) &&
       sc.duration_s > 0
     )
