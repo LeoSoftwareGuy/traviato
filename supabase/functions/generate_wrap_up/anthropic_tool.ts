@@ -55,6 +55,46 @@ interface ContentBlock {
   input?: unknown;
 }
 
+// Keywords strict tool use can't enforce (#332). They're dropped from what
+// is sent; the callers' own validation still checks them.
+const UNSUPPORTED_STRICT_KEYWORDS = new Set([
+  "minimum",
+  "maximum",
+  "exclusiveMinimum",
+  "exclusiveMaximum",
+  "multipleOf",
+  "minLength",
+  "maxLength",
+  "minItems",
+  "maxItems",
+  "uniqueItems",
+]);
+
+// [schema] made fit for `strict: true`: every object closed with
+// `additionalProperties: false`, unsupported keywords removed.
+export function toStrictSchema(schema: unknown): unknown {
+  if (Array.isArray(schema)) return schema.map(toStrictSchema);
+  if (typeof schema !== "object" || schema === null) return schema;
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(schema)) {
+    if (UNSUPPORTED_STRICT_KEYWORDS.has(key)) continue;
+    if (key === "properties" && typeof value === "object" && value !== null) {
+      out[key] = Object.fromEntries(
+        Object.entries(value).map(([name, sub]) => [name, toStrictSchema(sub)]),
+      );
+    } else if (key === "enum" || key === "required") {
+      out[key] = value;
+    } else {
+      out[key] = toStrictSchema(value);
+    }
+  }
+  const type = out.type;
+  if (type === "object" || (Array.isArray(type) && type.includes("object"))) {
+    out.additionalProperties = false;
+  }
+  return out;
+}
+
 function readUsage(body: Record<string, unknown>): TokenUsage {
   const usage = (body.usage ?? {}) as Record<string, unknown>;
   const n = (v: unknown) => (typeof v === "number" ? v : 0);
@@ -86,7 +126,13 @@ export async function callAnthropicTool(
         max_tokens: request.maxTokens,
         system: request.system,
         messages: [{ role: "user", content: request.content }],
-        tools: [request.tool],
+        // Strict: the model's tool input always matches the schema's
+        // types and enums (#332).
+        tools: [{
+          ...request.tool,
+          input_schema: toStrictSchema(request.tool.input_schema),
+          strict: true,
+        }],
         tool_choice: { type: "tool", name: request.tool.name },
       }),
     });

@@ -1,13 +1,19 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
-  encodeBase64,
+  analysePhotos,
+  imageTransformsWork,
   MAX_ANALYSED_PHOTOS,
   parsePhotoAnalysis,
   type PhotoAnalysisRow,
   photosNeedingAnalysis,
   plannablePhotos,
+  storageImageUrlSigner,
 } from "./photo_analysis.ts";
-import { analysisFor, directorTripData } from "./director_fixtures.ts";
+import {
+  analysisFor,
+  directorTripData,
+  toolResponse,
+} from "./director_fixtures.ts";
 import { parseDirectorFlag } from "./director_flag.ts";
 
 Deno.test("parsePhotoAnalysis keeps valid entries, prefixes dup groups, reports the rest", () => {
@@ -91,12 +97,121 @@ Deno.test("photosNeedingAnalysis skips photos cached from the same file", () => 
   );
 });
 
-Deno.test("encodeBase64 matches btoa", () => {
-  const bytes = new TextEncoder().encode("Storyni ✦");
+// A Storage bucket stub: createSignedUrl / createSignedUrls hand back
+// predictable URLs; paths in [missing] come back unsigned.
+function storageClient(missing: string[] = []) {
+  const calls: { method: string; args: unknown[] }[] = [];
+  const bucket = {
+    createSignedUrl: (path: string, seconds: number, options?: unknown) => {
+      calls.push({ method: "createSignedUrl", args: [path, seconds, options] });
+      return Promise.resolve({
+        data: { signedUrl: `https://render.test/${path}` },
+        error: null,
+      });
+    },
+    createSignedUrls: (paths: string[], seconds: number) => {
+      calls.push({ method: "createSignedUrls", args: [paths, seconds] });
+      return Promise.resolve({
+        data: paths.filter((p) => !missing.includes(p)).map((p) => ({
+          path: p,
+          signedUrl: `https://file.test/${p}`,
+          error: null,
+        })),
+        error: null,
+      });
+    },
+  };
+  return { calls, client: { storage: { from: () => bucket } } };
+}
+
+Deno.test("analysePhotos sends photos as URL image blocks, never base64", async () => {
+  const photos = directorTripData().photos.slice(0, 3);
+  const { client } = storageClient();
+  const bodies: Record<string, unknown>[] = [];
+  const fetchImpl = ((url: string | URL | Request, init?: RequestInit) => {
+    if (String(url).startsWith("https://render.test/")) {
+      // No image transforms on this project.
+      return Promise.resolve(new Response("not found", { status: 400 }));
+    }
+    const body = JSON.parse(init!.body as string);
+    bodies.push(body);
+    return Promise.resolve(
+      toolResponse("emit_photo_analysis", {
+        photos: photos.map((p) => analysisFor(p.id)),
+      }),
+    );
+  }) as typeof fetch;
+
+  const run = await analysePhotos({
+    client,
+    apiKey: "key",
+    model: "m",
+    fetchImpl,
+    log: () => {},
+  }, photos);
+
+  assertEquals(run.failedIds, []);
+  assertEquals(run.analysed.length, 3);
+  const content = (bodies[0].messages as { content: unknown[] }[])[0]
+    .content as { type: string; source?: Record<string, unknown> }[];
+  const images = content.filter((b) => b.type === "image");
   assertEquals(
-    encodeBase64(bytes),
-    btoa(String.fromCharCode(...bytes)),
+    images.map((b) => b.source),
+    photos.map((p) => ({
+      type: "url",
+      url: `https://file.test/${p.storage_path}`,
+    })),
   );
+  assertEquals(JSON.stringify(bodies[0]).includes("base64"), false);
+});
+
+Deno.test("analysePhotos uses 512px render URLs when transforms work", async () => {
+  const photos = directorTripData().photos.slice(0, 2);
+  const { client, calls } = storageClient();
+  const bodies: Record<string, unknown>[] = [];
+  const fetchImpl = ((url: string | URL | Request, init?: RequestInit) => {
+    if (String(url).startsWith("https://render.test/")) {
+      return Promise.resolve(
+        new Response("img", { headers: { "content-type": "image/jpeg" } }),
+      );
+    }
+    bodies.push(JSON.parse(init!.body as string));
+    return Promise.resolve(
+      toolResponse("emit_photo_analysis", {
+        photos: photos.map((p) => analysisFor(p.id)),
+      }),
+    );
+  }) as typeof fetch;
+
+  await analysePhotos({ client, apiKey: "k", model: "m", fetchImpl }, photos);
+
+  const content = (bodies[0].messages as { content: unknown[] }[])[0]
+    .content as { type: string; source?: { url: string } }[];
+  assertEquals(
+    content.filter((b) => b.type === "image").map((b) => b.source!.url),
+    photos.map((p) => `https://render.test/${p.storage_path}`),
+  );
+  assertEquals(calls.some((c) => c.method === "createSignedUrls"), false);
+});
+
+Deno.test("storageImageUrlSigner marks photos it couldn't sign as null", async () => {
+  const { client } = storageClient(["u/t/b.jpg"]);
+  const urls = await storageImageUrlSigner(client, false)([
+    "u/t/a.jpg",
+    "u/t/b.jpg",
+  ]);
+  assertEquals(urls, ["https://file.test/u/t/a.jpg", null]);
+});
+
+Deno.test("imageTransformsWork is false when the render isn't an image", async () => {
+  const { client } = storageClient();
+  const html = (() =>
+    Promise.resolve(
+      new Response("<html>", { headers: { "content-type": "text/html" } }),
+    )) as typeof fetch;
+  const failing = (() => Promise.reject(new Error("offline"))) as typeof fetch;
+  assertEquals(await imageTransformsWork(client, "u/t/a.jpg", html), false);
+  assertEquals(await imageTransformsWork(client, "u/t/a.jpg", failing), false);
 });
 
 Deno.test("parseDirectorFlag: listed ids, * for everyone, unset is off", () => {

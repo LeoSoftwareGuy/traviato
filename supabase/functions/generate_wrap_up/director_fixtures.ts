@@ -115,6 +115,20 @@ export function keepsakePlan(ids = DIRECTOR_PHOTO_IDS): FilmPlan {
   };
 }
 
+// keepsakePlan with the faults from the first hosted run (#332): no
+// plan_version, and a collage_3 holding only 2 photos.
+export function keepsakePlanWithFixableFaults(
+  ids = DIRECTOR_PHOTO_IDS,
+): Record<string, unknown> {
+  const plan = keepsakePlan(ids) as unknown as Record<string, unknown>;
+  delete plan.plan_version;
+  const chapters = plan.chapters as FilmPlan["chapters"];
+  chapters[0].scenes[1] = scene("collage_3", ids.slice(1, 3), {
+    caption_note_id: "n2",
+  });
+  return plan;
+}
+
 // A valid rave plan over DIRECTOR_PHOTO_IDS: 16 scenes × ~3s = 48s.
 export function ravePlan(ids = DIRECTOR_PHOTO_IDS): FilmPlan {
   const s = (

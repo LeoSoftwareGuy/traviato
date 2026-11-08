@@ -2,10 +2,15 @@ import {
   assert,
   assertEquals,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { bannedPhraseIn, describeFilmPlanProblems } from "./film_plan.ts";
+import {
+  bannedPhraseIn,
+  describeFilmPlanProblems,
+  repairFilmPlan,
+} from "./film_plan.ts";
 import {
   DIRECTOR_PHOTO_IDS,
   keepsakePlan,
+  keepsakePlanWithFixableFaults,
   planContext,
   ravePlan,
 } from "./director_fixtures.ts";
@@ -151,4 +156,51 @@ Deno.test("anything that isn't a plan object is rejected", () => {
   assertEquals(problemsOf(null), ["plan: expected an object"]);
   assert(problemsOf({}).length > 0);
   assertEquals(DIRECTOR_PHOTO_IDS.length, 12);
+});
+
+Deno.test("repairFilmPlan fixes plan_version and splits a 2-photo collage into card_flips", () => {
+  const broken = keepsakePlanWithFixableFaults();
+  assertEquals(describeFilmPlanProblems(broken, planContext()), [
+    "plan_version: expected 2",
+    "chapters[0].scenes[1].photo_ids: 2 photos, a collage_3 takes 3",
+  ]);
+
+  const repaired = repairFilmPlan(broken) as ReturnType<typeof keepsakePlan>;
+
+  assertEquals(describeFilmPlanProblems(repaired, planContext()), []);
+  assertEquals(repaired.plan_version, 2);
+  const ids = DIRECTOR_PHOTO_IDS;
+  assertEquals(
+    repaired.chapters[0].scenes.slice(1, 3).map((s) => ({
+      type: s.type,
+      photo_ids: s.photo_ids,
+      caption_note_id: s.caption_note_id,
+      duration_s: s.duration_s,
+    })),
+    [
+      {
+        type: "card_flip",
+        photo_ids: [ids[1]],
+        caption_note_id: "n2",
+        duration_s: 5,
+      },
+      {
+        type: "card_flip",
+        photo_ids: [ids[2]],
+        caption_note_id: null,
+        duration_s: 5,
+      },
+    ],
+  );
+  // The input is left as it was.
+  assertEquals("plan_version" in broken, false);
+});
+
+Deno.test("repairFilmPlan leaves full collages and non-plans alone", () => {
+  const plan = keepsakePlan();
+  assertEquals(repairFilmPlan(plan), plan);
+  assertEquals(repairFilmPlan(null), null);
+  assertEquals(repairFilmPlan("plan"), "plan");
+  const noChapters = repairFilmPlan({ recipe: "keepsake" });
+  assertEquals(noChapters, { recipe: "keepsake", plan_version: 2 });
 });
