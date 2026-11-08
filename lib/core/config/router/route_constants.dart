@@ -16,6 +16,9 @@ abstract class RoutePaths {
   static const tripJournal = '/memory/:tripId/journal';
   static const tripBonusTasks = '/memory/:tripId/bonus-tasks';
   static const tripWrapUp = '/memory/:tripId/wrap-up';
+
+  /// Debug builds only (#328): the wrap-up director's Plan inspector.
+  static const tripFilmPlan = '/memory/:tripId/film-plan';
   static const subscriptionOfferings = '/subscription/offerings';
 }
 
@@ -37,6 +40,7 @@ abstract class RouteNames {
   static const tripJournal = 'tripJournal';
   static const tripBonusTasks = 'tripBonusTasks';
   static const tripWrapUp = 'tripWrapUp';
+  static const tripFilmPlan = 'tripFilmPlan';
   static const subscriptionOfferings = 'subscriptionOfferings';
 }
 

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -21,6 +22,7 @@ import '../../../features/profile/presentation/pages/profile_page.dart';
 import '../../../features/quest/presentation/pages/plan_page.dart';
 import '../../../features/subscription/presentation/pages/paywall_page.dart';
 import '../../../features/trip/presentation/pages/create_memory_page.dart';
+import '../../../features/wrap_up/presentation/pages/film_plan_inspector_page.dart';
 import '../../../features/wrap_up/presentation/pages/wrap_up_page.dart';
 import 'route_constants.dart';
 
@@ -166,6 +168,14 @@ GoRouter router(Ref ref) {
               RouteQuery.fromMemory,
         ),
       ),
+      // The director's Plan inspector (#328) — never routed in release.
+      if (kDebugMode)
+        GoRoute(
+          path: RoutePaths.tripFilmPlan,
+          name: RouteNames.tripFilmPlan,
+          builder: (context, state) =>
+              FilmPlanInspectorPage(tripId: state.pathParameters['tripId']!),
+        ),
       GoRoute(
         path: RoutePaths.subscriptionOfferings,
         name: RouteNames.subscriptionOfferings,

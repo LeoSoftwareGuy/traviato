@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -93,6 +94,24 @@ class WrapUpFilmHud extends ConsumerWidget {
                     onPressed: () => _close(context),
                   ),
                 ),
+                // Debug builds only: the director's Plan inspector (#328).
+                if (kDebugMode) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  _HudScrim(
+                    child: IconButton(
+                      key: const Key('wrap-up-hud-film-plan'),
+                      tooltip: 'Plan inspector',
+                      icon: const Icon(
+                        Icons.movie_filter_outlined,
+                        color: AppColors.textOnPhoto,
+                      ),
+                      onPressed: () => context.pushNamed(
+                        RouteNames.tripFilmPlan,
+                        pathParameters: {'tripId': tripId},
+                      ),
+                    ),
+                  ),
+                ],
                 const Spacer(),
                 if (isPublished && isOutOfDate)
                   Flexible(
