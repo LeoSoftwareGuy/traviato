@@ -110,6 +110,18 @@ ai_generation_count int default 0`.
   client prunes references to since-deleted photos at playback. Clients can
   only set `published_at` (column grant), and never back to NULL.
 Post-MVP: `video_path`, `video_status`.
+- `director jsonb?` (#328, Wrap-Up Film v2): the last director run — the
+  `plan_version: 2` film plan or why it fell back, token usage + estimated
+  cost. Service-role writes, owner reads (debug Plan inspector). A draft's
+  `content` carries `plan_version` + `plan` while that plan still fits.
+
+### `photo_analysis` (#328)
+`photo_id PK/FK photos cascade, trip_id FK cascade, storage_path (the file
+analysed — a new path means re-analyse), summary (≤12 words, visible only),
+setting, people (0/1/2/small_group/crowd — a count, never identities),
+energy, quality, orientation, hero_score 1–5, dup_group?, model,
+analysed_at`. Cache of the director's vision call; owner select only,
+service-role writes.
 
 ## Views — unchanged
 `trip_card_view` (+stars, +expense_total as later migrations land),
