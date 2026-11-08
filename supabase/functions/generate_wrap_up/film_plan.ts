@@ -501,6 +501,7 @@ const COLLAGES: readonly string[] = ["collage_3", "collage_4", "collage_6"];
 // - a film shorter than MIN_TOTAL_SECONDS has every scene stretched by the
 //   same factor, each capped at its recipe's maximum (#334). If the caps
 //   stop it short, validation still reports the total.
+// - stray quotes around displayed lines are removed (#338);
 // With [context] (#336):
 // - a caption_note_id that isn't one of the memory's notes becomes null;
 // - the plan's photos are put back in chronological order across the same
@@ -543,6 +544,7 @@ export function repairFilmPlan(
       }));
     });
   }
+  cleanLines(plan);
   if (context) {
     dropUnknownCaptions(plan, context);
     restoreChronology(plan, context);
@@ -561,6 +563,55 @@ function planScenes(plan: Record<string, unknown>): Record<string, unknown>[] {
   ).filter((sc): sc is Record<string, unknown> =>
     typeof sc === "object" && sc !== null
   );
+}
+
+const OPENING_QUOTES = new Set(['"', "“", "«", "„"]);
+const CLOSING_QUOTES = new Set(['"', "”", "»", "“"]);
+const QUOTES = new Set([...OPENING_QUOTES, ...CLOSING_QUOTES]);
+
+function quoteCount(line: string): number {
+  return [...line].filter((ch) => QUOTES.has(ch)).length;
+}
+
+// [line] trimmed, without a quote pair wrapping all of it and without an
+// unmatched quote at either end. Quotes inside the line stay.
+export function cleanLine(line: string): string {
+  let out = line.trim();
+  for (;;) {
+    const first = out[0];
+    const last = out[out.length - 1];
+    if (
+      out.length >= 2 && OPENING_QUOTES.has(first) &&
+      CLOSING_QUOTES.has(last) && quoteCount(out.slice(1, -1)) % 2 === 0
+    ) {
+      out = out.slice(1, -1).trim();
+    } else if (quoteCount(out) % 2 === 1 && CLOSING_QUOTES.has(last)) {
+      out = out.slice(0, -1).trim();
+    } else if (quoteCount(out) % 2 === 1 && OPENING_QUOTES.has(first)) {
+      out = out.slice(1).trim();
+    } else {
+      return out;
+    }
+  }
+}
+
+function cleanLines(plan: Record<string, unknown>): void {
+  const clean = (v: unknown) => (typeof v === "string" ? cleanLine(v) : v);
+  plan.closing_line = clean(plan.closing_line);
+  const footnote = plan.footnote;
+  if (typeof footnote === "object" && footnote !== null) {
+    const f = footnote as Record<string, unknown>;
+    f.line = clean(f.line);
+  }
+  if (Array.isArray(plan.chapters)) {
+    for (const chapter of plan.chapters) {
+      if (typeof chapter === "object" && chapter !== null) {
+        const c = chapter as Record<string, unknown>;
+        c.bridge_line = clean(c.bridge_line);
+      }
+    }
+  }
+  for (const scene of planScenes(plan)) scene.text = clean(scene.text);
 }
 
 function dropUnknownCaptions(

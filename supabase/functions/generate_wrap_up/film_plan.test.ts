@@ -4,6 +4,7 @@ import {
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
   bannedPhraseIn,
+  cleanLine,
   describeFilmPlanProblems,
   MIN_TOTAL_SECONDS,
   repairFilmPlan,
@@ -334,4 +335,48 @@ Deno.test("repairFilmPlan leaves unknown and left-out ids where they are", () =>
   const problems = describeFilmPlanProblems(repaired, context);
   assert(problems.some((p) => p.includes('"ghost" is not a photo id')));
   assert(problems.some((p) => p.includes("left out by the user")));
+});
+
+Deno.test("cleanLine strips stray and wrapping quotes, keeps inner ones", () => {
+  // The two closing lines from the first real plans (#338).
+  assertEquals(
+    cleanLine('Dishdasha still folded in the suitcase, somewhere."'),
+    "Dishdasha still folded in the suitcase, somewhere.",
+  );
+  assertEquals(
+    cleanLine('Then home, to test the new coffee machine."'),
+    "Then home, to test the new coffee machine.",
+  );
+  assertEquals(
+    cleanLine('"Tired, full, and already missing it."'),
+    "Tired, full, and already missing it.",
+  );
+  assertEquals(
+    cleanLine("«Домой, к новой кофемашине.»"),
+    "Домой, к новой кофемашине.",
+  );
+  // Only the unmatched end quote goes; the matched pair stays.
+  assertEquals(cleanLine("“Wrapped” twice”"), "“Wrapped” twice");
+  assertEquals(
+    cleanLine('You called it "the fort" all week.'),
+    'You called it "the fort" all week.',
+  );
+  assertEquals(cleanLine("  No quotes at all.  "), "No quotes at all.");
+  assertEquals(cleanLine('"'), "");
+});
+
+Deno.test("repairFilmPlan cleans every displayed line", () => {
+  const plan = keepsakePlan();
+  plan.closing_line = 'You left with dry socks, barely."';
+  plan.footnote.line = '"Three days, one wet umbrella."';
+  plan.chapters[0].bridge_line = "«You came for the canals.»";
+  plan.chapters[0].scenes[3].text = 'And then the rain."';
+
+  const repaired = repairFilmPlan(plan) as ReturnType<typeof keepsakePlan>;
+
+  assertEquals(repaired.closing_line, "You left with dry socks, barely.");
+  assertEquals(repaired.footnote.line, "Three days, one wet umbrella.");
+  assertEquals(repaired.chapters[0].bridge_line, "You came for the canals.");
+  assertEquals(repaired.chapters[0].scenes[3].text, "And then the rain.");
+  assertEquals(repaired.chapters[0].scenes[0].text, null);
 });
