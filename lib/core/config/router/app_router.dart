@@ -23,6 +23,7 @@ import '../../../features/quest/presentation/pages/plan_page.dart';
 import '../../../features/subscription/presentation/pages/paywall_page.dart';
 import '../../../features/trip/presentation/pages/create_memory_page.dart';
 import '../../../features/wrap_up/presentation/pages/film_plan_inspector_page.dart';
+import '../../../features/wrap_up/presentation/pages/sky_story_preview_page.dart';
 import '../../../features/wrap_up/presentation/pages/wrap_up_page.dart';
 import 'route_constants.dart';
 
@@ -175,6 +176,13 @@ GoRouter router(Ref ref) {
           name: RouteNames.tripFilmPlan,
           builder: (context, state) =>
               FilmPlanInspectorPage(tripId: state.pathParameters['tripId']!),
+        ),
+      // The Sky Story film preview (#345) — never routed in release.
+      if (kDebugMode)
+        GoRoute(
+          path: RoutePaths.skyStoryPreview,
+          name: RouteNames.skyStoryPreview,
+          builder: (context, state) => const SkyStoryPreviewPage(),
         ),
       GoRoute(
         path: RoutePaths.subscriptionOfferings,
