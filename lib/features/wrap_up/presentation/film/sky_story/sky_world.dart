@@ -4,6 +4,7 @@ import 'package:flutter/animation.dart';
 
 import '../timeline/film_timeline.dart';
 import '../wrap_up_film_motion.dart';
+import 'sky_balloon_path.dart';
 import 'sky_scene_spec.dart';
 import 'sky_story_tokens.dart';
 
@@ -19,6 +20,7 @@ import 'sky_story_tokens.dart';
 class SkyWorld {
   SkyWorld(this.timeline)
     : gatherStart = timeline.first<SkyGatherSpec>()!.start,
+      balloon = SkyBalloonPath(timeline),
       _speed =
           climbToGather /
           _climbIntegral(timeline.first<SkyGatherSpec>()!.start);
@@ -37,6 +39,9 @@ class SkyWorld {
 
   final FilmTimeline<SkySceneSpec> timeline;
   final double gatherStart;
+
+  /// The big balloon, which rides with the camera (painted over the pages).
+  final SkyBalloonPath balloon;
   final double _speed;
 
   /// ∫ of the camera's speed profile (smoothstep ramp, then flat), in
@@ -226,66 +231,4 @@ class SkySmallBalloon {
 
   /// They drift up a touch faster than the world.
   static const double rise = 6;
-}
-
-/// Where the big balloon is, camera-relative (#345 spec §5): it rises out
-/// of the sunset, holds over the title, leaves upward; between pages it
-/// drifts across the middle of the frame. Null when it's off screen.
-({Offset center, double width})? heroBalloonAt(
-  double t,
-  FilmTimeline<SkySceneSpec> timeline,
-) {
-  final opening = timeline.first<SkyOpeningSpec>()!;
-  if (t < opening.end + 1.0) {
-    // Rise from below the frame and settle at (540, 700) by 3 s.
-    final settle = Curves.easeOutQuad.transform((t / 3.0).clamp(0.0, 1.0));
-    final leave = Curves.easeInCubic.transform(
-      ((t - (opening.end - 0.2)) / 1.1).clamp(0.0, 1.0),
-    );
-    final y = mix(2150, 700, settle) - leave * 1150;
-    return (
-      center: Offset(540, y + SkyWorld.bob(t, 0)),
-      width: 360,
-    );
-  }
-  for (final scene in timeline.scenes) {
-    final spec = scene.spec;
-    if (spec is! SkyInterludeSpec || spec.index == 0) continue;
-    if (t < scene.start || t > scene.end) continue;
-    // Across the centre, from lower left to upper right.
-    final u = (t - scene.start) / scene.duration;
-    return (
-      center: Offset(
-        mix(430, 870, u),
-        mix(1040, 260, u) + SkyWorld.bob(t, 1.3),
-      ),
-      width: 210,
-    );
-  }
-  return null;
-}
-
-/// The small balloon in a chapter page's top-right corner (spec §4), with
-/// its opacity: it arrives as a page comes in and leaves with it.
-({Offset center, double opacity})? cornerBalloonAt(
-  double t,
-  FilmTimeline<SkySceneSpec> timeline,
-) {
-  for (final scene in timeline.scenes) {
-    final spec = scene.spec;
-    if (spec is! SkyChapterSpec) continue;
-    // The first page's arrives as the title leaves (spec §5, 5–7 s);
-    // later ones once the big balloon has drifted past.
-    final inAt = spec.index == 0 ? scene.start - 2.0 : scene.start - 1.2;
-    if (t < inAt || t > scene.end + 0.6) continue;
-    final arrive = Curves.easeOutCubic.transform(
-      ((t - inAt) / 1.0).clamp(0.0, 1.0),
-    );
-    final opacity = band(t, inAt, 0.9, scene.end - 0.1, 0.6);
-    return (
-      center: Offset(930, 145 + (1 - arrive) * 140 + SkyWorld.bob(t, 2.1)),
-      opacity: opacity.clamp(0.0, 1.0),
-    );
-  }
-  return null;
 }

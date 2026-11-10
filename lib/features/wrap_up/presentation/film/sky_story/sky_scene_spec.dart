@@ -1,7 +1,9 @@
 import '../timeline/film_scene_spec.dart';
+import 'sky_story.dart';
 
-/// The Sky Story film's scenes (#345). Phase 1 carries only what the world
-/// needs (which beat is playing); the pages' data arrives with phases 2–4.
+/// The Sky Story film's scenes (#345): which beat is playing. What a page
+/// shows lives in `SkyStory`, by chapter index, so the timeline stays a
+/// plain, comparable schedule.
 sealed class SkySceneSpec extends FilmSceneSpec {
   const SkySceneSpec();
 }
@@ -33,6 +35,8 @@ final class SkyChapterSpec extends SkySceneSpec {
   final int count;
 
   bool get isLast => index == count - 1;
+
+  SkyPageLayout get layout => SkyPageLayout.forChapter(index, count);
 
   @override
   List<Object?> get props => [index, count];

@@ -3888,6 +3888,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Photos changed · Rebuild film'**
   String get film_outOfDate;
+
+  /// Sky Story film: small eyebrow over the memory's title on the opening page (#345); shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'A memory story'**
+  String get skyStory_eyebrowStory;
+
+  /// Sky Story film: a page's eyebrow, the day of the memory (#345); shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day}'**
+  String skyStory_day(int day);
+
+  /// Sky Story film: a page's eyebrow when the page covers several days (#345); shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'Days {first}–{last}'**
+  String skyStory_days(int first, int last);
+
+  /// Sky Story film: the day's photo count in a page's eyebrow (#345); shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 photo} other{{count} photos}}'**
+  String skyStory_photoCount(int count);
+
+  /// Sky Story film: the word under the big number in the round photo-count badge (#345); shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{photo} other{photos}}'**
+  String skyStory_photosLabel(int count);
+
+  /// Sky Story film: polaroid caption after the place, e.g. 'Alfama · Fri morning' (#345). weekday is abbreviated.
+  ///
+  /// In en, this message translates to:
+  /// **'{weekday} morning'**
+  String skyStory_morning(String weekday);
+
+  /// Sky Story film: polaroid caption, photo taken in the afternoon (#345).
+  ///
+  /// In en, this message translates to:
+  /// **'{weekday} afternoon'**
+  String skyStory_afternoon(String weekday);
+
+  /// Sky Story film: polaroid caption, photo taken in the evening (#345).
+  ///
+  /// In en, this message translates to:
+  /// **'{weekday} evening'**
+  String skyStory_evening(String weekday);
+
+  /// Sky Story film: polaroid caption, photo taken at night (#345).
+  ///
+  /// In en, this message translates to:
+  /// **'{weekday} night'**
+  String skyStory_night(String weekday);
 }
 
 class _AppLocalizationsDelegate

@@ -2316,5 +2316,84 @@
   "film_outOfDate": "Photos changed · Rebuild film",
   "@film_outOfDate": {
     "description": "Chip on a kept film after its photos or picks changed; tapping rebuilds it (#294)."
+  },
+  "skyStory_eyebrowStory": "A memory story",
+  "@skyStory_eyebrowStory": {
+    "description": "Sky Story film: small eyebrow over the memory's title on the opening page (#345); shown uppercase."
+  },
+  "skyStory_day": "Day {day}",
+  "@skyStory_day": {
+    "description": "Sky Story film: a page's eyebrow, the day of the memory (#345); shown uppercase.",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "skyStory_days": "Days {first}–{last}",
+  "@skyStory_days": {
+    "description": "Sky Story film: a page's eyebrow when the page covers several days (#345); shown uppercase.",
+    "placeholders": {
+      "first": {
+        "type": "int"
+      },
+      "last": {
+        "type": "int"
+      }
+    }
+  },
+  "skyStory_photoCount": "{count, plural, =1{1 photo} other{{count} photos}}",
+  "@skyStory_photoCount": {
+    "description": "Sky Story film: the day's photo count in a page's eyebrow (#345); shown uppercase.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "skyStory_photosLabel": "{count, plural, =1{photo} other{photos}}",
+  "@skyStory_photosLabel": {
+    "description": "Sky Story film: the word under the big number in the round photo-count badge (#345); shown uppercase.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "skyStory_morning": "{weekday} morning",
+  "@skyStory_morning": {
+    "description": "Sky Story film: polaroid caption after the place, e.g. 'Alfama · Fri morning' (#345). weekday is abbreviated.",
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "skyStory_afternoon": "{weekday} afternoon",
+  "@skyStory_afternoon": {
+    "description": "Sky Story film: polaroid caption, photo taken in the afternoon (#345).",
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "skyStory_evening": "{weekday} evening",
+  "@skyStory_evening": {
+    "description": "Sky Story film: polaroid caption, photo taken in the evening (#345).",
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "skyStory_night": "{weekday} night",
+  "@skyStory_night": {
+    "description": "Sky Story film: polaroid caption, photo taken at night (#345).",
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
   }
 }

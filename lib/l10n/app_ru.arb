@@ -2515,5 +2515,41 @@
   "film_outOfDate": "Фото изменились · Пересобрать фильм",
   "@film_outOfDate": {
     "x-review": "pending"
+  },
+  "skyStory_eyebrowStory": "История одного воспоминания",
+  "@skyStory_eyebrowStory": {
+    "x-review": "pending"
+  },
+  "skyStory_day": "День {day}",
+  "@skyStory_day": {
+    "x-review": "pending"
+  },
+  "skyStory_days": "Дни {first}–{last}",
+  "@skyStory_days": {
+    "x-review": "pending"
+  },
+  "skyStory_photoCount": "{count, plural, other{{count} фото}}",
+  "@skyStory_photoCount": {
+    "x-review": "pending"
+  },
+  "skyStory_photosLabel": "{count, plural, other{фото}}",
+  "@skyStory_photosLabel": {
+    "x-review": "pending"
+  },
+  "skyStory_morning": "{weekday}, утро",
+  "@skyStory_morning": {
+    "x-review": "pending"
+  },
+  "skyStory_afternoon": "{weekday}, день",
+  "@skyStory_afternoon": {
+    "x-review": "pending"
+  },
+  "skyStory_evening": "{weekday}, вечер",
+  "@skyStory_evening": {
+    "x-review": "pending"
+  },
+  "skyStory_night": "{weekday}, ночь",
+  "@skyStory_night": {
+    "x-review": "pending"
   }
 }
