@@ -44,6 +44,9 @@ class SkyPagesPainter extends CustomPainter {
   final List<SkyPageBeats> _beats;
   final double _openingEnd;
 
+  /// What a tilting page turns about: the middle of its photos and note.
+  static const _pageCenter = Offset(540, 1100);
+
   // Layout (spec §4), canvas px.
   static const heroCenter = Offset(540, 857);
   static const tapedHeroCenter = Offset(548, 850);
@@ -134,6 +137,13 @@ class SkyPagesPainter extends CustomPainter {
     canvas
       ..save()
       ..translate(0, beats.fallAt(t));
+    final tilt = beats.tiltAt(t);
+    if (tilt != 0) {
+      canvas
+        ..translate(_pageCenter.dx, _pageCenter.dy)
+        ..rotate(tilt)
+        ..translate(-_pageCenter.dx, -_pageCenter.dy);
+    }
     _fadeRise(canvas, t, beats.headerIn, text.eyebrow, text.eyebrowAt);
     _fadeRise(canvas, t, beats.headerIn + 0.1, text.headline, text.headlineAt);
     final page = story.pages[beats.index];

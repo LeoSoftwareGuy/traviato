@@ -162,6 +162,18 @@ void main() {
       expect(dip.center.dy, closeTo(800, 9));
     });
 
+    test('leaves the corner just before the page and passes over it', () {
+      // The reference's balloon at 16.375 / 16.625 / 16.875 s.
+      for (final (t, x, y) in const [
+        (16.375, 840.0, 300.0),
+        (16.625, 680.0, 600.0),
+        (16.875, 560.0, 780.0),
+      ]) {
+        final now = balloon.at(t)!.center;
+        expect((now - Offset(x, y)).distance, lessThan(70), reason: 't=$t');
+      }
+    });
+
     test("waits at the hub while the fly-out page's photos circle it", () {
       for (final t in [31.0, 33.0, 34.6]) {
         final hub = balloon.at(t)!;
@@ -202,6 +214,27 @@ void main() {
     for (var t = 0; t < 54; t += 2) {
       await tester.pump(const Duration(seconds: 2));
       expect(tester.takeException(), isNull, reason: 't=$t');
+    }
+  });
+
+  test('the interlude sky matches the reference (within 6 per channel)', () {
+    final world = SkyWorld(SkyStoryTimeline.forChapters(3));
+    for (final (t, y, ref) in const [
+      (18.0, 32.0, 0x1E1C48),
+      (18.0, 972.0, 0x332756),
+      (18.0, 1892.0, 0x5E3966),
+      (30.5, 32.0, 0x14183C),
+      (30.5, 972.0, 0x1E1C48),
+      (30.5, 1892.0, 0x322655),
+    ]) {
+      final ours = world.skyColor(y, t).toARGB32();
+      for (final shift in const [16, 8, 0]) {
+        expect(
+          ((ours >> shift) & 0xFF) - ((ref >> shift) & 0xFF),
+          inInclusiveRange(-6, 6),
+          reason: 't=$t y=$y',
+        );
+      }
     }
   });
 }
