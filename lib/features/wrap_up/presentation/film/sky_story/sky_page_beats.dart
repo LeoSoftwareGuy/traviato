@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:flutter/animation.dart';
+
 import '../timeline/film_timeline.dart';
 import 'sky_balloon_path.dart';
 import 'sky_scene_spec.dart';
@@ -17,7 +19,8 @@ import 'sky_story.dart';
 /// - fly-out: photos come out of the balloon from `c − 0.5` and circle it;
 ///   the hero spins in at `c + 3.25`; the quote's words settle from
 ///   `c + 4.4`.
-/// Every page falls away under gravity at its exit (`SkyBalloonPath`).
+/// Every page falls away at its exit (`SkyBalloonPath.exitStart`) along
+/// [fall]; a taped page tilts as it goes.
 class SkyPageBeats {
   SkyPageBeats(TimedScene<SkySceneSpec> chapter, {required this.previousEnd})
     : start = chapter.start,
@@ -51,9 +54,14 @@ class SkyPageBeats {
   SkyPageLayout get layout => spec.layout;
   int get index => spec.index;
 
-  /// Fall acceleration, px/s²: the reference's pages and title clear the
-  /// frame in about a second.
-  static const gravity = 1700.0;
+  /// How far a page has fallen [dt] s into its exit, px: a slow start,
+  /// then away. Fitted to the reference's headers at 0.125 s (#345 phase
+  /// 3): ~44 px at 0.25 s, ~190 at 0.5, ~960 at 1.0, ~1640 at 1.25.
+  static double fall(double dt) =>
+      dt <= 0 ? 0 : 960 * math.pow(dt, 2.35).toDouble();
+
+  /// A taped page's turn as it falls, radians (spec §5: "tilts ~−4°").
+  static const tapedExitTilt = -4 * math.pi / 180;
 
   static const fanDealGap = 0.25;
   static const orbitStagger = 0.15;
@@ -91,10 +99,14 @@ class SkyPageBeats {
   double get fanSignatureAt => start + 2.8;
 
   /// How far the page has fallen at [t].
-  double fallAt(double t) {
-    if (t <= exitStart) return 0;
-    final dt = t - exitStart;
-    return gravity * dt * dt;
+  double fallAt(double t) => fall(t - exitStart);
+
+  /// The page's turn about its centre at [t], radians: only a taped page
+  /// tilts, eased over the first second of its fall.
+  double tiltAt(double t) {
+    if (layout != SkyPageLayout.taped || t <= exitStart) return 0;
+    return tapedExitTilt *
+        Curves.easeInOut.transform(((t - exitStart) / 1.0).clamp(0.0, 1.0));
   }
 
   bool isVisibleAt(double t) => t >= headerIn && fallAt(t) < 2400;
@@ -107,9 +119,9 @@ abstract final class SkyTitleBeats {
   static const titleAt = 1.75;
   static const subtitleAt = 2.25;
 
-  static double fallAt(double t, double openingEnd) {
-    if (t <= openingEnd) return 0;
-    final dt = t - openingEnd;
-    return SkyPageBeats.gravity * dt * dt;
-  }
+  /// The title falls from 0.25 s before the opening ends, like a page.
+  static double exitStart(double openingEnd) => openingEnd - 0.25;
+
+  static double fallAt(double t, double openingEnd) =>
+      SkyPageBeats.fall(t - exitStart(openingEnd));
 }

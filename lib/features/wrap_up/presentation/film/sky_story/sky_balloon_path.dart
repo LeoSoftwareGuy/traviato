@@ -39,11 +39,16 @@ class SkyBalloonPath {
   final List<_Move> _moves;
 
   /// When a page falls away: just before its end, or for the last page
-  /// 1.5 s before, so it has fallen before the gather.
+  /// 1.75 s before, so it has fallen before the gather.
   static double exitStart(TimedScene<SkySceneSpec> chapter) {
     final spec = chapter.spec as SkyChapterSpec;
-    return spec.isLast ? chapter.end - 1.5 : chapter.end - 0.25;
+    return spec.isLast ? chapter.end - 1.75 : chapter.end - 0.25;
   }
+
+  /// The balloon leaves the corner this long before its page falls, and
+  /// reaches the middle in [dipDuration] (the reference's frames).
+  static const dipLead = 0.15;
+  static const dipDuration = 0.8;
 
   /// When a fly-out page's hero arrives and the balloon leaves the hub.
   static double flyOutRelease(double chapterStart) => chapterStart + 3.25;
@@ -66,7 +71,10 @@ class SkyBalloonPath {
         moves.add(_Move(release, release + 0.7, hub, corner, Curves.easeInOut));
       }
       final out = exitStart(chapter);
-      moves.add(_Move(out, out + 0.85, corner, dip, Curves.easeInOut));
+      final dipFrom = out - dipLead;
+      moves.add(
+        _Move(dipFrom, dipFrom + dipDuration, corner, dip, Curves.easeInOut),
+      );
       if (spec.isLast) {
         moves.add(
           _Move(gather.start, gather.start + 2.0, dip, _gone, Curves.easeIn),
