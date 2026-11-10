@@ -1,4 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:traviato/features/wrap_up/domain/entities/film_plan.dart';
+import 'package:traviato/features/wrap_up/domain/entities/film_plan_chapter.dart';
+import 'package:traviato/features/wrap_up/domain/entities/film_plan_scene.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_collage_layout.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_film_cut.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_flurry_leftovers.dart';
@@ -31,6 +34,30 @@ void main() {
     final pruned = pruneMissingPhotos(wrapUp, {'a', 'c0', 'c1', 'c2'});
 
     expect(pruned, wrapUp);
+  });
+
+  test('carries the plan through, as is (#344)', () {
+    const plan = FilmPlan(
+      chapters: [
+        FilmPlanChapter(
+          bridgeLine: 'x',
+          scenes: [
+            FilmPlanScene(
+              type: 'card_flip',
+              photoIds: ['gone'],
+              durationSeconds: 4,
+            ),
+          ],
+        ),
+      ],
+    );
+    final wrapUp = buildWrapUpEntity(
+      moments: const [WrapUpMoment(photoId: 'a')],
+      plan: plan,
+    );
+
+    expect(pruneMissingPhotos(wrapUp, {'a'}).plan, plan);
+    expect(wrapUp.copyWith(publishedAt: () => null).plan, plan);
   });
 
   test('removes a card-flip moment whose photo is gone', () {

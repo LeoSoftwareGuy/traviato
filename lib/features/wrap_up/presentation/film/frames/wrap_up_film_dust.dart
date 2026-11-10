@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../wrap_up_film_motion.dart';
-import '../wrap_up_film_scenes.dart';
+import '../timeline/film_timeline.dart';
 import '../wrap_up_film_tokens.dart';
 
 /// Opening frame: five star specks, a growing hairline, and the trip's
@@ -9,14 +9,19 @@ import '../wrap_up_film_tokens.dart';
 class WrapUpFilmDust extends StatelessWidget {
   const WrapUpFilmDust({
     required this.t,
-    required this.scenes,
+    required this.scene,
     required this.datesFormatted,
+    required this.specksUntil,
     super.key,
   });
 
   final double t;
-  final WrapUpFilmScenes scenes;
+  final TimedScene scene;
   final String datesFormatted;
+
+  /// When the specks start fading out: they stay over the whole film
+  /// until its closing scene.
+  final double specksUntil;
 
   static const _specks = [
     (214.0, 470.0, 2.4, 0.5),
@@ -28,9 +33,10 @@ class WrapUpFilmDust extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = swell(t, 1.2, 1.9, 0, 168);
-    final lineOpacity = band(t, 1.2, 1.0, 2.7, 0.7).clamp(0.0, 1.0);
-    final dateOpacity = band(t, 0.6, 1.4, 2.5, 0.9).clamp(0.0, 1.0);
+    final a = scene.start;
+    final line = swell(t, a + 1.2, 1.9, 0, 168);
+    final lineOpacity = band(t, a + 1.2, 1.0, a + 2.7, 0.7).clamp(0.0, 1.0);
+    final dateOpacity = band(t, a + 0.6, 1.4, a + 2.5, 0.9).clamp(0.0, 1.0);
 
     return Stack(
       children: [
@@ -79,8 +85,11 @@ class WrapUpFilmDust extends StatelessWidget {
   List<Widget> _speck(int i) {
     final (left, top, radius, phase) = _specks[i];
     final diameter = radius * 2.6;
-    final opacity = (band(t, phase, 1.4, scenes.keepsakeStart - 1.4, 1.8) * 0.7)
-        .clamp(0.0, 1.0);
+    final opacity =
+        (band(t, scene.start + phase, 1.4, specksUntil - 1.4, 1.8) * 0.7).clamp(
+          0.0,
+          1.0,
+        );
     return [
       Positioned(
         left: left,

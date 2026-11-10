@@ -1,5 +1,7 @@
-import '../../domain/entities/wrap_up_entity.dart';
-import '../../domain/entities/wrap_up_moment.dart';
+// The pre-#344 schedule, kept verbatim as the oracle for the timeline
+// engine's schedule-equivalence and golden tests. Do not edit.
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_entity.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_moment.dart';
 
 /// The Wrap-Up Film's scene timeline (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §1).
 ///
@@ -15,11 +17,11 @@ import '../../domain/entities/wrap_up_moment.dart';
 /// Persistent chrome (specks, washes, vignette, grain, letterbox) is
 /// anchored to scene starts, not absolute times, so it follows whatever
 /// schedule this produces.
-class WrapUpFilmScenes {
+class LegacyFilmScenes {
   /// [momentDurations] has one entry per moment that plays (default: 8
   /// bare card flips); [momentSlots] is the film's layout (8 or 16), which
   /// decides where the bridges fall between them.
-  factory WrapUpFilmScenes({
+  factory LegacyFilmScenes({
     required bool hasFlurry2,
     required bool hasUnlock,
     bool hasFlurry1 = true,
@@ -66,7 +68,7 @@ class WrapUpFilmScenes {
     final unlockStart = takeIf(hasUnlock, unlockDur);
     final keepsakeStart = take(keepsakeDur);
 
-    return WrapUpFilmScenes._(
+    return LegacyFilmScenes._(
       total: cursor,
       hasFlurry1: hasFlurry1,
       hasFlurry2: hasFlurry2,
@@ -94,7 +96,7 @@ class WrapUpFilmScenes {
   /// the 8-moment film, M7 / M13 in the 16-moment one). A pre-#151 wrap-up
   /// (`cut == null`) keeps the original shape: 8 moment slots, Flurry1
   /// always, all three bridges.
-  factory WrapUpFilmScenes.forWrapUp(WrapUpEntity wrapUp) {
+  factory LegacyFilmScenes.forWrapUp(WrapUpEntity wrapUp) {
     final hasUnlock = wrapUp.unlock != null;
     final hasFlurry2 = wrapUp.flurry2Photos.isNotEmpty;
     final slots = wrapUp.momentSlots == 16 ? 16 : 8;
@@ -106,7 +108,7 @@ class WrapUpFilmScenes {
         ),
     ];
     if (wrapUp.cut == null) {
-      return WrapUpFilmScenes(
+      return LegacyFilmScenes(
         hasFlurry2: hasFlurry2,
         hasUnlock: hasUnlock,
         momentDurations: [
@@ -116,7 +118,7 @@ class WrapUpFilmScenes {
       );
     }
     final (end1, end2) = groupEndsFor(slots);
-    return WrapUpFilmScenes(
+    return LegacyFilmScenes(
       hasFlurry1: wrapUp.flurry1Photos.isNotEmpty,
       hasFlurry2: hasFlurry2,
       hasUnlock: hasUnlock,
@@ -127,7 +129,7 @@ class WrapUpFilmScenes {
     );
   }
 
-  const WrapUpFilmScenes._({
+  const LegacyFilmScenes._({
     required this.total,
     required this.hasFlurry1,
     required this.hasFlurry2,

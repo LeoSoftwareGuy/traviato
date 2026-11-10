@@ -15,7 +15,9 @@ import 'package:traviato/features/wrap_up/domain/entities/wrap_up_unlock.dart';
 import 'package:traviato/features/wrap_up/presentation/film/frames/wrap_up_film_collage.dart';
 import 'package:traviato/features/wrap_up/presentation/film/frames/wrap_up_film_plate.dart';
 import 'package:traviato/features/wrap_up/presentation/film/wrap_up_film_canvas.dart';
-import 'package:traviato/features/wrap_up/presentation/film/wrap_up_film_scenes.dart';
+import 'package:traviato/features/wrap_up/presentation/film/timeline/film_scene_spec.dart';
+import 'package:traviato/features/wrap_up/presentation/film/timeline/film_timeline.dart';
+import 'package:traviato/features/wrap_up/presentation/film/timeline/template_timeline.dart';
 
 WrapUpEntity _entity({
   WrapUpFilmCut? cut,
@@ -65,21 +67,15 @@ Future<void> _scrub(WidgetTester tester, WrapUpEntity wrapUp) async {
   // time — `pump(duration)` advances the AnimationController's clock
   // directly. Uses the same schedule the canvas derives, so the samples
   // match whatever this wrapUp actually cut.
-  final scenes = WrapUpFilmScenes.forWrapUp(wrapUp);
-  final hasFlurry2 = scenes.hasFlurry2;
-  final hasUnlock = scenes.hasUnlock;
+  final timeline = TemplateTimeline.forWrapUp(wrapUp).timeline;
 
   var elapsed = 0.0;
   for (final target in [
-    0.5,
-    scenes.invitationStart + 0.1,
-    for (final at in scenes.momentStarts) ...[at + 0.5, at + 2.0],
-    if (scenes.hasFlurry1) scenes.flurry1Start + 1,
-    if (hasFlurry2) scenes.flurry2Start + 1,
-    scenes.footnoteStart + 1,
-    if (hasUnlock) scenes.unlockStart + 1,
-    scenes.keepsakeStart + 1,
-    scenes.total - 0.1,
+    for (final scene in timeline.scenes) ...[
+      scene.start + 0.1,
+      scene.start + scene.duration / 2,
+      scene.end - 0.1,
+    ],
   ]) {
     final delta = target - elapsed;
     if (delta > 0) {
@@ -89,6 +85,13 @@ Future<void> _scrub(WidgetTester tester, WrapUpEntity wrapUp) async {
     expect(tester.takeException(), isNull, reason: 'at T=$target');
   }
 }
+
+/// When the film's [index]th moment (card flip or collage) starts.
+double _momentStart(FilmTimeline timeline, int index) => [
+  for (final scene in timeline.scenes)
+    if (scene.spec is CardFlipSceneSpec || scene.spec is CollageSceneSpec)
+      scene.start,
+][index];
 
 void main() {
   testWidgets('zero bonus tasks completed: all moments have no badge', (
@@ -194,10 +197,10 @@ void main() {
       );
     }
 
-    Future<WrapUpFilmScenes> pumpCanvasAt(
+    Future<void> pumpCanvasAt(
       WidgetTester tester,
       WrapUpEntity wrapUp,
-      double Function(WrapUpFilmScenes) timeOf, {
+      double Function(FilmTimeline) timeOf, {
       bool collages = true,
     }) async {
       await tester.pumpWidget(
@@ -211,17 +214,20 @@ void main() {
           ),
         ),
       );
-      final scenes = WrapUpFilmScenes.forWrapUp(wrapUp);
+      final timeline = TemplateTimeline.forWrapUp(wrapUp).timeline;
       await tester.pump(
-        Duration(milliseconds: (timeOf(scenes) * 1000).round()),
+        Duration(milliseconds: (timeOf(timeline) * 1000).round()),
       );
-      return scenes;
     }
 
     testWidgets('a collage moment plays as a collage, not a card flip', (
       tester,
     ) async {
-      await pumpCanvasAt(tester, fullPlan(), (s) => s.momentStarts[4] + 0.5);
+      await pumpCanvasAt(
+        tester,
+        fullPlan(),
+        (timeline) => _momentStart(timeline, 4) + 0.5,
+      );
       // Only M5's torn4 is on screen: exactly four tiles rendered.
       expect(find.byKey(const ValueKey('collage-tile-3')), findsOneWidget);
       expect(find.byKey(const ValueKey('collage-tile-4')), findsNothing);
@@ -233,7 +239,7 @@ void main() {
       await pumpCanvasAt(
         tester,
         fullPlan(),
-        (s) => s.momentStarts[4] + 0.5,
+        (timeline) => _momentStart(timeline, 4) + 0.5,
         collages: false,
       );
       expect(find.byType(WrapUpFilmCollage), findsNothing);
@@ -246,7 +252,11 @@ void main() {
       tester,
     ) async {
       // Just before the Footnote the pile holds every card-flip moment.
-      await pumpCanvasAt(tester, fullPlan(), (s) => s.footnoteStart - 1.2);
+      await pumpCanvasAt(
+        tester,
+        fullPlan(),
+        (timeline) => timeline.first<FootnoteSceneSpec>()!.start - 1.2,
+      );
       expect(find.byType(WrapUpFilmPlate), findsNWidgets(4));
     });
 
@@ -256,7 +266,7 @@ void main() {
       await pumpCanvasAt(
         tester,
         fullPlan(),
-        (s) => s.footnoteStart - 1.2,
+        (timeline) => timeline.first<FootnoteSceneSpec>()!.start - 1.2,
         collages: false,
       );
       expect(find.byType(WrapUpFilmPlate), findsNWidgets(8));

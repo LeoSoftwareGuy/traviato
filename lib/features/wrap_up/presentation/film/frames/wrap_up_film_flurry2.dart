@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../wrap_up_film_motion.dart';
-import '../wrap_up_film_scenes.dart';
+import '../timeline/film_timeline.dart';
 import '../wrap_up_film_tokens.dart';
 import 'wrap_up_film_small_print.dart';
 
@@ -15,21 +15,21 @@ import 'wrap_up_film_small_print.dart';
 class WrapUpFilmFlurry2 extends StatelessWidget {
   const WrapUpFilmFlurry2({
     required this.t,
-    required this.scenes,
+    required this.scene,
     required this.photoUrls,
     required this.remainingLabel,
     super.key,
   });
 
   final double t;
-  final WrapUpFilmScenes scenes;
+  final TimedScene scene;
   final List<String?> photoUrls;
   final String? remainingLabel;
 
   @override
   Widget build(BuildContext context) {
-    final a = scenes.flurry2Start;
-    final next = scenes.bridge3Start;
+    final a = scene.start;
+    final next = scene.end;
     final grp = band(t, a + 0.05, 0.5, next - 0.25, 0.7);
     if (grp <= 0.004) return const SizedBox.shrink();
 
