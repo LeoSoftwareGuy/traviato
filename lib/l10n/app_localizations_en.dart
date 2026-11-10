@@ -2520,4 +2520,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get film_outOfDate => 'Photos changed · Rebuild film';
+
+  @override
+  String get skyStory_eyebrowStory => 'A memory story';
+
+  @override
+  String skyStory_day(int day) {
+    return 'Day $day';
+  }
+
+  @override
+  String skyStory_days(int first, int last) {
+    return 'Days $first–$last';
+  }
+
+  @override
+  String skyStory_photoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos',
+      one: '1 photo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String skyStory_photosLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'photos',
+      one: 'photo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String skyStory_morning(String weekday) {
+    return '$weekday morning';
+  }
+
+  @override
+  String skyStory_afternoon(String weekday) {
+    return '$weekday afternoon';
+  }
+
+  @override
+  String skyStory_evening(String weekday) {
+    return '$weekday evening';
+  }
+
+  @override
+  String skyStory_night(String weekday) {
+    return '$weekday night';
+  }
 }

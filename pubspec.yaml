@@ -96,6 +96,21 @@ flutter:
         - asset: assets/fonts/Literata[opsz,wght].ttf
         - asset: assets/fonts/Literata-Italic[opsz,wght].ttf
           style: italic
+    # The Sky Story film's type (#345; OFL, google/fonts, licences next to
+    # each file). DM Serif Display has no Cyrillic, so Russian titles use
+    # Playfair Display. Open Sans, Caveat and Playfair are variable.
+    - family: DMSerifDisplay
+      fonts:
+        - asset: assets/fonts/DMSerifDisplay-Regular.ttf
+    - family: PlayfairDisplay
+      fonts:
+        - asset: assets/fonts/PlayfairDisplay[wght].ttf
+    - family: OpenSans
+      fonts:
+        - asset: assets/fonts/OpenSans[wdth,wght].ttf
+    - family: Caveat
+      fonts:
+        - asset: assets/fonts/Caveat[wght].ttf
 
   assets:
     - .env
