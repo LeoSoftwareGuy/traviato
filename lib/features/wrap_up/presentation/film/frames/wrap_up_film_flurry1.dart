@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../wrap_up_film_motion.dart';
-import '../wrap_up_film_scenes.dart';
+import '../timeline/film_timeline.dart';
 import 'wrap_up_film_small_print.dart';
 
 /// Everything the film didn't stop on, dropped onto a table: a 3×5 grid,
@@ -14,13 +14,13 @@ import 'wrap_up_film_small_print.dart';
 class WrapUpFilmFlurry1 extends StatelessWidget {
   const WrapUpFilmFlurry1({
     required this.t,
-    required this.scenes,
+    required this.scene,
     required this.photoUrls,
     super.key,
   });
 
   final double t;
-  final WrapUpFilmScenes scenes;
+  final TimedScene scene;
   final List<String?> photoUrls;
 
   static const _cols = 3;
@@ -35,8 +35,8 @@ class WrapUpFilmFlurry1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final a = scenes.flurry1Start;
-    final next = scenes.bridge2Start;
+    final a = scene.start;
+    final next = scene.end;
     final grp = band(t, a + 0.05, 0.5, next - 1.0, 0.8);
     if (grp <= 0.004 || photoUrls.isEmpty) return const SizedBox.shrink();
 

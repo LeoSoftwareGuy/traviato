@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../wrap_up_film_motion.dart';
-import '../wrap_up_film_scenes.dart';
+import '../timeline/film_timeline.dart';
 import '../wrap_up_film_tokens.dart';
 
 /// One AI-written bridge line between chapters — never a photograph
@@ -10,32 +10,21 @@ import '../wrap_up_film_tokens.dart';
 class WrapUpFilmBridge extends StatelessWidget {
   const WrapUpFilmBridge({
     required this.t,
-    required this.scenes,
+    required this.scene,
     required this.index,
     required this.line,
     super.key,
   });
 
   final double t;
-  final WrapUpFilmScenes scenes;
+  final TimedScene scene;
   final int index;
   final String line;
 
-  static const _durs = [
-    WrapUpFilmScenes.bridge1Dur,
-    WrapUpFilmScenes.bridge2Dur,
-    WrapUpFilmScenes.bridge3Dur,
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final starts = [
-      scenes.bridge1Start,
-      scenes.bridge2Start,
-      scenes.bridge3Start,
-    ];
-    final a = starts[index];
-    final dur = _durs[index];
+    final a = scene.start;
+    final dur = scene.duration;
     final solid = index == 1;
     // Fade-out tracks this bridge's own duration (ending 1.0s before its
     // slot closes) rather than a fixed offset from `a` — otherwise

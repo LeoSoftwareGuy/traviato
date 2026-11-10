@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../wrap_up_film_motion.dart';
-import '../wrap_up_film_scenes.dart';
+import '../timeline/film_timeline.dart';
 import '../wrap_up_film_tokens.dart';
 
 /// "Five days. / One long road." — line 1 computed, line 2 AI-written
@@ -9,20 +9,20 @@ import '../wrap_up_film_tokens.dart';
 class WrapUpFilmInvitation extends StatelessWidget {
   const WrapUpFilmInvitation({
     required this.t,
-    required this.scenes,
+    required this.scene,
     required this.line1,
     required this.line2,
     super.key,
   });
 
   final double t;
-  final WrapUpFilmScenes scenes;
+  final TimedScene scene;
   final String line1;
   final String line2;
 
   @override
   Widget build(BuildContext context) {
-    final a = scenes.invitationStart;
+    final a = scene.start;
     final rise1 = rise(t, a + 0.4, 1.8, lift: 46);
     final rise2 = rise(t, a + 1.6, 1.8, lift: 46);
     final out = fade(t, a + 3.2, 1.0, 1, 0).clamp(0.0, 1.0);

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/l10n/context_l10n.dart';
 import '../../../domain/entities/wrap_up_footnote.dart';
 import '../wrap_up_film_motion.dart';
-import '../wrap_up_film_scenes.dart';
+import '../timeline/film_timeline.dart';
 import '../wrap_up_film_tokens.dart';
 
 /// The numbers, demoted to one breath: photographs taken, bonus tasks
@@ -12,18 +12,18 @@ import '../wrap_up_film_tokens.dart';
 class WrapUpFilmFootnote extends StatelessWidget {
   const WrapUpFilmFootnote({
     required this.t,
-    required this.scenes,
+    required this.scene,
     required this.footnote,
     super.key,
   });
 
   final double t;
-  final WrapUpFilmScenes scenes;
+  final TimedScene scene;
   final WrapUpFootnote footnote;
 
   @override
   Widget build(BuildContext context) {
-    final a = scenes.footnoteStart;
+    final a = scene.start;
     final grp = band(t, a + 0.3, 1.2, a + 3.0, 1.0);
     if (grp <= 0.004) return const SizedBox.shrink();
 

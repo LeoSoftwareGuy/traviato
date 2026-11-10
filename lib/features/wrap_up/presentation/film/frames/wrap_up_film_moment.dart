@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../../domain/entities/wrap_up_moment.dart';
 import '../wrap_up_film_motion.dart';
-import '../wrap_up_film_scenes.dart';
+import '../timeline/film_timeline.dart';
 import '../wrap_up_film_tokens.dart';
 import 'wrap_up_film_plate.dart';
 
 /// One Moment: thrown in, held centre-frame while its caption is read, then
 /// it slides down into the pile and stays there for the rest of the middle
 /// section (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md § Moments). Index 0..15
-/// maps to scenes M1..M16 via [WrapUpFilmScenes.momentStarts].
+/// is M1..M16, its place in the pile.
 ///
 /// Quick (#304): ~2.5s for a bare flip, ~3.5s with a caption — the toss,
 /// flip, caption and exit are all tightened to fit, so a short moment
@@ -17,8 +17,9 @@ import 'wrap_up_film_plate.dart';
 class WrapUpFilmMoment extends StatelessWidget {
   const WrapUpFilmMoment({
     required this.t,
-    required this.scenes,
+    required this.scene,
     required this.index,
+    required this.hideAfter,
     required this.moment,
     required this.imageUrl,
     required this.pileFade,
@@ -26,22 +27,27 @@ class WrapUpFilmMoment extends StatelessWidget {
   });
 
   final double t;
-  final WrapUpFilmScenes scenes;
+  final TimedScene scene;
+
+  /// The moment's place in the pile.
   final int index;
+
+  /// When the pile clears: the card stays in it until then.
+  final double hideAfter;
   final WrapUpMoment moment;
   final String? imageUrl;
   final double pileFade;
 
-  double get _dur => scenes.momentDurations[index];
+  double get _dur => scene.duration;
 
   @override
   Widget build(BuildContext context) {
-    final at = scenes.momentStarts[index];
+    final at = scene.start;
     final inAt = at - 0.35;
     final to = at + _dur;
     final goAt = to - 0.6;
 
-    if (t < inAt || t > scenes.footnoteStart + 0.2) {
+    if (t < inAt || t > hideAfter) {
       return const SizedBox.shrink();
     }
 

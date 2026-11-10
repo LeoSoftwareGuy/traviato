@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../wrap_up_film_motion.dart';
-import '../wrap_up_film_scenes.dart';
+import '../timeline/template_timeline.dart';
 
 /// The persistent background photo washes (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §6)
 /// — the cover image, blurred and drifting behind the opening/middle
@@ -11,13 +11,13 @@ import '../wrap_up_film_scenes.dart';
 class WrapUpFilmCoverWash extends StatelessWidget {
   const WrapUpFilmCoverWash({
     required this.t,
-    required this.scenes,
+    required this.anchors,
     required this.coverImage,
     super.key,
   });
 
   final double t;
-  final WrapUpFilmScenes scenes;
+  final TemplateAnchors anchors;
   final ImageProvider? coverImage;
 
   @override
@@ -27,30 +27,30 @@ class WrapUpFilmCoverWash extends StatelessWidget {
 
     final coverEarly = band(
       t,
-      scenes.invitationStart - 0.2,
+      anchors.invitationStart - 0.2,
       2.0,
-      scenes.bridge1Start - 0.3,
+      anchors.bridge1Start - 0.3,
       1.5,
     );
     final routeWash = band(
       t,
-      scenes.invitationStart + 1.4,
+      anchors.invitationStart + 1.4,
       1.3,
-      scenes.bridge1Start - 0.2,
+      anchors.bridge1Start - 0.2,
       1.1,
     );
     final roomTone = band(
       t,
-      scenes.bridge1Start - 0.4,
+      anchors.bridge1Start - 0.4,
       1.6,
-      scenes.footnoteStart - 0.6,
+      anchors.footnoteStart - 0.6,
       1.4,
     );
     final coverLate = band(
       t,
-      scenes.keepsakeStart - 0.6,
+      anchors.keepsakeStart - 0.6,
       2.3,
-      scenes.keepsakeStart + 5.3,
+      anchors.keepsakeStart + 5.3,
       1.3,
     );
 
@@ -58,7 +58,7 @@ class WrapUpFilmCoverWash extends StatelessWidget {
         .clamp(0.0, 1.0);
     final earlyScale = swell(t, 3.0, 40.0, 1.04, 1.28);
     final lateOpacity = coverLate.clamp(0.0, 1.0);
-    final lateScale = swell(t, scenes.keepsakeStart - 1.0, 9.0, 1.02, 1.16);
+    final lateScale = swell(t, anchors.keepsakeStart - 1.0, 9.0, 1.02, 1.16);
 
     return Stack(
       children: [

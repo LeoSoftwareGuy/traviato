@@ -11,7 +11,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../trip/presentation/widgets/delete_memory_sheet.dart';
 import '../../../wrap_up/presentation/controllers/wrap_up_controller.dart';
-import '../../../wrap_up/presentation/film/wrap_up_film_scenes.dart';
+import '../../../wrap_up/presentation/film/timeline/template_timeline.dart';
 import '../../../wrap_up/presentation/widgets/film_out_of_date_chip.dart';
 import '../../domain/entities/kept_memory.dart';
 import '../kept_memory_labels.dart';
@@ -103,7 +103,7 @@ class _KeptMemoryScroll extends ConsumerWidget {
     final filmDuration = film == null
         ? null
         : Duration(
-            milliseconds: (WrapUpFilmScenes.forWrapUp(film.wrapUp).total * 1000)
+            milliseconds: (TemplateTimeline.forWrapUp(film.wrapUp).total * 1000)
                 .round(),
           );
     final keptAt = memory.trip.wrapUpPublishedAt;

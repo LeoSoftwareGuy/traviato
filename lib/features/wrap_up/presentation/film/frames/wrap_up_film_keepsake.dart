@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../domain/entities/wrap_up_keepsake.dart';
 import '../wrap_up_film_motion.dart';
-import '../wrap_up_film_scenes.dart';
+import '../timeline/film_timeline.dart';
 import '../wrap_up_film_tokens.dart';
 
 /// The closing card: trip title, AI closing line, app mark
@@ -14,18 +14,18 @@ import '../wrap_up_film_tokens.dart';
 class WrapUpFilmKeepsake extends StatelessWidget {
   const WrapUpFilmKeepsake({
     required this.t,
-    required this.scenes,
+    required this.scene,
     required this.keepsake,
     super.key,
   });
 
   final double t;
-  final WrapUpFilmScenes scenes;
+  final TimedScene scene;
   final WrapUpKeepsake keepsake;
 
   @override
   Widget build(BuildContext context) {
-    final a = scenes.keepsakeStart;
+    final a = scene.start;
     final titleRise1 = rise(t, a + 0.6, 1.9, lift: 46);
     final titleRise2 = rise(t, a + 1.4, 1.9, lift: 46);
     final quoteRise = rise(t, a + 2.6, 2.0, lift: 34);

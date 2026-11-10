@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../domain/entities/wrap_up_unlock.dart';
 import '../wrap_up_film_motion.dart';
-import '../wrap_up_film_scenes.dart';
+import '../timeline/film_timeline.dart';
 import '../wrap_up_film_tokens.dart';
 
 /// The achievement earned by this trip, if any (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md
@@ -11,13 +11,13 @@ import '../wrap_up_film_tokens.dart';
 class WrapUpFilmUnlock extends StatelessWidget {
   const WrapUpFilmUnlock({
     required this.t,
-    required this.scenes,
+    required this.scene,
     required this.unlock,
     super.key,
   });
 
   final double t;
-  final WrapUpFilmScenes scenes;
+  final TimedScene scene;
   final WrapUpUnlock? unlock;
 
   @override
@@ -25,7 +25,7 @@ class WrapUpFilmUnlock extends StatelessWidget {
     final unlock = this.unlock;
     if (unlock == null) return const SizedBox.shrink();
 
-    final a = scenes.unlockStart;
+    final a = scene.start;
     final grp = band(t, a + 0.2, 1.0, a + 3.8, 0.9);
     if (grp <= 0.004) return const SizedBox.shrink();
 
