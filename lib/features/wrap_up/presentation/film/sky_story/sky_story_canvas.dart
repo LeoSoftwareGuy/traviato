@@ -1,18 +1,27 @@
 import 'package:flutter/material.dart';
 
-import '../timeline/film_timeline.dart';
-import 'sky_scene_spec.dart';
+import '../../../../../l10n/app_localizations.dart';
+import 'sky_pages_painter.dart';
+import 'sky_photo_images.dart';
+import 'sky_story.dart';
+import 'sky_story_copy.dart';
+import 'sky_story_texts.dart';
+import 'sky_story_timeline.dart';
 import 'sky_world.dart';
 import 'sky_world_painter.dart';
 
 /// The Sky Story film (#345): one 1080×1920 composition on one looping
-/// clock, like `WrapUpFilmCanvas`. Phase 1 plays the world only (sky,
-/// clouds, embers, stars and balloons); the title, pages and mosaic are
-/// laid over it in later phases.
+/// clock, like `WrapUpFilmCanvas`. The world (sky, clouds, embers, stars,
+/// far balloons) underneath; the title, the chapter pages and the big
+/// balloon over it. Its words follow the surrounding locale.
 class SkyStoryCanvas extends StatefulWidget {
-  const SkyStoryCanvas({required this.timeline, super.key});
+  const SkyStoryCanvas({required this.story, required this.photo, super.key});
 
-  final FilmTimeline<SkySceneSpec> timeline;
+  final SkyStory story;
+
+  /// Where each photo's pixels come from, by photo id. Null (or a failed
+  /// load) paints a warm placeholder.
+  final ImageProvider? Function(String photoId) photo;
 
   @override
   State<SkyStoryCanvas> createState() => _SkyStoryCanvasState();
@@ -20,23 +29,66 @@ class SkyStoryCanvas extends StatefulWidget {
 
 class _SkyStoryCanvasState extends State<SkyStoryCanvas>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final SkyWorld _world;
-  late final _FilmClock _clock;
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+  );
+  late final _FilmClock _clock = _FilmClock(_controller);
+  late SkyWorld _world;
+  late SkyPhotoImages _images;
+  SkyStoryCopy? _copy;
+  SkyStoryTexts? _texts;
 
   @override
   void initState() {
     super.initState();
-    _world = SkyWorld(widget.timeline);
-    _controller = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: (widget.timeline.total * 1000).round()),
-    )..repeat();
-    _clock = _FilmClock(_controller, widget.timeline.total);
+    _start();
+  }
+
+  /// (Re)starts the film for the widget's story, from the top.
+  void _start() {
+    final timeline = SkyStoryTimeline.forChapters(widget.story.pages.length);
+    _world = SkyWorld(timeline);
+    _clock.total = timeline.total;
+    _controller
+      ..duration = Duration(milliseconds: (timeline.total * 1000).round())
+      ..value = 0
+      ..repeat();
+    _images = SkyPhotoImages(widget.photo)..load(widget.story.photoIds);
+  }
+
+  @override
+  void didUpdateWidget(SkyStoryCanvas oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.story == widget.story && oldWidget.photo == widget.photo) {
+      return;
+    }
+    _images.dispose();
+    _start();
+    _resolveCopy();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _resolveCopy();
+  }
+
+  void _resolveCopy() {
+    final copy = SkyStoryCopy.resolve(
+      widget.story,
+      AppLocalizations.of(context),
+      Localizations.localeOf(context).toLanguageTag(),
+    );
+    if (copy == _copy) return;
+    _copy = copy;
+    _texts?.dispose();
+    _texts = SkyStoryTexts(copy);
   }
 
   @override
   void dispose() {
+    _texts?.dispose();
+    _images.dispose();
     _clock.dispose();
     _controller.dispose();
     super.dispose();
@@ -53,6 +105,13 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
           child: RepaintBoundary(
             child: CustomPaint(
               painter: SkyWorldPainter(world: _world, time: _clock),
+              foregroundPainter: SkyPagesPainter(
+                world: _world,
+                story: widget.story,
+                texts: _texts!,
+                images: _images,
+                time: _clock,
+              ),
             ),
           ),
         ),
@@ -63,15 +122,16 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
 
 /// The controller's 0–1 value as film seconds.
 class _FilmClock extends ValueNotifier<double> {
-  _FilmClock(this._controller, this._total)
-    : super(_controller.value * _total) {
+  _FilmClock(this._controller) : super(0) {
     _controller.addListener(_tick);
   }
 
   final AnimationController _controller;
-  final double _total;
 
-  void _tick() => value = _controller.value * _total;
+  /// The film's length, s.
+  double total = 0;
+
+  void _tick() => value = _controller.value * total;
 
   @override
   void dispose() {

@@ -8,9 +8,9 @@ import 'sky_balloon.dart';
 import 'sky_story_tokens.dart';
 import 'sky_world.dart';
 
-/// Paints Sky Story's world at one instant (#345, phase 1), back to front:
-/// sky, stars, clouds, embers, the small far balloons, then the big and
-/// corner balloons that ride with the camera. One painter for the whole
+/// Paints Sky Story's world at one instant (#345), back to front: sky,
+/// stars, clouds, embers and the small far balloons. The pages and the big
+/// balloon go over it (`SkyPagesPainter`). One painter for the whole
 /// layer, so a frame is one paint pass with no widget rebuilds.
 class SkyWorldPainter extends CustomPainter {
   SkyWorldPainter({required this.world, required this.time})
@@ -34,7 +34,6 @@ class SkyWorldPainter extends CustomPainter {
     _paintClouds(canvas, t);
     _paintEmbers(canvas, t);
     _paintSmallBalloons(canvas, t);
-    _paintCameraBalloons(canvas, t);
     canvas.restore();
   }
 
@@ -130,22 +129,6 @@ class SkyWorldPainter extends CustomPainter {
         center: Offset(balloon.x, y + SkyWorld.bob(t, balloon.phase)),
         width: balloon.width,
       );
-    }
-  }
-
-  void _paintCameraBalloons(Canvas canvas, double t) {
-    final corner = cornerBalloonAt(t, world.timeline);
-    if (corner != null) {
-      paintSkyBalloon(
-        canvas,
-        center: corner.center,
-        width: 110,
-        opacity: corner.opacity,
-      );
-    }
-    final hero = heroBalloonAt(t, world.timeline);
-    if (hero != null) {
-      paintSkyBalloon(canvas, center: hero.center, width: hero.width);
     }
   }
 

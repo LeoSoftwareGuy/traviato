@@ -1,11 +1,11 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_scene_spec.dart';
 import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story_canvas.dart';
+import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story_fixture.dart';
 import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story_timeline.dart';
 import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_world.dart';
+import 'package:traviato/l10n/app_localizations.dart';
 
 /// Within ±5 % per channel, the spec's tolerance for sampled colours.
 Matcher _closeToColor(int argb) {
@@ -135,30 +135,54 @@ void main() {
     });
   });
 
-  group('balloons', () {
+  group('the big balloon', () {
     final timeline = SkyStoryTimeline.forChapters(3);
+    final balloon = SkyWorld(timeline).balloon;
 
-    test('the big balloon settles over the title, then leaves', () {
-      final title = heroBalloonAt(3.5, timeline)!;
+    test('settles over the title', () {
+      final title = balloon.at(3.5)!;
       expect(title.center.dx, 540);
       expect(title.center.dy, closeTo(700, 9));
       expect(title.width, 360);
-      expect(heroBalloonAt(6.5, timeline), isNull);
     });
 
-    test('it drifts across the middle between pages, not on them', () {
-      expect(heroBalloonAt(12, timeline), isNull);
-      final across = heroBalloonAt(18, timeline)!;
-      expect(across.center.dx, closeTo(650, 1));
-      expect(across.center.dy, closeTo(650, 9));
+    test("then shrinks into each page's corner", () {
+      for (final t in [6.2, 12.0, 25.0, 38.0]) {
+        final corner = balloon.at(t)!;
+        expect(corner.center.dx, closeTo(930, 0.5), reason: 't=$t');
+        expect(corner.center.dy, closeTo(145, 9), reason: 't=$t');
+        expect(corner.width, 110, reason: 't=$t');
+      }
     });
 
-    test('a page has its corner balloon, the gather does not', () {
-      final corner = cornerBalloonAt(12, timeline)!;
-      expect(corner.opacity, 1);
-      expect(corner.center.dx, 930);
-      expect(corner.center.dy, closeTo(145, 9));
-      expect(cornerBalloonAt(45, timeline), isNull);
+    test('dips into the middle as a page falls away', () {
+      // Day 1 falls from 16.25 s; the reference has it mid-frame by 17.
+      final dip = balloon.at(17.2)!;
+      expect(dip.center.dx, closeTo(540, 0.5));
+      expect(dip.center.dy, closeTo(800, 9));
+    });
+
+    test("waits at the hub while the fly-out page's photos circle it", () {
+      for (final t in [31.0, 33.0, 34.6]) {
+        final hub = balloon.at(t)!;
+        expect(hub.center.dx, closeTo(540, 0.5), reason: 't=$t');
+        expect(hub.center.dy, closeTo(660, 9), reason: 't=$t');
+      }
+    });
+
+    test('never jumps, and has flown off by the outro', () {
+      var previous = balloon.at(0)!;
+      for (var t = 1 / 30; t < 45; t += 1 / 30) {
+        final now = balloon.at(t);
+        if (now == null) break;
+        expect(
+          (now.center - previous.center).distance,
+          lessThan(60),
+          reason: 't=$t',
+        );
+        previous = now;
+      }
+      expect(balloon.at(50), isNull);
     });
   });
 
@@ -166,7 +190,14 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      SkyStoryCanvas(timeline: SkyStoryTimeline.forChapters(3)),
+      Localizations(
+        locale: const Locale('en'),
+        delegates: AppLocalizations.localizationsDelegates,
+        child: SkyStoryCanvas(
+          story: SkyStoryFixtures.lisbon,
+          photo: (_) => null,
+        ),
+      ),
     );
     for (var t = 0; t < 54; t += 2) {
       await tester.pump(const Duration(seconds: 2));
