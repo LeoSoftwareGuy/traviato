@@ -1,6 +1,6 @@
 import '../../../domain/entities/wrap_up_entity.dart';
 import '../../../domain/entities/wrap_up_moment.dart';
-import 'film_scene_spec.dart';
+import 'classic_scene_spec.dart';
 import 'film_timeline.dart';
 
 /// The original film template (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md §1)
@@ -36,10 +36,10 @@ class TemplateTimeline {
     final momentSlotCount = isLegacy ? 8 : moments.length;
     final (end1, end2) = groupEndsFor(slots);
 
-    final scenes = <(double, FilmSceneSpec)>[];
+    final scenes = <(double, ClassicSceneSpec)>[];
     final anchors = <String, double>{};
     var cursor = 0.0;
-    void add(double duration, FilmSceneSpec spec, [String? anchor]) {
+    void add(double duration, ClassicSceneSpec spec, [String? anchor]) {
       if (anchor != null) anchors[anchor] = cursor;
       scenes.add((duration, spec));
       cursor += duration;
@@ -125,7 +125,7 @@ class TemplateTimeline {
     );
   }
 
-  final FilmTimeline timeline;
+  final FilmTimeline<ClassicSceneSpec> timeline;
   final TemplateAnchors anchors;
 
   double get total => timeline.total;

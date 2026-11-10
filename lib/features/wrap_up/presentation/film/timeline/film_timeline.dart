@@ -4,7 +4,7 @@ import 'film_scene_spec.dart';
 
 /// One scene on the film's master clock: it plays from [start] for
 /// [duration] seconds and shows [spec].
-class TimedScene extends Equatable {
+class TimedScene<S extends FilmSceneSpec> extends Equatable {
   const TimedScene({
     required this.start,
     required this.duration,
@@ -13,7 +13,7 @@ class TimedScene extends Equatable {
 
   final double start;
   final double duration;
-  final FilmSceneSpec spec;
+  final S spec;
 
   double get end => start + duration;
 
@@ -25,29 +25,29 @@ class TimedScene extends Equatable {
 /// clock (#344). Scenes follow each other with no gap and no overlap; a
 /// frame may still animate a little before its start or after its end
 /// (a toss in, a fade out), but the schedule itself is contiguous.
-class FilmTimeline extends Equatable {
+class FilmTimeline<S extends FilmSceneSpec> extends Equatable {
   /// Lays [scenes] end to end from 0, in order, with the given durations.
-  factory FilmTimeline.sequence(List<(double, FilmSceneSpec)> scenes) {
+  factory FilmTimeline.sequence(List<(double, S)> scenes) {
     var cursor = 0.0;
-    final timed = <TimedScene>[];
+    final timed = <TimedScene<S>>[];
     for (final (duration, spec) in scenes) {
       assert(duration > 0, 'a scene must last: $spec');
       timed.add(TimedScene(start: cursor, duration: duration, spec: spec));
       cursor += duration;
     }
-    return FilmTimeline._(List.unmodifiable(timed), cursor);
+    return FilmTimeline<S>._(List.unmodifiable(timed), cursor);
   }
 
   const FilmTimeline._(this.scenes, this.total);
 
   /// In play order.
-  final List<TimedScene> scenes;
+  final List<TimedScene<S>> scenes;
 
   /// Film length in seconds: the clock's loop duration.
   final double total;
 
   /// The first scene showing a [T], or null when none plays.
-  TimedScene? first<T extends FilmSceneSpec>() {
+  TimedScene<S>? first<T extends S>() {
     for (final scene in scenes) {
       if (scene.spec is T) return scene;
     }
