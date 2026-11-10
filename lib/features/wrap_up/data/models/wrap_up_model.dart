@@ -10,6 +10,7 @@ import '../../domain/entities/wrap_up_keepsake.dart';
 import '../../domain/entities/wrap_up_moment.dart';
 import '../../domain/entities/wrap_up_photo_ref.dart';
 import '../../domain/entities/wrap_up_unlock.dart';
+import 'film_plan_model.dart';
 
 /// Hand-parsed rather than `@JsonSerializable`-generated: `content` is
 /// function-generated JSONB (#125's data contract), and every field must
@@ -31,6 +32,7 @@ class WrapUpModel extends WrapUpEntity {
     required super.keepsake,
     required super.generatedAt,
     super.publishedAt,
+    super.plan,
   });
 
   /// [row] is a `wrap_ups` row shape: `content`, `generated_at`,
@@ -56,6 +58,7 @@ class WrapUpModel extends WrapUpEntity {
       keepsake: _parseKeepsake(contentMap['keepsake']),
       generatedAt: _parseDateTime(row['generated_at']) ?? DateTime.now(),
       publishedAt: _parseDateTime(row['published_at']),
+      plan: parseFilmPlan(contentMap),
     );
   }
 }

@@ -64,5 +64,7 @@ WrapUpEntity pruneMissingPhotos(
     keepsake: wrapUp.keepsake,
     generatedAt: wrapUp.generatedAt,
     publishedAt: wrapUp.publishedAt,
+    // The plan's own photo ids are left to whatever plays it.
+    plan: wrapUp.plan,
   );
 }
