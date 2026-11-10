@@ -6,7 +6,7 @@ import 'package:traviato/features/wrap_up/domain/entities/wrap_up_flurry_leftove
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_moment.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_photo_ref.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_unlock.dart';
-import 'package:traviato/features/wrap_up/presentation/film/timeline/film_scene_spec.dart';
+import 'package:traviato/features/wrap_up/presentation/film/timeline/classic_scene_spec.dart';
 import 'package:traviato/features/wrap_up/presentation/film/timeline/film_timeline.dart';
 import 'package:traviato/features/wrap_up/presentation/film/timeline/template_timeline.dart';
 
@@ -73,7 +73,7 @@ List<(String, double, double)> _oracle(WrapUpEntity wrapUp) {
   ]..sort((a, b) => a.$2.compareTo(b.$2));
 }
 
-String _label(FilmSceneSpec spec) => switch (spec) {
+String _label(ClassicSceneSpec spec) => switch (spec) {
   DustSceneSpec() => 'dust',
   InvitationSceneSpec() => 'invitation',
   BridgeSceneSpec(:final index) => 'bridge$index',
@@ -84,7 +84,9 @@ String _label(FilmSceneSpec spec) => switch (spec) {
   KeepsakeSceneSpec() => 'keepsake',
 };
 
-List<(String, double, double)> _schedule(FilmTimeline timeline) => [
+List<(String, double, double)> _schedule(
+  FilmTimeline<ClassicSceneSpec> timeline,
+) => [
   for (final scene in timeline.scenes)
     (_label(scene.spec), scene.start, scene.duration),
 ];

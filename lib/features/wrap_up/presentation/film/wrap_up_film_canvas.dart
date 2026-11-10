@@ -18,7 +18,7 @@ import 'frames/wrap_up_film_invitation.dart';
 import 'frames/wrap_up_film_keepsake.dart';
 import 'frames/wrap_up_film_moment.dart';
 import 'frames/wrap_up_film_unlock.dart';
-import 'timeline/film_scene_spec.dart';
+import 'timeline/classic_scene_spec.dart';
 import 'timeline/film_timeline.dart';
 import 'timeline/template_timeline.dart';
 import 'wrap_up_film_motion.dart';
@@ -63,7 +63,7 @@ class _WrapUpFilmCanvasState extends State<WrapUpFilmCanvas>
   late final TemplateTimeline _template;
 
   /// The timeline's scenes in paint order (see [_paintRank]).
-  late final List<TimedScene> _layers;
+  late final List<TimedScene<ClassicSceneSpec>> _layers;
 
   @override
   void initState() {
@@ -101,7 +101,7 @@ class _WrapUpFilmCanvasState extends State<WrapUpFilmCanvas>
   /// The template paints by kind, not by time: the card pile stays on
   /// screen under the later bridges and Flurries, and a later scene's fade
   /// in overlaps an earlier one's fade out.
-  static int _paintRank(FilmSceneSpec spec) => switch (spec) {
+  static int _paintRank(ClassicSceneSpec spec) => switch (spec) {
     DustSceneSpec() => 0,
     InvitationSceneSpec() => 1,
     CardFlipSceneSpec() || CollageSceneSpec() => 2,
@@ -170,7 +170,11 @@ class _WrapUpFilmCanvasState extends State<WrapUpFilmCanvas>
     );
   }
 
-  Widget _buildScene(double t, TimedScene scene, double pileFade) {
+  Widget _buildScene(
+    double t,
+    TimedScene<ClassicSceneSpec> scene,
+    double pileFade,
+  ) {
     final anchors = _template.anchors;
     return switch (scene.spec) {
       DustSceneSpec(:final datesFormatted) => WrapUpFilmDust(

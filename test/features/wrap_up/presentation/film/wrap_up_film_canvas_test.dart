@@ -15,7 +15,7 @@ import 'package:traviato/features/wrap_up/domain/entities/wrap_up_unlock.dart';
 import 'package:traviato/features/wrap_up/presentation/film/frames/wrap_up_film_collage.dart';
 import 'package:traviato/features/wrap_up/presentation/film/frames/wrap_up_film_plate.dart';
 import 'package:traviato/features/wrap_up/presentation/film/wrap_up_film_canvas.dart';
-import 'package:traviato/features/wrap_up/presentation/film/timeline/film_scene_spec.dart';
+import 'package:traviato/features/wrap_up/presentation/film/timeline/classic_scene_spec.dart';
 import 'package:traviato/features/wrap_up/presentation/film/timeline/film_timeline.dart';
 import 'package:traviato/features/wrap_up/presentation/film/timeline/template_timeline.dart';
 

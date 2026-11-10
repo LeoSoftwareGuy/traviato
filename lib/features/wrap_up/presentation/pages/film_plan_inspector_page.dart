@@ -2,7 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -47,6 +49,12 @@ class FilmPlanInspectorPage extends ConsumerWidget {
         backgroundColor: AppColors.background,
         title: Text('Plan inspector', style: AppTypography.screenTitle),
         actions: [
+          IconButton(
+            key: const Key('film-plan-sky-story'),
+            tooltip: 'Preview Sky Story',
+            onPressed: () => context.pushNamed(RouteNames.skyStoryPreview),
+            icon: const Icon(Icons.air),
+          ),
           TextButton.icon(
             key: const Key('film-plan-rerun'),
             onPressed: isRerunning

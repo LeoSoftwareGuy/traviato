@@ -44,3 +44,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Sky Story reference film (#345): 45 MB, kept local; the stills are committed
+docs/design/sky-story/*.mp4

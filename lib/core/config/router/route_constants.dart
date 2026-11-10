@@ -19,6 +19,9 @@ abstract class RoutePaths {
 
   /// Debug builds only (#328): the wrap-up director's Plan inspector.
   static const tripFilmPlan = '/memory/:tripId/film-plan';
+
+  /// Debug builds only (#345): the Sky Story film preview.
+  static const skyStoryPreview = '/debug/sky-story';
   static const subscriptionOfferings = '/subscription/offerings';
 }
 
@@ -41,6 +44,7 @@ abstract class RouteNames {
   static const tripBonusTasks = 'tripBonusTasks';
   static const tripWrapUp = 'tripWrapUp';
   static const tripFilmPlan = 'tripFilmPlan';
+  static const skyStoryPreview = 'skyStoryPreview';
   static const subscriptionOfferings = 'subscriptionOfferings';
 }
 
