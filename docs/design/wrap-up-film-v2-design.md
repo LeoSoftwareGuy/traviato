@@ -1,14 +1,30 @@
 # Wrap-Up Film v2 — Director + Renderer (design)
-
-Status: **Part 1 (director) shipped behind a flag** (#328, fixes #332–#338); Part 2 not started · Date: 2026-11-08 · Owner: Leo
+ 
+> **Direction change (2026-11-10):** instead of one scene library styled per recipe, the film is now a set of
+> **templates**, each with its own complete look, designed in Synthesia and specified precisely:
+> - #345 **Sky Story** — new default (trips, couples, city breaks)
+> - #346 **Golden Vows** — weddings, engagements, anniversaries, date nights
+> - planned: **Neon Night** (parties, raves, concerts, sports nights), **Confetti** (birthdays, kids,
+>   graduations, family celebrations), **Field Notes** (camping, hiking, fishing, road trips)
+>
+> All templates share: 1080×1920, ~45–75 s, title → chapter pages → payoff ending, the Storyni balloon in
+> every template, one licensed music track each, user's first name as signature, fallback to the old film.
+>
+> **Director (#328, merged)** stays the brain: it picks the template from the occasion and fills that
+> template's slots (heroes, chapters, notes, headlines). Extensions are in #345 phase 6 / #346 phase 7.
+>
+> **#344** rescoped to PR 1 (timeline engine) + reading/validating the plan; old-scene plan playback dropped.
+> Parts 1–2 below are kept for background; the scene-library/recipe tables are superseded by the templates.
+ 
+Status: **proposal, not started** · Date: 2026-11-08 · Owner: Leo
 Replaces: Milestone 7 "themes" in `issue-backlog.md` (the director picks a recipe; the user can override).
 Related issues: #291, #292 (ordering bugs), #293 (AI lines), #294 (choose photos).
-
+ 
 ## Why
 After real-trip testing, the current film (fixed 18-scene template, AI writes only 4 lines) looks the
 same for every memory. A wedding, a rave and a camping trip should feel different. The missing piece is
 an AI that **decides how each film is told**, not AI-generated video.
-
+ 
 ## Decisions
 - **Director** = the existing Anthropic API call in `generate_wrap_up`, extended: photos (small) + notes
   in, a structured **film plan** (JSON) out. No new service.
@@ -18,11 +34,10 @@ an AI that **decides how each film is told**, not AI-generated video.
 - **No server rendering yet** (Remotion / Creatomate). Revisit when MP4 export/sharing becomes a priority.
   The plan format must be renderer-agnostic so a server renderer can read the same plan later.
 - **Don't block MVP launch.** Ship with the current film + #291–#293; v2 ships as an update.
-
 ---
-
+ 
 ## Part 1 — Director (Supabase edge function `generate_wrap_up`)
-
+ 
 ### Pipeline
 1. **Gather** photos, notes, day titles, places, tagged people, bonus tasks, dates, vibes, user picks
    (#294: must-include / exclude).
@@ -33,10 +48,9 @@ an AI that **decides how each film is told**, not AI-generated video.
 4. **Call 2 — film plan**: analysis + notes + trip facts + recipe definitions → plan JSON via **tool use /
    structured output** (schema below).
 5. **Validate** in code: known scene types only, real photo ids only, no excluded photos, chronological
-   order, total length 30–100s (was 45, #334), text length limits, language = UI language (#250). Invalid → one retry →
+   order, total length 45–100s, text length limits, language = UI language (#250). Invalid → one retry →
    fall back to the current template.
 6. **Save** to `wrap_ups.content` (versioned: `plan_version: 2`).
-
 ### Plan schema (sketch)
 ```json
 {
@@ -60,7 +74,7 @@ an AI that **decides how each film is told**, not AI-generated video.
 }
 ```
 Opening (dust/invitation), stats footnote, badge unlock and keepsake stay fixed bookends filled by code.
-
+ 
 ### Recipes (first set, refine in prototype)
 | Recipe | Fits | Pace | Scene bias | Music | Tone of lines |
 |---|---|---|---|---|---|
@@ -70,93 +84,15 @@ Opening (dust/invitation), stats footnote, badge unlock and keepsake stay fixed 
 | outdoors | camping, hiking, fishing | slow-medium | ken_burns (wide), polaroid | folk/acoustic | earthy, self-deprecating |
 | city_break | city trips | medium | collage, split, card_flip | upbeat indie | curious, light |
 | warm_family | birthdays, family | medium | polaroid_drop, collage_3 | gentle, cheerful | warm |
-
-### Proposal: recipe = rhythm, theme = look (2026-11-08, #342)
-Status: **proposal**, to be decided before build-order step 4.
-
-**Problem.** One recipe per occasion grows linearly. Every new occasion (fishing, safari, sports event…)
-would need its own pace, scene mix, look and music, all built and licensed again.
-
-**Proposal.** Split a film's style into two independent layers that the director picks separately:
-
-| Layer | Decides | Cost to add one |
-|---|---|---|
-| **Rhythm** (today's `recipe`) | pace, scene types it may use, scene length, bursts, line tone | high: scene code + validation rules |
-| **Theme** (new) | colours, colour grade, overlays (grain, light leaks, frames), fonts, music pool | low: design assets + tracks, no scene code |
-
-Every theme works with every rhythm, so 3 rhythms × 4 themes gives 12 distinct-looking films for about 7
-pieces of work, instead of 12 recipes.
-
-**Rhythms (first set).** This replaces the six-recipe table above:
-
-| Rhythm | Pace | Scene bias | Replaces |
-|---|---|---|---|
-| `keepsake` | slow, 4–6s | card_flip, collage, ken_burns | keepsake, city_break |
-| `rave` | fast, beat-cut, 1.5–4s | burst, split, collage_6 | rave |
-| `epic` (new) | slow-medium | ken_burns (wide landscapes), polaroid_drop | outdoors |
-| `warm` (new) | medium | polaroid_drop, collage_3/4 | celebration, warm_family |
-
-**Themes (first set).** `classic` (today's look, the default), `nature`, `celebration`, `night`.
-Later: `city`, `sea`, `snow`, `stadium`.
-
-**Occasions.** These only steer the director's reasoning and line tone, so the list is cheap to extend:
-
-| Occasion | Default rhythm | Default theme |
-|---|---|---|
-| wedding | warm | celebration |
-| birthday | warm | celebration |
-| family | warm | classic |
-| party | rave | night |
-| festival_concert | rave | night |
-| sports_event | rave | classic → `stadium` later |
-| camping_hiking | epic | nature |
-| fishing_hunting | epic | nature |
-| safari_wildlife | epic | nature |
-| beach | keepsake | classic → `sea` later |
-| road_trip | epic | nature |
-| city | keepsake | classic → `city` later |
-| other | keepsake | classic |
-
-These are *defaults*: the director may deviate when the photo analysis says otherwise (a wedding
-after-party can be `rave` + `night`) and says why in `reasoning`.
-
-**Vibes as hints.** The memory's vibes are already in the plan input. They nudge the theme, never force it:
-
-| Vibe | Theme hint |
-|---|---|
-| Adventure, Wildlife, Road trip | nature |
-| Nightlife | night |
-| Romantic | celebration |
-| Cultural, Foodie | classic (`city` later) |
-| Chill, Wellness | classic (`sea` later) |
-| Photography | none: favour `epic` / ken_burns heroes |
-
-**Schema.** Add `"theme"` next to `"recipe"` in the plan, and add the new occasion values. A plan without
-`theme` plays `classic`, so stored v2 plans stay valid. Validation checks the theme against the enabled
-list, as with recipes.
-
-**What the user sees.** One **"Change style"** picker (step 7) showing curated rhythm + theme
-combinations with a preview, rather than two technical controls. Pro gating fits themes naturally
-(free: `classic` + one more).
-
-**Build-order impact.** Step 4 becomes "2 rhythms + 2 themes first" (e.g. `keepsake`/`rave` ×
-`classic`/`nature`). The director only offers rhythms and themes the player can render, as today with
-recipes.
-
-**Open questions.**
-1. Which 2 rhythms + 2 themes ship first?
-2. Music: one pool per theme, or per theme × energy? This drives how many tracks need licensing.
-3. Does `epic` need `ken_burns` (step 3) before it can ship? Probably yes.
-
+ 
 ### Cost & privacy
 - Vision input costs more than text; with ~512px images and one film per memory, expect cents to tens of
   cents per film. **Measure in the prototype**; log tokens per film.
 - Photos are sent to the Anthropic API → update privacy policy (EU/GDPR) before release.
-
 ---
-
+ 
 ## Part 2 — Renderer (Flutter, on device)
-
+ 
 ### Architecture
 - **Timeline engine:** plan → flat list of scenes with start time + duration. One master clock
   (`AnimationController`) drives everything; scrubbing seeks the clock. Each scene widget receives its
@@ -174,12 +110,11 @@ recipes.
 - **Performance:** precache the next scenes' images at screen size, `RepaintBoundary` per scene, test
   200+ photo memories on a mid-range Android and an older iPhone.
 - **Fallback:** if a plan is missing/invalid, play the current template.
-
 ### Initial scene library (8–12)
 Existing: card_flip, collage_3, collage_4, collage_6, flurry, text_card (bridges), bookends.
 New: ken_burns (slow pan/zoom, landscape heroes), burst (3–6 quick cuts on beats), split (2–3 photos
 side by side), polaroid_drop.
-
+ 
 ### Later: MP4 export / sharing (separate decision)
 Options when sharing becomes the priority:
 - **Server render** (Remotion or Creatomate) reading the same plan — richest output, per-render cost,
@@ -187,9 +122,8 @@ Options when sharing becomes the priority:
 - **On-device capture** of the Flutter film to video — no server cost; check current Flutter
   video-encoding packages at that time.
 Music licence must then cover published videos (a music API like Epidemic Sound covers this).
-
 ---
-
+ 
 ## Build order (each item ≈ one or a few GitHub issues)
 0. **Prototype (no app code):** run the director prompts on Amsterdam + 2–3 other occasions; judge whether
    plans differ and make sense; measure cost.
@@ -201,9 +135,9 @@ Music licence must then cover published videos (a music API like Epidemic Sound 
 6. Balloon signature (Rive).
 7. Recipe override in UI ("Change style") + Pro gating (free: keepsake + 1; Pro: all).
 8. Later: export/share.
-
 ## Open questions
 1. Which 2–3 recipes ship first?
 2. Music source and budget.
 3. Free vs Pro split of recipes.
 4. Max photos analysed per memory (cost cap), e.g. 120 most diverse.
+ 
