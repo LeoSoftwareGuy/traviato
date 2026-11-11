@@ -3942,6 +3942,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{weekday} night'**
   String skyStory_night(String weekday);
+
+  /// Sky Story film: the memory's photo total under the closing photo mosaic (#345).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 moment} other{{count} moments}}'**
+  String skyStory_moments(int count);
+
+  /// Sky Story film: the handwritten line under the moment count at the end of the film (#345); the landing page's headline.
+  ///
+  /// In en, this message translates to:
+  /// **'Every memory, beautifully captured'**
+  String get skyStory_tagline;
 }
 
 class _AppLocalizationsDelegate

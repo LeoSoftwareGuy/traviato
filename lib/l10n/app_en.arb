@@ -2395,5 +2395,18 @@
         "type": "String"
       }
     }
+  },
+  "skyStory_moments": "{count, plural, =1{1 moment} other{{count} moments}}",
+  "@skyStory_moments": {
+    "description": "Sky Story film: the memory's photo total under the closing photo mosaic (#345).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "skyStory_tagline": "Every memory, beautifully captured",
+  "@skyStory_tagline": {
+    "description": "Sky Story film: the handwritten line under the moment count at the end of the film (#345); the landing page's headline."
   }
 }

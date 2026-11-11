@@ -2619,4 +2619,20 @@ class AppLocalizationsRu extends AppLocalizations {
   String skyStory_night(String weekday) {
     return '$weekday, ночь';
   }
+
+  @override
+  String skyStory_moments(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count момента',
+      many: '$count моментов',
+      few: '$count момента',
+      one: '$count момент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get skyStory_tagline => 'Каждое воспоминание бережно сохранено';
 }

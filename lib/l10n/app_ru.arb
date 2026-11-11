@@ -2551,5 +2551,13 @@
   "skyStory_night": "{weekday}, ночь",
   "@skyStory_night": {
     "x-review": "pending"
+  },
+  "skyStory_moments": "{count, plural, one{{count} момент} few{{count} момента} many{{count} моментов} other{{count} момента}}",
+  "@skyStory_moments": {
+    "x-review": "pending"
+  },
+  "skyStory_tagline": "Каждое воспоминание бережно сохранено",
+  "@skyStory_tagline": {
+    "x-review": "pending"
   }
 }

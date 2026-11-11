@@ -114,6 +114,7 @@ flutter:
 
   assets:
     - .env
+    - assets/images/brand/
     - assets/images/guest/
     - assets/images/covers/
     - assets/images/trip/
