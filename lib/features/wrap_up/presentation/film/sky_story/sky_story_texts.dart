@@ -12,6 +12,7 @@ import 'sky_story_tokens.dart';
 class SkyStoryTexts {
   SkyStoryTexts(SkyStoryCopy copy)
     : title = SkyTitleTexts(copy.title),
+      outro = SkyOutroTexts(copy.outro),
       pages = [
         for (final (i, page) in copy.pages.indexed)
           SkyPageTexts(
@@ -22,9 +23,11 @@ class SkyStoryTexts {
 
   final SkyTitleTexts title;
   final List<SkyPageTexts> pages;
+  final SkyOutroTexts outro;
 
   void dispose() {
     title.dispose();
+    outro.dispose();
     for (final page in pages) {
       page.dispose();
     }
@@ -333,5 +336,98 @@ class SkyQuoteTexts {
     for (final (painter, _) in words) {
       painter.dispose();
     }
+  }
+}
+
+/// The ending under the mosaic, centred (spec §5 / the reference at 50 s):
+/// the count's baseline at y ≈ 1438, the tagline's at ≈ 1535, then the
+/// app icon beside the brand line, centred on y ≈ 1655.
+class SkyOutroTexts {
+  factory SkyOutroTexts(SkyOutroCopy copy) {
+    final moments = _layout(
+      copy.moments,
+      SkyStoryText.display(copy.moments, size: momentsSize),
+      maxWidth: maxWidth,
+      align: TextAlign.center,
+      maxLines: 1,
+    );
+    final tagline = _layout(
+      copy.tagline,
+      SkyStoryText.hand(size: taglineSize, color: SkyStoryColors.eyebrowGold),
+      maxWidth: maxWidth,
+      align: TextAlign.center,
+      maxLines: 1,
+    );
+    final brand = _layout(
+      SkyOutroCopy.brand,
+      SkyStoryText.label(
+        size: brandSize,
+        color: SkyStoryColors.headlineCream,
+        trackingEm: 0.3,
+        weight: FontWeight.w600,
+      ),
+    );
+    // Tracking trails the last letter; centre on the letters.
+    final brandWidth = brand.width - brandSize * 0.3;
+    final rowLeft = 540 - (iconSize + iconGap + brandWidth) / 2;
+    return SkyOutroTexts._(
+      moments: moments,
+      momentsAt: Offset(
+        540 - moments.width / 2,
+        momentsBaseline - _baseline(moments),
+      ),
+      tagline: tagline,
+      taglineAt: Offset(
+        540 - tagline.width / 2,
+        taglineBaseline - _baseline(tagline),
+      ),
+      brand: brand,
+      brandAt: Offset(
+        rowLeft + iconSize + iconGap,
+        brandCenterY - brand.height / 2,
+      ),
+      icon: Rect.fromLTWH(
+        rowLeft,
+        brandCenterY - iconSize / 2,
+        iconSize,
+        iconSize,
+      ),
+    );
+  }
+
+  SkyOutroTexts._({
+    required this.moments,
+    required this.momentsAt,
+    required this.tagline,
+    required this.taglineAt,
+    required this.brand,
+    required this.brandAt,
+    required this.icon,
+  });
+
+  static const maxWidth = 960.0;
+  static const momentsSize = 104.0;
+  static const momentsBaseline = 1438.0;
+  static const taglineSize = 62.0;
+  static const taglineBaseline = 1535.0;
+  static const brandSize = 34.0;
+  static const brandCenterY = 1655.0;
+  static const iconSize = 110.0;
+  static const iconGap = 30.0;
+
+  final TextPainter moments;
+  final Offset momentsAt;
+  final TextPainter tagline;
+  final Offset taglineAt;
+  final TextPainter brand;
+  final Offset brandAt;
+
+  /// Where the app icon sits, left of the brand line.
+  final Rect icon;
+
+  void dispose() {
+    moments.dispose();
+    tagline.dispose();
+    brand.dispose();
   }
 }

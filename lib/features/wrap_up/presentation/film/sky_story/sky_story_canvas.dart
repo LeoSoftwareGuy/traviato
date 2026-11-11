@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../l10n/app_localizations.dart';
+import 'sky_mosaic.dart';
+import 'sky_outro_painter.dart';
 import 'sky_pages_painter.dart';
 import 'sky_photo_images.dart';
+import 'sky_scene_spec.dart';
 import 'sky_story.dart';
 import 'sky_story_copy.dart';
 import 'sky_story_texts.dart';
@@ -35,6 +38,7 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
   late final _FilmClock _clock = _FilmClock(_controller);
   late SkyWorld _world;
   late SkyPhotoImages _images;
+  late SkyOutroLayer _outro;
   SkyStoryCopy? _copy;
   SkyStoryTexts? _texts;
 
@@ -54,6 +58,32 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
       ..value = 0
       ..repeat();
     _images = SkyPhotoImages(widget.photo)..load(widget.story.photoIds);
+    final mosaicIds = widget.story.mosaicPhotoIds
+        .take(SkyStory.maxMosaicPhotos)
+        .toList();
+    _outro = SkyOutroLayer(
+      mosaic: SkyMosaic(
+        gatherStart: timeline.first<SkyGatherSpec>()!.start,
+        photoCount: mosaicIds.length,
+      ),
+      photoIds: mosaicIds,
+      tiles: SkyPhotoImages(_tilePhoto)..load(mosaicIds),
+      icon: SkyPhotoImages((_) => const AssetImage(SkyOutroLayer.iconAsset))
+        ..load(const [SkyOutroLayer.iconId]),
+    );
+  }
+
+  /// A mosaic tile's photo, decoded small: tiles are 36 px.
+  ImageProvider? _tilePhoto(String id) {
+    final full = widget.photo(id);
+    return full == null ? null : ResizeImage(full, width: 96);
+  }
+
+  void _disposeOutro() {
+    _outro
+      ..dispose()
+      ..tiles.dispose()
+      ..icon.dispose();
   }
 
   @override
@@ -63,6 +93,7 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
       return;
     }
     _images.dispose();
+    _disposeOutro();
     _start();
     _resolveCopy();
   }
@@ -89,6 +120,7 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
   void dispose() {
     _texts?.dispose();
     _images.dispose();
+    _disposeOutro();
     _clock.dispose();
     _controller.dispose();
     super.dispose();
@@ -110,6 +142,7 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
                 story: widget.story,
                 texts: _texts!,
                 images: _images,
+                outro: _outro,
                 time: _clock,
               ),
             ),

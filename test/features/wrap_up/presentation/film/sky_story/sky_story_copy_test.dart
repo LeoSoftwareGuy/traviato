@@ -198,4 +198,48 @@ void main() {
     expect(layouts(3), 'fan,taped,flyOut');
     expect(layouts(5), 'fan,taped,fan,taped,flyOut');
   });
+
+  group('the ending', () {
+    SkyOutroCopy outro(int count, AppLocalizations l10n, String locale) =>
+        SkyStoryCopy.resolve(
+          SkyStory(
+            title: 'T',
+            startDate: DateTime(2026, 6, 12),
+            endDate: DateTime(2026, 6, 14),
+            pages: SkyStoryFixtures.lisbon.pages,
+            momentCount: count,
+          ),
+          l10n,
+          locale,
+        ).outro;
+
+    test('the reference: 187 moments, the tagline', () {
+      final copy = SkyStoryCopy.resolve(SkyStoryFixtures.lisbon, en, 'en');
+      expect(copy.outro.moments, '187 moments');
+      expect(copy.outro.tagline, 'Every memory, beautifully captured');
+      expect(SkyOutroCopy.brand, 'STORYNI');
+    });
+
+    test('English plurals', () {
+      expect(outro(1, en, 'en').moments, '1 moment');
+      expect(outro(2, en, 'en').moments, '2 moments');
+      expect(outro(0, en, 'en').moments, '0 moments');
+    });
+
+    test('Russian plurals', () {
+      for (final (count, words) in const [
+        (1, '1 момент'),
+        (2, '2 момента'),
+        (5, '5 моментов'),
+        (21, '21 момент'),
+        (187, '187 моментов'),
+      ]) {
+        expect(outro(count, ru, 'ru').moments, words);
+      }
+      expect(
+        outro(3, ru, 'ru').tagline,
+        'Каждое воспоминание бережно сохранено',
+      );
+    });
+  });
 }

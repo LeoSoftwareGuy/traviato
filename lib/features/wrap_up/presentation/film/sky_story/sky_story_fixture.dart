@@ -11,11 +11,30 @@ abstract final class SkyStoryFixtures {
   static ImageProvider? photo(String id) =>
       AssetImage('assets/images/covers/$id.jpg');
 
+  /// The mosaic's tiles: the bundled covers, standing in for a memory's
+  /// photos.
+  static const _mosaic = [
+    'mountain_town',
+    'sunset_peaks',
+    'maui',
+    'foodie',
+    'cultural',
+    'romantic',
+    'nightlife',
+    'rooftop_gathering',
+    'lago_di_braies',
+    'canoe',
+    'picnic_on_the_edge',
+    'departure',
+  ];
+
   static final lisbon = SkyStory(
     title: 'Lisbon, together',
     startDate: DateTime(2026, 6, 12),
     endDate: DateTime(2026, 6, 14),
     names: 'Mari & Jonas',
+    momentCount: 187,
+    mosaicPhotoIds: _mosaic,
     pages: [
       SkyPage(
         firstDay: 1,
@@ -84,6 +103,8 @@ abstract final class SkyStoryFixtures {
     startDate: lisbon.startDate,
     endDate: lisbon.endDate,
     names: 'Мари и Йонас',
+    momentCount: 187,
+    mosaicPhotoIds: _mosaic,
     pages: [
       _ru(
         lisbon.pages[0],

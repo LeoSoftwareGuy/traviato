@@ -47,6 +47,16 @@ Future<void> _pumpFilm(
     for (final id in story.photoIds.toSet()) {
       await precacheImage(SkyStoryFixtures.photo(id)!, context);
     }
+    for (final id in story.mosaicPhotoIds) {
+      await precacheImage(
+        ResizeImage(SkyStoryFixtures.photo(id)!, width: 96),
+        context,
+      );
+    }
+    await precacheImage(
+      const AssetImage('assets/images/brand/storyni_icon.png'),
+      context,
+    );
   });
 
   await tester.pumpWidget(
@@ -99,7 +109,13 @@ void main() {
       ('39', 39.0),
       ('42', 42.0),
       ('42_5', 42.5),
+      ('44_5', 44.5),
       ('45', 45.0),
+      ('45_5', 45.5),
+      ('46', 46.0),
+      ('47', 47.0),
+      ('48', 48.0),
+      ('50', 50.0),
       ('54', 53.8),
     ], 'film');
   });
@@ -111,6 +127,7 @@ void main() {
       ('15', 15.0),
       ('27', 27.0),
       ('39', 39.0),
+      ('50', 50.0),
     ], 'film_ru');
   });
 }

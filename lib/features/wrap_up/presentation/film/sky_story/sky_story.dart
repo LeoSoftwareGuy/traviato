@@ -12,6 +12,8 @@ class SkyStory extends Equatable {
     required this.endDate,
     required this.pages,
     this.names,
+    this.momentCount = 0,
+    this.mosaicPhotoIds = const [],
   });
 
   /// The memory's name, the opening's big title.
@@ -25,6 +27,15 @@ class SkyStory extends Equatable {
   /// One per chapter, in order.
   final List<SkyPage> pages;
 
+  /// Every photo of the memory: the closing `{N} moments`.
+  final int momentCount;
+
+  /// Photos for the closing mosaic's tiles (up to [maxMosaicPhotos]),
+  /// repeated across its ~260 tiles. Empty: placeholder tiles.
+  final List<String> mosaicPhotoIds;
+
+  static const maxMosaicPhotos = 60;
+
   /// Every photo the film shows, for preloading.
   Iterable<String> get photoIds sync* {
     for (final page in pages) {
@@ -36,7 +47,15 @@ class SkyStory extends Equatable {
   }
 
   @override
-  List<Object?> get props => [title, startDate, endDate, names, pages];
+  List<Object?> get props => [
+    title,
+    startDate,
+    endDate,
+    names,
+    pages,
+    momentCount,
+    mosaicPhotoIds,
+  ];
 }
 
 /// One chapter's page: a day (or a run of days), its headline, a hero

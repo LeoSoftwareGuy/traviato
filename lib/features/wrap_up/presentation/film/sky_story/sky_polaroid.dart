@@ -88,11 +88,13 @@ void paintSkyPhoto(
   Rect rect,
   ui.Image? image, {
   double zoom = 1,
+  double opacity = 1,
 }) {
   if (image == null) {
     canvas.drawRect(
       rect,
       Paint()
+        ..color = Color.fromRGBO(0, 0, 0, opacity)
         ..shader = ui.Gradient.linear(rect.topCenter, rect.bottomCenter, const [
           SkyStoryColors.photoPlaceholderTop,
           SkyStoryColors.photoPlaceholderBottom,
@@ -116,6 +118,8 @@ void paintSkyPhoto(
     image,
     src,
     rect,
-    Paint()..filterQuality = FilterQuality.medium,
+    Paint()
+      ..filterQuality = FilterQuality.medium
+      ..color = Color.fromRGBO(0, 0, 0, opacity),
   );
 }

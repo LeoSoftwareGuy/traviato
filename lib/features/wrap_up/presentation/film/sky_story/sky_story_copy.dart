@@ -7,7 +7,11 @@ import 'sky_story.dart';
 /// Sky Story's words in the film's language (#345): composed once per
 /// language from `SkyStory`, then painted every frame.
 class SkyStoryCopy extends Equatable {
-  const SkyStoryCopy({required this.title, required this.pages});
+  const SkyStoryCopy({
+    required this.title,
+    required this.pages,
+    required this.outro,
+  });
 
   factory SkyStoryCopy.resolve(
     SkyStory story,
@@ -32,10 +36,15 @@ class SkyStoryCopy extends Equatable {
           locale,
         ),
     ],
+    outro: SkyOutroCopy(
+      moments: l10n.skyStory_moments(story.momentCount),
+      tagline: l10n.skyStory_tagline,
+    ),
   );
 
   final SkyTitleCopy title;
   final List<SkyPageCopy> pages;
+  final SkyOutroCopy outro;
 
   /// `12 – 14 June 2026` · `30 May – 2 June 2026` · `30 December 2026 –
   /// 2 January 2027` (the reference's spaced dash and full month).
@@ -53,7 +62,7 @@ class SkyStoryCopy extends Equatable {
   }
 
   @override
-  List<Object?> get props => [title, pages];
+  List<Object?> get props => [title, pages, outro];
 }
 
 class SkyTitleCopy extends Equatable {
@@ -69,6 +78,22 @@ class SkyTitleCopy extends Equatable {
 
   @override
   List<Object?> get props => [eyebrow, title, subtitle];
+}
+
+/// The ending under the mosaic: `187 moments`, the tagline and the brand.
+class SkyOutroCopy extends Equatable {
+  const SkyOutroCopy({required this.moments, required this.tagline});
+
+  final String moments;
+  final String tagline;
+
+  /// The brand line beside the app icon: the product name, never
+  /// translated (#345: the icon and Storyni replace the reference's
+  /// "YOUR MEMORY COMPANION").
+  static const brand = 'STORYNI';
+
+  @override
+  List<Object?> get props => [moments, tagline];
 }
 
 class SkyPageCopy extends Equatable {

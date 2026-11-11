@@ -77,7 +77,15 @@ class SkyBalloonPath {
       );
       if (spec.isLast) {
         moves.add(
-          _Move(gather.start, gather.start + 2.0, dip, _gone, Curves.easeIn),
+          // Off the top just before the tiles come (the reference: 42.75
+          // to 43.9 s).
+          _Move(
+            gather.start - 0.25,
+            gather.start + 0.9,
+            dip,
+            _gone,
+            Curves.easeInSine,
+          ),
         );
         continue;
       }

@@ -77,6 +77,20 @@ void main() {
     );
   });
 
+  testWidgets('the ending plays with tiles that never load', (tester) async {
+    await _playThrough(
+      tester,
+      SkyStory(
+        title: 'Tiles',
+        startDate: DateTime(2026, 6, 12),
+        endDate: DateTime(2026, 6, 13),
+        pages: [_barePage(1), _barePage(2)],
+        momentCount: 1,
+        mosaicPhotoIds: [for (var i = 0; i < 80; i++) 'gone_$i'],
+      ),
+    );
+  });
+
   testWidgets('the preview switches the film to Russian', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
