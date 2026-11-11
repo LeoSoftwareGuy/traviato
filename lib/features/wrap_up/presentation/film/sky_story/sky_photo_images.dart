@@ -19,6 +19,9 @@ class SkyPhotoImages extends ChangeNotifier {
 
   ui.Image? operator [](String id) => _infos[id]?.image;
 
+  /// How many photos have arrived so far.
+  int get loadedCount => _infos.length;
+
   /// Starts loading [ids]; repaints as each arrives.
   void load(Iterable<String> ids) {
     for (final id in ids) {

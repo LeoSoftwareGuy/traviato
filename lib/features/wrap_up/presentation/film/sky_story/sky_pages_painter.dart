@@ -9,6 +9,7 @@ import '../wrap_up_film_motion.dart';
 import 'sky_balloon.dart';
 import 'sky_balloon_path.dart';
 import 'sky_handwriting.dart';
+import 'sky_outro_painter.dart';
 import 'sky_page_beats.dart';
 import 'sky_photo_images.dart';
 import 'sky_polaroid.dart';
@@ -28,15 +29,21 @@ class SkyPagesPainter extends CustomPainter {
     required this.story,
     required this.texts,
     required this.images,
+    required this.outro,
     required this.time,
   }) : _beats = SkyPageBeats.all(world.timeline),
        _openingEnd = world.timeline.first<SkyOpeningSpec>()!.end,
-       super(repaint: Listenable.merge([time, images]));
+       super(
+         repaint: Listenable.merge([time, images, outro.tiles, outro.icon]),
+       );
 
   final SkyWorld world;
   final SkyStory story;
   final SkyStoryTexts texts;
   final SkyPhotoImages images;
+
+  /// The ending's mosaic and lines, painted over the sky at the gather.
+  final SkyOutroLayer outro;
 
   /// The film clock, in seconds.
   final ValueListenable<double> time;
@@ -92,6 +99,7 @@ class SkyPagesPainter extends CustomPainter {
     if (balloon != null) {
       paintSkyBalloon(canvas, center: balloon.center, width: balloon.width);
     }
+    outro.paint(canvas, t, texts.outro);
     for (final beats in visible) {
       if (beats.layout != SkyPageLayout.flyOut) continue;
       canvas
@@ -588,30 +596,14 @@ class SkyPagesPainter extends CustomPainter {
     double start,
     TextPainter painter,
     Offset at,
-  ) {
-    final u = _progress(t, start, 0.6);
-    if (u <= 0) return;
-    final e = Curves.easeOutCubic.transform(u);
-    _paintText(canvas, painter, at.translate(0, 40 * (1 - e)), e);
-  }
+  ) => paintSkyTextFadeRise(canvas, t, start, painter, at);
 
   static void _paintText(
     Canvas canvas,
     TextPainter painter,
     Offset at,
     double alpha,
-  ) {
-    if (alpha >= 0.999) {
-      painter.paint(canvas, at);
-      return;
-    }
-    canvas.saveLayer(
-      (at & painter.size).inflate(24),
-      Paint()..color = Color.fromRGBO(0, 0, 0, alpha),
-    );
-    painter.paint(canvas, at);
-    canvas.restore();
-  }
+  ) => paintSkyText(canvas, painter, at, alpha);
 
   static void _paintTilted(
     Canvas canvas,
@@ -655,5 +647,6 @@ class SkyPagesPainter extends CustomPainter {
       oldDelegate.story != story ||
       oldDelegate.texts != texts ||
       oldDelegate.images != images ||
+      oldDelegate.outro != outro ||
       oldDelegate.time != time;
 }

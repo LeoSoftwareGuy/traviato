@@ -75,6 +75,7 @@ void main() {
       );
       final display = [
         copy.title.title,
+        copy.outro.moments,
         for (final page in copy.pages) ...[
           page.headline,
           if (page.badgeCount != null) page.badgeCount!,
@@ -89,6 +90,7 @@ void main() {
       expect(
         _missing(sans, [
           copy.title.eyebrow,
+          SkyOutroCopy.brand,
           for (final page in copy.pages) ...[
             page.eyebrow,
             if (page.badgeLabel != null) page.badgeLabel!,
@@ -99,6 +101,7 @@ void main() {
       expect(
         _missing(hand, [
           copy.title.subtitle,
+          copy.outro.tagline,
           for (final page in copy.pages) ...[
             page.heroCaption,
             if (page.note != null) page.note!,

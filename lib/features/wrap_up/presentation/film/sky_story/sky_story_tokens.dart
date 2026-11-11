@@ -21,6 +21,12 @@ abstract final class SkyStoryColors {
   ];
 
   /// The flat night of the gather and outro, top to bottom.
+  /// The closing mosaic's tile tints (over each photo): red gores, cream
+  /// stripes, the sepia basket.
+  static const mosaicRed = Color(0xFFC8283A);
+  static const mosaicCream = Color(0xFFF6EBDD);
+  static const mosaicBasket = Color(0xFF7A5238);
+
   static const outroTop = Color(0xFF0B0D26);
   static const outroBottom = Color(0xFF0D112E);
 

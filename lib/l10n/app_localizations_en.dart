@@ -2575,4 +2575,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String skyStory_night(String weekday) {
     return '$weekday night';
   }
+
+  @override
+  String skyStory_moments(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count moments',
+      one: '1 moment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get skyStory_tagline => 'Every memory, beautifully captured';
 }
