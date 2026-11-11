@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../../l10n/app_localizations.dart';
@@ -8,6 +10,7 @@ import 'sky_photo_images.dart';
 import 'sky_scene_spec.dart';
 import 'sky_story.dart';
 import 'sky_story_copy.dart';
+import 'sky_story_music.dart';
 import 'sky_story_texts.dart';
 import 'sky_story_timeline.dart';
 import 'sky_world.dart';
@@ -18,13 +21,26 @@ import 'sky_world_painter.dart';
 /// far balloons) underneath; the title, the chapter pages and the big
 /// balloon over it. Its words follow the surrounding locale.
 class SkyStoryCanvas extends StatefulWidget {
-  const SkyStoryCanvas({required this.story, required this.photo, super.key});
+  const SkyStoryCanvas({
+    required this.story,
+    required this.photo,
+    this.music,
+    this.muted = false,
+    super.key,
+  });
 
   final SkyStory story;
 
   /// Where each photo's pixels come from, by photo id. Null (or a failed
   /// load) paints a warm placeholder.
   final ImageProvider? Function(String photoId) photo;
+
+  /// Makes the player for the film's music, or null for a silent film
+  /// (tests, goldens).
+  final SkyMusicPlayer Function()? music;
+
+  /// Silences the music without stopping its clock.
+  final bool muted;
 
   @override
   State<SkyStoryCanvas> createState() => _SkyStoryCanvasState();
@@ -39,14 +55,23 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
   late SkyWorld _world;
   late SkyPhotoImages _images;
   late SkyOutroLayer _outro;
+  SkyStoryMusic? _music;
+  late final AppLifecycleListener _lifecycle = AppLifecycleListener(
+    onHide: () => _music?.pause(),
+  );
   SkyStoryCopy? _copy;
   SkyStoryTexts? _texts;
 
   @override
   void initState() {
     super.initState();
+    _clock.addListener(_syncMusic);
+    _lifecycle;
     _start();
   }
+
+  void _syncMusic() =>
+      _music?.sync(_clock.value, running: _controller.isAnimating);
 
   /// (Re)starts the film for the widget's story, from the top.
   void _start() {
@@ -58,6 +83,11 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
       ..value = 0
       ..repeat();
     _images = SkyPhotoImages(widget.photo)..load(widget.story.photoIds);
+    final player = widget.music?.call();
+    _music = player == null
+        ? null
+        : (SkyStoryMusic(player, filmLength: timeline.total)
+            ..muted = widget.muted);
     final mosaicIds = widget.story.mosaicPhotoIds
         .take(SkyStory.maxMosaicPhotos)
         .toList();
@@ -89,11 +119,13 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
   @override
   void didUpdateWidget(SkyStoryCanvas oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _music?.muted = widget.muted;
     if (oldWidget.story == widget.story && oldWidget.photo == widget.photo) {
       return;
     }
     _images.dispose();
     _disposeOutro();
+    unawaited(_music?.dispose());
     _start();
     _resolveCopy();
   }
@@ -121,6 +153,9 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
     _texts?.dispose();
     _images.dispose();
     _disposeOutro();
+    _lifecycle.dispose();
+    _clock.removeListener(_syncMusic);
+    unawaited(_music?.dispose());
     _clock.dispose();
     _controller.dispose();
     super.dispose();

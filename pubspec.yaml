@@ -67,6 +67,12 @@ dependencies:
   # page (#205) from the design's exported SVGs.
   flutter_svg: ^2.3.0
   wakelock_plus: ^1.8.1
+  # The Sky Story film's music (#345): just_audio is the most used Flutter
+  # audio player (asset playback, seek, volume); audio_session sets the
+  # "ambient" category so the silent switch mutes it and it mixes with
+  # other audio.
+  just_audio: ^0.10.6
+  audio_session: ^0.2.4
 
 dev_dependencies:
   flutter_test:
@@ -114,6 +120,7 @@ flutter:
 
   assets:
     - .env
+    - assets/audio/
     - assets/images/brand/
     - assets/images/guest/
     - assets/images/covers/

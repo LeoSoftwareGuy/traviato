@@ -2,14 +2,22 @@ import 'package:flutter/material.dart';
 
 import '../film/sky_story/sky_story_canvas.dart';
 import '../film/sky_story/sky_story_fixture.dart';
+import '../film/sky_story/sky_story_music.dart';
 
 /// Debug builds only (#345): plays the Sky Story film full screen on the
 /// reference's memory ("Lisbon, together", placeholder photos), so its
 /// look can be checked on a device while the template is being built.
-/// EN/RU switches both the film's language and the memory's words.
+/// EN/RU switches both the film's language and the memory's words; the
+/// speaker mutes the music.
 /// Reached from the Plan inspector; never routed in release.
 class SkyStoryPreviewPage extends StatefulWidget {
-  const SkyStoryPreviewPage({super.key});
+  const SkyStoryPreviewPage({
+    this.music = JustAudioSkyMusicPlayer.new,
+    super.key,
+  });
+
+  /// The music player; tests pass a fake.
+  final SkyMusicPlayer Function() music;
 
   @override
   State<SkyStoryPreviewPage> createState() => _SkyStoryPreviewPageState();
@@ -17,6 +25,7 @@ class SkyStoryPreviewPage extends StatefulWidget {
 
 class _SkyStoryPreviewPageState extends State<SkyStoryPreviewPage> {
   bool _russian = false;
+  bool _muted = false;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +44,8 @@ class _SkyStoryPreviewPageState extends State<SkyStoryPreviewPage> {
                     ? SkyStoryFixtures.lisbonRu
                     : SkyStoryFixtures.lisbon,
                 photo: SkyStoryFixtures.photo,
+                music: widget.music,
+                muted: _muted,
               ),
             ),
           ),
@@ -43,6 +54,14 @@ class _SkyStoryPreviewPageState extends State<SkyStoryPreviewPage> {
               children: [
                 const BackButton(color: Colors.white),
                 const Spacer(),
+                IconButton(
+                  key: const Key('sky-story-mute'),
+                  color: Colors.white,
+                  onPressed: () => setState(() => _muted = !_muted),
+                  icon: Icon(
+                    _muted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                  ),
+                ),
                 TextButton(
                   key: const Key('sky-story-language'),
                   style: TextButton.styleFrom(foregroundColor: Colors.white),
