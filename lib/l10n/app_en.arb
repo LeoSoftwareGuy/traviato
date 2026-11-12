@@ -2338,6 +2338,22 @@
       }
     }
   },
+  "goldenVows_packedHeading": "Before the big day",
+  "@goldenVows_packedHeading": {
+    "description": "Golden Vows film: the heading of the packing card, in script (#346)."
+  },
+  "goldenVows_packedCount": "What we packed · {packed} of {total}",
+  "@goldenVows_packedCount": {
+    "description": "Golden Vows film: the packing card's subhead (#346); shown uppercase.",
+    "placeholders": {
+      "packed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "skyStory_days": "Days {first}–{last}",
   "@skyStory_days": {
     "description": "Sky Story film: a page's eyebrow when the page covers several days (#345); shown uppercase.",

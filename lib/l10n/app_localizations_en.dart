@@ -2536,6 +2536,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get goldenVows_packedHeading => 'Before the big day';
+
+  @override
+  String goldenVows_packedCount(int packed, int total) {
+    return 'What we packed · $packed of $total';
+  }
+
+  @override
   String skyStory_days(int first, int last) {
     return 'Days $first–$last';
   }
