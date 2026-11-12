@@ -23,6 +23,7 @@ import '../../../features/quest/presentation/pages/plan_page.dart';
 import '../../../features/subscription/presentation/pages/paywall_page.dart';
 import '../../../features/trip/presentation/pages/create_memory_page.dart';
 import '../../../features/wrap_up/presentation/pages/film_plan_inspector_page.dart';
+import '../../../features/wrap_up/presentation/pages/golden_vows_preview_page.dart';
 import '../../../features/wrap_up/presentation/pages/sky_story_preview_page.dart';
 import '../../../features/wrap_up/presentation/pages/wrap_up_page.dart';
 import 'route_constants.dart';
@@ -185,6 +186,13 @@ GoRouter router(Ref ref) {
           builder: (context, state) => SkyStoryPreviewPage(
             tripId: state.uri.queryParameters['trip'],
           ),
+        ),
+      // The Golden Vows film preview (#346) — never routed in release.
+      if (kDebugMode)
+        GoRoute(
+          path: RoutePaths.goldenVowsPreview,
+          name: RouteNames.goldenVowsPreview,
+          builder: (context, state) => const GoldenVowsPreviewPage(),
         ),
       GoRoute(
         path: RoutePaths.subscriptionOfferings,
