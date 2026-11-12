@@ -341,12 +341,20 @@ class GvAlbumTexts {
         l10n.goldenVows_heartTitle,
         '${l10n.goldenVows_moments(story.momentCount)}'
         ' · ${l10n.goldenVows_days(story.dayCount)}',
+      ),
+      endLine = _fit(
+        story.endLine ?? l10n.goldenVows_endLine,
+        GoldenVowsType.script(88, color: GoldenVowsColors.gold),
+        GvHeadingTexts.maxWidth,
       );
 
   final List<GvHeroTexts> heroes;
   final List<GvHeadingTexts> chapters;
   final GvHeadingTexts? carousel;
   final GvHeadingTexts heart;
+
+  /// Under the balloon as the heart lifts off (spec §5.4).
+  final TextPainter endLine;
 
   void dispose() {
     for (final hero in heroes) {
@@ -357,5 +365,6 @@ class GvAlbumTexts {
     }
     carousel?.dispose();
     heart.dispose();
+    endLine.dispose();
   }
 }

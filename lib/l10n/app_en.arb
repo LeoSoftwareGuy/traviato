@@ -2376,6 +2376,10 @@
       }
     }
   },
+  "goldenVows_endLine": "Forever starts here",
+  "@goldenVows_endLine": {
+    "description": "Golden Vows film: the line under the balloon as the photo heart lifts off (#346), when the memory gives none of its own."
+  },
   "skyStory_days": "Days {first}–{last}",
   "@skyStory_days": {
     "description": "Sky Story film: a page's eyebrow when the page covers several days (#345); shown uppercase.",

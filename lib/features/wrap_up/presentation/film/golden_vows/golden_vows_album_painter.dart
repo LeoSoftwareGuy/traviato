@@ -314,27 +314,13 @@ class GoldenVowsAlbumPainter extends CustomPainter {
     }
     canvas.drawImageRect(
       image,
-      coverCrop(
+      gvCoverCrop(
         Size(image.width.toDouble(), image.height.toDouble()),
         dst.size,
         zoom,
       ),
       dst,
       Paint()..filterQuality = FilterQuality.medium,
-    );
-  }
-
-  /// The part of an image of [image] size that fills [box] edge to edge
-  /// (centred), seen [zoom] times closer.
-  @visibleForTesting
-  static Rect coverCrop(Size image, Size box, double zoom) {
-    final scale = math.max(box.width / image.width, box.height / image.height);
-    final w = box.width / scale / zoom;
-    final h = box.height / scale / zoom;
-    return Rect.fromCenter(
-      center: Offset(image.width / 2, image.height / 2),
-      width: w,
-      height: h,
     );
   }
 

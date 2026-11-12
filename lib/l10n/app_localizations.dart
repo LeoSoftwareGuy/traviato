@@ -3943,6 +3943,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{One day} other{{count} days}}'**
   String goldenVows_days(int count);
 
+  /// Golden Vows film: the line under the balloon as the photo heart lifts off (#346), when the memory gives none of its own.
+  ///
+  /// In en, this message translates to:
+  /// **'Forever starts here'**
+  String get goldenVows_endLine;
+
   /// Sky Story film: a page's eyebrow when the page covers several days (#345); shown uppercase.
   ///
   /// In en, this message translates to:

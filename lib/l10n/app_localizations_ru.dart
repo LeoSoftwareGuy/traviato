@@ -2619,6 +2619,9 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get goldenVows_endLine => 'Навсегда начинается здесь';
+
+  @override
   String skyStory_days(int first, int last) {
     return 'Дни $first–$last';
   }

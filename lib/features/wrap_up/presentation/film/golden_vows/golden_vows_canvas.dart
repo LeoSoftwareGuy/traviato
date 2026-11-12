@@ -9,6 +9,8 @@ import 'golden_vows_album.dart';
 import 'golden_vows_album_painter.dart';
 import 'golden_vows_ambient.dart';
 import 'golden_vows_ambient_painter.dart';
+import 'golden_vows_heart.dart';
+import 'golden_vows_heart_painter.dart';
 import 'golden_vows_intro_painter.dart';
 import 'golden_vows_story.dart';
 import 'golden_vows_texts.dart';
@@ -35,6 +37,11 @@ class GoldenVowsCanvas extends StatefulWidget {
 
   static ImageProvider? _noPhoto(String _) => null;
 
+  /// A heart photo as the film decodes it: small, since its tiles are
+  /// 46–107 px (200 down to 44 photos).
+  static ImageProvider heartImage(ImageProvider photo) =>
+      ResizeImage(photo, width: 192, allowUpscaling: false);
+
   /// The film doesn't start until every photo has loaded or failed (no
   /// frame is drawn with a photo still missing), or this long has passed.
   static const photoWait = Duration(seconds: 5);
@@ -57,7 +64,11 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
   late GoldenVowsTimeline _timeline;
   late GoldenVowsAmbient _ambient;
   late GoldenVowsAlbum _album;
+  late GoldenVowsHeart _heart;
   SkyPhotoImages? _images;
+
+  /// The heart's photos, decoded small (see [GoldenVowsCanvas.heartImage]).
+  SkyPhotoImages? _heartImages;
   GoldenVowsTexts? _texts;
   Locale? _textsLocale;
   bool _failed = false;
@@ -72,23 +83,36 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
     _timeline = GoldenVowsTimeline.forStory(widget.story);
     _ambient = GoldenVowsAmbient(_timeline);
     _album = GoldenVowsAlbum(_timeline);
+    _heart = GoldenVowsHeart(
+      start: _timeline.heartStart,
+      photoCount: widget.story.heartPhotos.length,
+    );
     _clock.total = _timeline.total;
     _controller
       ..stop()
       ..duration = Duration(milliseconds: (_timeline.total * 1000).round())
       ..value = 0;
     _images?.dispose();
+    _heartImages?.dispose();
     final images = _images = SkyPhotoImages(widget.photo)
       ..load(widget.story.albumPhotoIds);
-    unawaited(_playWhenReady(images));
+    final heartImages = _heartImages = SkyPhotoImages((id) {
+      final photo = widget.photo(id);
+      return photo == null ? null : GoldenVowsCanvas.heartImage(photo);
+    })..load(widget.story.heartPhotos);
+    unawaited(_playWhenReady(images, heartImages));
   }
 
-  /// Starts the clock once [images] have all loaded or failed, or after
+  /// Starts the clock once every photo has loaded or failed, or after
   /// [GoldenVowsCanvas.photoWait].
-  Future<void> _playWhenReady(SkyPhotoImages images) async {
-    await images.ready
-        .then<void>((_) {})
-        .timeout(GoldenVowsCanvas.photoWait, onTimeout: () {});
+  Future<void> _playWhenReady(
+    SkyPhotoImages images,
+    SkyPhotoImages heartImages,
+  ) async {
+    await Future.wait([
+      images.ready,
+      heartImages.ready,
+    ]).then<void>((_) {}).timeout(GoldenVowsCanvas.photoWait, onTimeout: () {});
     if (!mounted || _failed || _images != images) return;
     unawaited(_controller.repeat());
   }
@@ -138,6 +162,7 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
   void dispose() {
     _texts?.dispose();
     _images?.dispose();
+    _heartImages?.dispose();
     _clock.dispose();
     _controller.dispose();
     super.dispose();
@@ -147,7 +172,8 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
   Widget build(BuildContext context) {
     final texts = _texts;
     final images = _images;
-    if (_failed || texts == null || images == null) {
+    final heartImages = _heartImages;
+    if (_failed || texts == null || images == null || heartImages == null) {
       return const ColoredBox(color: Colors.black);
     }
     return ColoredBox(
@@ -173,9 +199,16 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
                     images: images,
                     time: _clock,
                   ),
+                  GoldenVowsHeartPainter(
+                    heart: _heart,
+                    photoIds: widget.story.heartPhotos,
+                    images: heartImages,
+                    texts: texts.album,
+                    time: _clock,
+                  ),
                   GoldenVowsFrontPainter(ambient: _ambient, time: _clock),
                 ]),
-                repaint: Listenable.merge([_clock, images]),
+                repaint: Listenable.merge([_clock, images, heartImages]),
                 onError: _fail,
               ),
             ),

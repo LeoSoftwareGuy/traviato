@@ -2552,6 +2552,10 @@
   "@goldenVows_days": {
     "x-review": "pending"
   },
+  "goldenVows_endLine": "Навсегда начинается здесь",
+  "@goldenVows_endLine": {
+    "x-review": "pending"
+  },
   "skyStory_days": "Дни {first}–{last}",
   "@skyStory_days": {
     "x-review": "pending"

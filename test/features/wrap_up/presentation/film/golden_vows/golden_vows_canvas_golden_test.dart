@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_story.dart';
+import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_timeline.dart';
 import 'package:traviato/l10n/app_localizations.dart';
 
 import 'gv_placeholder_photos.dart';
@@ -41,9 +42,14 @@ Future<void> _pumpFilm(
   final context = tester.element(find.byType(SizedBox));
   late final Map<String, MemoryImage> photos;
   await tester.runAsync(() async {
-    photos = await GvPlaceholderPhotos.generate();
+    photos = await GvPlaceholderPhotos.generate(
+      hearts: story.heartPhotos.length,
+    );
     for (final photo in photos.values) {
       await precacheImage(photo, context);
+    }
+    for (final id in story.heartPhotos) {
+      await precacheImage(GoldenVowsCanvas.heartImage(photos[id]!), context);
     }
   });
 
@@ -105,7 +111,15 @@ void main() {
       ('46', 46.0),
       ('50', 50.0),
       ('51_7', 51.7),
+      ('52_8', 52.8),
+      ('53_6', 53.6),
       ('54', 54.0),
+      ('55', 55.0),
+      ('55_9', 55.9),
+      ('56_5', 56.5),
+      ('57', 57.0),
+      ('58_4', 58.4),
+      ('59_4', 59.4),
       ('60_4', 60.4),
       ('61_8', 61.8),
       ('69_5', 69.5),
@@ -123,6 +137,7 @@ void main() {
       ('32_5', 32.5),
       ('46', 46.0),
       ('54', 54.0),
+      ('58_4', 58.4),
     ], 'wedding_ru');
   });
 
@@ -150,4 +165,21 @@ void main() {
     );
     await _expectAt(tester, const [('04_4', 4.4)], 'long_names');
   });
+
+  // The heart's extremes: few photos repeat to fill 42 cells; 200 fill 200.
+  for (final (name, count) in const [('few', 20), ('many', 200)]) {
+    testWidgets('a heart of $count photos', skip: _skip, (tester) async {
+      final story = GoldenVowsStory(
+        names: 'Mia & Jonas',
+        date: DateTime(2026, 9, 5),
+        heartPhotoIds: GoldenVowsFixtures.heartIds(count),
+      );
+      await _pumpFilm(tester, story, const Locale('en'));
+      final h0 = GoldenVowsTimeline.forStory(story).heartStart;
+      await _expectAt(tester, [
+        ('formed', h0 + 3.0),
+        ('lifting', h0 + 7.0),
+      ], 'heart_$name');
+    });
+  }
 }

@@ -57,6 +57,7 @@ abstract final class GvPlaceholderPhotos {
     return switch (parts.first) {
       'hero' => 'HERO ${parts[1]}',
       'chapter' => 'CH ${parts[1]} · ${parts[2]}',
+      'heart' => parts[1],
       _ => 'CAROUSEL ${parts[1]}',
     };
   }
@@ -70,14 +71,29 @@ abstract final class GvPlaceholderPhotos {
     return '$kind ${aspect.toStringAsFixed(2)}';
   }
 
-  /// Every placeholder as PNG bytes. Call inside `tester.runAsync`, with
-  /// the film's fonts loaded.
-  static Future<Map<String, MemoryImage>> generate() async {
+  /// The heart's photos cycle through these aspects, so its square tiles
+  /// crop every shape.
+  static const heartAspects = [3 / 4, 3 / 2, 1.0, 2 / 3, 4 / 3];
+
+  /// Every placeholder as PNG bytes, plus `heart-1`…`heart-[hearts]`
+  /// (small, numbered). Call inside `tester.runAsync`, with the film's
+  /// fonts loaded.
+  static Future<Map<String, MemoryImage>> generate({int hearts = 0}) async {
     final out = <String, MemoryImage>{};
     var n = 0;
     for (final MapEntry(key: id, value: aspect) in aspects.entries) {
       out[id] = MemoryImage(
         await _png(id, aspect, _tints[n++ % _tints.length]),
+      );
+    }
+    for (var i = 1; i <= hearts; i++) {
+      out['heart-$i'] = MemoryImage(
+        await _png(
+          'heart-$i',
+          heartAspects[i % heartAspects.length],
+          _tints[i % _tints.length],
+          long: 200,
+        ),
       );
     }
     return out;
@@ -86,9 +102,10 @@ abstract final class GvPlaceholderPhotos {
   static Future<Uint8List> _png(
     String id,
     double aspect,
-    (Color, Color) tint,
-  ) async {
-    const long = 720.0;
+    (Color, Color) tint, {
+    double long = 720,
+  }) async {
+    final small = long < 400;
     final size = aspect >= 1
         ? Size(long, (long / aspect).roundToDouble())
         : Size((long * aspect).roundToDouble(), long);
@@ -112,8 +129,12 @@ abstract final class GvPlaceholderPhotos {
       ..drawLine(rect.topCenter, rect.bottomCenter, line..strokeWidth = 2)
       ..drawLine(rect.centerLeft, rect.centerRight, line);
     for (final (text, dy, fontSize) in [
-      (label(id), -34.0, 54.0),
-      (shape(aspect), 34.0, 36.0),
+      if (small)
+        (label(id), 0.0, 64.0)
+      else ...[
+        (label(id), -34.0, 54.0),
+        (shape(aspect), 34.0, 36.0),
+      ],
     ]) {
       final painter = TextPainter(
         text: TextSpan(

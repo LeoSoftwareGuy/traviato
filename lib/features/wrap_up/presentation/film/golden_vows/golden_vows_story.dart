@@ -38,7 +38,8 @@ class GoldenVowsStory extends Equatable {
     this.heroes = const [],
     this.chapters = const [],
     this.carousel,
-    this.momentCount = 0,
+    this.heartPhotoIds = const [],
+    this.endLine,
     this.dayCount = 1,
   });
 
@@ -69,9 +70,21 @@ class GoldenVowsStory extends Equatable {
   /// Two rows of prints sliding past; null or no photos → no page.
   final GvChapter? carousel;
 
+  /// Every photo of the memory (spec §6 `allPhotos`): they form the heart,
+  /// up to [maxHeartPhotos] of them. None → no heart.
+  final List<String> heartPhotoIds;
+
+  /// The line under the balloon; null → "Forever starts here".
+  final String? endLine;
+
   /// The heart page's line: "{N} MOMENTS · ONE DAY".
-  final int momentCount;
+  int get momentCount => heartPhotoIds.length;
   final int dayCount;
+
+  static const maxHeartPhotos = 200;
+
+  /// The heart's photos, capped.
+  List<String> get heartPhotos => heartPhotoIds.take(maxHeartPhotos).toList();
 
   static const maxPacked = 5;
   static const maxChapterPhotos = 3;
@@ -101,7 +114,8 @@ class GoldenVowsStory extends Equatable {
     heroes,
     chapters,
     carousel,
-    momentCount,
+    heartPhotoIds,
+    endLine,
     dayCount,
   ];
 }
@@ -133,7 +147,7 @@ abstract final class GoldenVowsFixtures {
       ('Just married', 'Chapter three · Afternoon'),
     ]),
     carousel: _carousel('And the night went on', 'Chapter four · Evening'),
-    momentCount: 64,
+    heartPhotoIds: heartIds(64),
   );
 
   static final weddingRu = GoldenVowsStory(
@@ -161,7 +175,7 @@ abstract final class GoldenVowsFixtures {
       ('Мы женаты', 'Глава третья · День'),
     ]),
     carousel: _carousel('А вечер продолжался', 'Глава четвёртая · Вечер'),
-    momentCount: 64,
+    heartPhotoIds: heartIds(64),
   );
 
   /// The fixture's photo ids: `hero-1`…, `chapter-1-1`…, `carousel-1`….
@@ -178,6 +192,11 @@ abstract final class GoldenVowsFixtures {
         line: line,
         photoIds: [for (var p = 1; p <= 3; p++) 'chapter-${i + 1}-$p'],
       ),
+  ];
+
+  /// `heart-1`…`heart-[count]`.
+  static List<String> heartIds(int count) => [
+    for (var i = 1; i <= count; i++) 'heart-$i',
   ];
 
   static GvChapter _carousel(String title, String line) => GvChapter(
