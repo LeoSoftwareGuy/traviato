@@ -22,6 +22,9 @@ abstract class RoutePaths {
 
   /// Debug builds only (#345): the Sky Story film preview.
   static const skyStoryPreview = '/debug/sky-story';
+
+  /// Debug builds only (#346): the Golden Vows film preview.
+  static const goldenVowsPreview = '/debug/golden-vows';
   static const subscriptionOfferings = '/subscription/offerings';
 }
 
@@ -45,6 +48,7 @@ abstract class RouteNames {
   static const tripWrapUp = 'tripWrapUp';
   static const tripFilmPlan = 'tripFilmPlan';
   static const skyStoryPreview = 'skyStoryPreview';
+  static const goldenVowsPreview = 'goldenVowsPreview';
   static const subscriptionOfferings = 'subscriptionOfferings';
 }
 

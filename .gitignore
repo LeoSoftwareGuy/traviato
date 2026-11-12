@@ -47,3 +47,5 @@ app.*.map.json
 
 # Sky Story reference film (#345): 45 MB, kept local; the stills are committed
 docs/design/sky-story/*.mp4
+# Golden Vows reference film (#346): 23 MB, kept local; the stills are committed
+docs/design/golden-vows/*.mp4
