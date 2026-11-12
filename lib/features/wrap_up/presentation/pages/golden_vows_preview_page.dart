@@ -5,8 +5,8 @@ import '../film/golden_vows/golden_vows_story.dart';
 
 /// Debug builds only (#346): plays the Golden Vows film full screen with
 /// the spec's wedding. EN/RU switches the film's language (and the
-/// fixture's words). Built up phase by phase: phase 2 has the ambient
-/// layer, the invitation and the packing card.
+/// fixture's words). Built up phase by phase: phase 3 adds the album.
+/// No photos ship with the app, so its prints are empty mats here.
 /// Reached from the Plan inspector; never routed in release.
 class GoldenVowsPreviewPage extends StatefulWidget {
   const GoldenVowsPreviewPage({super.key});

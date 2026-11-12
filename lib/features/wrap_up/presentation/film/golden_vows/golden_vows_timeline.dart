@@ -1,5 +1,6 @@
 import '../timeline/film_timeline.dart';
 import 'golden_vows_scene_spec.dart';
+import 'golden_vows_story.dart';
 
 /// Golden Vows' scenes on the film clock (#346), from the spec's rules
 /// (golden-vows-spec.md §5): the reference wedding — the packing card, 4
@@ -17,6 +18,16 @@ class GoldenVowsTimeline {
     this.hasCarousel = true,
   }) : assert(heroes >= 0 && chapters >= 0, 'pages: $heroes, $chapters'),
        film = _build(hasPackingCard, heroes, chapters, hasCarousel);
+
+  /// A memory's film: no packed items, no packing card; no carousel
+  /// photos, no carousel page.
+  factory GoldenVowsTimeline.forStory(GoldenVowsStory story) =>
+      GoldenVowsTimeline(
+        hasPackingCard: story.hasPackingCard,
+        heroes: story.heroes.length,
+        chapters: story.chapters.length,
+        hasCarousel: story.hasCarousel,
+      );
 
   /// The reference wedding (spec §5).
   factory GoldenVowsTimeline.reference() => GoldenVowsTimeline();

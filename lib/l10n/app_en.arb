@@ -2354,6 +2354,28 @@
       }
     }
   },
+  "goldenVows_heartTitle": "Every moment",
+  "@goldenVows_heartTitle": {
+    "description": "Golden Vows film: the title of the album's last page, where every photo forms a heart (#346)."
+  },
+  "goldenVows_moments": "{count, plural, =1{1 moment} other{{count} moments}}",
+  "@goldenVows_moments": {
+    "description": "Golden Vows film: how many photos the heart page holds (#346); shown uppercase, joined to goldenVows_days with ' · '.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goldenVows_days": "{count, plural, =1{One day} other{{count} days}}",
+  "@goldenVows_days": {
+    "description": "Golden Vows film: how many days the memory spans, on the heart page (#346); shown uppercase.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "skyStory_days": "Days {first}–{last}",
   "@skyStory_days": {
     "description": "Sky Story film: a page's eyebrow when the page covers several days (#345); shown uppercase.",

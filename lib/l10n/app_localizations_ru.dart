@@ -2590,6 +2590,35 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get goldenVows_heartTitle => 'Каждый миг';
+
+  @override
+  String goldenVows_moments(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count момента',
+      many: '$count моментов',
+      few: '$count момента',
+      one: '$count момент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String goldenVows_days(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count дня',
+      many: '$count дней',
+      few: '$count дня',
+      one: '$count день',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String skyStory_days(int first, int last) {
     return 'Дни $first–$last';
   }

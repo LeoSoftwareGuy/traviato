@@ -3925,6 +3925,24 @@ abstract class AppLocalizations {
   /// **'What we packed · {packed} of {total}'**
   String goldenVows_packedCount(int packed, int total);
 
+  /// Golden Vows film: the title of the album's last page, where every photo forms a heart (#346).
+  ///
+  /// In en, this message translates to:
+  /// **'Every moment'**
+  String get goldenVows_heartTitle;
+
+  /// Golden Vows film: how many photos the heart page holds (#346); shown uppercase, joined to goldenVows_days with ' · '.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 moment} other{{count} moments}}'**
+  String goldenVows_moments(int count);
+
+  /// Golden Vows film: how many days the memory spans, on the heart page (#346); shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One day} other{{count} days}}'**
+  String goldenVows_days(int count);
+
   /// Sky Story film: a page's eyebrow when the page covers several days (#345); shown uppercase.
   ///
   /// In en, this message translates to:

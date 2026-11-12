@@ -2544,6 +2544,31 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get goldenVows_heartTitle => 'Every moment';
+
+  @override
+  String goldenVows_moments(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count moments',
+      one: '1 moment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String goldenVows_days(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: 'One day',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String skyStory_days(int first, int last) {
     return 'Days $first–$last';
   }
