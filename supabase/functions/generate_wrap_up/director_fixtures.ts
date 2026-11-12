@@ -4,6 +4,7 @@ import type { TripData } from "./gather.ts";
 import type { FilmPlan, PlanContext, PlanScene } from "./film_plan.ts";
 import type { PhotoAnalysis } from "./photo_analysis.ts";
 import type { SkyStoryPlan } from "./sky_story.ts";
+import type { GoldenVowsPlan } from "./golden_vows.ts";
 
 export const DIRECTOR_PHOTO_IDS = Array.from(
   { length: 12 },
@@ -239,4 +240,47 @@ export function toolResponse(
     }),
     { status: 200 },
   );
+}
+
+// A valid Golden Vows section over directorTripData(): 2 heroes (one with
+// an excerpt of day 1's note), 3 chapters of 3, a carousel title. 9 of 12
+// photos used, so only 3 are left — too few for the carousel page.
+export function goldenVowsPlan(ids = DIRECTOR_PHOTO_IDS): GoldenVowsPlan {
+  return {
+    occasion: "wedding",
+    occasion_line: "Our Wedding Day",
+    heroes: [
+      {
+        photo_id: ids[1],
+        label: "The vows",
+        note_id: "n1",
+        note_excerpt: "Bikes everywhere",
+      },
+      {
+        photo_id: ids[9],
+        label: "First dance",
+        note_id: null,
+        note_excerpt: null,
+      },
+    ],
+    chapters: [
+      {
+        title: "Getting ready",
+        line: "Chapter one · Morning",
+        photo_ids: [ids[0], ids[2], ids[3]],
+      },
+      {
+        title: "The ceremony",
+        line: "Chapter two · Midday",
+        photo_ids: [ids[4], ids[5], ids[6]],
+      },
+      {
+        title: "Just married",
+        line: "Chapter three · Evening",
+        photo_ids: [ids[7], ids[8], ids[10]],
+      },
+    ],
+    carousel: { title: "And the night went on", line: "Chapter four" },
+    end_line: "Forever starts here",
+  };
 }

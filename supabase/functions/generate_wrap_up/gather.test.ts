@@ -143,3 +143,35 @@ Deno.test("gatherTripData throws with a descriptive message when a query errors"
     "failed to load photos: permission denied for table photos",
   );
 });
+
+Deno.test("gatherTripData loads the checklist and quests for Golden Vows (#346)", async () => {
+  const tables = {
+    trips: [{ name: "A & M", start_date: "2026-06-14", user_id: "user-1" }],
+    checklist_items: [
+      { title: "Rings", suggestion_code: null, is_checked: true },
+      { title: "Passport", suggestion_code: "passport", is_checked: false },
+    ],
+    quests: [
+      { title: "Ceremony", day_date: "2026-06-14", completed_at: null },
+    ],
+  };
+  const result = await gatherTripData(fakeSupabaseClient(tables), "trip-1");
+  assertEquals(result.checklist, [
+    { title: "Rings", suggestion_code: null, is_checked: true },
+    { title: "Passport", suggestion_code: "passport", is_checked: false },
+  ]);
+  assertEquals(result.quests, [
+    { title: "Ceremony", day_date: "2026-06-14", completed_at: null },
+  ]);
+
+  // A failed read only costs the packing card.
+  const failed = await gatherTripData(
+    fakeSupabaseClient(tables, {
+      checklist_items: { message: "permission denied" },
+      quests: { message: "permission denied" },
+    }),
+    "trip-1",
+  );
+  assertEquals(failed.checklist, []);
+  assertEquals(failed.quests, []);
+});

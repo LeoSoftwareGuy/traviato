@@ -128,6 +128,19 @@ Post-MVP: `video_path`, `video_status`.
   it's there. A film kept as a Sky Story keeps it, and "Rebuild film"
   rebuilds its pages too (no AI call); a film kept before Sky Story never
   gains it.
+- `content.golden_vows` (#346, no schema change): the Golden Vows wedding
+  album, only when the director read the memory as a wedding, engagement,
+  anniversary or date night and its `golden_vows` section (in `director`,
+  with the photos' `orientations`) still fits. It holds the occasion line,
+  names (memory title), dates, place, the packing card (up to 5 checked
+  checklist items with their `suggestion_code`, else planned quests, else
+  none), 2–6 heroes (photo, label, `taken_at`, note = caption or an exact
+  excerpt of that day's note), 1–4 chapters of 3 photos with an A/B/C
+  layout, a carousel of 6–12 unused photos (or none), up to 200 heart
+  photos, the moment count and the end line. No section = Sky Story plays.
+  A film kept as Golden Vows rebuilds it while the section fits, else plays
+  its Sky Story; no kept film gains one. The edge function reads
+  `checklist_items` for this (service-role select grant).
 
 ### `photo_analysis` (#328)
 `photo_id PK/FK photos cascade, trip_id FK cascade, storage_path (the file

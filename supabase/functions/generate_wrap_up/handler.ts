@@ -26,6 +26,10 @@
 // built by code. The director is on for everyone unless switched off
 // (director_flag.ts), and runs again on its own when the memory's photo
 // days change (capped, director.ts).
+//
+// Golden Vows (#346): a draft also gets `content.golden_vows` when the
+// director's section (a wedding, engagement, anniversary or date night)
+// still fits the memory. The app plays it before Sky Story.
 
 import { gatherTripData, type TripData } from "./gather.ts";
 import {
@@ -41,6 +45,7 @@ import { computeAiInputHash } from "./ai_input_hash.ts";
 import { parseWrapUpLanguage, type WrapUpLanguage } from "./language.ts";
 import { logEvent, type LogLike, WrapUpGenerationError } from "./anthropic.ts";
 import {
+  currentGoldenVows,
   currentPlan,
   currentSkyStory,
   directorIsStale,
@@ -48,6 +53,7 @@ import {
   isDirectorRecord,
 } from "./director.ts";
 import { buildSkyContent } from "./sky_story.ts";
+import { buildGoldenVowsContent } from "./golden_vows.ts";
 
 // deno-lint-ignore no-explicit-any
 type SupabaseClient = any;
@@ -264,10 +270,14 @@ export async function handleRequest(
     directorOn ? currentSkyStory(director, tripData) : null,
     isDirectorRecord(director) ? director.hero_scores ?? {} : {},
   );
+  const goldenVows = directorOn
+    ? goldenVowsContentFor(director, tripData)
+    : null;
   const content = {
     ...template,
     ...(plan ? { plan_version: 2 as const, plan } : {}),
     ...(sky ? { sky } : {}),
+    ...(goldenVows ? { golden_vows: goldenVows } : {}),
   };
   const generatedAt = new Date().toISOString();
   const row = {
@@ -352,7 +362,9 @@ async function rerunKeptDirector(
 // writes over a row that is still kept. A film kept as a Sky Story (#345)
 // rebuilds its pages too — the director's stored pages while they still
 // fit, else code-built; no AI call — so it stays a Sky Story. A film kept
-// before Sky Story never gains one.
+// before Sky Story never gains one. A film kept as Golden Vows (#346)
+// rebuilds from the director's stored section while it still fits; once
+// it doesn't, the film plays its Sky Story. No kept film gains Golden Vows.
 async function rebuildKept(
   deps: Deps,
   tripId: string,
@@ -380,7 +392,16 @@ async function rebuildKept(
         : {},
     )
     : null;
-  const content = sky ? { ...template, sky } : template;
+  const keptAsGoldenVows = keptAsSky &&
+    "golden_vows" in (existing.content as Record<string, unknown>);
+  const goldenVows = keptAsGoldenVows
+    ? goldenVowsContentFor(existing.director, tripData)
+    : null;
+  const content = {
+    ...template,
+    ...(sky ? { sky } : {}),
+    ...(goldenVows ? { golden_vows: goldenVows } : {}),
+  };
   const generatedAt = new Date().toISOString();
   const { error } = await deps.serviceClient
     .from("wrap_ups")
@@ -391,6 +412,13 @@ async function rebuildKept(
     return json({ error: `failed to save wrap-up: ${error.message}` }, 500);
   }
   return json({ content, generated_at: generatedAt }, 200);
+}
+
+// content.golden_vows from the director's section, while it still fits.
+function goldenVowsContentFor(director: unknown, tripData: TripData) {
+  const plan = currentGoldenVows(director, tripData);
+  if (!plan || !isDirectorRecord(director)) return null;
+  return buildGoldenVowsContent(tripData, plan, director.orientations ?? {});
 }
 
 // Runs the director and counts the run against [previous]'s, so automatic

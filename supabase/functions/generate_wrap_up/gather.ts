@@ -16,6 +16,9 @@ type SupabaseClient = any;
 const MAX_PHOTOS = 500;
 const MAX_BONUS_ASSIGNMENTS = 500;
 export const MAX_NOTE_CHARS = 500;
+// Golden Vows (#346) shows 5 items but counts them all.
+const MAX_CHECKLIST_ITEMS = 500;
+const MAX_QUESTS = 200;
 
 export interface TripData {
   trip: {
@@ -59,6 +62,18 @@ export interface TripData {
   latestAchievement:
     | { code: string; title: string; description: string }
     | null;
+  // The memory's checklist, in its order, and its quests by day and time
+  // (#346): Golden Vows' packing card. Absent = none.
+  checklist?: {
+    title: string;
+    suggestion_code: string | null;
+    is_checked: boolean;
+  }[];
+  quests?: {
+    title: string;
+    day_date: string;
+    completed_at: string | null;
+  }[];
   // The owner's profile name (#345): Sky Story signs notes with its first
   // word. Absent or null = no signature.
   username?: string | null;
@@ -86,6 +101,8 @@ export async function gatherTripData(
     pointsRes,
     achievementsRes,
     profileRes,
+    checklistRes,
+    questsRes,
   ] = await Promise.all([
     client
       .from("day_notes")
@@ -124,6 +141,20 @@ export async function gatherTripData(
       .select("username")
       .eq("id", trip.user_id)
       .maybeSingle(),
+    client
+      .from("checklist_items")
+      .select("title, suggestion_code, is_checked")
+      .eq("trip_id", tripId)
+      .order("position")
+      .limit(MAX_CHECKLIST_ITEMS),
+    client
+      .from("quests")
+      .select("title, day_date, completed_at")
+      .eq("trip_id", tripId)
+      .order("day_date")
+      .order("time", { nullsFirst: false })
+      .order("position")
+      .limit(MAX_QUESTS),
   ]);
 
   for (
@@ -195,6 +226,21 @@ export async function gatherTripData(
         description: latestTemplate.description as string,
       }
       : null,
+    // A failed read of either only costs the packing card.
+    checklist: checklistRes.error
+      ? []
+      : (checklistRes.data ?? []).map((i: Record<string, unknown>) => ({
+        title: i.title as string,
+        suggestion_code: (i.suggestion_code as string | null) ?? null,
+        is_checked: i.is_checked === true,
+      })),
+    quests: questsRes.error
+      ? []
+      : (questsRes.data ?? []).map((q: Record<string, unknown>) => ({
+        title: q.title as string,
+        day_date: q.day_date as string,
+        completed_at: (q.completed_at as string | null) ?? null,
+      })),
     // A failed profile read only costs the signature.
     username: profileRes.error
       ? null

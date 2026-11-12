@@ -41,6 +41,14 @@ import {
   skyStoryToolProperty,
 } from "./sky_story.ts";
 import {
+  describeGoldenVowsProblems,
+  GOLDEN_VOWS_PROMPT_RULES,
+  type GoldenVowsPlan,
+  goldenVowsToolProperty,
+  gvCheckContext,
+  repairGoldenVows,
+} from "./golden_vows.ts";
+import {
   analysePhotos,
   type ImageUrlSigner,
   loadCachedAnalysis,
@@ -66,8 +74,8 @@ export const MIN_PLANNABLE_PHOTOS = 6;
 // the Plan inspector is never capped.
 export const MAX_DIRECTOR_RUNS = 4;
 
-// emit_film_plan with the Sky Story section (#345). Composed here so
-// film_plan.ts and sky_story.ts don't import each other.
+// emit_film_plan with the Sky Story section (#345) and the Golden Vows
+// one (#346). Composed here so the films' modules don't import each other.
 export const directorToolSchema = {
   ...filmPlanToolSchema,
   input_schema: {
@@ -75,8 +83,13 @@ export const directorToolSchema = {
     properties: {
       ...filmPlanToolSchema.input_schema.properties,
       sky_story: skyStoryToolProperty,
+      golden_vows: goldenVowsToolProperty,
     },
-    required: [...filmPlanToolSchema.input_schema.required, "sky_story"],
+    required: [
+      ...filmPlanToolSchema.input_schema.required,
+      "sky_story",
+      "golden_vows",
+    ],
   },
 };
 
@@ -106,6 +119,14 @@ export interface DirectorRecord {
   // classic plan fell back. null = code-built pages; sky_problems says why.
   sky_story?: SkyStoryPlan | null;
   sky_problems?: string[];
+  // The Golden Vows section (#346): null when the director chose another
+  // occasion, or its section stayed invalid (golden_vows_problems says
+  // why) — then Sky Story plays.
+  golden_vows?: GoldenVowsPlan | null;
+  golden_vows_problems?: string[];
+  // id → orientation of every analysed photo: Golden Vows' chapter
+  // layouts.
+  orientations?: Record<string, string>;
   // id → hero_score of every analysed photo, so code-built pages can still
   // pick strong heroes.
   hero_scores?: Record<string, number>;
@@ -257,6 +278,7 @@ export function buildPlanSystemPrompt(language: WrapUpLanguage): string {
     "- reasoning: 2–3 sentences on why this occasion, recipe and shape.\n",
     `- ${languageRule(language)}`,
     SKY_STORY_PROMPT_RULES,
+    GOLDEN_VOWS_PROMPT_RULES,
   ].join("");
 }
 
@@ -277,6 +299,7 @@ function normalisePlan(input: unknown): FilmPlan {
   const plan = structuredClone(input) as FilmPlan;
   // Stored on its own (DirectorRecord.sky_story).
   delete (plan as unknown as Record<string, unknown>).sky_story;
+  delete (plan as unknown as Record<string, unknown>).golden_vows;
   for (const chapter of plan.chapters) {
     for (const scene of chapter.scenes) {
       scene.caption_note_id = scene.caption_note_id ?? null;
@@ -346,6 +369,9 @@ export async function runDirector(
     photo_paths: {},
     sky_story: null,
     sky_problems: [],
+    golden_vows: null,
+    golden_vows_problems: [],
+    orientations: {},
     hero_scores: {},
     photo_days: photoDaysOf(tripData),
     usage: summariseUsage(calls),
@@ -405,12 +431,16 @@ export async function runDirector(
     record.hero_scores = Object.fromEntries(
       usable.map((p) => [p.id, analyses.get(p.id)!.hero_score]),
     );
+    record.orientations = Object.fromEntries(
+      usable.map((p) => [p.id, analyses.get(p.id)!.orientation]),
+    );
 
     if (usable.length < MIN_PLANNABLE_PHOTOS) {
       record.problems = [
         `only ${usable.length} analysed photos, a plan needs at least ${MIN_PLANNABLE_PHOTOS}`,
       ];
       record.sky_problems = record.problems;
+      record.golden_vows_problems = record.problems;
       return record;
     }
 
@@ -423,10 +453,20 @@ export async function runDirector(
         analyses.has(p.id) || p.use_in_wrap_up === false
       ),
     });
+    // Golden Vows, too, may use only analysed photos.
+    const gvContext = gvCheckContext({
+      ...tripData,
+      photos: tripData.photos.filter((p) =>
+        analyses.has(p.id) || p.use_in_wrap_up === false
+      ),
+    });
     const input = buildPlanInput(tripData, usable, analyses, language);
     const system = buildPlanSystemPrompt(language);
     let problems: string[] = [];
     let skyProblems: string[] = [];
+    let gvProblems: string[] = [];
+    // A null section is a valid answer (another occasion).
+    let gvSettled = false;
     for (let attempt = 1; attempt <= PLAN_ATTEMPTS; attempt++) {
       record.attempts = attempt;
       let toolInput: unknown;
@@ -436,7 +476,11 @@ export async function runDirector(
           model: DIRECTOR_MODEL,
           maxTokens: PLAN_MAX_TOKENS,
           system,
-          content: buildPlanUserPrompt(input, [...problems, ...skyProblems]),
+          content: buildPlanUserPrompt(input, [
+            ...problems,
+            ...skyProblems,
+            ...gvProblems,
+          ]),
           tool: directorToolSchema,
           label: "plan",
           fetchImpl: deps.fetchImpl,
@@ -449,6 +493,7 @@ export async function runDirector(
         const failed = `plan call failed: ${(err as Error).message}`;
         if (record.status !== "planned") problems = [failed];
         if (!record.sky_story) skyProblems = [failed];
+        if (!gvSettled) gvProblems = [failed];
         continue;
       }
       toolInput = repairFilmPlan(toolInput, context);
@@ -473,18 +518,39 @@ export async function runDirector(
           record.sky_story = sky as SkyStoryPlan;
         }
       }
-      if (record.status === "planned" && record.sky_story) break;
+      if (!gvSettled) {
+        const raw = typeof toolInput === "object" && toolInput !== null
+          ? (toolInput as Record<string, unknown>).golden_vows
+          : undefined;
+        if (raw === null || raw === undefined) {
+          record.golden_vows = null;
+          gvProblems = [];
+          gvSettled = true;
+        } else {
+          const gv = repairGoldenVows(raw, gvContext);
+          gvProblems = describeGoldenVowsProblems(gv, gvContext);
+          if (gvProblems.length === 0) {
+            record.golden_vows = gv as GoldenVowsPlan;
+            gvSettled = true;
+          }
+        }
+      }
+      if (record.status === "planned" && record.sky_story && gvSettled) {
+        break;
+      }
       logEvent(log, "director_plan_invalid", {
         trip_id: tripId,
         attempt,
-        problems: [...problems, ...skyProblems].slice(0, 30),
+        problems: [...problems, ...skyProblems, ...gvProblems].slice(0, 30),
       });
     }
     record.problems = problems;
     record.sky_problems = skyProblems;
+    record.golden_vows_problems = gvProblems;
   } catch (err) {
     record.problems = [`director failed: ${(err as Error).message}`];
     record.sky_problems = record.problems;
+    record.golden_vows_problems = record.problems;
   } finally {
     record.usage = summariseUsage(calls);
     logEvent(log, "director_usage", {
@@ -563,4 +629,19 @@ export function currentSkyStory(
   return describeSkyStoryProblems(record.sky_story, context).length === 0
     ? record.sky_story
     : null;
+}
+
+// The director's Golden Vows section if it still fits the memory as it is
+// now (no deleted or left-out photos, notes still saying those words) —
+// otherwise null, and Sky Story plays (#346).
+export function currentGoldenVows(
+  record: unknown,
+  tripData: TripData,
+): GoldenVowsPlan | null {
+  if (!isDirectorRecord(record) || !record.golden_vows) return null;
+  const problems = describeGoldenVowsProblems(
+    record.golden_vows,
+    gvCheckContext(tripData),
+  );
+  return problems.length === 0 ? record.golden_vows : null;
 }
