@@ -27,19 +27,25 @@ final class SkyInterludeSpec extends SkySceneSpec {
   List<Object?> get props => [index];
 }
 
-/// One chapter page, [index] of [count].
+/// One chapter page, [index] of [count], laid out as [layout] (by default
+/// `SkyPageLayout.forChapter`).
 final class SkyChapterSpec extends SkySceneSpec {
-  const SkyChapterSpec({required this.index, required this.count});
+  const SkyChapterSpec({
+    required this.index,
+    required this.count,
+    SkyPageLayout? layout,
+  }) : _layout = layout;
 
   final int index;
   final int count;
+  final SkyPageLayout? _layout;
 
   bool get isLast => index == count - 1;
 
-  SkyPageLayout get layout => SkyPageLayout.forChapter(index, count);
+  SkyPageLayout get layout => _layout ?? SkyPageLayout.forChapter(index, count);
 
   @override
-  List<Object?> get props => [index, count];
+  List<Object?> get props => [index, count, layout];
 }
 
 /// The sky flattens into night and the photo tiles swirl up.

@@ -159,9 +159,11 @@ class SkyPagesPainter extends CustomPainter {
       case SkyPageLayout.fan:
         _paintFan(canvas, t, beats, page, text);
         _paintNoteCard(canvas, t, beats, text, tilt: -1.1);
+        _paintQuote(canvas, t, beats, text);
       case SkyPageLayout.taped:
         _paintTaped(canvas, t, beats, page, text);
         _paintNoteCard(canvas, t, beats, text, tilt: 1.0);
+        _paintQuote(canvas, t, beats, text);
       case SkyPageLayout.flyOut:
         _paintOrbit(canvas, t, beats, front: false);
         _paintFlyOutHero(canvas, t, beats, page, text);
@@ -528,8 +530,9 @@ class SkyPagesPainter extends CustomPainter {
     );
   }
 
-  /// The note on the night sky: each word drifts up into place and fades
-  /// in, one after another; then the gold signature.
+  /// Words on the night sky (the fly-out page's note, or a page's line
+  /// when it has no note): each word drifts up into place and fades in,
+  /// one after another; then the gold signature, under a note only.
   void _paintQuote(
     Canvas canvas,
     double t,

@@ -12,11 +12,16 @@ import 'package:traviato/features/wrap_up/domain/entities/film_photo_analysis.da
 import 'package:traviato/features/wrap_up/domain/entities/film_plan_chapter.dart';
 import 'package:traviato/features/wrap_up/domain/entities/film_plan_inspection.dart';
 import 'package:traviato/features/wrap_up/domain/entities/film_plan_scene.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_sky.dart';
+import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 import 'package:traviato/features/wrap_up/presentation/pages/film_plan_inspector_page.dart';
 import 'package:traviato/features/wrap_up/presentation/providers/film_director_providers.dart';
+import 'package:traviato/features/wrap_up/presentation/providers/wrap_up_providers.dart';
 
 import '../../../photo/fakes/fake_photo_repository.dart';
+import '../../../trip/fakes/fake_trip_repository.dart';
 import '../../fakes/fake_film_director_repository.dart';
+import '../../fakes/fake_wrap_up_repository.dart';
 
 const _planned = FilmDirectorReport(
   isPlanned: true,
@@ -61,14 +66,31 @@ const _analysis = FilmPhotoAnalysis(
   heroScore: 4,
 );
 
-Future<void> _pump(WidgetTester tester, FakeFilmDirectorRepository repo) {
+Future<void> _pump(
+  WidgetTester tester,
+  FakeFilmDirectorRepository repo, {
+  WrapUpSky? sky,
+}) {
   return tester.pumpWidget(
     ProviderScope(
       retry: (_, _) => null,
       overrides: [
         filmDirectorRepositoryProvider.overrideWithValue(repo),
+        wrapUpRepositoryProvider.overrideWithValue(
+          FakeWrapUpRepository()
+            ..getOrGenerateResult = Right(buildWrapUpEntity(sky: sky)),
+        ),
+        tripRepositoryProvider.overrideWithValue(FakeTripRepository()),
         photoRepositoryProvider.overrideWithValue(
-          FakePhotoRepository()..photosResult = const Right([]),
+          FakePhotoRepository()
+            ..photosResult = Right([
+              for (final id in ['p1', 'p2', 'p3'])
+                buildPhotoEntity(
+                  id: id,
+                  imageUrl: 'https://img.test/$id.jpg',
+                  placeText: 'Alfama',
+                ),
+            ]),
         ),
         resolvedAppLanguageProvider.overrideWithValue(AppLanguage.en),
       ],
@@ -167,5 +189,66 @@ void main() {
     expect(repo.rerunCallCount, 1);
     expect(repo.lastLanguage, 'en');
     expect(repo.getInspectionCallCount, 2);
+  });
+
+  group('Sky Story card (#345)', () {
+    final sky = WrapUpSky(
+      isFromDirector: false,
+      title: 'Lisbon',
+      momentCount: 3,
+      pages: [
+        WrapUpSkyPage(
+          firstDay: 1,
+          date: DateTime(2026, 6, 12),
+          photoCount: 3,
+          heroPhotoId: 'p1',
+          extraPhotoIds: const ['p2', 'p3', 'gone'],
+        ),
+      ],
+    );
+
+    Future<void> scrollTo(WidgetTester tester, Finder finder) =>
+        tester.scrollUntilVisible(
+          finder,
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+
+    testWidgets('shows the pages the film will play and why', (tester) async {
+      final repo = FakeFilmDirectorRepository()
+        ..inspectionResult = const Right(
+          FilmPlanInspection(
+            report: FilmDirectorReport(
+              isPlanned: true,
+              runCount: 2,
+              skyProblems: ['sky_story.pages[0].days: [0, 9] is not within'],
+            ),
+          ),
+        );
+      await _pump(tester, repo, sky: sky);
+      await tester.pumpAndSettle();
+
+      await scrollTo(tester, find.byKey(const Key('film-plan-sky-preview')));
+      expect(find.text('code-built pages (fallback)'), findsOneWidget);
+      expect(find.textContaining('is not within'), findsOneWidget);
+      expect(find.text('Day 1 · fan · 3 photos'), findsOneWidget);
+      expect(find.text('(Alfama — no headline)'), findsOneWidget);
+      expect(
+        find.textContaining('caption goes on the sky', findRichText: true),
+        findsOneWidget,
+      );
+      // 1 page: 5 + 2 + 14.5 + 3 + 8.
+      expect(
+        find.textContaining('1 page(s) · 32.5s', findRichText: true),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('says when the classic film plays instead', (tester) async {
+      await _pump(tester, FakeFilmDirectorRepository());
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('film-plan-sky-none')), findsOneWidget);
+    });
   });
 }

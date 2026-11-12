@@ -130,4 +130,56 @@ void main() {
       ('50', 50.0),
     ], 'film_ru');
   });
+
+  // A real memory's pages (#345, phase 6): no headlines (the place stands
+  // in), a run of days, a director's line on the sky in place of a note,
+  // and a page with neither, whose caption moves onto the sky.
+  final realMemory = SkyStory(
+    title: 'Lisbon',
+    startDate: DateTime(2026, 6, 9),
+    endDate: DateTime(2026, 6, 14),
+    momentCount: 40,
+    pages: [
+      SkyPage(
+        firstDay: 4,
+        lastDay: 7,
+        date: DateTime(2026, 6, 12),
+        endDate: DateTime(2026, 6, 15),
+        photoCount: 31,
+        hero: SkyPhoto(
+          id: 'mountain_town',
+          place: 'Alfama',
+          takenAt: DateTime(2026, 6, 12, 9, 40),
+        ),
+        extras: const [
+          SkyPhoto(id: 'rooftop_gathering', place: 'Alfama'),
+          SkyPhoto(id: 'foodie'),
+        ],
+        skyLine: 'You counted eleven bridges and lost count.',
+      ),
+      SkyPage(
+        firstDay: 8,
+        date: DateTime(2026, 6, 16),
+        photoCount: 9,
+        hero: const SkyPhoto(id: 'maui', place: 'Cascais'),
+        extras: const [
+          SkyPhoto(id: 'canoe'),
+          SkyPhoto(id: 'picnic_on_the_edge'),
+          SkyPhoto(id: 'departure'),
+        ],
+      ),
+    ],
+  );
+
+  testWidgets('a real memory: sky line, caption on the sky', skip: _skip, (
+    tester,
+  ) async {
+    await _pumpFilm(tester, realMemory, const Locale('en'));
+    await _expectAt(tester, const [('10', 10.0), ('26', 26.0)], 'real');
+  });
+
+  testWidgets('a real memory in Russian', skip: _skip, (tester) async {
+    await _pumpFilm(tester, realMemory, const Locale('ru'));
+    await _expectAt(tester, const [('10', 10.0)], 'real_ru');
+  });
 }

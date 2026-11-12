@@ -242,4 +242,108 @@ void main() {
       );
     });
   });
+
+  group('real memories (#345, phase 6)', () {
+    SkyPage bare({
+      String? headline,
+      String? note,
+      String? skyLine,
+      SkyPhoto hero = const SkyPhoto(id: 'h'),
+      List<SkyPhoto> extras = const [],
+      int? lastDay,
+    }) => SkyPage(
+      firstDay: 4,
+      lastDay: lastDay,
+      date: DateTime(2026, 6, 12),
+      photoCount: 12,
+      headline: headline,
+      hero: hero,
+      extras: extras,
+      note: note,
+      signature: 'Jonas',
+      skyLine: skyLine,
+    );
+
+    SkyPageCopy resolve(SkyPage page, {AppLocalizations? l10n}) =>
+        SkyPageCopy.resolve(page, SkyPageLayout.fan, l10n ?? en, 'en');
+
+    test('no headline: the place most photos share, else Day N', () {
+      expect(SkyPageCopy.headlineFor(bare(headline: '  Salt  '), en), 'Salt');
+      expect(
+        SkyPageCopy.headlineFor(
+          bare(
+            hero: const SkyPhoto(id: 'h', place: 'Belém'),
+            extras: const [
+              SkyPhoto(id: 'a', place: 'Alfama'),
+              SkyPhoto(id: 'b', place: 'Alfama'),
+              SkyPhoto(id: 'c'),
+            ],
+          ),
+          en,
+        ),
+        'Alfama',
+      );
+      expect(
+        SkyPageCopy.headlineFor(
+          bare(
+            hero: const SkyPhoto(id: 'h', place: 'Belém'),
+          ),
+          en,
+        ),
+        'Belém',
+      );
+      expect(SkyPageCopy.headlineFor(bare(), en), 'Day 4');
+      expect(SkyPageCopy.headlineFor(bare(lastDay: 7), en), 'Days 4–7');
+      expect(SkyPageCopy.headlineFor(bare(lastDay: 7), ru), 'Дни 4–7');
+    });
+
+    test('a note: on its card, nothing on the sky', () {
+      final copy = resolve(bare(note: 'A note.', skyLine: 'Unused.'));
+      expect(copy.note, 'A note.');
+      expect(copy.skyText, isNull);
+      expect(copy.signature, '– Jonas');
+    });
+
+    test('no note: the sky line on the sky, the caption on its strip', () {
+      final copy = resolve(
+        bare(
+          skyLine: 'Eleven bridges.',
+          hero: SkyPhoto(
+            id: 'h',
+            place: 'Alfama',
+            takenAt: DateTime(2026, 6, 12, 9),
+          ),
+        ),
+      );
+      expect(copy.skyText, 'Eleven bridges.');
+      expect(copy.heroCaption, 'Alfama · Fri morning');
+      expect(copy.signature, isNull);
+    });
+
+    test('neither: the caption moves onto the sky, its strip left blank', () {
+      final copy = resolve(
+        bare(
+          hero: const SkyPhoto(id: 'h', place: 'Cascais'),
+        ),
+      );
+      expect(copy.skyText, 'Cascais · Fri');
+      expect(copy.heroCaption, '');
+    });
+
+    test('the story resolves each page in its own layout', () {
+      final story = SkyStory(
+        title: 'T',
+        startDate: DateTime(2026, 6, 12),
+        endDate: DateTime(2026, 6, 14),
+        pages: [bare(), bare(), bare()],
+      );
+      final copy = SkyStoryCopy.resolve(story, en, 'en');
+      // The middle page has no photos for a taped grid.
+      expect(copy.pages.map((p) => p.layout), [
+        SkyPageLayout.fan,
+        SkyPageLayout.fan,
+        SkyPageLayout.flyOut,
+      ]);
+    });
+  });
 }

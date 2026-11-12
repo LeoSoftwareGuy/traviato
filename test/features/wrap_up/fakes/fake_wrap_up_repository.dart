@@ -10,6 +10,7 @@ import 'package:traviato/features/wrap_up/domain/entities/wrap_up_footnote.dart'
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_invitation.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_keepsake.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_moment.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_sky.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_unlock.dart';
 import 'package:traviato/features/wrap_up/domain/repositories/wrap_up_repository.dart';
 
@@ -68,6 +69,7 @@ WrapUpEntity buildWrapUpEntity({
   DateTime? generatedAt,
   DateTime? publishedAt,
   FilmPlan? plan,
+  WrapUpSky? sky,
 }) {
   return WrapUpEntity(
     cut: cut,
@@ -94,5 +96,6 @@ WrapUpEntity buildWrapUpEntity({
     generatedAt: generatedAt ?? DateTime(2026, 1, 1),
     publishedAt: publishedAt,
     plan: plan,
+    sky: sky,
   );
 }

@@ -17,6 +17,10 @@ import '../../domain/entities/film_photo_analysis.dart';
 import '../../domain/entities/film_plan_chapter.dart';
 import '../../domain/entities/film_plan_inspection.dart';
 import '../../domain/entities/film_plan_scene.dart';
+import '../controllers/wrap_up_controller.dart';
+import '../film/sky_story/sky_story.dart';
+import '../film/sky_story/sky_story_copy.dart';
+import '../film/sky_story/sky_story_timeline.dart';
 import '../mutations/film_director_mutations.dart';
 import '../providers/film_director_providers.dart';
 
@@ -93,15 +97,19 @@ class _InspectionBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final report = inspection.report;
     if (report == null) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.xl),
-          child: Text(
-            'The director has not run for this memory yet. Re-run it, or '
-            'check WRAP_UP_DIRECTOR_USER_IDS for this account.',
-            textAlign: TextAlign.center,
+      return ListView(
+        padding: const EdgeInsets.all(AppSpacing.base),
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(AppSpacing.xl),
+            child: Text(
+              'The director has not run for this memory yet. Re-run it, '
+              'or check that WRAP_UP_DIRECTOR_USER_IDS is not "off".',
+              textAlign: TextAlign.center,
+            ),
           ),
-        ),
+          _SkyStoryCard(tripId: tripId, report: null),
+        ],
       );
     }
     final urls =
@@ -111,6 +119,7 @@ class _InspectionBody extends ConsumerWidget {
       padding: const EdgeInsets.all(AppSpacing.base),
       children: [
         _SummaryCard(report: report),
+        _SkyStoryCard(tripId: tripId, report: report),
         if (report.problems.isNotEmpty)
           _ProblemsCard(problems: report.problems),
         for (final (index, chapter) in report.chapters.indexed)
@@ -225,7 +234,7 @@ class _SummaryCard extends StatelessWidget {
         _Line(
           'Run',
           '${report.model} · ${report.attempts} plan attempt(s) · '
-              '${report.ranAt?.toLocal() ?? '—'}',
+              'run ${report.runCount} · ${report.ranAt?.toLocal() ?? '—'}',
         ),
       ],
     );
@@ -390,6 +399,157 @@ class _LinesCard extends StatelessWidget {
         _Line('Footnote', report.footnoteLine ?? '—'),
         _Line('Closing', report.closingLine ?? '—'),
       ],
+    );
+  }
+}
+
+/// Sky Story's pages as the film will play them (#345): from the draft's
+/// `content.sky` with the memory's photos, plus why the director's own
+/// pages weren't used, if they weren't.
+class _SkyStoryCard extends ConsumerWidget {
+  const _SkyStoryCard({required this.tripId, required this.report});
+
+  final String tripId;
+  final FilmDirectorReport? report;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(wrapUpControllerProvider(tripId));
+    final problems = report?.skyProblems ?? const <String>[];
+    return _Card(
+      title: 'Sky Story',
+      children: state.when(
+        loading: () => const [LinearProgressIndicator()],
+        error: (error, _) => [Text('Could not load the wrap-up: $error')],
+        data: (data) {
+          final story = data.skyStory;
+          final sky = data.wrapUp.sky;
+          if (story == null || sky == null) {
+            return const [
+              Text(
+                "No Sky Story: no photos on the memory's days, or a kept "
+                'film from before Sky Story. The classic film plays.',
+                key: Key('film-plan-sky-none'),
+              ),
+            ];
+          }
+          final length = SkyStoryTimeline.forStory(story).total;
+          return [
+            Text(
+              sky.isFromDirector
+                  ? "director's pages"
+                  : 'code-built pages (fallback)',
+              key: const Key('film-plan-sky-source'),
+              style: AppTypography.headlineSerif.copyWith(
+                color: sky.isFromDirector
+                    ? AppColors.success
+                    : AppColors.accentCoral,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            _Line(
+              'Film',
+              '${story.pages.length} page(s) · '
+                  '${length.toStringAsFixed(1)}s · '
+                  '${story.momentCount} moments · '
+                  'signed ${story.names ?? '—'}',
+            ),
+            for (final problem in problems)
+              Text(
+                '• $problem',
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.accentCoral,
+                ),
+              ),
+            for (final (i, page) in story.pages.indexed)
+              _SkyPageRow(
+                page: page,
+                layout: story.layouts[i],
+                urls: data.photoUrlById,
+              ),
+            const SizedBox(height: AppSpacing.sm),
+            FilledButton.icon(
+              key: const Key('film-plan-sky-preview'),
+              onPressed: () => context.pushNamed(
+                RouteNames.skyStoryPreview,
+                queryParameters: {'trip': tripId},
+              ),
+              icon: const Icon(Icons.play_arrow_rounded),
+              label: const Text('Preview this memory'),
+            ),
+          ];
+        },
+      ),
+    );
+  }
+}
+
+class _SkyPageRow extends StatelessWidget {
+  const _SkyPageRow({
+    required this.page,
+    required this.layout,
+    required this.urls,
+  });
+
+  final SkyPage page;
+  final SkyPageLayout layout;
+  final Map<String, String> urls;
+
+  @override
+  Widget build(BuildContext context) {
+    final days = page.lastDay == null
+        ? 'Day ${page.firstDay}'
+        : 'Days ${page.firstDay}–${page.lastDay}';
+    final headline =
+        page.headline ??
+        '(${SkyPageCopy.headlineFor(page, context.l10n)} — no headline)';
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$days · ${layout.name} · ${page.photoCount} photos',
+            style: AppTypography.mono.copyWith(color: AppColors.primary),
+          ),
+          Text(headline, style: AppTypography.pullQuote),
+          if (page.note != null)
+            _Line('Note', '${page.note} — ${page.signature ?? 'unsigned'}')
+          else if (page.skyLine != null)
+            _Line('Sky line', page.skyLine!)
+          else
+            const _Line('No note', 'the caption goes on the sky'),
+          SizedBox(
+            height: 70,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                for (final photo in [page.hero, ...page.extras])
+                  Padding(
+                    padding: const EdgeInsets.only(right: AppSpacing.xs),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(AppSpacing.xs),
+                      child: SizedBox(
+                        width: photo == page.hero ? 88 : 56,
+                        height: 66,
+                        child: switch (urls[photo.id]) {
+                          final url? => CachedNetworkImage(
+                            imageUrl: url,
+                            fit: BoxFit.cover,
+                            memCacheWidth: 264,
+                          ),
+                          null => const ColoredBox(
+                            color: AppColors.surfaceDisabled,
+                          ),
+                        },
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

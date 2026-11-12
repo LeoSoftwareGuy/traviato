@@ -77,6 +77,31 @@ void main() {
     );
   });
 
+  testWidgets('pages without notes or headlines play through (#345)', (
+    tester,
+  ) async {
+    SkyPage page(int day, {String? skyLine, String? place}) => SkyPage(
+      firstDay: day,
+      date: DateTime(2026, 6, 11 + day),
+      photoCount: 3,
+      hero: SkyPhoto(id: 'h$day', place: place),
+      extras: const [
+        SkyPhoto(id: 'a'),
+        SkyPhoto(id: 'b'),
+      ],
+      skyLine: skyLine,
+    );
+    await _playThrough(
+      tester,
+      _story([
+        page(1, skyLine: 'You counted eleven bridges and lost count.'),
+        page(2, place: 'Alfama'),
+        page(3),
+        page(4, skyLine: 'Rain, then more rain.'),
+      ]),
+    );
+  });
+
   testWidgets('the ending plays with tiles that never load', (tester) async {
     await _playThrough(
       tester,

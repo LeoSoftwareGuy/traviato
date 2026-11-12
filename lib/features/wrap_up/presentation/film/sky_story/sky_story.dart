@@ -1,10 +1,9 @@
 import 'package:equatable/equatable.dart';
 
-/// What one Sky Story film shows (#345, phase 2): the opening title and one
-/// page per chapter. Raw data only; the copy is composed in the film's
-/// language at render time (`SkyStoryCopy`). Building this from a real
-/// memory, and the director's choices, come in later phases; for now the
-/// debug preview plays a fixture.
+/// What one Sky Story film shows (#345): the opening title and one page per
+/// chapter. Raw data only; the copy is composed in the film's language at
+/// render time (`SkyStoryCopy`). Built from a wrap-up's `content.sky`
+/// (`skyStoryFromWrapUp`) or a fixture.
 class SkyStory extends Equatable {
   const SkyStory({
     required this.title,
@@ -24,8 +23,14 @@ class SkyStory extends Equatable {
   /// Who was there, after the dates in the subtitle (`Mari & Jonas`).
   final String? names;
 
-  /// One per chapter, in order.
+  /// One per chapter, in order (1 to 5).
   final List<SkyPage> pages;
+
+  /// How each page lays out its photos, in order.
+  List<SkyPageLayout> get layouts => [
+    for (final (i, page) in pages.indexed)
+      SkyPageLayout.forPage(i, pages.length, extras: page.extras.length),
+  ];
 
   /// Every photo of the memory: the closing `{N} moments`.
   final int momentCount;
@@ -65,13 +70,14 @@ class SkyPage extends Equatable {
     required this.firstDay,
     required this.date,
     required this.photoCount,
-    required this.headline,
     required this.hero,
+    this.headline,
     this.lastDay,
     this.endDate,
     this.extras = const [],
     this.note,
     this.signature,
+    this.skyLine,
   });
 
   /// Day numbers within the memory; [lastDay] is set when the page covers
@@ -85,7 +91,10 @@ class SkyPage extends Equatable {
 
   /// Photos taken on the page's days.
   final int photoCount;
-  final String headline;
+
+  /// The director's title for the page; null shows its place, else
+  /// `Day 2` (`SkyPageCopy.headlineFor`).
+  final String? headline;
   final SkyPhoto hero;
 
   /// Photos dealt under the hero or circling the balloon; up to
@@ -95,6 +104,9 @@ class SkyPage extends Equatable {
   /// The day's note, and who signs it (a first name).
   final String? note;
   final String? signature;
+
+  /// The director's line for a page without a note, written on the sky.
+  final String? skyLine;
 
   static const maxExtras = 4;
 
@@ -110,6 +122,7 @@ class SkyPage extends Equatable {
     extras,
     note,
     signature,
+    skyLine,
   ];
 }
 
@@ -143,11 +156,25 @@ enum SkyPageLayout {
   /// halo; the note is written on the night sky.
   flyOut;
 
-  /// Until the director picks (phase 6): the first page is a fan, the last
-  /// flies out, the ones between alternate taped / fan. One page: a fan.
+  /// The first page is a fan, the last flies out, the ones between
+  /// alternate taped / fan. One page: a fan.
   static SkyPageLayout forChapter(int index, int count) {
     if (index == 0) return fan;
     if (index == count - 1) return flyOut;
     return index.isOdd ? taped : fan;
   }
+
+  /// [forChapter] for a page with [extras] photos around its hero: a taped
+  /// page needs at least [minTapedExtras] to fill its grid, so with fewer
+  /// it's a fan (#345, phase 6).
+  static SkyPageLayout forPage(
+    int index,
+    int count, {
+    required int extras,
+  }) {
+    final layout = forChapter(index, count);
+    return layout == taped && extras < minTapedExtras ? fan : layout;
+  }
+
+  static const minTapedExtras = 2;
 }

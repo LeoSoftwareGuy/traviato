@@ -8,6 +8,7 @@ import 'package:traviato/features/photo/domain/entities/film_pick.dart';
 import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_entity.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_moment.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_sky.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/settings/domain/app_language.dart';
 import 'package:traviato/features/settings/presentation/providers/settings_providers.dart';
@@ -114,6 +115,58 @@ void main() {
     ).read(wrapUpControllerProvider('t1').future);
 
     expect(state.wrapUp.moments.map((m) => m.photoId), ['kept']);
+  });
+
+  test(
+    'builds the Sky Story film from content.sky and the photos (#345)',
+    () async {
+      final wrapUp = buildWrapUpEntity(
+        sky: WrapUpSky(
+          isFromDirector: true,
+          title: 'Lisbon',
+          firstName: 'Jonas',
+          pages: [
+            WrapUpSkyPage(
+              firstDay: 1,
+              date: DateTime(2026, 6, 12),
+              photoCount: 2,
+              heroPhotoId: 'hero',
+              extraPhotoIds: const ['no-url', 'extra'],
+              note: 'A note.',
+            ),
+          ],
+        ),
+      );
+
+      final state = await container(
+        FakeTripRepository(),
+        wrapUp: wrapUp,
+        photos: [
+          buildPhotoEntity(
+            id: 'hero',
+            imageUrl: 'https://x/hero.jpg',
+            placeText: 'Alfama',
+            takenAt: DateTime.utc(2026, 6, 12, 9),
+          ),
+          buildPhotoEntity(id: 'no-url'),
+          buildPhotoEntity(id: 'extra', imageUrl: 'https://x/extra.jpg'),
+        ],
+      ).read(wrapUpControllerProvider('t1').future);
+
+      final page = state.skyStory!.pages.single;
+      expect(page.hero.place, 'Alfama');
+      expect(page.hero.takenAt, DateTime.utc(2026, 6, 12, 9).toLocal());
+      // A photo without a URL can't be shown, so it's skipped.
+      expect(page.extras.map((p) => p.id), ['extra']);
+      expect(page.signature, 'Jonas');
+    },
+  );
+
+  test('no content.sky, no Sky Story', () async {
+    final state = await container(
+      FakeTripRepository(),
+    ).read(wrapUpControllerProvider('t1').future);
+    expect(state.skyStory, isNull);
   });
 
   test('asks for the wrap-up in the UI language (#250)', () async {

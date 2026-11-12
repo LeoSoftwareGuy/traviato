@@ -114,6 +114,17 @@ Post-MVP: `video_path`, `video_status`.
   `plan_version: 2` film plan or why it fell back, token usage + estimated
   cost. Service-role writes, owner reads (debug Plan inspector). A draft's
   `content` carries `plan_version` + `plan` while that plan still fits.
+  Since #345 the record also holds the Sky Story pages (`sky_story`,
+  `sky_problems`), every analysed photo's `hero_scores`, and `photo_days` +
+  `run_count`: the director re-runs on its own when a memory's photo days
+  change, up to 4 runs. It is on for everyone; `WRAP_UP_DIRECTOR_USER_IDS=off`
+  switches it off.
+- `content.sky` (#345, no schema change): Sky Story's pages on every draft
+  with photos — per page its days, photo count, headline (null = the app
+  shows the place or "Day N"), hero + up to 4 extra photo ids, the note's id
+  and text, and a director's sky line; plus title, first name (signature),
+  moment count and up to 60 mosaic photo ids. The director's pages while they
+  still fit the memory, else built by code. Kept films never gain it.
 
 ### `photo_analysis` (#328)
 `photo_id PK/FK photos cascade, trip_id FK cascade, storage_path (the file

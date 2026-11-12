@@ -14,11 +14,7 @@ class SkyStoryTexts {
     : title = SkyTitleTexts(copy.title),
       outro = SkyOutroTexts(copy.outro),
       pages = [
-        for (final (i, page) in copy.pages.indexed)
-          SkyPageTexts(
-            page,
-            SkyPageLayout.forChapter(i, copy.pages.length),
-          ),
+        for (final page in copy.pages) SkyPageTexts(page, page.layout),
       ];
 
   final SkyTitleTexts title;
@@ -173,7 +169,11 @@ class SkyPageTexts {
               for (final line in wrapWords(note, noteWidth, _measureNote))
                 _layout(line, _noteStyle),
             ],
-      quote: note == null || !onSky ? null : SkyQuoteTexts(note),
+      quote: switch ((note, copy.skyText)) {
+        (final note?, _) when onSky => SkyQuoteTexts(note),
+        (null, final line?) => SkyQuoteTexts(line),
+        _ => null,
+      },
       signature: copy.signature == null
           ? null
           : _layout(
@@ -247,7 +247,8 @@ class SkyPageTexts {
   /// The note on a card (fan, taped).
   final List<TextPainter> noteLines;
 
-  /// The note on the night sky (fly-out).
+  /// Words on the night sky: the fly-out page's note, or a page's line
+  /// when it has no note (`SkyPageCopy.skyText`).
   final SkyQuoteTexts? quote;
   final TextPainter? signature;
   final TextPainter? badgeCount;
