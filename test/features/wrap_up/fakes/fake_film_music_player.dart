@@ -1,9 +1,9 @@
-import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story_music.dart';
+import 'package:traviato/features/wrap_up/presentation/film/film_music.dart';
 
 /// Records what the music asked of the player; its position is set by
 /// the test.
-class FakeSkyMusicPlayer implements SkyMusicPlayer {
-  FakeSkyMusicPlayer({this.failLoad = false});
+class FakeFilmMusicPlayer implements FilmMusicPlayer {
+  FakeFilmMusicPlayer({this.failLoad = false});
 
   final bool failLoad;
   final calls = <String>[];

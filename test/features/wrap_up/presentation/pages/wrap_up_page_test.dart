@@ -20,7 +20,7 @@ import 'package:traviato/features/wrap_up/presentation/providers/wrap_up_provide
 
 import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
-import '../../fakes/fake_sky_music_player.dart';
+import '../../fakes/fake_film_music_player.dart';
 import '../../fakes/fake_wrap_up_repository.dart';
 
 Future<void> _pump(
@@ -38,7 +38,7 @@ Future<void> _pump(
         path: '/wrap-up',
         builder: (context, state) => WrapUpPage(
           tripId: 't1',
-          skyMusic: FakeSkyMusicPlayer.new,
+          skyMusic: FakeFilmMusicPlayer.new,
           openedFromMemory:
               state.uri.queryParameters[RouteQuery.from] ==
               RouteQuery.fromMemory,

@@ -11,7 +11,7 @@ import 'sky_photo_images.dart';
 import 'sky_scene_spec.dart';
 import 'sky_story.dart';
 import 'sky_story_copy.dart';
-import 'sky_story_music.dart';
+import '../film_music.dart';
 import 'sky_story_texts.dart';
 import 'sky_story_timeline.dart';
 import 'sky_world.dart';
@@ -39,7 +39,7 @@ class SkyStoryCanvas extends StatefulWidget {
 
   /// Makes the player for the film's music, or null for a silent film
   /// (tests, goldens).
-  final SkyMusicPlayer Function()? music;
+  final FilmMusicPlayer Function()? music;
 
   /// Silences the music without stopping its clock.
   final bool muted;
@@ -62,7 +62,7 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
   late SkyWorld _world;
   late SkyPhotoImages _images;
   late SkyOutroLayer _outro;
-  SkyStoryMusic? _music;
+  FilmMusic? _music;
   late final AppLifecycleListener _lifecycle = AppLifecycleListener(
     onHide: () => _music?.pause(),
   );
@@ -94,8 +94,7 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
     final player = widget.music?.call();
     _music = player == null
         ? null
-        : (SkyStoryMusic(player, filmLength: timeline.total)
-            ..muted = widget.muted);
+        : (FilmMusic(player, filmLength: timeline.total)..muted = widget.muted);
     final mosaicIds = widget.story.mosaicPhotoIds
         .take(SkyStory.maxMosaicPhotos)
         .toList();
