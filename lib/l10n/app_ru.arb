@@ -2540,6 +2540,18 @@
   "@goldenVows_packedCount": {
     "x-review": "pending"
   },
+  "goldenVows_heartTitle": "Каждый миг",
+  "@goldenVows_heartTitle": {
+    "x-review": "pending"
+  },
+  "goldenVows_moments": "{count, plural, one{{count} момент} few{{count} момента} many{{count} моментов} other{{count} момента}}",
+  "@goldenVows_moments": {
+    "x-review": "pending"
+  },
+  "goldenVows_days": "{count, plural, one{{count} день} few{{count} дня} many{{count} дней} other{{count} дня}}",
+  "@goldenVows_days": {
+    "x-review": "pending"
+  },
   "skyStory_days": "Дни {first}–{last}",
   "@skyStory_days": {
     "x-review": "pending"

@@ -10,6 +10,8 @@ import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_v
 import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_story.dart';
 import 'package:traviato/l10n/app_localizations.dart';
 
+import 'gv_placeholder_photos.dart';
+
 /// Goldens render on Windows only, like Sky Story's.
 final bool _skip = !Platform.isWindows;
 
@@ -33,13 +35,28 @@ Future<void> _pumpFilm(
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   await loadGoldenVowsFonts();
+
+  // Generate and decode the placeholders first, so the film starts at once.
+  await tester.pumpWidget(const SizedBox());
+  final context = tester.element(find.byType(SizedBox));
+  late final Map<String, MemoryImage> photos;
+  await tester.runAsync(() async {
+    photos = await GvPlaceholderPhotos.generate();
+    for (final photo in photos.values) {
+      await precacheImage(photo, context);
+    }
+  });
+
   await tester.pumpWidget(
     Localizations(
       locale: locale,
       delegates: AppLocalizations.localizationsDelegates,
-      child: GoldenVowsCanvas(story: story),
+      child: GoldenVowsCanvas(story: story, photo: (id) => photos[id]),
     ),
   );
+  // The film starts once its photos are ready (here at once): this frame
+  // is its t = 0.
+  await tester.pump();
 }
 
 Future<void> _expectAt(
@@ -60,8 +77,8 @@ Future<void> _expectAt(
 }
 
 void main() {
-  // Compare with docs/design/golden-vows/ref-*.png. The album, heart and
-  // ending arrive in later phases; until then the ambient layer shows.
+  // Compare with docs/design/golden-vows/ref-*.png. The photos are
+  // generated placeholders; the heart and ending arrive in later phases.
   testWidgets('the wedding at the reference instants', skip: _skip, (
     tester,
   ) async {
@@ -75,8 +92,22 @@ void main() {
       ('08', 8.0),
       ('10', 10.0),
       ('12_3', 12.3),
-      ('14', 14.0),
-      ('40', 40.0),
+      ('13_3', 13.3),
+      ('13_7', 13.7),
+      ('15_5', 15.5),
+      ('17_6', 17.6),
+      ('20', 20.0),
+      ('24', 24.0),
+      ('28', 28.0),
+      ('32_5', 32.5),
+      ('36', 36.0),
+      ('41', 41.0),
+      ('46', 46.0),
+      ('50', 50.0),
+      ('51_7', 51.7),
+      ('54', 54.0),
+      ('60_4', 60.4),
+      ('61_8', 61.8),
       ('69_5', 69.5),
     ], 'wedding');
   });
@@ -85,7 +116,14 @@ void main() {
     tester,
   ) async {
     await _pumpFilm(tester, GoldenVowsFixtures.weddingRu, const Locale('ru'));
-    await _expectAt(tester, const [('04_4', 4.4), ('10', 10.0)], 'wedding_ru');
+    await _expectAt(tester, const [
+      ('04_4', 4.4),
+      ('10', 10.0),
+      ('15_5', 15.5),
+      ('32_5', 32.5),
+      ('46', 46.0),
+      ('54', 54.0),
+    ], 'wedding_ru');
   });
 
   testWidgets('a memory with nothing packed skips the card', skip: _skip, (

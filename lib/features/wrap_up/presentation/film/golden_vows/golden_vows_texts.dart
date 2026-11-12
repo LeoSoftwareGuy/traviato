@@ -10,14 +10,17 @@ import 'golden_vows_tokens.dart';
 class GoldenVowsTexts {
   GoldenVowsTexts(GoldenVowsStory story, AppLocalizations l10n)
     : invitation = GvInvitationTexts(story),
-      packing = story.hasPackingCard ? GvPackingTexts(story, l10n) : null;
+      packing = story.hasPackingCard ? GvPackingTexts(story, l10n) : null,
+      album = GvAlbumTexts(story, l10n);
 
   final GvInvitationTexts invitation;
   final GvPackingTexts? packing;
+  final GvAlbumTexts album;
 
   void dispose() {
     invitation.dispose();
     packing?.dispose();
+    album.dispose();
   }
 }
 
@@ -215,5 +218,144 @@ class GvPackingTexts {
     for (final item in items) {
       item.dispose();
     }
+  }
+}
+
+/// [text] centred on up to [maxLines] lines of [maxWidth], shrunk in steps
+/// until it fits (never below [minScale], then cut with an ellipsis).
+TextPainter _fitLines(
+  String text,
+  TextStyle style,
+  double maxWidth, {
+  int maxLines = 2,
+  double minScale = 0.6,
+}) {
+  final size = style.fontSize!;
+  TextPainter? painter;
+  for (var scale = 1.0; ; scale -= 0.1) {
+    final last = scale - 0.1 < minScale - 1e-9;
+    painter?.dispose();
+    painter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: style.copyWith(fontSize: size * scale),
+      ),
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+      textWidthBasis: TextWidthBasis.longestLine,
+      maxLines: maxLines,
+      ellipsis: last ? '…' : null,
+    )..layout(maxWidth: maxWidth);
+    if (last || !painter.didExceedMaxLines) return painter;
+  }
+}
+
+/// A titled page's heading (spec §5.3): the script title at y 268 and the
+/// spaced line under it at y 398.
+class GvHeadingTexts {
+  GvHeadingTexts(String title, String? line)
+    : title = _fit(
+        title,
+        GoldenVowsType.script(92, color: GoldenVowsColors.gold),
+        maxWidth,
+      ),
+      line = line == null
+          ? null
+          : _fit(
+              line.toUpperCase(),
+              GoldenVowsType.serif(
+                28,
+                weight: 600,
+                letterSpacing: 9,
+                color: GoldenVowsColors.inkSoft,
+              ),
+              maxWidth,
+            );
+
+  /// Inside the page's gold hairline.
+  static const maxWidth = 840.0;
+
+  final TextPainter title;
+  final TextPainter? line;
+
+  void dispose() {
+    title.dispose();
+    line?.dispose();
+  }
+}
+
+/// A photo-with-note page's words: the caption under the photo and the
+/// note on its card, each optional.
+class GvHeroTexts {
+  GvHeroTexts(String? caption, String? note)
+    : caption = caption == null
+          ? null
+          : _fit(
+              caption.toUpperCase(),
+              GoldenVowsType.serif(
+                30,
+                weight: 600,
+                letterSpacing: 8,
+                color: GoldenVowsColors.gold,
+              ),
+              captionMaxWidth,
+            ),
+      note = note == null
+          ? null
+          : _fitLines(
+              note,
+              GoldenVowsType.script(66, color: GoldenVowsColors.ink),
+              noteMaxWidth,
+            );
+
+  /// The photo's width.
+  static const captionMaxWidth = 712.0;
+
+  /// The note card (640×190) less its margins.
+  static const noteMaxWidth = 560.0;
+
+  final TextPainter? caption;
+  final TextPainter? note;
+
+  void dispose() {
+    caption?.dispose();
+    note?.dispose();
+  }
+}
+
+/// The album's words (spec §5.3): each photo-with-note page, chapter, the
+/// carousel and the heart page.
+class GvAlbumTexts {
+  GvAlbumTexts(GoldenVowsStory story, AppLocalizations l10n)
+    : heroes = [
+        for (final hero in story.heroes) GvHeroTexts(hero.caption, hero.note),
+      ],
+      chapters = [
+        for (final chapter in story.chapters)
+          GvHeadingTexts(chapter.title, chapter.line),
+      ],
+      carousel = story.hasCarousel
+          ? GvHeadingTexts(story.carousel!.title, story.carousel!.line)
+          : null,
+      heart = GvHeadingTexts(
+        l10n.goldenVows_heartTitle,
+        '${l10n.goldenVows_moments(story.momentCount)}'
+        ' · ${l10n.goldenVows_days(story.dayCount)}',
+      );
+
+  final List<GvHeroTexts> heroes;
+  final List<GvHeadingTexts> chapters;
+  final GvHeadingTexts? carousel;
+  final GvHeadingTexts heart;
+
+  void dispose() {
+    for (final hero in heroes) {
+      hero.dispose();
+    }
+    for (final chapter in chapters) {
+      chapter.dispose();
+    }
+    carousel?.dispose();
+    heart.dispose();
   }
 }

@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../../core/l10n/context_l10n.dart';
 import '../sky_story/guarded_painter.dart';
+import '../sky_story/sky_photo_images.dart';
+import 'golden_vows_album.dart';
+import 'golden_vows_album_painter.dart';
 import 'golden_vows_ambient.dart';
 import 'golden_vows_ambient_painter.dart';
 import 'golden_vows_intro_painter.dart';
@@ -15,9 +20,24 @@ import 'golden_vows_timeline.dart';
 /// album, heart and ending in later phases); the gold frame, flare and
 /// petals on top. Its fixed words follow the surrounding locale.
 class GoldenVowsCanvas extends StatefulWidget {
-  const GoldenVowsCanvas({required this.story, this.onFailure, super.key});
+  const GoldenVowsCanvas({
+    required this.story,
+    this.photo = _noPhoto,
+    this.onFailure,
+    super.key,
+  });
 
   final GoldenVowsStory story;
+
+  /// Where each photo id's image comes from: signed URLs for a real
+  /// memory, generated placeholders in tests. Null → an empty mat.
+  final ImageProvider? Function(String photoId) photo;
+
+  static ImageProvider? _noPhoto(String _) => null;
+
+  /// The film doesn't start until every photo has loaded or failed (no
+  /// frame is drawn with a photo still missing), or this long has passed.
+  static const photoWait = Duration(seconds: 5);
 
   /// Called once, after the frame, if laying out the words or painting
   /// throws: the film stops and goes blank, and the caller can play
@@ -36,6 +56,8 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
   late final _clock = _FilmClock(_controller);
   late GoldenVowsTimeline _timeline;
   late GoldenVowsAmbient _ambient;
+  late GoldenVowsAlbum _album;
+  SkyPhotoImages? _images;
   GoldenVowsTexts? _texts;
   Locale? _textsLocale;
   bool _failed = false;
@@ -46,18 +68,29 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
     _start();
   }
 
-  /// The film's scenes for the story: no packed items, no packing card.
-  static GoldenVowsTimeline timelineFor(GoldenVowsStory story) =>
-      GoldenVowsTimeline(hasPackingCard: story.hasPackingCard);
-
   void _start() {
-    _timeline = timelineFor(widget.story);
+    _timeline = GoldenVowsTimeline.forStory(widget.story);
     _ambient = GoldenVowsAmbient(_timeline);
+    _album = GoldenVowsAlbum(_timeline);
     _clock.total = _timeline.total;
     _controller
+      ..stop()
       ..duration = Duration(milliseconds: (_timeline.total * 1000).round())
-      ..value = 0
-      ..repeat();
+      ..value = 0;
+    _images?.dispose();
+    final images = _images = SkyPhotoImages(widget.photo)
+      ..load(widget.story.albumPhotoIds);
+    unawaited(_playWhenReady(images));
+  }
+
+  /// Starts the clock once [images] have all loaded or failed, or after
+  /// [GoldenVowsCanvas.photoWait].
+  Future<void> _playWhenReady(SkyPhotoImages images) async {
+    await images.ready
+        .then<void>((_) {})
+        .timeout(GoldenVowsCanvas.photoWait, onTimeout: () {});
+    if (!mounted || _failed || _images != images) return;
+    unawaited(_controller.repeat());
   }
 
   @override
@@ -104,6 +137,7 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
   @override
   void dispose() {
     _texts?.dispose();
+    _images?.dispose();
     _clock.dispose();
     _controller.dispose();
     super.dispose();
@@ -112,7 +146,8 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
   @override
   Widget build(BuildContext context) {
     final texts = _texts;
-    if (_failed || texts == null) {
+    final images = _images;
+    if (_failed || texts == null || images == null) {
       return const ColoredBox(color: Colors.black);
     }
     return ColoredBox(
@@ -131,9 +166,16 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
                     texts: texts,
                     time: _clock,
                   ),
+                  GoldenVowsAlbumPainter(
+                    album: _album,
+                    story: widget.story,
+                    texts: texts.album,
+                    images: images,
+                    time: _clock,
+                  ),
                   GoldenVowsFrontPainter(ambient: _ambient, time: _clock),
                 ]),
-                repaint: _clock,
+                repaint: Listenable.merge([_clock, images]),
                 onError: _fail,
               ),
             ),
