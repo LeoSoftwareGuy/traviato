@@ -1788,6 +1788,14 @@
   "@wrapUp_keepForever": {
     "x-review": "pending"
   },
+  "wrapUp_mute": "Выключить музыку",
+  "@wrapUp_mute": {
+    "x-review": "pending"
+  },
+  "wrapUp_unmute": "Включить музыку",
+  "@wrapUp_unmute": {
+    "x-review": "pending"
+  },
   "wrapUp_openMemory": "Открыть воспоминание",
   "@wrapUp_openMemory": {
     "x-review": "pending"

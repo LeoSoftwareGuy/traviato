@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../../l10n/app_localizations.dart';
+import '../../../../../core/l10n/context_l10n.dart';
+import 'guarded_painter.dart';
 import 'sky_mosaic.dart';
 import 'sky_outro_painter.dart';
 import 'sky_pages_painter.dart';
@@ -26,6 +27,7 @@ class SkyStoryCanvas extends StatefulWidget {
     required this.photo,
     this.music,
     this.muted = false,
+    this.onFailure,
     super.key,
   });
 
@@ -41,6 +43,11 @@ class SkyStoryCanvas extends StatefulWidget {
 
   /// Silences the music without stopping its clock.
   final bool muted;
+
+  /// Called once, after the frame, if laying out the words or painting
+  /// the film throws (#345): the film stops and goes black, and the caller
+  /// can play something else instead.
+  final void Function(Object error, StackTrace stack)? onFailure;
 
   @override
   State<SkyStoryCanvas> createState() => _SkyStoryCanvasState();
@@ -61,6 +68,7 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
   );
   SkyStoryCopy? _copy;
   SkyStoryTexts? _texts;
+  bool _failed = false;
 
   @override
   void initState() {
@@ -133,19 +141,42 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Another screen covers the film: its clock stops ticking, so the
+    // music has to be stopped here. It picks up again with the clock.
+    if (!TickerMode.valuesOf(context).enabled) _music?.pause();
     _resolveCopy();
   }
 
   void _resolveCopy() {
-    final copy = SkyStoryCopy.resolve(
-      widget.story,
-      AppLocalizations.of(context),
-      Localizations.localeOf(context).toLanguageTag(),
-    );
-    if (copy == _copy) return;
-    _copy = copy;
-    _texts?.dispose();
-    _texts = SkyStoryTexts(copy);
+    if (_failed) return;
+    try {
+      final copy = SkyStoryCopy.resolve(
+        widget.story,
+        context.l10n,
+        Localizations.localeOf(context).toLanguageTag(),
+      );
+      if (copy == _copy) return;
+      _copy = copy;
+      _texts?.dispose();
+      _texts = SkyStoryTexts(copy);
+    } catch (error, stack) {
+      _fail(error, stack);
+    }
+  }
+
+  /// Stops the film for good after its first failure and tells the caller,
+  /// once, after the frame (this can run mid-paint).
+  void _fail(Object error, StackTrace stack) {
+    if (_failed) return;
+    _failed = true;
+    debugPrint('Sky Story failed; the film stops: $error\n$stack');
+    _music?.pause();
+    _controller.stop();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {});
+      widget.onFailure?.call(error, stack);
+    });
   }
 
   @override
@@ -163,6 +194,10 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
 
   @override
   Widget build(BuildContext context) {
+    final texts = _texts;
+    if (_failed || texts == null) {
+      return const ColoredBox(color: Colors.black);
+    }
     return ColoredBox(
       color: Colors.black,
       child: FittedBox(
@@ -171,14 +206,27 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
           height: SkyWorld.height,
           child: RepaintBoundary(
             child: CustomPaint(
-              painter: SkyWorldPainter(world: _world, time: _clock),
-              foregroundPainter: SkyPagesPainter(
-                world: _world,
-                story: widget.story,
-                texts: _texts!,
-                images: _images,
-                outro: _outro,
-                time: _clock,
+              painter: GuardedPainter(
+                SkyWorldPainter(world: _world, time: _clock),
+                repaint: _clock,
+                onError: _fail,
+              ),
+              foregroundPainter: GuardedPainter(
+                SkyPagesPainter(
+                  world: _world,
+                  story: widget.story,
+                  texts: texts,
+                  images: _images,
+                  outro: _outro,
+                  time: _clock,
+                ),
+                repaint: Listenable.merge([
+                  _clock,
+                  _images,
+                  _outro.tiles,
+                  _outro.icon,
+                ]),
+                onError: _fail,
               ),
             ),
           ),

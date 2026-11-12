@@ -895,3 +895,61 @@ Deno.test("the director runs again when photo days changed, and counts the run",
   assertEquals(runs, [TRIP_ID]);
   assertEquals(client.writes[0].values.director.run_count, 3);
 });
+
+Deno.test("rebuilding a film kept as a Sky Story rebuilds its pages (#345)", async () => {
+  const data = directorTripData();
+  const client = fakeSupabaseClient({
+    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+    wrap_ups: [{
+      content: { ...validWrapUpContent, sky: { sky_version: 1, pages: [] } },
+      generated_at: "2026-09-05T00:00:00Z",
+      published_at: "2026-09-06T00:00:00Z",
+      ai_fields: validAiFields,
+      ai_input_hash: "old",
+      ai_generation_count: 1,
+      director: { ...plannedRecord(), sky_story: skyStoryPlan() },
+    }],
+    day_notes: data.notes,
+    // A photo of day 2's page was deleted since: the director's pages no
+    // longer fit, so they're rebuilt by code.
+    photos: data.photos.filter((p) => p.id !== "p05"),
+    bonus_task_assignments: [],
+    points_ledger: [],
+    user_achievements: [],
+  });
+  const { runs, deps } = directorDeps(client);
+
+  const json = await (await handleRequest(
+    request({ trip_id: TRIP_ID, rebuild: true }),
+    deps,
+  )).json();
+
+  assertEquals(runs, []);
+  assertEquals(json.content.sky.source, "code");
+  assertEquals(json.content.sky.pages.length, 3);
+  assertEquals(client.writes[0].values.content.sky, json.content.sky);
+
+  // While they still fit, the director's pages are kept.
+  const fits = fakeSupabaseClient({
+    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+    wrap_ups: [{
+      content: { ...validWrapUpContent, sky: { sky_version: 1, pages: [] } },
+      generated_at: "2026-09-05T00:00:00Z",
+      published_at: "2026-09-06T00:00:00Z",
+      ai_fields: validAiFields,
+      ai_input_hash: "old",
+      ai_generation_count: 1,
+      director: { ...plannedRecord(), sky_story: skyStoryPlan() },
+    }],
+    day_notes: data.notes,
+    photos: data.photos,
+    bonus_task_assignments: [],
+    points_ledger: [],
+    user_achievements: [],
+  });
+  const kept = await (await handleRequest(
+    request({ trip_id: TRIP_ID, rebuild: true }),
+    directorDeps(fits).deps,
+  )).json();
+  assertEquals(kept.content.sky.source, "director");
+});

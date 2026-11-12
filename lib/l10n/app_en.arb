@@ -1507,6 +1507,14 @@
   "paywall_reassurance": "Your three free memories stay yours either way: nothing is deleted or locked if you don't upgrade.",
   "wrapUp_openJournal": "Open journal",
   "wrapUp_keepForever": "Keep forever",
+  "wrapUp_mute": "Mute music",
+  "@wrapUp_mute": {
+    "description": "Film HUD: tooltip/screen-reader label of the speaker button that silences the Sky Story film's music (#345)."
+  },
+  "wrapUp_unmute": "Play music",
+  "@wrapUp_unmute": {
+    "description": "Film HUD: tooltip/screen-reader label of the speaker button while the film's music is muted (#345)."
+  },
   "wrapUp_openMemory": "Open memory",
   "@wrapUp_openMemory": {
     "description": "Film HUD primary button on a kept memory: replaces the film with the Kept Memory page (#279)."

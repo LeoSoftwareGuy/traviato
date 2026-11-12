@@ -2797,6 +2797,18 @@ abstract class AppLocalizations {
   /// **'Keep forever'**
   String get wrapUp_keepForever;
 
+  /// Film HUD: tooltip/screen-reader label of the speaker button that silences the Sky Story film's music (#345).
+  ///
+  /// In en, this message translates to:
+  /// **'Mute music'**
+  String get wrapUp_mute;
+
+  /// Film HUD: tooltip/screen-reader label of the speaker button while the film's music is muted (#345).
+  ///
+  /// In en, this message translates to:
+  /// **'Play music'**
+  String get wrapUp_unmute;
+
   /// Film HUD primary button on a kept memory: replaces the film with the Kept Memory page (#279).
   ///
   /// In en, this message translates to:

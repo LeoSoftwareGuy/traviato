@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story_canvas.dart';
@@ -7,52 +9,7 @@ import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story_
 import 'package:traviato/features/wrap_up/presentation/pages/sky_story_preview_page.dart';
 import 'package:traviato/l10n/app_localizations.dart';
 
-/// Records what the music asked of the player; its position is set by
-/// the test.
-class FakeSkyMusicPlayer implements SkyMusicPlayer {
-  FakeSkyMusicPlayer({this.failLoad = false});
-
-  final bool failLoad;
-  final calls = <String>[];
-  final seeks = <double>[];
-  final volumes = <double>[];
-  bool playing = false;
-  bool disposed = false;
-  double positionS = 0;
-
-  @override
-  Future<void> load() async {
-    calls.add('load');
-    if (failLoad) throw Exception('no track');
-  }
-
-  @override
-  Future<void> play() async {
-    calls.add('play');
-    playing = true;
-  }
-
-  @override
-  Future<void> pause() async {
-    calls.add('pause');
-    playing = false;
-  }
-
-  @override
-  Future<void> seek(Duration position) async {
-    seeks.add(position.inMicroseconds / 1e6);
-    positionS = position.inMicroseconds / 1e6;
-  }
-
-  @override
-  Future<void> setVolume(double volume) async => volumes.add(volume);
-
-  @override
-  Duration get position => Duration(microseconds: (positionS * 1e6).round());
-
-  @override
-  Future<void> dispose() async => disposed = true;
-}
+import '../../../fakes/fake_sky_music_player.dart';
 
 Widget _film(SkyMusicPlayer Function() music) => Localizations(
   locale: const Locale('en'),
@@ -209,6 +166,65 @@ void main() {
     await tester.tap(find.byKey(const Key('sky-story-mute')));
     await tester.pump(const Duration(milliseconds: 100));
     expect(player.volumes.last, 1);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('the music stops while another screen covers the film', (
+    tester,
+  ) async {
+    late FakeSkyMusicPlayer player;
+    final navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: SkyStoryCanvas(
+          story: SkyStoryFixtures.lisbon,
+          photo: (_) => null,
+          music: () => player = FakeSkyMusicPlayer(),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 2));
+    expect(player.playing, isTrue);
+
+    unawaited(
+      navigator.currentState!.push(
+        MaterialPageRoute<void>(builder: (_) => const Text('Journal')),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(player.playing, isFalse);
+
+    navigator.currentState!.pop();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(player.playing, isTrue);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('a failure stops the film and the music, once', (
+    tester,
+  ) async {
+    late FakeSkyMusicPlayer player;
+    final failures = <Object>[];
+    // No Localizations: laying out the words throws.
+    await tester.pumpWidget(
+      SkyStoryCanvas(
+        story: SkyStoryFixtures.lisbon,
+        photo: (_) => null,
+        music: () => player = FakeSkyMusicPlayer(),
+        onFailure: (error, _) => failures.add(error),
+      ),
+    );
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 250));
+    }
+    expect(failures, hasLength(1));
+    expect(find.byType(CustomPaint), findsNothing);
+    expect(player.playing, isFalse);
     await tester.pumpWidget(const SizedBox());
   });
 }

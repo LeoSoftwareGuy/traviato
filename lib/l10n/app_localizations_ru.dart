@@ -1804,6 +1804,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get wrapUp_keepForever => 'Сохранить навсегда';
 
   @override
+  String get wrapUp_mute => 'Выключить музыку';
+
+  @override
+  String get wrapUp_unmute => 'Включить музыку';
+
+  @override
   String get wrapUp_openMemory => 'Открыть воспоминание';
 
   @override

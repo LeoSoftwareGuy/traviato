@@ -124,7 +124,10 @@ Post-MVP: `video_path`, `video_status`.
   shows the place or "Day N"), hero + up to 4 extra photo ids, the note's id
   and text, and a director's sky line; plus title, first name (signature),
   moment count and up to 60 mosaic photo ids. The director's pages while they
-  still fit the memory, else built by code. Kept films never gain it.
+  still fit the memory, else built by code. The app plays Sky Story whenever
+  it's there. A film kept as a Sky Story keeps it, and "Rebuild film"
+  rebuilds its pages too (no AI call); a film kept before Sky Story never
+  gains it.
 
 ### `photo_analysis` (#328)
 `photo_id PK/FK photos cascade, trip_id FK cascade, storage_path (the file

@@ -29,6 +29,8 @@ class WrapUpFilmHud extends ConsumerWidget {
     required this.isPublished,
     this.openedFromMemory = false,
     this.isOutOfDate = false,
+    this.muted = false,
+    this.onToggleMute,
     super.key,
   });
 
@@ -36,6 +38,11 @@ class WrapUpFilmHud extends ConsumerWidget {
   final bool isPublished;
   final bool openedFromMemory;
   final bool isOutOfDate;
+
+  /// Whether the film's music is muted. Shown only with [onToggleMute]:
+  /// the Sky Story film has music, the classic film doesn't (#345).
+  final bool muted;
+  final VoidCallback? onToggleMute;
 
   /// Back to wherever the film was opened from (#279) — Home when there's
   /// nothing to pop (e.g. a deep link).
@@ -94,6 +101,24 @@ class WrapUpFilmHud extends ConsumerWidget {
                     onPressed: () => _close(context),
                   ),
                 ),
+                if (onToggleMute != null) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  _HudScrim(
+                    child: IconButton(
+                      key: const Key('wrap-up-hud-mute'),
+                      tooltip: muted
+                          ? context.l10n.wrapUp_unmute
+                          : context.l10n.wrapUp_mute,
+                      icon: Icon(
+                        muted
+                            ? Icons.volume_off_rounded
+                            : Icons.volume_up_rounded,
+                        color: AppColors.textOnPhoto,
+                      ),
+                      onPressed: onToggleMute,
+                    ),
+                  ),
+                ],
                 // Debug builds only: the director's Plan inspector (#328).
                 if (kDebugMode) ...[
                   const SizedBox(width: AppSpacing.sm),

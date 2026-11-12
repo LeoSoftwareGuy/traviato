@@ -4,6 +4,7 @@ import 'package:traviato/features/wrap_up/domain/entities/wrap_up_film_cut.dart'
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_flurry_leftovers.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_moment.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_photo_ref.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_sky.dart';
 import 'package:traviato/features/wrap_up/domain/kept_film_staleness.dart';
 
 import '../../photo/fakes/fake_photo_repository.dart';
@@ -58,5 +59,37 @@ void main() {
       );
       expect(isKeptFilmOutOfDate(draft, const []), isFalse);
     });
+
+    test(
+      "a kept Sky Story whose page photo was deleted is out of date (#345)",
+      () {
+        final kept = buildWrapUpEntity(
+          generatedAt: _builtAt,
+          publishedAt: DateTime.utc(2026, 6, 10, 13),
+          moments: const [],
+          sky: WrapUpSky(
+            isFromDirector: false,
+            title: 'Lisbon',
+            pages: [
+              WrapUpSkyPage(
+                firstDay: 1,
+                date: DateTime(2026, 6, 1),
+                photoCount: 2,
+                heroPhotoId: 'p1',
+                extraPhotoIds: const ['p3'],
+              ),
+            ],
+          ),
+        );
+        expect(
+          isKeptFilmOutOfDate(kept, [
+            buildPhotoEntity(id: 'p1'),
+            buildPhotoEntity(id: 'p3'),
+          ]),
+          isFalse,
+        );
+        expect(isKeptFilmOutOfDate(kept, [buildPhotoEntity(id: 'p1')]), isTrue);
+      },
+    );
   });
 }

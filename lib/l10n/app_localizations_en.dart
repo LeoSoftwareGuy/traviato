@@ -1757,6 +1757,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wrapUp_keepForever => 'Keep forever';
 
   @override
+  String get wrapUp_mute => 'Mute music';
+
+  @override
+  String get wrapUp_unmute => 'Play music';
+
+  @override
   String get wrapUp_openMemory => 'Open memory';
 
   @override

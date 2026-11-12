@@ -12,6 +12,9 @@ import '../../../trip/presentation/widgets/cover_options.dart';
 import '../controllers/wrap_up_controller.dart';
 import '../controllers/wrap_up_state.dart';
 import '../film/chrome/wrap_up_film_grain.dart';
+import '../film/sky_story/sky_story.dart';
+import '../film/sky_story/sky_story_canvas.dart';
+import '../film/sky_story/sky_story_music.dart';
 import '../film/wrap_up_film_canvas.dart';
 import '../film/wrap_up_film_hud.dart';
 import '../film/wrap_up_film_photo.dart';
@@ -19,10 +22,11 @@ import '../film/wrap_up_film_photo_pins.dart';
 import '../widgets/wrap_up_generating_view.dart';
 import '../../../../core/l10n/context_l10n.dart';
 
-class WrapUpPage extends ConsumerWidget {
+class WrapUpPage extends ConsumerStatefulWidget {
   const WrapUpPage({
     required this.tripId,
     this.openedFromMemory = false,
+    this.skyMusic = JustAudioSkyMusicPlayer.new,
     super.key,
   });
 
@@ -32,8 +36,23 @@ class WrapUpPage extends ConsumerWidget {
   /// then leads back there.
   final bool openedFromMemory;
 
+  /// The Sky Story film's music player; tests pass a fake.
+  final SkyMusicPlayer Function() skyMusic;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WrapUpPage> createState() => _WrapUpPageState();
+}
+
+/// Plays the Sky Story film (#345) whenever the wrap-up has one — every
+/// draft with photos, and films kept since — else the classic film. If
+/// Sky Story fails while it plays, the classic film takes over for good.
+class _WrapUpPageState extends ConsumerState<WrapUpPage> {
+  bool _skyFailed = false;
+  bool _muted = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final tripId = widget.tripId;
     final wrapUpAsync = ref.watch(wrapUpControllerProvider(tripId));
 
     return Scaffold(
@@ -44,29 +63,86 @@ class WrapUpPage extends ConsumerWidget {
           message: presentationFailureMessage(error, context.l10n),
           onRetry: () => ref.invalidate(wrapUpControllerProvider(tripId)),
         ),
-        data: (state) => Stack(
-          children: [
-            Positioned.fill(
-              child: _WrapUpFilmReady(
-                // Keyed on generatedAt (stable across a "Keep forever"
-                // publish) so asset prep — signed cover URL, precache, grain
-                // generation — runs once per wrap-up, not on every state
-                // change.
-                key: ValueKey(state.wrapUp.generatedAt),
-                state: state,
+        data: (state) {
+          final skyStory = _skyFailed ? null : state.skyStory;
+          return Stack(
+            children: [
+              Positioned.fill(
+                child: skyStory != null
+                    ? _SkyStoryFilm(
+                        state: state,
+                        story: skyStory,
+                        music: widget.skyMusic,
+                        muted: _muted,
+                        onFailure: () => setState(() => _skyFailed = true),
+                      )
+                    : _WrapUpFilmReady(
+                        // Keyed on generatedAt (stable across a "Keep
+                        // forever" publish) so asset prep — signed cover
+                        // URL, precache, grain generation — runs once per
+                        // wrap-up, not on every state change.
+                        key: ValueKey(state.wrapUp.generatedAt),
+                        state: state,
+                      ),
               ),
-            ),
-            // Independent of asset prep — closing the film or publishing
-            // must never wait on photo precaching.
-            WrapUpFilmHud(
-              tripId: tripId,
-              isPublished: state.wrapUp.isPublished,
-              openedFromMemory: openedFromMemory,
-              isOutOfDate: state.isOutOfDate,
-            ),
-          ],
-        ),
+              // Independent of asset prep — closing the film or publishing
+              // must never wait on photo precaching.
+              WrapUpFilmHud(
+                tripId: tripId,
+                isPublished: state.wrapUp.isPublished,
+                openedFromMemory: widget.openedFromMemory,
+                isOutOfDate: state.isOutOfDate,
+                muted: _muted,
+                onToggleMute: skyStory == null
+                    ? null
+                    : () => setState(() => _muted = !_muted),
+              ),
+            ],
+          );
+        },
       ),
+    );
+  }
+}
+
+/// The Sky Story film over the memory's photos. It starts at once — its
+/// first seconds are sky and title — and the photos stream in behind it,
+/// decoded no bigger than the film can show.
+class _SkyStoryFilm extends StatefulWidget {
+  const _SkyStoryFilm({
+    required this.state,
+    required this.story,
+    required this.music,
+    required this.muted,
+    required this.onFailure,
+  });
+
+  final WrapUpState state;
+  final SkyStory story;
+  final SkyMusicPlayer Function() music;
+  final bool muted;
+  final VoidCallback onFailure;
+
+  @override
+  State<_SkyStoryFilm> createState() => _SkyStoryFilmState();
+}
+
+class _SkyStoryFilmState extends State<_SkyStoryFilm> {
+  /// A method tear-off, so it stays equal across rebuilds and the film
+  /// doesn't restart; it reads the latest URLs from the widget.
+  ImageProvider? _photo(String id) {
+    final url = widget.state.imageUrlForPhoto(id);
+    return url == null ? null : WrapUpFilmPhoto.providerFor(url);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SkyStoryCanvas(
+      story: widget.story,
+      photo: _photo,
+      music: widget.music,
+      muted: widget.muted,
+      onFailure: (_, _) => widget.onFailure(),
     );
   }
 }
