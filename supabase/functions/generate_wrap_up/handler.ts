@@ -161,7 +161,13 @@ export async function handleRequest(
       return await rerunKeptDirector(deps, tripId, language, existing);
     }
     if (rebuild && validateAiGeneratedFields(existing.ai_fields)) {
-      return await rebuildKept(deps, tripId, existing.ai_fields, slots);
+      return await rebuildKept(
+        deps,
+        tripId,
+        existing.ai_fields,
+        slots,
+        existing,
+      );
     }
     return json({
       content: existing.content,
@@ -343,12 +349,16 @@ async function rerunKeptDirector(
 }
 
 // Re-assembles a kept film with its stored AI lines (#294). Only ever
-// writes over a row that is still kept.
+// writes over a row that is still kept. A film kept as a Sky Story (#345)
+// rebuilds its pages too — the director's stored pages while they still
+// fit, else code-built; no AI call — so it stays a Sky Story. A film kept
+// before Sky Story never gains one.
 async function rebuildKept(
   deps: Deps,
   tripId: string,
   aiFields: AiGeneratedFields,
   slots: MomentSlots,
+  existing: { content: unknown; director?: unknown },
 ): Promise<Response> {
   let tripData: TripData;
   try {
@@ -358,7 +368,19 @@ async function rebuildKept(
       error: `failed to gather trip data: ${(err as Error).message}`,
     }, 500);
   }
-  const content = assembleWrapUpContent(tripData, aiFields, slots);
+  const template = assembleWrapUpContent(tripData, aiFields, slots);
+  const keptAsSky = typeof existing.content === "object" &&
+    existing.content !== null && "sky" in existing.content;
+  const sky = keptAsSky
+    ? buildSkyContent(
+      tripData,
+      currentSkyStory(existing.director, tripData),
+      isDirectorRecord(existing.director)
+        ? existing.director.hero_scores ?? {}
+        : {},
+    )
+    : null;
+  const content = sky ? { ...template, sky } : template;
   const generatedAt = new Date().toISOString();
   const { error } = await deps.serviceClient
     .from("wrap_ups")
