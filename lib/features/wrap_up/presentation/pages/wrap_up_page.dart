@@ -12,6 +12,8 @@ import '../../../trip/presentation/widgets/cover_options.dart';
 import '../controllers/wrap_up_controller.dart';
 import '../controllers/wrap_up_state.dart';
 import '../film/chrome/wrap_up_film_grain.dart';
+import '../film/golden_vows/golden_vows_canvas.dart';
+import '../film/golden_vows/golden_vows_story.dart';
 import '../film/sky_story/sky_story.dart';
 import '../film/sky_story/sky_story_canvas.dart';
 import '../film/film_music.dart';
@@ -27,6 +29,7 @@ class WrapUpPage extends ConsumerStatefulWidget {
     required this.tripId,
     this.openedFromMemory = false,
     this.skyMusic = JustAudioFilmMusicPlayer.skyStory,
+    this.goldenVowsMusic = JustAudioFilmMusicPlayer.goldenVows,
     super.key,
   });
 
@@ -39,14 +42,20 @@ class WrapUpPage extends ConsumerStatefulWidget {
   /// The Sky Story film's music player; tests pass a fake.
   final FilmMusicPlayer Function() skyMusic;
 
+  /// The Golden Vows film's music player; tests pass a fake.
+  final FilmMusicPlayer Function() goldenVowsMusic;
+
   @override
   ConsumerState<WrapUpPage> createState() => _WrapUpPageState();
 }
 
-/// Plays the Sky Story film (#345) whenever the wrap-up has one — every
-/// draft with photos, and films kept since — else the classic film. If
-/// Sky Story fails while it plays, the classic film takes over for good.
+/// Plays Golden Vows (#346) when the wrap-up has one — a wedding,
+/// engagement, anniversary or date night the director planned — else the
+/// Sky Story film (#345) whenever there is one (every draft with photos,
+/// and films kept since), else the classic film. A film that fails while
+/// it plays hands over to the next one for good.
 class _WrapUpPageState extends ConsumerState<WrapUpPage> {
+  bool _goldenVowsFailed = false;
   bool _skyFailed = false;
   bool _muted = false;
 
@@ -64,11 +73,21 @@ class _WrapUpPageState extends ConsumerState<WrapUpPage> {
           onRetry: () => ref.invalidate(wrapUpControllerProvider(tripId)),
         ),
         data: (state) {
+          final goldenVows = _goldenVowsFailed ? null : state.goldenVows;
           final skyStory = _skyFailed ? null : state.skyStory;
           return Stack(
             children: [
               Positioned.fill(
-                child: skyStory != null
+                child: goldenVows != null
+                    ? _GoldenVowsFilm(
+                        state: state,
+                        story: goldenVows,
+                        music: widget.goldenVowsMusic,
+                        muted: _muted,
+                        onFailure: () =>
+                            setState(() => _goldenVowsFailed = true),
+                      )
+                    : skyStory != null
                     ? _SkyStoryFilm(
                         state: state,
                         story: skyStory,
@@ -93,7 +112,7 @@ class _WrapUpPageState extends ConsumerState<WrapUpPage> {
                 openedFromMemory: widget.openedFromMemory,
                 isOutOfDate: state.isOutOfDate,
                 muted: _muted,
-                onToggleMute: skyStory == null
+                onToggleMute: goldenVows == null && skyStory == null
                     ? null
                     : () => setState(() => _muted = !_muted),
               ),
@@ -138,6 +157,48 @@ class _SkyStoryFilmState extends State<_SkyStoryFilm> {
   @override
   Widget build(BuildContext context) {
     return SkyStoryCanvas(
+      story: widget.story,
+      photo: _photo,
+      music: widget.music,
+      muted: widget.muted,
+      onFailure: (_, _) => widget.onFailure(),
+    );
+  }
+}
+
+/// The Golden Vows film over the memory's photos (#346). Its clock waits
+/// for the photos (at most a few seconds) so no page turns over an empty
+/// print.
+class _GoldenVowsFilm extends StatefulWidget {
+  const _GoldenVowsFilm({
+    required this.state,
+    required this.story,
+    required this.music,
+    required this.muted,
+    required this.onFailure,
+  });
+
+  final WrapUpState state;
+  final GoldenVowsStory story;
+  final FilmMusicPlayer Function() music;
+  final bool muted;
+  final VoidCallback onFailure;
+
+  @override
+  State<_GoldenVowsFilm> createState() => _GoldenVowsFilmState();
+}
+
+class _GoldenVowsFilmState extends State<_GoldenVowsFilm> {
+  /// A method tear-off, so it stays equal across rebuilds and the film
+  /// doesn't restart; it reads the latest URLs from the widget.
+  ImageProvider? _photo(String id) {
+    final url = widget.state.imageUrlForPhoto(id);
+    return url == null ? null : WrapUpFilmPhoto.providerFor(url);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GoldenVowsCanvas(
       story: widget.story,
       photo: _photo,
       music: widget.music,

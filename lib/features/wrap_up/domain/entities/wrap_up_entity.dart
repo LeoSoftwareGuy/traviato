@@ -10,6 +10,7 @@ import 'wrap_up_invitation.dart';
 import 'wrap_up_keepsake.dart';
 import 'wrap_up_moment.dart';
 import 'wrap_up_photo_ref.dart';
+import 'wrap_up_golden_vows.dart';
 import 'wrap_up_sky.dart';
 import 'wrap_up_unlock.dart';
 
@@ -34,6 +35,7 @@ class WrapUpEntity extends Equatable {
     this.publishedAt,
     this.plan,
     this.sky,
+    this.goldenVows,
   });
 
   /// The generator's resolved film plan (#151); `null` for a wrap-up
@@ -67,6 +69,11 @@ class WrapUpEntity extends Equatable {
   /// Sky Story's pages (#345), read from `content.sky`; null on kept films
   /// and on memories without photos, which play the classic film.
   final WrapUpSky? sky;
+
+  /// The Golden Vows album (#346), from `content.golden_vows`: only for a
+  /// memory the director read as a wedding, engagement, anniversary or date
+  /// night. Plays before [sky].
+  final WrapUpGoldenVows? goldenVows;
 
   bool get isPublished => publishedAt != null;
 
@@ -104,6 +111,7 @@ class WrapUpEntity extends Equatable {
     publishedAt: publishedAt != null ? publishedAt() : this.publishedAt,
     plan: plan,
     sky: sky,
+    goldenVows: goldenVows,
   );
 
   @override
@@ -123,5 +131,6 @@ class WrapUpEntity extends Equatable {
     publishedAt,
     plan,
     sky,
+    goldenVows,
   ];
 }

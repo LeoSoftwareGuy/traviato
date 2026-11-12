@@ -219,6 +219,15 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   Every draft with photos plays it, and so does a film kept as one. Films
   kept before Sky Story, a memory without photos, or any failure while it
   plays fall back to the classic film above.
+- **Golden Vows (#346):** an ivory-and-gold wedding album for memories the
+  director reads as a wedding, engagement, anniversary or date night —
+  invitation, a packing card (checked checklist items, else planned
+  quests), photo-with-note pages (notes only in the user's own words:
+  caption, else an exact excerpt of that day's note), chapter pages, a
+  carousel, every photo forming a heart that lifts off as the Storyni
+  balloon, then the Storyni ending; 70–83 s, with its own music. It plays
+  before Sky Story; any failure hands over to Sky Story, then the classic
+  film. A film kept as Golden Vows stays one while its section still fits.
 
 ## 16. Profile ("You") ✅ — redesigned
 

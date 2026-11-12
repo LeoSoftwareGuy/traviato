@@ -95,6 +95,25 @@ void main() {
       expect(report.attempts, 2);
     });
 
+    test('reads the Golden Vows occasion and problems (#346)', () {
+      final chosen = FilmDirectorReportModel.fromJson({
+        'status': 'planned',
+        'problems': <String>[],
+        'golden_vows': {'occasion': 'anniversary'},
+        'golden_vows_problems': <String>[],
+      })!;
+      expect(chosen.goldenVowsOccasion, 'anniversary');
+      expect(chosen.goldenVowsProblems, isEmpty);
+      final invalid = FilmDirectorReportModel.fromJson({
+        'status': 'planned',
+        'problems': <String>[],
+        'golden_vows': null,
+        'golden_vows_problems': ['golden_vows.heroes: 1', 7],
+      })!;
+      expect(invalid.goldenVowsOccasion, isNull);
+      expect(invalid.goldenVowsProblems, ['golden_vows.heroes: 1']);
+    });
+
     test('is null when the director never ran', () {
       expect(FilmDirectorReportModel.fromJson(null), isNull);
       expect(FilmDirectorReportModel.fromJson({'status': 'odd'}), isNull);

@@ -2354,6 +2354,10 @@
       }
     }
   },
+  "goldenVows_plannedHeading": "What we planned",
+  "@goldenVows_plannedHeading": {
+    "description": "Golden Vows film: the packing card's subhead when it lists the memory's planned quests instead of checked checklist items (#346); shown uppercase."
+  },
   "goldenVows_heartTitle": "Every moment",
   "@goldenVows_heartTitle": {
     "description": "Golden Vows film: the title of the album's last page, where every photo forms a heart (#346)."

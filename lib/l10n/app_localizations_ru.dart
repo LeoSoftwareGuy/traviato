@@ -2590,6 +2590,9 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get goldenVows_plannedHeading => 'Что мы запланировали';
+
+  @override
   String get goldenVows_heartTitle => 'Каждый миг';
 
   @override

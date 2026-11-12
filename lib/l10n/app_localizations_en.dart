@@ -2544,6 +2544,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get goldenVows_plannedHeading => 'What we planned';
+
+  @override
   String get goldenVows_heartTitle => 'Every moment';
 
   @override

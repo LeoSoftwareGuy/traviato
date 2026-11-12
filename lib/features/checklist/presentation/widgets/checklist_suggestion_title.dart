@@ -20,6 +20,11 @@ String checklistItemTitle(AppLocalizations l10n, ChecklistItemEntity item) {
   return (code == null ? null : _titleForCode(l10n, code)) ?? item.title;
 }
 
+/// A seeded suggestion's title in the UI language, or null for a code this
+/// build doesn't know. Also read by Golden Vows' packing card (#346).
+String? checklistTitleForCode(AppLocalizations l10n, String code) =>
+    _titleForCode(l10n, code);
+
 String? _titleForCode(AppLocalizations l10n, String code) => switch (code) {
   'passport' => l10n.content_checklist_passport,
   'visa_documents' => l10n.content_checklist_visa_documents,

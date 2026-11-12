@@ -13,6 +13,7 @@ import '../../domain/entities/wrap_up_invitation.dart';
 import '../../domain/kept_film_staleness.dart';
 import '../../domain/wrap_up_date_labels.dart';
 import '../../domain/wrap_up_photo_pruning.dart';
+import '../film/golden_vows/golden_vows_from_wrap_up.dart';
 import '../film/sky_story/sky_story.dart';
 import '../film/sky_story/sky_story_from_wrap_up.dart';
 import '../providers/wrap_up_providers.dart';
@@ -102,6 +103,15 @@ class WrapUpController extends _$WrapUpController {
                   takenAt: photo.takenAt?.toLocal(),
                 ),
           },
+          startDate: trip?.startDate,
+          endDate: trip?.endDate,
+        ),
+        null => null,
+      },
+      goldenVows: switch (wrapUp.goldenVows) {
+        final gv? => goldenVowsFromWrapUp(
+          gv,
+          photoIds: photoUrlById.keys.toSet(),
           startDate: trip?.startDate,
           endDate: trip?.endDate,
         ),
