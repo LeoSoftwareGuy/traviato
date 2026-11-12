@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/l10n/context_l10n.dart';
+import '../film_music.dart';
 import '../sky_story/guarded_painter.dart';
 import '../sky_story/sky_photo_images.dart';
 import 'golden_vows_album.dart';
@@ -27,6 +28,8 @@ class GoldenVowsCanvas extends StatefulWidget {
   const GoldenVowsCanvas({
     required this.story,
     this.photo = _noPhoto,
+    this.music,
+    this.muted = false,
     this.onFailure,
     super.key,
   });
@@ -38,6 +41,15 @@ class GoldenVowsCanvas extends StatefulWidget {
   final ImageProvider? Function(String photoId) photo;
 
   static ImageProvider? _noPhoto(String _) => null;
+
+  /// Makes the player for the film's music
+  /// ([JustAudioFilmMusicPlayer.goldenVows]), or null for a silent film
+  /// (tests, goldens). It plays from the top with the film and fades out
+  /// as the film ends.
+  final FilmMusicPlayer Function()? music;
+
+  /// Silences the music without stopping its clock.
+  final bool muted;
 
   /// A heart photo as the film decodes it: small, since its tiles are
   /// 46–107 px (200 down to 44 photos).
@@ -75,12 +87,21 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
   GoldenVowsTexts? _texts;
   Locale? _textsLocale;
   bool _failed = false;
+  FilmMusic? _music;
+  late final AppLifecycleListener _lifecycle = AppLifecycleListener(
+    onHide: () => _music?.pause(),
+  );
 
   @override
   void initState() {
     super.initState();
+    _clock.addListener(_syncMusic);
+    _lifecycle;
     _start();
   }
+
+  void _syncMusic() =>
+      _music?.sync(_clock.value, running: _controller.isAnimating);
 
   void _start() {
     _timeline = GoldenVowsTimeline.forStory(widget.story);
@@ -98,6 +119,12 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
       ..value = 0;
     _images?.dispose();
     _heartImages?.dispose();
+    unawaited(_music?.dispose());
+    final player = widget.music?.call();
+    _music = player == null
+        ? null
+        : (FilmMusic(player, filmLength: _timeline.total)
+            ..muted = widget.muted);
     final images = _images = SkyPhotoImages(widget.photo)
       ..load(widget.story.albumPhotoIds);
     final heartImages = _heartImages = SkyPhotoImages((id) {
@@ -124,12 +151,16 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Another screen covers the film: its clock stops ticking, so the
+    // music has to be stopped here. It picks up again with the clock.
+    if (!TickerMode.valuesOf(context).enabled) _music?.pause();
     _layoutTexts();
   }
 
   @override
   void didUpdateWidget(GoldenVowsCanvas oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _music?.muted = widget.muted;
     if (oldWidget.story == widget.story) return;
     _start();
     _textsLocale = null;
@@ -154,6 +185,7 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
     if (_failed) return;
     _failed = true;
     debugPrint('Golden Vows failed; the film stops: $error\n$stack');
+    _music?.pause();
     _controller.stop();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -167,6 +199,9 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
     _texts?.dispose();
     _images?.dispose();
     _heartImages?.dispose();
+    _lifecycle.dispose();
+    _clock.removeListener(_syncMusic);
+    unawaited(_music?.dispose());
     _clock.dispose();
     _controller.dispose();
     super.dispose();
