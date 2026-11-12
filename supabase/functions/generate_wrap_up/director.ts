@@ -32,6 +32,15 @@ import {
   SCENE_PHOTO_COUNT,
 } from "./film_plan.ts";
 import {
+  describeSkyStoryProblems,
+  repairSkyStory,
+  SKY_STORY_PROMPT_RULES,
+  skyCheckContext,
+  skyPhotos,
+  type SkyStoryPlan,
+  skyStoryToolProperty,
+} from "./sky_story.ts";
+import {
   analysePhotos,
   type ImageUrlSigner,
   loadCachedAnalysis,
@@ -52,6 +61,24 @@ const PLAN_MAX_TOKENS = 8192;
 const PLAN_ATTEMPTS = 2;
 // Below this many analysed photos there's nothing for a director to shape.
 export const MIN_PLANNABLE_PHOTOS = 6;
+// The director runs again on its own when a memory's photo days change
+// (#345), at most this many runs per memory in all. A manual rerun from
+// the Plan inspector is never capped.
+export const MAX_DIRECTOR_RUNS = 4;
+
+// emit_film_plan with the Sky Story section (#345). Composed here so
+// film_plan.ts and sky_story.ts don't import each other.
+export const directorToolSchema = {
+  ...filmPlanToolSchema,
+  input_schema: {
+    ...filmPlanToolSchema.input_schema,
+    properties: {
+      ...filmPlanToolSchema.input_schema.properties,
+      sky_story: skyStoryToolProperty,
+    },
+    required: [...filmPlanToolSchema.input_schema.required, "sky_story"],
+  },
+};
 
 export type DirectorCall = TokenUsage & { call: "analysis" | "plan" };
 
@@ -75,6 +102,17 @@ export interface DirectorRecord {
   // id → storage path of every photo the plan could use (inspector
   // thumbnails).
   photo_paths: Record<string, string>;
+  // The Sky Story pages (#345), kept on their own: valid even when the
+  // classic plan fell back. null = code-built pages; sky_problems says why.
+  sky_story?: SkyStoryPlan | null;
+  sky_problems?: string[];
+  // id → hero_score of every analysed photo, so code-built pages can still
+  // pick strong heroes.
+  hero_scores?: Record<string, number>;
+  // The days with photos when it ran, and how many times it has run for
+  // this memory (set by the handler).
+  photo_days?: string[];
+  run_count?: number;
   usage: {
     calls: DirectorCall[];
     input_tokens: number;
@@ -218,6 +256,7 @@ export function buildPlanSystemPrompt(language: WrapUpLanguage): string {
     "- When unsure which recipe fits, choose keepsake.\n",
     "- reasoning: 2–3 sentences on why this occasion, recipe and shape.\n",
     `- ${languageRule(language)}`,
+    SKY_STORY_PROMPT_RULES,
   ].join("");
 }
 
@@ -236,6 +275,8 @@ export function buildPlanUserPrompt(
 // always has the full shape.
 function normalisePlan(input: unknown): FilmPlan {
   const plan = structuredClone(input) as FilmPlan;
+  // Stored on its own (DirectorRecord.sky_story).
+  delete (plan as unknown as Record<string, unknown>).sky_story;
   for (const chapter of plan.chapters) {
     for (const scene of chapter.scenes) {
       scene.caption_note_id = scene.caption_note_id ?? null;
@@ -303,6 +344,10 @@ export async function runDirector(
     photos: { plannable: 0, analysed_now: 0, cached: 0, failed: 0 },
     failed_ids: [],
     photo_paths: {},
+    sky_story: null,
+    sky_problems: [],
+    hero_scores: {},
+    photo_days: photoDaysOf(tripData),
     usage: summariseUsage(calls),
   };
 
@@ -357,18 +402,31 @@ export async function runDirector(
     record.photo_paths = Object.fromEntries(
       usable.map((p) => [p.id, p.storage_path]),
     );
+    record.hero_scores = Object.fromEntries(
+      usable.map((p) => [p.id, analyses.get(p.id)!.hero_score]),
+    );
 
     if (usable.length < MIN_PLANNABLE_PHOTOS) {
       record.problems = [
         `only ${usable.length} analysed photos, a plan needs at least ${MIN_PLANNABLE_PHOTOS}`,
       ];
+      record.sky_problems = record.problems;
       return record;
     }
 
     const context = planContextFor(tripData, usable, language);
+    // Sky Story pages may use only analysed photos, so the director never
+    // picks one it hasn't seen (unanalysed Always picks aren't required).
+    const skyContext = skyCheckContext({
+      ...tripData,
+      photos: tripData.photos.filter((p) =>
+        analyses.has(p.id) || p.use_in_wrap_up === false
+      ),
+    });
     const input = buildPlanInput(tripData, usable, analyses, language);
     const system = buildPlanSystemPrompt(language);
     let problems: string[] = [];
+    let skyProblems: string[] = [];
     for (let attempt = 1; attempt <= PLAN_ATTEMPTS; attempt++) {
       record.attempts = attempt;
       let toolInput: unknown;
@@ -378,8 +436,8 @@ export async function runDirector(
           model: DIRECTOR_MODEL,
           maxTokens: PLAN_MAX_TOKENS,
           system,
-          content: buildPlanUserPrompt(input, problems),
-          tool: filmPlanToolSchema,
+          content: buildPlanUserPrompt(input, [...problems, ...skyProblems]),
+          tool: directorToolSchema,
           label: "plan",
           fetchImpl: deps.fetchImpl,
           log,
@@ -387,25 +445,46 @@ export async function runDirector(
         calls.push({ ...result.usage, call: "plan" });
         toolInput = result.input;
       } catch (err) {
-        problems = [`plan call failed: ${(err as Error).message}`];
+        // Keeps what an earlier attempt got right.
+        const failed = `plan call failed: ${(err as Error).message}`;
+        if (record.status !== "planned") problems = [failed];
+        if (!record.sky_story) skyProblems = [failed];
         continue;
       }
       toolInput = repairFilmPlan(toolInput, context);
-      problems = describeFilmPlanProblems(toolInput, context);
-      if (problems.length === 0) {
-        record.status = "planned";
-        record.plan = normalisePlan(toolInput);
-        break;
+      const sky = repairSkyStory(
+        typeof toolInput === "object" && toolInput !== null
+          ? (toolInput as Record<string, unknown>).sky_story
+          : undefined,
+        skyContext,
+      );
+      // Each half keeps the first attempt that got it right; only what's
+      // still wrong is fed back on the retry.
+      if (record.status !== "planned") {
+        problems = describeFilmPlanProblems(toolInput, context);
+        if (problems.length === 0) {
+          record.status = "planned";
+          record.plan = normalisePlan(toolInput);
+        }
       }
+      if (!record.sky_story) {
+        skyProblems = describeSkyStoryProblems(sky, skyContext);
+        if (skyProblems.length === 0) {
+          record.sky_story = sky as SkyStoryPlan;
+        }
+      }
+      if (record.status === "planned" && record.sky_story) break;
       logEvent(log, "director_plan_invalid", {
         trip_id: tripId,
         attempt,
-        problems: problems.slice(0, 30),
+        problems: [...problems, ...skyProblems].slice(0, 30),
       });
     }
     record.problems = problems;
+    record.sky_problems = skyProblems;
   } catch (err) {
     record.problems = [`director failed: ${(err as Error).message}`];
+    record.sky_problems = record.problems;
   } finally {
     record.usage = summariseUsage(calls);
     logEvent(log, "director_usage", {
@@ -452,5 +531,36 @@ export function currentPlan(
   );
   return describeFilmPlanProblems(record.plan, context).length === 0
     ? record.plan
+    : null;
+}
+
+// The days with a photo the film could show, sorted. When they change, the
+// director's pages no longer tell the whole memory (#345).
+export function photoDaysOf(tripData: TripData): string[] {
+  return [...new Set(skyPhotos(tripData).map((p) => p.day_date!))].sort();
+}
+
+// Whether the director should run again on its own: the memory's photo
+// days changed since its last run, and it has runs left (#345).
+export function directorIsStale(record: unknown, tripData: TripData): boolean {
+  if (!isDirectorRecord(record)) return false;
+  if ((record.run_count ?? 1) >= MAX_DIRECTOR_RUNS) return false;
+  const before = record.photo_days;
+  if (!before) return false;
+  const now = photoDaysOf(tripData);
+  return before.length !== now.length || before.some((d, i) => d !== now[i]);
+}
+
+// The director's Sky Story pages if they still fit the memory as it is now
+// (no deleted, moved or left-out photos, notes still there, every new
+// Always pick shown) — otherwise null, and the film uses code-built pages.
+export function currentSkyStory(
+  record: unknown,
+  tripData: TripData,
+): SkyStoryPlan | null {
+  if (!isDirectorRecord(record) || !record.sky_story) return null;
+  const context = skyCheckContext(tripData, new Set(record.failed_ids ?? []));
+  return describeSkyStoryProblems(record.sky_story, context).length === 0
+    ? record.sky_story
     : null;
 }

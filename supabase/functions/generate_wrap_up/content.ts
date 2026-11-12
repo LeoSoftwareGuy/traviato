@@ -12,6 +12,7 @@
 // player ignores both; the plan-driven player reads them.
 
 import type { FilmPlan } from "./film_plan.ts";
+import type { SkyContent } from "./sky_story.ts";
 
 export interface PhotoRef {
   photo_id: string;
@@ -77,6 +78,9 @@ export interface WrapUpContent {
   };
   plan_version?: 2;
   plan?: FilmPlan;
+  // Sky Story's pages (#345, sky_story.ts): on every draft with photos.
+  // Kept films never gain it.
+  sky?: SkyContent;
 }
 
 function isString(v: unknown): v is string {

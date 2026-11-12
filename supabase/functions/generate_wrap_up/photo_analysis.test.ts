@@ -214,12 +214,13 @@ Deno.test("imageTransformsWork is false when the render isn't an image", async (
   assertEquals(await imageTransformsWork(client, "u/t/a.jpg", failing), false);
 });
 
-Deno.test("parseDirectorFlag: listed ids, * for everyone, unset is off", () => {
+Deno.test("parseDirectorFlag: on by default, off switch, listed ids", () => {
   const some = parseDirectorFlag(" leo , other ");
   assertEquals(some("leo"), true);
   assertEquals(some("other"), true);
   assertEquals(some("stranger"), false);
   assertEquals(parseDirectorFlag("*")("anyone"), true);
-  assertEquals(parseDirectorFlag(undefined)("leo"), false);
-  assertEquals(parseDirectorFlag("")("leo"), false);
+  assertEquals(parseDirectorFlag(undefined)("leo"), true);
+  assertEquals(parseDirectorFlag("")("leo"), true);
+  assertEquals(parseDirectorFlag(" off ")("leo"), false);
 });

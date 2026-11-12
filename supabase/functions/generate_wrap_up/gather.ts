@@ -59,6 +59,9 @@ export interface TripData {
   latestAchievement:
     | { code: string; title: string; description: string }
     | null;
+  // The owner's profile name (#345): Sky Story signs notes with its first
+  // word. Absent or null = no signature.
+  username?: string | null;
 }
 
 export async function gatherTripData(
@@ -76,41 +79,52 @@ export async function gatherTripData(
     throw new Error(`trip ${tripId} not found`);
   }
 
-  const [notesRes, photosRes, bonusRes, pointsRes, achievementsRes] =
-    await Promise.all([
-      client
-        .from("day_notes")
-        .select("id, day_date, content, created_at")
-        .eq("trip_id", tripId)
-        .order("day_date"),
-      client
-        .from("photos")
-        .select(
-          "id, day_date, taken_at, created_at, storage_path, caption, use_in_wrap_up, place_text, people_tags",
-        )
-        .eq("trip_id", tripId)
-        .order("day_date")
-        .order("created_at")
-        .limit(MAX_PHOTOS),
-      client
-        .from("bonus_task_assignments")
-        .select("completed_at, photo_id, bonus_task_templates(title, points)")
-        .eq("trip_id", tripId)
-        .not("completed_at", "is", null)
-        .order("completed_at")
-        .limit(MAX_BONUS_ASSIGNMENTS),
-      client
-        .from("points_ledger")
-        .select("points")
-        .eq("trip_id", tripId),
-      client
-        .from("user_achievements")
-        .select("earned_at, achievement_templates(code, title, description)")
-        .eq("user_id", trip.user_id)
-        .gte("earned_at", trip.start_date ?? "1970-01-01")
-        .order("earned_at", { ascending: false })
-        .limit(1),
-    ]);
+  const [
+    notesRes,
+    photosRes,
+    bonusRes,
+    pointsRes,
+    achievementsRes,
+    profileRes,
+  ] = await Promise.all([
+    client
+      .from("day_notes")
+      .select("id, day_date, content, created_at")
+      .eq("trip_id", tripId)
+      .order("day_date"),
+    client
+      .from("photos")
+      .select(
+        "id, day_date, taken_at, created_at, storage_path, caption, use_in_wrap_up, place_text, people_tags",
+      )
+      .eq("trip_id", tripId)
+      .order("day_date")
+      .order("created_at")
+      .limit(MAX_PHOTOS),
+    client
+      .from("bonus_task_assignments")
+      .select("completed_at, photo_id, bonus_task_templates(title, points)")
+      .eq("trip_id", tripId)
+      .not("completed_at", "is", null)
+      .order("completed_at")
+      .limit(MAX_BONUS_ASSIGNMENTS),
+    client
+      .from("points_ledger")
+      .select("points")
+      .eq("trip_id", tripId),
+    client
+      .from("user_achievements")
+      .select("earned_at, achievement_templates(code, title, description)")
+      .eq("user_id", trip.user_id)
+      .gte("earned_at", trip.start_date ?? "1970-01-01")
+      .order("earned_at", { ascending: false })
+      .limit(1),
+    client
+      .from("profiles")
+      .select("username")
+      .eq("id", trip.user_id)
+      .maybeSingle(),
+  ]);
 
   for (
     const [label, res] of [
@@ -181,5 +195,9 @@ export async function gatherTripData(
         description: latestTemplate.description as string,
       }
       : null,
+    // A failed profile read only costs the signature.
+    username: profileRes.error
+      ? null
+      : (profileRes.data?.username as string | null | undefined) ?? null,
   };
 }

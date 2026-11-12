@@ -914,7 +914,11 @@ Deno.test("16 slots never repeat a photo or mix days in a collage", () => {
         }
       }
       for (const size of flurrySizes(content)) {
-        assertEquals(size === 0 || size >= 6, true, `sparse flurry at ${count}`);
+        assertEquals(
+          size === 0 || size >= 6,
+          true,
+          `sparse flurry at ${count}`,
+        );
       }
     }
   }
