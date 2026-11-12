@@ -9,6 +9,7 @@ import { validAiFields, validWrapUpContent } from "./test_fixtures.ts";
 import type { DirectorRecord } from "./director.ts";
 import {
   directorTripData,
+  goldenVowsPlan,
   keepsakePlan,
   skyStoryPlan,
 } from "./director_fixtures.ts";
@@ -952,4 +953,145 @@ Deno.test("rebuilding a film kept as a Sky Story rebuilds its pages (#345)", asy
     directorDeps(fits).deps,
   )).json();
   assertEquals(kept.content.sky.source, "director");
+});
+
+// --- Golden Vows (#346) ---
+
+function goldenVowsRecord(): DirectorRecord {
+  return {
+    ...plannedRecord(),
+    sky_story: skyStoryPlan(),
+    golden_vows: goldenVowsPlan(),
+    orientations: {},
+  };
+}
+
+function keptGoldenVowsClient(photos = directorTripData().photos) {
+  const data = directorTripData();
+  return fakeSupabaseClient({
+    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+    wrap_ups: [{
+      content: {
+        ...validWrapUpContent,
+        sky: { sky_version: 1, pages: [] },
+        golden_vows: { gv_version: 1 },
+      },
+      generated_at: "2026-09-05T00:00:00Z",
+      published_at: "2026-09-06T00:00:00Z",
+      ai_fields: validAiFields,
+      ai_input_hash: "old",
+      ai_generation_count: 1,
+      director: goldenVowsRecord(),
+    }],
+    day_notes: data.notes,
+    photos,
+    bonus_task_assignments: [],
+    points_ledger: [],
+    user_achievements: [],
+  });
+}
+
+Deno.test("a draft gets content.golden_vows from the director's section", async () => {
+  const client = directorClient();
+  const { deps } = directorDeps(client, { record: goldenVowsRecord() });
+
+  const json = await (await handleRequest(request({ trip_id: TRIP_ID }), deps))
+    .json();
+
+  const gv = json.content.golden_vows;
+  assertEquals(gv.occasion, "wedding");
+  assertEquals(gv.names, "Amsterdam");
+  assertEquals(gv.heroes.map((h: { note: string | null }) => h.note), [
+    "Bikes everywhere",
+    null,
+  ]);
+  assertEquals(gv.heart_photo_ids.length, 12);
+  // Sky Story is there too: the app falls back to it.
+  assertEquals(json.content.sky.source, "director");
+  assertEquals(client.writes[0].values.content.golden_vows, gv);
+});
+
+Deno.test("no section, the director off, or a section that no longer fits: no Golden Vows", async () => {
+  const none = await (await handleRequest(
+    request({ trip_id: TRIP_ID }),
+    directorDeps(directorClient()).deps,
+  )).json();
+  assertEquals("golden_vows" in none.content, false);
+
+  const off = await (await handleRequest(
+    request({ trip_id: TRIP_ID }),
+    directorDeps(directorClient(), {
+      enabled: false,
+      record: goldenVowsRecord(),
+    }).deps,
+  )).json();
+  assertEquals("golden_vows" in off.content, false);
+
+  const data = directorTripData();
+  const deleted = fakeSupabaseClient({
+    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+    wrap_ups: [],
+    day_notes: data.notes,
+    photos: data.photos.filter((p) => p.id !== "p05"),
+    bonus_task_assignments: [],
+    points_ledger: [],
+    user_achievements: [],
+  });
+  const gone = await (await handleRequest(
+    request({ trip_id: TRIP_ID }),
+    directorDeps(deleted, { record: goldenVowsRecord() }).deps,
+  )).json();
+  assertEquals("golden_vows" in gone.content, false);
+  assertEquals(gone.content.sky.pages.length, 3);
+});
+
+Deno.test("rebuilding a film kept as Golden Vows rebuilds it while it fits, else Sky Story", async () => {
+  const client = keptGoldenVowsClient();
+  const { runs, deps } = directorDeps(client);
+  const kept = await (await handleRequest(
+    request({ trip_id: TRIP_ID, rebuild: true }),
+    deps,
+  )).json();
+  assertEquals(runs, []);
+  assertEquals(kept.content.golden_vows.occasion, "wedding");
+  assertEquals(kept.content.golden_vows.chapters.length, 3);
+  assertEquals(client.writes[0].values.content.golden_vows.gv_version, 1);
+
+  const changed = await (await handleRequest(
+    request({ trip_id: TRIP_ID, rebuild: true }),
+    directorDeps(
+      keptGoldenVowsClient(
+        directorTripData().photos.filter((p) => p.id !== "p05"),
+      ),
+    ).deps,
+  )).json();
+  assertEquals("golden_vows" in changed.content, false);
+  assertEquals(changed.content.sky.pages.length, 3);
+});
+
+Deno.test("a film kept as a Sky Story never gains Golden Vows", async () => {
+  const data = directorTripData();
+  const client = fakeSupabaseClient({
+    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+    wrap_ups: [{
+      content: { ...validWrapUpContent, sky: { sky_version: 1, pages: [] } },
+      generated_at: "2026-09-05T00:00:00Z",
+      published_at: "2026-09-06T00:00:00Z",
+      ai_fields: validAiFields,
+      ai_input_hash: "old",
+      ai_generation_count: 1,
+      director: goldenVowsRecord(),
+    }],
+    day_notes: data.notes,
+    photos: data.photos,
+    bonus_task_assignments: [],
+    points_ledger: [],
+    user_achievements: [],
+  });
+  const json = await (await handleRequest(
+    request({ trip_id: TRIP_ID, rebuild: true }),
+    directorDeps(client).deps,
+  )).json();
+  assertEquals(json.content.sky.source, "director");
+  assertEquals("golden_vows" in json.content, false);
 });

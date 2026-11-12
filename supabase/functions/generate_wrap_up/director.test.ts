@@ -6,6 +6,7 @@ import {
 import {
   buildPlanInput,
   buildPlanSystemPrompt,
+  currentGoldenVows,
   currentPlan,
   currentSkyStory,
   directorIsStale,
@@ -20,6 +21,7 @@ import {
   DIRECTOR_PHOTO_IDS,
   directorTripData,
   emittedPlan,
+  goldenVowsPlan,
   keepsakePlan,
   keepsakePlanWithFixableFaults,
   skyStoryPlan,
@@ -481,5 +483,128 @@ Deno.test("directorIsStale when photo days change, until the run cap", () => {
   assertEquals(
     directorIsStale(skyRecord({ photo_days: undefined }), fewer),
     false,
+  );
+});
+
+// --- Golden Vows (#346) ---
+
+function withGoldenVows(golden_vows: unknown = goldenVowsPlan()) {
+  return { ...emittedPlan(), golden_vows };
+}
+
+Deno.test("runDirector keeps a valid Golden Vows section and the photos' shapes", async () => {
+  const anthropic = fakeAnthropic([withGoldenVows()]);
+  const { deps: d } = deps(anthropic.fetchImpl);
+
+  const record = await runDirector(d, TRIP_ID, directorTripData(), "en");
+
+  assertEquals(record.attempts, 1);
+  assertEquals(record.golden_vows, goldenVowsPlan());
+  assertEquals(record.golden_vows_problems, []);
+  assertEquals(record.orientations!.p00, "portrait");
+  // Stored on its own, never inside the classic plan.
+  assertEquals("golden_vows" in record.plan!, false);
+});
+
+Deno.test("a null section is an answer: no Golden Vows, no retry", async () => {
+  const anthropic = fakeAnthropic([withGoldenVows(null)]);
+  const { deps: d } = deps(anthropic.fetchImpl);
+
+  const record = await runDirector(d, TRIP_ID, directorTripData(), "en");
+
+  assertEquals(record.attempts, 1);
+  assertEquals(record.golden_vows, null);
+  assertEquals(record.golden_vows_problems, []);
+});
+
+Deno.test("an invalid section is retried with its problems; the rest is kept", async () => {
+  const broken = goldenVowsPlan();
+  broken.chapters[0].photo_ids = ["invented", "p02", "p03"];
+  const anthropic = fakeAnthropic([withGoldenVows(broken), withGoldenVows()]);
+  const { deps: d } = deps(anthropic.fetchImpl);
+
+  const record = await runDirector(d, TRIP_ID, directorTripData(), "en");
+
+  assertEquals(record.attempts, 2);
+  assertEquals(record.status, "planned");
+  assertEquals(record.sky_story, skyStoryPlan());
+  assertEquals(record.golden_vows, goldenVowsPlan());
+  const retry = anthropic.sent.at(-1)!.body;
+  assertStringIncludes(
+    (retry.messages as { content: string }[])[0].content,
+    'golden_vows.chapters[0].photo_ids[2]: "invented"',
+  );
+});
+
+Deno.test("a section still invalid after the retry: Sky Story, problems kept", async () => {
+  const broken = goldenVowsPlan();
+  broken.heroes = broken.heroes.slice(0, 1);
+  const anthropic = fakeAnthropic([withGoldenVows(broken)]);
+  const { deps: d } = deps(anthropic.fetchImpl);
+
+  const record = await runDirector(d, TRIP_ID, directorTripData(), "en");
+
+  assertEquals(record.attempts, 2);
+  assertEquals(record.status, "planned");
+  assertEquals(record.golden_vows, null);
+  assert(
+    record.golden_vows_problems!.some((p) =>
+      p.startsWith("golden_vows.heroes: 1")
+    ),
+  );
+});
+
+Deno.test("too few photos: no Golden Vows, the reason recorded", async () => {
+  const anthropic = fakeAnthropic([withGoldenVows()]);
+  const { deps: d } = deps(anthropic.fetchImpl);
+  const data = directorTripData();
+  data.photos = data.photos.slice(0, 4);
+
+  const record = await runDirector(d, TRIP_ID, data, "en");
+
+  assertEquals(record.golden_vows, null);
+  assertEquals(record.golden_vows_problems!.length, 1);
+});
+
+Deno.test("the prompt and the tool carry the Golden Vows rules", async () => {
+  const prompt = buildPlanSystemPrompt("en");
+  assertStringIncludes(prompt, "golden_vows");
+  assertStringIncludes(prompt, "copy a short phrase from it exactly");
+  const anthropic = fakeAnthropic([withGoldenVows()]);
+  await runDirector(
+    deps(anthropic.fetchImpl).deps,
+    TRIP_ID,
+    directorTripData(),
+    "en",
+  );
+  const plan = anthropic.sent.find((s) => s.tool === "emit_film_plan")!;
+  const schema = (plan.body.tools as {
+    input_schema: { required: string[]; properties: Record<string, unknown> };
+  }[])[0].input_schema;
+  assert(schema.required.includes("golden_vows"));
+  assert("golden_vows" in schema.properties);
+});
+
+Deno.test("currentGoldenVows: the stored section while it fits the memory", () => {
+  const record = {
+    status: "planned",
+    plan: keepsakePlan(),
+    problems: [],
+    failed_ids: [],
+    golden_vows: goldenVowsPlan(),
+  } as unknown as DirectorRecord;
+  assertEquals(
+    currentGoldenVows(record, directorTripData()),
+    goldenVowsPlan(),
+  );
+  const deleted = directorTripData();
+  deleted.photos = deleted.photos.filter((p) => p.id !== "p05");
+  assertEquals(currentGoldenVows(record, deleted), null);
+  const reworded = directorTripData();
+  reworded.notes[0].content = "Bicycles all over the place.";
+  assertEquals(currentGoldenVows(record, reworded), null);
+  assertEquals(
+    currentGoldenVows({ ...record, golden_vows: null }, directorTripData()),
+    null,
   );
 });
