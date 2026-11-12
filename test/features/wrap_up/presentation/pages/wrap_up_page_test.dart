@@ -12,12 +12,15 @@ import 'package:traviato/features/photo/presentation/providers/photo_providers.d
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_cover_photo.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_moment.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_sky.dart';
+import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/film/wrap_up_film_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/pages/wrap_up_page.dart';
 import 'package:traviato/features/wrap_up/presentation/providers/wrap_up_providers.dart';
 
 import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
+import '../../fakes/fake_sky_music_player.dart';
 import '../../fakes/fake_wrap_up_repository.dart';
 
 Future<void> _pump(
@@ -35,6 +38,7 @@ Future<void> _pump(
         path: '/wrap-up',
         builder: (context, state) => WrapUpPage(
           tripId: 't1',
+          skyMusic: FakeSkyMusicPlayer.new,
           openedFromMemory:
               state.uri.queryParameters[RouteQuery.from] ==
               RouteQuery.fromMemory,
@@ -313,6 +317,135 @@ void main() {
       await _settle(tester);
 
       expect(find.byKey(const Key('film-out-of-date-chip')), findsNothing);
+    });
+  });
+
+  group('Sky Story is the default film (#345)', () {
+    final sky = WrapUpSky(
+      isFromDirector: true,
+      title: 'Lisbon',
+      firstName: 'Jonas',
+      pages: [
+        WrapUpSkyPage(
+          firstDay: 1,
+          date: DateTime(2026, 6, 12),
+          photoCount: 1,
+          heroPhotoId: 'hero',
+          note: 'A note.',
+        ),
+      ],
+    );
+    final photos = FakePhotoRepository()
+      ..photosResult = Right([
+        buildPhotoEntity(id: 'hero', imageUrl: 'https://x/hero.jpg'),
+      ]);
+
+    FakeWrapUpRepository repo({DateTime? publishedAt, WrapUpSky? withSky}) =>
+        FakeWrapUpRepository()
+          ..getOrGenerateResult = Right(
+            buildWrapUpEntity(
+              coverPhoto: const WrapUpCoverPhoto(),
+              publishedAt: publishedAt,
+              sky: withSky,
+            ),
+          );
+
+    testWidgets('a wrap-up with Sky Story pages plays Sky Story', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        wrapUpRepo: repo(withSky: sky),
+        photoRepo: photos,
+      );
+      await _settle(tester);
+
+      expect(find.byType(SkyStoryCanvas), findsOneWidget);
+      expect(find.byType(WrapUpFilmCanvas), findsNothing);
+      // The rest of the controls are unchanged.
+      expect(find.text('Keep forever'), findsOneWidget);
+      expect(find.text('Open journal'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('the speaker mutes and unmutes the music', (tester) async {
+      await _pump(
+        tester,
+        wrapUpRepo: repo(withSky: sky),
+        photoRepo: photos,
+      );
+      await _settle(tester);
+
+      final mute = find.byKey(const Key('wrap-up-hud-mute'));
+      expect(find.byTooltip('Mute music'), findsOneWidget);
+      await tester.tap(mute);
+      await tester.pump();
+      expect(
+        tester.widget<SkyStoryCanvas>(find.byType(SkyStoryCanvas)).muted,
+        isTrue,
+      );
+      expect(find.byTooltip('Play music'), findsOneWidget);
+      await tester.tap(mute);
+      await tester.pump();
+      expect(
+        tester.widget<SkyStoryCanvas>(find.byType(SkyStoryCanvas)).muted,
+        isFalse,
+      );
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a film kept as a Sky Story stays one', (tester) async {
+      await _pump(
+        tester,
+        wrapUpRepo: repo(withSky: sky, publishedAt: DateTime(2026, 6, 20)),
+        photoRepo: photos,
+      );
+      await _settle(tester);
+      expect(find.byType(SkyStoryCanvas), findsOneWidget);
+      expect(find.byKey(const Key('wrap-up-hud-memory')), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('without pages, or kept before Sky Story: the classic film', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        wrapUpRepo: repo(publishedAt: DateTime(2026, 6, 20)),
+        photoRepo: photos,
+      );
+      await _settle(tester);
+      expect(find.byType(SkyStoryCanvas), findsNothing);
+      expect(find.byKey(const Key('wrap-up-hud-mute')), findsNothing);
+    });
+
+    testWidgets('pages whose photos are all gone: the classic film', (
+      tester,
+    ) async {
+      await _pump(tester, wrapUpRepo: repo(withSky: sky));
+      await _settle(tester);
+      expect(find.byType(SkyStoryCanvas), findsNothing);
+    });
+
+    testWidgets('a Sky Story failure hands over to the classic film', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        wrapUpRepo: repo(withSky: sky),
+        photoRepo: photos,
+      );
+      await _settle(tester);
+
+      tester.widget<SkyStoryCanvas>(find.byType(SkyStoryCanvas)).onFailure!(
+        StateError('broken'),
+        StackTrace.empty,
+      );
+      await tester.pump();
+
+      expect(find.byType(SkyStoryCanvas), findsNothing);
+      expect(find.byKey(const Key('wrap-up-hud-mute')), findsNothing);
+      expect(find.text('Keep forever'), findsOneWidget);
     });
   });
 }

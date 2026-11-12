@@ -212,6 +212,13 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   journal" / "Keep forever".
 - Generation pipeline unchanged: edge function → Anthropic → screenplay JSONB in
   `wrap_ups.content`; app renders live; MP4 export post-MVP.
+- **Sky Story is the default film (#345):** a balloon over a dusk-to-night sky,
+  one page per day or group of days (up to 5) — headline, a polaroid fan,
+  taped grid or fly-out, the day's note or a short line on the sky — then the
+  mosaic of moments; 32.5–75 s, with music (speaker button in the controls).
+  Every draft with photos plays it, and so does a film kept as one. Films
+  kept before Sky Story, a memory without photos, or any failure while it
+  plays fall back to the classic film above.
 
 ## 16. Profile ("You") ✅ — redesigned
 
