@@ -13,6 +13,8 @@ import '../../domain/entities/wrap_up_invitation.dart';
 import '../../domain/kept_film_staleness.dart';
 import '../../domain/wrap_up_date_labels.dart';
 import '../../domain/wrap_up_photo_pruning.dart';
+import '../film/sky_story/sky_story.dart';
+import '../film/sky_story/sky_story_from_wrap_up.dart';
 import '../providers/wrap_up_providers.dart';
 import 'wrap_up_state.dart';
 
@@ -87,6 +89,24 @@ class WrapUpController extends _$WrapUpController {
       // Checked before pruning: a deleted photo the film shows is exactly
       // what makes it stale.
       isOutOfDate: isKeptFilmOutOfDate(wrapUp, photos),
+      skyStory: switch (wrapUp.sky) {
+        final sky? => skyStoryFromWrapUp(
+          sky,
+          // Only photos the film can show; captions read place and time.
+          photos: {
+            for (final photo in photos)
+              if (photo.imageUrl != null)
+                photo.id: SkyPhoto(
+                  id: photo.id,
+                  place: photo.placeText,
+                  takenAt: photo.takenAt?.toLocal(),
+                ),
+          },
+          startDate: trip?.startDate,
+          endDate: trip?.endDate,
+        ),
+        null => null,
+      },
     );
   }
 

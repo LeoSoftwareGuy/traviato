@@ -7,7 +7,11 @@ import { computeAiInputHash } from "./ai_input_hash.ts";
 import type { AiGeneratedFields } from "./ai_fields.ts";
 import { validAiFields, validWrapUpContent } from "./test_fixtures.ts";
 import type { DirectorRecord } from "./director.ts";
-import { directorTripData, keepsakePlan } from "./director_fixtures.ts";
+import {
+  directorTripData,
+  keepsakePlan,
+  skyStoryPlan,
+} from "./director_fixtures.ts";
 
 const TRIP_ID = "trip-1";
 const OWNER_ID = "user-1";
@@ -660,7 +664,10 @@ Deno.test("director on: the first build runs it, stores the run and merges the p
   // Everything the current player reads is still there.
   assertEquals(json.content.bridges, validAiFields.bridges);
   assertEquals(json.content.moments.length > 0, true);
-  assertEquals(client.writes[0].values.director, plannedRecord());
+  assertEquals(client.writes[0].values.director, {
+    ...plannedRecord(),
+    run_count: 1,
+  });
 });
 
 Deno.test("director on, already run: no second run, the stored plan is still merged", async () => {
@@ -749,7 +756,7 @@ Deno.test("rerun on a kept film writes only wrap_ups.director, content untouched
   assertEquals(res.status, 200);
   assertEquals(runs, [TRIP_ID]);
   assertEquals(json.content, validWrapUpContent);
-  assertEquals(json.director, plannedRecord());
+  assertEquals(json.director, { ...plannedRecord(), run_count: 1 });
   assertEquals(client.writes.length, 1);
   assertEquals(Object.keys(client.writes[0].values), ["director"]);
   assertEquals(client.writes[0].filters, [
@@ -768,4 +775,123 @@ Deno.test("a kept film is never planned by an ordinary open", async () => {
   assertEquals(runs, []);
   assertEquals(json.content, validWrapUpContent);
   assertEquals(client.writes, []);
+});
+
+// --- Sky Story (#345) ---
+
+Deno.test("a draft gets content.sky from the director's pages", async () => {
+  const client = directorClient();
+  const { deps } = directorDeps(client, {
+    record: { ...plannedRecord(), sky_story: skyStoryPlan() },
+  });
+
+  const json = await (await handleRequest(request({ trip_id: TRIP_ID }), deps))
+    .json();
+
+  assertEquals(json.content.sky.source, "director");
+  assertEquals(
+    json.content.sky.pages.map((p: { headline: string }) => p.headline),
+    skyStoryPlan().pages.map((p) => p.headline),
+  );
+  assertEquals(json.content.sky.moment_count, 12);
+  assertEquals(client.writes[0].values.content.sky, json.content.sky);
+});
+
+Deno.test("director off or without pages: code-built content.sky", async () => {
+  for (const enabled of [false, true]) {
+    const client = directorClient();
+    const { deps } = directorDeps(client, {
+      enabled,
+      record: { ...plannedRecord(), sky_story: null, hero_scores: { p02: 5 } },
+    });
+    const json = await (await handleRequest(
+      request({ trip_id: TRIP_ID }),
+      deps,
+    )).json();
+    assertEquals(json.content.sky.source, "code");
+    assertEquals(json.content.sky.pages.length, 3);
+    assertEquals(json.content.sky.pages[0].headline, null);
+    if (enabled) {
+      // Code-built pages still use the director's hero scores.
+      assertEquals(json.content.sky.pages[0].hero_photo_id, "p02");
+    }
+  }
+});
+
+Deno.test("content.sky signs with the profile's first name", async () => {
+  const data = directorTripData();
+  const client = fakeSupabaseClient({
+    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+    wrap_ups: [],
+    day_notes: data.notes,
+    photos: data.photos,
+    bonus_task_assignments: [],
+    points_ledger: [],
+    user_achievements: [],
+    profiles: [{ username: "Mari Tamm" }],
+  });
+  const { deps } = directorDeps(client, { enabled: false });
+
+  const json = await (await handleRequest(request({ trip_id: TRIP_ID }), deps))
+    .json();
+
+  assertEquals(json.content.sky.first_name, "Mari");
+});
+
+Deno.test("a memory without photos gets no content.sky", async () => {
+  const data = directorTripData();
+  const client = fakeSupabaseClient({
+    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+    wrap_ups: [],
+    day_notes: data.notes,
+    photos: [],
+    bonus_task_assignments: [],
+    points_ledger: [],
+    user_achievements: [],
+  });
+  const { deps } = directorDeps(client, { enabled: false });
+
+  const json = await (await handleRequest(request({ trip_id: TRIP_ID }), deps))
+    .json();
+
+  assertEquals("sky" in json.content, false);
+});
+
+Deno.test("kept films never gain content.sky, rebuilt or not", async () => {
+  const client = keptClient();
+  const { deps } = directorDeps(client);
+  const opened = await (await handleRequest(
+    request({ trip_id: TRIP_ID }),
+    deps,
+  )).json();
+  assertEquals("sky" in opened.content, false);
+
+  const rebuilt = await (await handleRequest(
+    request({ trip_id: TRIP_ID, rebuild: true }),
+    directorDeps(keptClient()).deps,
+  )).json();
+  assertEquals("sky" in rebuilt.content, false);
+});
+
+Deno.test("the director runs again when photo days changed, and counts the run", async () => {
+  const stale = {
+    ...plannedRecord(),
+    photo_days: ["2026-09-01"],
+    run_count: 2,
+  };
+  const client = directorClient([{
+    content: validWrapUpContent,
+    generated_at: "2026-11-01T00:00:00Z",
+    published_at: null,
+    ai_fields: validAiFields,
+    ai_input_hash: null,
+    ai_generation_count: 1,
+    director: stale,
+  }]);
+  const { runs, deps } = directorDeps(client);
+
+  await handleRequest(request({ trip_id: TRIP_ID }), deps);
+
+  assertEquals(runs, [TRIP_ID]);
+  assertEquals(client.writes[0].values.director.run_count, 3);
 });

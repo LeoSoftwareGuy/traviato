@@ -20,6 +20,12 @@
 // content as `plan_version: 2` + `plan`. `director: "rerun"` runs it again
 // (the dev Plan inspector). On a kept film a rerun writes only
 // wrap_ups.director — a kept film's content is never touched by it.
+//
+// Sky Story (#345): every draft with photos gets `content.sky`, the film's
+// pages — the director's when its sky_story still fits the memory, else
+// built by code. The director is on for everyone unless switched off
+// (director_flag.ts), and runs again on its own when the memory's photo
+// days change (capped, director.ts).
 
 import { gatherTripData, type TripData } from "./gather.ts";
 import {
@@ -36,9 +42,12 @@ import { parseWrapUpLanguage, type WrapUpLanguage } from "./language.ts";
 import { logEvent, type LogLike, WrapUpGenerationError } from "./anthropic.ts";
 import {
   currentPlan,
+  currentSkyStory,
+  directorIsStale,
   type DirectorRecord,
   isDirectorRecord,
 } from "./director.ts";
+import { buildSkyContent } from "./sky_story.ts";
 
 // deno-lint-ignore no-explicit-any
 type SupabaseClient = any;
@@ -228,20 +237,32 @@ export async function handleRequest(
     newCount = generationCount + 1;
   }
 
-  // The director runs once per memory on its own, then only on a rerun.
+  // The director runs once per memory on its own, again when its photo days
+  // changed (capped), and on a rerun.
   let director: unknown = existing?.director ?? null;
   let directorRan = false;
-  if (directorOn && (directorRerun || !isDirectorRecord(director))) {
-    director = await deps.director!.run(tripId, tripData, language);
+  if (
+    directorOn &&
+    (directorRerun || !isDirectorRecord(director) ||
+      directorIsStale(director, tripData))
+  ) {
+    director = await runCounted(deps, tripId, tripData, language, director);
     directorRan = true;
   }
 
   const template = assembleWrapUpContent(tripData, aiFields, slots);
   // Next to everything the current player reads, so it keeps playing.
   const plan = directorOn ? currentPlan(director, tripData, language) : null;
-  const content = plan
-    ? { ...template, plan_version: 2 as const, plan }
-    : template;
+  const sky = buildSkyContent(
+    tripData,
+    directorOn ? currentSkyStory(director, tripData) : null,
+    isDirectorRecord(director) ? director.hero_scores ?? {} : {},
+  );
+  const content = {
+    ...template,
+    ...(plan ? { plan_version: 2 as const, plan } : {}),
+    ...(sky ? { sky } : {}),
+  };
   const generatedAt = new Date().toISOString();
   const row = {
     content,
@@ -285,7 +306,11 @@ async function rerunKeptDirector(
   deps: Deps,
   tripId: string,
   language: WrapUpLanguage,
-  existing: { content: unknown; generated_at: string | null },
+  existing: {
+    content: unknown;
+    generated_at: string | null;
+    director?: unknown;
+  },
 ): Promise<Response> {
   let tripData: TripData;
   try {
@@ -295,7 +320,13 @@ async function rerunKeptDirector(
       error: `failed to gather trip data: ${(err as Error).message}`,
     }, 500);
   }
-  const director = await deps.director!.run(tripId, tripData, language);
+  const director = await runCounted(
+    deps,
+    tripId,
+    tripData,
+    language,
+    existing.director,
+  );
   const { error } = await deps.serviceClient
     .from("wrap_ups")
     .update({ director })
@@ -338,6 +369,20 @@ async function rebuildKept(
     return json({ error: `failed to save wrap-up: ${error.message}` }, 500);
   }
   return json({ content, generated_at: generatedAt }, 200);
+}
+
+// Runs the director and counts the run against [previous]'s, so automatic
+// re-runs stay capped (director.ts, MAX_DIRECTOR_RUNS).
+async function runCounted(
+  deps: Deps,
+  tripId: string,
+  tripData: TripData,
+  language: WrapUpLanguage,
+  previous: unknown,
+): Promise<DirectorRecord> {
+  const runs = isDirectorRecord(previous) ? previous.run_count ?? 1 : 0;
+  const record = await deps.director!.run(tripId, tripData, language);
+  return { ...record, run_count: runs + 1 };
 }
 
 function logGenerationFailure(

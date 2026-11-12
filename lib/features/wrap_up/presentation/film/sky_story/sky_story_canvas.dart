@@ -75,7 +75,7 @@ class _SkyStoryCanvasState extends State<SkyStoryCanvas>
 
   /// (Re)starts the film for the widget's story, from the top.
   void _start() {
-    final timeline = SkyStoryTimeline.forChapters(widget.story.pages.length);
+    final timeline = SkyStoryTimeline.forStory(widget.story);
     _world = SkyWorld(timeline);
     _clock.total = timeline.total;
     _controller

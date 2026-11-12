@@ -182,7 +182,9 @@ GoRouter router(Ref ref) {
         GoRoute(
           path: RoutePaths.skyStoryPreview,
           name: RouteNames.skyStoryPreview,
-          builder: (context, state) => const SkyStoryPreviewPage(),
+          builder: (context, state) => SkyStoryPreviewPage(
+            tripId: state.uri.queryParameters['trip'],
+          ),
         ),
       GoRoute(
         path: RoutePaths.subscriptionOfferings,

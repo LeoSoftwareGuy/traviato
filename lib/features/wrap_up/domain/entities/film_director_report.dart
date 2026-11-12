@@ -16,6 +16,9 @@ class FilmDirectorReport extends Equatable {
     this.footnoteLine,
     this.closingLine,
     this.problems = const [],
+    this.skyProblems = const [],
+    this.hasSkyStory = false,
+    this.runCount = 0,
     this.attempts = 0,
     this.model = '',
     this.ranAt,
@@ -38,6 +41,16 @@ class FilmDirectorReport extends Equatable {
   final String? footnoteLine;
   final String? closingLine;
   final List<String> problems;
+
+  /// Why the director's Sky Story pages weren't used (#345); empty when
+  /// [hasSkyStory].
+  final List<String> skyProblems;
+
+  /// The run produced Sky Story pages.
+  final bool hasSkyStory;
+
+  /// Runs for this memory so far (automatic re-runs are capped).
+  final int runCount;
   final int attempts;
   final String model;
   final DateTime? ranAt;
@@ -63,6 +76,9 @@ class FilmDirectorReport extends Equatable {
     footnoteLine,
     closingLine,
     problems,
+    skyProblems,
+    hasSkyStory,
+    runCount,
     attempts,
     model,
     ranAt,

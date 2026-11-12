@@ -7,7 +7,11 @@ import {
   buildPlanInput,
   buildPlanSystemPrompt,
   currentPlan,
+  currentSkyStory,
+  directorIsStale,
   type DirectorRecord,
+  MAX_DIRECTOR_RUNS,
+  photoDaysOf,
   runDirector,
 } from "./director.ts";
 import { fakeSupabaseClient } from "./test_fakes.ts";
@@ -15,8 +19,10 @@ import {
   analysisFor,
   DIRECTOR_PHOTO_IDS,
   directorTripData,
+  emittedPlan,
   keepsakePlan,
   keepsakePlanWithFixableFaults,
+  skyStoryPlan,
   toolResponse,
 } from "./director_fixtures.ts";
 import type { TripData } from "./gather.ts";
@@ -77,7 +83,7 @@ function deps(
 }
 
 Deno.test("runDirector analyses photos, caches them, plans and records cost", async () => {
-  const anthropic = fakeAnthropic([keepsakePlan()]);
+  const anthropic = fakeAnthropic([emittedPlan()]);
   const { client, logs, deps: d } = deps(anthropic.fetchImpl);
 
   const record = await runDirector(d, TRIP_ID, directorTripData(), "en");
@@ -106,7 +112,7 @@ Deno.test("runDirector analyses photos, caches them, plans and records cost", as
 });
 
 Deno.test("runDirector reuses cached analysis and only sends new photos", async () => {
-  const anthropic = fakeAnthropic([keepsakePlan()]);
+  const anthropic = fakeAnthropic([emittedPlan()]);
   const cached = DIRECTOR_PHOTO_IDS.slice(0, 10).map((id) => ({
     ...analysisFor(id),
     trip_id: TRIP_ID,
@@ -127,9 +133,9 @@ Deno.test("runDirector reuses cached analysis and only sends new photos", async 
 });
 
 Deno.test("an invalid plan is retried once with its problems, then accepted", async () => {
-  const broken = keepsakePlan();
+  const broken = emittedPlan();
   broken.chapters[0].scenes[0].photo_ids = ["invented"];
-  const anthropic = fakeAnthropic([broken, keepsakePlan()]);
+  const anthropic = fakeAnthropic([broken, emittedPlan()]);
   const { deps: d } = deps(anthropic.fetchImpl);
 
   const record = await runDirector(d, TRIP_ID, directorTripData(), "en");
@@ -144,7 +150,7 @@ Deno.test("an invalid plan is retried once with its problems, then accepted", as
 });
 
 Deno.test("two invalid plans fall back, keeping the problems", async () => {
-  const broken = keepsakePlan();
+  const broken = emittedPlan();
   broken.closing_line = "An unforgettable trip.";
   const anthropic = fakeAnthropic([broken]);
   const { deps: d } = deps(anthropic.fetchImpl);
@@ -169,7 +175,7 @@ Deno.test("an Anthropic outage falls back without throwing", async () => {
 });
 
 Deno.test("too few photos falls back without a plan call", async () => {
-  const anthropic = fakeAnthropic([keepsakePlan()]);
+  const anthropic = fakeAnthropic([emittedPlan()]);
   const { deps: d } = deps(anthropic.fetchImpl);
   const data = directorTripData();
   data.photos = data.photos.slice(0, 4);
@@ -181,7 +187,7 @@ Deno.test("too few photos falls back without a plan call", async () => {
 });
 
 Deno.test("left-out photos are never analysed or offered to the plan", async () => {
-  const anthropic = fakeAnthropic([keepsakePlan()]);
+  const anthropic = fakeAnthropic([emittedPlan()]);
   const { deps: d } = deps(anthropic.fetchImpl);
   const data = directorTripData();
   data.photos[11].use_in_wrap_up = false;
@@ -288,7 +294,7 @@ Deno.test("runDirector repairs fixable plan faults instead of retrying", async (
 });
 
 Deno.test("runDirector sends strict tools: closed objects, no unsupported keywords", async () => {
-  const anthropic = fakeAnthropic([keepsakePlan()]);
+  const anthropic = fakeAnthropic([emittedPlan()]);
   const { deps: d } = deps(anthropic.fetchImpl);
 
   await runDirector(d, TRIP_ID, directorTripData(), "en");
@@ -325,4 +331,155 @@ Deno.test("runDirector sends strict tools: closed objects, no unsupported keywor
     };
     walk(tool.input_schema, tool.name as string);
   }
+});
+
+// --- Sky Story (#345) ---
+
+Deno.test("runDirector keeps the Sky Story pages and every photo's hero score", async () => {
+  const anthropic = fakeAnthropic([emittedPlan()]);
+  const { deps: d } = deps(anthropic.fetchImpl);
+
+  const record = await runDirector(d, TRIP_ID, directorTripData(), "en");
+
+  assertEquals(record.status, "planned");
+  assertEquals(record.sky_story, skyStoryPlan());
+  assertEquals(record.sky_problems, []);
+  assertEquals("sky_story" in record.plan!, false);
+  assertEquals(Object.keys(record.hero_scores!), DIRECTOR_PHOTO_IDS);
+  assertEquals(record.photo_days, ["2026-09-01", "2026-09-02", "2026-09-03"]);
+  const tool = (anthropic.sent[1].body.tools as Record<string, unknown>[])[0];
+  const schema = tool.input_schema as {
+    properties: Record<string, unknown>;
+    required: string[];
+  };
+  assert("sky_story" in schema.properties);
+  assert(schema.required.includes("sky_story"));
+});
+
+Deno.test("an invalid sky_story is retried; the valid classic plan is kept", async () => {
+  const broken = emittedPlan();
+  broken.sky_story.pages[0].hero_photo_id = "invented";
+  // The retry breaks the classic plan instead: each half keeps its
+  // first valid attempt.
+  const second = emittedPlan();
+  second.closing_line = "An unforgettable trip.";
+  const anthropic = fakeAnthropic([broken, second]);
+  const { deps: d } = deps(anthropic.fetchImpl);
+
+  const record = await runDirector(d, TRIP_ID, directorTripData(), "en");
+
+  assertEquals(record.attempts, 2);
+  assertEquals(record.status, "planned");
+  assertEquals(record.problems, []);
+  assertEquals(record.sky_story, skyStoryPlan());
+  const retry = anthropic.sent.at(-1)!.body;
+  assertStringIncludes(
+    (retry.messages as { content: string }[])[0].content,
+    'sky_story.pages[0].hero_photo_id: "invented"',
+  );
+});
+
+Deno.test("a sky_story still invalid after the retry leaves code-built pages", async () => {
+  const broken = emittedPlan();
+  broken.sky_story.pages[0].days = [0, 9];
+  const anthropic = fakeAnthropic([broken]);
+  const { deps: d } = deps(anthropic.fetchImpl);
+
+  const record = await runDirector(d, TRIP_ID, directorTripData(), "en");
+
+  assertEquals(record.status, "planned");
+  assertEquals(record.sky_story, null);
+  assert(record.sky_problems!.some((p) => p.startsWith("sky_story.pages[0]")));
+});
+
+Deno.test("Sky Story pages survive a classic plan that falls back", async () => {
+  const broken = emittedPlan();
+  broken.closing_line = "An unforgettable trip.";
+  const anthropic = fakeAnthropic([broken]);
+  const { deps: d } = deps(anthropic.fetchImpl);
+
+  const record = await runDirector(d, TRIP_ID, directorTripData(), "en");
+
+  assertEquals(record.status, "fallback");
+  assertEquals(record.sky_story, skyStoryPlan());
+});
+
+Deno.test("too few photos: no Sky Story plan, the reason recorded", async () => {
+  const anthropic = fakeAnthropic([emittedPlan()]);
+  const { deps: d } = deps(anthropic.fetchImpl);
+  const data = directorTripData();
+  data.photos = data.photos.slice(0, 4);
+
+  const record = await runDirector(d, TRIP_ID, data, "en");
+
+  assertEquals(record.sky_story, null);
+  assertEquals(record.sky_problems!.length, 1);
+});
+
+Deno.test("the system prompt carries the Sky Story rules", () => {
+  const prompt = buildPlanSystemPrompt("en");
+  assertStringIncludes(prompt, "sky_story");
+  assertStringIncludes(prompt, "hero_photo_id");
+});
+
+function skyRecord(overrides: Partial<DirectorRecord> = {}): DirectorRecord {
+  return {
+    status: "planned",
+    plan: keepsakePlan(),
+    problems: [],
+    attempts: 1,
+    model: "claude-sonnet-5",
+    ran_at: "2026-11-08T12:00:00Z",
+    photos: { plannable: 12, analysed_now: 12, cached: 0, failed: 0 },
+    failed_ids: [],
+    photo_paths: {},
+    sky_story: skyStoryPlan(),
+    photo_days: ["2026-09-01", "2026-09-02", "2026-09-03"],
+    run_count: 1,
+    usage: { calls: [], input_tokens: 0, output_tokens: 0, estimated_usd: 0 },
+    ...overrides,
+  };
+}
+
+Deno.test("currentSkyStory: the stored pages while they fit the memory", () => {
+  assertEquals(
+    currentSkyStory(skyRecord(), directorTripData()),
+    skyStoryPlan(),
+  );
+  assertEquals(currentSkyStory(null, directorTripData()), null);
+  assertEquals(
+    currentSkyStory(skyRecord({ sky_story: null }), directorTripData()),
+    null,
+  );
+
+  const deleted = directorTripData();
+  deleted.photos = deleted.photos.filter((p) => p.id !== "p05");
+  assertEquals(currentSkyStory(skyRecord(), deleted), null);
+
+  const leftOut = directorTripData();
+  leftOut.photos[9].use_in_wrap_up = false;
+  assertEquals(currentSkyStory(skyRecord(), leftOut), null);
+
+  const noteGone = directorTripData();
+  noteGone.notes = noteGone.notes.slice(1);
+  assertEquals(currentSkyStory(skyRecord(), noteGone), null);
+});
+
+Deno.test("directorIsStale when photo days change, until the run cap", () => {
+  const data = directorTripData();
+  assertEquals(photoDaysOf(data), ["2026-09-01", "2026-09-02", "2026-09-03"]);
+  assertEquals(directorIsStale(skyRecord(), data), false);
+
+  const fewer = directorTripData();
+  fewer.photos = fewer.photos.slice(0, 8);
+  assertEquals(directorIsStale(skyRecord(), fewer), true);
+  assertEquals(
+    directorIsStale(skyRecord({ run_count: MAX_DIRECTOR_RUNS }), fewer),
+    false,
+  );
+  // Records from before #345 have no photo days: never stale.
+  assertEquals(
+    directorIsStale(skyRecord({ photo_days: undefined }), fewer),
+    false,
+  );
 });

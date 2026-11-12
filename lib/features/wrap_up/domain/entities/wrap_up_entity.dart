@@ -10,6 +10,7 @@ import 'wrap_up_invitation.dart';
 import 'wrap_up_keepsake.dart';
 import 'wrap_up_moment.dart';
 import 'wrap_up_photo_ref.dart';
+import 'wrap_up_sky.dart';
 import 'wrap_up_unlock.dart';
 
 /// The generated Wrap-Up Film data (docs/data-model.md `wrap_ups`, #125's
@@ -32,6 +33,7 @@ class WrapUpEntity extends Equatable {
     required this.generatedAt,
     this.publishedAt,
     this.plan,
+    this.sky,
   });
 
   /// The generator's resolved film plan (#151); `null` for a wrap-up
@@ -61,6 +63,10 @@ class WrapUpEntity extends Equatable {
   /// kept film freezes the plan it was kept with, like the rest of
   /// `content`.
   final FilmPlan? plan;
+
+  /// Sky Story's pages (#345), read from `content.sky`; null on kept films
+  /// and on memories without photos, which play the classic film.
+  final WrapUpSky? sky;
 
   bool get isPublished => publishedAt != null;
 
@@ -97,6 +103,7 @@ class WrapUpEntity extends Equatable {
     generatedAt: generatedAt,
     publishedAt: publishedAt != null ? publishedAt() : this.publishedAt,
     plan: plan,
+    sky: sky,
   );
 
   @override
@@ -115,5 +122,6 @@ class WrapUpEntity extends Equatable {
     generatedAt,
     publishedAt,
     plan,
+    sky,
   ];
 }

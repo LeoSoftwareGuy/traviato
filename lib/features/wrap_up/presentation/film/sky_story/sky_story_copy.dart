@@ -28,13 +28,10 @@ class SkyStoryCopy extends Equatable {
       ].join(' · '),
     ),
     pages: [
-      for (final (i, page) in story.pages.indexed)
-        SkyPageCopy.resolve(
-          page,
-          SkyPageLayout.forChapter(i, story.pages.length),
-          l10n,
-          locale,
-        ),
+      for (final (page, layout) in [
+        for (final (i, page) in story.pages.indexed) (page, story.layouts[i]),
+      ])
+        SkyPageCopy.resolve(page, layout, l10n, locale),
     ],
     outro: SkyOutroCopy(
       moments: l10n.skyStory_moments(story.momentCount),
@@ -98,11 +95,13 @@ class SkyOutroCopy extends Equatable {
 
 class SkyPageCopy extends Equatable {
   const SkyPageCopy({
+    required this.layout,
     required this.eyebrow,
     required this.headline,
     required this.heroCaption,
     this.note,
     this.signature,
+    this.skyText,
     this.badgeCount,
     this.badgeLabel,
   });
@@ -117,11 +116,22 @@ class SkyPageCopy extends Equatable {
     final trimmed = page.note?.trim();
     final note = (trimmed == null || trimmed.isEmpty) ? null : trimmed;
     final signature = page.signature?.trim();
+    final caption = captionFor(page.hero, page.date, l10n, locale);
+    final skyLine = page.skyLine?.trim();
+    // No note: the director's line on the sky, else the caption moves up
+    // onto the sky, bigger, and leaves the polaroid's strip blank (#345:
+    // a page without a note still looks finished).
+    final skyText = note != null
+        ? null
+        : (skyLine != null && skyLine.isNotEmpty ? skyLine : caption);
+    final captionOnSky = note == null && skyText == caption;
     return SkyPageCopy(
+      layout: layout,
       eyebrow: eyebrowFor(page, l10n, locale, withCount: !badge),
-      headline: page.headline.trim(),
-      heroCaption: captionFor(page.hero, page.date, l10n, locale),
+      headline: headlineFor(page, l10n),
+      heroCaption: captionOnSky ? '' : caption,
       note: note,
+      skyText: skyText == null || skyText.isEmpty ? null : skyText,
       signature: (signature == null || signature.isEmpty || note == null)
           ? null
           : '– $signature',
@@ -130,6 +140,28 @@ class SkyPageCopy extends Equatable {
           ? l10n.skyStory_photosLabel(page.photoCount).toUpperCase()
           : null,
     );
+  }
+
+  /// The director's headline; without one, the place most of the page's
+  /// photos share (`Alfama`), else `Day 2` / `Days 4–7`.
+  static String headlineFor(SkyPage page, AppLocalizations l10n) {
+    final headline = page.headline?.trim();
+    if (headline != null && headline.isNotEmpty) return headline;
+    final counts = <String, int>{};
+    for (final photo in [page.hero, ...page.extras]) {
+      final place = photo.place?.trim();
+      if (place != null && place.isNotEmpty) {
+        counts[place] = (counts[place] ?? 0) + 1;
+      }
+    }
+    if (counts.isNotEmpty) {
+      // The most shared; on a tie, the hero's (it comes first).
+      return counts.entries.reduce((a, b) => b.value > a.value ? b : a).key;
+    }
+    final last = page.lastDay;
+    return last != null && last != page.firstDay
+        ? l10n.skyStory_days(page.firstDay, last)
+        : l10n.skyStory_day(page.firstDay);
   }
 
   /// `DAY 1 · FRI 12 JUNE · 64 PHOTOS`. A taped page shows its count in
@@ -193,10 +225,17 @@ class SkyPageCopy extends Equatable {
     return [if (place != null && place.isNotEmpty) place, when].join(' · ');
   }
 
+  final SkyPageLayout layout;
   final String eyebrow;
   final String headline;
+
+  /// On the hero's strip; empty when it's on the sky instead ([skyText]).
   final String heroCaption;
   final String? note;
+
+  /// Written on the sky when the page has no note: the director's line,
+  /// else the hero's caption.
+  final String? skyText;
 
   /// `– Jonas`, only under a note.
   final String? signature;
@@ -207,10 +246,12 @@ class SkyPageCopy extends Equatable {
 
   @override
   List<Object?> get props => [
+    layout,
     eyebrow,
     headline,
     heroCaption,
     note,
+    skyText,
     signature,
     badgeCount,
     badgeLabel,
