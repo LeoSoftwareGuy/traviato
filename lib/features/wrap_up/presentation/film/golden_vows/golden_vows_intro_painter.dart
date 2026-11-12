@@ -70,7 +70,7 @@ class GoldenVowsIntroPainter extends CustomPainter {
         (GoldenVowsAmbient.width - painter.width) / 2,
         top - 60 * exit,
       );
-      _paintText(canvas, painter, offset, alpha, blur: blur);
+      gvPaintText(canvas, painter, offset, alpha, blur: blur);
     }
 
     final occasion = inv.occasion;
@@ -144,13 +144,13 @@ class GoldenVowsIntroPainter extends CustomPainter {
           ..color = GoldenVowsColors.gold.withAlpha(170),
       );
 
-    _paintText(
+    gvPaintText(
       canvas,
       packing.heading,
       Offset((width - packing.heading.width) / 2, 70),
       1,
     );
-    _paintText(
+    gvPaintText(
       canvas,
       packing.subhead,
       Offset((width - packing.subhead.width) / 2, 222),
@@ -184,7 +184,7 @@ class GoldenVowsIntroPainter extends CustomPainter {
             ..color = GoldenVowsColors.goldDeep.withValues(alpha: alpha),
         );
       }
-      _paintText(canvas, packing.items[i], const Offset(176, 10), alpha);
+      gvPaintText(canvas, packing.items[i], const Offset(176, 10), alpha);
       canvas.restore();
     }
     canvas.restore();
@@ -201,29 +201,6 @@ class GoldenVowsIntroPainter extends CustomPainter {
             ..lineTo(135, 30))
           .computeMetrics()
           .first;
-
-  /// Paints [painter] at [offset], faded to [alpha] and blurred by [blur]
-  /// (a Gaussian's standard deviation, as in CSS) through one small layer.
-  static void _paintText(
-    Canvas canvas,
-    TextPainter painter,
-    Offset offset,
-    double alpha, {
-    double blur = 0,
-  }) {
-    if (alpha >= 0.999 && blur <= 0.01) {
-      painter.paint(canvas, offset);
-      return;
-    }
-    final bounds = (offset & painter.size).inflate(blur * 3 + 2);
-    final layer = Paint()..color = Color.fromRGBO(0, 0, 0, alpha);
-    if (blur > 0.01) {
-      layer.imageFilter = ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur);
-    }
-    canvas.saveLayer(bounds, layer);
-    painter.paint(canvas, offset);
-    canvas.restore();
-  }
 
   @override
   bool shouldRepaint(GoldenVowsIntroPainter oldDelegate) =>

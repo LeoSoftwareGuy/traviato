@@ -1,4 +1,9 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/painting.dart';
+import 'package:intl/intl.dart' show DateFormat;
+
+import '../../../../../core/constants/app_constants.dart';
 
 import '../../../../../l10n/app_localizations.dart';
 import 'golden_vows_story.dart';
@@ -11,17 +16,44 @@ class GoldenVowsTexts {
   GoldenVowsTexts(GoldenVowsStory story, AppLocalizations l10n)
     : invitation = GvInvitationTexts(story),
       packing = story.hasPackingCard ? GvPackingTexts(story, l10n) : null,
-      album = GvAlbumTexts(story, l10n);
+      album = GvAlbumTexts(story, l10n),
+      ending = GvEndingTexts(story, l10n);
 
   final GvInvitationTexts invitation;
   final GvPackingTexts? packing;
   final GvAlbumTexts album;
+  final GvEndingTexts ending;
 
   void dispose() {
     invitation.dispose();
     packing?.dispose();
     album.dispose();
+    ending.dispose();
   }
+}
+
+/// Paints [painter] at [offset], faded to [alpha] and blurred by [blur]
+/// (a Gaussian's standard deviation, as in CSS) through one small layer.
+void gvPaintText(
+  Canvas canvas,
+  TextPainter painter,
+  Offset offset,
+  double alpha, {
+  double blur = 0,
+}) {
+  if (alpha <= 0.002) return;
+  if (alpha >= 0.999 && blur <= 0.01) {
+    painter.paint(canvas, offset);
+    return;
+  }
+  final bounds = (offset & painter.size).inflate(blur * 3 + 2);
+  final layer = Paint()..color = Color.fromRGBO(0, 0, 0, alpha);
+  if (blur > 0.01) {
+    layer.imageFilter = ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur);
+  }
+  canvas.saveLayer(bounds, layer);
+  painter.paint(canvas, offset);
+  canvas.restore();
 }
 
 TextPainter _layout(String text, TextStyle style) => TextPainter(
@@ -366,5 +398,48 @@ class GvAlbumTexts {
     carousel?.dispose();
     heart.dispose();
     endLine.dispose();
+  }
+}
+
+/// The ending (spec §5.6): the "Storyni" wordmark, laid out per spacing
+/// step as it tightens, and "ANNA & MARCO · 14 JUNE 2026" under it.
+class GvEndingTexts {
+  GvEndingTexts(GoldenVowsStory story, AppLocalizations l10n)
+    : line = _fit(
+        '${story.names} · '
+                '${DateFormat('d MMMM y', l10n.localeName).format(story.date)}'
+            .toUpperCase(),
+        GoldenVowsType.serif(
+          32,
+          weight: 600,
+          letterSpacing: 8,
+          color: GoldenVowsColors.inkSoft,
+        ),
+        GvInvitationTexts.maxWidth,
+      );
+
+  final TextPainter line;
+  final _wordmarkBySpacing = <int, TextPainter>{};
+
+  /// "Storyni" at [spacing] px between letters (each ¼-px step laid out
+  /// once).
+  TextPainter wordmark(double spacing) {
+    final step = (spacing * 4).round();
+    return _wordmarkBySpacing[step] ??= _layout(
+      AppConstants.appName,
+      GoldenVowsType.serif(
+        150,
+        color: GoldenVowsColors.ink,
+        letterSpacing: step / 4,
+      ),
+    );
+  }
+
+  void dispose() {
+    line.dispose();
+    for (final painter in _wordmarkBySpacing.values) {
+      painter.dispose();
+    }
+    _wordmarkBySpacing.clear();
   }
 }

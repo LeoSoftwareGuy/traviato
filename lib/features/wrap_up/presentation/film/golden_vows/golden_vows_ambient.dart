@@ -148,13 +148,16 @@ class GoldenVowsAmbient {
   }
 
   /// 1, then fading to 0 over the film's last [GoldenVowsTimeline.fadeOutDur]
-  /// (68.6 → 70 in the reference). Only the background stays.
+  /// (68.6 → 70 in the reference). Only the background stays. The spec
+  /// names no ease; measured on the reference's wordmark it's power1.in
+  /// (0.99 / 0.86 / 0.55 / 0.08 left at 68.8 / 69.2 / 69.6 / 69.95 s).
   double endFade(double t) =>
       1 -
       FilmEases.at(
         t,
         timeline.total - GoldenVowsTimeline.fadeOutDur,
         GoldenVowsTimeline.fadeOutDur,
+        FilmEases.power1In,
       );
 
   /// The frame at [inset], as one path that starts at the top-centre and

@@ -9,6 +9,8 @@ import 'golden_vows_album.dart';
 import 'golden_vows_album_painter.dart';
 import 'golden_vows_ambient.dart';
 import 'golden_vows_ambient_painter.dart';
+import 'golden_vows_ending.dart';
+import 'golden_vows_ending_painter.dart';
 import 'golden_vows_heart.dart';
 import 'golden_vows_heart_painter.dart';
 import 'golden_vows_intro_painter.dart';
@@ -18,9 +20,9 @@ import 'golden_vows_timeline.dart';
 
 /// The Golden Vows film (#346): one 1080×1920 composition on one looping
 /// clock, like `SkyStoryCanvas`, painted in the spec's layer order:
-/// background and light leaks; the invitation and packing card; (the
-/// album, heart and ending in later phases); the gold frame, flare and
-/// petals on top. Its fixed words follow the surrounding locale.
+/// background and light leaks; the invitation and packing card; the
+/// album; the heart; the Storyni ending; the gold frame, flare and petals
+/// on top. Its fixed words follow the surrounding locale.
 class GoldenVowsCanvas extends StatefulWidget {
   const GoldenVowsCanvas({
     required this.story,
@@ -65,6 +67,7 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
   late GoldenVowsAmbient _ambient;
   late GoldenVowsAlbum _album;
   late GoldenVowsHeart _heart;
+  late GoldenVowsEnding _ending;
   SkyPhotoImages? _images;
 
   /// The heart's photos, decoded small (see [GoldenVowsCanvas.heartImage]).
@@ -83,6 +86,7 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
     _timeline = GoldenVowsTimeline.forStory(widget.story);
     _ambient = GoldenVowsAmbient(_timeline);
     _album = GoldenVowsAlbum(_timeline);
+    _ending = GoldenVowsEnding(_ambient);
     _heart = GoldenVowsHeart(
       start: _timeline.heartStart,
       photoCount: widget.story.heartPhotos.length,
@@ -204,6 +208,11 @@ class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
                     photoIds: widget.story.heartPhotos,
                     images: heartImages,
                     texts: texts.album,
+                    time: _clock,
+                  ),
+                  GoldenVowsEndingPainter(
+                    ending: _ending,
+                    texts: texts.ending,
                     time: _clock,
                   ),
                   GoldenVowsFrontPainter(ambient: _ambient, time: _clock),
