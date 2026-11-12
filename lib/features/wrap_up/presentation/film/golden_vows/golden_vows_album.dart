@@ -182,6 +182,17 @@ class GoldenVowsAlbum {
   }
 }
 
+/// The part of an image of [image] size that fills [box] edge to edge
+/// (centred), seen [zoom] times closer: photos are cover-cropped.
+Rect gvCoverCrop(Size image, Size box, [double zoom = 1]) {
+  final scale = math.max(box.width / image.width, box.height / image.height);
+  return Rect.fromCenter(
+    center: Offset(image.width / 2, image.height / 2),
+    width: box.width / scale / zoom,
+    height: box.height / scale / zoom,
+  );
+}
+
 /// The carousel's prints (spec §5.3): two rows of up to 6, each 460 tall
 /// with its width from the photo's aspect.
 abstract final class GvCarouselLayout {

@@ -189,7 +189,7 @@ void main() {
 
     test('photos are cover-cropped, centred, and zoom in', () {
       const box = Size(712, 800);
-      final wide = GoldenVowsAlbumPainter.coverCrop(
+      final wide = gvCoverCrop(
         const Size(1500, 1000),
         box,
         1,
@@ -198,7 +198,7 @@ void main() {
       expect(wide.width / wide.height, closeTo(712 / 800, 1e-9));
       expect(wide.center.dx, closeTo(750, 1e-9));
       expect(wide.center.dy, closeTo(500, 1e-9));
-      final tall = GoldenVowsAlbumPainter.coverCrop(
+      final tall = gvCoverCrop(
         const Size(600, 1200),
         box,
         1.08,
@@ -259,7 +259,7 @@ void main() {
         GoldenVowsStory(
           names: 'A',
           date: DateTime(2026),
-          momentCount: 21,
+          heartPhotoIds: GoldenVowsFixtures.heartIds(21),
           dayCount: 3,
         ),
         ru,

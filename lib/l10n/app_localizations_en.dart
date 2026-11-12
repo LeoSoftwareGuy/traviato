@@ -2569,6 +2569,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get goldenVows_endLine => 'Forever starts here';
+
+  @override
   String skyStory_days(int first, int last) {
     return 'Days $first–$last';
   }
