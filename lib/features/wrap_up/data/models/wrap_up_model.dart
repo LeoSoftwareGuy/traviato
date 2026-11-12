@@ -11,6 +11,7 @@ import '../../domain/entities/wrap_up_moment.dart';
 import '../../domain/entities/wrap_up_photo_ref.dart';
 import '../../domain/entities/wrap_up_unlock.dart';
 import 'film_plan_model.dart';
+import 'wrap_up_golden_vows_model.dart';
 import 'wrap_up_sky_model.dart';
 
 /// Hand-parsed rather than `@JsonSerializable`-generated: `content` is
@@ -35,6 +36,7 @@ class WrapUpModel extends WrapUpEntity {
     super.publishedAt,
     super.plan,
     super.sky,
+    super.goldenVows,
   });
 
   /// [row] is a `wrap_ups` row shape: `content`, `generated_at`,
@@ -62,6 +64,7 @@ class WrapUpModel extends WrapUpEntity {
       publishedAt: _parseDateTime(row['published_at']),
       plan: parseFilmPlan(contentMap),
       sky: parseWrapUpSky(contentMap),
+      goldenVows: parseWrapUpGoldenVows(contentMap),
     );
   }
 }

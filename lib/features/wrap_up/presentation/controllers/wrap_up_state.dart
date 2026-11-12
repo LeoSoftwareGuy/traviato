@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../domain/entities/wrap_up_entity.dart';
+import '../film/golden_vows/golden_vows_story.dart';
 import '../film/sky_story/sky_story.dart';
 
 class WrapUpState extends Equatable {
@@ -9,6 +10,7 @@ class WrapUpState extends Equatable {
     this.photoUrlById = const {},
     this.isOutOfDate = false,
     this.skyStory,
+    this.goldenVows,
   });
 
   final WrapUpEntity wrapUp;
@@ -22,9 +24,12 @@ class WrapUpState extends Equatable {
   final Map<String, String> photoUrlById;
 
   /// The Sky Story film for this wrap-up (#345), from `content.sky` and
-  /// the memory's photos; null plays the classic film. Not played yet
-  /// outside the debug preview (phase 7).
+  /// the memory's photos; null plays the classic film.
   final SkyStory? skyStory;
+
+  /// The Golden Vows film (#346), from `content.golden_vows` and the
+  /// memory's photos; it plays before [skyStory] when there is one.
+  final GoldenVowsStory? goldenVows;
 
   String? imageUrlForPhoto(String? photoId) =>
       photoId == null ? null : photoUrlById[photoId];
@@ -34,8 +39,15 @@ class WrapUpState extends Equatable {
     photoUrlById: photoUrlById,
     isOutOfDate: isOutOfDate,
     skyStory: skyStory,
+    goldenVows: goldenVows,
   );
 
   @override
-  List<Object?> get props => [wrapUp, photoUrlById, isOutOfDate, skyStory];
+  List<Object?> get props => [
+    wrapUp,
+    photoUrlById,
+    isOutOfDate,
+    skyStory,
+    goldenVows,
+  ];
 }

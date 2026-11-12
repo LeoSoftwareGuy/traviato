@@ -6,6 +6,7 @@ import 'package:intl/intl.dart' show DateFormat;
 import '../../../../../core/constants/app_constants.dart';
 
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../checklist/presentation/widgets/checklist_suggestion_title.dart';
 import 'golden_vows_story.dart';
 import 'golden_vows_tokens.dart';
 
@@ -211,11 +212,12 @@ class GvPackingTexts {
         cardWidth - 120,
       ),
       subhead = _fit(
-        l10n
-            .goldenVows_packedCount(
-              story.packedShown.length,
-              story.packedTotal ?? story.packed.length,
-            )
+        (story.isPackedFromQuests
+                ? l10n.goldenVows_plannedHeading
+                : l10n.goldenVows_packedCount(
+                    story.packedChecked ?? story.packedShown.length,
+                    story.packedTotal ?? story.packed.length,
+                  ))
             .toUpperCase(),
         GoldenVowsType.serif(
           30,
@@ -226,9 +228,13 @@ class GvPackingTexts {
         cardWidth - 120,
       ),
       items = [
-        for (final item in story.packedShown)
+        for (final (i, item) in story.packedShown.indexed)
           _fit(
-            item,
+            _packedTitle(
+              l10n,
+              item,
+              i < story.packedCodes.length ? story.packedCodes[i] : null,
+            ),
             GoldenVowsType.serif(54, color: GoldenVowsColors.ink),
             itemMaxWidth,
             minScale: 0.7,
@@ -443,3 +449,8 @@ class GvEndingTexts {
     _wordmarkBySpacing.clear();
   }
 }
+
+/// A packed item as the film shows it: a seeded checklist item in the
+/// film's language (#285), the user's own items as they wrote them.
+String _packedTitle(AppLocalizations l10n, String text, String? code) =>
+    (code == null ? null : checklistTitleForCode(l10n, code)) ?? text;

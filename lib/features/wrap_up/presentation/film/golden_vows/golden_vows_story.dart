@@ -16,15 +16,27 @@ class GvHero extends Equatable {
 /// A titled album page of up to 3 prints ("Getting ready" · "CHAPTER ONE
 /// · MORNING"); the carousel page is one too, with up to 12.
 class GvChapter extends Equatable {
-  const GvChapter({required this.title, required this.photoIds, this.line});
+  const GvChapter({
+    required this.title,
+    required this.photoIds,
+    this.line,
+    this.layout,
+  });
 
   final String title;
   final String? line;
   final List<String> photoIds;
 
+  /// Where its prints go (spec §5.3); null cycles A, B, C by chapter.
+  final GvChapterLayout? layout;
+
   @override
-  List<Object?> get props => [title, line, photoIds];
+  List<Object?> get props => [title, line, photoIds, layout];
 }
+
+/// The chapter pages' print arrangements (`GvChapterLayouts`): A — a wide
+/// print over two; B — a tall print beside two; C — two over a wide one.
+enum GvChapterLayout { a, b, c }
 
 /// What the Golden Vows film shows of one memory (#346, spec §6).
 class GoldenVowsStory extends Equatable {
@@ -34,13 +46,17 @@ class GoldenVowsStory extends Equatable {
     this.occasionLine,
     this.place,
     this.packed = const [],
+    this.packedCodes = const [],
+    this.packedChecked,
     this.packedTotal,
+    this.isPackedFromQuests = false,
     this.heroes = const [],
     this.chapters = const [],
     this.carousel,
     this.heartPhotoIds = const [],
     this.endLine,
     this.dayCount = 1,
+    this.moments,
   });
 
   /// The occasion in the UI language ("Our Wedding Day"); none → the
@@ -58,8 +74,19 @@ class GoldenVowsStory extends Equatable {
   /// [maxPacked]. None → no packing card.
   final List<String> packed;
 
-  /// "X OF Y": how many there were to pack, at least the packed ones.
+  /// The seeded checklist code of each [packed] item, by position (null or
+  /// missing = the user's own words): the film shows a seeded item in its
+  /// language.
+  final List<String?> packedCodes;
+
+  /// "X OF Y": how many were packed (null = the items shown) and how many
+  /// there were to pack (null = all of [packed]).
+  final int? packedChecked;
   final int? packedTotal;
+
+  /// The items are the memory's planned quests (nothing was checked off):
+  /// the card reads "What we planned", with no count.
+  final bool isPackedFromQuests;
 
   /// One photo-with-note page each.
   final List<GvHero> heroes;
@@ -77,8 +104,10 @@ class GoldenVowsStory extends Equatable {
   /// The line under the balloon; null → "Forever starts here".
   final String? endLine;
 
-  /// The heart page's line: "{N} MOMENTS · ONE DAY".
-  int get momentCount => heartPhotoIds.length;
+  /// The heart page's line: "{N} MOMENTS · ONE DAY" — every photo of the
+  /// memory ([moments]), else the heart's.
+  int get momentCount => moments ?? heartPhotoIds.length;
+  final int? moments;
   final int dayCount;
 
   static const maxHeartPhotos = 200;
@@ -110,13 +139,17 @@ class GoldenVowsStory extends Equatable {
     date,
     place,
     packed,
+    packedCodes,
+    packedChecked,
     packedTotal,
+    isPackedFromQuests,
     heroes,
     chapters,
     carousel,
     heartPhotoIds,
     endLine,
     dayCount,
+    moments,
   ];
 }
 

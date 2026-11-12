@@ -18,6 +18,8 @@ class FilmDirectorReport extends Equatable {
     this.problems = const [],
     this.skyProblems = const [],
     this.hasSkyStory = false,
+    this.goldenVowsOccasion,
+    this.goldenVowsProblems = const [],
     this.runCount = 0,
     this.attempts = 0,
     this.model = '',
@@ -49,6 +51,14 @@ class FilmDirectorReport extends Equatable {
   /// The run produced Sky Story pages.
   final bool hasSkyStory;
 
+  /// The occasion of the run's Golden Vows section (#346); null when the
+  /// director chose another occasion or its section stayed invalid.
+  final String? goldenVowsOccasion;
+
+  /// Why the section stayed invalid; empty when there is one, or when the
+  /// director left it out on purpose.
+  final List<String> goldenVowsProblems;
+
   /// Runs for this memory so far (automatic re-runs are capped).
   final int runCount;
   final int attempts;
@@ -78,6 +88,8 @@ class FilmDirectorReport extends Equatable {
     problems,
     skyProblems,
     hasSkyStory,
+    goldenVowsOccasion,
+    goldenVowsProblems,
     runCount,
     attempts,
     model,

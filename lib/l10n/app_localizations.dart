@@ -3925,6 +3925,12 @@ abstract class AppLocalizations {
   /// **'What we packed · {packed} of {total}'**
   String goldenVows_packedCount(int packed, int total);
 
+  /// Golden Vows film: the packing card's subhead when it lists the memory's planned quests instead of checked checklist items (#346); shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'What we planned'**
+  String get goldenVows_plannedHeading;
+
   /// Golden Vows film: the title of the album's last page, where every photo forms a heart (#346).
   ///
   /// In en, this message translates to:

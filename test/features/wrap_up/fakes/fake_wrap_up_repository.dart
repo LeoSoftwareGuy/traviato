@@ -11,6 +11,7 @@ import 'package:traviato/features/wrap_up/domain/entities/wrap_up_invitation.dar
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_keepsake.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_moment.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_sky.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_golden_vows.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_unlock.dart';
 import 'package:traviato/features/wrap_up/domain/repositories/wrap_up_repository.dart';
 
@@ -70,6 +71,7 @@ WrapUpEntity buildWrapUpEntity({
   DateTime? publishedAt,
   FilmPlan? plan,
   WrapUpSky? sky,
+  WrapUpGoldenVows? goldenVows,
 }) {
   return WrapUpEntity(
     cut: cut,
@@ -97,5 +99,6 @@ WrapUpEntity buildWrapUpEntity({
     publishedAt: publishedAt,
     plan: plan,
     sky: sky,
+    goldenVows: goldenVows,
   );
 }

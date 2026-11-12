@@ -2540,6 +2540,10 @@
   "@goldenVows_packedCount": {
     "x-review": "pending"
   },
+  "goldenVows_plannedHeading": "Что мы запланировали",
+  "@goldenVows_plannedHeading": {
+    "x-review": "pending"
+  },
   "goldenVows_heartTitle": "Каждый миг",
   "@goldenVows_heartTitle": {
     "x-review": "pending"

@@ -210,8 +210,9 @@ class GoldenVowsAlbumPainter extends CustomPainter {
 
   void _paintChapter(Canvas canvas, int index, double zoom) {
     _paintHeading(canvas, texts.chapters[index]);
-    final photos = story.chapters[index].photoIds;
-    final spots = GvChapterLayouts.forChapter(index);
+    final chapter = story.chapters[index];
+    final photos = chapter.photoIds;
+    final spots = GvChapterLayouts.forChapter(index, chapter.layout);
     for (var i = 0; i < spots.length; i++) {
       final (x, y, w, h, tilt) = spots[i];
       _paintPrint(

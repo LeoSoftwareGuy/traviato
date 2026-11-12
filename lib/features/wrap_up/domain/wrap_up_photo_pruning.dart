@@ -64,9 +64,10 @@ WrapUpEntity pruneMissingPhotos(
     keepsake: wrapUp.keepsake,
     generatedAt: wrapUp.generatedAt,
     publishedAt: wrapUp.publishedAt,
-    // The plan's and Sky Story's own photo ids are left to whatever plays
+    // The plan's, Sky Story's and Golden Vows' own photo ids are left to whatever plays
     // them.
     plan: wrapUp.plan,
     sky: wrapUp.sky,
+    goldenVows: wrapUp.goldenVows,
   );
 }

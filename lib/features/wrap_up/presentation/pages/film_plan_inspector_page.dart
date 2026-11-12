@@ -18,6 +18,7 @@ import '../../domain/entities/film_plan_chapter.dart';
 import '../../domain/entities/film_plan_inspection.dart';
 import '../../domain/entities/film_plan_scene.dart';
 import '../controllers/wrap_up_controller.dart';
+import '../film/golden_vows/golden_vows_timeline.dart';
 import '../film/sky_story/sky_story.dart';
 import '../film/sky_story/sky_story_copy.dart';
 import '../film/sky_story/sky_story_timeline.dart';
@@ -114,6 +115,7 @@ class _InspectionBody extends ConsumerWidget {
               textAlign: TextAlign.center,
             ),
           ),
+          _GoldenVowsCard(tripId: tripId, report: null),
           _SkyStoryCard(tripId: tripId, report: null),
         ],
       );
@@ -125,6 +127,7 @@ class _InspectionBody extends ConsumerWidget {
       padding: const EdgeInsets.all(AppSpacing.base),
       children: [
         _SummaryCard(report: report),
+        _GoldenVowsCard(tripId: tripId, report: report),
         _SkyStoryCard(tripId: tripId, report: report),
         if (report.problems.isNotEmpty)
           _ProblemsCard(problems: report.problems),
@@ -407,6 +410,92 @@ class _LinesCard extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Golden Vows as the film will play it (#346): from the draft's
+/// `content.golden_vows` with the memory's photos, else what the director
+/// chose and why its section wasn't used.
+class _GoldenVowsCard extends ConsumerWidget {
+  const _GoldenVowsCard({required this.tripId, required this.report});
+
+  final String tripId;
+  final FilmDirectorReport? report;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(wrapUpControllerProvider(tripId));
+    final problems = report?.goldenVowsProblems ?? const <String>[];
+    return _Card(
+      title: 'Golden Vows',
+      children: state.when(
+        loading: () => const [LinearProgressIndicator()],
+        error: (error, _) => [Text('Could not load the wrap-up: $error')],
+        data: (data) {
+          final story = data.goldenVows;
+          if (story == null) {
+            return [
+              Text(
+                problems.isEmpty
+                    ? 'No Golden Vows: the director read this memory as '
+                          'another occasion (or the section no longer fits '
+                          'it). Sky Story plays.'
+                    : "No Golden Vows: the director's section stayed "
+                          'invalid. Sky Story plays.',
+                key: const Key('film-plan-golden-vows-none'),
+              ),
+              for (final problem in problems) _ProblemLine(problem),
+            ];
+          }
+          final length = GoldenVowsTimeline.forStory(story).total;
+          return [
+            Text(
+              '${data.wrapUp.goldenVows?.occasion ?? '—'} · plays first',
+              key: const Key('film-plan-golden-vows-occasion'),
+              style: AppTypography.headlineSerif.copyWith(
+                color: AppColors.success,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            _Line(
+              'Film',
+              '${length.toStringAsFixed(1)}s · ${story.heroes.length} '
+                  'hero(es) · ${story.chapters.length} chapter(s) · '
+                  'carousel ${story.hasCarousel ? story.carousel!.photoIds.length : '—'}'
+                  ' · ${story.heartPhotos.length} in the heart',
+            ),
+            _Line(
+              'Packing',
+              story.hasPackingCard
+                  ? '${story.isPackedFromQuests ? 'quests' : 'checklist'}: '
+                        '${story.packedShown.join(' · ')}'
+                  : '— (no card)',
+            ),
+            _Line('Occasion line', story.occasionLine ?? '—'),
+            for (final hero in story.heroes)
+              _Line(hero.caption ?? 'Hero', hero.note ?? '— (no note)'),
+            for (final chapter in story.chapters)
+              _Line(
+                '${chapter.title} (${chapter.layout?.name.toUpperCase() ?? 'cycle'})',
+                chapter.line ?? '—',
+              ),
+            _Line('End line', story.endLine ?? '—'),
+          ];
+        },
+      ),
+    );
+  }
+}
+
+class _ProblemLine extends StatelessWidget {
+  const _ProblemLine(this.problem);
+
+  final String problem;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    '• $problem',
+    style: AppTypography.caption.copyWith(color: AppColors.accentCoral),
+  );
 }
 
 /// Sky Story's pages as the film will play them (#345): from the draft's

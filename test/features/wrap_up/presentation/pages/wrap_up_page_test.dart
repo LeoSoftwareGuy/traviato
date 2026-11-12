@@ -12,7 +12,9 @@ import 'package:traviato/features/photo/presentation/providers/photo_providers.d
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_cover_photo.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_moment.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_golden_vows.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_sky.dart';
+import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/film/wrap_up_film_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/pages/wrap_up_page.dart';
@@ -39,6 +41,7 @@ Future<void> _pump(
         builder: (context, state) => WrapUpPage(
           tripId: 't1',
           skyMusic: FakeFilmMusicPlayer.new,
+          goldenVowsMusic: FakeFilmMusicPlayer.new,
           openedFromMemory:
               state.uri.queryParameters[RouteQuery.from] ==
               RouteQuery.fromMemory,
@@ -446,6 +449,111 @@ void main() {
       expect(find.byType(SkyStoryCanvas), findsNothing);
       expect(find.byKey(const Key('wrap-up-hud-mute')), findsNothing);
       expect(find.text('Keep forever'), findsOneWidget);
+    });
+  });
+
+  group('Golden Vows plays first (#346)', () {
+    final sky = WrapUpSky(
+      isFromDirector: true,
+      title: 'Anna & Marco',
+      pages: [
+        WrapUpSkyPage(
+          firstDay: 1,
+          date: DateTime(2026, 6, 14),
+          photoCount: 1,
+          heroPhotoId: 'hero',
+        ),
+      ],
+    );
+    final goldenVows = WrapUpGoldenVows(
+      occasion: 'wedding',
+      occasionLine: 'Our Wedding Day',
+      names: 'Anna & Marco',
+      startDate: DateTime(2026, 6, 14),
+      heroes: const [
+        WrapUpGoldenVowsHero(photoId: 'hero', label: 'The vows'),
+      ],
+      chapters: const [],
+      heartPhotoIds: const ['hero'],
+    );
+    final photos = FakePhotoRepository()
+      ..photosResult = Right([
+        buildPhotoEntity(id: 'hero', imageUrl: 'https://x/hero.jpg'),
+      ]);
+
+    FakeWrapUpRepository repo({WrapUpGoldenVows? withGoldenVows}) =>
+        FakeWrapUpRepository()
+          ..getOrGenerateResult = Right(
+            buildWrapUpEntity(
+              coverPhoto: const WrapUpCoverPhoto(),
+              sky: sky,
+              goldenVows: withGoldenVows,
+            ),
+          );
+
+    testWidgets('a wrap-up with Golden Vows plays it, with the speaker', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        wrapUpRepo: repo(withGoldenVows: goldenVows),
+        photoRepo: photos,
+      );
+      await _settle(tester);
+      // Past the canvas's wait for photos that never load here.
+      await tester.pump(GoldenVowsCanvas.photoWait);
+
+      expect(find.byType(GoldenVowsCanvas), findsOneWidget);
+      expect(find.byType(SkyStoryCanvas), findsNothing);
+      expect(find.text('Keep forever'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('wrap-up-hud-mute')));
+      await tester.pump();
+      expect(
+        tester.widget<GoldenVowsCanvas>(find.byType(GoldenVowsCanvas)).muted,
+        isTrue,
+      );
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('without Golden Vows, or with its photos gone: Sky Story', (
+      tester,
+    ) async {
+      await _pump(tester, wrapUpRepo: repo(), photoRepo: photos);
+      await _settle(tester);
+      expect(find.byType(GoldenVowsCanvas), findsNothing);
+      expect(find.byType(SkyStoryCanvas), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+
+      // Its hero gone: nothing left of the album, so the classic film (Sky
+      // Story's page lost its hero too).
+      await _pump(tester, wrapUpRepo: repo(withGoldenVows: goldenVows));
+      await _settle(tester);
+      expect(find.byType(GoldenVowsCanvas), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a Golden Vows failure hands over to Sky Story', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        wrapUpRepo: repo(withGoldenVows: goldenVows),
+        photoRepo: photos,
+      );
+      await _settle(tester);
+      // Past the canvas's wait for photos that never load here.
+      await tester.pump(GoldenVowsCanvas.photoWait);
+
+      tester.widget<GoldenVowsCanvas>(find.byType(GoldenVowsCanvas)).onFailure!(
+        StateError('broken'),
+        StackTrace.empty,
+      );
+      await tester.pump();
+      await _settle(tester);
+
+      expect(find.byType(GoldenVowsCanvas), findsNothing);
+      expect(find.byType(SkyStoryCanvas), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
     });
   });
 }

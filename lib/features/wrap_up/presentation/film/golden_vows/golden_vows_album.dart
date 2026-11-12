@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart' show Matrix4;
 
 import '../film_eases.dart';
 import 'golden_vows_scene_spec.dart';
+import 'golden_vows_story.dart' show GvChapterLayout;
 import 'golden_vows_timeline.dart';
 
 typedef _E = FilmEases;
@@ -242,7 +243,14 @@ abstract final class GvChapterLayouts {
     (120.0, 1020.0, 840.0, 600.0, 1.0),
   ];
 
-  /// Chapters cycle A, B, C.
-  static List<(double, double, double, double, double)> forChapter(int i) =>
-      const [a, b, c][i % 3];
+  /// The chapter's [layout], else A, B, C in turn.
+  static List<(double, double, double, double, double)> forChapter(
+    int i, [
+    GvChapterLayout? layout,
+  ]) => switch (layout) {
+    GvChapterLayout.a => a,
+    GvChapterLayout.b => b,
+    GvChapterLayout.c => c,
+    null => const [a, b, c][i % 3],
+  };
 }
