@@ -4,9 +4,10 @@ import 'package:audio_session/audio_session.dart';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 
-/// What the film's music needs from an audio player (#345, phase 5): a
-/// seam so tests drive a fake and the film never depends on a plugin.
-abstract interface class SkyMusicPlayer {
+/// What a film's music needs from an audio player (#345, shared since
+/// #346): a seam so tests drive a fake and a film never depends on a
+/// plugin.
+abstract interface class FilmMusicPlayer {
   /// Loads the track; throws if it can't.
   Future<void> load();
   Future<void> play();
@@ -17,15 +18,22 @@ abstract interface class SkyMusicPlayer {
   Future<void> dispose();
 }
 
-/// The film's track, played by just_audio from the bundled asset.
+/// A film's track, played by just_audio from a bundled asset (credits in
+/// `assets/audio/CREDITS.md`).
 ///
 /// The audio session is "ambient": the iPhone's silent switch mutes it and
 /// it mixes with whatever else is playing instead of stopping it; the
 /// player never takes audio focus.
-class JustAudioSkyMusicPlayer implements SkyMusicPlayer {
-  JustAudioSkyMusicPlayer({this.asset = defaultAsset});
+class JustAudioFilmMusicPlayer implements FilmMusicPlayer {
+  JustAudioFilmMusicPlayer(this.asset);
 
-  static const defaultAsset = 'assets/audio/sky_story_upbeat.m4a';
+  /// Sky Story's track (#345).
+  static FilmMusicPlayer skyStory() =>
+      JustAudioFilmMusicPlayer('assets/audio/sky_story_upbeat.m4a');
+
+  /// Golden Vows' track (#346).
+  static FilmMusicPlayer goldenVows() =>
+      JustAudioFilmMusicPlayer('assets/audio/golden_vows_wedding.m4a');
 
   final String asset;
   final _player = AudioPlayer(handleAudioSessionActivation: false);
@@ -72,12 +80,12 @@ class JustAudioSkyMusicPlayer implements SkyMusicPlayer {
 /// and out, pauses and resumes with it, starts again when it loops, and
 /// pulls the audio back when it drifts. Any failure (no track, a decode
 /// error) is logged once and the film goes on silent.
-class SkyStoryMusic {
-  SkyStoryMusic(this._player, {required this.filmLength}) {
+class FilmMusic {
+  FilmMusic(this._player, {required this.filmLength}) {
     _ready = _load();
   }
 
-  final SkyMusicPlayer _player;
+  final FilmMusicPlayer _player;
 
   /// The film's length, s: the fade-out ends here.
   final double filmLength;
@@ -132,7 +140,7 @@ class SkyStoryMusic {
   void _fail(String what, Object error) {
     if (_failed) return;
     _failed = true;
-    debugPrint('Sky Story music $what failed; the film plays silent: $error');
+    debugPrint('Film music $what failed; the film plays silent: $error');
   }
 
   /// Called every frame with the film's time [t] and whether it is
@@ -203,7 +211,7 @@ class SkyStoryMusic {
     try {
       await _player.dispose();
     } catch (e) {
-      debugPrint('Sky Story music dispose failed: $e');
+      debugPrint('Film music dispose failed: $e');
     }
   }
 }

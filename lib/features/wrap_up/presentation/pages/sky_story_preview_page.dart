@@ -7,7 +7,7 @@ import '../controllers/wrap_up_controller.dart';
 import '../film/sky_story/sky_story.dart';
 import '../film/sky_story/sky_story_canvas.dart';
 import '../film/sky_story/sky_story_fixture.dart';
-import '../film/sky_story/sky_story_music.dart';
+import '../film/film_music.dart';
 
 /// Debug builds only (#345): plays the Sky Story film full screen. With a
 /// [tripId], that memory's own film (its `content.sky`, real photos);
@@ -18,14 +18,14 @@ import '../film/sky_story/sky_story_music.dart';
 class SkyStoryPreviewPage extends ConsumerStatefulWidget {
   const SkyStoryPreviewPage({
     this.tripId,
-    this.music = JustAudioSkyMusicPlayer.new,
+    this.music = JustAudioFilmMusicPlayer.skyStory,
     super.key,
   });
 
   final String? tripId;
 
   /// The music player; tests pass a fake.
-  final SkyMusicPlayer Function() music;
+  final FilmMusicPlayer Function() music;
 
   @override
   ConsumerState<SkyStoryPreviewPage> createState() =>

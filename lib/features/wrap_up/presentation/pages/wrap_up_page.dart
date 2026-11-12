@@ -14,7 +14,7 @@ import '../controllers/wrap_up_state.dart';
 import '../film/chrome/wrap_up_film_grain.dart';
 import '../film/sky_story/sky_story.dart';
 import '../film/sky_story/sky_story_canvas.dart';
-import '../film/sky_story/sky_story_music.dart';
+import '../film/film_music.dart';
 import '../film/wrap_up_film_canvas.dart';
 import '../film/wrap_up_film_hud.dart';
 import '../film/wrap_up_film_photo.dart';
@@ -26,7 +26,7 @@ class WrapUpPage extends ConsumerStatefulWidget {
   const WrapUpPage({
     required this.tripId,
     this.openedFromMemory = false,
-    this.skyMusic = JustAudioSkyMusicPlayer.new,
+    this.skyMusic = JustAudioFilmMusicPlayer.skyStory,
     super.key,
   });
 
@@ -37,7 +37,7 @@ class WrapUpPage extends ConsumerStatefulWidget {
   final bool openedFromMemory;
 
   /// The Sky Story film's music player; tests pass a fake.
-  final SkyMusicPlayer Function() skyMusic;
+  final FilmMusicPlayer Function() skyMusic;
 
   @override
   ConsumerState<WrapUpPage> createState() => _WrapUpPageState();
@@ -119,7 +119,7 @@ class _SkyStoryFilm extends StatefulWidget {
 
   final WrapUpState state;
   final SkyStory story;
-  final SkyMusicPlayer Function() music;
+  final FilmMusicPlayer Function() music;
   final bool muted;
   final VoidCallback onFailure;
 

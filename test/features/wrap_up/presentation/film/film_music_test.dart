@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story_fixture.dart';
-import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story_music.dart';
+import 'package:traviato/features/wrap_up/presentation/film/film_music.dart';
 import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story_timeline.dart';
 import 'package:traviato/features/wrap_up/presentation/pages/sky_story_preview_page.dart';
 import 'package:traviato/l10n/app_localizations.dart';
 
-import '../../../fakes/fake_sky_music_player.dart';
+import '../../fakes/fake_film_music_player.dart';
 
-Widget _film(SkyMusicPlayer Function() music) => Localizations(
+Widget _film(FilmMusicPlayer Function() music) => Localizations(
   locale: const Locale('en'),
   delegates: AppLocalizations.localizationsDelegates,
   child: SkyStoryCanvas(
@@ -26,27 +26,27 @@ void main() {
     for (var n = 1; n <= SkyStoryTimeline.maxChapters; n++) {
       test('fades in and out of a $n-chapter film', () {
         final total = SkyStoryTimeline.forChapters(n).total;
-        expect(SkyStoryMusic.volumeAt(0, total), 0);
-        expect(SkyStoryMusic.volumeAt(0.2, total), closeTo(0.5, 1e-9));
-        expect(SkyStoryMusic.volumeAt(0.4, total), 1);
-        expect(SkyStoryMusic.volumeAt(total / 2, total), 1);
-        expect(SkyStoryMusic.volumeAt(total - 2.5, total), 1);
+        expect(FilmMusic.volumeAt(0, total), 0);
+        expect(FilmMusic.volumeAt(0.2, total), closeTo(0.5, 1e-9));
+        expect(FilmMusic.volumeAt(0.4, total), 1);
+        expect(FilmMusic.volumeAt(total / 2, total), 1);
+        expect(FilmMusic.volumeAt(total - 2.5, total), 1);
         expect(
-          SkyStoryMusic.volumeAt(total - 1.25, total),
+          FilmMusic.volumeAt(total - 1.25, total),
           closeTo(0.5, 1e-9),
         );
-        expect(SkyStoryMusic.volumeAt(total, total), 0);
+        expect(FilmMusic.volumeAt(total, total), 0);
       });
     }
   });
 
   group('on the film clock', () {
-    late FakeSkyMusicPlayer player;
-    late SkyStoryMusic music;
+    late FakeFilmMusicPlayer player;
+    late FilmMusic music;
 
     setUp(() async {
-      player = FakeSkyMusicPlayer();
-      music = SkyStoryMusic(player, filmLength: 54);
+      player = FakeFilmMusicPlayer();
+      music = FilmMusic(player, filmLength: 54);
       await music.ready;
     });
 
@@ -117,8 +117,8 @@ void main() {
   });
 
   test('a track that fails to load leaves the film silent', () async {
-    final player = FakeSkyMusicPlayer(failLoad: true);
-    final music = SkyStoryMusic(player, filmLength: 54);
+    final player = FakeFilmMusicPlayer(failLoad: true);
+    final music = FilmMusic(player, filmLength: 54);
     await music.ready;
     expect(music.failed, isTrue);
     music.sync(1, running: true);
@@ -126,8 +126,8 @@ void main() {
   });
 
   testWidgets('the film plays its music', (tester) async {
-    late FakeSkyMusicPlayer player;
-    await tester.pumpWidget(_film(() => player = FakeSkyMusicPlayer()));
+    late FakeFilmMusicPlayer player;
+    await tester.pumpWidget(_film(() => player = FakeFilmMusicPlayer()));
     await tester.pump(const Duration(seconds: 2));
     expect(player.playing, isTrue);
     expect(player.seeks, isNotEmpty);
@@ -136,9 +136,9 @@ void main() {
   });
 
   testWidgets('a failing track: the film plays on, silent', (tester) async {
-    late FakeSkyMusicPlayer player;
+    late FakeFilmMusicPlayer player;
     await tester.pumpWidget(
-      _film(() => player = FakeSkyMusicPlayer(failLoad: true)),
+      _film(() => player = FakeFilmMusicPlayer(failLoad: true)),
     );
     for (var i = 0; i < 20; i++) {
       await tester.pump(const Duration(milliseconds: 250));
@@ -149,12 +149,12 @@ void main() {
   });
 
   testWidgets('the preview mutes and unmutes the music', (tester) async {
-    late FakeSkyMusicPlayer player;
+    late FakeFilmMusicPlayer player;
     await tester.pumpWidget(
       MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: SkyStoryPreviewPage(music: () => player = FakeSkyMusicPlayer()),
+        home: SkyStoryPreviewPage(music: () => player = FakeFilmMusicPlayer()),
       ),
     );
     await tester.pump(const Duration(seconds: 2));
@@ -172,7 +172,7 @@ void main() {
   testWidgets('the music stops while another screen covers the film', (
     tester,
   ) async {
-    late FakeSkyMusicPlayer player;
+    late FakeFilmMusicPlayer player;
     final navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -182,7 +182,7 @@ void main() {
         home: SkyStoryCanvas(
           story: SkyStoryFixtures.lisbon,
           photo: (_) => null,
-          music: () => player = FakeSkyMusicPlayer(),
+          music: () => player = FakeFilmMusicPlayer(),
         ),
       ),
     );
@@ -208,14 +208,14 @@ void main() {
   testWidgets('a failure stops the film and the music, once', (
     tester,
   ) async {
-    late FakeSkyMusicPlayer player;
+    late FakeFilmMusicPlayer player;
     final failures = <Object>[];
     // No Localizations: laying out the words throws.
     await tester.pumpWidget(
       SkyStoryCanvas(
         story: SkyStoryFixtures.lisbon,
         photo: (_) => null,
-        music: () => player = FakeSkyMusicPlayer(),
+        music: () => player = FakeFilmMusicPlayer(),
         onFailure: (error, _) => failures.add(error),
       ),
     );
