@@ -58,12 +58,18 @@ export interface SkyPageContent {
   hero_photo_id: string;
   extra_photo_ids: string[];
   note_id: string | null;
+  // The note's text, the user's own words exactly (a shared or exported
+  // film can't read the viewer's notes). Drafts rebuild on every open, so
+  // it follows edits.
+  note: string | null;
   sky_line: string | null;
 }
 
 export interface SkyContent {
   sky_version: typeof SKY_VERSION;
   source: "director" | "code";
+  // The memory's name: the opening's big title.
+  title: string;
   // Signs the notes and closes the title's subtitle; null = no signature.
   first_name: string | null;
   // Every photo of the memory: the closing "{N} moments".
@@ -551,6 +557,7 @@ function pageContent(
     date: dateOfDay(start, group.first),
     end_date: multi ? dateOfDay(start, group.last) : null,
     photo_count: group.photos.length,
+    note: null,
     ...fields,
   };
 }
@@ -639,12 +646,20 @@ export function buildSkyContent(
     ? directorSkyPages(tripData, plan)
     : codeSkyPages(tripData, heroScores);
   if (pages.length === 0) return null;
+  const notes = new Map(
+    tripData.notes.filter((n) => n.id).map((n) => [n.id!, n.content.trim()]),
+  );
+  for (const page of pages) {
+    page.note = page.note_id ? notes.get(page.note_id) || null : null;
+    if (!page.note) page.note_id = null;
+  }
   const mosaic = sortPhotosChronologically(
     tripData.photos.filter((p) => p.use_in_wrap_up !== false),
   );
   return {
     sky_version: SKY_VERSION,
     source: plan ? "director" : "code",
+    title: tripData.trip.name,
     first_name: firstNameOf(tripData.username),
     moment_count: tripData.photos.length,
     mosaic_photo_ids: spreadEvenly(mosaic, MAX_SKY_MOSAIC_PHOTOS).map((p) =>

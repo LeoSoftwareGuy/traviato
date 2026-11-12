@@ -208,6 +208,7 @@ Deno.test("buildSkyContent: counts, mosaic and first name", () => {
   assertEquals(sky.sky_version, 1);
   assertEquals(sky.source, "code");
   assertEquals(sky.first_name, "Mari");
+  assertEquals(sky.title, "Amsterdam");
   assertEquals(sky.moment_count, 80);
   assertEquals(sky.mosaic_photo_ids.length, MAX_SKY_MOSAIC_PHOTOS);
   assert(!sky.mosaic_photo_ids.includes("d1p0"));
@@ -235,6 +236,7 @@ Deno.test("buildSkyContent: the director's pages, with counts and dates from cod
     hero_photo_id: "p01",
     extra_photo_ids: ["p00", "p02", "p03"],
     note_id: "n1",
+    note: "Bikes everywhere.",
     sky_line: null,
   });
   assertEquals(
