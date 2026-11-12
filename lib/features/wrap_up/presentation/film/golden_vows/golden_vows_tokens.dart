@@ -1,5 +1,7 @@
 import 'package:flutter/painting.dart';
 
+import '../marks/balloon_mark.dart';
+
 /// Golden Vows' palette (docs/design/golden-vows/golden-vows-spec.md §1,
 /// #346). Film-local like `SkyStoryColors`: the film is a fixed
 /// composition that doesn't follow the app theme.
@@ -17,4 +19,47 @@ abstract final class GoldenVowsColors {
 
   /// The page-turn flare's warm light (spec §3, at its 200/255 peak).
   static const flare = Color(0xFFFFD696);
+
+  /// The balloon mark in gold (spec §4): Golden Vows' own styling of the
+  /// Storyni balloon, in the intro, on the album cover and at the end.
+  static const balloon = BalloonMarkStyle(
+    envelope: [goldLight, gold, goldDeep],
+    envelopeStops: [0, 0.55, 1],
+    gores: Color(0x96FFFCF6),
+    band: goldDeep,
+    ropes: goldDeep,
+    basket: goldDeep,
+  );
+}
+
+/// Golden Vows' type (spec §1): Cormorant Garamond for names, labels and
+/// lists, Pinyon Script for titles and handwriting. Pinyon has no Cyrillic,
+/// so Russian script falls back glyph by glyph to Great Vibes, a close
+/// formal script.
+abstract final class GoldenVowsType {
+  static const serifFamily = 'CormorantGaramond';
+  static const scriptFamily = 'PinyonScript';
+  static const scriptFallback = ['GreatVibes'];
+
+  static TextStyle serif(
+    double size, {
+    required Color color,
+    int weight = 500,
+    double letterSpacing = 0,
+  }) => TextStyle(
+    fontFamily: serifFamily,
+    fontSize: size,
+    color: color,
+    letterSpacing: letterSpacing,
+    height: 1.2,
+    fontVariations: [FontVariation.weight(weight.toDouble())],
+  );
+
+  static TextStyle script(double size, {required Color color}) => TextStyle(
+    fontFamily: scriptFamily,
+    fontFamilyFallback: scriptFallback,
+    fontSize: size,
+    color: color,
+    height: 1.2,
+  );
 }

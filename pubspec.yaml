@@ -117,6 +117,18 @@ flutter:
     - family: Caveat
       fonts:
         - asset: assets/fonts/Caveat[wght].ttf
+    # The Golden Vows film's type (#346; OFL, google/fonts, licences next
+    # to each file). Cormorant Garamond is variable and has Cyrillic; Pinyon
+    # Script has none, so Russian script lines fall back to Great Vibes.
+    - family: CormorantGaramond
+      fonts:
+        - asset: assets/fonts/CormorantGaramond[wght].ttf
+    - family: PinyonScript
+      fonts:
+        - asset: assets/fonts/PinyonScript-Regular.ttf
+    - family: GreatVibes
+      fonts:
+        - asset: assets/fonts/GreatVibes-Regular.ttf
 
   assets:
     - .env

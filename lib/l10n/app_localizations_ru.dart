@@ -2582,6 +2582,14 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get goldenVows_packedHeading => 'Перед важным днём';
+
+  @override
+  String goldenVows_packedCount(int packed, int total) {
+    return 'Что мы взяли · $packed из $total';
+  }
+
+  @override
   String skyStory_days(int first, int last) {
     return 'Дни $first–$last';
   }

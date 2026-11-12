@@ -2532,6 +2532,14 @@
   "@skyStory_day": {
     "x-review": "pending"
   },
+  "goldenVows_packedHeading": "Перед важным днём",
+  "@goldenVows_packedHeading": {
+    "x-review": "pending"
+  },
+  "goldenVows_packedCount": "Что мы взяли · {packed} из {total}",
+  "@goldenVows_packedCount": {
+    "x-review": "pending"
+  },
   "skyStory_days": "Дни {first}–{last}",
   "@skyStory_days": {
     "x-review": "pending"

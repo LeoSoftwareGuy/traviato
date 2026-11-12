@@ -3913,6 +3913,18 @@ abstract class AppLocalizations {
   /// **'Day {day}'**
   String skyStory_day(int day);
 
+  /// Golden Vows film: the heading of the packing card, in script (#346).
+  ///
+  /// In en, this message translates to:
+  /// **'Before the big day'**
+  String get goldenVows_packedHeading;
+
+  /// Golden Vows film: the packing card's subhead (#346); shown uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'What we packed · {packed} of {total}'**
+  String goldenVows_packedCount(int packed, int total);
+
   /// Sky Story film: a page's eyebrow when the page covers several days (#345); shown uppercase.
   ///
   /// In en, this message translates to:

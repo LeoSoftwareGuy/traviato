@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../film/golden_vows/golden_vows_canvas.dart';
-import '../film/golden_vows/golden_vows_timeline.dart';
+import '../film/golden_vows/golden_vows_story.dart';
 
-/// Debug builds only (#346): plays the Golden Vows film full screen, with
-/// the reference wedding's timing. Phase 1 shows its ambient layer only.
+/// Debug builds only (#346): plays the Golden Vows film full screen with
+/// the spec's wedding. EN/RU switches the film's language (and the
+/// fixture's words). Built up phase by phase: phase 2 has the ambient
+/// layer, the invitation and the packing card.
 /// Reached from the Plan inspector; never routed in release.
 class GoldenVowsPreviewPage extends StatefulWidget {
   const GoldenVowsPreviewPage({super.key});
@@ -15,20 +16,39 @@ class GoldenVowsPreviewPage extends StatefulWidget {
 }
 
 class _GoldenVowsPreviewPageState extends State<GoldenVowsPreviewPage> {
-  final _timeline = GoldenVowsTimeline.reference();
+  bool _russian = false;
 
   @override
   Widget build(BuildContext context) {
+    final locale = Locale(_russian ? 'ru' : 'en');
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          Positioned.fill(child: GoldenVowsCanvas(timeline: _timeline)),
+          Positioned.fill(
+            child: Localizations.override(
+              context: context,
+              locale: locale,
+              child: GoldenVowsCanvas(
+                key: ValueKey(locale),
+                story: _russian
+                    ? GoldenVowsFixtures.weddingRu
+                    : GoldenVowsFixtures.wedding,
+              ),
+            ),
+          ),
           SafeArea(
-            child: IconButton(
-              key: const Key('golden-vows-close'),
-              icon: const Icon(Icons.close, color: AppColors.textOnPhoto),
-              onPressed: () => Navigator.of(context).maybePop(),
+            child: Row(
+              children: [
+                const BackButton(color: Colors.white),
+                const Spacer(),
+                TextButton(
+                  key: const Key('golden-vows-language'),
+                  style: TextButton.styleFrom(foregroundColor: Colors.white),
+                  onPressed: () => setState(() => _russian = !_russian),
+                  child: Text(_russian ? 'RU' : 'EN'),
+                ),
+              ],
             ),
           ),
         ],

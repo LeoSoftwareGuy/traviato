@@ -83,6 +83,9 @@ class GoldenVowsTimeline {
       )
       .start;
 
+  /// When the packing card comes in, or null without one.
+  double? get packingCardStart => film.first<GvPackingCardSpec>()?.start;
+
   /// When the ending starts: the spec's e.
   double get endingStart => film.first<GvEndingSpec>()!.start;
 
