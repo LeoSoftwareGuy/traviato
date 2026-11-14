@@ -3,9 +3,9 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_story.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_texts.dart';
-import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_timeline.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_scene_painter.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_text_fx.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_tokens.dart';
@@ -14,6 +14,7 @@ import 'package:traviato/l10n/app_localizations.dart';
 
 import '../../../../../helpers/font_codepoints.dart';
 import 'neon_test_fonts.dart';
+import 'neon_test_photos.dart';
 
 void main() {
   final en = lookupAppLocalizations(const ui.Locale('en'));
@@ -73,7 +74,11 @@ void main() {
 
     test('no plan → no plan texts', () {
       final texts = NeonNightTexts(
-        NeonNightStory(title: 'Rave', date: DateTime(2026)),
+        NeonNightStory(
+          title: 'Rave',
+          date: DateTime(2026),
+          chapters: NeonNightFixtures.few.chapters,
+        ),
         en,
       );
       expect(texts.plan, isNull);
@@ -129,6 +134,7 @@ void main() {
       ]) ...[
         story.title.toUpperCase(),
         for (final row in story.plan) ...[row.time, row.item.toUpperCase()],
+        for (final chapter in story.chapters) chapter.title.toUpperCase(),
       ],
     ];
     expect(missingCodepoints(display.union(fallback), titles), isEmpty);
@@ -139,6 +145,13 @@ void main() {
         for (final l10n in [en, ru]) l10n.neonNight_planMore(3).toUpperCase(),
         NnIgnitionTexts.formatDate(DateTime(2026, 11, 14), 'en'),
         NnIgnitionTexts.formatDate(DateTime(2026, 11, 14), 'ru'),
+        // The chapter cards' header, times, typed notes and cursor.
+        'CH 01/03 22:10 – 23:40 > ▌',
+        for (final story in [
+          NeonNightFixtures.reference,
+          NeonNightFixtures.referenceRu,
+        ])
+          for (final chapter in story.chapters) ?chapter.note?.toUpperCase(),
       ]),
       isEmpty,
     );
@@ -178,8 +191,10 @@ void main() {
   group('export-ready (#345 rules)', () {
     Future<Uint8List> render(double t, NeonNightTexts texts) async {
       final painter = NeonScenePainter(
-        timeline: NeonNightTimeline.reference(),
+        timeline: NeonNightCanvas.timelineFor(NeonNightFixtures.reference),
+        story: NeonNightFixtures.reference,
         texts: texts,
+        photos: const NoPhotos(),
         time: ValueNotifier(t),
       );
       final recorder = ui.PictureRecorder();

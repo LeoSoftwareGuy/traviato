@@ -11,3 +11,7 @@ Regenerate a still: `ffmpeg -ss <seconds> -i NeonNight.mp4 -frames:v 1 -q:v 3 st
 - **Every long chapter card plays laser zooms**, however few photos the chapter has (overrides §8's "needs ≥ 4 tiles; fewer → no zooms"). Each tile is zoomed at most once: 3+ tiles → 3 zooms (lb 6, 9, 12), 2 tiles → 2 zooms (lb 6, 9), 1 tile → 1 zoom (lb 6). See `NeonZoomPicks`.
 - **Card length:** middle chapters get the 8-beat card. The first and last chapter get the zoom card: 16 beats with 3+ photos, **12 beats with 1–2 photos** (each zoom takes 3 beats from lb 6, kept to whole bars so the drop stays on a downbeat). That chapter's film is 1 bar (1.905 s) shorter.
 - **Film lengths for 1 and 2 chapters follow the scene rules** (23 and 30 bars), not §9's table (24 and 29).
+- **A chapter with no note has no typed line** and its bar moves up to gridBottom + 70 (§5.3, and the MP4's Ch 2). §8's counted fallback line (`> n PHOTOS IN x MIN`) is not used: no counts during the film.
+- **The laser zoom's hit spot stays lit while the laser is on** (0.55 + the τ 0.25 hit flare), as in the MP4; the spec has only the flare.
+- **The ghost numeral's box is line-height 1.12**, which puts its glyph tops at y ≈ 275 like the MP4's (the spec's y 230 is the CSS box).
+- The reference's Ch 1 has **34 photos** (5 sheet rows, as in the MP4 at 15.7 s); Ch 2 has 12, Ch 3 has 40.

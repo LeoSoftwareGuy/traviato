@@ -2,6 +2,7 @@ import 'package:flutter/painting.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
 import '../../../../../l10n/app_localizations.dart';
+import 'neon_chapter_card.dart';
 import 'neon_night_story.dart';
 import 'neon_text_fx.dart';
 import 'neon_tokens.dart';
@@ -13,16 +14,26 @@ import 'neon_type.dart';
 class NeonNightTexts {
   NeonNightTexts(NeonNightStory story, AppLocalizations l10n)
     : ignition = NnIgnitionTexts(story, l10n.localeName),
-      plan = story.hasPlan ? NnPlanTexts(story, l10n) : null;
+      plan = story.hasPlan ? NnPlanTexts(story, l10n) : null,
+      chapters = [
+        for (var i = 0; i < story.chapters.length; i++)
+          NnChapterTexts(story, i),
+      ];
 
   final NnIgnitionTexts ignition;
 
   /// Null when the memory has no plan (the scene is cut).
   final NnPlanTexts? plan;
 
+  /// One per chapter, in order.
+  final List<NnChapterTexts> chapters;
+
   void dispose() {
     ignition.dispose();
     plan?.dispose();
+    for (final chapter in chapters) {
+      chapter.dispose();
+    }
   }
 }
 
@@ -182,5 +193,116 @@ class NnPlanRowTexts {
   void dispose() {
     time.dispose();
     item.dispose();
+  }
+}
+
+/// A chapter card (§5.3): header, time range, ghost numeral (pink, then
+/// the accent), title, the typed line and each zoom's time label.
+class NnChapterTexts {
+  factory NnChapterTexts(NeonNightStory story, int index) {
+    final chapter = story.chapters[index];
+    final count = story.chapters.length;
+    final accent = NeonColors.chapterAccent(index);
+    String two(int n) => n.toString().padLeft(2, '0');
+    NeonTubeText numeral(Color color) => NeonTubeText(
+      two(index + 1),
+      size: 380,
+      maxWidth: 1000,
+      stroke: 6,
+      color: color,
+      mono: true,
+    );
+    final title = NeonType.splitTitle(chapter.title.toUpperCase());
+    final note = chapter.note;
+    final typed =
+        note == null
+              ? null
+              : TextPainter(
+                  text: TextSpan(
+                    text: '> ${note.toUpperCase()}',
+                    style: NeonType.mono(40, color: accent, height: 52 / 40),
+                  ),
+                  textDirection: TextDirection.ltr,
+                  maxLines: 2,
+                  ellipsis: '…',
+                )
+          ?..layout(maxWidth: typedWidth);
+    final sheet = NnContactSheet.forPhotos(chapter.photos.length);
+    final tiles = sheet.tiles.length;
+    final timing = NnCardTiming(
+      chapterNumber: index + 1,
+      beats: 16,
+      zooms: 3,
+      tiles: tiles,
+    );
+    return NnChapterTexts._(
+      accent: accent,
+      header: neonLayout(
+        'CH ${two(index + 1)}/${two(count)}',
+        NeonType.mono(52, color: accent),
+      ),
+      range: neonLayout(
+        '${chapter.from} – ${chapter.to}',
+        NeonType.mono(36, color: accent.withValues(alpha: 0.75)),
+      ),
+      numeralPink: numeral(NeonColors.pink),
+      numeral: numeral(accent),
+      title: NeonChromaticText(
+        title,
+        size: NeonType.fit(title, 860, 170, 0.5),
+        maxWidth: 860,
+        split: 4,
+      ),
+      typed: typed,
+      tileLabels: {
+        for (final k in timing.zoomTiles)
+          k: NeonLabelBox(chapter.photos[k].takenAt),
+      },
+    );
+  }
+
+  NnChapterTexts._({
+    required this.accent,
+    required this.header,
+    required this.range,
+    required this.numeralPink,
+    required this.numeral,
+    required this.title,
+    required this.typed,
+    required this.tileLabels,
+  });
+
+  static const typedWidth = 936.0;
+
+  final Color accent;
+  final TextPainter header;
+  final TextPainter range;
+  final NeonTubeText numeralPink;
+  final NeonTubeText numeral;
+  final NeonChromaticText title;
+
+  /// `> NOTE`, at most 2 lines; null when the chapter has no note.
+  final TextPainter? typed;
+
+  /// The time label of each tile a zoom can pick.
+  final Map<int, NeonLabelBox> tileLabels;
+
+  /// How many lines the typed note takes (0 without one).
+  int get typedLines => typed?.computeLineMetrics().length ?? 0;
+
+  /// How many characters the typed line has to type.
+  int get typedLength =>
+      typed == null ? 0 : (typed!.text! as TextSpan).text!.length;
+
+  void dispose() {
+    header.dispose();
+    range.dispose();
+    numeralPink.dispose();
+    numeral.dispose();
+    title.dispose();
+    typed?.dispose();
+    for (final label in tileLabels.values) {
+      label.dispose();
+    }
   }
 }

@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../film/neon_night/neon_night_canvas.dart';
 import '../film/neon_night/neon_night_story.dart';
+import '../film/neon_night/neon_placeholder_photo.dart';
 
 /// Debug builds only (#363): plays the Neon Night film full screen on the
-/// spec's reference night. Built up phase by phase: phase 3 adds Ignition
-/// and Plan. EN/RU switches the film's language (and the fixture's
+/// spec's reference night, with placeholder photos. Built up phase by
+/// phase: phase 4 adds the chapter cards. EN/RU switches the film's language (and the fixture's
 /// words); "Reduced" switches to the reduced-flashing version (§6).
 /// Reached from the Plan inspector; never routed in release.
 class NeonNightPreviewPage extends StatefulWidget {
@@ -22,6 +23,9 @@ class _NeonNightPreviewPageState extends State<NeonNightPreviewPage> {
   @override
   Widget build(BuildContext context) {
     final locale = Locale(_russian ? 'ru' : 'en');
+    final story = _russian
+        ? NeonNightFixtures.referenceRu
+        : NeonNightFixtures.reference;
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -32,9 +36,10 @@ class _NeonNightPreviewPageState extends State<NeonNightPreviewPage> {
               locale: locale,
               child: NeonNightCanvas(
                 key: ValueKey(locale),
-                story: _russian
-                    ? NeonNightFixtures.referenceRu
-                    : NeonNightFixtures.reference,
+                story: story,
+                photo: NeonPlaceholderPhoto.forIds(
+                  NeonNightFixtures.photoIds(story),
+                ),
                 reducedFlashing: _reduced,
               ),
             ),

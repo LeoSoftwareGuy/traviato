@@ -33,17 +33,20 @@ abstract final class NeonType {
 
   static TextStyle mono(
     double size, {
-    required Color color,
+    Color? color,
+    Paint? foreground,
     int weight = 500,
     double letterSpacing = 2,
+    double height = 1.2,
   }) => TextStyle(
     fontFamily: monoFamily,
     fontSize: size,
     fontWeight: _weight(weight),
     fontVariations: [FontVariation.weight(weight.toDouble())],
-    color: color,
+    color: foreground == null ? color : null,
+    foreground: foreground,
     letterSpacing: letterSpacing,
-    height: 1.2,
+    height: height,
   );
 
   static FontWeight _weight(int weight) =>
@@ -57,5 +60,28 @@ abstract final class NeonType {
         .map((line) => line.runes.length)
         .fold(1, math.max);
     return math.min(maxSize, maxWidth / (chars * k));
+  }
+
+  /// A title over 10 characters with 2+ words goes on 2 lines, split at
+  /// the word boundary nearest its middle (§5.3).
+  static String splitTitle(String title) {
+    final words = title.split(' ');
+    if (title.runes.length <= 10 || words.length < 2) return title;
+    final middle = title.length / 2;
+    var best = 1;
+    var bestDistance = double.infinity;
+    var at = 0;
+    for (var i = 1; i < words.length; i++) {
+      at += words[i - 1].length + 1;
+      final distance = (at - 1 - middle).abs();
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = i;
+      }
+    }
+    return [
+      words.take(best).join(' '),
+      words.skip(best).join(' '),
+    ].join('\n');
   }
 }
