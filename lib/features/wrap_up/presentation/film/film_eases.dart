@@ -21,6 +21,10 @@ abstract final class FilmEases {
   static double sineInOut(double p) => -(math.cos(math.pi * p) - 1) / 2;
   static double sineOut(double p) => math.sin(p * math.pi / 2);
 
+  /// `easeOutExpo`: Neon Night's slam (#363).
+  static double expoOut(double p) =>
+      p >= 1 ? 1 : 1 - math.pow(2, -10 * p).toDouble();
+
   /// `back.out(overshoot)`; GSAP's default overshoot is 1.70158.
   static double backOut(double p, [double overshoot = 1.70158]) {
     final q = p - 1;

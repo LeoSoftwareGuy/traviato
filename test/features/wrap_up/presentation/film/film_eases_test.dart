@@ -17,6 +17,7 @@ void main() {
       FilmEases.sineInOut,
       FilmEases.sineOut,
       FilmEases.backOut,
+      FilmEases.expoOut,
     ]) {
       expect(ease(0), closeTo(0, 1e-12));
       expect(ease(1), closeTo(1, 1e-12));
@@ -41,5 +42,10 @@ void main() {
     expect(FilmEases.at(0, 1, 2), 0);
     expect(FilmEases.at(5, 1, 2), 1);
     expect(FilmEases.at(2, 1, 2, FilmEases.linear), 0.5);
+  });
+
+  test('expoOut is easeOutExpo: 1 − 2^(−10p)', () {
+    expect(FilmEases.expoOut(0.1), 0.5);
+    expect(FilmEases.expoOut(0.5), closeTo(1 - 1 / 32, 1e-12));
   });
 }
