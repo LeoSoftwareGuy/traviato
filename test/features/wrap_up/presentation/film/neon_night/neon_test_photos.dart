@@ -11,4 +11,7 @@ class NoPhotos implements NeonPhotoSource {
 
   @override
   ui.Image? large(String id) => null;
+
+  @override
+  ui.Image? tile(String id) => null;
 }

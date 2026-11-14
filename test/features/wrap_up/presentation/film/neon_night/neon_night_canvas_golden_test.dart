@@ -36,7 +36,7 @@ Future<void> _pumpFilm(
   // Decode the photos first, so the frames don't race the image loads.
   await tester.pumpWidget(const SizedBox());
   final context = tester.element(find.byType(SizedBox));
-  final (:thumbs, :large) = NeonPhotoImages.idsFor(
+  final (:thumbs, :large, :tiles) = NeonPhotoImages.idsFor(
     night,
     NeonNightCanvas.timelineFor(night),
   );
@@ -46,6 +46,9 @@ Future<void> _pumpFilm(
     }
     for (final id in large) {
       await precacheImage(NeonPhotoImages.largeProvider(photo, id)!, context);
+    }
+    for (final id in tiles) {
+      await precacheImage(NeonPhotoImages.tileProvider(photo, id)!, context);
     }
   });
 
@@ -304,5 +307,57 @@ void main() {
     await _expectAt(tester, [
       ('lit', note.start + timeline.beat.beatToSec(4)),
     ], 'note_few');
+  });
+
+  // Finale (§5.8) and Ending (§5.9) at the MP4's instants: the drop, the
+  // heart building and outlined, the glow-up and confetti, the headline,
+  // the heart fading, the end card, the fade to black.
+  testWidgets('finale and ending', skip: _skip, (tester) async {
+    await _pumpFilm(tester);
+    await _expectAt(tester, const [
+      ('51_5', 51.5),
+      ('52_5', 52.5),
+      ('54_3', 54.286),
+      ('55_5', 55.5),
+      ('56_2', 56.19),
+      ('58_0', 58.0),
+      ('59_5', 59.5),
+      ('60_5', 60.5),
+      ('62_4', 62.381),
+      ('64_0', 64.0),
+    ], 'finale');
+  });
+
+  testWidgets('finale, reduced flashing', skip: _skip, (tester) async {
+    await _pumpFilm(tester, reduced: true);
+    await _expectAt(tester, const [
+      ('51_5', 51.5),
+      ('55_5', 55.5),
+    ], 'finale_reduced');
+  });
+
+  testWidgets('finale and ending in Russian', skip: _skip, (tester) async {
+    await _pumpFilm(
+      tester,
+      story: NeonNightFixtures.referenceRu,
+      locale: const Locale('ru'),
+    );
+    await _expectAt(tester, const [
+      ('56_2', 56.19),
+      ('62_4', 62.381),
+    ], 'finale_ru');
+  });
+
+  // 11 photos repeating over ~220 cells; counted totals; the note's line
+  // as headline.
+  testWidgets('a small night: finale and ending', skip: _skip, (tester) async {
+    final story = NeonNightFixtures.few;
+    final timeline = NeonNightCanvas.timelineFor(story);
+    final beat = timeline.beat;
+    await _pumpFilm(tester, story: story);
+    await _expectAt(tester, [
+      ('heart', timeline.finaleCue + beat.beatToSec(10)),
+      ('end', timeline.endingCue + beat.beatToSec(7)),
+    ], 'finale_few');
   });
 }

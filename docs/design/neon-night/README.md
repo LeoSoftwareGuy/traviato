@@ -19,3 +19,6 @@ Regenerate a still: `ffmpeg -ss <seconds> -i NeonNight.mp4 -frames:v 1 -q:v 3 st
 - **Moment labels are built from the data**, so they translate: Split `{time} · {PLACE}` (only the time without a place), Burst `BURST · {time}` (`neonNight_burst`), Peak `{first} → {last}`.
 - **Note lines wrap at 18 characters, not 16** (§5.7). The MP4's first line, `WE LOST EACH OTHER`, is 18, and fit(900, 210, 0.43) only gives its ≈116 px for an 18-character line. The user's own line breaks are kept; past 5 lines the last one ends at a whole word with "…".
 - **The Note's tag is built from the data:** `NOTE {nn} · {time}` (`neonNight_noteTag`), just `NOTE {nn}` with no time. No first name means no signature line.
+- **Heart cells use the cell-centre test.** §5.8's "all four corners (inset 3 px) inside" gives 194 cells. Its "about 220" and the MP4's density come from testing the cell's centre (222 cells).
+- **The "Storyni" end sign has a pale pink core and stroke 4**, as in the MP4 (the spec says a cyan core, stroke 3).
+- **The Finale headline** is the memory's own, else the note's first line, else "What a night" (`neonNight_headline`). **The end card's totals** come from the data, else are counted from the story (photos, 1 note if any, done plan rows).

@@ -23,6 +23,9 @@ import 'neon_zoom_picks.dart';
 abstract interface class NeonPhotoSource {
   ui.Image? thumb(String id);
   ui.Image? large(String id);
+
+  /// Tiny, for the Finale's 40 px heart tiles.
+  ui.Image? tile(String id);
 }
 
 /// A chapter card (#363, NEON_NIGHT_SPEC.md §5.3), at film time `t` in
@@ -429,13 +432,28 @@ class NeonFlashPainter extends CustomPainter {
   final ValueListenable<double> time;
   final bool reducedFlashing;
 
-  /// The flash's opacity at [t].
+  /// The chapter slam's opacity at [t] (pink).
   double flashAt(double t) {
     final (:scene, lb: _) = timeline.sceneAt(t);
     if (scene.spec is! NnChapterCardSpec) return 0;
     return reducedFlashing
         ? 0.12 * NeonBeat.flare(t, scene.start, 0.4)
         : 0.4 * NeonBeat.flare(t, scene.start, 0.16);
+  }
+
+  /// The Finale's white → violet flash at [t] (§5.8): the drop (0.5, τ
+  /// 0.12; reduced 0.12, τ 0.4) plus the glow-up at lb 8 (0.22, τ 0.5;
+  /// reduced 0.08).
+  double dropAt(double t) {
+    final (:scene, lb: _) = timeline.sceneAt(t);
+    if (scene.spec is! NnFinaleSpec) return 0;
+    final cue = scene.start;
+    final glowUp = cue + timeline.beat.beatToSec(8);
+    return reducedFlashing
+        ? 0.12 * NeonBeat.flare(t, cue, 0.4) +
+              0.08 * NeonBeat.flare(t, glowUp, 0.5)
+        : 0.5 * NeonBeat.flare(t, cue, 0.12) +
+              0.22 * NeonBeat.flare(t, glowUp, 0.5);
   }
 
   /// Radial from (30 %, 25 %), pink fading out 70 % of the way to the
@@ -449,6 +467,26 @@ class NeonFlashPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final drop = dropAt(time.value).clamp(0.0, 1.0);
+    if (drop > 0.002) {
+      // Radial `#FFF 0% → violet@70% 55% → 0`, from the frame's centre to
+      // its farthest corner.
+      final centre = size.center(Offset.zero);
+      canvas.drawRect(
+        Offset.zero & size,
+        Paint()
+          ..shader = ui.Gradient.radial(
+            centre,
+            centre.distance,
+            [
+              NeonColors.white.withValues(alpha: drop),
+              NeonColors.violet.withValues(alpha: 0.7 * drop),
+              NeonColors.violet.withValues(alpha: 0),
+            ],
+            const [0, 0.55, 1],
+          ),
+      );
+    }
     final a = flashAt(time.value);
     if (a <= 0.002) return;
     canvas.drawRect(

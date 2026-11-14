@@ -155,6 +155,29 @@ class NnNoteMoment extends Equatable {
   List<Object?> get props => [text, number, time, photo];
 }
 
+/// The end card's numbers (§5.9): `142 PHOTOS · 9 NOTES · 3 TICKS` and
+/// `143 moments`.
+class NnTotals extends Equatable {
+  const NnTotals({
+    required this.photos,
+    required this.notes,
+    required this.ticks,
+    required this.moments,
+  });
+
+  final int photos;
+  final int notes;
+
+  /// Plan items done.
+  final int ticks;
+
+  /// Photos + videos.
+  final int moments;
+
+  @override
+  List<Object?> get props => [photos, notes, ticks, moments];
+}
+
 /// What the Neon Night film shows of one memory (#363, spec §7). Grows
 /// phase by phase: the title, the night's date, the plan, the chapters
 /// and the note.
@@ -166,6 +189,8 @@ class NeonNightStory extends Equatable {
     this.plan = const [],
     this.note,
     this.firstName,
+    this.headline,
+    this.totals,
   }) : assert(
          chapters.isNotEmpty && chapters.length <= 5,
          '1–5 chapters',
@@ -189,11 +214,43 @@ class NeonNightStory extends Equatable {
   /// Signs the note (`— Leo`); none → no signature.
   final String? firstName;
 
+  /// The Finale's headline, e.g. "Best night ever"; none → the note's
+  /// first line, else a default.
+  final String? headline;
+
+  /// The end card's numbers; none → counted from the story.
+  final NnTotals? totals;
+
   bool get hasPlan => plan.isNotEmpty;
   bool get hasNote => note != null;
 
+  /// Every photo of the night, in order: what the Finale's heart shows.
+  List<NnPhoto> get allPhotos => [
+    for (final chapter in chapters) ...chapter.photos,
+  ];
+
+  /// [totals], or what the story itself has: its photos, its note, the
+  /// plan's done rows.
+  NnTotals get endTotals =>
+      totals ??
+      NnTotals(
+        photos: allPhotos.length,
+        notes: hasNote ? 1 : 0,
+        ticks: plan.where((row) => row.done).length,
+        moments: allPhotos.length,
+      );
+
   @override
-  List<Object?> get props => [title, date, plan, chapters, note, firstName];
+  List<Object?> get props => [
+    title,
+    date,
+    plan,
+    chapters,
+    note,
+    firstName,
+    headline,
+    totals,
+  ];
 }
 
 /// The spec's reference night (the MP4 in docs/design/neon-night/), for
@@ -271,6 +328,9 @@ abstract final class NeonNightFixtures {
     date: DateTime(2026, 11, 14),
     chapters: _chapters(russian: false),
     firstName: 'Leo',
+    headline: 'Best night ever',
+    // The MP4's end card.
+    totals: const NnTotals(photos: 142, notes: 9, ticks: 3, moments: 143),
     note: const NnNoteMoment(
       text:
           'We lost each other\nFound each other\nBy the bass\n'
@@ -293,6 +353,8 @@ abstract final class NeonNightFixtures {
     date: DateTime(2026, 11, 14),
     chapters: _chapters(russian: true),
     firstName: 'Лео',
+    headline: 'Лучшая ночь',
+    totals: const NnTotals(photos: 142, notes: 9, ticks: 3, moments: 143),
     note: const NnNoteMoment(
       text: 'Потерялись\nНашлись у басов\nЛучшая ночь',
       number: 4,

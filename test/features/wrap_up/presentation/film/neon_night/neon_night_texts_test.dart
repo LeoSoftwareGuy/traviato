@@ -136,6 +136,12 @@ void main() {
         for (final row in story.plan) ...[row.time, row.item.toUpperCase()],
         for (final chapter in story.chapters) chapter.title.toUpperCase(),
         ...neonNoteLines(story.note!.text),
+        story.headline!.toUpperCase(),
+      ],
+      for (final l10n in [en, ru]) ...[
+        l10n.neonNight_headline.toUpperCase(),
+        l10n.neonNight_moments(143),
+        'Storyni',
       ],
     ];
     expect(missingCodepoints(display.union(fallback), titles), isEmpty);
@@ -155,6 +161,15 @@ void main() {
         // The Note's tag and signature.
         for (final l10n in [en, ru]) l10n.neonNight_noteTag('04').toUpperCase(),
         '— Leo — Лео',
+        // The end card's totals.
+        for (final l10n in [en, ru])
+          [
+            l10n.neonNight_photos(142),
+            l10n.neonNight_notes(9),
+            l10n.neonNight_ticks(3),
+            l10n.neonNight_notes(1),
+            l10n.neonNight_ticks(21),
+          ].join(' · ').toUpperCase(),
         for (final story in [
           NeonNightFixtures.reference,
           NeonNightFixtures.referenceRu,

@@ -9,6 +9,7 @@ import 'neon_balloon.dart';
 import 'neon_beat.dart';
 import 'neon_chapter_card_painter.dart';
 import 'neon_eases.dart';
+import 'neon_finale_painter.dart';
 import 'neon_moment_painter.dart';
 import 'neon_night_scene_spec.dart';
 import 'neon_night_story.dart';
@@ -20,7 +21,8 @@ import 'neon_tokens.dart';
 
 /// Layer 3 (#363, NEON_NIGHT_SPEC.md §4): the content of whichever scene
 /// is playing, cut hard on every cue. So far Ignition (§5.1), Plan (§5.2),
-/// the chapter cards (§5.3), their moments (§5.4–5.6) and the Note (§5.7).
+/// the chapter cards (§5.3), their moments (§5.4–5.6), the Note (§5.7)
+/// and the Finale's heart, fading in the Ending (§5.8–5.9).
 class NeonScenePainter extends CustomPainter {
   NeonScenePainter({
     required this.timeline,
@@ -41,6 +43,12 @@ class NeonScenePainter extends CustomPainter {
                reducedFlashing: reducedFlashing,
              ),
        },
+       _heart = NnHeartPainter(
+         timeline: timeline,
+         story: story,
+         photos: photos,
+         reducedFlashing: reducedFlashing,
+       ),
        _moments = _momentPainters(
          timeline,
          story,
@@ -85,6 +93,7 @@ class NeonScenePainter extends CustomPainter {
   final bool reducedFlashing;
   final Map<int, NnChapterCardPainter> _cards;
   final Map<double, NnMomentPainter> _moments;
+  final NnHeartPainter _heart;
 
   NeonBeat get beat => timeline.beat;
 
@@ -102,11 +111,11 @@ class NeonScenePainter extends CustomPainter {
         _cards[chapter]?.paint(canvas, t, scene.start, scene.duration);
       case NnMomentSpec():
         _moments[scene.start]?.paint(canvas, t, scene.start, scene.duration);
+      case NnFinaleSpec() || NnEndingSpec():
+        _heart.paint(canvas, t);
       case NnNoteSpec():
         final note = texts.note;
         if (note != null) _note(canvas, t, scene.start, scene.duration, note);
-      default:
-        break;
     }
   }
 

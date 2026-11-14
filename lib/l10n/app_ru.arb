@@ -2604,6 +2604,16 @@
   "@neonNight_burst": {"description": "Neon Night film (#363): the label word on a burst of photos taken within a minute, shown in capitals as 'BURST · 23:41'.", "x-review": "pending"},
   "neonNight_noteTag": "Заметка {number}",
   "@neonNight_noteTag": {"x-review": "pending", "description": "Neon Night film (#363): the tag over the note written in neon, shown in capitals as 'NOTE 04 · 00:31'. number is the note's place among the memory's notes, already zero-padded.", "placeholders": {"number": {"type": "String"}}},
+  "neonNight_headline": "Вот это ночь",
+  "@neonNight_headline": {"x-review": "pending"},
+  "neonNight_moments": "{count, plural, one{{count} момент} few{{count} момента} many{{count} моментов} other{{count} момента}}",
+  "@neonNight_moments": {"x-review": "pending"},
+  "neonNight_photos": "{count, plural, other{{count} фото}}",
+  "@neonNight_photos": {"x-review": "pending"},
+  "neonNight_notes": "{count, plural, one{{count} заметка} few{{count} заметки} many{{count} заметок} other{{count} заметки}}",
+  "@neonNight_notes": {"x-review": "pending"},
+  "neonNight_ticks": "{count, plural, one{{count} отметка} few{{count} отметки} many{{count} отметок} other{{count} отметки}}",
+  "@neonNight_ticks": {"x-review": "pending"},
   "neonNight_planMore": "{count, plural, other{и ещё {count}}}",
   "@neonNight_planMore": {
     "x-review": "pending"

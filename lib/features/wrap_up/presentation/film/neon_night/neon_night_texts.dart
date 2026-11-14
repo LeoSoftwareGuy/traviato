@@ -1,6 +1,7 @@
 import 'package:flutter/painting.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
+import '../../../../../core/constants/app_constants.dart';
 import '../../../../../l10n/app_localizations.dart';
 import 'neon_chapter_card.dart';
 import 'neon_night_story.dart';
@@ -19,7 +20,9 @@ class NeonNightTexts {
         for (var i = 0; i < story.chapters.length; i++)
           NnChapterTexts(story, i, l10n),
       ],
-      note = story.note == null ? null : NnNoteTexts(story, l10n);
+      note = story.note == null ? null : NnNoteTexts(story, l10n),
+      finale = NnFinaleTexts(story, l10n),
+      ending = NnEndingTexts(story, l10n);
 
   final NnIgnitionTexts ignition;
 
@@ -32,6 +35,9 @@ class NeonNightTexts {
   /// Null when the memory has no note (the scene is cut).
   final NnNoteTexts? note;
 
+  final NnFinaleTexts finale;
+  final NnEndingTexts ending;
+
   void dispose() {
     ignition.dispose();
     plan?.dispose();
@@ -39,6 +45,8 @@ class NeonNightTexts {
       chapter.dispose();
     }
     note?.dispose();
+    finale.dispose();
+    ending.dispose();
   }
 }
 
@@ -499,5 +507,86 @@ class NnNoteTexts {
       line.dispose();
     }
     signature?.dispose();
+  }
+}
+
+/// The Finale's headline (§5.8): white chromatic, d 5, fit(960, 150,
+/// 0.45).
+class NnFinaleTexts {
+  NnFinaleTexts(NeonNightStory story, AppLocalizations l10n)
+    : headline = _chromatic(headlineFor(story, l10n));
+
+  static NeonChromaticText _chromatic(String text) => NeonChromaticText(
+    text,
+    size: NeonType.fit(text, width, 150, 0.45),
+    maxWidth: width,
+    split: 5,
+  );
+
+  static const width = 960.0;
+
+  final NeonChromaticText headline;
+
+  /// The memory's own headline, else its note's first line, else "What
+  /// a night"; in capitals, without a cut-off "…".
+  static String headlineFor(NeonNightStory story, AppLocalizations l10n) {
+    final own = story.headline?.trim();
+    if (own != null && own.isNotEmpty) return own.toUpperCase();
+    final note = story.note;
+    if (note != null) {
+      final lines = neonNoteLines(note.text);
+      if (lines.isNotEmpty && !lines.first.endsWith('…')) return lines.first;
+    }
+    return l10n.neonNight_headline.toUpperCase();
+  }
+
+  void dispose() => headline.dispose();
+}
+
+/// The end card (§5.9): `{n} moments`, the totals, `{TITLE} · {DATE}`
+/// and the "Storyni" sign.
+class NnEndingTexts {
+  NnEndingTexts(NeonNightStory story, AppLocalizations l10n)
+    : moments = NeonChromaticText(
+        l10n.neonNight_moments(story.endTotals.moments).toLowerCase(),
+        size: 150,
+        maxWidth: 960,
+        split: 4,
+        weight: 800,
+      ),
+      totals = neonLayout(
+        [
+          l10n.neonNight_photos(story.endTotals.photos),
+          l10n.neonNight_notes(story.endTotals.notes),
+          l10n.neonNight_ticks(story.endTotals.ticks),
+        ].join(' · ').toUpperCase(),
+        NeonType.mono(36, color: NeonColors.body, letterSpacing: 3),
+      ),
+      titleDate = neonLayout(
+        '${story.title.toUpperCase()} · '
+        '${NnIgnitionTexts.formatDate(story.date, l10n.localeName)}',
+        NeonType.mono(36, color: NeonColors.pink, letterSpacing: 3),
+      ),
+      // The spec says a cyan core, stroke 3; the reference render shows a
+      // pale pink core and a heavier tube, and the render wins.
+      logo = NeonTubeText(
+        AppConstants.appName,
+        size: 120,
+        maxWidth: 960,
+        stroke: 4,
+        color: NeonColors.pink,
+        core: NeonColors.tintPink,
+      );
+
+  final NeonChromaticText moments;
+  final TextPainter totals;
+  final TextPainter titleDate;
+  final NeonTubeText logo;
+
+  void dispose() {
+    moments.dispose();
+    totals.dispose();
+    titleDate.dispose();
+    logo.dispose();
   }
 }
