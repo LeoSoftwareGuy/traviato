@@ -2684,4 +2684,17 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get skyStory_tagline => 'Каждое воспоминание бережно сохранено';
+
+  @override
+  String get neonNight_planTitle => 'План на ночь';
+
+  @override
+  String neonNight_planMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'и ещё $count',
+    );
+    return '$_temp0';
+  }
 }
