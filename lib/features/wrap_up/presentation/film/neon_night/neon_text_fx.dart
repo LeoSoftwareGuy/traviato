@@ -329,13 +329,16 @@ class NeonChromaticText {
 /// A label box (§5.4a): mono 500 38 px, white on `rgba(5,3,10,.8)`,
 /// padding 10/18, a 1 px white@14 % border.
 class NeonLabelBox {
-  NeonLabelBox(this.text, {double size = 38})
+  NeonLabelBox(this.text, {double size = 38, this.border})
     : _text = neonLayout(
         text,
         NeonType.mono(size, color: NeonColors.white, letterSpacing: 2),
       );
 
   final String text;
+
+  /// A gradient border, left to right; none → white@14 %.
+  final List<Color>? border;
   final TextPainter _text;
 
   static const padding = EdgeInsets.symmetric(vertical: 10, horizontal: 18);
@@ -352,8 +355,14 @@ class NeonLabelBox {
           box.deflate(0.5),
           Paint()
             ..style = PaintingStyle.stroke
-            ..strokeWidth = 1
-            ..color = const Color(0x24FFFFFF),
+            ..strokeWidth = border == null ? 1 : 2
+            // A shader is scaled by the paint's alpha: opaque under one.
+            ..color = border == null
+                ? const Color(0x24FFFFFF)
+                : const Color(0xFFFFFFFF)
+            ..shader = border == null
+                ? null
+                : ui.Gradient.linear(box.centerLeft, box.centerRight, border!),
         );
       _text.paint(canvas, topLeft + padding.topLeft);
     });

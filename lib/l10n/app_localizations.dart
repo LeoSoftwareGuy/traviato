@@ -4021,6 +4021,12 @@ abstract class AppLocalizations {
   /// **'Burst'**
   String get neonNight_burst;
 
+  /// Neon Night film (#363): the tag over the note written in neon, shown in capitals as 'NOTE 04 · 00:31'. number is the note's place among the memory's notes, already zero-padded.
+  ///
+  /// In en, this message translates to:
+  /// **'Note {number}'**
+  String neonNight_noteTag(String number);
+
   /// Neon Night film: under the plan's 5 rows when the night has more planned quests (#363); shown in capitals.
   ///
   /// In en, this message translates to:

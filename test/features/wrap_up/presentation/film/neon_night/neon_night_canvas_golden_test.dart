@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_grain.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_canvas.dart';
+import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_scene_spec.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_story.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_photo_images.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_placeholder_photo.dart';
@@ -262,5 +263,46 @@ void main() {
       ('timeline', atBeat(5, 4.5)),
       ('peak', atBeat(7, 5)),
     ], 'moment_few');
+  });
+
+  // Note (§5.7) at the MP4's instants: the tag, each line lighting with
+  // its flicker, the signature, the exit fade.
+  testWidgets('note', skip: _skip, (tester) async {
+    await _pumpFilm(tester);
+    await _expectAt(tester, const [
+      ('45_9', 45.9),
+      ('46_6', 46.6),
+      ('47_5', 47.5),
+      ('49_0', 49.048),
+      ('50_5', 50.5),
+      ('51_3', 51.3),
+    ], 'note');
+  });
+
+  testWidgets('note, reduced flashing', skip: _skip, (tester) async {
+    await _pumpFilm(tester, reduced: true);
+    await _expectAt(tester, const [('46_6', 46.6)], 'note_reduced');
+  });
+
+  testWidgets('note in Russian', skip: _skip, (tester) async {
+    await _pumpFilm(
+      tester,
+      story: NeonNightFixtures.referenceRu,
+      locale: const Locale('ru'),
+    );
+    await _expectAt(tester, const [('50_5', 50.5)], 'note_ru');
+  });
+
+  // One short line; no time, photo or first name.
+  testWidgets('a short note', skip: _skip, (tester) async {
+    final story = NeonNightFixtures.few;
+    final timeline = NeonNightCanvas.timelineFor(story);
+    final note = timeline.scenes.firstWhere(
+      (s) => s.spec is NnNoteSpec,
+    );
+    await _pumpFilm(tester, story: story);
+    await _expectAt(tester, [
+      ('lit', note.start + timeline.beat.beatToSec(4)),
+    ], 'note_few');
   });
 }

@@ -135,6 +135,7 @@ void main() {
         story.title.toUpperCase(),
         for (final row in story.plan) ...[row.time, row.item.toUpperCase()],
         for (final chapter in story.chapters) chapter.title.toUpperCase(),
+        ...neonNoteLines(story.note!.text),
       ],
     ];
     expect(missingCodepoints(display.union(fallback), titles), isEmpty);
@@ -151,6 +152,9 @@ void main() {
         for (final l10n in [en, ru])
           '${l10n.neonNight_burst.toUpperCase()} · 23:41',
         '00:12 → 00:40',
+        // The Note's tag and signature.
+        for (final l10n in [en, ru]) l10n.neonNight_noteTag('04').toUpperCase(),
+        '— Leo — Лео',
         for (final story in [
           NeonNightFixtures.reference,
           NeonNightFixtures.referenceRu,
