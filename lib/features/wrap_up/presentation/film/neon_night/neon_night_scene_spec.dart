@@ -36,16 +36,18 @@ final class NnPlanSpec extends NeonNightSceneSpec {
 /// A chapter's card: header, ghost numeral, title, contact sheet, typed
 /// line and progress bar (§5.3).
 ///
-/// The first and the last chapter get the long card, and every long card
-/// plays laser zooms (§9), however few photos the chapter has: up to three,
-/// one per tile, never the same tile twice (`NeonZoomPicks`). This
-/// overrides §8's "fewer than 4 tiles → no zooms" (Leo, #363).
+/// The first and the last chapter get the zoom card (§9). Every zoom card
+/// plays laser zooms, however few photos the chapter has (this overrides
+/// §8's "fewer than 4 tiles → no zooms", Leo, #363), one per photo and
+/// never the same one twice (`NeonZoomPicks`). Its length follows the
+/// zooms: 3 zooms → 16 beats; 1–2 zooms → 12 beats (each zoom takes 3
+/// beats from lb 6, kept to whole bars); no zooms → the 8-beat card.
 final class NnChapterCardSpec extends NeonNightSceneSpec {
   const NnChapterCardSpec({
     required this.chapter,
     required this.chapters,
-    required this.isLong,
-  });
+    required this.zooms,
+  }) : assert(zooms >= 0 && zooms <= 3, 'zooms: $zooms');
 
   /// Which chapter, from 0.
   final int chapter;
@@ -53,14 +55,20 @@ final class NnChapterCardSpec extends NeonNightSceneSpec {
   /// How many chapters the film has.
   final int chapters;
 
-  /// 16 beats with laser zooms, else 8.
-  final bool isLong;
+  /// How many laser zooms the card plays, 0–3.
+  final int zooms;
+
+  bool get hasZooms => zooms > 0;
 
   @override
-  int get beats => isLong ? 16 : 8;
+  int get beats => switch (zooms) {
+    0 => 8,
+    3 => 16,
+    _ => 12,
+  };
 
   @override
-  List<Object?> get props => [chapter, chapters, isLong];
+  List<Object?> get props => [chapter, chapters, zooms];
 }
 
 /// The block that shows a chapter's photos after its card (§5.4–5.6, §7).

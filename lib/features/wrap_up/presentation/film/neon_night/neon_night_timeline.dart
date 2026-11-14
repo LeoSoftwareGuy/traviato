@@ -1,6 +1,17 @@
 import '../timeline/film_timeline.dart';
 import 'neon_beat.dart';
 import 'neon_night_scene_spec.dart';
+import 'neon_zoom_picks.dart';
+
+/// What the timeline needs to know about one chapter: the moments that
+/// follow its card, and how many photos it has (for its laser zooms).
+class NnChapterShape {
+  const NnChapterShape({required this.moments, required this.photos})
+    : assert(photos >= 1, 'a chapter has photos');
+
+  final List<NnMomentType> moments;
+  final int photos;
+}
 
 /// Neon Night's scenes on the film clock (#363, NEON_NIGHT_SPEC.md §5, §9).
 ///
@@ -9,12 +20,14 @@ import 'neon_night_scene_spec.dart';
 /// Finale (the drop) and the Ending. Every scene is a whole number of bars,
 /// so every cue — and the drop — falls on a downbeat.
 ///
-/// The film's length depends only on what plays, never on how many photos
-/// there are (§8): the first and the last chapter get the long card, the
-/// ones between the short one (§9).
+/// The first and the last chapter get the zoom card, the ones between the
+/// short one (§9). Photo counts change densities, not length (§8), with
+/// one exception (Leo, #363): a zoom card zooms each photo at most once,
+/// so a first or last chapter with 1–2 photos gets a 12-beat zoom card
+/// instead of 16.
 class NeonNightTimeline {
   factory NeonNightTimeline({
-    required List<List<NnMomentType>> chapters,
+    required List<NnChapterShape> chapters,
     bool hasPlan = true,
     bool hasNote = true,
     NeonBeat beat = const NeonBeat(),
@@ -24,7 +37,7 @@ class NeonNightTimeline {
       'chapters: ${chapters.length}',
     );
     assert(
-      chapters.every((moments) => moments.isNotEmpty),
+      chapters.every((c) => c.moments.isNotEmpty),
       'every chapter needs a moment',
     );
     final count = chapters.length;
@@ -35,9 +48,12 @@ class NeonNightTimeline {
         NnChapterCardSpec(
           chapter: i,
           chapters: count,
-          isLong: i == 0 || i == count - 1,
+          zooms: i == 0 || i == count - 1
+              ? NeonZoomPicks.countFor(chapters[i].photos)
+              : 0,
         ),
-        for (final type in chapters[i]) NnMomentSpec(chapter: i, type: type),
+        for (final type in chapters[i].moments)
+          NnMomentSpec(chapter: i, type: type),
       ],
       if (hasNote) const NnNoteSpec(),
       const NnFinaleSpec(),
@@ -62,15 +78,17 @@ class NeonNightTimeline {
   /// [chapterCount] chapters with the spec's moments (§7): Ch 1 split +
   /// burst, Ch 2 timeline, Ch 3 peak, later chapters one two-bar moment.
   /// The reference shape and the fixtures' default; real memories pick
-  /// their moments from their photos.
+  /// their moments from their photos. Every chapter has [photos] photos.
   factory NeonNightTimeline.standard(
     int chapterCount, {
+    int photos = 20,
     bool hasPlan = true,
     bool hasNote = true,
     NeonBeat beat = const NeonBeat(),
   }) => NeonNightTimeline(
     chapters: [
-      for (var i = 0; i < chapterCount; i++) standardMoments(i),
+      for (var i = 0; i < chapterCount; i++)
+        NnChapterShape(moments: standardMoments(i), photos: photos),
     ],
     hasPlan: hasPlan,
     hasNote: hasNote,

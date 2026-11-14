@@ -8,6 +8,6 @@ Regenerate a still: `ffmpeg -ss <seconds> -i NeonNight.mp4 -frames:v 1 -q:v 3 st
 
 ## Decisions that override the spec
 
-- **Every long chapter card plays laser zooms**, however few photos the chapter has (overrides §8's "needs ≥ 4 tiles; fewer → no zooms"). Each tile is zoomed at most once: 3+ tiles → 3 zooms (lb 6, 9, 12), 2 tiles → 2 zooms (lb 6, 9), 1 tile → 1 zoom (lb 6); the card then holds until its 16 beats are up. See `NeonZoomPicks`.
-- **A card's length depends only on its position** (first and last chapter: 16 beats, middle: 8), never on its photos.
+- **Every long chapter card plays laser zooms**, however few photos the chapter has (overrides §8's "needs ≥ 4 tiles; fewer → no zooms"). Each tile is zoomed at most once: 3+ tiles → 3 zooms (lb 6, 9, 12), 2 tiles → 2 zooms (lb 6, 9), 1 tile → 1 zoom (lb 6). See `NeonZoomPicks`.
+- **Card length:** middle chapters get the 8-beat card. The first and last chapter get the zoom card: 16 beats with 3+ photos, **12 beats with 1–2 photos** (each zoom takes 3 beats from lb 6, kept to whole bars so the drop stays on a downbeat). That chapter's film is 1 bar (1.905 s) shorter.
 - **Film lengths for 1 and 2 chapters follow the scene rules** (23 and 30 bars), not §9's table (24 and 29).

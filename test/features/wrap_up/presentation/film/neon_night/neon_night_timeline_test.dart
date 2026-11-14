@@ -10,12 +10,12 @@ void main() {
     const expected = <(double, int, NeonNightSceneSpec)>[
       (0.000, 0, NnIgnitionSpec()),
       (3.810, 8, NnPlanSpec()),
-      (9.524, 20, NnChapterCardSpec(chapter: 0, chapters: 3, isLong: true)),
+      (9.524, 20, NnChapterCardSpec(chapter: 0, chapters: 3, zooms: 3)),
       (17.143, 36, NnMomentSpec(chapter: 0, type: NnMomentType.split)),
       (20.952, 44, NnMomentSpec(chapter: 0, type: NnMomentType.burst)),
-      (24.762, 52, NnChapterCardSpec(chapter: 1, chapters: 3, isLong: false)),
+      (24.762, 52, NnChapterCardSpec(chapter: 1, chapters: 3, zooms: 0)),
       (28.571, 60, NnMomentSpec(chapter: 1, type: NnMomentType.timeline)),
-      (34.286, 72, NnChapterCardSpec(chapter: 2, chapters: 3, isLong: true)),
+      (34.286, 72, NnChapterCardSpec(chapter: 2, chapters: 3, zooms: 3)),
       (41.905, 88, NnMomentSpec(chapter: 2, type: NnMomentType.peak)),
       (45.714, 96, NnNoteSpec()),
       (51.429, 108, NnFinaleSpec()),
@@ -72,17 +72,55 @@ void main() {
     expect(NeonNightTimeline.standard(5).total, closeTo(80.0, 5e-4));
   });
 
-  test('the zoom rule: the first and the last chapter get the long card', () {
-    List<bool> longCards(int chapters) => [
+  test('the zoom rule: the first and the last chapter get the zoom card', () {
+    List<bool> zoomCards(int chapters) => [
       for (var i = 0; i < chapters; i++)
         (NeonNightTimeline.standard(chapters).chapterCard(i).spec
                 as NnChapterCardSpec)
-            .isLong,
+            .hasZooms,
     ];
-    expect(longCards(1), [true]);
-    expect(longCards(2), [true, true]);
-    expect(longCards(3), [true, false, true]);
-    expect(longCards(5), [true, false, false, false, true]);
+    expect(zoomCards(1), [true]);
+    expect(zoomCards(2), [true, true]);
+    expect(zoomCards(3), [true, false, true]);
+    expect(zoomCards(5), [true, false, false, false, true]);
+  });
+
+  test('a zoom card zooms each photo once and fits its zooms', () {
+    NeonNightTimeline film(List<int> photos) => NeonNightTimeline(
+      chapters: [
+        for (var i = 0; i < photos.length; i++)
+          NnChapterShape(
+            moments: NeonNightTimeline.standardMoments(i),
+            photos: photos[i],
+          ),
+      ],
+    );
+    NnChapterCardSpec card(NeonNightTimeline t, int i) =>
+        t.chapterCard(i).spec as NnChapterCardSpec;
+
+    // 3+ photos: 3 zooms, 16 beats; 1–2 photos: 1–2 zooms, 12 beats.
+    for (final (photos, zooms, beats) in [
+      (200, 3, 16),
+      (3, 3, 16),
+      (2, 2, 12),
+      (1, 1, 12),
+    ]) {
+      final t = film([photos, 20, photos]);
+      for (final i in [0, 2]) {
+        expect(card(t, i).zooms, zooms, reason: '$photos photos');
+        expect(card(t, i).beats, beats, reason: '$photos photos');
+      }
+      // A middle chapter never zooms, whatever its photos.
+      expect(card(t, 1).zooms, 0);
+    }
+    expect(card(film([20, 1, 20]), 1).beats, 8);
+
+    // One bar shorter per small first/last chapter; the drop stays on a
+    // downbeat.
+    final small = film([2, 20, 1]);
+    expect(small.totalBeats, reference.totalBeats - 8);
+    expect(small.total, closeTo(reference.total - 2 * 1.905, 1e-3));
+    expect(small.finaleBeat % 4, 0);
   });
 
   test('the standard moments per chapter (§7)', () {

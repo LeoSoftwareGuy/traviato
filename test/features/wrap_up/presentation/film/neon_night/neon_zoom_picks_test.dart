@@ -28,4 +28,17 @@ void main() {
       NeonZoomPicks.pick(chapterNumber: 2, tiles: 10),
     );
   });
+
+  test('countFor: one zoom per photo, at most 3', () {
+    expect(
+      [for (var n = 1; n <= 5; n++) NeonZoomPicks.countFor(n)],
+      [
+        1,
+        2,
+        3,
+        3,
+        3,
+      ],
+    );
+  });
 }
