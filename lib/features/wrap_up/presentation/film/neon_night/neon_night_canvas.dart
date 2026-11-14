@@ -8,21 +8,24 @@ import '../sky_story/guarded_painter.dart';
 import 'neon_ambient.dart';
 import 'neon_ambient_painter.dart';
 import 'neon_balloon.dart';
+import 'neon_chapter_card_painter.dart';
 import 'neon_grain.dart';
 import 'neon_night_story.dart';
 import 'neon_night_texts.dart';
 import 'neon_night_timeline.dart';
+import 'neon_photo_images.dart';
 import 'neon_scene_painter.dart';
 import 'neon_tokens.dart';
 
 /// The Neon Night film (#363): one 1080 × 1920 composition on one looping
 /// clock, like `GoldenVowsCanvas`, painted in the spec's layer order
 /// (NEON_NIGHT_SPEC.md §4). Built up phase by phase: so far the ambient
-/// layers and the neon balloon sign, Ignition and Plan. Its fixed words
-/// follow the surrounding locale.
+/// layers and the neon balloon sign, Ignition, Plan and the chapter cards.
+/// Its fixed words follow the surrounding locale.
 class NeonNightCanvas extends StatefulWidget {
   const NeonNightCanvas({
     required this.story,
+    required this.photo,
     this.reducedFlashing = false,
     this.onFailure,
     super.key,
@@ -30,11 +33,26 @@ class NeonNightCanvas extends StatefulWidget {
 
   final NeonNightStory story;
 
-  /// The film's schedule for [story]. Until the chapters and the note are
-  /// built (phases 4–6) it is the reference's 3 chapters with a note; the
-  /// Plan scene plays only when the memory has a plan.
+  /// Each photo's full-size image; the film decodes it small for the
+  /// contact sheets and large for the laser zooms. Null → an empty mat.
+  final ImageProvider? Function(String id) photo;
+
+  /// The film's schedule for [story]: its chapters (each card's length
+  /// follows its photos), the standard moments until phase 5 picks them
+  /// from the photos, and a Note until phase 6. The Plan scene plays only
+  /// when the memory has a plan.
   static NeonNightTimeline timelineFor(NeonNightStory story) =>
-      NeonNightTimeline.standard(3, hasPlan: story.hasPlan);
+      NeonNightTimeline(
+        chapters: [
+          for (final (i, chapter) in story.chapters.indexed)
+            NnChapterShape(
+              moments: NeonNightTimeline.standardMoments(i),
+              photos: chapter.photos.length,
+            ),
+        ],
+        hasPlan: story.hasPlan,
+        hasNote: true,
+      );
 
   /// The §6 version: softer flicker, flares and laser punch, same timings.
   final bool reducedFlashing;
@@ -59,6 +77,8 @@ class _NeonNightCanvasState extends State<NeonNightCanvas>
   NeonNightTexts? _texts;
   Locale? _textsLocale;
   ui.Image? _grain = NeonGrain.cached;
+  NeonPhotoImages? _photos;
+  bool _photosReady = false;
   bool _failed = false;
 
   @override
@@ -66,6 +86,24 @@ class _NeonNightCanvasState extends State<NeonNightCanvas>
     super.initState();
     _start();
     if (_grain == null) unawaited(_loadGrain());
+  }
+
+  /// No frame is drawn before the photos are decoded (or have had 5 s).
+  void _loadPhotos(NeonNightTimeline timeline) {
+    _photos?.dispose();
+    _photosReady = false;
+    final photos = _photos = NeonPhotoImages(
+      widget.photo,
+      story: widget.story,
+      timeline: timeline,
+    );
+    unawaited(
+      photos.ready().then((_) {
+        if (!mounted || _photos != photos) return;
+        setState(() => _photosReady = true);
+        _play();
+      }),
+    );
   }
 
   /// No frame is drawn without the grain: the clock starts once it's made.
@@ -91,6 +129,7 @@ class _NeonNightCanvasState extends State<NeonNightCanvas>
       reducedFlashing: widget.reducedFlashing,
     );
     _clock.total = timeline.total;
+    _loadPhotos(timeline);
     _controller
       ..stop()
       ..duration = Duration(milliseconds: (timeline.total * 1000).round())
@@ -99,7 +138,7 @@ class _NeonNightCanvasState extends State<NeonNightCanvas>
   }
 
   void _play() {
-    if (_grain == null || _failed || !mounted) return;
+    if (_grain == null || !_photosReady || _failed || !mounted) return;
     unawaited(_controller.repeat());
   }
 
@@ -112,7 +151,8 @@ class _NeonNightCanvasState extends State<NeonNightCanvas>
   @override
   void didUpdateWidget(NeonNightCanvas oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final storyChanged = oldWidget.story != widget.story;
+    final storyChanged =
+        oldWidget.story != widget.story || oldWidget.photo != widget.photo;
     if (storyChanged || oldWidget.reducedFlashing != widget.reducedFlashing) {
       final at = _controller.value;
       _start();
@@ -155,6 +195,7 @@ class _NeonNightCanvasState extends State<NeonNightCanvas>
   @override
   void dispose() {
     _texts?.dispose();
+    _photos?.dispose();
     _clock.dispose();
     _controller.dispose();
     super.dispose();
@@ -164,7 +205,8 @@ class _NeonNightCanvasState extends State<NeonNightCanvas>
   Widget build(BuildContext context) {
     final grain = _grain;
     final texts = _texts;
-    if (_failed || grain == null || texts == null) {
+    final photos = _photos;
+    if (_failed || grain == null || texts == null || photos == null) {
       return const ColoredBox(color: NeonColors.black);
     }
     return ColoredBox(
@@ -181,12 +223,19 @@ class _NeonNightCanvasState extends State<NeonNightCanvas>
                     NeonBackPainter(ambient: _ambient, time: _clock),
                     NeonScenePainter(
                       timeline: _timeline,
+                      story: widget.story,
                       texts: texts,
+                      photos: photos,
                       time: _clock,
                       reducedFlashing: widget.reducedFlashing,
                     ),
                     NeonLaserPainter(ambient: _ambient, time: _clock),
                     NeonBalloonPainter(balloon: _balloon, time: _clock),
+                    NeonFlashPainter(
+                      timeline: _timeline,
+                      time: _clock,
+                      reducedFlashing: widget.reducedFlashing,
+                    ),
                     NeonFrontPainter(
                       ambient: _ambient,
                       grain: grain,

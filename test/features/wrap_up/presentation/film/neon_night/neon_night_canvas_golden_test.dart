@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_grain.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_story.dart';
+import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_photo_images.dart';
+import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_placeholder_photo.dart';
 import 'package:traviato/l10n/app_localizations.dart';
 
 import 'neon_test_fonts.dart';
@@ -27,12 +29,32 @@ Future<void> _pumpFilm(
   // The grain is made before the film, so it starts at once.
   await tester.runAsync(NeonGrain.load);
   await loadNeonNightFonts();
+  final night = story ?? NeonNightFixtures.reference;
+  final photo = NeonPlaceholderPhoto.forIds(NeonNightFixtures.photoIds(night));
+
+  // Decode the photos first, so the frames don't race the image loads.
+  await tester.pumpWidget(const SizedBox());
+  final context = tester.element(find.byType(SizedBox));
+  final (:thumbs, :large) = NeonPhotoImages.idsFor(
+    night,
+    NeonNightCanvas.timelineFor(night),
+  );
+  await tester.runAsync(() async {
+    for (final id in thumbs) {
+      await precacheImage(NeonPhotoImages.thumbProvider(photo, id)!, context);
+    }
+    for (final id in large) {
+      await precacheImage(NeonPhotoImages.largeProvider(photo, id)!, context);
+    }
+  });
+
   await tester.pumpWidget(
     Localizations(
       locale: locale,
       delegates: AppLocalizations.localizationsDelegates,
       child: NeonNightCanvas(
-        story: story ?? NeonNightFixtures.reference,
+        story: night,
+        photo: photo,
         reducedFlashing: reduced,
       ),
     ),
@@ -128,5 +150,58 @@ void main() {
   ) async {
     await _pumpFilm(tester, story: NeonNightFixtures.longPlan);
     await _expectAt(tester, const [('08_6', 8.6)], 'long_plan');
+  });
+
+  // Chapter cards (§5.3), at the MP4's instants: the numeral slamming in
+  // pink, the sheet popping, the highlight, the three laser zooms, Ch 2's
+  // short card without a note, Ch 3's typed line on 2 lines.
+  testWidgets('chapter cards', skip: _skip, (tester) async {
+    await _pumpFilm(tester);
+    await _expectAt(tester, const [
+      ('09_6', 9.6),
+      ('10_3', 10.3),
+      ('11_2', 11.2),
+      ('12_9', 12.9),
+      ('13_6', 13.6),
+      ('14_0', 14.0),
+      ('15_7', 15.7),
+      ('16_8', 16.8),
+      ('26_0', 26.0),
+      ('36_4', 36.4),
+      ('41_6', 41.6),
+    ], 'card');
+  });
+
+  testWidgets('chapter cards, reduced flashing', skip: _skip, (tester) async {
+    await _pumpFilm(tester, reduced: true);
+    await _expectAt(tester, const [
+      ('09_6', 9.6),
+      ('13_6', 13.6),
+    ], 'card_reduced');
+  });
+
+  testWidgets('chapter cards in Russian', skip: _skip, (tester) async {
+    await _pumpFilm(
+      tester,
+      story: NeonNightFixtures.referenceRu,
+      locale: const Locale('ru'),
+    );
+    await _expectAt(tester, const [('15_7', 15.7), ('26_0', 26.0)], 'card_ru');
+  });
+
+  // 2 photos in Ch 1 (a 12-beat card, two zooms), no notes.
+  testWidgets('a small night: few photos, no notes', skip: _skip, (
+    tester,
+  ) async {
+    final story = NeonNightFixtures.few;
+    final timeline = NeonNightCanvas.timelineFor(story);
+    final card = timeline.chapterCard(0);
+    final beat = timeline.beat;
+    await _pumpFilm(tester, story: story);
+    await _expectAt(tester, [
+      ('sheet', card.start + beat.beatToSec(5)),
+      ('zoom1', card.start + beat.beatToSec(7.5)),
+      ('zoom2', card.start + beat.beatToSec(10.5)),
+    ], 'card_few');
   });
 }
