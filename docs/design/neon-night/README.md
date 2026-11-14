@@ -15,3 +15,5 @@ Regenerate a still: `ffmpeg -ss <seconds> -i NeonNight.mp4 -frames:v 1 -q:v 3 st
 - **The laser zoom's hit spot stays lit while the laser is on** (0.55 + the τ 0.25 hit flare), as in the MP4; the spec has only the flare.
 - **The ghost numeral's box is line-height 1.12**, which puts its glyph tops at y ≈ 275 like the MP4's (the spec's y 230 is the CSS box).
 - The reference's Ch 1 has **34 photos** (5 sheet rows, as in the MP4 at 15.7 s); Ch 2 has 12, Ch 3 has 40.
+- **Ken Burns on the moments:** the spec gives only Split's (0.14). Burst uses 0.08, Timeline 0.06 and Peak 0.10, all within §3.5's 0.06–0.15.
+- **Moment labels are built from the data**, so they translate: Split `{time} · {PLACE}` (only the time without a place), Burst `BURST · {time}` (`neonNight_burst`), Peak `{first} → {last}`.

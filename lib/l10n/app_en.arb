@@ -2467,6 +2467,8 @@
   "@neonNight_planTitle": {
     "description": "Neon Night film: the heading over the night's planned quests (#363); shown in neon capitals."
   },
+  "neonNight_burst": "Burst",
+  "@neonNight_burst": {"description": "Neon Night film (#363): the label word on a burst of photos taken within a minute, shown in capitals as 'BURST · 23:41'."},
   "neonNight_planMore": "{count, plural, other{+{count} more}}",
   "@neonNight_planMore": {
     "description": "Neon Night film: under the plan's 5 rows when the night has more planned quests (#363); shown in capitals.",

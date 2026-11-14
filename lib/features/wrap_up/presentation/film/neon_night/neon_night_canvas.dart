@@ -38,15 +38,14 @@ class NeonNightCanvas extends StatefulWidget {
   final ImageProvider? Function(String id) photo;
 
   /// The film's schedule for [story]: its chapters (each card's length
-  /// follows its photos), the standard moments until phase 5 picks them
-  /// from the photos, and a Note until phase 6. The Plan scene plays only
+  /// follows its photos) with their moments, and a Note until phase 6. The Plan scene plays only
   /// when the memory has a plan.
   static NeonNightTimeline timelineFor(NeonNightStory story) =>
       NeonNightTimeline(
         chapters: [
-          for (final (i, chapter) in story.chapters.indexed)
+          for (final chapter in story.chapters)
             NnChapterShape(
-              moments: NeonNightTimeline.standardMoments(i),
+              moments: [for (final moment in chapter.moments) moment.type],
               photos: chapter.photos.length,
             ),
         ],

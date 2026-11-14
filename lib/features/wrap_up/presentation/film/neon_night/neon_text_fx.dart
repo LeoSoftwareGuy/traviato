@@ -258,6 +258,7 @@ class NeonChromaticText {
     required double maxWidth,
     required double split,
     int weight = 900,
+    Color color = NeonColors.white,
   }) {
     TextPainter layout(double size, Color color) => TextPainter(
       text: TextSpan(
@@ -273,10 +274,10 @@ class NeonChromaticText {
     return NeonChromaticText._(
       fitted,
       split,
-      layout(fitted, NeonColors.white),
+      layout(fitted, color),
       layout(fitted, NeonColors.cyan),
       layout(fitted, NeonColors.pink),
-      layout(fitted, NeonColors.white.withValues(alpha: 0.22)),
+      layout(fitted, color.withValues(alpha: 0.22)),
     );
   }
 
@@ -328,12 +329,13 @@ class NeonChromaticText {
 /// A label box (§5.4a): mono 500 38 px, white on `rgba(5,3,10,.8)`,
 /// padding 10/18, a 1 px white@14 % border.
 class NeonLabelBox {
-  NeonLabelBox(String text, {double size = 38})
+  NeonLabelBox(this.text, {double size = 38})
     : _text = neonLayout(
         text,
         NeonType.mono(size, color: NeonColors.white, letterSpacing: 2),
       );
 
+  final String text;
   final TextPainter _text;
 
   static const padding = EdgeInsets.symmetric(vertical: 10, horizontal: 18);

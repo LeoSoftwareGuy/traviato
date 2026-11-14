@@ -156,17 +156,26 @@ void main() {
     });
   });
 
-  test('the film decodes every sheet tile small and only zoom picks large', () {
+  test('the film decodes sheet tiles small; zoom picks and moments large', () {
     final story = NeonNightFixtures.reference;
     final (:thumbs, :large) = NeonPhotoImages.idsFor(
       story,
       NeonNightCanvas.timelineFor(story),
     );
     expect(thumbs, hasLength(34 + 10 + 34));
-    // Zooms on the first and last cards only.
-    expect(large, hasLength(6));
-    expect(large.toSet(), hasLength(6));
-    expect(large.where((id) => id.startsWith('ch2-')), isEmpty);
+    final moments = {
+      for (final chapter in story.chapters)
+        for (final moment in chapter.moments)
+          for (final photo in moment.photos) photo.id,
+    };
+    expect(large, containsAll(moments));
+    expect(large.toSet(), hasLength(large.length));
+    // Zooms only on the first and last cards: Ch 2's large photos are
+    // its timeline's.
+    expect(
+      large.where((id) => id.startsWith('ch2-')).toSet(),
+      {for (final p in story.chapters[1].moments.single.photos) p.id},
+    );
   });
 
   group('the slam flash', () {

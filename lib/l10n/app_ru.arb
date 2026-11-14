@@ -2600,6 +2600,8 @@
   "@neonNight_planTitle": {
     "x-review": "pending"
   },
+  "neonNight_burst": "Серия",
+  "@neonNight_burst": {"description": "Neon Night film (#363): the label word on a burst of photos taken within a minute, shown in capitals as 'BURST · 23:41'.", "x-review": "pending"},
   "neonNight_planMore": "{count, plural, other{и ещё {count}}}",
   "@neonNight_planMore": {
     "x-review": "pending"
