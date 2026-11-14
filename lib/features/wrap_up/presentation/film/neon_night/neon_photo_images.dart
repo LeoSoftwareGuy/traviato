@@ -6,6 +6,7 @@ import 'package:flutter/painting.dart';
 import '../sky_story/sky_photo_images.dart';
 import 'neon_chapter_card.dart';
 import 'neon_chapter_card_painter.dart';
+import 'neon_heart.dart';
 import 'neon_night_scene_spec.dart';
 import 'neon_night_story.dart';
 import 'neon_night_timeline.dart';
@@ -19,17 +20,31 @@ class NeonPhotoImages implements NeonPhotoSource {
     required NeonNightStory story,
     required NeonNightTimeline timeline,
   }) : _thumbs = SkyPhotoImages((id) => thumbProvider(photo, id)),
-       _large = SkyPhotoImages((id) => largeProvider(photo, id)) {
-    final (:thumbs, :large) = idsFor(story, timeline);
+       _large = SkyPhotoImages((id) => largeProvider(photo, id)),
+       _tiles = SkyPhotoImages((id) => tileProvider(photo, id)) {
+    final (:thumbs, :large, :tiles) = idsFor(story, timeline);
     _thumbs.load(thumbs);
     _large.load(large);
+    _tiles.load(tiles);
   }
 
   static const thumbWidth = 256;
   static const largeWidth = 960;
 
+  /// The heart's 40 px tiles: a 200-photo heart stays about 7 MB.
+  static const tileWidth = 96;
+
   final SkyPhotoImages _thumbs;
   final SkyPhotoImages _large;
+  final SkyPhotoImages _tiles;
+
+  static ImageProvider? tileProvider(
+    ImageProvider? Function(String id) photo,
+    String id,
+  ) {
+    final full = photo(id);
+    return full == null ? null : ResizeImage(full, width: tileWidth);
+  }
 
   static ImageProvider? thumbProvider(
     ImageProvider? Function(String id) photo,
@@ -48,8 +63,8 @@ class NeonPhotoImages implements NeonPhotoSource {
   }
 
   /// Which photos the film shows: every sheet tile small; the zoom picks
-  /// and the moments' photos large.
-  static ({List<String> thumbs, List<String> large}) idsFor(
+  /// and the moments' photos large; the heart's tiny.
+  static ({List<String> thumbs, List<String> large, List<String> tiles}) idsFor(
     NeonNightStory story,
     NeonNightTimeline timeline,
   ) {
@@ -78,7 +93,16 @@ class NeonPhotoImages implements NeonPhotoSource {
     }
     // The Note's background is blurred: the small decode is plenty.
     if (story.note?.photo case final photo?) thumbs.add(photo.id);
-    return (thumbs: thumbs.toSet().toList(), large: large.toSet().toList());
+    final all = story.allPhotos;
+    final heart = NnHeart(photos: all.length);
+    final tiles = {
+      for (var k = 0; k < heart.cells.length; k++) all[heart.photoFor(k)].id,
+    };
+    return (
+      thumbs: thumbs.toSet().toList(),
+      large: large.toSet().toList(),
+      tiles: tiles.toList(),
+    );
   }
 
   @override
@@ -87,6 +111,9 @@ class NeonPhotoImages implements NeonPhotoSource {
   @override
   ui.Image? large(String id) => _large[id];
 
+  @override
+  ui.Image? tile(String id) => _tiles[id];
+
   /// Completes once every photo has loaded or failed, or after [cap]: a
   /// photo that never answers paints its empty mat instead of holding the
   /// film forever.
@@ -94,15 +121,18 @@ class NeonPhotoImages implements NeonPhotoSource {
       Future.wait([
         _thumbs.ready,
         _large.ready,
+        _tiles.ready,
       ]).timeout(cap, onTimeout: () => []);
 
   void addListener(VoidCallback listener) {
     _thumbs.addListener(listener);
     _large.addListener(listener);
+    _tiles.addListener(listener);
   }
 
   void dispose() {
     _thumbs.dispose();
     _large.dispose();
+    _tiles.dispose();
   }
 }

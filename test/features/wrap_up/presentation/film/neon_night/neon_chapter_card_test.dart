@@ -158,7 +158,7 @@ void main() {
 
   test('the film decodes sheet tiles small; zoom picks and moments large', () {
     final story = NeonNightFixtures.reference;
-    final (:thumbs, :large) = NeonPhotoImages.idsFor(
+    final (:thumbs, :large, tiles: _) = NeonPhotoImages.idsFor(
       story,
       NeonNightCanvas.timelineFor(story),
     );

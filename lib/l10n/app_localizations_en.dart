@@ -2647,6 +2647,53 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get neonNight_headline => 'What a night';
+
+  @override
+  String neonNight_moments(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count moments',
+      one: '$count moment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String neonNight_photos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos',
+      one: '$count photo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String neonNight_notes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count notes',
+      one: '$count note',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String neonNight_ticks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ticks',
+      one: '$count tick',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String neonNight_planMore(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

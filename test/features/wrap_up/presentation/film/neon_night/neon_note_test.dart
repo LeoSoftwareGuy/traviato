@@ -81,7 +81,7 @@ void main() {
 
     test("the note's photo decodes small: it is blurred", () {
       final story = NeonNightFixtures.reference;
-      final (:thumbs, large: _) = NeonPhotoImages.idsFor(
+      final (:thumbs, large: _, tiles: _) = NeonPhotoImages.idsFor(
         story,
         NeonNightCanvas.timelineFor(story),
       );

@@ -9,6 +9,7 @@ import 'neon_ambient.dart';
 import 'neon_ambient_painter.dart';
 import 'neon_balloon.dart';
 import 'neon_chapter_card_painter.dart';
+import 'neon_finale_painter.dart';
 import 'neon_grain.dart';
 import 'neon_night_story.dart';
 import 'neon_night_texts.dart';
@@ -20,7 +21,8 @@ import 'neon_tokens.dart';
 /// The Neon Night film (#363): one 1080 × 1920 composition on one looping
 /// clock, like `GoldenVowsCanvas`, painted in the spec's layer order
 /// (NEON_NIGHT_SPEC.md §4). Built up phase by phase: so far the ambient
-/// layers and the neon balloon sign, Ignition, Plan and the chapter cards.
+/// layers and the neon balloon sign, and every scene from Ignition to the
+/// Ending.
 /// Its fixed words follow the surrounding locale.
 class NeonNightCanvas extends StatefulWidget {
   const NeonNightCanvas({
@@ -231,6 +233,12 @@ class _NeonNightCanvasState extends State<NeonNightCanvas>
                     ),
                     NeonLaserPainter(ambient: _ambient, time: _clock),
                     NeonBalloonPainter(balloon: _balloon, time: _clock),
+                    NeonTopPainter(
+                      timeline: _timeline,
+                      texts: texts,
+                      time: _clock,
+                      reducedFlashing: widget.reducedFlashing,
+                    ),
                     NeonFlashPainter(
                       timeline: _timeline,
                       time: _clock,

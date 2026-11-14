@@ -4027,6 +4027,36 @@ abstract class AppLocalizations {
   /// **'Note {number}'**
   String neonNight_noteTag(String number);
 
+  /// Neon Night film (#363): the Finale's headline over the heart of photos when the memory has none of its own and no note; shown in capitals.
+  ///
+  /// In en, this message translates to:
+  /// **'What a night'**
+  String get neonNight_headline;
+
+  /// Neon Night film (#363): the end card's big line, photos plus videos; shown in lowercase.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} moment} other{{count} moments}}'**
+  String neonNight_moments(int count);
+
+  /// Neon Night film (#363): the end card's totals, shown in capitals as '142 PHOTOS · 9 NOTES · 3 TICKS'.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} photo} other{{count} photos}}'**
+  String neonNight_photos(int count);
+
+  /// Neon Night film (#363): the end card's totals; see neonNight_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} note} other{{count} notes}}'**
+  String neonNight_notes(int count);
+
+  /// Neon Night film (#363): the end card's totals, plan items done; see neonNight_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} tick} other{{count} ticks}}'**
+  String neonNight_ticks(int count);
+
   /// Neon Night film: under the plan's 5 rows when the night has more planned quests (#363); shown in capitals.
   ///
   /// In en, this message translates to:

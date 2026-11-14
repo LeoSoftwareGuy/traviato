@@ -2697,6 +2697,58 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get neonNight_headline => 'Вот это ночь';
+
+  @override
+  String neonNight_moments(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count момента',
+      many: '$count моментов',
+      few: '$count момента',
+      one: '$count момент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String neonNight_photos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count фото',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String neonNight_notes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count заметки',
+      many: '$count заметок',
+      few: '$count заметки',
+      one: '$count заметка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String neonNight_ticks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count отметки',
+      many: '$count отметок',
+      few: '$count отметки',
+      one: '$count отметка',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String neonNight_planMore(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
