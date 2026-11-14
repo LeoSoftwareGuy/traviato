@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../film/neon_night/neon_night_canvas.dart';
-import '../film/neon_night/neon_night_timeline.dart';
+import '../film/neon_night/neon_night_story.dart';
 
 /// Debug builds only (#363): plays the Neon Night film full screen on the
-/// spec's 3-chapter reference timeline. Built up phase by phase: phase 2
-/// is the ambient layers and the neon balloon sign. "Reduced" switches to
-/// the reduced-flashing version (§6). Reached from the Plan inspector;
-/// never routed in release.
+/// spec's reference night. Built up phase by phase: phase 3 adds Ignition
+/// and Plan. EN/RU switches the film's language (and the fixture's
+/// words); "Reduced" switches to the reduced-flashing version (§6).
+/// Reached from the Plan inspector; never routed in release.
 class NeonNightPreviewPage extends StatefulWidget {
   const NeonNightPreviewPage({super.key});
 
@@ -16,19 +16,27 @@ class NeonNightPreviewPage extends StatefulWidget {
 }
 
 class _NeonNightPreviewPageState extends State<NeonNightPreviewPage> {
-  static final _timeline = NeonNightTimeline.reference();
   bool _reduced = false;
+  bool _russian = false;
 
   @override
   Widget build(BuildContext context) {
+    final locale = Locale(_russian ? 'ru' : 'en');
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
           Positioned.fill(
-            child: NeonNightCanvas(
-              timeline: _timeline,
-              reducedFlashing: _reduced,
+            child: Localizations.override(
+              context: context,
+              locale: locale,
+              child: NeonNightCanvas(
+                key: ValueKey(locale),
+                story: _russian
+                    ? NeonNightFixtures.referenceRu
+                    : NeonNightFixtures.reference,
+                reducedFlashing: _reduced,
+              ),
             ),
           ),
           SafeArea(
@@ -41,6 +49,12 @@ class _NeonNightPreviewPageState extends State<NeonNightPreviewPage> {
                   style: TextButton.styleFrom(foregroundColor: Colors.white),
                   onPressed: () => setState(() => _reduced = !_reduced),
                   child: Text(_reduced ? 'Reduced' : 'Full'),
+                ),
+                TextButton(
+                  key: const Key('neon-night-language'),
+                  style: TextButton.styleFrom(foregroundColor: Colors.white),
+                  onPressed: () => setState(() => _russian = !_russian),
+                  child: Text(_russian ? 'RU' : 'EN'),
                 ),
               ],
             ),

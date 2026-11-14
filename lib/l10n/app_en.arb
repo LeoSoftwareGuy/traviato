@@ -2462,5 +2462,18 @@
   "skyStory_tagline": "Every memory, beautifully captured",
   "@skyStory_tagline": {
     "description": "Sky Story film: the handwritten line under the moment count at the end of the film (#345); the landing page's headline."
+  },
+  "neonNight_planTitle": "Tonight's plan",
+  "@neonNight_planTitle": {
+    "description": "Neon Night film: the heading over the night's planned quests (#363); shown in neon capitals."
+  },
+  "neonNight_planMore": "{count, plural, other{+{count} more}}",
+  "@neonNight_planMore": {
+    "description": "Neon Night film: under the plan's 5 rows when the night has more planned quests (#363); shown in capitals.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

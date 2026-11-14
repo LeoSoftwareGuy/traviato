@@ -4008,6 +4008,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Every memory, beautifully captured'**
   String get skyStory_tagline;
+
+  /// Neon Night film: the heading over the night's planned quests (#363); shown in neon capitals.
+  ///
+  /// In en, this message translates to:
+  /// **'Tonight\'s plan'**
+  String get neonNight_planTitle;
+
+  /// Neon Night film: under the plan's 5 rows when the night has more planned quests (#363); shown in capitals.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{+{count} more}}'**
+  String neonNight_planMore(int count);
 }
 
 class _AppLocalizationsDelegate

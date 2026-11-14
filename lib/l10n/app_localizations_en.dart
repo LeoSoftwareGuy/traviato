@@ -2634,4 +2634,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get skyStory_tagline => 'Every memory, beautifully captured';
+
+  @override
+  String get neonNight_planTitle => 'Tonight\'s plan';
+
+  @override
+  String neonNight_planMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count more',
+    );
+    return '$_temp0';
+  }
 }

@@ -129,6 +129,25 @@ flutter:
     - family: GreatVibes
       fonts:
         - asset: assets/fonts/GreatVibes-Regular.ttf
+    # The Neon Night film's type (#363; OFL, google/fonts, licences next to
+    # each file). Big Shoulders Display (variable) has no Cyrillic, so
+    # Russian titles fall back to Fira Sans Extra Condensed, a close
+    # condensed sans with Cyrillic (static 600/800/900). JetBrains Mono
+    # (variable, Cyrillic) is bundled so the film never fetches a font.
+    - family: BigShouldersDisplay
+      fonts:
+        - asset: assets/fonts/BigShouldersDisplay[wght].ttf
+    - family: FiraSansExtraCondensed
+      fonts:
+        - asset: assets/fonts/FiraSansExtraCondensed-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/FiraSansExtraCondensed-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/FiraSansExtraCondensed-Black.ttf
+          weight: 900
+    - family: JetBrainsMono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono[wght].ttf
 
   assets:
     - .env
