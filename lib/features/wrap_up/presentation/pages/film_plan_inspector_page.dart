@@ -66,6 +66,12 @@ class FilmPlanInspectorPage extends ConsumerWidget {
             onPressed: () => context.pushNamed(RouteNames.goldenVowsPreview),
             icon: const Icon(Icons.favorite_border),
           ),
+          IconButton(
+            key: const Key('film-plan-neon-night'),
+            tooltip: 'Preview Neon Night',
+            onPressed: () => context.pushNamed(RouteNames.neonNightPreview),
+            icon: const Icon(Icons.nightlife),
+          ),
           TextButton.icon(
             key: const Key('film-plan-rerun'),
             onPressed: isRerunning
