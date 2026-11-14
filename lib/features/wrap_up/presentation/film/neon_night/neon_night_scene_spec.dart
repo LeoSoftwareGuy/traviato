@@ -36,9 +36,10 @@ final class NnPlanSpec extends NeonNightSceneSpec {
 /// A chapter's card: header, ghost numeral, title, contact sheet, typed
 /// line and progress bar (§5.3).
 ///
-/// The first and the last chapter get the long card, with room for three
-/// laser zooms (§9). Whether the zooms actually play depends on the
-/// chapter's photos (≥ 4 tiles), not on its length.
+/// The first and the last chapter get the long card, and every long card
+/// plays its three laser zooms (§9), however few photos the chapter has:
+/// with fewer than 3 tiles a tile is zoomed again (`NeonZoomPicks`). This
+/// overrides §8's "fewer than 4 tiles → no zooms" (Leo, #363).
 final class NnChapterCardSpec extends NeonNightSceneSpec {
   const NnChapterCardSpec({
     required this.chapter,
