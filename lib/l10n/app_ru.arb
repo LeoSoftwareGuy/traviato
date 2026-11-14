@@ -2602,6 +2602,8 @@
   },
   "neonNight_burst": "Серия",
   "@neonNight_burst": {"description": "Neon Night film (#363): the label word on a burst of photos taken within a minute, shown in capitals as 'BURST · 23:41'.", "x-review": "pending"},
+  "neonNight_noteTag": "Заметка {number}",
+  "@neonNight_noteTag": {"x-review": "pending", "description": "Neon Night film (#363): the tag over the note written in neon, shown in capitals as 'NOTE 04 · 00:31'. number is the note's place among the memory's notes, already zero-padded.", "placeholders": {"number": {"type": "String"}}},
   "neonNight_planMore": "{count, plural, other{и ещё {count}}}",
   "@neonNight_planMore": {
     "x-review": "pending"

@@ -38,7 +38,8 @@ class NeonNightCanvas extends StatefulWidget {
   final ImageProvider? Function(String id) photo;
 
   /// The film's schedule for [story]: its chapters (each card's length
-  /// follows its photos) with their moments, and a Note until phase 6. The Plan scene plays only
+  /// follows its photos) with their moments. The Plan and Note scenes
+  /// play only when the memory has a plan and a note. The Plan scene plays only
   /// when the memory has a plan.
   static NeonNightTimeline timelineFor(NeonNightStory story) =>
       NeonNightTimeline(
@@ -50,7 +51,7 @@ class NeonNightCanvas extends StatefulWidget {
             ),
         ],
         hasPlan: story.hasPlan,
-        hasNote: true,
+        hasNote: story.hasNote,
       );
 
   /// The §6 version: softer flicker, flares and laser punch, same timings.

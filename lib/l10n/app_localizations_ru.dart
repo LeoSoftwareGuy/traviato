@@ -2692,6 +2692,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get neonNight_burst => 'Серия';
 
   @override
+  String neonNight_noteTag(String number) {
+    return 'Заметка $number';
+  }
+
+  @override
   String neonNight_planMore(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

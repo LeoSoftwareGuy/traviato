@@ -18,7 +18,8 @@ class NeonNightTexts {
       chapters = [
         for (var i = 0; i < story.chapters.length; i++)
           NnChapterTexts(story, i, l10n),
-      ];
+      ],
+      note = story.note == null ? null : NnNoteTexts(story, l10n);
 
   final NnIgnitionTexts ignition;
 
@@ -28,12 +29,16 @@ class NeonNightTexts {
   /// One per chapter, in order.
   final List<NnChapterTexts> chapters;
 
+  /// Null when the memory has no note (the scene is cut).
+  final NnNoteTexts? note;
+
   void dispose() {
     ignition.dispose();
     plan?.dispose();
     for (final chapter in chapters) {
       chapter.dispose();
     }
+    note?.dispose();
   }
 }
 
@@ -423,5 +428,76 @@ class NnPeakTexts implements NnMomentTexts {
   void dispose() {
     title.dispose();
     range.dispose();
+  }
+}
+
+/// The Note scene (§5.7): its tag, the lines as tubes and the signature.
+class NnNoteTexts {
+  factory NnNoteTexts(NeonNightStory story, AppLocalizations l10n) {
+    final note = story.note!;
+    final word = l10n
+        .neonNight_noteTag(note.number.toString().padLeft(2, '0'))
+        .toUpperCase();
+    final lines = neonNoteLines(note.text);
+    final size = NeonType.fit(lines.join('\n'), lineWidth, 210, 0.43);
+    final name = story.firstName;
+    return NnNoteTexts._(
+      tag: NeonLabelBox(
+        note.time == null ? word : '$word · ${note.time}',
+        size: 40,
+        border: const [NeonColors.cyan, NeonColors.pink],
+      ),
+      lines: [
+        for (final (i, line) in lines.indexed)
+          NeonTubeText(
+            line,
+            size: size,
+            maxWidth: lineWidth,
+            stroke: 4,
+            weight: 600,
+            color: colors[i],
+          ),
+      ],
+      fontSize: size,
+      signature: name == null
+          ? null
+          : neonLayout(
+              '— $name',
+              NeonType.mono(48, color: NeonColors.body, letterSpacing: 2),
+            ),
+    );
+  }
+
+  NnNoteTexts._({
+    required this.tag,
+    required this.lines,
+    required this.fontSize,
+    required this.signature,
+  });
+
+  static const lineWidth = 900.0;
+  static const colors = [
+    NeonColors.cyan,
+    NeonColors.pink,
+    NeonColors.cyan,
+    NeonColors.green,
+    NeonColors.pink,
+  ];
+
+  final NeonLabelBox tag;
+  final List<NeonTubeText> lines;
+
+  /// The lines' size: fit(900, 210, 0.43) on the longest.
+  final double fontSize;
+
+  /// `— Leo`; null without a first name.
+  final TextPainter? signature;
+
+  void dispose() {
+    tag.dispose();
+    for (final line in lines) {
+      line.dispose();
+    }
+    signature?.dispose();
   }
 }

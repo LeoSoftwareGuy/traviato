@@ -85,3 +85,41 @@ abstract final class NeonType {
     ].join('\n');
   }
 }
+
+/// The Note's lines (§5.7, app side): uppercase, the user's own line
+/// breaks kept, each wrapped greedily at [width] characters, at most
+/// [maxLines]. A longer note stops at the last whole word that fits and
+/// ends with "…".
+///
+/// The spec says 16 characters; the reference render's first line, "WE
+/// LOST EACH OTHER", is 18, and the fit formula's size only matches 18,
+/// so the render wins.
+List<String> neonNoteLines(
+  String note, {
+  int width = 18,
+  int maxLines = 5,
+}) {
+  final lines = <String>[];
+  for (final paragraph in note.toUpperCase().split('\n')) {
+    var line = '';
+    for (final word in paragraph.split(RegExp(r'\s+'))) {
+      if (word.isEmpty) continue;
+      if (line.isNotEmpty && line.length + 1 + word.length > width) {
+        lines.add(line);
+        line = word;
+      } else {
+        line = line.isEmpty ? word : '$line $word';
+      }
+    }
+    if (line.isNotEmpty) lines.add(line);
+  }
+  if (lines.length <= maxLines) return lines;
+  // Too long: the last line drops words until its "…" fits.
+  final kept = lines.take(maxLines).toList();
+  final words = kept.last.split(' ');
+  while (words.length > 1 && words.join(' ').length + 1 > width) {
+    words.removeLast();
+  }
+  kept.last = '${words.join(' ')}…';
+  return kept;
+}

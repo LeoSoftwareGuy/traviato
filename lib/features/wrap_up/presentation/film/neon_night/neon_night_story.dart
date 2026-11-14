@@ -129,14 +129,43 @@ class NnChapter extends Equatable {
   List<Object?> get props => [title, from, to, photos, note, moments];
 }
 
+/// The note the film writes out in neon (§5.7, §7): the user's own words,
+/// over a blurred photo of the night.
+class NnNoteMoment extends Equatable {
+  const NnNoteMoment({
+    required this.text,
+    required this.number,
+    this.time,
+    this.photo,
+  });
+
+  /// The note as the user wrote it; their line breaks are kept.
+  final String text;
+
+  /// Its place among the memory's notes, from 1: the tag's "NOTE 04".
+  final int number;
+
+  /// 'HH:MM', when it was written; none → the tag is just the number.
+  final String? time;
+
+  /// The blurred background; none → the haze shows through.
+  final NnPhoto? photo;
+
+  @override
+  List<Object?> get props => [text, number, time, photo];
+}
+
 /// What the Neon Night film shows of one memory (#363, spec §7). Grows
-/// phase by phase: the title, the night's date, the plan and the chapters.
+/// phase by phase: the title, the night's date, the plan, the chapters
+/// and the note.
 class NeonNightStory extends Equatable {
   NeonNightStory({
     required this.title,
     required this.date,
     required this.chapters,
     this.plan = const [],
+    this.note,
+    this.firstName,
   }) : assert(
          chapters.isNotEmpty && chapters.length <= 5,
          '1–5 chapters',
@@ -154,10 +183,17 @@ class NeonNightStory extends Equatable {
   /// 1–5.
   final List<NnChapter> chapters;
 
+  /// The note written out in neon; none → no Note scene.
+  final NnNoteMoment? note;
+
+  /// Signs the note (`— Leo`); none → no signature.
+  final String? firstName;
+
   bool get hasPlan => plan.isNotEmpty;
+  bool get hasNote => note != null;
 
   @override
-  List<Object?> get props => [title, date, plan, chapters];
+  List<Object?> get props => [title, date, plan, chapters, note, firstName];
 }
 
 /// The spec's reference night (the MP4 in docs/design/neon-night/), for
@@ -234,6 +270,15 @@ abstract final class NeonNightFixtures {
     title: 'Night out',
     date: DateTime(2026, 11, 14),
     chapters: _chapters(russian: false),
+    firstName: 'Leo',
+    note: const NnNoteMoment(
+      text:
+          'We lost each other\nFound each other\nBy the bass\n'
+          'Best night ever',
+      number: 4,
+      time: '00:31',
+      photo: NnPhoto(id: 'ch3-10', takenAt: '00:56'),
+    ),
     plan: const [
       NnPlanRow(time: '22:00', item: 'Pre-drinks', done: true),
       NnPlanRow(time: '23:30', item: 'Main stage', done: true),
@@ -247,6 +292,13 @@ abstract final class NeonNightFixtures {
     title: 'Ночь в городе',
     date: DateTime(2026, 11, 14),
     chapters: _chapters(russian: true),
+    firstName: 'Лео',
+    note: const NnNoteMoment(
+      text: 'Потерялись\nНашлись у басов\nЛучшая ночь',
+      number: 4,
+      time: '00:31',
+      photo: NnPhoto(id: 'ch3-10', takenAt: '00:56'),
+    ),
     plan: const [
       NnPlanRow(time: '22:00', item: 'Разогрев', done: true),
       NnPlanRow(time: '23:30', item: 'Главная сцена', done: true),
@@ -283,6 +335,9 @@ abstract final class NeonNightFixtures {
     return NeonNightStory(
       title: 'Small hours',
       date: DateTime(2026, 11, 14),
+      // No time, no photo, no first name: the tag is just the number and
+      // the note isn't signed.
+      note: const NnNoteMoment(text: 'Short and sweet', number: 1),
       chapters: [
         NnChapter(
           title: 'Warm-up',
@@ -319,5 +374,6 @@ abstract final class NeonNightFixtures {
       for (final moment in chapter.moments)
         for (final photo in moment.photos) photo.id,
     ],
+    ?story.note?.photo?.id,
   };
 }

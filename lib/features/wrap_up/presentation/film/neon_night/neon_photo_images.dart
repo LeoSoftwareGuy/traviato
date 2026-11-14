@@ -76,7 +76,9 @@ class NeonPhotoImages implements NeonPhotoSource {
         ]);
       }
     }
-    return (thumbs: thumbs, large: large.toSet().toList());
+    // The Note's background is blurred: the small decode is plenty.
+    if (story.note?.photo case final photo?) thumbs.add(photo.id);
+    return (thumbs: thumbs.toSet().toList(), large: large.toSet().toList());
   }
 
   @override

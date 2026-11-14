@@ -17,3 +17,5 @@ Regenerate a still: `ffmpeg -ss <seconds> -i NeonNight.mp4 -frames:v 1 -q:v 3 st
 - The reference's Ch 1 has **34 photos** (5 sheet rows, as in the MP4 at 15.7 s); Ch 2 has 12, Ch 3 has 40.
 - **Ken Burns on the moments:** the spec gives only Split's (0.14). Burst uses 0.08, Timeline 0.06 and Peak 0.10, all within §3.5's 0.06–0.15.
 - **Moment labels are built from the data**, so they translate: Split `{time} · {PLACE}` (only the time without a place), Burst `BURST · {time}` (`neonNight_burst`), Peak `{first} → {last}`.
+- **Note lines wrap at 18 characters, not 16** (§5.7). The MP4's first line, `WE LOST EACH OTHER`, is 18, and fit(900, 210, 0.43) only gives its ≈116 px for an 18-character line. The user's own line breaks are kept; past 5 lines the last one ends at a whole word with "…".
+- **The Note's tag is built from the data:** `NOTE {nn} · {time}` (`neonNight_noteTag`), just `NOTE {nn}` with no time. No first name means no signature line.

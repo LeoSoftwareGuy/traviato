@@ -2642,6 +2642,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get neonNight_burst => 'Burst';
 
   @override
+  String neonNight_noteTag(String number) {
+    return 'Note $number';
+  }
+
+  @override
   String neonNight_planMore(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
