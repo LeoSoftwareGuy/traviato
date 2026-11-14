@@ -4015,6 +4015,12 @@ abstract class AppLocalizations {
   /// **'Tonight\'s plan'**
   String get neonNight_planTitle;
 
+  /// Neon Night film (#363): the label word on a burst of photos taken within a minute, shown in capitals as 'BURST · 23:41'.
+  ///
+  /// In en, this message translates to:
+  /// **'Burst'**
+  String get neonNight_burst;
+
   /// Neon Night film: under the plan's 5 rows when the night has more planned quests (#363); shown in capitals.
   ///
   /// In en, this message translates to:

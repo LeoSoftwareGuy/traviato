@@ -147,6 +147,17 @@ void main() {
         NnIgnitionTexts.formatDate(DateTime(2026, 11, 14), 'ru'),
         // The chapter cards' header, times, typed notes and cursor.
         'CH 01/03 22:10 – 23:40 > ▌',
+        // The moments' labels and the peak's range.
+        for (final l10n in [en, ru])
+          '${l10n.neonNight_burst.toUpperCase()} · 23:41',
+        '00:12 → 00:40',
+        for (final story in [
+          NeonNightFixtures.reference,
+          NeonNightFixtures.referenceRu,
+        ])
+          for (final chapter in story.chapters)
+            for (final moment in chapter.moments)
+              if (moment case NnSplit(:final place?)) place.toUpperCase(),
         for (final story in [
           NeonNightFixtures.reference,
           NeonNightFixtures.referenceRu,

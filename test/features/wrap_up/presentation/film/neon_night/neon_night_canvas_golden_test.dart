@@ -204,4 +204,63 @@ void main() {
       ('zoom2', card.start + beat.beatToSec(10.5)),
     ], 'card_few');
   });
+
+  // Moments (§5.4–5.6) at the MP4's instants: strips wiping and pulsing,
+  // frames popping and jumping, the timeline scrolling with its
+  // highlight, the peak fanning out.
+  testWidgets('moments', skip: _skip, (tester) async {
+    await _pumpFilm(tester);
+    await _expectAt(tester, const [
+      ('17_5', 17.5),
+      ('19_0', 19.048),
+      ('21_5', 21.5),
+      ('23_3', 23.333),
+      ('28_9', 28.9),
+      ('29_8', 29.8),
+      ('31_9', 31.905),
+      ('42_3', 42.3),
+      ('44_3', 44.286),
+    ], 'moment');
+  });
+
+  testWidgets('moments, reduced flashing', skip: _skip, (tester) async {
+    await _pumpFilm(tester, reduced: true);
+    await _expectAt(tester, const [
+      ('19_0', 19.048),
+      ('29_8', 29.8),
+      ('44_3', 44.286),
+    ], 'moment_reduced');
+  });
+
+  testWidgets('moments in Russian', skip: _skip, (tester) async {
+    await _pumpFilm(
+      tester,
+      story: NeonNightFixtures.referenceRu,
+      locale: const Locale('ru'),
+    );
+    await _expectAt(tester, const [
+      ('19_0', 19.048),
+      ('23_3', 23.333),
+      ('31_9', 31.905),
+      ('44_3', 44.286),
+    ], 'moment_ru');
+  });
+
+  // 2 strips, 2 frames, a 3-item timeline, a 3-strip peak.
+  testWidgets('moments with few photos', skip: _skip, (tester) async {
+    final story = NeonNightFixtures.few;
+    final timeline = NeonNightCanvas.timelineFor(story);
+    final beat = timeline.beat;
+    double atBeat(int scene, double lb) =>
+        timeline.scenes[scene].start + beat.beatToSec(lb);
+    // Ignition, Plan? no (few has no plan), Card 1, Split, Card 2, Burst,
+    // Timeline, Card 3, Peak.
+    await _pumpFilm(tester, story: story);
+    await _expectAt(tester, [
+      ('split', atBeat(2, 4)),
+      ('burst', atBeat(4, 5.3)),
+      ('timeline', atBeat(5, 4.5)),
+      ('peak', atBeat(7, 5)),
+    ], 'moment_few');
+  });
 }

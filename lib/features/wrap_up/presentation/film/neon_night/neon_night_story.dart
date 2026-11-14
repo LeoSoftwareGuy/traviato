@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'neon_night_scene_spec.dart';
+
 /// One row of "Tonight's plan" (#363, NEON_NIGHT_SPEC.md §5.2, §7): a
 /// quest with a time, ticked if it was done.
 class NnPlanRow extends Equatable {
@@ -29,6 +31,69 @@ class NnPhoto extends Equatable {
   List<Object?> get props => [id, takenAt];
 }
 
+/// A block that shows a few of a chapter's photos after its card
+/// (§5.4–5.6, §7). Which one a chapter gets is the app's choice.
+sealed class NnMoment extends Equatable {
+  // Not const: the moments assert their photo counts, which a const
+  // constructor cannot.
+  // ignore: prefer_const_constructors_in_immutables
+  NnMoment(this.photos);
+
+  final List<NnPhoto> photos;
+
+  NnMomentType get type;
+
+  @override
+  List<Object?> get props => [type, photos];
+}
+
+/// 2–3 photos side by side, taken close together (§5.4a). Labelled with
+/// the first one's time and, when known, the place.
+class NnSplit extends NnMoment {
+  NnSplit(super.photos, {this.place})
+    : assert(photos.length >= 2 && photos.length <= 3, 'split: 2–3 photos');
+
+  final String? place;
+
+  @override
+  NnMomentType get type => NnMomentType.split;
+
+  @override
+  List<Object?> get props => [...super.props, place];
+}
+
+/// 2–4 photos taken within a minute, tossed in one by one (§5.4b).
+class NnBurst extends NnMoment {
+  NnBurst(super.photos)
+    : assert(photos.length >= 2 && photos.length <= 4, 'burst: 2–4 photos');
+
+  @override
+  NnMomentType get type => NnMomentType.burst;
+}
+
+/// 2–8 photos across the chapter, in time order, with their times
+/// (§5.5b).
+class NnTimeline extends NnMoment {
+  NnTimeline(super.photos)
+    : assert(
+        photos.length >= 2 && photos.length <= 8,
+        'timeline: 2–8 photos',
+      );
+
+  @override
+  NnMomentType get type => NnMomentType.timeline;
+}
+
+/// 3–5 standout photos fanned over a laser fan (§5.6b), labelled with
+/// the first and last one's times.
+class NnPeak extends NnMoment {
+  NnPeak(super.photos)
+    : assert(photos.length >= 3 && photos.length <= 5, 'peak: 3–5 photos');
+
+  @override
+  NnMomentType get type => NnMomentType.peak;
+}
+
 /// One chapter of the night (§7): a stretch of time with its photos.
 class NnChapter extends Equatable {
   NnChapter({
@@ -36,8 +101,13 @@ class NnChapter extends Equatable {
     required this.from,
     required this.to,
     required this.photos,
+    required this.moments,
     this.note,
-  }) : assert(photos.isNotEmpty, 'a chapter has photos');
+  }) : assert(photos.isNotEmpty, 'a chapter has photos'),
+       assert(
+         moments.isNotEmpty && moments.length <= 2,
+         'a chapter has 1–2 moments',
+       );
 
   /// The director's title in the UI language, e.g. "Doors open".
   final String title;
@@ -52,8 +122,11 @@ class NnChapter extends Equatable {
   /// The user's own words, typed out on the card; none → no typed line.
   final String? note;
 
+  /// The 1–2 blocks after the card, in order.
+  final List<NnMoment> moments;
+
   @override
-  List<Object?> get props => [title, from, to, photos, note];
+  List<Object?> get props => [title, from, to, photos, note, moments];
 }
 
 /// What the Neon Night film shows of one memory (#363, spec §7). Grows
@@ -112,33 +185,50 @@ abstract final class NeonNightFixtures {
   }
 
   /// The reference's chapters (34, 12 and 40 photos: 5, 2 and 5 sheet
-  /// rows, as in the MP4).
-  static List<NnChapter> _chapters({required bool russian}) => [
-    NnChapter(
-      title: russian ? 'Двери открыты' : 'Doors open',
-      from: '22:10',
-      to: '23:40',
-      photos: photos('ch1', 34, from: 22 * 60 + 10, minutes: 90),
-      note: russian
-          ? 'Очередь того стоила. Почти.'
-          : 'Queue was worth it. Barely.',
-    ),
-    NnChapter(
-      title: russian ? 'После полуночи' : 'After midnight',
-      from: '23:40',
-      to: '00:10',
-      photos: photos('ch2', 12, from: 23 * 60 + 40, minutes: 30),
-    ),
-    NnChapter(
-      title: russian ? 'Пик ночи' : 'Peak time',
-      from: '00:10',
-      to: '03:10',
-      photos: photos('ch3', 40, from: 24 * 60 + 10, minutes: 180),
-      note: russian
-          ? 'Нашли всех у сцены. Потеряли куртку.'
-          : 'Found everyone at the front. Lost the jacket.',
-    ),
-  ];
+  /// rows, as in the MP4) and their moments: Ch 1 split + burst, Ch 2
+  /// timeline, Ch 3 peak.
+  static List<NnChapter> _chapters({required bool russian}) {
+    final ch1 = photos('ch1', 34, from: 22 * 60 + 10, minutes: 90);
+    final ch2 = photos('ch2', 12, from: 23 * 60 + 40, minutes: 30);
+    final ch3 = photos('ch3', 40, from: 24 * 60 + 10, minutes: 180);
+    return [
+      NnChapter(
+        title: russian ? 'Двери открыты' : 'Doors open',
+        from: '22:10',
+        to: '23:40',
+        photos: ch1,
+        note: russian
+            ? 'Очередь того стоила. Почти.'
+            : 'Queue was worth it. Barely.',
+        moments: [
+          NnSplit(
+            ch1.sublist(22, 25),
+            place: russian ? 'Главная сцена' : 'Main stage',
+          ),
+          NnBurst(ch1.sublist(30, 34)),
+        ],
+      ),
+      NnChapter(
+        title: russian ? 'После полуночи' : 'After midnight',
+        from: '23:40',
+        to: '00:10',
+        photos: ch2,
+        moments: [NnTimeline(ch2.sublist(0, 8))],
+      ),
+      NnChapter(
+        title: russian ? 'Пик ночи' : 'Peak time',
+        from: '00:10',
+        to: '03:10',
+        photos: ch3,
+        note: russian
+            ? 'Нашли всех у сцены. Потеряли куртку.'
+            : 'Found everyone at the front. Lost the jacket.',
+        moments: [
+          NnPeak([ch3[0], ch3[2], ch3[4], ch3[5], ch3[6]]),
+        ],
+      ),
+    ];
+  }
 
   static final reference = NeonNightStory(
     title: 'Night out',
@@ -183,36 +273,51 @@ abstract final class NeonNightFixtures {
     ],
   );
 
-  /// A small night: 2 photos in Ch 1 (two zooms, a 12-beat card), 1 in
-  /// the last (one zoom), and no notes.
-  static final few = NeonNightStory(
-    title: 'Small hours',
-    date: DateTime(2026, 11, 14),
-    chapters: [
-      NnChapter(
-        title: 'Warm-up',
-        from: '23:00',
-        to: '23:30',
-        photos: photos('few1', 2, from: 23 * 60, minutes: 30),
-      ),
-      NnChapter(
-        title: 'The long middle bit',
-        from: '23:30',
-        to: '01:00',
-        photos: photos('few2', 6, from: 23 * 60 + 30, minutes: 90),
-      ),
-      NnChapter(
-        title: 'Home',
-        from: '01:00',
-        to: '01:20',
-        photos: photos('few3', 1, from: 60, minutes: 20),
-      ),
-    ],
-  );
+  /// A small night: 2 photos in Ch 1 (two zooms, a 12-beat card, a
+  /// 2-strip split), 6 in Ch 2 (a 2-frame burst and a 3-item timeline), 3
+  /// in the last (one zoom, a 3-strip peak), and no notes or places.
+  static final few = () {
+    final ch1 = photos('few1', 2, from: 23 * 60, minutes: 30);
+    final ch2 = photos('few2', 6, from: 23 * 60 + 30, minutes: 90);
+    final ch3 = photos('few3', 3, from: 60, minutes: 20);
+    return NeonNightStory(
+      title: 'Small hours',
+      date: DateTime(2026, 11, 14),
+      chapters: [
+        NnChapter(
+          title: 'Warm-up',
+          from: '23:00',
+          to: '23:30',
+          photos: ch1,
+          moments: [NnSplit(ch1)],
+        ),
+        NnChapter(
+          title: 'The long middle bit',
+          from: '23:30',
+          to: '01:00',
+          photos: ch2,
+          moments: [
+            NnBurst(ch2.sublist(0, 2)),
+            NnTimeline(ch2.sublist(2, 5)),
+          ],
+        ),
+        NnChapter(
+          title: 'Home',
+          from: '01:00',
+          to: '01:20',
+          photos: ch3,
+          moments: [NnPeak(ch3)],
+        ),
+      ],
+    );
+  }();
 
   /// Every photo id in [story], in order.
-  static Iterable<String> photoIds(NeonNightStory story) => [
-    for (final chapter in story.chapters)
+  static Iterable<String> photoIds(NeonNightStory story) => {
+    for (final chapter in story.chapters) ...[
       for (final photo in chapter.photos) photo.id,
-  ];
+      for (final moment in chapter.moments)
+        for (final photo in moment.photos) photo.id,
+    ],
+  };
 }

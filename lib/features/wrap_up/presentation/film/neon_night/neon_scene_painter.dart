@@ -8,6 +8,7 @@ import 'neon_ambient.dart';
 import 'neon_beat.dart';
 import 'neon_chapter_card_painter.dart';
 import 'neon_eases.dart';
+import 'neon_moment_painter.dart';
 import 'neon_night_scene_spec.dart';
 import 'neon_night_story.dart';
 import 'neon_night_texts.dart';
@@ -15,8 +16,8 @@ import 'neon_night_timeline.dart';
 import 'neon_text_fx.dart';
 
 /// Layer 3 (#363, NEON_NIGHT_SPEC.md §4): the content of whichever scene
-/// is playing, cut hard on every cue. So far Ignition (§5.1), Plan (§5.2)
-/// and the chapter cards (§5.3).
+/// is playing, cut hard on every cue. So far Ignition (§5.1), Plan (§5.2),
+/// the chapter cards (§5.3) and their moments (§5.4–5.6).
 class NeonScenePainter extends CustomPainter {
   NeonScenePainter({
     required this.timeline,
@@ -37,7 +38,41 @@ class NeonScenePainter extends CustomPainter {
                reducedFlashing: reducedFlashing,
              ),
        },
+       _moments = _momentPainters(
+         timeline,
+         story,
+         texts,
+         photos,
+         reducedFlashing,
+       ),
        super(repaint: time);
+
+  /// One painter per moment scene, keyed by its cue: a chapter's moments
+  /// play in the order the story lists them.
+  static Map<double, NnMomentPainter> _momentPainters(
+    NeonNightTimeline timeline,
+    NeonNightStory story,
+    NeonNightTexts texts,
+    NeonPhotoSource photos,
+    bool reducedFlashing,
+  ) {
+    final out = <double, NnMomentPainter>{};
+    final seen = <int, int>{};
+    for (final scene in timeline.scenes) {
+      if (scene.spec case final NnMomentSpec spec) {
+        final k = seen[spec.chapter] = (seen[spec.chapter] ?? -1) + 1;
+        out[scene.start] = NnMomentPainter(
+          spec: spec,
+          moment: story.chapters[spec.chapter].moments[k],
+          texts: texts.chapters[spec.chapter].moments[k],
+          photos: photos,
+          beat: timeline.beat,
+          reducedFlashing: reducedFlashing,
+        );
+      }
+    }
+    return out;
+  }
 
   final NeonNightTimeline timeline;
   final NeonNightStory story;
@@ -46,6 +81,7 @@ class NeonScenePainter extends CustomPainter {
   final ValueListenable<double> time;
   final bool reducedFlashing;
   final Map<int, NnChapterCardPainter> _cards;
+  final Map<double, NnMomentPainter> _moments;
 
   NeonBeat get beat => timeline.beat;
 
@@ -61,6 +97,8 @@ class NeonScenePainter extends CustomPainter {
         if (plan != null) _plan(canvas, t, scene.start, plan);
       case NnChapterCardSpec(:final chapter):
         _cards[chapter]?.paint(canvas, t, scene.start, scene.duration);
+      case NnMomentSpec():
+        _moments[scene.start]?.paint(canvas, t, scene.start, scene.duration);
       default:
         break;
     }

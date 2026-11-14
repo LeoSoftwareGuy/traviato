@@ -11,8 +11,8 @@ import 'neon_night_story.dart';
 import 'neon_night_timeline.dart';
 
 /// The film's photos, decoded at two sizes (#363): every contact-sheet
-/// tile small, only the laser zooms' picks large, so a 200-photo night
-/// stays light.
+/// tile small; only the laser zooms' picks and the moments' photos, which
+/// fill big frames, large. So a 200-photo night stays light.
 class NeonPhotoImages implements NeonPhotoSource {
   NeonPhotoImages(
     ImageProvider? Function(String id) photo, {
@@ -47,7 +47,8 @@ class NeonPhotoImages implements NeonPhotoSource {
     return full == null ? null : ResizeImage(full, width: largeWidth);
   }
 
-  /// Which photos the film shows: every sheet tile, and the zoom picks.
+  /// Which photos the film shows: every sheet tile small; the zoom picks
+  /// and the moments' photos large.
   static ({List<String> thumbs, List<String> large}) idsFor(
     NeonNightStory story,
     NeonNightTimeline timeline,
@@ -70,10 +71,12 @@ class NeonPhotoImages implements NeonPhotoSource {
         );
         large.addAll([
           for (final k in timing.zoomTiles) chapter.photos[k].id,
+          for (final moment in chapter.moments)
+            for (final photo in moment.photos) photo.id,
         ]);
       }
     }
-    return (thumbs: thumbs, large: large);
+    return (thumbs: thumbs, large: large.toSet().toList());
   }
 
   @override

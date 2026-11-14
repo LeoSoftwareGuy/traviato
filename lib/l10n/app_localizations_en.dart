@@ -2639,6 +2639,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get neonNight_planTitle => 'Tonight\'s plan';
 
   @override
+  String get neonNight_burst => 'Burst';
+
+  @override
   String neonNight_planMore(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

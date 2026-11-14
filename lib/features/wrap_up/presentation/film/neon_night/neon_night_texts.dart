@@ -17,7 +17,7 @@ class NeonNightTexts {
       plan = story.hasPlan ? NnPlanTexts(story, l10n) : null,
       chapters = [
         for (var i = 0; i < story.chapters.length; i++)
-          NnChapterTexts(story, i),
+          NnChapterTexts(story, i, l10n),
       ];
 
   final NnIgnitionTexts ignition;
@@ -199,7 +199,11 @@ class NnPlanRowTexts {
 /// A chapter card (§5.3): header, time range, ghost numeral (pink, then
 /// the accent), title, the typed line and each zoom's time label.
 class NnChapterTexts {
-  factory NnChapterTexts(NeonNightStory story, int index) {
+  factory NnChapterTexts(
+    NeonNightStory story,
+    int index,
+    AppLocalizations l10n,
+  ) {
     final chapter = story.chapters[index];
     final count = story.chapters.length;
     final accent = NeonColors.chapterAccent(index);
@@ -254,6 +258,10 @@ class NnChapterTexts {
         split: 4,
       ),
       typed: typed,
+      moments: [
+        for (final moment in chapter.moments)
+          NnMomentTexts(moment, chapter, l10n),
+      ],
       tileLabels: {
         for (final k in timing.zoomTiles)
           k: NeonLabelBox(chapter.photos[k].takenAt),
@@ -270,6 +278,7 @@ class NnChapterTexts {
     required this.title,
     required this.typed,
     required this.tileLabels,
+    required this.moments,
   });
 
   static const typedWidth = 936.0;
@@ -287,6 +296,9 @@ class NnChapterTexts {
   /// The time label of each tile a zoom can pick.
   final Map<int, NeonLabelBox> tileLabels;
 
+  /// One per moment, in order.
+  final List<NnMomentTexts> moments;
+
   /// How many lines the typed note takes (0 without one).
   int get typedLines => typed?.computeLineMetrics().length ?? 0;
 
@@ -301,8 +313,115 @@ class NnChapterTexts {
     numeral.dispose();
     title.dispose();
     typed?.dispose();
+    for (final moment in moments) {
+      moment.dispose();
+    }
     for (final label in tileLabels.values) {
       label.dispose();
     }
+  }
+}
+
+/// A moment's words (§5.4–5.6): its label, or its title and times.
+sealed class NnMomentTexts {
+  factory NnMomentTexts(
+    NnMoment moment,
+    NnChapter chapter,
+    AppLocalizations l10n,
+  ) => switch (moment) {
+    NnSplit(:final photos, :final place) => NnLabelTexts(
+      place == null
+          ? photos.first.takenAt
+          : '${photos.first.takenAt} · ${place.toUpperCase()}',
+    ),
+    NnBurst(:final photos) => NnLabelTexts(
+      '${l10n.neonNight_burst.toUpperCase()} · ${photos.first.takenAt}',
+    ),
+    NnTimeline() => NnTimelineTexts(moment, chapter),
+    NnPeak() => NnPeakTexts(moment, chapter),
+  };
+
+  void dispose();
+}
+
+/// Split's and Burst's label box at (48, 1760): mono 38, no wrap.
+class NnLabelTexts implements NnMomentTexts {
+  NnLabelTexts(String text) : label = NeonLabelBox(text);
+
+  final NeonLabelBox label;
+
+  @override
+  void dispose() => label.dispose();
+}
+
+/// Timeline: the chapter's title as a pink tube, and each item's time,
+/// plain and lit.
+class NnTimelineTexts implements NnMomentTexts {
+  NnTimelineTexts(NnTimeline moment, NnChapter chapter)
+    : title = NeonTubeText(
+        chapter.title.toUpperCase(),
+        size: NeonType.fit(chapter.title, titleWidth, 140, 0.46),
+        maxWidth: titleWidth,
+        stroke: 4,
+        color: NeonColors.pink,
+        core: NeonColors.tintViolet,
+      ),
+      times = [
+        for (final photo in moment.photos)
+          (
+            neonLayout(
+              photo.takenAt,
+              NeonType.mono(44, color: plainTime, letterSpacing: 2),
+            ),
+            neonLayout(
+              photo.takenAt,
+              NeonType.mono(44, color: NeonColors.tintGreen, letterSpacing: 2),
+            ),
+          ),
+      ];
+
+  static const titleWidth = 760.0;
+  static const plainTime = Color(0xFFECE8F6);
+
+  final NeonTubeText title;
+
+  /// Each item's time: (plain, lit).
+  final List<(TextPainter, TextPainter)> times;
+
+  @override
+  void dispose() {
+    title.dispose();
+    for (final (plain, lit) in times) {
+      plain.dispose();
+      lit.dispose();
+    }
+  }
+}
+
+/// Peak: the chapter's title in pink with the chromatic split, and the
+/// time range of its photos.
+class NnPeakTexts implements NnMomentTexts {
+  NnPeakTexts(NnPeak moment, NnChapter chapter)
+    : title = NeonChromaticText(
+        chapter.title.toUpperCase(),
+        size: NeonType.fit(chapter.title, titleWidth, 260, 0.42),
+        maxWidth: titleWidth,
+        split: 4,
+        color: NeonColors.pink,
+      ),
+      range = neonLayout(
+        '${moment.photos.first.takenAt} → ${moment.photos.last.takenAt}',
+        NeonType.mono(40, color: NeonColors.white, letterSpacing: 2),
+      );
+
+  static const titleWidth = 820.0;
+
+  final NeonChromaticText title;
+  final TextPainter range;
+
+  @override
+  void dispose() {
+    title.dispose();
+    range.dispose();
   }
 }
