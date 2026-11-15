@@ -84,6 +84,9 @@ Opening (dust/invitation), stats footnote, badge unlock and keepsake stay fixed 
 | outdoors | camping, hiking, fishing | slow-medium | ken_burns (wide), polaroid | folk/acoustic | earthy, self-deprecating |
 | city_break | city trips | medium | collage, split, card_flip | upbeat indie | curious, light |
 | warm_family | birthdays, family | medium | polaroid_drop, collage_3 | gentle, cheerful | warm |
+
+> **Update (#363):** the `rave` recipe (and its burst/split scenes) was removed. Nights out play
+> the Neon Night film; the classic plan has only `keepsake`.
  
 ### Cost & privacy
 - Vision input costs more than text; with ~512px images and one film per memory, expect cents to tens of

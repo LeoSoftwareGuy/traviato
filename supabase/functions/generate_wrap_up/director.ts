@@ -240,9 +240,7 @@ function recipeLines(): string {
       r.scenes.join(", ")
     }. Each scene ${r.minDuration}–${r.maxDuration}s, so at least ${
       Math.ceil(MIN_TOTAL_SECONDS / r.maxDuration)
-    } scenes.${
-      r.minBursts > 0 ? ` At least ${r.minBursts} bursts.` : ""
-    } Tone: ${r.tone}.`;
+    } scenes. Tone: ${r.tone}.`;
   }).join("\n");
 }
 
@@ -285,8 +283,7 @@ export function buildPlanSystemPrompt(language: WrapUpLanguage): string {
     `- The scenes add up to ${MIN_TOTAL_SECONDS}–${MAX_TOTAL_SECONDS} seconds.\n`,
     "- 2–3 chapters, each opening with a bridge_line.\n",
     "- Lines are second person, specific — real details from notes, places ",
-    "and photos — never generic. Keepsake: quiet, wry. Rave: playful, a bit ",
-    "cheeky.\n",
+    "and photos — never generic: quiet, wry.\n",
     `- bridge_line ≤ ${MAX_BRIDGE_CHARS} characters; text_card text ≤ ${MAX_TEXT_CARD_CHARS}; `,
     `footnote.line and closing_line ≤ ${MAX_CLOSING_CHARS}.\n`,
     `- Never use: ${BANNED_PHRASES.map((p) => `"${p}"`).join(", ")}.\n`,

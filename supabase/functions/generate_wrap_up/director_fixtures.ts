@@ -172,48 +172,6 @@ export function keepsakePlanWithFixableFaults(
   return plan;
 }
 
-// A valid rave plan over DIRECTOR_PHOTO_IDS: 16 scenes × ~3s = 48s.
-export function ravePlan(ids = DIRECTOR_PHOTO_IDS): FilmPlan {
-  const s = (
-    type: PlanScene["type"],
-    photo_ids: string[],
-  ) => scene(type, photo_ids, { duration_s: 3 });
-  return {
-    ...keepsakePlan(ids),
-    occasion: "party",
-    recipe: "rave",
-    music: { energy: "high" },
-    chapters: [
-      {
-        bridge_line: "Doors at ten.",
-        scenes: [
-          s("burst", ids.slice(0, 3)),
-          s("split", ids.slice(3, 5)),
-          s("text_card", []),
-          s("text_card", []),
-          s("text_card", []),
-          s("text_card", []),
-          s("text_card", []),
-          s("text_card", []),
-        ],
-      },
-      {
-        bridge_line: "Then it got loud.",
-        scenes: [
-          s("burst", ids.slice(5, 9)),
-          s("card_flip", [ids[9]]),
-          s("split", ids.slice(10, 12)),
-          s("text_card", []),
-          s("text_card", []),
-          s("text_card", []),
-          s("text_card", []),
-          s("text_card", []),
-        ],
-      },
-    ],
-  };
-}
-
 export function planContext(
   overrides: Partial<PlanContext> = {},
 ): PlanContext {
