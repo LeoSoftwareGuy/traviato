@@ -141,6 +141,20 @@ Post-MVP: `video_path`, `video_status`.
   A film kept as Golden Vows rebuilds it while the section fits, else plays
   its Sky Story; no kept film gains one. The edge function reads
   `checklist_items` for this (service-role select grant).
+- `content.neon_night` (#363, no schema change): the Neon Night party film,
+  only when the director read the memory as a party, rave, club night,
+  festival, concert or night out and its `neon_night` section (in
+  `director`) still fits. It holds the title, start date, place, the plan
+  rows (the user's quests with a time: HH:MM, title, done), 1–5 chapters
+  (title, photos with `taken_at` — each chapter runs from its first photo
+  to the next one's, so new photos join a chapter — the card's typed line as
+  an exact excerpt of a note or null, 1–2 moments: split / burst / timeline
+  / peak with their photos and a split's place), the note scene (an exact
+  excerpt, its number among the notes, when written, a background photo) or
+  null, the director's headline or null, the first name and the totals. Up
+  to 200 photos (more are sampled evenly). The app sends
+  `utc_offset_minutes` so the director reads photo times as local times.
+  Kept films follow Golden Vows' rules.
 
 ### `photo_analysis` (#328)
 `photo_id PK/FK photos cascade, trip_id FK cascade, storage_path (the file

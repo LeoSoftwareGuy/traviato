@@ -7,10 +7,12 @@ import {
   buildPlanInput,
   buildPlanSystemPrompt,
   currentGoldenVows,
+  currentNeonNight,
   currentPlan,
   currentSkyStory,
   directorIsStale,
   type DirectorRecord,
+  localClock,
   MAX_DIRECTOR_RUNS,
   photoDaysOf,
   runDirector,
@@ -24,6 +26,7 @@ import {
   goldenVowsPlan,
   keepsakePlan,
   keepsakePlanWithFixableFaults,
+  neonNightPlan,
   skyStoryPlan,
   toolResponse,
 } from "./director_fixtures.ts";
@@ -223,6 +226,7 @@ Deno.test("the plan input carries facts in order and the prompt the rules", () =
     day: 1,
     day_date: "2026-09-01",
     text: "Bikes everywhere.",
+    written_at: null,
   });
   assertEquals(input.photos[0].place, "Centraal");
   assertEquals(input.photos[1].bonus_task, "Snap a canal");
@@ -605,6 +609,125 @@ Deno.test("currentGoldenVows: the stored section while it fits the memory", () =
   assertEquals(currentGoldenVows(record, reworded), null);
   assertEquals(
     currentGoldenVows({ ...record, golden_vows: null }, directorTripData()),
+    null,
+  );
+});
+
+// --- Neon Night (#363) ---
+
+function withNeonNight(neon_night: unknown = neonNightPlan()) {
+  return { ...emittedPlan(), neon_night };
+}
+
+Deno.test("runDirector keeps a valid Neon Night section on its own", async () => {
+  const anthropic = fakeAnthropic([withNeonNight()]);
+  const { deps: d } = deps(anthropic.fetchImpl);
+
+  const record = await runDirector(d, TRIP_ID, directorTripData(), "en");
+
+  assertEquals(record.attempts, 1);
+  assertEquals(record.neon_night, neonNightPlan());
+  assertEquals(record.neon_night_problems, []);
+  assertEquals("neon_night" in record.plan!, false);
+});
+
+Deno.test("no Neon Night section is an answer: no retry", async () => {
+  // null, or the field left out.
+  for (const plan of [withNeonNight(null), emittedPlan()]) {
+    const anthropic = fakeAnthropic([plan]);
+    const record = await runDirector(
+      deps(anthropic.fetchImpl).deps,
+      TRIP_ID,
+      directorTripData(),
+      "en",
+    );
+    assertEquals(record.attempts, 1);
+    assertEquals(record.neon_night, null);
+    assertEquals(record.neon_night_problems, []);
+  }
+});
+
+Deno.test("an invalid Neon Night section is retried with its problems", async () => {
+  const broken = neonNightPlan();
+  broken.chapters[2].moments[0].photo_ids = ["p08", "p09"];
+  const anthropic = fakeAnthropic([withNeonNight(broken), withNeonNight()]);
+
+  const record = await runDirector(
+    deps(anthropic.fetchImpl).deps,
+    TRIP_ID,
+    directorTripData(),
+    "en",
+  );
+
+  assertEquals(record.attempts, 2);
+  assertEquals(record.neon_night, neonNightPlan());
+  const retry = anthropic.sent.at(-1)!.body;
+  assertStringIncludes(
+    (retry.messages as { content: string }[])[0].content,
+    "neon_night.chapters[2].moments[0].photo_ids: 2, a peak takes 3–5",
+  );
+
+  const stillBroken = fakeAnthropic([withNeonNight(broken)]);
+  const failed = await runDirector(
+    deps(stillBroken.fetchImpl).deps,
+    TRIP_ID,
+    directorTripData(),
+    "en",
+  );
+  assertEquals(failed.status, "planned");
+  assertEquals(failed.neon_night, null);
+  assert(failed.neon_night_problems!.length > 0);
+});
+
+Deno.test("the prompt, the tool and the input carry what Neon Night needs", async () => {
+  const prompt = buildPlanSystemPrompt("en");
+  assertStringIncludes(prompt, "neon_night");
+  assertStringIncludes(prompt, "Never fill both golden_vows and neon_night");
+  const anthropic = fakeAnthropic([withNeonNight()]);
+  const data = directorTripData({ utc_offset_minutes: 120 });
+  data.notes[0].created_at = "2026-09-01T21:59:00Z";
+  await runDirector(deps(anthropic.fetchImpl).deps, TRIP_ID, data, "en");
+  const plan = anthropic.sent.find((s) => s.tool === "emit_film_plan")!;
+  const schema = (plan.body.tools as {
+    input_schema: { required: string[]; properties: Record<string, unknown> };
+  }[])[0].input_schema;
+  assert(schema.required.includes("neon_night"));
+  assert("neon_night" in schema.properties);
+  // Photo and note times on the app's clock.
+  const content = (plan.body.messages as { content: string }[])[0].content;
+  const input = JSON.parse(content.slice(content.indexOf("{")));
+  assertEquals(input.photos[0].time, "12:00");
+  assertEquals(input.notes[0].written_at, "23:59");
+});
+
+Deno.test("localClock: ISO instants as HH:MM on the app's clock", () => {
+  const utc = directorTripData();
+  assertEquals(localClock("2026-09-01T23:30:00Z", utc), "23:30");
+  const tallinn = directorTripData({ utc_offset_minutes: 120 });
+  assertEquals(localClock("2026-09-01T23:30:00Z", tallinn), "01:30");
+  const behind = directorTripData({ utc_offset_minutes: -300 });
+  assertEquals(localClock("2026-09-01T02:15:00Z", behind), "21:15");
+  assertEquals(localClock(null, utc), null);
+  assertEquals(localClock("not a date", utc), null);
+});
+
+Deno.test("currentNeonNight: the stored section while it fits the memory", () => {
+  const record = {
+    status: "planned",
+    plan: keepsakePlan(),
+    problems: [],
+    failed_ids: [],
+    neon_night: neonNightPlan(),
+  } as unknown as DirectorRecord;
+  assertEquals(currentNeonNight(record, directorTripData()), neonNightPlan());
+  const deleted = directorTripData();
+  deleted.photos = deleted.photos.filter((p) => p.id !== "p09");
+  assertEquals(currentNeonNight(record, deleted), null);
+  const reworded = directorTripData();
+  reworded.notes[1].content = "Sun, then pancakes.";
+  assertEquals(currentNeonNight(record, reworded), null);
+  assertEquals(
+    currentNeonNight({ ...record, neon_night: null }, directorTripData()),
     null,
   );
 });

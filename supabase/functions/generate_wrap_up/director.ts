@@ -49,6 +49,14 @@ import {
   repairGoldenVows,
 } from "./golden_vows.ts";
 import {
+  describeNeonNightProblems,
+  NEON_NIGHT_PROMPT_RULES,
+  type NeonNightPlan,
+  neonNightToolProperty,
+  nnCheckContext,
+  repairNeonNight,
+} from "./neon_night.ts";
+import {
   analysePhotos,
   type ImageUrlSigner,
   loadCachedAnalysis,
@@ -74,8 +82,8 @@ export const MIN_PLANNABLE_PHOTOS = 6;
 // the Plan inspector is never capped.
 export const MAX_DIRECTOR_RUNS = 4;
 
-// emit_film_plan with the Sky Story section (#345) and the Golden Vows
-// one (#346). Composed here so the films' modules don't import each other.
+// emit_film_plan with the Sky Story section (#345), the Golden Vows one
+// (#346) and the Neon Night one (#363). Composed here so the films' modules don't import each other.
 export const directorToolSchema = {
   ...filmPlanToolSchema,
   input_schema: {
@@ -84,11 +92,13 @@ export const directorToolSchema = {
       ...filmPlanToolSchema.input_schema.properties,
       sky_story: skyStoryToolProperty,
       golden_vows: goldenVowsToolProperty,
+      neon_night: neonNightToolProperty,
     },
     required: [
       ...filmPlanToolSchema.input_schema.required,
       "sky_story",
       "golden_vows",
+      "neon_night",
     ],
   },
 };
@@ -124,6 +134,11 @@ export interface DirectorRecord {
   // why) — then Sky Story plays.
   golden_vows?: GoldenVowsPlan | null;
   golden_vows_problems?: string[];
+  // The Neon Night section (#363): null when the director chose another
+  // occasion, or its section stayed invalid (neon_night_problems says
+  // why) — then the next film plays.
+  neon_night?: NeonNightPlan | null;
+  neon_night_problems?: string[];
   // id → orientation of every analysed photo: Golden Vows' chapter
   // layouts.
   orientations?: Record<string, string>;
@@ -190,6 +205,7 @@ export function buildPlanInput(
         day: dayNumber(trip.start_date, n.day_date),
         day_date: n.day_date,
         text: n.content,
+        written_at: localClock(n.created_at ?? null, tripData),
       })),
     // Already in chronological order (day, then time).
     photos: photos.map((p) => {
@@ -198,6 +214,7 @@ export function buildPlanInput(
         photo_id: p.id,
         day: dayNumber(trip.start_date, p.day_date),
         day_date: p.day_date,
+        time: localClock(p.taken_at ?? p.created_at, tripData),
         summary: a.summary,
         setting: a.setting,
         people: a.people,
@@ -279,6 +296,7 @@ export function buildPlanSystemPrompt(language: WrapUpLanguage): string {
     `- ${languageRule(language)}`,
     SKY_STORY_PROMPT_RULES,
     GOLDEN_VOWS_PROMPT_RULES,
+    NEON_NIGHT_PROMPT_RULES,
   ].join("");
 }
 
@@ -300,6 +318,7 @@ function normalisePlan(input: unknown): FilmPlan {
   // Stored on its own (DirectorRecord.sky_story).
   delete (plan as unknown as Record<string, unknown>).sky_story;
   delete (plan as unknown as Record<string, unknown>).golden_vows;
+  delete (plan as unknown as Record<string, unknown>).neon_night;
   for (const chapter of plan.chapters) {
     for (const scene of chapter.scenes) {
       scene.caption_note_id = scene.caption_note_id ?? null;
@@ -371,6 +390,8 @@ export async function runDirector(
     sky_problems: [],
     golden_vows: null,
     golden_vows_problems: [],
+    neon_night: null,
+    neon_night_problems: [],
     orientations: {},
     hero_scores: {},
     photo_days: photoDaysOf(tripData),
@@ -441,6 +462,7 @@ export async function runDirector(
       ];
       record.sky_problems = record.problems;
       record.golden_vows_problems = record.problems;
+      record.neon_night_problems = record.problems;
       return record;
     }
 
@@ -460,6 +482,13 @@ export async function runDirector(
         analyses.has(p.id) || p.use_in_wrap_up === false
       ),
     });
+    // Neon Night, too, may use only analysed photos.
+    const nnContext = nnCheckContext({
+      ...tripData,
+      photos: tripData.photos.filter((p) =>
+        analyses.has(p.id) || p.use_in_wrap_up === false
+      ),
+    });
     const input = buildPlanInput(tripData, usable, analyses, language);
     const system = buildPlanSystemPrompt(language);
     let problems: string[] = [];
@@ -467,6 +496,8 @@ export async function runDirector(
     let gvProblems: string[] = [];
     // A null section is a valid answer (another occasion).
     let gvSettled = false;
+    let nnProblems: string[] = [];
+    let nnSettled = false;
     for (let attempt = 1; attempt <= PLAN_ATTEMPTS; attempt++) {
       record.attempts = attempt;
       let toolInput: unknown;
@@ -480,6 +511,7 @@ export async function runDirector(
             ...problems,
             ...skyProblems,
             ...gvProblems,
+            ...nnProblems,
           ]),
           tool: directorToolSchema,
           label: "plan",
@@ -494,6 +526,7 @@ export async function runDirector(
         if (record.status !== "planned") problems = [failed];
         if (!record.sky_story) skyProblems = [failed];
         if (!gvSettled) gvProblems = [failed];
+        if (!nnSettled) nnProblems = [failed];
         continue;
       }
       toolInput = repairFilmPlan(toolInput, context);
@@ -535,22 +568,49 @@ export async function runDirector(
           }
         }
       }
-      if (record.status === "planned" && record.sky_story && gvSettled) {
+      if (!nnSettled) {
+        const raw = typeof toolInput === "object" && toolInput !== null
+          ? (toolInput as Record<string, unknown>).neon_night
+          : undefined;
+        if (raw === null || raw === undefined) {
+          record.neon_night = null;
+          nnProblems = [];
+          nnSettled = true;
+        } else {
+          const nn = repairNeonNight(raw, nnContext);
+          nnProblems = describeNeonNightProblems(nn, nnContext);
+          if (nnProblems.length === 0) {
+            record.neon_night = nn as NeonNightPlan;
+            nnSettled = true;
+          }
+        }
+      }
+      if (
+        record.status === "planned" && record.sky_story && gvSettled &&
+        nnSettled
+      ) {
         break;
       }
       logEvent(log, "director_plan_invalid", {
         trip_id: tripId,
         attempt,
-        problems: [...problems, ...skyProblems, ...gvProblems].slice(0, 30),
+        problems: [
+          ...problems,
+          ...skyProblems,
+          ...gvProblems,
+          ...nnProblems,
+        ].slice(0, 30),
       });
     }
     record.problems = problems;
     record.sky_problems = skyProblems;
     record.golden_vows_problems = gvProblems;
+    record.neon_night_problems = nnProblems;
   } catch (err) {
     record.problems = [`director failed: ${(err as Error).message}`];
     record.sky_problems = record.problems;
     record.golden_vows_problems = record.problems;
+    record.neon_night_problems = record.problems;
   } finally {
     record.usage = summariseUsage(calls);
     logEvent(log, "director_usage", {
@@ -644,4 +704,33 @@ export function currentGoldenVows(
     gvCheckContext(tripData),
   );
   return problems.length === 0 ? record.golden_vows : null;
+}
+
+// The director's Neon Night section if it still fits the memory as it is
+// now (no deleted or left-out photos, notes still saying those words) —
+// otherwise null, and the next film plays (#363).
+export function currentNeonNight(
+  record: unknown,
+  tripData: TripData,
+): NeonNightPlan | null {
+  if (!isDirectorRecord(record) || !record.neon_night) return null;
+  const problems = describeNeonNightProblems(
+    record.neon_night,
+    nnCheckContext(tripData),
+  );
+  return problems.length === 0 ? record.neon_night : null;
+}
+
+// [iso] as 'HH:MM' on the app's clock (TripData.utc_offset_minutes, #363),
+// or null.
+export function localClock(
+  iso: string | null,
+  tripData: TripData,
+): string | null {
+  if (!iso) return null;
+  const ms = Date.parse(iso);
+  if (Number.isNaN(ms)) return null;
+  const local = new Date(ms + (tripData.utc_offset_minutes ?? 0) * 60_000);
+  const two = (v: number) => String(v).padStart(2, "0");
+  return `${two(local.getUTCHours())}:${two(local.getUTCMinutes())}`;
 }
