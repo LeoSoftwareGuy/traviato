@@ -40,17 +40,7 @@ class JustAudioFilmMusicPlayer implements FilmMusicPlayer {
 
   @override
   Future<void> load() async {
-    final session = await AudioSession.instance;
-    await session.configure(
-      const AudioSessionConfiguration(
-        avAudioSessionCategory: AVAudioSessionCategory.ambient,
-        androidAudioAttributes: AndroidAudioAttributes(
-          contentType: AndroidAudioContentType.music,
-          usage: AndroidAudioUsage.media,
-        ),
-        androidWillPauseWhenDucked: false,
-      ),
-    );
+    await _configureAmbientSession();
     await _player.setAsset(asset);
   }
 
@@ -71,6 +61,89 @@ class JustAudioFilmMusicPlayer implements FilmMusicPlayer {
 
   @override
   Duration get position => _player.position;
+
+  @override
+  Future<void> dispose() => _player.dispose();
+}
+
+/// The "ambient" audio session every film's music plays in.
+Future<void> _configureAmbientSession() async {
+  final session = await AudioSession.instance;
+  await session.configure(
+    const AudioSessionConfiguration(
+      avAudioSessionCategory: AVAudioSessionCategory.ambient,
+      androidAudioAttributes: AndroidAudioAttributes(
+        contentType: AndroidAudioContentType.music,
+        usage: AndroidAudioUsage.media,
+      ),
+      androidWillPauseWhenDucked: false,
+    ),
+  );
+}
+
+/// A film's track made of bundled pieces played back to back, gapless
+/// (#363: Neon Night fits its track to the film's length this way). To
+/// [FilmMusic] it is one track: [position] and [seek] are on the film
+/// clock, each piece starting at its `start` (s).
+class JustAudioPlaylistMusicPlayer implements FilmMusicPlayer {
+  JustAudioPlaylistMusicPlayer(this.pieces)
+    : assert(pieces.isNotEmpty, 'a playlist needs a piece');
+
+  /// The assets in playing order, each with where it starts on the film
+  /// clock; the last one plays to its end.
+  final List<({String asset, double start})> pieces;
+
+  // Every piece is prepared up front, so each join is ready when it comes.
+  final _player = AudioPlayer(
+    handleAudioSessionActivation: false,
+    useLazyPreparation: false,
+  );
+
+  @override
+  Future<void> load() async {
+    await _configureAmbientSession();
+    await _player.setAudioSources(
+      [for (final piece in pieces) AudioSource.asset(piece.asset)],
+    );
+  }
+
+  /// The piece of [pieces] that is playing at film time [t] (s).
+  static int pieceAt(List<({String asset, double start})> pieces, double t) {
+    var index = 0;
+    while (index + 1 < pieces.length && pieces[index + 1].start <= t) {
+      index++;
+    }
+    return index;
+  }
+
+  @override
+  Future<void> play() async {
+    // just_audio's play() completes when playback stops; don't wait.
+    unawaited(_player.play());
+  }
+
+  @override
+  Future<void> pause() => _player.pause();
+
+  @override
+  Future<void> seek(Duration position) {
+    final t = position.inMicroseconds / 1e6;
+    final index = pieceAt(pieces, t);
+    final into = (t - pieces[index].start).clamp(0.0, double.infinity);
+    return _player.seek(
+      Duration(microseconds: (into * 1e6).round()),
+      index: index,
+    );
+  }
+
+  @override
+  Future<void> setVolume(double volume) => _player.setVolume(volume);
+
+  @override
+  Duration get position {
+    final start = pieces[_player.currentIndex ?? 0].start;
+    return Duration(microseconds: (start * 1e6).round()) + _player.position;
+  }
 
   @override
   Future<void> dispose() => _player.dispose();
