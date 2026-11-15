@@ -1941,6 +1941,17 @@ class AppLocalizationsRu extends AppLocalizations {
       'Утром и вечером, пока идёт воспоминание';
 
   @override
+  String get settings_reduceFlashing => 'Меньше вспышек';
+
+  @override
+  String get settings_reduceFlashingSubtitle =>
+      'Мягче вспышки в фильмах о вечеринках';
+
+  @override
+  String get settings_reduceFlashingByPhone =>
+      'Включено: в телефоне уменьшено движение';
+
+  @override
   String get language_systemDefault => 'Как в системе';
 
   @override

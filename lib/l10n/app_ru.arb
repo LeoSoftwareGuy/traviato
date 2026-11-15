@@ -1900,6 +1900,18 @@
   "@settings_memoryRemindersSubtitle": {
     "x-review": "pending"
   },
+  "settings_reduceFlashing": "Меньше вспышек",
+  "@settings_reduceFlashing": {
+    "x-review": "pending"
+  },
+  "settings_reduceFlashingSubtitle": "Мягче вспышки в фильмах о вечеринках",
+  "@settings_reduceFlashingSubtitle": {
+    "x-review": "pending"
+  },
+  "settings_reduceFlashingByPhone": "Включено: в телефоне уменьшено движение",
+  "@settings_reduceFlashingByPhone": {
+    "x-review": "pending"
+  },
   "language_systemDefault": "Как в системе",
   "@language_systemDefault": {
     "x-review": "pending"

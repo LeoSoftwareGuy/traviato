@@ -281,7 +281,7 @@ final class LanguageProfileSyncControllerProvider
 }
 
 String _$languageProfileSyncControllerHash() =>
-    r'cda202f95c207f0b8252208b7d068f76ba4ea199';
+    r'98e21055f437ec9c6ec32b607737bc4f008aa6d7';
 
 /// Reconciles the device choices with `profiles.language` (#236) and
 /// `profiles.dictation_language` (#218) on sign-in: a value on the profile wins (it's the user's choice from
