@@ -21,6 +21,8 @@ class FilmDirectorReportModel extends FilmDirectorReport {
     super.hasSkyStory,
     super.goldenVowsOccasion,
     super.goldenVowsProblems,
+    super.hasNeonNight,
+    super.neonNightProblems,
     super.runCount,
     super.attempts,
     super.model,
@@ -57,6 +59,10 @@ class FilmDirectorReportModel extends FilmDirectorReport {
       goldenVowsOccasion: _string(_map(json['golden_vows'])['occasion']),
       goldenVowsProblems: _list(
         json['golden_vows_problems'],
+      ).whereType<String>().toList(),
+      hasNeonNight: _map(json['neon_night']).isNotEmpty,
+      neonNightProblems: _list(
+        json['neon_night_problems'],
       ).whereType<String>().toList(),
       runCount: _int(json['run_count']),
       attempts: _int(json['attempts']),

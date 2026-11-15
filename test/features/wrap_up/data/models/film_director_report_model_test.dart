@@ -114,6 +114,26 @@ void main() {
       expect(invalid.goldenVowsProblems, ['golden_vows.heroes: 1']);
     });
 
+    test('reads whether there is a Neon Night section and its problems '
+        '(#363)', () {
+      final chosen = FilmDirectorReportModel.fromJson({
+        'status': 'planned',
+        'problems': <String>[],
+        'neon_night': {'chapters': <Object>[]},
+        'neon_night_problems': <String>[],
+      })!;
+      expect(chosen.hasNeonNight, isTrue);
+      expect(chosen.neonNightProblems, isEmpty);
+      final invalid = FilmDirectorReportModel.fromJson({
+        'status': 'planned',
+        'problems': <String>[],
+        'neon_night': null,
+        'neon_night_problems': ['neon_night.chapters: 0', 7],
+      })!;
+      expect(invalid.hasNeonNight, isFalse);
+      expect(invalid.neonNightProblems, ['neon_night.chapters: 0']);
+    });
+
     test('is null when the director never ran', () {
       expect(FilmDirectorReportModel.fromJson(null), isNull);
       expect(FilmDirectorReportModel.fromJson({'status': 'odd'}), isNull);

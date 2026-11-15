@@ -19,6 +19,8 @@ import '../../domain/entities/film_plan_inspection.dart';
 import '../../domain/entities/film_plan_scene.dart';
 import '../controllers/wrap_up_controller.dart';
 import '../film/golden_vows/golden_vows_timeline.dart';
+import '../film/neon_night/neon_night_canvas.dart';
+import '../film/neon_night/neon_track.dart';
 import '../film/sky_story/sky_story.dart';
 import '../film/sky_story/sky_story_copy.dart';
 import '../film/sky_story/sky_story_timeline.dart';
@@ -122,6 +124,7 @@ class _InspectionBody extends ConsumerWidget {
             ),
           ),
           _GoldenVowsCard(tripId: tripId, report: null),
+          _NeonNightCard(tripId: tripId, report: null),
           _SkyStoryCard(tripId: tripId, report: null),
         ],
       );
@@ -134,6 +137,7 @@ class _InspectionBody extends ConsumerWidget {
       children: [
         _SummaryCard(report: report),
         _GoldenVowsCard(tripId: tripId, report: report),
+        _NeonNightCard(tripId: tripId, report: report),
         _SkyStoryCard(tripId: tripId, report: report),
         if (report.problems.isNotEmpty)
           _ProblemsCard(problems: report.problems),
@@ -485,6 +489,80 @@ class _GoldenVowsCard extends ConsumerWidget {
                 chapter.line ?? '—',
               ),
             _Line('End line', story.endLine ?? '—'),
+          ];
+        },
+      ),
+    );
+  }
+}
+
+/// Neon Night as the film will play it (#363): from the draft's
+/// `content.neon_night` with the memory's photos, else why the director's
+/// section wasn't used.
+class _NeonNightCard extends ConsumerWidget {
+  const _NeonNightCard({required this.tripId, required this.report});
+
+  final String tripId;
+  final FilmDirectorReport? report;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(wrapUpControllerProvider(tripId));
+    final problems = report?.neonNightProblems ?? const <String>[];
+    // Most memories are no night out: no card unless there is a film or
+    // something to explain.
+    if (problems.isEmpty && state.value?.neonNight == null) {
+      return const SizedBox.shrink();
+    }
+    return _Card(
+      title: 'Neon Night',
+      children: state.when(
+        loading: () => const [LinearProgressIndicator()],
+        error: (error, _) => [Text('Could not load the wrap-up: $error')],
+        data: (data) {
+          final story = data.neonNight;
+          if (story == null) {
+            return [
+              const Text(
+                "No Neon Night: the director's section stayed invalid.",
+                key: Key('film-plan-neon-night-none'),
+              ),
+              for (final problem in problems) _ProblemLine(problem),
+            ];
+          }
+          final length = NeonNightCanvas.timelineFor(
+            story,
+            beat: NeonTrack.beat,
+          ).total;
+          return [
+            Text(
+              data.goldenVows == null ? 'Plays first' : 'After Golden Vows',
+              key: const Key('film-plan-neon-night-plays'),
+              style: AppTypography.headlineSerif.copyWith(
+                color: AppColors.success,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            _Line(
+              'Film',
+              '${length.toStringAsFixed(1)}s · ${story.chapters.length} '
+                  'chapter(s) · ${story.allPhotos.length} photo(s) · plan '
+                  '${story.plan.length}',
+            ),
+            for (final chapter in story.chapters)
+              _Line(
+                '${chapter.title} (${chapter.from}–${chapter.to})',
+                '${chapter.photos.length} photo(s) · '
+                    '${chapter.moments.map((m) => m.type.name).join(' + ')}'
+                    ' · ${chapter.note ?? '— (no line)'}',
+              ),
+            _Line(
+              'Note',
+              story.note == null
+                  ? '— (no scene)'
+                  : 'NOTE ${story.note!.number} · ${story.note!.text}',
+            ),
+            _Line('Headline', story.headline ?? '—'),
           ];
         },
       ),

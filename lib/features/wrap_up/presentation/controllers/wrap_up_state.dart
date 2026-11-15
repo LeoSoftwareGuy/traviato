@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../domain/entities/wrap_up_entity.dart';
 import '../film/golden_vows/golden_vows_story.dart';
+import '../film/neon_night/neon_night_story.dart';
 import '../film/sky_story/sky_story.dart';
 
 class WrapUpState extends Equatable {
@@ -11,6 +12,7 @@ class WrapUpState extends Equatable {
     this.isOutOfDate = false,
     this.skyStory,
     this.goldenVows,
+    this.neonNight,
   });
 
   final WrapUpEntity wrapUp;
@@ -31,6 +33,10 @@ class WrapUpState extends Equatable {
   /// memory's photos; it plays before [skyStory] when there is one.
   final GoldenVowsStory? goldenVows;
 
+  /// The Neon Night film (#363), from `content.neon_night` and the
+  /// memory's photos; it plays after [goldenVows], before [skyStory].
+  final NeonNightStory? neonNight;
+
   String? imageUrlForPhoto(String? photoId) =>
       photoId == null ? null : photoUrlById[photoId];
 
@@ -40,6 +46,7 @@ class WrapUpState extends Equatable {
     isOutOfDate: isOutOfDate,
     skyStory: skyStory,
     goldenVows: goldenVows,
+    neonNight: neonNight,
   );
 
   @override
@@ -49,5 +56,6 @@ class WrapUpState extends Equatable {
     isOutOfDate,
     skyStory,
     goldenVows,
+    neonNight,
   ];
 }

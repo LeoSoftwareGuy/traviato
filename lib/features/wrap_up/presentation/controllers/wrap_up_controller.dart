@@ -14,6 +14,7 @@ import '../../domain/kept_film_staleness.dart';
 import '../../domain/wrap_up_date_labels.dart';
 import '../../domain/wrap_up_photo_pruning.dart';
 import '../film/golden_vows/golden_vows_from_wrap_up.dart';
+import '../film/neon_night/neon_night_from_wrap_up.dart';
 import '../film/sky_story/sky_story.dart';
 import '../film/sky_story/sky_story_from_wrap_up.dart';
 import '../providers/wrap_up_providers.dart';
@@ -114,6 +115,14 @@ class WrapUpController extends _$WrapUpController {
           photoIds: photoUrlById.keys.toSet(),
           startDate: trip?.startDate,
           endDate: trip?.endDate,
+        ),
+        null => null,
+      },
+      neonNight: switch (wrapUp.neonNight) {
+        final nn? => neonNightFromWrapUp(
+          nn,
+          photoIds: photoUrlById.keys.toSet(),
+          startDate: trip?.startDate,
         ),
         null => null,
       },

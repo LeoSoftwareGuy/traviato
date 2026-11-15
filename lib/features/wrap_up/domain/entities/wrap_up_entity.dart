@@ -11,6 +11,7 @@ import 'wrap_up_keepsake.dart';
 import 'wrap_up_moment.dart';
 import 'wrap_up_photo_ref.dart';
 import 'wrap_up_golden_vows.dart';
+import 'wrap_up_neon_night.dart';
 import 'wrap_up_sky.dart';
 import 'wrap_up_unlock.dart';
 
@@ -36,6 +37,7 @@ class WrapUpEntity extends Equatable {
     this.plan,
     this.sky,
     this.goldenVows,
+    this.neonNight,
   });
 
   /// The generator's resolved film plan (#151); `null` for a wrap-up
@@ -75,6 +77,11 @@ class WrapUpEntity extends Equatable {
   /// night. Plays before [sky].
   final WrapUpGoldenVows? goldenVows;
 
+  /// The Neon Night party film (#363), from `content.neon_night`: only for
+  /// a memory the director read as a party, rave, club night, festival,
+  /// concert or night out. Plays after [goldenVows], before [sky].
+  final WrapUpNeonNight? neonNight;
+
   bool get isPublished => publishedAt != null;
 
   /// Pre-#151 wrap-ups carry no resolved Flurry lists, so the player keeps
@@ -112,6 +119,7 @@ class WrapUpEntity extends Equatable {
     plan: plan,
     sky: sky,
     goldenVows: goldenVows,
+    neonNight: neonNight,
   );
 
   @override
@@ -132,5 +140,6 @@ class WrapUpEntity extends Equatable {
     plan,
     sky,
     goldenVows,
+    neonNight,
   ];
 }
