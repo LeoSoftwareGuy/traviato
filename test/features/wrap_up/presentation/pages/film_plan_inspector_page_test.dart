@@ -12,6 +12,7 @@ import 'package:traviato/features/wrap_up/domain/entities/film_photo_analysis.da
 import 'package:traviato/features/wrap_up/domain/entities/film_plan_chapter.dart';
 import 'package:traviato/features/wrap_up/domain/entities/film_plan_inspection.dart';
 import 'package:traviato/features/wrap_up/domain/entities/film_plan_scene.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_neon_night.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_sky.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 import 'package:traviato/features/wrap_up/presentation/pages/film_plan_inspector_page.dart';
@@ -70,6 +71,7 @@ Future<void> _pump(
   WidgetTester tester,
   FakeFilmDirectorRepository repo, {
   WrapUpSky? sky,
+  WrapUpNeonNight? neonNight,
 }) {
   return tester.pumpWidget(
     ProviderScope(
@@ -78,7 +80,9 @@ Future<void> _pump(
         filmDirectorRepositoryProvider.overrideWithValue(repo),
         wrapUpRepositoryProvider.overrideWithValue(
           FakeWrapUpRepository()
-            ..getOrGenerateResult = Right(buildWrapUpEntity(sky: sky)),
+            ..getOrGenerateResult = Right(
+              buildWrapUpEntity(sky: sky, neonNight: neonNight),
+            ),
         ),
         tripRepositoryProvider.overrideWithValue(FakeTripRepository()),
         photoRepositoryProvider.overrideWithValue(
@@ -249,6 +253,84 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('film-plan-sky-none')), findsOneWidget);
+    });
+  });
+
+  group('Neon Night card (#363)', () {
+    final neonNight = WrapUpNeonNight(
+      title: 'Night out',
+      startDate: DateTime(2026, 11, 14),
+      chapters: [
+        WrapUpNeonChapter(
+          title: 'Doors open',
+          note: 'Queue was worth it.',
+          photos: [
+            WrapUpNeonPhoto(id: 'p1', takenAt: DateTime(2026, 11, 14, 22)),
+            WrapUpNeonPhoto(id: 'p2', takenAt: DateTime(2026, 11, 14, 23)),
+          ],
+          moments: const [
+            WrapUpNeonMoment(type: 'split', photoIds: ['p1', 'p2']),
+          ],
+        ),
+      ],
+      headline: 'Best night ever',
+    );
+
+    Future<void> scrollTo(WidgetTester tester, Finder finder) =>
+        tester.scrollUntilVisible(
+          finder,
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+
+    testWidgets('shows the chapters the film will play', (tester) async {
+      final repo = FakeFilmDirectorRepository()
+        ..inspectionResult = const Right(
+          FilmPlanInspection(
+            report: FilmDirectorReport(isPlanned: true, hasNeonNight: true),
+          ),
+        );
+      await _pump(tester, repo, neonNight: neonNight);
+      await tester.pumpAndSettle();
+
+      await scrollTo(
+        tester,
+        find.byKey(const Key('film-plan-neon-night-plays')),
+      );
+      expect(find.text('Plays first'), findsOneWidget);
+      expect(
+        find.textContaining('Doors open (22:00–23:00)', findRichText: true),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('split · Queue was worth it.', findRichText: true),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('says why there is none', (tester) async {
+      final repo = FakeFilmDirectorRepository()
+        ..inspectionResult = const Right(
+          FilmPlanInspection(
+            report: FilmDirectorReport(
+              isPlanned: true,
+              neonNightProblems: ['neon_night.chapters: 0'],
+            ),
+          ),
+        );
+      await _pump(tester, repo);
+      await tester.pumpAndSettle();
+
+      await scrollTo(
+        tester,
+        find.byKey(const Key('film-plan-neon-night-none')),
+      );
+      expect(find.textContaining('stayed invalid'), findsOneWidget);
+      expect(
+        find.textContaining('neon_night.chapters: 0'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('film-plan-neon-night-plays')), findsNothing);
     });
   });
 }

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
+import '../../../settings/presentation/controllers/reduce_flashing_controller.dart';
 import '../../../trip/presentation/providers/cover_image_url_provider.dart';
 import '../../../trip/presentation/widgets/cover_options.dart';
 import '../controllers/wrap_up_controller.dart';
@@ -14,6 +15,9 @@ import '../controllers/wrap_up_state.dart';
 import '../film/chrome/wrap_up_film_grain.dart';
 import '../film/golden_vows/golden_vows_canvas.dart';
 import '../film/golden_vows/golden_vows_story.dart';
+import '../film/neon_night/neon_night_canvas.dart';
+import '../film/neon_night/neon_night_story.dart';
+import '../film/neon_night/neon_track.dart';
 import '../film/sky_story/sky_story.dart';
 import '../film/sky_story/sky_story_canvas.dart';
 import '../film/film_music.dart';
@@ -30,6 +34,7 @@ class WrapUpPage extends ConsumerStatefulWidget {
     this.openedFromMemory = false,
     this.skyMusic = JustAudioFilmMusicPlayer.skyStory,
     this.goldenVowsMusic = JustAudioFilmMusicPlayer.goldenVows,
+    this.neonNightMusic = NeonTrack.player,
     super.key,
   });
 
@@ -45,17 +50,23 @@ class WrapUpPage extends ConsumerStatefulWidget {
   /// The Golden Vows film's music player; tests pass a fake.
   final FilmMusicPlayer Function() goldenVowsMusic;
 
+  /// The Neon Night film's music, cut to the film's length; tests pass a
+  /// fake.
+  final FilmMusicPlayer Function(List<NeonTrackPart> parts) neonNightMusic;
+
   @override
   ConsumerState<WrapUpPage> createState() => _WrapUpPageState();
 }
 
 /// Plays Golden Vows (#346) when the wrap-up has one — a wedding,
-/// engagement, anniversary or date night the director planned — else the
-/// Sky Story film (#345) whenever there is one (every draft with photos,
-/// and films kept since), else the classic film. A film that fails while
-/// it plays hands over to the next one for good.
+/// engagement, anniversary or date night the director planned — else Neon
+/// Night (#363) for a party the director planned, else the Sky Story film
+/// (#345) whenever there is one (every draft with photos, and films kept
+/// since), else the classic film. A film that fails while it plays hands
+/// over to the next one for good.
 class _WrapUpPageState extends ConsumerState<WrapUpPage> {
   bool _goldenVowsFailed = false;
+  bool _neonNightFailed = false;
   bool _skyFailed = false;
   bool _muted = false;
 
@@ -74,6 +85,7 @@ class _WrapUpPageState extends ConsumerState<WrapUpPage> {
         ),
         data: (state) {
           final goldenVows = _goldenVowsFailed ? null : state.goldenVows;
+          final neonNight = _neonNightFailed ? null : state.neonNight;
           final skyStory = _skyFailed ? null : state.skyStory;
           return Stack(
             children: [
@@ -86,6 +98,15 @@ class _WrapUpPageState extends ConsumerState<WrapUpPage> {
                         muted: _muted,
                         onFailure: () =>
                             setState(() => _goldenVowsFailed = true),
+                      )
+                    : neonNight != null
+                    ? _NeonNightFilm(
+                        state: state,
+                        story: neonNight,
+                        music: widget.neonNightMusic,
+                        muted: _muted,
+                        onFailure: () =>
+                            setState(() => _neonNightFailed = true),
                       )
                     : skyStory != null
                     ? _SkyStoryFilm(
@@ -112,7 +133,8 @@ class _WrapUpPageState extends ConsumerState<WrapUpPage> {
                 openedFromMemory: widget.openedFromMemory,
                 isOutOfDate: state.isOutOfDate,
                 muted: _muted,
-                onToggleMute: goldenVows == null && skyStory == null
+                onToggleMute:
+                    goldenVows == null && neonNight == null && skyStory == null
                     ? null
                     : () => setState(() => _muted = !_muted),
               ),
@@ -201,6 +223,50 @@ class _GoldenVowsFilmState extends State<_GoldenVowsFilm> {
     return GoldenVowsCanvas(
       story: widget.story,
       photo: _photo,
+      music: widget.music,
+      muted: widget.muted,
+      onFailure: (_, _) => widget.onFailure(),
+    );
+  }
+}
+
+/// The Neon Night film over the memory's photos (#363), on its music's
+/// beat. Its clock waits for the photos (at most a few seconds); it plays
+/// the softer version under Reduce flashing or the phone's reduced motion.
+class _NeonNightFilm extends ConsumerStatefulWidget {
+  const _NeonNightFilm({
+    required this.state,
+    required this.story,
+    required this.music,
+    required this.muted,
+    required this.onFailure,
+  });
+
+  final WrapUpState state;
+  final NeonNightStory story;
+  final FilmMusicPlayer Function(List<NeonTrackPart> parts) music;
+  final bool muted;
+  final VoidCallback onFailure;
+
+  @override
+  ConsumerState<_NeonNightFilm> createState() => _NeonNightFilmState();
+}
+
+class _NeonNightFilmState extends ConsumerState<_NeonNightFilm> {
+  /// A method tear-off, so it stays equal across rebuilds and the film
+  /// doesn't restart; it reads the latest URLs from the widget.
+  ImageProvider? _photo(String id) {
+    final url = widget.state.imageUrlForPhoto(id);
+    return url == null ? null : WrapUpFilmPhoto.providerFor(url);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return NeonNightCanvas(
+      story: widget.story,
+      photo: _photo,
+      reducedFlashing: watchReduceFlashing(context, ref),
+      beat: NeonTrack.beat,
       music: widget.music,
       muted: widget.muted,
       onFailure: (_, _) => widget.onFailure(),

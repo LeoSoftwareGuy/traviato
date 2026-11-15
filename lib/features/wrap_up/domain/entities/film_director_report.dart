@@ -20,6 +20,8 @@ class FilmDirectorReport extends Equatable {
     this.hasSkyStory = false,
     this.goldenVowsOccasion,
     this.goldenVowsProblems = const [],
+    this.hasNeonNight = false,
+    this.neonNightProblems = const [],
     this.runCount = 0,
     this.attempts = 0,
     this.model = '',
@@ -59,6 +61,13 @@ class FilmDirectorReport extends Equatable {
   /// director left it out on purpose.
   final List<String> goldenVowsProblems;
 
+  /// The run produced a Neon Night section (#363).
+  final bool hasNeonNight;
+
+  /// Why the Neon Night section stayed invalid; empty when there is one,
+  /// or when the director left it out on purpose.
+  final List<String> neonNightProblems;
+
   /// Runs for this memory so far (automatic re-runs are capped).
   final int runCount;
   final int attempts;
@@ -90,6 +99,8 @@ class FilmDirectorReport extends Equatable {
     hasSkyStory,
     goldenVowsOccasion,
     goldenVowsProblems,
+    hasNeonNight,
+    neonNightProblems,
     runCount,
     attempts,
     model,

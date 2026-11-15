@@ -13,8 +13,10 @@ import 'package:traviato/features/trip/presentation/providers/trip_providers.dar
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_cover_photo.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_moment.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_golden_vows.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_neon_night.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_sky.dart';
 import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_canvas.dart';
+import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/film/wrap_up_film_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/pages/wrap_up_page.dart';
@@ -42,6 +44,7 @@ Future<void> _pump(
           tripId: 't1',
           skyMusic: FakeFilmMusicPlayer.new,
           goldenVowsMusic: FakeFilmMusicPlayer.new,
+          neonNightMusic: (_) => FakeFilmMusicPlayer(),
           openedFromMemory:
               state.uri.queryParameters[RouteQuery.from] ==
               RouteQuery.fromMemory,
@@ -552,6 +555,146 @@ void main() {
       await _settle(tester);
 
       expect(find.byType(GoldenVowsCanvas), findsNothing);
+      expect(find.byType(SkyStoryCanvas), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+  });
+
+  group('Neon Night plays after Golden Vows, before Sky Story (#363)', () {
+    final sky = WrapUpSky(
+      isFromDirector: true,
+      title: 'Night out',
+      pages: [
+        WrapUpSkyPage(
+          firstDay: 1,
+          date: DateTime(2026, 11, 14),
+          photoCount: 1,
+          heroPhotoId: 'n1',
+        ),
+      ],
+    );
+    final neonNight = WrapUpNeonNight(
+      title: 'Night out',
+      startDate: DateTime(2026, 11, 14),
+      chapters: [
+        WrapUpNeonChapter(
+          title: 'Doors open',
+          photos: [
+            WrapUpNeonPhoto(id: 'n1', takenAt: DateTime(2026, 11, 14, 22)),
+            WrapUpNeonPhoto(id: 'n2', takenAt: DateTime(2026, 11, 14, 23)),
+          ],
+          moments: const [
+            WrapUpNeonMoment(type: 'split', photoIds: ['n1', 'n2']),
+          ],
+        ),
+      ],
+    );
+    final goldenVows = WrapUpGoldenVows(
+      names: 'Night out',
+      startDate: DateTime(2026, 11, 14),
+      heroes: const [WrapUpGoldenVowsHero(photoId: 'n1')],
+      chapters: const [],
+    );
+    final photos = FakePhotoRepository()
+      ..photosResult = Right([
+        buildPhotoEntity(id: 'n1', imageUrl: 'https://x/n1.jpg'),
+        buildPhotoEntity(id: 'n2', imageUrl: 'https://x/n2.jpg'),
+      ]);
+
+    FakeWrapUpRepository repo({
+      WrapUpNeonNight? withNeonNight,
+      WrapUpGoldenVows? withGoldenVows,
+    }) => FakeWrapUpRepository()
+      ..getOrGenerateResult = Right(
+        buildWrapUpEntity(
+          coverPhoto: const WrapUpCoverPhoto(),
+          sky: sky,
+          goldenVows: withGoldenVows,
+          neonNight: withNeonNight,
+        ),
+      );
+
+    Future<void> pastPhotoWait(WidgetTester tester) async {
+      await _settle(tester);
+      // Past the canvas's wait for photos that never load here.
+      await tester.pump(const Duration(seconds: 6));
+    }
+
+    testWidgets('a wrap-up with Neon Night plays it, with the speaker', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        wrapUpRepo: repo(withNeonNight: neonNight),
+        photoRepo: photos,
+      );
+      await pastPhotoWait(tester);
+
+      expect(find.byType(NeonNightCanvas), findsOneWidget);
+      expect(find.byType(SkyStoryCanvas), findsNothing);
+      final canvas = tester.widget<NeonNightCanvas>(
+        find.byType(NeonNightCanvas),
+      );
+      expect(canvas.story.chapters.single.title, 'Doors open');
+      expect(canvas.reducedFlashing, isFalse);
+      await tester.tap(find.byKey(const Key('wrap-up-hud-mute')));
+      await tester.pump();
+      expect(
+        tester.widget<NeonNightCanvas>(find.byType(NeonNightCanvas)).muted,
+        isTrue,
+      );
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('Golden Vows comes first', (tester) async {
+      await _pump(
+        tester,
+        wrapUpRepo: repo(withNeonNight: neonNight, withGoldenVows: goldenVows),
+        photoRepo: photos,
+      );
+      await _settle(tester);
+      await tester.pump(GoldenVowsCanvas.photoWait);
+      expect(find.byType(GoldenVowsCanvas), findsOneWidget);
+      expect(find.byType(NeonNightCanvas), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('its photos gone: Sky Story, or the classic film', (
+      tester,
+    ) async {
+      final one = FakePhotoRepository()
+        ..photosResult = Right([
+          buildPhotoEntity(id: 'n1', imageUrl: 'https://x/n1.jpg'),
+        ]);
+      await _pump(
+        tester,
+        wrapUpRepo: repo(withNeonNight: neonNight),
+        photoRepo: one,
+      );
+      await _settle(tester);
+      expect(find.byType(NeonNightCanvas), findsNothing);
+      expect(find.byType(SkyStoryCanvas), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a Neon Night failure hands over to Sky Story', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        wrapUpRepo: repo(withNeonNight: neonNight),
+        photoRepo: photos,
+      );
+      await pastPhotoWait(tester);
+
+      tester.widget<NeonNightCanvas>(find.byType(NeonNightCanvas)).onFailure!(
+        StateError('broken'),
+        StackTrace.empty,
+      );
+      await tester.pump();
+      await _settle(tester);
+
+      expect(find.byType(NeonNightCanvas), findsNothing);
       expect(find.byType(SkyStoryCanvas), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     });

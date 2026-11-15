@@ -228,6 +228,16 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   balloon, then the Storyni ending; 70–83 s, with its own music. It plays
   before Sky Story; any failure hands over to Sky Story, then the classic
   film. A film kept as Golden Vows stays one while its section still fits.
+- **Neon Night (#363):** a beat-synced party film for memories the director
+  reads as a party, rave, club night, festival, concert or night out —
+  ignition, the neon balloon sign, "Tonight's plan" (quests with a time),
+  1–5 chapters by time (card with the user's own line, then 1–2 moments:
+  split, burst, timeline or peak), the note written out in neon, a heart
+  of every photo and the end card with real counts; on Summer Party, cut
+  to the film's length. Times are the phone's local times. It plays after
+  Golden Vows and before Sky Story; any failure hands over to Sky Story,
+  then the classic film. **Reduce flashing** plays its softer version.
+  Kept films follow Golden Vows' rules.
 
 ## 16. Profile ("You") ✅ — redesigned
 
