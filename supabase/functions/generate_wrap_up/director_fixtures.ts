@@ -5,6 +5,7 @@ import type { FilmPlan, PlanContext, PlanScene } from "./film_plan.ts";
 import type { PhotoAnalysis } from "./photo_analysis.ts";
 import type { SkyStoryPlan } from "./sky_story.ts";
 import type { GoldenVowsPlan } from "./golden_vows.ts";
+import type { NeonNightPlan } from "./neon_night.ts";
 
 export const DIRECTOR_PHOTO_IDS = Array.from(
   { length: 12 },
@@ -282,5 +283,47 @@ export function goldenVowsPlan(ids = DIRECTOR_PHOTO_IDS): GoldenVowsPlan {
     ],
     carousel: { title: "And the night went on", line: "Chapter four" },
     end_line: "Forever starts here",
+  };
+}
+
+// A valid Neon Night section over directorTripData(): 3 chapters of 4
+// photos (one per day), chapter 1 split + burst with an excerpt of day 1's
+// note, chapter 2 a timeline, chapter 3 a peak; day 3's note in neon.
+export function neonNightPlan(ids = DIRECTOR_PHOTO_IDS): NeonNightPlan {
+  return {
+    chapters: [
+      {
+        title: "Doors open",
+        first_photo_id: ids[0],
+        note_id: "n1",
+        note_excerpt: "Bikes everywhere",
+        moments: [
+          { type: "split", photo_ids: [ids[0], ids[1]] },
+          { type: "burst", photo_ids: [ids[2], ids[3]] },
+        ],
+      },
+      {
+        title: "After midnight",
+        first_photo_id: ids[4],
+        note_id: null,
+        note_excerpt: null,
+        moments: [
+          { type: "timeline", photo_ids: [ids[4], ids[5], ids[6], ids[7]] },
+        ],
+      },
+      {
+        title: "Peak time",
+        first_photo_id: ids[8],
+        note_id: null,
+        note_excerpt: null,
+        moments: [{ type: "peak", photo_ids: [ids[8], ids[9], ids[10]] }],
+      },
+    ],
+    note_moment: {
+      note_id: "n2",
+      excerpt: "Rain, then stroopwafels.",
+      photo_id: ids[10],
+    },
+    headline: "Best night ever",
   };
 }

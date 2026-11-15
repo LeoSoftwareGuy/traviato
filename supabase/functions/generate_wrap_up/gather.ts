@@ -4,8 +4,9 @@
 // so the caps below are generous (no AI cost to protect), just a defensive
 // ceiling on query/response size.
 //
-// Quests are deliberately not fetched — the film has no route chapter (no
-// Mapbox, ever; see the #94 memory note), so they never feed this content.
+// Quests feed only Golden Vows' packing card (#346) and Neon Night's plan
+// rows (#363) — the film has no route chapter (no Mapbox, ever; see the
+// #94 memory note).
 //
 // photos.use_in_wrap_up is the user's per-photo pick (#294): null = Auto,
 // true = Always, false = Leave out. assemble.ts applies it.
@@ -72,11 +73,16 @@ export interface TripData {
   quests?: {
     title: string;
     day_date: string;
+    // 'HH:MM:SS' wall-clock time, or null: Neon Night's plan rows (#363).
+    time?: string | null;
     completed_at: string | null;
   }[];
   // The owner's profile name (#345): Sky Story signs notes with its first
   // word. Absent or null = no signature.
   username?: string | null;
+  // The app's offset from UTC when it asked, in minutes (#363): the
+  // director sees photo times as local wall-clock times. Absent = UTC.
+  utc_offset_minutes?: number;
 }
 
 export async function gatherTripData(
@@ -149,7 +155,7 @@ export async function gatherTripData(
       .limit(MAX_CHECKLIST_ITEMS),
     client
       .from("quests")
-      .select("title, day_date, completed_at")
+      .select("title, day_date, time, completed_at")
       .eq("trip_id", tripId)
       .order("day_date")
       .order("time", { nullsFirst: false })
@@ -239,6 +245,7 @@ export async function gatherTripData(
       : (questsRes.data ?? []).map((q: Record<string, unknown>) => ({
         title: q.title as string,
         day_date: q.day_date as string,
+        time: (q.time as string | null) ?? null,
         completed_at: (q.completed_at as string | null) ?? null,
       })),
     // A failed profile read only costs the signature.

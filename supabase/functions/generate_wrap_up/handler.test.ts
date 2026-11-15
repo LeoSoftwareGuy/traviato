@@ -1,5 +1,10 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { type Deps, handleRequest, MAX_AI_GENERATIONS } from "./handler.ts";
+import {
+  type Deps,
+  handleRequest,
+  MAX_AI_GENERATIONS,
+  parseUtcOffset,
+} from "./handler.ts";
 import { LOG_PREFIX, WrapUpGenerationError } from "./anthropic.ts";
 import { fakeAuthClient, fakeSupabaseClient } from "./test_fakes.ts";
 import { gatherTripData } from "./gather.ts";
@@ -11,6 +16,7 @@ import {
   directorTripData,
   goldenVowsPlan,
   keepsakePlan,
+  neonNightPlan,
   skyStoryPlan,
 } from "./director_fixtures.ts";
 
@@ -1094,4 +1100,155 @@ Deno.test("a film kept as a Sky Story never gains Golden Vows", async () => {
   )).json();
   assertEquals(json.content.sky.source, "director");
   assertEquals("golden_vows" in json.content, false);
+});
+
+// --- Neon Night (#363) ---
+
+function neonNightRecord(): DirectorRecord {
+  return {
+    ...plannedRecord(),
+    sky_story: skyStoryPlan(),
+    neon_night: neonNightPlan(),
+  };
+}
+
+function keptNeonClient(
+  content: Record<string, unknown>,
+  photos = directorTripData().photos,
+) {
+  const data = directorTripData();
+  return fakeSupabaseClient({
+    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+    wrap_ups: [{
+      content: { ...validWrapUpContent, ...content },
+      generated_at: "2026-09-05T00:00:00Z",
+      published_at: "2026-09-06T00:00:00Z",
+      ai_fields: validAiFields,
+      ai_input_hash: "old",
+      ai_generation_count: 1,
+      director: neonNightRecord(),
+    }],
+    day_notes: data.notes,
+    photos,
+    bonus_task_assignments: [],
+    points_ledger: [],
+    user_achievements: [],
+  });
+}
+
+Deno.test("a draft gets content.neon_night from the director's section", async () => {
+  const client = directorClient();
+  const { deps } = directorDeps(client, { record: neonNightRecord() });
+
+  const json = await (await handleRequest(request({ trip_id: TRIP_ID }), deps))
+    .json();
+
+  const nn = json.content.neon_night;
+  assertEquals(nn.nn_version, 1);
+  assertEquals(nn.chapters.length, 3);
+  assertEquals(nn.chapters[0].note, "Bikes everywhere");
+  assertEquals(nn.note.text, "Rain, then stroopwafels.");
+  // Sky Story is there too: the app falls back to it.
+  assertEquals(json.content.sky.source, "director");
+  assertEquals(client.writes[0].values.content.neon_night, nn);
+});
+
+Deno.test("no section, the director off, or a section that no longer fits: no Neon Night", async () => {
+  const none = await (await handleRequest(
+    request({ trip_id: TRIP_ID }),
+    directorDeps(directorClient()).deps,
+  )).json();
+  assertEquals("neon_night" in none.content, false);
+
+  const off = await (await handleRequest(
+    request({ trip_id: TRIP_ID }),
+    directorDeps(directorClient(), {
+      enabled: false,
+      record: neonNightRecord(),
+    }).deps,
+  )).json();
+  assertEquals("neon_night" in off.content, false);
+
+  const data = directorTripData();
+  const deleted = fakeSupabaseClient({
+    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+    wrap_ups: [],
+    day_notes: data.notes,
+    photos: data.photos.filter((p) => p.id !== "p09"),
+    bonus_task_assignments: [],
+    points_ledger: [],
+    user_achievements: [],
+  });
+  const gone = await (await handleRequest(
+    request({ trip_id: TRIP_ID }),
+    directorDeps(deleted, { record: neonNightRecord() }).deps,
+  )).json();
+  assertEquals("neon_night" in gone.content, false);
+  assertEquals(gone.content.sky.pages.length, 3);
+});
+
+Deno.test("the app's UTC offset reaches the director", async () => {
+  const seen: (number | undefined)[] = [];
+  const deps = baseDeps({
+    serviceClient: directorClient(),
+    director: {
+      isEnabledFor: () => true,
+      run: (_tripId, tripData) => {
+        seen.push(tripData.utc_offset_minutes);
+        return Promise.resolve(neonNightRecord());
+      },
+    },
+  });
+  await handleRequest(
+    request({ trip_id: TRIP_ID, utc_offset_minutes: 120 }),
+    deps,
+  );
+  assertEquals(seen, [120]);
+});
+
+Deno.test("parseUtcOffset: whole minutes within ±14 h, else none", () => {
+  assertEquals(parseUtcOffset(120), 120);
+  assertEquals(parseUtcOffset(-300), -300);
+  assertEquals(parseUtcOffset(0), 0);
+  assertEquals(parseUtcOffset(14 * 60 + 1), undefined);
+  assertEquals(parseUtcOffset(90.5), undefined);
+  assertEquals(parseUtcOffset("120"), undefined);
+  assertEquals(parseUtcOffset(undefined), undefined);
+});
+
+Deno.test("rebuilding a film kept as Neon Night rebuilds it while it fits, else Sky Story", async () => {
+  const content = {
+    sky: { sky_version: 1, pages: [] },
+    neon_night: { nn_version: 1 },
+  };
+  const client = keptNeonClient(content);
+  const { runs, deps } = directorDeps(client);
+  const kept = await (await handleRequest(
+    request({ trip_id: TRIP_ID, rebuild: true }),
+    deps,
+  )).json();
+  assertEquals(runs, []);
+  assertEquals(kept.content.neon_night.chapters.length, 3);
+  assertEquals(client.writes[0].values.content.neon_night.nn_version, 1);
+
+  const changed = await (await handleRequest(
+    request({ trip_id: TRIP_ID, rebuild: true }),
+    directorDeps(
+      keptNeonClient(
+        content,
+        directorTripData().photos.filter((p) => p.id !== "p09"),
+      ),
+    ).deps,
+  )).json();
+  assertEquals("neon_night" in changed.content, false);
+  assertEquals(changed.content.sky.pages.length, 3);
+});
+
+Deno.test("a film kept as a Sky Story never gains Neon Night", async () => {
+  const json = await (await handleRequest(
+    request({ trip_id: TRIP_ID, rebuild: true }),
+    directorDeps(keptNeonClient({ sky: { sky_version: 1, pages: [] } })).deps,
+  )).json();
+  assertEquals(json.content.sky.source, "director");
+  assertEquals("neon_night" in json.content, false);
 });

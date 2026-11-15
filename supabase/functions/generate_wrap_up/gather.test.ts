@@ -152,7 +152,12 @@ Deno.test("gatherTripData loads the checklist and quests for Golden Vows (#346)"
       { title: "Passport", suggestion_code: "passport", is_checked: false },
     ],
     quests: [
-      { title: "Ceremony", day_date: "2026-06-14", completed_at: null },
+      {
+        title: "Ceremony",
+        day_date: "2026-06-14",
+        time: "14:00:00",
+        completed_at: null,
+      },
     ],
   };
   const result = await gatherTripData(fakeSupabaseClient(tables), "trip-1");
@@ -160,8 +165,14 @@ Deno.test("gatherTripData loads the checklist and quests for Golden Vows (#346)"
     { title: "Rings", suggestion_code: null, is_checked: true },
     { title: "Passport", suggestion_code: "passport", is_checked: false },
   ]);
+  // Neon Night's plan rows read the time (#363).
   assertEquals(result.quests, [
-    { title: "Ceremony", day_date: "2026-06-14", completed_at: null },
+    {
+      title: "Ceremony",
+      day_date: "2026-06-14",
+      time: "14:00:00",
+      completed_at: null,
+    },
   ]);
 
   // A failed read only costs the packing card.

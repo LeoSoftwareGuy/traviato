@@ -30,6 +30,11 @@
 // Golden Vows (#346): a draft also gets `content.golden_vows` when the
 // director's section (a wedding, engagement, anniversary or date night)
 // still fits the memory. The app plays it before Sky Story.
+//
+// Neon Night (#363): likewise `content.neon_night` for a party or a night
+// out, from the director's section while it still fits. The app plays it
+// after Golden Vows and before Sky Story. The app sends its UTC offset
+// (`utc_offset_minutes`) so the director sees local photo times.
 
 import { gatherTripData, type TripData } from "./gather.ts";
 import {
@@ -46,6 +51,7 @@ import { parseWrapUpLanguage, type WrapUpLanguage } from "./language.ts";
 import { logEvent, type LogLike, WrapUpGenerationError } from "./anthropic.ts";
 import {
   currentGoldenVows,
+  currentNeonNight,
   currentPlan,
   currentSkyStory,
   directorIsStale,
@@ -54,6 +60,7 @@ import {
 } from "./director.ts";
 import { buildSkyContent } from "./sky_story.ts";
 import { buildGoldenVowsContent } from "./golden_vows.ts";
+import { buildNeonNightContent } from "./neon_night.ts";
 
 // deno-lint-ignore no-explicit-any
 type SupabaseClient = any;
@@ -116,6 +123,10 @@ export async function handleRequest(
   const slots = parseMomentSlots(
     (body as Record<string, unknown>).moment_slots,
   );
+  // The app's clock (#363); older app versions send none → UTC.
+  const utcOffset = parseUtcOffset(
+    (body as Record<string, unknown>).utc_offset_minutes,
+  );
   // The dev Plan inspector's "Re-run director" (#328).
   const directorRerun = (body as Record<string, unknown>).director === "rerun";
 
@@ -164,7 +175,13 @@ export async function handleRequest(
   // user's explicit request (#294).
   if (existing?.published_at && existing.content) {
     if (directorRerun) {
-      return await rerunKeptDirector(deps, tripId, language, existing);
+      return await rerunKeptDirector(
+        deps,
+        tripId,
+        language,
+        utcOffset,
+        existing,
+      );
     }
     if (rebuild && validateAiGeneratedFields(existing.ai_fields)) {
       return await rebuildKept(
@@ -191,6 +208,7 @@ export async function handleRequest(
       error: `failed to gather trip data: ${(err as Error).message}`,
     }, 500);
   }
+  if (utcOffset !== undefined) tripData.utc_offset_minutes = utcOffset;
 
   const inputHash = await computeAiInputHash(tripData, language);
   const storedFields = validateAiGeneratedFields(existing?.ai_fields)
@@ -273,11 +291,13 @@ export async function handleRequest(
   const goldenVows = directorOn
     ? goldenVowsContentFor(director, tripData)
     : null;
+  const neonNight = directorOn ? neonNightContentFor(director, tripData) : null;
   const content = {
     ...template,
     ...(plan ? { plan_version: 2 as const, plan } : {}),
     ...(sky ? { sky } : {}),
     ...(goldenVows ? { golden_vows: goldenVows } : {}),
+    ...(neonNight ? { neon_night: neonNight } : {}),
   };
   const generatedAt = new Date().toISOString();
   const row = {
@@ -322,6 +342,7 @@ async function rerunKeptDirector(
   deps: Deps,
   tripId: string,
   language: WrapUpLanguage,
+  utcOffset: number | undefined,
   existing: {
     content: unknown;
     generated_at: string | null;
@@ -336,6 +357,7 @@ async function rerunKeptDirector(
       error: `failed to gather trip data: ${(err as Error).message}`,
     }, 500);
   }
+  if (utcOffset !== undefined) tripData.utc_offset_minutes = utcOffset;
   const director = await runCounted(
     deps,
     tripId,
@@ -365,6 +387,7 @@ async function rerunKeptDirector(
 // before Sky Story never gains one. A film kept as Golden Vows (#346)
 // rebuilds from the director's stored section while it still fits; once
 // it doesn't, the film plays its Sky Story. No kept film gains Golden Vows.
+// Neon Night (#363) follows the same rules.
 async function rebuildKept(
   deps: Deps,
   tripId: string,
@@ -397,10 +420,16 @@ async function rebuildKept(
   const goldenVows = keptAsGoldenVows
     ? goldenVowsContentFor(existing.director, tripData)
     : null;
+  const keptAsNeonNight = keptAsSky &&
+    "neon_night" in (existing.content as Record<string, unknown>);
+  const neonNight = keptAsNeonNight
+    ? neonNightContentFor(existing.director, tripData)
+    : null;
   const content = {
     ...template,
     ...(sky ? { sky } : {}),
     ...(goldenVows ? { golden_vows: goldenVows } : {}),
+    ...(neonNight ? { neon_night: neonNight } : {}),
   };
   const generatedAt = new Date().toISOString();
   const { error } = await deps.serviceClient
@@ -419,6 +448,21 @@ function goldenVowsContentFor(director: unknown, tripData: TripData) {
   const plan = currentGoldenVows(director, tripData);
   if (!plan || !isDirectorRecord(director)) return null;
   return buildGoldenVowsContent(tripData, plan, director.orientations ?? {});
+}
+
+// content.neon_night from the director's section, while it still fits.
+function neonNightContentFor(director: unknown, tripData: TripData) {
+  const plan = currentNeonNight(director, tripData);
+  return plan ? buildNeonNightContent(tripData, plan) : null;
+}
+
+// The app's offset from UTC in minutes, when it is a whole number within
+// ±14 h; anything else → undefined (UTC).
+export function parseUtcOffset(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isInteger(value) &&
+      Math.abs(value) <= 14 * 60
+    ? value
+    : undefined;
 }
 
 // Runs the director and counts the run against [previous]'s, so automatic

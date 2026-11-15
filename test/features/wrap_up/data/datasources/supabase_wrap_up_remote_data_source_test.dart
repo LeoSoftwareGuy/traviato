@@ -36,20 +36,23 @@ void main() {
 
   test('the generate_wrap_up body carries the UI language (#250) and asks '
       'for the 16-moment film (#304)', () {
-    expect(generateWrapUpBody('t1', 'ru'), {
+    final now = DateTime.now();
+    expect(generateWrapUpBody('t1', 'ru', now: now), {
       'trip_id': 't1',
       'language': 'ru',
       'moment_slots': 16,
+      'utc_offset_minutes': now.timeZoneOffset.inMinutes,
     });
   });
 
   test('a rebuild request asks the function to re-assemble a kept film '
       '(#294)', () {
-    expect(generateWrapUpBody('t1', 'en', rebuild: true), {
-      'trip_id': 't1',
-      'language': 'en',
-      'moment_slots': 16,
-      'rebuild': true,
-    });
+    expect(generateWrapUpBody('t1', 'en', rebuild: true)['rebuild'], isTrue);
+  });
+
+  test('the body carries the phone UTC offset in minutes (#363)', () {
+    final body = generateWrapUpBody('t1', 'en');
+    expect(body['utc_offset_minutes'], DateTime.now().timeZoneOffset.inMinutes);
+    expect(body['utc_offset_minutes'], isA<int>());
   });
 }

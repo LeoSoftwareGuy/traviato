@@ -1,0 +1,677 @@
+// Neon Night (#363, phase 9): the beat-synced party film, stored as
+// wrap_ups.content.neon_night next to everything the other films read.
+//
+// Only the director makes one: its `neon_night` section, emitted for a
+// party, a rave, a club night, a festival, a concert or any night out,
+// validated here against the memory as it is now. There is no code-built
+// Neon Night — no section (another occasion, the director off or failed, a
+// section still invalid after its retry, one that no longer fits) means
+// the next film plays instead.
+//
+// The director picks: where each chapter starts (its first photo — every
+// photo of the night falls into a chapter, so new photos join one on their
+// own), chapter titles, each chapter's 1–2 moments and their photos, which
+// of the user's notes to type out (exact excerpts only, never reworded),
+// the note scene's background photo and the Finale's headline.
+// What code fills in, never the AI: the plan rows (the user's quests with
+// times), every photo and its time, the totals, the signature.
+
+import type { TripData } from "./gather.ts";
+import { sortPhotosChronologically, spreadEvenly } from "./assemble.ts";
+import { bannedPhraseIn, cleanLine } from "./film_plan.ts";
+import { isExcerptOf } from "./golden_vows.ts";
+import { firstNameOf } from "./sky_story.ts";
+
+export const NN_VERSION = 1;
+
+export const NN_MOMENT_TYPES = ["split", "burst", "timeline", "peak"] as const;
+export type NnMomentType = typeof NN_MOMENT_TYPES[number];
+
+// Photos per moment, as [min, max] (NEON_NIGHT_SPEC.md §7).
+export const NN_MOMENT_PHOTOS: Record<NnMomentType, [number, number]> = {
+  split: [2, 3],
+  burst: [2, 4],
+  timeline: [2, 8],
+  peak: [3, 5],
+};
+
+export const MIN_NN_CHAPTERS = 1;
+export const MAX_NN_CHAPTERS = 5;
+export const MAX_NN_MOMENTS = 2;
+// The heart shows about 220 tiles; more photos are sampled evenly.
+export const MAX_NN_PHOTOS = 200;
+
+// Lengths the film's type fits at its sizes.
+export const MAX_NN_TITLE_CHARS = 22;
+export const MAX_NN_HEADLINE_CHARS = 18;
+// A card's typed line wraps to at most 2 lines.
+export const MAX_NN_CARD_NOTE_CHARS = 60;
+// The note scene: up to 5 lines of about 18 characters.
+export const MAX_NN_NOTE_CHARS = 90;
+
+type Photo = TripData["photos"][number];
+
+export interface NeonNightChapterPlan {
+  title: string;
+  // Where the chapter starts; it runs to the next chapter's first photo.
+  first_photo_id: string;
+  // A note to type out on the card and an exact excerpt of it, or both
+  // null.
+  note_id: string | null;
+  note_excerpt: string | null;
+  moments: { type: NnMomentType; photo_ids: string[] }[];
+}
+
+export interface NeonNightPlan {
+  chapters: NeonNightChapterPlan[];
+  // The note written out in neon; null = no Note scene.
+  note_moment: {
+    note_id: string;
+    excerpt: string;
+    // The blurred background; null = the haze.
+    photo_id: string | null;
+  } | null;
+  // The Finale's headline; null = the app's fallback.
+  headline: string | null;
+}
+
+export interface NeonNightContent {
+  nn_version: typeof NN_VERSION;
+  // The memory's name (the app shows it in capitals) and first day.
+  title: string;
+  start_date: string | null;
+  place: string | null;
+  // The user's quests with a time, in order: "Tonight's plan".
+  plan: { time: string; title: string; done: boolean }[];
+  chapters: {
+    title: string;
+    // Chronological; taken_at is an ISO instant the app shows in local
+    // time.
+    photos: { id: string; taken_at: string }[];
+    // The user's own words, or null for no typed line.
+    note: string | null;
+    moments: {
+      type: NnMomentType;
+      photo_ids: string[];
+      // A split's label: the first photo's place, when tagged.
+      place: string | null;
+    }[];
+  }[];
+  note: {
+    text: string;
+    // Its place among the memory's notes, from 1: "NOTE 04".
+    number: number;
+    written_at: string | null;
+    photo_id: string | null;
+  } | null;
+  headline: string | null;
+  first_name: string | null;
+  totals: { photos: number; notes: number; ticks: number; moments: number };
+}
+
+function isString(v: unknown): v is string {
+  return typeof v === "string";
+}
+
+function collapse(text: string): string {
+  return text.replace(/\s+/g, " ").trim();
+}
+
+// --- The director's tool section -----------------------------------------
+
+const lineProperty = (description: string) => ({
+  type: "string",
+  description,
+});
+
+const excerptDescription = (max: number) =>
+  `With note_id: words copied exactly from that note, at most ${max} characters, never reworded. Otherwise null.`;
+
+export const neonNightToolProperty = {
+  type: ["object", "null"],
+  description:
+    "The Neon Night film: a loud, beat-synced neon party film. Only for a party, a rave, a club night, a festival, a concert or another night out; null for every other memory.",
+  properties: {
+    chapters: {
+      type: "array",
+      description:
+        `${MIN_NN_CHAPTERS}–${MAX_NN_CHAPTERS} chapters of the night, in order. Each starts at its first photo and runs to the next chapter's.`,
+      items: {
+        type: "object",
+        properties: {
+          title: lineProperty(
+            `At most ${MAX_NN_TITLE_CHARS} characters, e.g. "Doors open".`,
+          ),
+          first_photo_id: { type: "string" },
+          note_id: {
+            type: ["string", "null"],
+            description:
+              "A note whose words fit this part of the night, typed out on its card, or null.",
+          },
+          note_excerpt: {
+            type: ["string", "null"],
+            description: excerptDescription(MAX_NN_CARD_NOTE_CHARS),
+          },
+          moments: {
+            type: "array",
+            description: `1–${MAX_NN_MOMENTS} blocks after the card.`,
+            items: {
+              type: "object",
+              properties: {
+                type: { type: "string", enum: [...NN_MOMENT_TYPES] },
+                photo_ids: { type: "array", items: { type: "string" } },
+              },
+              required: ["type", "photo_ids"],
+            },
+          },
+        },
+        required: [
+          "title",
+          "first_photo_id",
+          "note_id",
+          "note_excerpt",
+          "moments",
+        ],
+      },
+    },
+    note_moment: {
+      type: ["object", "null"],
+      description:
+        "The one note written out in neon near the end, or null when no note fits.",
+      properties: {
+        note_id: { type: "string" },
+        excerpt: lineProperty(excerptDescription(MAX_NN_NOTE_CHARS)),
+        photo_id: {
+          type: ["string", "null"],
+          description: "A photo of the night behind it, or null.",
+        },
+      },
+      required: ["note_id", "excerpt", "photo_id"],
+    },
+    headline: {
+      type: ["string", "null"],
+      description:
+        `The Finale's headline, at most ${MAX_NN_HEADLINE_CHARS} characters, e.g. "Best night ever"; or null.`,
+    },
+  },
+  required: ["chapters", "note_moment", "headline"],
+} as const;
+
+export const NEON_NIGHT_PROMPT_RULES = [
+  "\n\nneon_night — a fourth film, a loud neon party film. Fill it only ",
+  "when the memory is a party, a rave, a club night, a festival, a concert ",
+  "or another night out (from its name, vibes, notes and photos); ",
+  "otherwise null. When unsure, null. Never fill both golden_vows and ",
+  "neon_night.\n",
+  `- chapters: ${MIN_NN_CHAPTERS}–${MAX_NN_CHAPTERS}. One night: split it `,
+  "by time into parts (arriving, the peak, late…). Several nights: one ",
+  `chapter per night, grouped when there are more than ${MAX_NN_CHAPTERS}. `,
+  "first_photo_id is the chapter's first photo; the first chapter starts ",
+  "at the first photo. title is short and in the night's mood.\n",
+  "- moments: 1–2 per chapter, photos from that chapter only, each photo at ",
+  "most once. split: 2–3 photos within about 10 minutes. burst: 2–4 ",
+  "photos within about a minute. timeline: 2–8 photos spread across the ",
+  "chapter. peak: 3–5 standout photos (hero_score ≥ 4). Good mix: chapter ",
+  "1 split + burst, chapter 2 timeline, chapter 3 peak, later whichever ",
+  "fits.\n",
+  "- Notes are the person's own words only: note_id points at a note and ",
+  "note_excerpt / excerpt copy words from it exactly — same words, same ",
+  "spelling, never reworded or shortened inside. Else null. note_moment ",
+  "is the single most heartfelt line of the night.\n",
+  "- headline: a few loud words for the drop, in the film's language; ",
+  "null if nothing fits.",
+].join("");
+
+// --- Checking a section against the memory -------------------------------
+
+export interface NnCheckContext {
+  // Chronological index of every photo the section may use.
+  photoOrder: ReadonlyMap<string, number>;
+  excludedIds: ReadonlySet<string>;
+  notes: ReadonlyMap<string, string>;
+}
+
+// Photos the film may show, chronological: not left out.
+export function nnPhotos(tripData: TripData): Photo[] {
+  return sortPhotosChronologically(
+    tripData.photos.filter((p) => p.use_in_wrap_up !== false),
+  );
+}
+
+export function nnCheckContext(tripData: TripData): NnCheckContext {
+  const photos = nnPhotos(tripData);
+  return {
+    photoOrder: new Map(photos.map((p, i) => [p.id, i])),
+    excludedIds: new Set(
+      tripData.photos.filter((p) => p.use_in_wrap_up === false).map((p) =>
+        p.id
+      ),
+    ),
+    notes: new Map(
+      tripData.notes.filter((n) => n.id).map((n) => [n.id!, n.content]),
+    ),
+  };
+}
+
+function checkLine(
+  problems: string[],
+  where: string,
+  line: unknown,
+  maxChars: number,
+): void {
+  if (!isString(line) || line.trim().length === 0) {
+    problems.push(`${where}: expected a non-empty string`);
+    return;
+  }
+  if ([...line].length > maxChars) {
+    problems.push(
+      `${where}: ${[...line].length} characters, at most ${maxChars}`,
+    );
+  }
+  const banned = bannedPhraseIn(line);
+  if (banned) problems.push(`${where}: banned phrase "${banned}"`);
+}
+
+function checkExcerpt(
+  problems: string[],
+  where: string,
+  noteId: unknown,
+  excerpt: unknown,
+  context: NnCheckContext,
+  maxChars: number,
+): void {
+  const note = isString(noteId) ? context.notes.get(noteId) : undefined;
+  if (note === undefined) {
+    problems.push(`${where}.note_id: not a note id from the input`);
+    return;
+  }
+  if (!isString(excerpt) || !isExcerptOf(excerpt, note)) {
+    problems.push(`${where}: must be copied exactly from the note`);
+  } else if ([...collapse(excerpt)].length > maxChars) {
+    problems.push(
+      `${where}: ${
+        [...collapse(excerpt)].length
+      } characters, at most ${maxChars}`,
+    );
+  }
+}
+
+// Every way [data] breaks the neon_night rules, one readable line each —
+// empty when it's valid. Call it only for a non-null section.
+export function describeNeonNightProblems(
+  data: unknown,
+  context: NnCheckContext,
+): string[] {
+  if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    return ["neon_night: expected an object or null"];
+  }
+  const nn = data as Record<string, unknown>;
+  const problems: string[] = [];
+
+  const photoAt = (id: unknown, where: string): number | null => {
+    if (!isString(id)) {
+      problems.push(`${where}: expected a photo id`);
+      return null;
+    }
+    if (context.excludedIds.has(id)) {
+      problems.push(`${where}: "${id}" was left out by the user`);
+      return null;
+    }
+    const at = context.photoOrder.get(id);
+    if (at === undefined) {
+      problems.push(`${where}: "${id}" is not a photo id from the input`);
+      return null;
+    }
+    return at;
+  };
+
+  const chapters = nn.chapters;
+  if (!Array.isArray(chapters)) {
+    problems.push("neon_night.chapters: expected an array");
+  } else {
+    if (
+      chapters.length < MIN_NN_CHAPTERS || chapters.length > MAX_NN_CHAPTERS
+    ) {
+      problems.push(
+        `neon_night.chapters: ${chapters.length}, expected ${MIN_NN_CHAPTERS}–${MAX_NN_CHAPTERS}`,
+      );
+    }
+    // Where each chapter starts, to check its moments' photos are its own.
+    const starts = chapters.map((raw) =>
+      typeof raw === "object" && raw !== null
+        ? context.photoOrder.get(
+          (raw as Record<string, unknown>).first_photo_id as string,
+        ) ?? null
+        : null
+    );
+    chapters.forEach((raw, i) => {
+      const where = `neon_night.chapters[${i}]`;
+      if (typeof raw !== "object" || raw === null) {
+        problems.push(`${where}: expected an object`);
+        return;
+      }
+      const chapter = raw as Record<string, unknown>;
+      checkLine(problems, `${where}.title`, chapter.title, MAX_NN_TITLE_CHARS);
+      const start = photoAt(chapter.first_photo_id, `${where}.first_photo_id`);
+      if (start !== null) {
+        if (i === 0 && start !== 0) {
+          problems.push(`${where}.first_photo_id: must be the first photo`);
+        }
+        const previous = i > 0 ? starts[i - 1] : null;
+        if (previous !== null && start <= previous) {
+          problems.push(
+            `${where}.first_photo_id: must come after the previous chapter's`,
+          );
+        }
+      }
+      const end = starts.slice(i + 1).find((s) => s !== null) ??
+        context.photoOrder.size;
+
+      const noteId = chapter.note_id ?? null;
+      const excerpt = chapter.note_excerpt ?? null;
+      if (noteId === null) {
+        if (excerpt !== null) {
+          problems.push(`${where}.note_excerpt: only with a note_id`);
+        }
+      } else {
+        checkExcerpt(
+          problems,
+          `${where}.note_excerpt`,
+          noteId,
+          excerpt,
+          context,
+          MAX_NN_CARD_NOTE_CHARS,
+        );
+      }
+
+      const moments = chapter.moments;
+      if (!Array.isArray(moments)) {
+        problems.push(`${where}.moments: expected an array`);
+        return;
+      }
+      if (moments.length < 1 || moments.length > MAX_NN_MOMENTS) {
+        problems.push(
+          `${where}.moments: ${moments.length}, expected 1–${MAX_NN_MOMENTS}`,
+        );
+      }
+      const used = new Set<string>();
+      moments.forEach((rawMoment, m) => {
+        const at = `${where}.moments[${m}]`;
+        if (typeof rawMoment !== "object" || rawMoment === null) {
+          problems.push(`${at}: expected an object`);
+          return;
+        }
+        const moment = rawMoment as Record<string, unknown>;
+        const type = moment.type as NnMomentType;
+        if (!NN_MOMENT_TYPES.includes(type)) {
+          problems.push(
+            `${at}.type: expected one of ${NN_MOMENT_TYPES.join(", ")}`,
+          );
+          return;
+        }
+        const ids = moment.photo_ids;
+        if (!Array.isArray(ids)) {
+          problems.push(`${at}.photo_ids: expected an array of ids`);
+          return;
+        }
+        const [min, max] = NN_MOMENT_PHOTOS[type];
+        if (ids.length < min || ids.length > max) {
+          problems.push(
+            `${at}.photo_ids: ${ids.length}, a ${type} takes ${min}–${max}`,
+          );
+        }
+        let last = -1;
+        ids.forEach((id, k) => {
+          const order = photoAt(id, `${at}.photo_ids[${k}]`);
+          if (order === null) return;
+          if (start !== null && (order < start || order >= end)) {
+            problems.push(
+              `${at}.photo_ids[${k}]: "${id}" is not from this chapter`,
+            );
+          }
+          if (used.has(id as string)) {
+            problems.push(`${at}.photo_ids[${k}]: "${id}" is used twice`);
+          }
+          used.add(id as string);
+          if (order < last) {
+            problems.push(
+              `${at}.photo_ids[${k}]: "${id}" is out of chronological order`,
+            );
+          }
+          last = Math.max(last, order);
+        });
+      });
+    });
+  }
+
+  const noteMoment = nn.note_moment;
+  if (noteMoment !== null && noteMoment !== undefined) {
+    if (typeof noteMoment !== "object" || Array.isArray(noteMoment)) {
+      problems.push("neon_night.note_moment: expected an object or null");
+    } else {
+      const n = noteMoment as Record<string, unknown>;
+      checkExcerpt(
+        problems,
+        "neon_night.note_moment.excerpt",
+        n.note_id,
+        n.excerpt,
+        context,
+        MAX_NN_NOTE_CHARS,
+      );
+      if (n.photo_id !== null && n.photo_id !== undefined) {
+        photoAt(n.photo_id, "neon_night.note_moment.photo_id");
+      }
+    }
+  }
+
+  if (nn.headline !== null && nn.headline !== undefined) {
+    checkLine(
+      problems,
+      "neon_night.headline",
+      nn.headline,
+      MAX_NN_HEADLINE_CHARS,
+    );
+  }
+  return problems;
+}
+
+function cleanExcerpt(text: string): string {
+  return cleanLine(text).replace(/^(\.\.\.|…)\s*/u, "").replace(
+    /\s*(\.\.\.|…)$/u,
+    "",
+  ).trim();
+}
+
+// Fixes what code can put right without guessing: stray quotes on lines,
+// quotes or ellipses around an excerpt, a card excerpt that isn't the
+// note's words (→ no typed line), a note moment that isn't (→ no Note
+// scene), too many chapters or moments, chapters, moment photos out of
+// order, a first chapter that starts late. Never throws.
+export function repairNeonNight(
+  data: unknown,
+  context: NnCheckContext,
+): unknown {
+  if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    return data;
+  }
+  const nn = structuredClone(data) as Record<string, unknown>;
+  const order = (id: unknown) =>
+    isString(id) ? context.photoOrder.get(id) ?? Infinity : Infinity;
+  const fitsNote = (noteId: unknown, excerpt: unknown, max: number) => {
+    const note = isString(noteId) ? context.notes.get(noteId) : undefined;
+    return note !== undefined && isString(excerpt) &&
+      isExcerptOf(excerpt, note) && [...collapse(excerpt)].length <= max;
+  };
+
+  if (Array.isArray(nn.chapters)) {
+    const chapters = (nn.chapters as unknown[]).slice(0, MAX_NN_CHAPTERS);
+    for (const raw of chapters) {
+      if (typeof raw !== "object" || raw === null) continue;
+      const chapter = raw as Record<string, unknown>;
+      if (isString(chapter.title)) chapter.title = cleanLine(chapter.title);
+      chapter.note_id = chapter.note_id ?? null;
+      chapter.note_excerpt = chapter.note_excerpt ?? null;
+      if (isString(chapter.note_excerpt)) {
+        chapter.note_excerpt = cleanExcerpt(chapter.note_excerpt);
+      }
+      if (
+        fitsNote(chapter.note_id, chapter.note_excerpt, MAX_NN_CARD_NOTE_CHARS)
+      ) {
+        chapter.note_excerpt = collapse(chapter.note_excerpt as string);
+      } else {
+        chapter.note_id = null;
+        chapter.note_excerpt = null;
+      }
+      if (Array.isArray(chapter.moments)) {
+        chapter.moments = chapter.moments.slice(0, MAX_NN_MOMENTS);
+        for (const m of chapter.moments as unknown[]) {
+          if (typeof m !== "object" || m === null) continue;
+          const moment = m as Record<string, unknown>;
+          if (Array.isArray(moment.photo_ids)) {
+            moment.photo_ids = [...moment.photo_ids].sort((a, b) =>
+              order(a) - order(b)
+            );
+          }
+        }
+      }
+    }
+    chapters.sort((a, b) =>
+      order((a as Record<string, unknown> | null)?.first_photo_id) -
+      order((b as Record<string, unknown> | null)?.first_photo_id)
+    );
+    // The night starts with its first photo.
+    const first = chapters[0] as Record<string, unknown> | undefined;
+    const firstId = [...context.photoOrder].find(([, i]) => i === 0)?.[0];
+    if (first && typeof first === "object" && firstId !== undefined) {
+      first.first_photo_id = firstId;
+    }
+    nn.chapters = chapters;
+  }
+
+  if (typeof nn.note_moment === "object" && nn.note_moment !== null) {
+    const n = nn.note_moment as Record<string, unknown>;
+    if (isString(n.excerpt)) n.excerpt = cleanExcerpt(n.excerpt);
+    n.photo_id = n.photo_id ?? null;
+    if (fitsNote(n.note_id, n.excerpt, MAX_NN_NOTE_CHARS)) {
+      // Keeps the note's own line breaks: only the ends are trimmed.
+      n.excerpt = (n.excerpt as string).trim();
+    } else {
+      nn.note_moment = null;
+    }
+  }
+  if (nn.note_moment === undefined) nn.note_moment = null;
+
+  if (isString(nn.headline)) {
+    nn.headline = cleanLine(nn.headline) || null;
+  }
+  if (nn.headline === undefined) nn.headline = null;
+  return nn;
+}
+
+// --- Building content.neon_night -----------------------------------------
+
+// 'HH:MM:SS' or 'HH:MM' → 'HH:MM'; anything else → null.
+function clockOf(time: string | null | undefined): string | null {
+  const m = /^(\d{2}):(\d{2})/.exec(time ?? "");
+  return m ? `${m[1]}:${m[2]}` : null;
+}
+
+function planRows(tripData: TripData): NeonNightContent["plan"] {
+  const rows: NeonNightContent["plan"] = [];
+  for (const quest of tripData.quests ?? []) {
+    const time = clockOf(quest.time);
+    if (!time || !quest.title.trim()) continue;
+    rows.push({
+      time,
+      title: quest.title.trim(),
+      done: quest.completed_at !== null,
+    });
+  }
+  return rows;
+}
+
+// The film's photos: all of them up to MAX_NN_PHOTOS, else an even spread
+// that still keeps every photo the plan names; chronological.
+function filmPhotos(photos: Photo[], named: ReadonlySet<string>): Photo[] {
+  if (photos.length <= MAX_NN_PHOTOS) return photos;
+  const kept = new Set([
+    ...photos.filter((p) => named.has(p.id)),
+    ...spreadEvenly(photos, MAX_NN_PHOTOS),
+  ]);
+  return photos.filter((p) => kept.has(p));
+}
+
+// content.neon_night from a valid, current [plan].
+export function buildNeonNightContent(
+  tripData: TripData,
+  plan: NeonNightPlan,
+): NeonNightContent {
+  const all = nnPhotos(tripData);
+  const order = new Map(all.map((p, i) => [p.id, i]));
+  const named = new Set<string>([
+    ...plan.chapters.flatMap((c) => [
+      c.first_photo_id,
+      ...c.moments.flatMap((m) => m.photo_ids),
+    ]),
+    ...(plan.note_moment?.photo_id ? [plan.note_moment.photo_id] : []),
+  ]);
+  const shown = new Set(filmPhotos(all, named).map((p) => p.id));
+  const byId = new Map(all.map((p) => [p.id, p]));
+  const notes = [...tripData.notes].sort((a, b) =>
+    a.day_date < b.day_date ? -1 : a.day_date > b.day_date ? 1 : 0
+  );
+
+  const starts = plan.chapters.map((c) => order.get(c.first_photo_id)!);
+  const chapters = plan.chapters.map((chapter, i) => {
+    const end = starts[i + 1] ?? all.length;
+    const photos = all.slice(starts[i], end).filter((p) => shown.has(p.id));
+    return {
+      title: chapter.title,
+      photos: photos.map((p) => ({
+        id: p.id,
+        taken_at: p.taken_at ?? p.created_at,
+      })),
+      note: chapter.note_id && chapter.note_excerpt
+        ? collapse(chapter.note_excerpt)
+        : null,
+      moments: chapter.moments.map((m) => ({
+        type: m.type,
+        photo_ids: [...m.photo_ids],
+        place: m.type === "split"
+          ? byId.get(m.photo_ids[0])?.place_text?.trim() || null
+          : null,
+      })),
+    };
+  });
+
+  const noteMoment = plan.note_moment;
+  const noteIndex = noteMoment
+    ? notes.findIndex((n) => n.id === noteMoment.note_id)
+    : -1;
+  const plan_ = planRows(tripData);
+  const { start_date } = tripData.trip;
+  return {
+    nn_version: NN_VERSION,
+    title: tripData.trip.name,
+    start_date,
+    place: tripData.trip.destination?.trim() || null,
+    plan: plan_,
+    chapters,
+    note: noteMoment && noteIndex >= 0
+      ? {
+        text: noteMoment.excerpt,
+        number: noteIndex + 1,
+        written_at: notes[noteIndex].created_at ?? null,
+        photo_id: noteMoment.photo_id,
+      }
+      : null,
+    headline: plan.headline,
+    first_name: firstNameOf(tripData.username),
+    totals: {
+      photos: all.length,
+      notes: notes.filter((n) => n.content.trim()).length,
+      ticks: plan_.filter((r) => r.done).length,
+      moments: all.length,
+    },
+  };
+}

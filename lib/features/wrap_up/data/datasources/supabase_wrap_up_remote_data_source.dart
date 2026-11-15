@@ -105,15 +105,18 @@ class SupabaseWrapUpRemoteDataSource implements WrapUpRemoteDataSource {
 /// The `generate_wrap_up` request: the trip, the UI language the AI writes
 /// in (#250), and that this build plays the 16-moment film (#304 — without
 /// it the function builds the 8 an older build can play). [rebuild] asks it
-/// to re-assemble a kept film (#294).
+/// to re-assemble a kept film (#294). The phone's offset from UTC lets the
+/// director read photo times as local times (#363); [now] is for tests.
 Map<String, Object> generateWrapUpBody(
   String tripId,
   String language, {
   bool rebuild = false,
+  DateTime? now,
 }) => {
   'trip_id': tripId,
   'language': language,
   'moment_slots': filmMomentCount,
+  'utc_offset_minutes': (now ?? DateTime.now()).timeZoneOffset.inMinutes,
   if (rebuild) 'rebuild': true,
 };
 
