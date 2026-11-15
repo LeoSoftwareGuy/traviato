@@ -130,6 +130,7 @@ void main() {
     expect(pubspec, contains('assets/audio/neon_night/'));
     final credits = File('assets/audio/CREDITS.md').readAsStringSync();
     expect(credits, contains('Summer Party'));
+    expect(credits, contains('pixabay.com/music/dance-summer-party-590004'));
     for (final part in NeonTrackPart.values) {
       expect(File(part.asset).existsSync(), isTrue, reason: part.asset);
     }
