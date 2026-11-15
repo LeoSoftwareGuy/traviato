@@ -1887,6 +1887,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Morning and evening while a memory is happening';
 
   @override
+  String get settings_reduceFlashing => 'Reduce flashing';
+
+  @override
+  String get settings_reduceFlashingSubtitle => 'Softer flashes in party films';
+
+  @override
+  String get settings_reduceFlashingByPhone =>
+      'On while your phone reduces motion';
+
+  @override
   String get language_systemDefault => 'System default';
 
   @override

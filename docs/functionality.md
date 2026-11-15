@@ -235,6 +235,8 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   Countries · Days · Stars); achievements 2-col grid — earned vs locked with
   progress bar + mono progress line ("9 OF 14 DAYS"). Canonical badge set: our
   seeded 8 (design's sample names are placeholders where they differ).
+- **Settings → Reduce flashing** (#363, default off): films with flashes (Neon
+  Night) play their softer version. Always on while the phone reduces motion.
 
 ## 17. Kept Memory page — NEW (#279)
 
