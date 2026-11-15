@@ -234,7 +234,9 @@ Deno.test("the plan input carries facts in order and the prompt the rules", () =
   assertEquals(input.photos[11].day, 3);
 
   const system = buildPlanSystemPrompt("ru");
-  assertStringIncludes(system, "rave: fits nights out");
+  assertStringIncludes(system, "keepsake: fits everything else");
+  // Nights out play Neon Night (#363): no rave recipe any more.
+  assertEquals(system.includes("rave:"), false);
   assertStringIncludes(system, '"wanderlust"');
   assertStringIncludes(system, "Russian");
 });

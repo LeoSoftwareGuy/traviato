@@ -13,7 +13,9 @@ import type { WrapUpLanguage } from "./language.ts";
 
 export const PLAN_VERSION = 2;
 
-export const RECIPES = ["rave", "keepsake"] as const;
+// The classic film has one recipe; nights out play Neon Night (#363),
+// which replaced the old "rave" recipe and its burst/split scenes.
+export const RECIPES = ["keepsake"] as const;
 export type Recipe = typeof RECIPES[number];
 
 export const OCCASIONS = [
@@ -33,8 +35,6 @@ export const SCENE_TYPES = [
   "collage_4",
   "collage_6",
   "flurry",
-  "burst",
-  "split",
   "text_card",
 ] as const;
 export type SceneType = typeof SCENE_TYPES[number];
@@ -73,21 +73,11 @@ export interface RecipeRules {
   scenes: readonly SceneType[];
   minDuration: number;
   maxDuration: number;
-  minBursts: number;
   fits: string;
   tone: string;
 }
 
 export const RECIPE_RULES: Record<Recipe, RecipeRules> = {
-  rave: {
-    scenes: ["burst", "split", "collage_6", "card_flip", "text_card"],
-    minDuration: 1.5,
-    maxDuration: 4,
-    minBursts: 2,
-    fits:
-      "nights out, parties, festivals, concerts, club/venue photos, high energy, crowds",
-    tone: "playful, a bit cheeky",
-  },
   keepsake: {
     scenes: [
       "card_flip",
@@ -99,7 +89,6 @@ export const RECIPE_RULES: Record<Recipe, RecipeRules> = {
     ],
     minDuration: 4,
     maxDuration: 6,
-    minBursts: 0,
     fits: "everything else — and the fallback when unsure",
     tone: "quiet, wry",
   },
@@ -112,8 +101,6 @@ export const SCENE_PHOTO_COUNT: Record<SceneType, [number, number]> = {
   collage_4: [4, 4],
   collage_6: [6, 6],
   flurry: [6, 15],
-  burst: [3, 6],
-  split: [2, 3],
   text_card: [0, 0],
 };
 
@@ -352,7 +339,6 @@ export function describeFilmPlanProblems(
   let lastIndex = -1;
   let chronologyBroken = false;
   let totalSeconds = 0;
-  let bursts = 0;
 
   d.chapters.forEach((rawChapter, c) => {
     const chapterWhere = `chapters[${c}]`;
@@ -390,7 +376,6 @@ export function describeFilmPlanProblems(
           })`,
         );
       }
-      if (type === "burst") bursts++;
 
       if (typeof scene.duration_s !== "number" || !isFinite(scene.duration_s)) {
         problems.push(`${where}.duration_s: expected a number`);
@@ -468,11 +453,6 @@ export function describeFilmPlanProblems(
     });
   });
 
-  if (rules && bursts < rules.minBursts) {
-    problems.push(
-      `scenes: ${bursts} bursts, a ${recipe} film needs at least ${rules.minBursts}`,
-    );
-  }
   // Rounded so 44.999999 from float sums doesn't fail.
   const total = Math.round(totalSeconds * 10) / 10;
   if (total < MIN_TOTAL_SECONDS || total > MAX_TOTAL_SECONDS) {
@@ -497,7 +477,6 @@ const COLLAGES: readonly string[] = ["collage_3", "collage_4", "collage_6"];
 //   keepsake recipe has no 2-photo scene, so a leftover pair otherwise ends
 //   up in a collage_3). Each keeps the collage's duration, emphasis and
 //   order; the caption stays on the first;
-// - a burst with only 2 photos becomes a split (#334);
 // - a film shorter than MIN_TOTAL_SECONDS has every scene stretched by the
 //   same factor, each capped at its recipe's maximum (#334). If the caps
 //   stop it short, validation still reports the total.
@@ -527,9 +506,6 @@ export function repairFilmPlan(
       if (typeof scene !== "object" || scene === null) return [scene];
       const sc = scene as Record<string, unknown>;
       const ids = sc.photo_ids;
-      if (sc.type === "burst" && Array.isArray(ids) && ids.length === 2) {
-        return [{ ...sc, type: "split" }];
-      }
       if (
         !COLLAGES.includes(sc.type as string) || !Array.isArray(ids) ||
         ids.length === 0 || ids.length > 2
