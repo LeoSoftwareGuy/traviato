@@ -4,10 +4,12 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../../../../../core/l10n/context_l10n.dart';
+import '../film_music.dart';
 import '../sky_story/guarded_painter.dart';
 import 'neon_ambient.dart';
 import 'neon_ambient_painter.dart';
 import 'neon_balloon.dart';
+import 'neon_beat.dart';
 import 'neon_chapter_card_painter.dart';
 import 'neon_finale_painter.dart';
 import 'neon_grain.dart';
@@ -17,6 +19,7 @@ import 'neon_night_timeline.dart';
 import 'neon_photo_images.dart';
 import 'neon_scene_painter.dart';
 import 'neon_tokens.dart';
+import 'neon_track.dart';
 
 /// The Neon Night film (#363): one 1080 × 1920 composition on one looping
 /// clock, like `GoldenVowsCanvas`, painted in the spec's layer order
@@ -29,6 +32,9 @@ class NeonNightCanvas extends StatefulWidget {
     required this.story,
     required this.photo,
     this.reducedFlashing = false,
+    this.beat = const NeonBeat(),
+    this.music,
+    this.muted = false,
     this.onFailure,
     super.key,
   });
@@ -43,21 +49,36 @@ class NeonNightCanvas extends StatefulWidget {
   /// follows its photos) with their moments. The Plan and Note scenes
   /// play only when the memory has a plan and a note. The Plan scene plays only
   /// when the memory has a plan.
-  static NeonNightTimeline timelineFor(NeonNightStory story) =>
-      NeonNightTimeline(
-        chapters: [
-          for (final chapter in story.chapters)
-            NnChapterShape(
-              moments: [for (final moment in chapter.moments) moment.type],
-              photos: chapter.photos.length,
-            ),
-        ],
-        hasPlan: story.hasPlan,
-        hasNote: story.hasNote,
-      );
+  static NeonNightTimeline timelineFor(
+    NeonNightStory story, {
+    NeonBeat beat = const NeonBeat(),
+  }) => NeonNightTimeline(
+    chapters: [
+      for (final chapter in story.chapters)
+        NnChapterShape(
+          moments: [for (final moment in chapter.moments) moment.type],
+          photos: chapter.photos.length,
+        ),
+    ],
+    hasPlan: story.hasPlan,
+    hasNote: story.hasNote,
+    beat: beat,
+  );
 
   /// The §6 version: softer flicker, flares and laser punch, same timings.
   final bool reducedFlashing;
+
+  /// The film's beat clock. With [music] it must be [NeonTrack.beat]; the
+  /// spec's 126 bpm otherwise (goldens).
+  final NeonBeat beat;
+
+  /// Makes the player for the film's music from the track parts that fit
+  /// this film ([NeonTrack.partsForTimeline]), or null for a silent film
+  /// (tests, goldens). [NeonTrack.player] is the real one.
+  final FilmMusicPlayer Function(List<NeonTrackPart> parts)? music;
+
+  /// Silences the music without stopping its clock.
+  final bool muted;
 
   /// Called once, after the frame, if painting throws: the film stops and
   /// goes black, and the caller can play something else.
@@ -73,6 +94,10 @@ class _NeonNightCanvasState extends State<NeonNightCanvas>
     vsync: this,
   );
   late final _clock = _FilmClock(_controller);
+  FilmMusic? _music;
+  late final AppLifecycleListener _lifecycle = AppLifecycleListener(
+    onHide: () => _music?.pause(),
+  );
   late NeonNightTimeline _timeline;
   late NeonAmbient _ambient;
   late NeonBalloon _balloon;
@@ -86,6 +111,8 @@ class _NeonNightCanvasState extends State<NeonNightCanvas>
   @override
   void initState() {
     super.initState();
+    _clock.addListener(_syncMusic);
+    _lifecycle;
     _start();
     if (_grain == null) unawaited(_loadGrain());
   }
@@ -120,8 +147,24 @@ class _NeonNightCanvasState extends State<NeonNightCanvas>
     }
   }
 
-  void _start() {
-    final timeline = _timeline = NeonNightCanvas.timelineFor(widget.story);
+  void _syncMusic() =>
+      _music?.sync(_clock.value, running: _controller.isAnimating);
+
+  /// A new film gets new music; switching reduced flashing keeps it.
+  void _startMusic(NeonNightTimeline timeline) {
+    unawaited(_music?.dispose());
+    final player = widget.music?.call(NeonTrack.partsForTimeline(timeline));
+    _music = player == null
+        ? null
+        : (FilmMusic(player, filmLength: timeline.total)..muted = widget.muted);
+  }
+
+  void _start({bool restartMusic = true}) {
+    final timeline = _timeline = NeonNightCanvas.timelineFor(
+      widget.story,
+      beat: widget.beat,
+    );
+    if (restartMusic) _startMusic(timeline);
     _ambient = NeonAmbient(
       timeline,
       reducedFlashing: widget.reducedFlashing,
@@ -147,17 +190,23 @@ class _NeonNightCanvasState extends State<NeonNightCanvas>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Another screen covers the film: its clock stops ticking, so the
+    // music has to be stopped here. It picks up again with the clock.
+    if (!TickerMode.valuesOf(context).enabled) _music?.pause();
     _layoutTexts();
   }
 
   @override
   void didUpdateWidget(NeonNightCanvas oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _music?.muted = widget.muted;
     final storyChanged =
-        oldWidget.story != widget.story || oldWidget.photo != widget.photo;
+        oldWidget.story != widget.story ||
+        oldWidget.photo != widget.photo ||
+        oldWidget.beat.bpm != widget.beat.bpm;
     if (storyChanged || oldWidget.reducedFlashing != widget.reducedFlashing) {
       final at = _controller.value;
-      _start();
+      _start(restartMusic: storyChanged);
       // Switching reduced flashing keeps the film where it was.
       if (!storyChanged) _controller.value = at;
       _play();
@@ -186,6 +235,7 @@ class _NeonNightCanvasState extends State<NeonNightCanvas>
     if (_failed) return;
     _failed = true;
     debugPrint('Neon Night failed; the film stops: $error\n$stack');
+    _music?.pause();
     _controller.stop();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -198,6 +248,9 @@ class _NeonNightCanvasState extends State<NeonNightCanvas>
   void dispose() {
     _texts?.dispose();
     _photos?.dispose();
+    _lifecycle.dispose();
+    _clock.removeListener(_syncMusic);
+    unawaited(_music?.dispose());
     _clock.dispose();
     _controller.dispose();
     super.dispose();

@@ -152,6 +152,7 @@ flutter:
   assets:
     - .env
     - assets/audio/
+    - assets/audio/neon_night/
     - assets/images/brand/
     - assets/images/guest/
     - assets/images/covers/
