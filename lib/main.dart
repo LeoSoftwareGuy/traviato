@@ -15,6 +15,7 @@ import 'features/auth/presentation/widgets/auth_link_failure_listener.dart';
 import 'features/notifications/presentation/controllers/bonus_notifications_lifecycle_controller.dart';
 import 'features/settings/data/app_language_prefs.dart';
 import 'features/settings/data/dictation_language_prefs.dart';
+import 'features/settings/data/reduce_flashing_prefs.dart';
 import 'features/settings/presentation/controllers/app_language_controller.dart';
 import 'features/settings/presentation/providers/settings_providers.dart';
 import 'features/settings/presentation/widgets/locale_fade.dart';
@@ -43,6 +44,7 @@ Future<void> main() async {
   // language (#236).
   final initialLanguage = await const AppLanguagePrefs().read();
   final initialDictationLanguage = await const DictationLanguagePrefs().read();
+  final initialReduceFlashing = await const ReduceFlashingPrefs().read();
   // Disable Riverpod's silent auto-retry; retries are handled explicitly with
   // Retry buttons (guidelines doc 02).
   runApp(
@@ -54,6 +56,7 @@ Future<void> main() async {
         initialDictationLanguageProvider.overrideWithValue(
           initialDictationLanguage,
         ),
+        initialReduceFlashingProvider.overrideWithValue(initialReduceFlashing),
       ],
       child: const TraviatoApp(),
     ),

@@ -2965,6 +2965,24 @@ abstract class AppLocalizations {
   /// **'Morning and evening while a memory is happening'**
   String get settings_memoryRemindersSubtitle;
 
+  /// No description provided for @settings_reduceFlashing.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce flashing'**
+  String get settings_reduceFlashing;
+
+  /// No description provided for @settings_reduceFlashingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Softer flashes in party films'**
+  String get settings_reduceFlashingSubtitle;
+
+  /// No description provided for @settings_reduceFlashingByPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'On while your phone reduces motion'**
+  String get settings_reduceFlashingByPhone;
+
   /// No description provided for @language_systemDefault.
   ///
   /// In en, this message translates to:
