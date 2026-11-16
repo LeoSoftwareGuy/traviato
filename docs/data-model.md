@@ -117,7 +117,13 @@ Post-MVP: `video_path`, `video_status`.
   plan, Sky Story, and `special_film`: golden_vows / neon_night / none),
   then — only for golden_vows or neon_night — that film's section alone
   (`section_attempts`; usage `call: "section"`). One tool with every
-  film's section compiled to a grammar Anthropic rejected as too large. A draft's
+  film's section compiled to a grammar Anthropic rejected as too large.
+  Since #382 code repairs what it can before checking a section instead
+  of discarding it: Sky Story Always picks the director left off go into
+  free slots, then onto continuation pages (headline null), then in place
+  of Auto photos; Neon Night moment photos from another chapter are
+  dropped, a moment whose count no longer fits takes a type that does, and
+  Always picks join a moment of their chapter. A draft's
   `content` carries `plan_version` + `plan` while that plan still fits.
   Since #345 the record also holds the Sky Story pages (`sky_story`,
   `sky_problems`), every analysed photo's `hero_scores`, and `photo_days` +

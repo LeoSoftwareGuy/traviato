@@ -550,3 +550,103 @@ Deno.test("Always picks beyond five pages land in the mosaic and are reported", 
   assertEquals(missing.length, 25);
   for (const id of missing) assert(sky.mosaic_photo_ids.includes(id));
 });
+
+// --- Repairs: Always picks the director left off (#382) -------------------
+
+// One director page per day, as ADE-Amsterdam got: hero + 4 extras on
+// day 1, which has 15 Always picks.
+function onePagePerDay(): SkyStoryPlan {
+  return {
+    pages: [1, 2, 3].map((day) => ({
+      days: [day, day] as [number, number],
+      headline: `Day ${day} headline`,
+      hero_photo_id: `d${day}p0`,
+      extra_photo_ids: day === 1
+        ? ["d1p1", "d1p2", "d1p3", "d1p4"]
+        : [`d${day}p1`],
+      note_id: null,
+      sky_line: `Line ${day}`,
+    })),
+  };
+}
+
+Deno.test("repair: continuation pages for a busy day's Always picks, director's pages kept", () => {
+  const data = amsterdamLike();
+  const context = skyCheckContext(data);
+  // The director's exact miss: "day 1 has … more photos marked Always".
+  assert(
+    describeSkyStoryProblems(onePagePerDay(), context).some((p) =>
+      p.includes("add a continuation page")
+    ),
+  );
+
+  const fixed = repairSkyStory(onePagePerDay(), context) as SkyStoryPlan;
+
+  assertEquals(describeSkyStoryProblems(fixed, context), []);
+  assertEquals(fixed.pages.map((p) => p.days[0]), [1, 1, 1, 2, 3]);
+  // The director's page and text are untouched; the new ones carry none.
+  assertEquals(fixed.pages[0], onePagePerDay().pages[0]);
+  for (const page of fixed.pages.slice(1, 3)) {
+    assertEquals(page.headline, null);
+    assertEquals(page.note_id, null);
+    assertEquals(page.sky_line, null);
+  }
+  // Day 1's 15 Always picks are all on its 3 pages.
+  const day1 = fixed.pages.slice(0, 3).flatMap((p) => [
+    p.hero_photo_id,
+    ...p.extra_photo_ids,
+  ]);
+  for (let k = 0; k < 15; k++) assert(day1.includes(`d1p${k}`), `d1p${k}`);
+  // Days 2 and 3: their Always picks went into free extra slots.
+  assertEquals(fixed.pages[3].extra_photo_ids, ["d2p1"]);
+  assertEquals(fixed.pages[4].extra_photo_ids, ["d3p1", "d3p2"]);
+});
+
+Deno.test("repair: no room for pages → Always picks take Auto slots", () => {
+  // Five single-day pages already: day 1's extra picks replace its Auto
+  // extras.
+  const data = memory([8, 1, 1, 1, 1]);
+  // As many Always picks as the page's 5 slots.
+  for (const p of data.photos.slice(0, 5)) p.use_in_wrap_up = true;
+  const context = skyCheckContext(data);
+  const plan: SkyStoryPlan = {
+    pages: [1, 2, 3, 4, 5].map((day) => ({
+      days: [day, day] as [number, number],
+      headline: `Day ${day}`,
+      hero_photo_id: day === 1 ? "d1p7" : `d${day}p0`,
+      extra_photo_ids: day === 1 ? ["d1p0", "d1p6"] : [],
+      note_id: null,
+      sky_line: null,
+    })),
+  };
+
+  const fixed = repairSkyStory(plan, context) as SkyStoryPlan;
+
+  assertEquals(describeSkyStoryProblems(fixed, context), []);
+  assertEquals(fixed.pages.length, 5);
+  const page = fixed.pages[0];
+  const shown = [page.hero_photo_id, ...page.extra_photo_ids];
+  for (let k = 0; k < 5; k++) assert(shown.includes(`d1p${k}`), `d1p${k}`);
+});
+
+Deno.test("repair: a day with Always picks and no page gets one in day order", () => {
+  const data = memory([2, 2, 2]);
+  data.photos[2].use_in_wrap_up = true; // d2p0
+  const context = skyCheckContext(data);
+  const plan: SkyStoryPlan = {
+    pages: [1, 3].map((day) => ({
+      days: [day, day] as [number, number],
+      headline: `Day ${day}`,
+      hero_photo_id: `d${day}p0`,
+      extra_photo_ids: [`d${day}p1`],
+      note_id: null,
+      sky_line: null,
+    })),
+  };
+
+  const fixed = repairSkyStory(plan, context) as SkyStoryPlan;
+
+  assertEquals(describeSkyStoryProblems(fixed, context), []);
+  assertEquals(fixed.pages.map((p) => p.days), [[1, 1], [2, 2], [3, 3]]);
+  assertEquals(fixed.pages[1].hero_photo_id, "d2p0");
+});

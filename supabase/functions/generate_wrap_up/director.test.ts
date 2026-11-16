@@ -759,8 +759,9 @@ Deno.test("no Neon Night section is an answer: no retry", async () => {
 });
 
 Deno.test("an invalid Neon Night section is retried with its problems", async () => {
+  // A fault code can't repair (a 2-photo peak it can, #382).
   const broken = neonNightPlan();
-  broken.chapters[2].moments[0].photo_ids = ["p08", "p09"];
+  broken.chapters[2].title = "A title far too long for the card";
   const anthropic = neon(broken, neonNightPlan());
 
   const record = await runDirector(
@@ -776,7 +777,7 @@ Deno.test("an invalid Neon Night section is retried with its problems", async ()
   assertEquals(retry.tool, "emit_neon_night");
   assertStringIncludes(
     (retry.body.messages as { content: string }[])[0].content,
-    "neon_night.chapters[2].moments[0].photo_ids: 2, a peak takes 3–5",
+    "neon_night.chapters[2].title: 33 characters, at most 22",
   );
 
   const stillBroken = neon(broken);
