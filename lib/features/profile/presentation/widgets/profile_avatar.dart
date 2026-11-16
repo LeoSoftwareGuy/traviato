@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/storage_cache_key.dart';
 import '../providers/profile_providers.dart';
 
 /// The profile avatar — either an external OAuth picture URL, this app's
@@ -78,6 +79,7 @@ class ProfileAvatar extends ConsumerWidget {
       error: (_, _) => _Initials(username: username, style: initialsStyle),
       data: (resolvedUrl) => CachedNetworkImage(
         imageUrl: resolvedUrl,
+        cacheKey: storageCacheKey(resolvedUrl),
         fit: BoxFit.cover,
         placeholder: (context, url) => const ColoredBox(
           color: AppColors.surface,

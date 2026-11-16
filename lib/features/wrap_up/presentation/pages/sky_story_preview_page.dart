@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/storage_cache_key.dart';
 import '../controllers/wrap_up_controller.dart';
 import '../film/sky_story/sky_story.dart';
 import '../film/sky_story/sky_story_canvas.dart';
@@ -42,7 +43,10 @@ class _SkyStoryPreviewPageState extends ConsumerState<SkyStoryPreviewPage> {
   Map<String, String> _urls = const {};
 
   ImageProvider? _memoryPhoto(String id) => switch (_urls[id]) {
-    final url? => CachedNetworkImageProvider(url),
+    final url? => CachedNetworkImageProvider(
+      url,
+      cacheKey: storageCacheKey(url),
+    ),
     null => null,
   };
 
