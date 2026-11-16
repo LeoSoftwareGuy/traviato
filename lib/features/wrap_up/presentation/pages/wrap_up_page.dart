@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/storage_cache_key.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../settings/presentation/controllers/reduce_flashing_controller.dart';
 import '../../../trip/presentation/providers/cover_image_url_provider.dart';
@@ -327,7 +328,10 @@ class _WrapUpFilmReadyState extends ConsumerState<_WrapUpFilmReady> {
       } else {
         try {
           final url = await ref.read(coverImageUrlProvider(coverPath).future);
-          coverImage = CachedNetworkImageProvider(url);
+          coverImage = CachedNetworkImageProvider(
+            url,
+            cacheKey: storageCacheKey(url),
+          );
         } catch (_) {
           coverImage = null;
         }

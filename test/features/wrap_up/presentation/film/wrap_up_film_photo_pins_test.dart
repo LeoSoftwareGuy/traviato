@@ -40,6 +40,19 @@ void main() {
     expect(a, b);
   });
 
+  testWidgets('a re-signed link for the same photo is the same cache entry, '
+      'so it is not downloaded again (#376)', (tester) async {
+    const signed =
+        'https://abc.supabase.co/storage/v1/object/sign/trip-photos/u/t/p.jpg';
+    final a = await WrapUpFilmPhoto.providerFor(
+      '$signed?token=first',
+    ).obtainKey(ImageConfiguration.empty);
+    final b = await WrapUpFilmPhoto.providerFor(
+      '$signed?token=second',
+    ).obtainKey(ImageConfiguration.empty);
+    expect(a, b);
+  });
+
   testWidgets('a pinned photo survives the LRU cache being emptied — what '
       'later precaches did to Moment photos before #178', (tester) async {
     final key = await seedDecodedPhoto(tester);

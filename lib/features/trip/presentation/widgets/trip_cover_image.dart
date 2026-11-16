@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/storage_cache_key.dart';
 import '../providers/cover_image_url_provider.dart';
 import 'cover_options.dart';
 
@@ -34,6 +35,7 @@ class TripCoverImage extends ConsumerWidget {
       error: (_, _) => const _BrokenCover(),
       data: (url) => CachedNetworkImage(
         imageUrl: url,
+        cacheKey: storageCacheKey(url),
         fit: BoxFit.cover,
         filterQuality: FilterQuality.high,
         placeholder: (context, url) =>
