@@ -112,7 +112,12 @@ ai_generation_count int default 0`.
 Post-MVP: `video_path`, `video_status`.
 - `director jsonb?` (#328, Wrap-Up Film v2): the last director run — the
   `plan_version: 2` film plan or why it fell back, token usage + estimated
-  cost. Service-role writes, owner reads (debug Plan inspector). A draft's
+  cost. Service-role writes, owner reads (debug Plan inspector). Since
+  #380 the plan is two strict Anthropic calls: `emit_film_plan` (classic
+  plan, Sky Story, and `special_film`: golden_vows / neon_night / none),
+  then — only for golden_vows or neon_night — that film's section alone
+  (`section_attempts`; usage `call: "section"`). One tool with every
+  film's section compiled to a grammar Anthropic rejected as too large. A draft's
   `content` carries `plan_version` + `plan` while that plan still fits.
   Since #345 the record also holds the Sky Story pages (`sky_story`,
   `sky_problems`), every analysed photo's `hero_scores`, and `photo_days` +

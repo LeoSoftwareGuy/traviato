@@ -8,12 +8,21 @@
 // `plan_version: 2` + `plan`, next to everything the current player reads,
 // so the current film keeps playing until the plan-driven player lands.
 //
-// Model: claude-sonnet-5 for both calls, same as the 4 AI lines (#93).
+// The plan is two strict calls (#380): emit_film_plan (classic plan, Sky
+// Story and which occasion film fits), then — only for a wedding or a
+// party — that film's section on its own. One strict tool carrying every
+// film's section compiled to a grammar Anthropic refuses as too large.
+//
+// Model: claude-sonnet-5 for every call, same as the 4 AI lines (#93).
 
 import type { TripData } from "./gather.ts";
 import { inclusiveDayCount, sortPhotosChronologically } from "./assemble.ts";
 import { type FetchLike, logEvent, type LogLike } from "./anthropic.ts";
-import { callAnthropicTool, type TokenUsage } from "./anthropic_tool.ts";
+import {
+  callAnthropicTool,
+  type TokenUsage,
+  type ToolDefinition,
+} from "./anthropic_tool.ts";
 import type { WrapUpLanguage } from "./language.ts";
 import {
   BANNED_PHRASES,
@@ -82,8 +91,15 @@ export const MIN_PLANNABLE_PHOTOS = 6;
 // the Plan inspector is never capped.
 export const MAX_DIRECTOR_RUNS = 4;
 
-// emit_film_plan with the Sky Story section (#345), the Golden Vows one
-// (#346) and the Neon Night one (#363). Composed here so the films' modules don't import each other.
+// The occasion films with a section of their own (#346, #363), planned in
+// a second call; "none" = Sky Story is the memory's film.
+export const SPECIAL_FILMS = ["golden_vows", "neon_night", "none"] as const;
+export type SpecialFilm = typeof SPECIAL_FILMS[number];
+type SectionFilm = Exclude<SpecialFilm, "none">;
+
+// emit_film_plan with the Sky Story section (#345) and the occasion film
+// to plan next (#380). Composed here so the films' modules don't import
+// each other.
 export const directorToolSchema = {
   ...filmPlanToolSchema,
   input_schema: {
@@ -91,19 +107,58 @@ export const directorToolSchema = {
     properties: {
       ...filmPlanToolSchema.input_schema.properties,
       sky_story: skyStoryToolProperty,
-      golden_vows: goldenVowsToolProperty,
-      neon_night: neonNightToolProperty,
+      special_film: {
+        type: "string",
+        enum: [...SPECIAL_FILMS],
+        description:
+          "The occasion film this memory gets, planned in a second step: golden_vows (a wedding, engagement, anniversary or date night), neon_night (a party, rave, club night, festival, concert or night out), or none.",
+      },
     },
     required: [
       ...filmPlanToolSchema.input_schema.required,
       "sky_story",
-      "golden_vows",
-      "neon_night",
+      "special_film",
     ],
   },
 };
 
-export type DirectorCall = TokenUsage & { call: "analysis" | "plan" };
+// The second call's tool: one film's section, or null when the memory
+// turns out not to be that occasion (#380).
+function sectionTool(
+  name: string,
+  description: string,
+  key: SectionFilm,
+  property: unknown,
+): ToolDefinition {
+  return {
+    name,
+    description,
+    input_schema: {
+      type: "object",
+      properties: { [key]: property },
+      required: [key],
+    },
+  } as ToolDefinition;
+}
+
+export const sectionToolSchemas: Record<SectionFilm, ToolDefinition> = {
+  golden_vows: sectionTool(
+    "emit_golden_vows",
+    "Emit this memory's Golden Vows wedding album, or null if it isn't a wedding, engagement, anniversary or date night.",
+    "golden_vows",
+    goldenVowsToolProperty,
+  ),
+  neon_night: sectionTool(
+    "emit_neon_night",
+    "Emit this memory's Neon Night party film, or null if it isn't a party, rave, club night, festival, concert or night out.",
+    "neon_night",
+    neonNightToolProperty,
+  ),
+};
+
+export type DirectorCall = TokenUsage & {
+  call: "analysis" | "plan" | "section";
+};
 
 export interface DirectorRecord {
   status: "planned" | "fallback";
@@ -139,6 +194,10 @@ export interface DirectorRecord {
   // why) — then the next film plays.
   neon_night?: NeonNightPlan | null;
   neon_night_problems?: string[];
+  // Which occasion film the plan call chose (#380); null when no plan
+  // answer arrived. The section call's attempts, when one ran.
+  special_film?: SpecialFilm | null;
+  section_attempts?: number;
   // id → orientation of every analysed photo: Golden Vows' chapter
   // layouts.
   orientations?: Record<string, string>;
@@ -252,6 +311,12 @@ function sceneLines(): string {
   ).join("\n");
 }
 
+function sectionLanguageRule(language: WrapUpLanguage): string {
+  return language === "ru"
+    ? 'Write every line in natural Russian, addressing the reader as "вы". Keep names of the memory, places and people exactly as given.'
+    : "Write every line in English.";
+}
+
 function languageRule(language: WrapUpLanguage): string {
   return language === "ru"
     ? 'Write every line in natural Russian, addressing the reader as "вы". Keep names of the memory, places and people exactly as given. Set "language" to "ru".'
@@ -292,9 +357,55 @@ export function buildPlanSystemPrompt(language: WrapUpLanguage): string {
     "- reasoning: 2–3 sentences on why this occasion, recipe and shape.\n",
     `- ${languageRule(language)}`,
     SKY_STORY_PROMPT_RULES,
-    GOLDEN_VOWS_PROMPT_RULES,
-    NEON_NIGHT_PROMPT_RULES,
+    SPECIAL_FILM_PROMPT_RULES,
   ].join("");
+}
+
+const SPECIAL_FILM_PROMPT_RULES = [
+  "\n\nspecial_film — whether this memory also gets a film made for its ",
+  "occasion, planned in a second step (from its name, vibes, notes and ",
+  "photos):\n",
+  "- golden_vows: a wedding, an engagement, an anniversary or a date night.\n",
+  "- neon_night: a party, a rave, a club night, a festival, a concert or ",
+  "another night out.\n",
+  "- none: anything else. When unsure, none.",
+].join("");
+
+// The second call's system prompt (#380): the shared rules and just that
+// film's.
+export function buildSectionSystemPrompt(
+  film: SectionFilm,
+  language: WrapUpLanguage,
+): string {
+  const name = film === "golden_vows"
+    ? "Golden Vows, an elegant wedding album"
+    : "Neon Night, a loud neon party film";
+  return [
+    "You are the director of a short film made from one person's memory. ",
+    `It will be told as ${name}. Emit it with the `,
+    `${sectionToolSchemas[film].name} tool.\n\n`,
+    "Rules:\n",
+    "- Use only photo_ids and note_ids from the input. Never invent people, ",
+    "places or events.\n",
+    "- Photos are listed in order (day, then time); each at most once.\n",
+    "- Prefer sharp photos with hero_score ≥ 3. Skip blurry or dark photos, ",
+    "and all but one photo of each dup_group.\n",
+    "- Lines are specific — real details from notes, places and photos — ",
+    "never generic.\n",
+    `- Never use: ${BANNED_PHRASES.map((p) => `"${p}"`).join(", ")}.\n`,
+    `- ${sectionLanguageRule(language)}`,
+    film === "golden_vows" ? GOLDEN_VOWS_PROMPT_RULES : NEON_NIGHT_PROMPT_RULES,
+  ].join("");
+}
+
+// The plan answer's occasion film; anything else counts as none.
+function specialFilmOf(input: unknown): SpecialFilm {
+  const value = typeof input === "object" && input !== null
+    ? (input as Record<string, unknown>).special_film
+    : undefined;
+  return SPECIAL_FILMS.includes(value as SpecialFilm)
+    ? value as SpecialFilm
+    : "none";
 }
 
 export function buildPlanUserPrompt(
@@ -316,6 +427,7 @@ function normalisePlan(input: unknown): FilmPlan {
   delete (plan as unknown as Record<string, unknown>).sky_story;
   delete (plan as unknown as Record<string, unknown>).golden_vows;
   delete (plan as unknown as Record<string, unknown>).neon_night;
+  delete (plan as unknown as Record<string, unknown>).special_film;
   for (const chapter of plan.chapters) {
     for (const scene of chapter.scenes) {
       scene.caption_note_id = scene.caption_note_id ?? null;
@@ -363,6 +475,64 @@ function summariseUsage(calls: DirectorCall[]): DirectorRecord["usage"] {
   };
 }
 
+// The occasion film's section in a call of its own (#380): its tool, its
+// rules, one retry with the problems fed back. A null section is an
+// answer (not that occasion after all). Never throws.
+async function planSection(
+  deps: DirectorDeps,
+  calls: DirectorCall[],
+  tripId: string,
+  film: SectionFilm,
+  input: ReturnType<typeof buildPlanInput>,
+  language: WrapUpLanguage,
+  check: (raw: unknown) => { value: unknown; problems: string[] },
+): Promise<{ value: unknown | null; problems: string[]; attempts: number }> {
+  const log = deps.log ?? console.error;
+  const system = buildSectionSystemPrompt(film, language);
+  let problems: string[] = [];
+  let attempts = 0;
+  for (let attempt = 1; attempt <= PLAN_ATTEMPTS; attempt++) {
+    attempts = attempt;
+    let toolInput: unknown;
+    try {
+      const result = await callAnthropicTool({
+        apiKey: deps.apiKey,
+        model: DIRECTOR_MODEL,
+        maxTokens: PLAN_MAX_TOKENS,
+        system,
+        content: buildPlanUserPrompt(input, problems),
+        tool: sectionToolSchemas[film],
+        label: film,
+        fetchImpl: deps.fetchImpl,
+        log,
+      });
+      calls.push({ ...result.usage, call: "section" });
+      toolInput = result.input;
+    } catch (err) {
+      problems = [`${film} call failed: ${(err as Error).message}`];
+      continue;
+    }
+    const raw = typeof toolInput === "object" && toolInput !== null
+      ? (toolInput as Record<string, unknown>)[film]
+      : undefined;
+    if (raw === null || raw === undefined) {
+      return { value: null, problems: [], attempts };
+    }
+    const checked = check(raw);
+    if (checked.problems.length === 0) {
+      return { value: checked.value, problems: [], attempts };
+    }
+    problems = checked.problems;
+    logEvent(log, "director_section_invalid", {
+      trip_id: tripId,
+      film,
+      attempt,
+      problems: problems.slice(0, 30),
+    });
+  }
+  return { value: null, problems, attempts };
+}
+
 // Runs the director for one memory. Never throws: anything that goes wrong
 // becomes a fallback record, so the film always plays.
 export async function runDirector(
@@ -389,6 +559,7 @@ export async function runDirector(
     golden_vows_problems: [],
     neon_night: null,
     neon_night_problems: [],
+    special_film: null,
     orientations: {},
     hero_scores: {},
     photo_days: photoDaysOf(tripData),
@@ -490,11 +661,8 @@ export async function runDirector(
     const system = buildPlanSystemPrompt(language);
     let problems: string[] = [];
     let skyProblems: string[] = [];
-    let gvProblems: string[] = [];
-    // A null section is a valid answer (another occasion).
-    let gvSettled = false;
-    let nnProblems: string[] = [];
-    let nnSettled = false;
+    // The occasion film from the first answer that arrived.
+    let special: SpecialFilm | null = null;
     for (let attempt = 1; attempt <= PLAN_ATTEMPTS; attempt++) {
       record.attempts = attempt;
       let toolInput: unknown;
@@ -504,12 +672,7 @@ export async function runDirector(
           model: DIRECTOR_MODEL,
           maxTokens: PLAN_MAX_TOKENS,
           system,
-          content: buildPlanUserPrompt(input, [
-            ...problems,
-            ...skyProblems,
-            ...gvProblems,
-            ...nnProblems,
-          ]),
+          content: buildPlanUserPrompt(input, [...problems, ...skyProblems]),
           tool: directorToolSchema,
           label: "plan",
           fetchImpl: deps.fetchImpl,
@@ -522,10 +685,9 @@ export async function runDirector(
         const failed = `plan call failed: ${(err as Error).message}`;
         if (record.status !== "planned") problems = [failed];
         if (!record.sky_story) skyProblems = [failed];
-        if (!gvSettled) gvProblems = [failed];
-        if (!nnSettled) nnProblems = [failed];
         continue;
       }
+      special ??= specialFilmOf(toolInput);
       toolInput = repairFilmPlan(toolInput, context);
       const sky = repairSkyStory(
         typeof toolInput === "object" && toolInput !== null
@@ -548,61 +710,55 @@ export async function runDirector(
           record.sky_story = sky as SkyStoryPlan;
         }
       }
-      if (!gvSettled) {
-        const raw = typeof toolInput === "object" && toolInput !== null
-          ? (toolInput as Record<string, unknown>).golden_vows
-          : undefined;
-        if (raw === null || raw === undefined) {
-          record.golden_vows = null;
-          gvProblems = [];
-          gvSettled = true;
-        } else {
-          const gv = repairGoldenVows(raw, gvContext);
-          gvProblems = describeGoldenVowsProblems(gv, gvContext);
-          if (gvProblems.length === 0) {
-            record.golden_vows = gv as GoldenVowsPlan;
-            gvSettled = true;
-          }
-        }
-      }
-      if (!nnSettled) {
-        const raw = typeof toolInput === "object" && toolInput !== null
-          ? (toolInput as Record<string, unknown>).neon_night
-          : undefined;
-        if (raw === null || raw === undefined) {
-          record.neon_night = null;
-          nnProblems = [];
-          nnSettled = true;
-        } else {
-          const nn = repairNeonNight(raw, nnContext);
-          nnProblems = describeNeonNightProblems(nn, nnContext);
-          if (nnProblems.length === 0) {
-            record.neon_night = nn as NeonNightPlan;
-            nnSettled = true;
-          }
-        }
-      }
-      if (
-        record.status === "planned" && record.sky_story && gvSettled &&
-        nnSettled
-      ) {
-        break;
-      }
+      if (record.status === "planned" && record.sky_story) break;
       logEvent(log, "director_plan_invalid", {
         trip_id: tripId,
         attempt,
-        problems: [
-          ...problems,
-          ...skyProblems,
-          ...gvProblems,
-          ...nnProblems,
-        ].slice(0, 30),
+        problems: [...problems, ...skyProblems].slice(0, 30),
       });
     }
     record.problems = problems;
     record.sky_problems = skyProblems;
-    record.golden_vows_problems = gvProblems;
-    record.neon_night_problems = nnProblems;
+    record.special_film = special;
+
+    // No answer at all: the occasion films share the plan call's failure.
+    // "none" (or the other film) is an answer — no problems.
+    const unanswered = special === null ? problems : [];
+    record.golden_vows_problems = unanswered;
+    record.neon_night_problems = unanswered;
+    if (special === "golden_vows" || special === "neon_night") {
+      const outcome = await planSection(
+        deps,
+        calls,
+        tripId,
+        special,
+        input,
+        language,
+        special === "golden_vows"
+          ? (raw) => {
+            const gv = repairGoldenVows(raw, gvContext);
+            return {
+              value: gv,
+              problems: describeGoldenVowsProblems(gv, gvContext),
+            };
+          }
+          : (raw) => {
+            const nn = repairNeonNight(raw, nnContext);
+            return {
+              value: nn,
+              problems: describeNeonNightProblems(nn, nnContext),
+            };
+          },
+      );
+      record.section_attempts = outcome.attempts;
+      if (special === "golden_vows") {
+        record.golden_vows = outcome.value as GoldenVowsPlan | null;
+        record.golden_vows_problems = outcome.problems;
+      } else {
+        record.neon_night = outcome.value as NeonNightPlan | null;
+        record.neon_night_problems = outcome.problems;
+      }
+    }
   } catch (err) {
     record.problems = [`director failed: ${(err as Error).message}`];
     record.sky_problems = record.problems;
