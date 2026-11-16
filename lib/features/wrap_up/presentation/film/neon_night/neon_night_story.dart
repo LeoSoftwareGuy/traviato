@@ -191,6 +191,7 @@ class NeonNightStory extends Equatable {
     this.firstName,
     this.headline,
     this.totals,
+    this.heartPhotoIds = const [],
   }) : assert(
          chapters.isNotEmpty && chapters.length <= 5,
          '1–5 chapters',
@@ -221,13 +222,30 @@ class NeonNightStory extends Equatable {
   /// The end card's numbers; none → counted from the story.
   final NnTotals? totals;
 
+  /// The photos the Finale's heart is made of (#378), ids of [allPhotos];
+  /// empty → all of them.
+  final List<String> heartPhotoIds;
+
   bool get hasPlan => plan.isNotEmpty;
   bool get hasNote => note != null;
 
-  /// Every photo of the night, in order: what the Finale's heart shows.
+  /// Every photo of the night, in order.
   List<NnPhoto> get allPhotos => [
     for (final chapter in chapters) ...chapter.photos,
   ];
+
+  /// What the Finale's heart shows, in order: [heartPhotoIds] that are
+  /// photos of the night, else every photo. Always picks already had their
+  /// moment, so the heart is made of the others (#378).
+  List<String> get heartIds {
+    final all = [for (final photo in allPhotos) photo.id];
+    final known = all.toSet();
+    final heart = [
+      for (final id in heartPhotoIds)
+        if (known.contains(id)) id,
+    ];
+    return heart.isNotEmpty ? heart : all;
+  }
 
   /// [totals], or what the story itself has: its photos, its note, the
   /// plan's done rows.
@@ -250,6 +268,7 @@ class NeonNightStory extends Equatable {
     firstName,
     headline,
     totals,
+    heartPhotoIds,
   ];
 }
 

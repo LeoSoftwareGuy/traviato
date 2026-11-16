@@ -3,6 +3,7 @@ import {
   assertEquals,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
+  alwaysWithoutPage,
   buildSkyContent,
   codeSkyPages,
   dayNumberOf,
@@ -10,11 +11,13 @@ import {
   firstNameOf,
   groupDays,
   MAX_SKY_MOSAIC_PHOTOS,
+  pagesPerRange,
   pickExtras,
   pickHero,
   repairSkyStory,
   skyCheckContext,
   type SkyStoryPlan,
+  splitAtAlways,
 } from "./sky_story.ts";
 import type { TripData } from "./gather.ts";
 import { directorTripData, skyStoryPlan } from "./director_fixtures.ts";
@@ -345,7 +348,7 @@ Deno.test("sky_story Always picks: on their page, and every such day has one", (
   const data = directorTripData();
   data.photos[7].use_in_wrap_up = true; // day 2, not on its page
   assertEquals(check(skyStoryPlan(), data), [
-    'sky_story.pages[1]: photo "p07" is marked Always but not on its page',
+    'sky_story: photo "p07" is marked Always but not on a page of day 2',
   ]);
 
   const skipped: SkyStoryPlan = { pages: [skyStoryPlan().pages[0]] };
@@ -354,8 +357,10 @@ Deno.test("sky_story Always picks: on their page, and every such day has one", (
       "sky_story: day 2 has a photo marked Always but no page",
     ),
   );
+});
 
-  // More Always picks than slots: five shown is enough.
+// Day 1 with six Always picks: p00–p03, p12, p13.
+function busyDayOne(): TripData {
   const busy = directorTripData();
   busy.photos = [
     ...busy.photos,
@@ -364,9 +369,64 @@ Deno.test("sky_story Always picks: on their page, and every such day has one", (
   busy.photos.filter((p) => p.day_date === "2026-09-01").forEach((p) =>
     p.use_in_wrap_up = true
   );
+  return busy;
+}
+
+Deno.test("sky_story: a full page isn't enough while pages are left — add a continuation page (#378)", () => {
   const full = skyStoryPlan();
   full.pages[0].extra_photo_ids = ["p00", "p02", "p03", "p12"];
-  assertEquals(check(full, busy), []);
+  assertEquals(check(full, busyDayOne()), [
+    'sky_story: day 1 has 1 more photos marked Always than its pages show (first: "p13") — add a continuation page with the same days',
+  ]);
+
+  const continued = skyStoryPlan();
+  continued.pages[0].extra_photo_ids = ["p00", "p02", "p03"];
+  continued.pages.splice(1, 0, {
+    days: [1, 1],
+    headline: "Still the first day",
+    hero_photo_id: "p13",
+    extra_photo_ids: ["p12"],
+    note_id: null,
+    sky_line: null,
+  });
+  assertEquals(check(continued, busyDayOne()), []);
+});
+
+Deno.test("sky_story: a continuation page must repeat the previous days exactly", () => {
+  const plan = skyStoryPlan();
+  plan.pages.splice(2, 0, {
+    days: [1, 2],
+    headline: "Back again",
+    hero_photo_id: "p12",
+    extra_photo_ids: [],
+    note_id: null,
+    sky_line: null,
+  });
+  const data = directorTripData();
+  data.photos.push({ ...data.photos[0], id: "p12" });
+  assert(
+    check(plan, data).includes(
+      "sky_story.pages[2].days: [1, 2] overlaps or comes before the previous page",
+    ),
+  );
+});
+
+Deno.test("sky_story: with all pages used and full of Always picks, the rest may go without a page", () => {
+  const data = memory([7, 1, 1, 1, 1]);
+  data.photos.filter((p) => p.day_date === "2026-06-01").forEach((p) =>
+    p.use_in_wrap_up = true
+  );
+  const plan: SkyStoryPlan = {
+    pages: [1, 2, 3, 4, 5].map((day) => ({
+      days: [day, day] as [number, number],
+      headline: `Headline ${day}`,
+      hero_photo_id: `d${day}p0`,
+      extra_photo_ids: day === 1 ? ["d1p1", "d1p2", "d1p3", "d1p4"] : [],
+      note_id: null,
+      sky_line: null,
+    })),
+  };
+  assertEquals(check(plan, data), []);
 });
 
 Deno.test("repairSkyStory trims, de-duplicates and clears what doesn't belong", () => {
@@ -387,4 +447,106 @@ Deno.test("repairSkyStory trims, de-duplicates and clears what doesn't belong", 
   assertEquals(fixed.pages[1].note_id, null);
   assertEquals(fixed.pages[2].sky_line, null);
   assertEquals(repairSkyStory("nope", context), "nope");
+});
+
+// --- Busy days: Always picks get their own pages (#378) -------------------
+
+// ADE-Amsterdam's shape: 19 / 4 / 7 photos, Always 15 / 2 / 3.
+function amsterdamLike(): TripData {
+  const data = memory([19, 4, 7]);
+  const always: Record<string, number> = {
+    "2026-06-01": 15,
+    "2026-06-02": 2,
+    "2026-06-03": 3,
+  };
+  const seen: Record<string, number> = {};
+  for (const p of data.photos) {
+    seen[p.day_date!] = (seen[p.day_date!] ?? 0) + 1;
+    if (seen[p.day_date!] <= always[p.day_date!]) p.use_in_wrap_up = true;
+  }
+  return data;
+}
+
+Deno.test("pagesPerRange gives spare pages to the ranges whose Always picks overflow most", () => {
+  assertEquals(pagesPerRange([15, 2, 3]), [3, 1, 1]);
+  assertEquals(pagesPerRange([0, 0]), [1, 1]);
+  assertEquals(pagesPerRange([6, 11]), [2, 3]);
+  assertEquals(pagesPerRange([30, 1, 1, 1, 1]), [1, 1, 1, 1, 1]);
+});
+
+Deno.test("splitAtAlways cuts before an Always pick, an even share per part", () => {
+  const data = memory([10]);
+  [1, 2, 4, 5, 7, 8, 9].forEach((k) => data.photos[k].use_in_wrap_up = true);
+  const parts = splitAtAlways(data.photos, 2).map((part) =>
+    part.map((p) => p.id)
+  );
+  // 7 Always picks → 4 + 3; d1p0 (Auto) stays with the first part.
+  assertEquals(parts, [
+    ["d1p0", "d1p1", "d1p2", "d1p3", "d1p4", "d1p5", "d1p6"],
+    ["d1p7", "d1p8", "d1p9"],
+  ]);
+  assertEquals(splitAtAlways(data.photos, 1), [data.photos]);
+});
+
+Deno.test("code-built pages split a busy day so every Always pick is on a page", () => {
+  const data = amsterdamLike();
+  const pages = codeSkyPages(data);
+  assertEquals(pages.map((p) => p.first_day), [1, 1, 1, 2, 3]);
+  const shown = new Set(
+    pages.flatMap((p) => [p.hero_photo_id, ...p.extra_photo_ids]),
+  );
+  for (const p of data.photos.filter((p) => p.use_in_wrap_up === true)) {
+    assert(shown.has(p.id), `${p.id} is on a page`);
+  }
+  // Day one's note sits on its first page only.
+  assertEquals(pages[1].note_id, null);
+  assertEquals(pages[2].note_id, null);
+  // And the pages pass the director's own check.
+  const plan: SkyStoryPlan = {
+    pages: pages.map((p) => ({
+      days: [p.first_day, p.last_day ?? p.first_day] as [number, number],
+      headline: "A headline",
+      hero_photo_id: p.hero_photo_id,
+      extra_photo_ids: p.extra_photo_ids,
+      note_id: null,
+      sky_line: null,
+    })),
+  };
+  assertEquals(check(plan, data), []);
+});
+
+Deno.test("the mosaic leaves out Always picks that have a page (#378)", () => {
+  const data = amsterdamLike();
+  const sky = buildSkyContent(data, null)!;
+  const always = new Set(
+    data.photos.filter((p) => p.use_in_wrap_up === true).map((p) => p.id),
+  );
+  // 30 photos, 20 Always: all 10 Auto ones, and — below the 12 a full
+  // mosaic needs — 2 Always picks to top it up.
+  assertEquals(sky.mosaic_photo_ids.length, 12);
+  assertEquals(sky.mosaic_photo_ids.filter((id) => always.has(id)).length, 2);
+  assertEquals(alwaysWithoutPage(data, sky), []);
+
+  // With plenty of Auto photos, no Always pick is in the mosaic.
+  const roomy = memory([20, 20]);
+  roomy.photos.slice(0, 3).forEach((p) => p.use_in_wrap_up = true);
+  const roomySky = buildSkyContent(roomy, null)!;
+  assertEquals(
+    roomySky.mosaic_photo_ids.filter((id) =>
+      ["d1p0", "d1p1", "d1p2"].includes(id)
+    ),
+    [],
+  );
+  assertEquals(roomySky.mosaic_photo_ids.length, 37);
+});
+
+Deno.test("Always picks beyond five pages land in the mosaic and are reported", () => {
+  const data = memory([30, 1, 1, 1, 1]);
+  data.photos.filter((p) => p.day_date === "2026-06-01").forEach((p) =>
+    p.use_in_wrap_up = true
+  );
+  const sky = buildSkyContent(data, null)!;
+  const missing = alwaysWithoutPage(data, sky);
+  assertEquals(missing.length, 25);
+  for (const id of missing) assert(sky.mosaic_photo_ids.includes(id));
 });

@@ -93,10 +93,10 @@ class NeonPhotoImages implements NeonPhotoSource {
     }
     // The Note's background is blurred: the small decode is plenty.
     if (story.note?.photo case final photo?) thumbs.add(photo.id);
-    final all = story.allPhotos;
+    final all = story.heartIds;
     final heart = NnHeart(photos: all.length);
     final tiles = {
-      for (var k = 0; k < heart.cells.length; k++) all[heart.photoFor(k)].id,
+      for (var k = 0; k < heart.cells.length; k++) all[heart.photoFor(k)],
     };
     return (
       thumbs: thumbs.toSet().toList(),

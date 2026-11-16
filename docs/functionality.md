@@ -102,7 +102,13 @@ set. Mockup copy showing other numbers is adjusted at implementation.
 - **In the film** (#294, `docs/design/photo-pick/`): the day's photo viewer
   has an Auto · Always · Leave out control per photo, saved at once. Always
   photos get a main moment first; Leave out photos appear nowhere in the
-  film. Never an AI call. A kept film whose photos changed offers "Photos
+  film. Never an AI call. **Always means you see it (#378):** in every film
+  an Always photo gets a real moment — a Sky Story page (a busy day spreads
+  over extra pages, up to 5 in all), a Golden Vows hero, chapter or
+  carousel photo, a Neon Night moment. The decorative endings (Sky Story's
+  balloon mosaic, the Golden Vows and Neon Night hearts) are made of the
+  other photos; Always photos only top them up below 12 photos, or appear
+  there when more than Sky Story's 5 pages × 5 photos are marked. A kept film whose photos changed offers "Photos
   changed · Rebuild film" (film HUD + Kept Memory page) — rebuilt on tap,
   keeping its AI lines. The all-days "Choose photos" screen is #294 part 2.
 - Days where `day_date > today` are locked (no note/photo entry, blurred

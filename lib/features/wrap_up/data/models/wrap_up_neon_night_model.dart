@@ -26,6 +26,7 @@ WrapUpNeonNight? parseWrapUpNeonNight(Map<String, dynamic> content) {
     headline: _string(nn['headline']),
     firstName: _string(nn['first_name']),
     totals: _totals(nn['totals']),
+    heartPhotoIds: _ids(nn['heart_photo_ids']),
   );
 }
 

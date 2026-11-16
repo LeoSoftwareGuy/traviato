@@ -16,6 +16,7 @@ class WrapUpNeonNight extends Equatable {
     this.headline,
     this.firstName,
     this.totals,
+    this.heartPhotoIds = const [],
   });
 
   /// The memory's name.
@@ -33,6 +34,11 @@ class WrapUpNeonNight extends Equatable {
   final String? firstName;
   final WrapUpNeonTotals? totals;
 
+  /// The Finale's heart (#378): the photos without a moment of their own,
+  /// Always picks only to top it up. Empty in older content → every
+  /// chapter photo.
+  final List<String> heartPhotoIds;
+
   @override
   List<Object?> get props => [
     title,
@@ -44,6 +50,7 @@ class WrapUpNeonNight extends Equatable {
     headline,
     firstName,
     totals,
+    heartPhotoIds,
   ];
 }
 
