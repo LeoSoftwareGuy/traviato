@@ -4,6 +4,7 @@ import 'package:intl/intl.dart' show DateFormat;
 import '../../../../../core/constants/app_constants.dart';
 import '../../../../../l10n/app_localizations.dart';
 import 'neon_chapter_card.dart';
+import 'neon_moments.dart';
 import 'neon_night_story.dart';
 import 'neon_text_fx.dart';
 import 'neon_tokens.dart';
@@ -209,8 +210,13 @@ class NnPlanRowTexts {
   }
 }
 
+/// A zoom's label fits under the 900-wide zoom, padding included (#387).
+final double _zoomLabelWidth =
+    NnCardTiming.zoomRect.width - NeonLabelBox.padding.horizontal;
+
 /// A chapter card (§5.3): header, time range, ghost numeral (pink, then
-/// the accent), title, the typed line and each zoom's time label.
+/// the accent), title, the typed line and each zoom's label (caption or
+/// time, #387).
 class NnChapterTexts {
   factory NnChapterTexts(
     NeonNightStory story,
@@ -277,7 +283,12 @@ class NnChapterTexts {
       ],
       tileLabels: {
         for (final k in timing.zoomTiles)
-          k: NeonLabelBox(chapter.cardPhotos[k].takenAt),
+          // The caption (up to 3 lines) or the time, under the zoom (#387).
+          k: NeonLabelBox(
+            chapter.cardPhotos[k].label,
+            maxLines: 3,
+            maxWidth: _zoomLabelWidth,
+          ),
       },
     );
   }
@@ -382,16 +393,23 @@ class NnTimelineTexts implements NnMomentTexts {
       times = [
         for (final photo in moment.photos)
           (
-            neonLayout(
-              photo.takenAt,
-              NeonType.mono(44, color: plainTime, letterSpacing: 2),
-            ),
-            neonLayout(
-              photo.takenAt,
-              NeonType.mono(44, color: NeonColors.tintGreen, letterSpacing: 2),
-            ),
+            _label(photo, plainTime),
+            _label(photo, NeonColors.tintGreen),
           ),
       ];
+
+  /// The item's caption on one line within its column (#387), else its
+  /// time at the spec's size.
+  static TextPainter _label(NnPhoto photo, Color color) => photo.caption == null
+      ? neonLayout(
+          photo.takenAt,
+          NeonType.mono(44, color: color, letterSpacing: 2),
+        )
+      : neonLayout(
+          photo.caption!,
+          NeonType.mono(34, color: color, letterSpacing: 1),
+          maxWidth: NnTimelineLayout.width,
+        );
 
   static const titleWidth = 760.0;
   static const plainTime = Color(0xFFECE8F6);

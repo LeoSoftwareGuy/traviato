@@ -245,4 +245,32 @@ void main() {
     );
     expect(neonNightFromWrapUp(three, photoIds: _all())!.hasPlan, isTrue);
   });
+
+  test('a photo keeps its caption for its labels (#387)', () {
+    final nn = _nn();
+    final captioned = WrapUpNeonNight(
+      title: nn.title,
+      startDate: nn.startDate,
+      chapters: [
+        WrapUpNeonChapter(
+          title: 'Doors open',
+          photos: [
+            WrapUpNeonPhoto(
+              id: 'a1',
+              takenAt: DateTime(2026, 11, 14, 22, 10),
+              caption: 'Lost the keys',
+            ),
+            _p('a2', 22, 20),
+          ],
+          moments: const [
+            WrapUpNeonMoment(type: 'split', photoIds: ['a1', 'a2']),
+          ],
+        ),
+      ],
+    );
+    final story = neonNightFromWrapUp(captioned, photoIds: {'a1', 'a2'})!;
+    final photos = story.chapters.single.photos;
+    expect(photos.first.label, 'Lost the keys');
+    expect(photos.last.label, '22:20');
+  });
 }

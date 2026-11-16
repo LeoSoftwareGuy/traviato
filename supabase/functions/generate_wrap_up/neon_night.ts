@@ -100,7 +100,7 @@ export interface NeonNightContent {
     title: string;
     // Chronological; taken_at is an ISO instant the app shows in local
     // time.
-    photos: { id: string; taken_at: string }[];
+    photos: { id: string; taken_at: string; caption: string | null }[];
     // The card's own photos (#390): its grid and zooms, never a moment's.
     // Older content has none — the app then uses every chapter photo.
     card_photo_ids: string[];
@@ -1023,6 +1023,9 @@ export function buildNeonNightContent(
       photos: chapter.photos.map((p) => ({
         id: p.id,
         taken_at: p.taken_at ?? p.created_at,
+        // The user's own words on the photo (#387): the zoom and timeline
+        // labels show it instead of the time.
+        caption: p.caption?.trim() || null,
       })),
       card_photo_ids: chapter.card,
       note: chapter.note,

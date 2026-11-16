@@ -20,15 +20,21 @@ class NnPlanRow extends Equatable {
 
 /// One photo of the night (§7): its id and when it was taken.
 class NnPhoto extends Equatable {
-  const NnPhoto({required this.id, required this.takenAt});
+  const NnPhoto({required this.id, required this.takenAt, this.caption});
 
   final String id;
 
   /// 'HH:MM'.
   final String takenAt;
 
+  /// The user's caption (#387), shown instead of [takenAt]; null = none.
+  final String? caption;
+
+  /// What labels the photo: its caption, else its time (#387).
+  String get label => caption ?? takenAt;
+
   @override
-  List<Object?> get props => [id, takenAt];
+  List<Object?> get props => [id, takenAt, caption];
 }
 
 /// A block that shows a few of a chapter's photos after its card

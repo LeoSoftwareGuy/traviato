@@ -19,7 +19,11 @@ Map<String, dynamic> _content() => {
         'title': 'Doors open',
         'photos': [
           {'id': 'p1', 'taken_at': '2026-11-14T20:10:00Z'},
-          {'id': 'p2', 'taken_at': '2026-11-14T20:20:00Z'},
+          {
+            'id': 'p2',
+            'taken_at': '2026-11-14T20:20:00Z',
+            'caption': 'Lost the keys',
+          },
           {'id': 'broken'},
         ],
         'note': 'Queue was worth it.',
@@ -66,6 +70,9 @@ void main() {
     final chapter = nn.chapters.single;
     expect(chapter.photos.map((p) => p.id), ['p1', 'p2']);
     expect(chapter.photos.first.takenAt, DateTime.utc(2026, 11, 14, 20, 10));
+    // The user's caption (#387); none → null.
+    expect(chapter.photos.first.caption, isNull);
+    expect(chapter.photos[1].caption, 'Lost the keys');
     expect(chapter.note, 'Queue was worth it.');
     expect(chapter.moments, const [
       WrapUpNeonMoment(

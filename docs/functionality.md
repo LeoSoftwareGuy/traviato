@@ -241,7 +241,8 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   1–5 chapters by time (card with the user's own line, then 1–2 moments:
   split, burst or a timeline of 5–8 photos; no peak since #386; small
   chapters merge into fuller ones, and the card shows its own photos so
-  nothing repeats — #390), the note written out in neon, a heart
+  nothing repeats — #390; zooms and timeline labels show the photo's
+  caption, the time only without one — #387), the note written out in neon, a heart
   of every photo and the end card with real counts; on Summer Party, cut
   to the film's length. Times are the phone's local times. It plays after
   Golden Vows and before Sky Story; any failure hands over to Sky Story,

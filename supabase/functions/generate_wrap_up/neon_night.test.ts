@@ -579,3 +579,15 @@ Deno.test("the Plan scene needs 3 rows", () => {
   );
   assertEquals(three.plan.length, 3);
 });
+
+Deno.test("chapter photos carry the user's caption, trimmed (#387)", () => {
+  const data = fullNight();
+  data.photos.find((p) => p.id === "p01")!.caption = "  Lost the keys ";
+  data.photos.find((p) => p.id === "p02")!.caption = "   ";
+  const photos = buildNeonNightContent(data, neonNightPlan()).chapters[0]
+    .photos;
+  const caption = (id: string) => photos.find((p) => p.id === id)!.caption;
+  assertEquals(caption("p01"), "Lost the keys");
+  assertEquals(caption("p02"), null);
+  assertEquals(caption("p03"), null);
+});
