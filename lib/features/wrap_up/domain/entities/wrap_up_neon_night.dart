@@ -71,13 +71,20 @@ class WrapUpNeonPlanRow extends Equatable {
 }
 
 class WrapUpNeonPhoto extends Equatable {
-  const WrapUpNeonPhoto({required this.id, required this.takenAt});
+  const WrapUpNeonPhoto({
+    required this.id,
+    required this.takenAt,
+    this.caption,
+  });
 
   final String id;
   final DateTime takenAt;
 
+  /// The user's own caption from Photo detail (#387), exact; null = none.
+  final String? caption;
+
   @override
-  List<Object?> get props => [id, takenAt];
+  List<Object?> get props => [id, takenAt, caption];
 }
 
 class WrapUpNeonChapter extends Equatable {

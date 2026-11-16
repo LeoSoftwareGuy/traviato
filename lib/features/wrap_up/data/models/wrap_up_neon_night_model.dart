@@ -54,7 +54,13 @@ WrapUpNeonChapter? _chapter(dynamic json) {
     final id = _string(photo['id']);
     final takenAt = _instant(photo['taken_at']);
     if (id == null || takenAt == null) continue;
-    photos.add(WrapUpNeonPhoto(id: id, takenAt: takenAt));
+    photos.add(
+      WrapUpNeonPhoto(
+        id: id,
+        takenAt: takenAt,
+        caption: _string(photo['caption']),
+      ),
+    );
   }
   if (photos.isEmpty) return null;
   final moments = <WrapUpNeonMoment>[];

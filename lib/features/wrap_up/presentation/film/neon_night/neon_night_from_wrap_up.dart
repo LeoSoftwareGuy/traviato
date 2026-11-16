@@ -143,8 +143,11 @@ List<NnPhoto> _spread(List<NnPhoto> photos) {
   ];
 }
 
-NnPhoto _photo(WrapUpNeonPhoto photo) =>
-    NnPhoto(id: photo.id, takenAt: _clock(photo.takenAt));
+NnPhoto _photo(WrapUpNeonPhoto photo) => NnPhoto(
+  id: photo.id,
+  takenAt: _clock(photo.takenAt),
+  caption: photo.caption,
+);
 
 /// 'HH:MM' on the phone's clock.
 String _clock(DateTime instant) {
