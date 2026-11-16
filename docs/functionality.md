@@ -236,9 +236,12 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   film. A film kept as Golden Vows stays one while its section still fits.
 - **Neon Night (#363):** a beat-synced party film for memories the director
   reads as a party, rave, club night, festival, concert or night out —
-  ignition, the neon balloon sign, "Tonight's plan" (quests with a time),
+  ignition, the neon balloon sign, "Tonight's plan" (quests with a time;
+  only with 3 or more),
   1–5 chapters by time (card with the user's own line, then 1–2 moments:
-  split, burst or a timeline of up to 6+ photos; no peak since #386), the note written out in neon, a heart
+  split, burst or a timeline of 5–8 photos; no peak since #386; small
+  chapters merge into fuller ones, and the card shows its own photos so
+  nothing repeats — #390), the note written out in neon, a heart
   of every photo and the end card with real counts; on Summer Party, cut
   to the film's length. Times are the phone's local times. It plays after
   Golden Vows and before Sky Story; any failure hands over to Sky Story,

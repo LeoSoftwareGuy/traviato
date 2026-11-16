@@ -202,4 +202,47 @@ void main() {
     expect(story.heartIds, ['a3', 'b1']);
     expect(story.allPhotos.length, greaterThan(story.heartIds.length));
   });
+
+  test('the card shows its own photos; without them, all (#390)', () {
+    final legacy = neonNightFromWrapUp(_nn(), photoIds: _all())!;
+    expect(legacy.chapters[1].cardPhotos, legacy.chapters[1].photos);
+
+    final nn = _nn();
+    final withCard = WrapUpNeonNight(
+      title: nn.title,
+      startDate: nn.startDate,
+      chapters: [
+        for (final (i, c) in nn.chapters.indexed)
+          WrapUpNeonChapter(
+            title: c.title,
+            photos: c.photos,
+            note: c.note,
+            moments: c.moments,
+            cardPhotoIds: i == 1 ? const ['b9', 'b10', 'gone'] : const [],
+          ),
+      ],
+    );
+    final story = neonNightFromWrapUp(withCard, photoIds: _all())!;
+    expect(story.chapters[1].cardPhotos.map((p) => p.id), ['b9', 'b10']);
+    // The chapter's range is unchanged.
+    expect(story.chapters[1].photos, hasLength(12));
+  });
+
+  test('the Plan scene needs 3 rows (#390)', () {
+    final story = neonNightFromWrapUp(_nn(), photoIds: _all())!;
+    expect(story.plan, hasLength(2));
+    expect(story.hasPlan, isFalse);
+
+    final nn = _nn();
+    final three = WrapUpNeonNight(
+      title: nn.title,
+      startDate: nn.startDate,
+      chapters: nn.chapters,
+      plan: [
+        ...nn.plan,
+        const WrapUpNeonPlanRow(time: '05:00', title: 'Breakfast'),
+      ],
+    );
+    expect(neonNightFromWrapUp(three, photoIds: _all())!.hasPlan, isTrue);
+  });
 }

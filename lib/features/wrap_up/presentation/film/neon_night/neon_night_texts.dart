@@ -244,7 +244,7 @@ class NnChapterTexts {
                   ellipsis: '…',
                 )
           ?..layout(maxWidth: typedWidth);
-    final sheet = NnContactSheet.forPhotos(chapter.photos.length);
+    final sheet = NnContactSheet.forPhotos(chapter.cardPhotos.length);
     final tiles = sheet.tiles.length;
     final timing = NnCardTiming(
       chapterNumber: index + 1,
@@ -277,7 +277,7 @@ class NnChapterTexts {
       ],
       tileLabels: {
         for (final k in timing.zoomTiles)
-          k: NeonLabelBox(chapter.photos[k].takenAt),
+          k: NeonLabelBox(chapter.cardPhotos[k].takenAt),
       },
     );
   }

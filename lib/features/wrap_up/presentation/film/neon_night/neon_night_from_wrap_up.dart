@@ -62,6 +62,10 @@ NeonNightStory? neonNightFromWrapUp(
             ? _clock(kept[index + 1].photos.first.takenAt)
             : photos.last.takenAt,
         photos: photos,
+        cardPhotos: [
+          for (final id in entry.chapter.cardPhotoIds)
+            if (ids.contains(id)) _photo(byId[id]!),
+        ],
         note: entry.chapter.note,
         moments: moments.isNotEmpty ? moments : [NnTimeline(_spread(photos))],
       ),

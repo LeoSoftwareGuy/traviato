@@ -23,6 +23,7 @@ Map<String, dynamic> _content() => {
           {'id': 'broken'},
         ],
         'note': 'Queue was worth it.',
+        'card_photo_ids': ['p2', 3],
         'moments': [
           {
             'type': 'split',
@@ -83,6 +84,8 @@ void main() {
       const WrapUpNeonTotals(photos: 2, notes: 4, ticks: 1, moments: 2),
     );
     expect(nn.heartPhotoIds, ['p1', 'p2']);
+    // The card's own photos (#390), malformed ids dropped.
+    expect(chapter.cardPhotoIds, ['p2']);
   });
 
   test('older content without heart_photo_ids: an empty list (#378)', () {

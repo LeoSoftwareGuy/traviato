@@ -1145,7 +1145,8 @@ Deno.test("a draft gets content.neon_night from the director's section", async (
 
   const nn = json.content.neon_night;
   assertEquals(nn.nn_version, 1);
-  assertEquals(nn.chapters.length, 3);
+  // The fixture's 3 chapters of 4 photos merge into one (#390).
+  assertEquals(nn.chapters.length, 1);
   assertEquals(nn.chapters[0].note, "Bikes everywhere");
   assertEquals(nn.note.text, "Rain, then stroopwafels.");
   // Sky Story is there too: the app falls back to it.
@@ -1228,7 +1229,7 @@ Deno.test("rebuilding a film kept as Neon Night rebuilds it while it fits, else 
     deps,
   )).json();
   assertEquals(runs, []);
-  assertEquals(kept.content.neon_night.chapters.length, 3);
+  assertEquals(kept.content.neon_night.chapters.length, 1);
   assertEquals(client.writes[0].values.content.neon_night.nn_version, 1);
 
   const changed = await (await handleRequest(

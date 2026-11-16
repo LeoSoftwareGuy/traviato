@@ -75,6 +75,7 @@ WrapUpNeonChapter? _chapter(dynamic json) {
     photos: photos,
     note: _string(json['note']),
     moments: moments,
+    cardPhotoIds: _ids(json['card_photo_ids']),
   );
 }
 
