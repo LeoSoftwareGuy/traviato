@@ -36,6 +36,15 @@ export const NN_MOMENT_PHOTOS: Record<NnMomentType, [number, number]> = {
   peak: [3, 5],
 };
 
+// What the director may plan (#386): no peak — its tapered strips looked
+// bad. Peaks in plans made before still check; the content turns them
+// into a moment that fits (contentMoments).
+export const PLANNED_NN_MOMENT_TYPES = ["split", "burst", "timeline"] as const;
+
+// A timeline is filled up to this many photos from its chapter's unused
+// ones (#386): its two columns looked empty with 3.
+export const NN_TIMELINE_FILL = 6;
+
 export const MIN_NN_CHAPTERS = 1;
 export const MAX_NN_CHAPTERS = 5;
 export const MAX_NN_MOMENTS = 2;
@@ -166,7 +175,7 @@ export const neonNightToolProperty = {
             items: {
               type: "object",
               properties: {
-                type: { type: "string", enum: [...NN_MOMENT_TYPES] },
+                type: { type: "string", enum: [...PLANNED_NN_MOMENT_TYPES] },
                 photo_ids: { type: "array", items: { type: "string" } },
               },
               required: ["type", "photo_ids"],
@@ -219,8 +228,8 @@ export const NEON_NIGHT_PROMPT_RULES = [
   "- moments: 1–2 per chapter, photos from that chapter only, each photo at ",
   "most once. split: 2–3 photos within about 10 minutes. burst: 2–4 ",
   "photos within about a minute. timeline: 2–8 photos spread across the ",
-  "chapter. peak: 3–5 standout photos (hero_score ≥ 4). Good mix: chapter ",
-  "1 split + burst, chapter 2 timeline, chapter 3 peak, later whichever ",
+  "chapter (code fills it up with more of the chapter's photos). Good ",
+  "mix: chapter 1 split + burst, chapter 2 timeline, later whichever ",
   "fits.\n",
   "- Notes are the person's own words only: note_id points at a note and ",
   "note_excerpt / excerpt copy words from it exactly — same words, same ",
@@ -634,7 +643,8 @@ function typeFor(type: unknown, count: number): NnMomentType | null {
   if (NN_MOMENT_TYPES.includes(type as NnMomentType)) {
     if (fits(type as NnMomentType)) return type as NnMomentType;
   }
-  for (const t of ["timeline", "burst", "peak", "split"] as const) {
+  // Never a peak (#386).
+  for (const t of ["timeline", "burst", "split"] as const) {
     if (fits(t)) return t;
   }
   return null;
@@ -642,7 +652,7 @@ function typeFor(type: unknown, count: number): NnMomentType | null {
 
 // Fixes moments in code instead of discarding the section (#382): photos
 // from another chapter (or unknown, or used twice) are dropped, a moment
-// whose count no longer fits its type takes one that does (a 2-photo peak
+// whose count no longer fits its type takes one that does (a 2-photo burst
 // becomes a timeline), one under 2 photos goes, a chapter left with none
 // gets a timeline over its photos, and Always picks without a moment join
 // one of their chapter while there's room. Never invents a photo, never
@@ -772,6 +782,61 @@ function filmPhotos(photos: Photo[], named: ReadonlySet<string>): Photo[] {
   return photos.filter((p) => kept.has(p));
 }
 
+// A peak as the moment the film plays instead (#386): 3 photos side by
+// side, 4 as a burst, 5 as a timeline.
+function withoutPeak(
+  moment: { type: NnMomentType; photo_ids: string[] },
+): { type: NnMomentType; photo_ids: string[] } {
+  if (moment.type !== "peak") return moment;
+  const n = moment.photo_ids.length;
+  return {
+    type: n <= NN_MOMENT_PHOTOS.split[1]
+      ? "split"
+      : n <= NN_MOMENT_PHOTOS.burst[1]
+      ? "burst"
+      : "timeline",
+    photo_ids: moment.photo_ids,
+  };
+}
+
+// The chapters' moments as the film plays them (#386): no peak, and each
+// timeline filled up to NN_TIMELINE_FILL with its chapter's photos no
+// moment (or the note scene) shows — Always picks first, the rest spread
+// evenly — in time order.
+function contentMoments(
+  chapterPhotos: Photo[][],
+  plan: NeonNightPlan,
+): { type: NnMomentType; photo_ids: string[] }[][] {
+  const used = momentPhotoIds(plan as unknown as Record<string, unknown>);
+  return plan.chapters.map((chapter, i) => {
+    const photos = chapterPhotos[i];
+    const at = new Map(photos.map((p, k) => [p.id, k]));
+    return chapter.moments.map((raw) => {
+      const moment = withoutPeak(raw);
+      if (moment.type !== "timeline") {
+        return { ...moment, photo_ids: [...moment.photo_ids] };
+      }
+      const room = NN_TIMELINE_FILL - moment.photo_ids.length;
+      const free = photos.filter((p) => !used.has(p.id));
+      const always = free.filter((p) => p.use_in_wrap_up === true)
+        .slice(0, Math.max(0, room));
+      const added = [
+        ...always,
+        ...spreadEvenly(
+          free.filter((p) => p.use_in_wrap_up !== true),
+          Math.max(0, room - always.length),
+        ),
+      ];
+      for (const p of added) used.add(p.id);
+      const ids = [...moment.photo_ids, ...added.map((p) => p.id)].sort((
+        a,
+        b,
+      ) => (at.get(a) ?? 0) - (at.get(b) ?? 0));
+      return { type: "timeline" as const, photo_ids: ids };
+    });
+  });
+}
+
 // content.neon_night from a valid, current [plan].
 export function buildNeonNightContent(
   tripData: TripData,
@@ -794,9 +859,14 @@ export function buildNeonNightContent(
   );
 
   const starts = plan.chapters.map((c) => order.get(c.first_photo_id)!);
+  const chapterPhotos = plan.chapters.map((_, i) =>
+    all.slice(starts[i], starts[i + 1] ?? all.length).filter((p) =>
+      shown.has(p.id)
+    )
+  );
+  const moments = contentMoments(chapterPhotos, plan);
   const chapters = plan.chapters.map((chapter, i) => {
-    const end = starts[i + 1] ?? all.length;
-    const photos = all.slice(starts[i], end).filter((p) => shown.has(p.id));
+    const photos = chapterPhotos[i];
     return {
       title: chapter.title,
       photos: photos.map((p) => ({
@@ -806,9 +876,9 @@ export function buildNeonNightContent(
       note: chapter.note_id && chapter.note_excerpt
         ? collapse(chapter.note_excerpt)
         : null,
-      moments: chapter.moments.map((m) => ({
+      moments: moments[i].map((m) => ({
         type: m.type,
-        photo_ids: [...m.photo_ids],
+        photo_ids: m.photo_ids,
         place: m.type === "split"
           ? byId.get(m.photo_ids[0])?.place_text?.trim() || null
           : null,
@@ -849,7 +919,10 @@ export function buildNeonNightContent(
     // it's made from the other photos (#378).
     heart_photo_ids: decorativePhotos(
       film,
-      momentPhotoIds(plan as unknown as Record<string, unknown>),
+      new Set([
+        ...moments.flat().flatMap((m) => m.photo_ids),
+        ...(noteMoment?.photo_id ? [noteMoment.photo_id] : []),
+      ]),
       MAX_NN_PHOTOS,
     ).map((p) => p.id),
   };
