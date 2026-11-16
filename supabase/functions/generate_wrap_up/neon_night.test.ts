@@ -242,3 +242,58 @@ Deno.test("over 200 photos: an even spread that keeps the named ones", () => {
   }
   assertEquals(content.totals.photos, 312);
 });
+
+// --- Always picks get their own moment (#378) -----------------------------
+
+Deno.test("an Always pick must be in a moment (or the Note scene's photo)", () => {
+  const data = directorTripData();
+  data.photos[11].use_in_wrap_up = true; // in no moment
+  assertEquals(problemsOf(() => {}, data), [
+    `neon_night: photo "p11" is marked Always but is in no moment — put it in a moment of its chapter`,
+  ]);
+
+  // As the Note scene's background it's shown.
+  assertEquals(
+    problemsOf((p) => p.note_moment!.photo_id = "p11", data),
+    [],
+  );
+
+  // In a moment: fine.
+  const inMoment = directorTripData();
+  inMoment.photos[3].use_in_wrap_up = true;
+  assertEquals(problemsOf(() => {}, inMoment), []);
+});
+
+Deno.test("an Always pick whose analysis failed isn't required", () => {
+  const data = directorTripData();
+  data.photos[11].use_in_wrap_up = true;
+  assertEquals(
+    describeNeonNightProblems(
+      neonNightPlan(),
+      nnCheckContext(data, new Set(["p11"])),
+    ),
+    [],
+  );
+});
+
+Deno.test("the heart leaves out Always picks that have their moment", () => {
+  const data = directorTripData();
+  data.photos = Array.from({ length: 40 }, (_, i) => ({
+    ...data.photos[i % 12],
+    id: `h${String(i).padStart(2, "0")}`,
+    taken_at: `2026-09-01T22:${String(i).padStart(2, "0")}:00Z`,
+    day_date: "2026-09-01",
+    use_in_wrap_up: i === 1 || i === 3 ? true : null,
+  }));
+  const content = buildNeonNightContent(
+    data,
+    neonNightPlan(data.photos.map((p) => p.id)),
+  );
+  assertEquals(
+    content.heart_photo_ids.filter((id) => id === "h01" || id === "h03"),
+    [],
+  );
+  assertEquals(content.heart_photo_ids.length, 38);
+  // Every photo still plays in its chapter.
+  assertEquals(content.chapters.flatMap((c) => c.photos).length, 40);
+});

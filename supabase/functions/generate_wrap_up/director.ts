@@ -713,7 +713,7 @@ export function currentNeonNight(
   if (!isDirectorRecord(record) || !record.neon_night) return null;
   const problems = describeNeonNightProblems(
     record.neon_night,
-    nnCheckContext(tripData),
+    nnCheckContext(tripData, new Set(record.failed_ids ?? [])),
   );
   return problems.length === 0 ? record.neon_night : null;
 }

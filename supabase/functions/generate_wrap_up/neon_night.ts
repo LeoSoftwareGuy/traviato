@@ -18,6 +18,7 @@
 
 import type { TripData } from "./gather.ts";
 import { sortPhotosChronologically, spreadEvenly } from "./assemble.ts";
+import { decorativePhotos } from "./decorative.ts";
 import { bannedPhraseIn, cleanLine } from "./film_plan.ts";
 import { isExcerptOf } from "./golden_vows.ts";
 import { firstNameOf } from "./sky_story.ts";
@@ -40,6 +41,9 @@ export const MAX_NN_CHAPTERS = 5;
 export const MAX_NN_MOMENTS = 2;
 // The heart shows about 220 tiles; more photos are sampled evenly.
 export const MAX_NN_PHOTOS = 200;
+// Photos the moments can show at most: every chapter's moments at their
+// largest (a timeline's 8).
+export const MAX_NN_MOMENT_SLOTS = MAX_NN_CHAPTERS * MAX_NN_MOMENTS * 8;
 
 // Lengths the film's type fits at its sizes.
 export const MAX_NN_TITLE_CHARS = 22;
@@ -107,6 +111,10 @@ export interface NeonNightContent {
   headline: string | null;
   first_name: string | null;
   totals: { photos: number; notes: number; ticks: number; moments: number };
+  // The Finale's heart (#378): the photos without a moment of their own,
+  // Always picks only to top it up. Older content has none — the app then
+  // uses every chapter photo.
+  heart_photo_ids: string[];
 }
 
 function isString(v: unknown): v is string {
@@ -218,6 +226,8 @@ export const NEON_NIGHT_PROMPT_RULES = [
   "note_excerpt / excerpt copy words from it exactly — same words, same ",
   "spelling, never reworded or shortened inside. Else null. note_moment ",
   "is the single most heartfelt line of the night.\n",
+  "- Every must_include photo is in a moment of its chapter (or is the ",
+  "note_moment's photo): pick moment types and sizes that fit them.\n",
   "- headline: a few loud words for the drop, in the film's language; ",
   "null if nothing fits.",
 ].join("");
@@ -228,6 +238,8 @@ export interface NnCheckContext {
   // Chronological index of every photo the section may use.
   photoOrder: ReadonlyMap<string, number>;
   excludedIds: ReadonlySet<string>;
+  // "Always" picks (#294): each in a moment (#378).
+  mustIncludeIds: ReadonlySet<string>;
   notes: ReadonlyMap<string, string>;
 }
 
@@ -238,7 +250,10 @@ export function nnPhotos(tripData: TripData): Photo[] {
   );
 }
 
-export function nnCheckContext(tripData: TripData): NnCheckContext {
+export function nnCheckContext(
+  tripData: TripData,
+  notRequiredIds: ReadonlySet<string> = new Set(),
+): NnCheckContext {
   const photos = nnPhotos(tripData);
   return {
     photoOrder: new Map(photos.map((p, i) => [p.id, i])),
@@ -247,10 +262,36 @@ export function nnCheckContext(tripData: TripData): NnCheckContext {
         p.id
       ),
     ),
+    mustIncludeIds: new Set(
+      photos.filter((p) =>
+        p.use_in_wrap_up === true && !notRequiredIds.has(p.id)
+      ).map((p) => p.id),
+    ),
     notes: new Map(
       tripData.notes.filter((n) => n.id).map((n) => [n.id!, n.content]),
     ),
   };
+}
+
+// The photos a section gives a moment of their own: every moment's, and
+// the Note scene's background.
+function momentPhotoIds(nn: Record<string, unknown>): Set<string> {
+  const ids = new Set<string>();
+  if (Array.isArray(nn.chapters)) {
+    for (const chapter of nn.chapters) {
+      const moments = (chapter as Record<string, unknown> | null)?.moments;
+      if (!Array.isArray(moments)) continue;
+      for (const moment of moments) {
+        const photos = (moment as Record<string, unknown> | null)?.photo_ids;
+        if (Array.isArray(photos)) {
+          for (const id of photos) if (isString(id)) ids.add(id);
+        }
+      }
+    }
+  }
+  const note = nn.note_moment as Record<string, unknown> | null | undefined;
+  if (note && isString(note.photo_id)) ids.add(note.photo_id);
+  return ids;
 }
 
 function checkLine(
@@ -472,6 +513,22 @@ export function describeNeonNightProblems(
       MAX_NN_HEADLINE_CHARS,
     );
   }
+
+  // Every Always pick in a moment (#378), unless the moments are full of
+  // them.
+  const inMoments = momentPhotoIds(nn);
+  const always = [...context.mustIncludeIds];
+  const missing = always.filter((id) => !inMoments.has(id));
+  if (
+    missing.length > 0 &&
+    always.length - missing.length < MAX_NN_MOMENT_SLOTS
+  ) {
+    problems.push(
+      `neon_night: photo "${
+        missing[0]
+      }" is marked Always but is in no moment — put it in a moment of its chapter`,
+    );
+  }
   return problems;
 }
 
@@ -615,7 +672,8 @@ export function buildNeonNightContent(
     ]),
     ...(plan.note_moment?.photo_id ? [plan.note_moment.photo_id] : []),
   ]);
-  const shown = new Set(filmPhotos(all, named).map((p) => p.id));
+  const film = filmPhotos(all, named);
+  const shown = new Set(film.map((p) => p.id));
   const byId = new Map(all.map((p) => [p.id, p]));
   const notes = [...tripData.notes].sort((a, b) =>
     a.day_date < b.day_date ? -1 : a.day_date > b.day_date ? 1 : 0
@@ -673,5 +731,12 @@ export function buildNeonNightContent(
       ticks: plan_.filter((r) => r.done).length,
       moments: all.length,
     },
+    // The heart is decoration: Always picks already have their moment, so
+    // it's made from the other photos (#378).
+    heart_photo_ids: decorativePhotos(
+      film,
+      momentPhotoIds(plan as unknown as Record<string, unknown>),
+      MAX_NN_PHOTOS,
+    ).map((p) => p.id),
   };
 }
