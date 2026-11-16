@@ -123,7 +123,11 @@ Post-MVP: `video_path`, `video_status`.
   with photos — per page its days, photo count, headline (null = the app
   shows the place or "Day N"), hero + up to 4 extra photo ids, the note's id
   and text, and a director's sky line; plus title, first name (signature),
-  moment count and up to 60 mosaic photo ids. The director's pages while they
+  moment count and up to 60 mosaic photo ids. A page may repeat the
+  previous page's days: a continuation page for a day with more Always
+  photos than one page shows (#378). The mosaic is Auto photos plus Always
+  photos without a page, topped up with Always photos below 12. The
+  director's pages while they
   still fit the memory, else built by code. The app plays Sky Story whenever
   it's there. A film kept as a Sky Story keeps it, and "Rebuild film"
   rebuilds its pages too (no AI call); a film kept before Sky Story never
@@ -137,7 +141,9 @@ Post-MVP: `video_path`, `video_status`.
   none), 2–6 heroes (photo, label, `taken_at`, note = caption or an exact
   excerpt of that day's note), 1–4 chapters of 3 photos with an A/B/C
   layout, a carousel of 6–12 unused photos (or none), up to 200 heart
-  photos, the moment count and the end line. No section = Sky Story plays.
+  photos (#378: those without a hero, chapter or carousel slot, Always
+  photos only to top up below 12), the moment count and the end line. Every
+  Always photo is a hero, a chapter photo or on the carousel. No section = Sky Story plays.
   A film kept as Golden Vows rebuilds it while the section fits, else plays
   its Sky Story; no kept film gains one. The edge function reads
   `checklist_items` for this (service-role select grant).
@@ -151,8 +157,11 @@ Post-MVP: `video_path`, `video_status`.
   an exact excerpt of a note or null, 1–2 moments: split / burst / timeline
   / peak with their photos and a split's place), the note scene (an exact
   excerpt, its number among the notes, when written, a background photo) or
-  null, the director's headline or null, the first name and the totals. Up
-  to 200 photos (more are sampled evenly). The app sends
+  null, the director's headline or null, the first name, the totals and
+  `heart_photo_ids` (#378: the Finale's heart, photos without a moment,
+  Always photos only to top up below 12; absent in older content = every
+  chapter photo). Every Always photo is in a moment or is the note scene's
+  photo. Up to 200 photos (more are sampled evenly). The app sends
   `utc_offset_minutes` so the director reads photo times as local times.
   Kept films follow Golden Vows' rules.
 
