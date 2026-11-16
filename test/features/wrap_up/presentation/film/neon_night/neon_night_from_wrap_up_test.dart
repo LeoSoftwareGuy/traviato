@@ -184,4 +184,22 @@ void main() {
     final story = neonNightFromWrapUp(busy, photoIds: _all())!;
     expect(story.chapters.single.moments.single.photos, hasLength(8));
   });
+
+  test('the heart: its own photos when sent, else every photo (#378)', () {
+    final legacy = neonNightFromWrapUp(_nn(), photoIds: _all())!;
+    expect(legacy.heartIds, [for (final p in legacy.allPhotos) p.id]);
+
+    final nn = _nn();
+    final withHeart = WrapUpNeonNight(
+      title: nn.title,
+      startDate: nn.startDate,
+      chapters: nn.chapters,
+      heartPhotoIds: const ['a3', 'b1', 'gone', 'c3'],
+    );
+    final all = _all()..remove('c3');
+    final story = neonNightFromWrapUp(withHeart, photoIds: all)!;
+    // Photos the memory no longer has drop out of the heart.
+    expect(story.heartIds, ['a3', 'b1']);
+    expect(story.allPhotos.length, greaterThan(story.heartIds.length));
+  });
 }

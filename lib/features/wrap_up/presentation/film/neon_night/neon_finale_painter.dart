@@ -26,8 +26,8 @@ class NnHeartPainter {
     required this.story,
     required this.photos,
     required this.reducedFlashing,
-  }) : heart = NnHeart(photos: story.allPhotos.length),
-       _ids = [for (final photo in story.allPhotos) photo.id];
+  }) : heart = NnHeart(photos: story.heartIds.length),
+       _ids = story.heartIds;
 
   final NeonNightTimeline timeline;
   final NeonNightStory story;

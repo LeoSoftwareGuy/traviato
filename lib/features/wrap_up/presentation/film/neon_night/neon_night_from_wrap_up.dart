@@ -102,6 +102,10 @@ NeonNightStory? neonNightFromWrapUp(
       ),
       null => null,
     },
+    heartPhotoIds: [
+      for (final id in nn.heartPhotoIds)
+        if (photoIds.contains(id)) id,
+    ],
   );
 }
 

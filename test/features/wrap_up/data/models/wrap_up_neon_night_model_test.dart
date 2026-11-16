@@ -46,6 +46,7 @@ Map<String, dynamic> _content() => {
     'headline': 'Best night ever',
     'first_name': 'Leo',
     'totals': {'photos': 2, 'notes': 4, 'ticks': 1, 'moments': 2},
+    'heart_photo_ids': ['p1', 7, 'p2'],
   },
 };
 
@@ -81,6 +82,13 @@ void main() {
       nn.totals,
       const WrapUpNeonTotals(photos: 2, notes: 4, ticks: 1, moments: 2),
     );
+    expect(nn.heartPhotoIds, ['p1', 'p2']);
+  });
+
+  test('older content without heart_photo_ids: an empty list (#378)', () {
+    final content = _content();
+    (content['neon_night'] as Map).remove('heart_photo_ids');
+    expect(parseWrapUpNeonNight(content)!.heartPhotoIds, isEmpty);
   });
 
   test('no title, no chapter with photos, or another version: none', () {
