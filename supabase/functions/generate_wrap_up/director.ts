@@ -698,7 +698,7 @@ export function currentGoldenVows(
   if (!isDirectorRecord(record) || !record.golden_vows) return null;
   const problems = describeGoldenVowsProblems(
     record.golden_vows,
-    gvCheckContext(tripData),
+    gvCheckContext(tripData, new Set(record.failed_ids ?? [])),
   );
   return problems.length === 0 ? record.golden_vows : null;
 }

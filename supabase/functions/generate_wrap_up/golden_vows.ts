@@ -19,6 +19,7 @@ import {
   sortPhotosChronologically,
   spreadEvenly,
 } from "./assemble.ts";
+import { decorativePhotos } from "./decorative.ts";
 import { bannedPhraseIn, cleanLine } from "./film_plan.ts";
 
 export const GV_VERSION = 1;
@@ -233,6 +234,10 @@ export const GOLDEN_VOWS_PROMPT_RULES = [
   "- No photo twice across heroes and chapters. Photos used nowhere else ",
   "fill the carousel page; give it a title and line, or null if fewer ",
   `than ${MIN_GV_CAROUSEL} photos are left.\n`,
+  "- Every must_include photo is a hero, a chapter photo or left for the ",
+  `carousel (which shows up to ${MAX_GV_CAROUSEL}, must_include first, `,
+  `and only with ${MIN_GV_CAROUSEL} or more photos left over). If the `,
+  "carousel can't show it, make it a hero or put it in a chapter.\n",
   "- occasion_line, titles, lines and end_line: warm and simple, in the ",
   "occasion's tone, in the film's language.",
 ].join("");
@@ -244,6 +249,9 @@ export interface GvCheckContext {
   photoOrder: ReadonlyMap<string, number>;
   photoDates: ReadonlyMap<string, string | null>;
   excludedIds: ReadonlySet<string>;
+  // "Always" picks (#294): each a hero, a chapter photo or in the
+  // carousel (#378).
+  mustIncludeIds: ReadonlySet<string>;
   notes: ReadonlyMap<string, { day_date: string; content: string }>;
 }
 
@@ -254,7 +262,10 @@ export function gvPhotos(tripData: TripData): Photo[] {
   );
 }
 
-export function gvCheckContext(tripData: TripData): GvCheckContext {
+export function gvCheckContext(
+  tripData: TripData,
+  notRequiredIds: ReadonlySet<string> = new Set(),
+): GvCheckContext {
   const photos = gvPhotos(tripData);
   return {
     photoOrder: new Map(photos.map((p, i) => [p.id, i])),
@@ -263,6 +274,11 @@ export function gvCheckContext(tripData: TripData): GvCheckContext {
       tripData.photos.filter((p) => p.use_in_wrap_up === false).map((p) =>
         p.id
       ),
+    ),
+    mustIncludeIds: new Set(
+      photos.filter((p) =>
+        p.use_in_wrap_up === true && !notRequiredIds.has(p.id)
+      ).map((p) => p.id),
     ),
     notes: new Map(
       tripData.notes.filter((n) => n.id).map((n) => [
@@ -461,6 +477,34 @@ export function describeGoldenVowsProblems(
       );
     }
   }
+
+  // Every Always pick a hero, a chapter photo or in the carousel (#378).
+  // The carousel takes leftover Always picks first, up to MAX_GV_CAROUSEL,
+  // and only plays with MIN_GV_CAROUSEL or more photos left over. Only
+  // once every slot holds an Always pick may the rest go without one.
+  const always = [...context.mustIncludeIds];
+  const leftoverAlways = always.filter((id) => !used.has(id));
+  if (leftoverAlways.length > 0) {
+    const leftover = [...context.photoOrder.keys()].filter((id) =>
+      !used.has(id)
+    );
+    const carouselOn = carousel !== null && carousel !== undefined &&
+      leftover.length >= MIN_GV_CAROUSEL;
+    const inCarousel = carouselOn
+      ? Math.min(leftoverAlways.length, MAX_GV_CAROUSEL)
+      : 0;
+    const shown = always.length - leftoverAlways.length + inCarousel;
+    const slots = MAX_GV_HEROES + MAX_GV_CHAPTERS * GV_CHAPTER_PHOTOS +
+      MAX_GV_CAROUSEL;
+    if (inCarousel < leftoverAlways.length && shown < slots) {
+      const id = leftoverAlways[inCarousel];
+      problems.push(
+        carouselOn
+          ? `golden_vows: photo "${id}" is marked Always but is no hero or chapter photo, and the carousel is full`
+          : `golden_vows: photo "${id}" is marked Always but is no hero or chapter photo, and there's no carousel to show it`,
+      );
+    }
+  }
   return problems;
 }
 
@@ -645,6 +689,9 @@ export function buildGoldenVowsContent(
     };
   });
   const carouselIds = plan.carousel ? carouselPhotos(photos, used) : [];
+  const carouselOn = plan.carousel !== null &&
+    carouselIds.length >= MIN_GV_CAROUSEL;
+  if (carouselOn) { for (const id of carouselIds) used.add(id); }
   const { start_date, end_date } = tripData.trip;
   return {
     gv_version: GV_VERSION,
@@ -658,10 +705,13 @@ export function buildGoldenVowsContent(
     packing: packingOf(tripData),
     heroes,
     chapters,
-    carousel: plan.carousel && carouselIds.length >= MIN_GV_CAROUSEL
+    carousel: plan.carousel && carouselOn
       ? { ...plan.carousel, photo_ids: carouselIds }
       : null,
-    heart_photo_ids: spreadEvenly(photos, MAX_GV_HEART).map((p) => p.id),
+    // The heart is decoration: Always picks already have their moment, so
+    // it's made from the other photos (#378).
+    heart_photo_ids: decorativePhotos(tripData.photos, used, MAX_GV_HEART)
+      .map((p) => p.id),
     moment_count: photos.length,
     end_line: plan.end_line,
   };
