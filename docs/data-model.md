@@ -168,7 +168,12 @@ Post-MVP: `video_path`, `video_status`.
   an exact excerpt of a note or null, 1–2 moments: split / burst / timeline
   with their photos and a split's place — no peak since #386: an older
   plan's peak plays as a split, burst or timeline, and a timeline is
-  filled up to 6 with its chapter's unused photos), the note scene (an exact
+  filled up to 6 with its chapter's unused photos). Since #390 the content
+  merges neighbouring chapters until each has ≥ 8 photos (the first
+  one's title, first note line; its first moment plus one timeline of the
+  others'), gives each card its own `card_photo_ids` (up to 4, captioned
+  first — never a moment's photo), plays a timeline only with ≥ 5 photos
+  (else a split or burst), and keeps plan rows only when there are ≥ 3, the note scene (an exact
   excerpt, its number among the notes, when written, a background photo) or
   null, the director's headline or null, the first name, the totals and
   `heart_photo_ids` (#378: the Finale's heart, photos without a moment,

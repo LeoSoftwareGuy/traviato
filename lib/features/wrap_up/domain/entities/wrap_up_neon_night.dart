@@ -86,6 +86,7 @@ class WrapUpNeonChapter extends Equatable {
     required this.photos,
     required this.moments,
     this.note,
+    this.cardPhotoIds = const [],
   });
 
   final String title;
@@ -93,12 +94,16 @@ class WrapUpNeonChapter extends Equatable {
   /// In time order.
   final List<WrapUpNeonPhoto> photos;
 
+  /// The card's own photos (#390), ids of [photos]: its grid and zooms,
+  /// never a moment's. Empty in older content: the card shows [photos].
+  final List<String> cardPhotoIds;
+
   /// The user's own words for the card, or null for no typed line.
   final String? note;
   final List<WrapUpNeonMoment> moments;
 
   @override
-  List<Object?> get props => [title, photos, note, moments];
+  List<Object?> get props => [title, photos, note, moments, cardPhotoIds];
 }
 
 /// `split`, `burst`, `timeline` or `peak`, over some of a chapter's photos.

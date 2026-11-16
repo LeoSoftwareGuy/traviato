@@ -103,7 +103,11 @@ class NnChapter extends Equatable {
     required this.photos,
     required this.moments,
     this.note,
-  }) : assert(photos.isNotEmpty, 'a chapter has photos'),
+    List<NnPhoto>? cardPhotos,
+  }) : cardPhotos = cardPhotos == null || cardPhotos.isEmpty
+           ? photos
+           : cardPhotos,
+       assert(photos.isNotEmpty, 'a chapter has photos'),
        assert(
          moments.isNotEmpty && moments.length <= 2,
          'a chapter has 1–2 moments',
@@ -116,8 +120,12 @@ class NnChapter extends Equatable {
   final String from;
   final String to;
 
-  /// In order; the contact sheet shows the first 34.
+  /// In order: the chapter's range of the night.
   final List<NnPhoto> photos;
+
+  /// What the card's contact sheet and zooms show, in order (the first
+  /// 34): its own photos (#390), else all of [photos].
+  final List<NnPhoto> cardPhotos;
 
   /// The user's own words, typed out on the card; none → no typed line.
   final String? note;
@@ -126,7 +134,15 @@ class NnChapter extends Equatable {
   final List<NnMoment> moments;
 
   @override
-  List<Object?> get props => [title, from, to, photos, note, moments];
+  List<Object?> get props => [
+    title,
+    from,
+    to,
+    photos,
+    cardPhotos,
+    note,
+    moments,
+  ];
 }
 
 /// The note the film writes out in neon (§5.7, §7): the user's own words,
@@ -226,7 +242,10 @@ class NeonNightStory extends Equatable {
   /// empty → all of them.
   final List<String> heartPhotoIds;
 
-  bool get hasPlan => plan.isNotEmpty;
+  /// One or two rows aren't worth a scene (#390).
+  bool get hasPlan => plan.length >= minPlanRows;
+
+  static const minPlanRows = 3;
   bool get hasNote => note != null;
 
   /// Every photo of the night, in order.

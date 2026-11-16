@@ -101,6 +101,9 @@ export interface NeonNightContent {
     // Chronological; taken_at is an ISO instant the app shows in local
     // time.
     photos: { id: string; taken_at: string }[];
+    // The card's own photos (#390): its grid and zooms, never a moment's.
+    // Older content has none — the app then uses every chapter photo.
+    card_photo_ids: string[];
     // The user's own words, or null for no typed line.
     note: string | null;
     moments: {
@@ -768,7 +771,8 @@ function planRows(tripData: TripData): NeonNightContent["plan"] {
       done: quest.completed_at !== null,
     });
   }
-  return rows;
+  // A plan of one or two rows isn't worth a scene (#390).
+  return rows.length >= MIN_NN_PLAN_ROWS ? rows : [];
 }
 
 // The film's photos: all of them up to MAX_NN_PHOTOS, else an even spread
@@ -799,42 +803,188 @@ function withoutPeak(
   };
 }
 
-// The chapters' moments as the film plays them (#386): no peak, and each
-// timeline filled up to NN_TIMELINE_FILL with its chapter's photos no
-// moment (or the note scene) shows — Always picks first, the rest spread
-// evenly — in time order.
-function contentMoments(
+type ContentMoment = { type: NnMomentType; photo_ids: string[] };
+
+interface ShapedChapter {
+  title: string;
+  note: string | null;
+  photos: Photo[];
+  card: string[];
+  moments: ContentMoment[];
+}
+
+// A chapter is merged into a neighbour while it has fewer photos (#390):
+// fewer, fuller scenes rather than half-empty ones.
+export const MIN_NN_CHAPTER_PHOTOS = 8;
+// The card's own photos, up to one row of heroes (#390).
+export const MAX_NN_CARD_PHOTOS = 4;
+// A timeline under this many photos plays as a split or burst (#390).
+export const MIN_NN_TIMELINE_PHOTOS = 5;
+// The Plan scene needs this many rows (#390).
+export const MIN_NN_PLAN_ROWS = 3;
+
+// The type a moment of [count] photos plays as once its photos are
+// settled: a timeline needs MIN_NN_TIMELINE_PHOTOS (#390), else a split
+// (2–3) or burst (4); never a peak (#386).
+function settledType(type: NnMomentType, count: number): NnMomentType | null {
+  if (count < 2) return null;
+  if (type === "timeline" && count >= MIN_NN_TIMELINE_PHOTOS) return type;
+  if (type !== "timeline" && type !== "peak") {
+    const [, max] = NN_MOMENT_PHOTOS[type];
+    if (count <= max) return type;
+  }
+  if (count <= NN_MOMENT_PHOTOS.split[1]) return "split";
+  if (count <= NN_MOMENT_PHOTOS.burst[1]) return "burst";
+  return "timeline";
+}
+
+// The chapters as the film plays them (#386, #390):
+// 1. neighbours merge while one has fewer than MIN_NN_CHAPTER_PHOTOS
+//    (the earlier one's title, the first note line); a merged chapter
+//    keeps its first moment plus one timeline of the others' photos;
+// 2. each card gets its own photos — ones no moment or the note scene
+//    shows, captioned first; else taken from a moment that keeps 2;
+// 3. each timeline is filled to NN_TIMELINE_FILL with what's left (Always
+//    picks first), then every moment settles its type (settledType).
+// No photo is in two places; time order throughout.
+function shapeChapters(
   chapterPhotos: Photo[][],
   plan: NeonNightPlan,
-): { type: NnMomentType; photo_ids: string[] }[][] {
-  const used = momentPhotoIds(plan as unknown as Record<string, unknown>);
-  return plan.chapters.map((chapter, i) => {
-    const photos = chapterPhotos[i];
-    const at = new Map(photos.map((p, k) => [p.id, k]));
-    return chapter.moments.map((raw) => {
-      const moment = withoutPeak(raw);
-      if (moment.type !== "timeline") {
-        return { ...moment, photo_ids: [...moment.photo_ids] };
+): ShapedChapter[] {
+  const chapters: ShapedChapter[] = plan.chapters.map((chapter, i) => ({
+    title: chapter.title,
+    note: chapter.note_id && chapter.note_excerpt
+      ? collapse(chapter.note_excerpt)
+      : null,
+    photos: chapterPhotos[i],
+    card: [],
+    moments: chapter.moments.map((m) => ({
+      type: m.type,
+      photo_ids: [...m.photo_ids],
+    })),
+  }));
+
+  // 1. Merge.
+  while (chapters.length > 1) {
+    let small = -1;
+    for (let i = 0; i < chapters.length; i++) {
+      if (chapters[i].photos.length >= MIN_NN_CHAPTER_PHOTOS) continue;
+      if (
+        small === -1 ||
+        chapters[i].photos.length < chapters[small].photos.length
+      ) {
+        small = i;
       }
+    }
+    if (small === -1) break;
+    const left = small - 1;
+    const right = small + 1;
+    const other = left < 0
+      ? right
+      : right >= chapters.length
+      ? left
+      : chapters[left].photos.length <= chapters[right].photos.length
+      ? left
+      : right;
+    const [a, b] = other < small ? [other, small] : [small, other];
+    const first = chapters[a];
+    const second = chapters[b];
+    chapters.splice(a, 2, {
+      title: first.title,
+      note: first.note ?? second.note,
+      photos: [...first.photos, ...second.photos],
+      card: [],
+      moments: [...first.moments, ...second.moments],
+    });
+  }
+
+  const notePhoto = plan.note_moment?.photo_id ?? null;
+  for (const chapter of chapters) {
+    const at = new Map(chapter.photos.map((p, k) => [p.id, k]));
+    const byTime = (a: string, b: string) =>
+      (at.get(a) ?? 0) - (at.get(b) ?? 0);
+    // A merged chapter keeps at most MAX_NN_MOMENTS: its first moment,
+    // then one timeline of the others' photos (the rest are left free).
+    if (chapter.moments.length > MAX_NN_MOMENTS) {
+      const [first, ...rest] = chapter.moments;
+      const ids = rest.flatMap((m) => m.photo_ids).sort(byTime);
+      chapter.moments = [
+        first,
+        {
+          type: "timeline",
+          photo_ids: spreadEvenly(ids, NN_MOMENT_PHOTOS.timeline[1]),
+        },
+      ];
+    }
+    const captioned = (id: string) =>
+      !!chapter.photos[at.get(id) ?? -1]?.caption?.trim();
+    const inMoments = () =>
+      new Set(chapter.moments.flatMap((m) => m.photo_ids));
+
+    // 2. The card's own photos.
+    let used = inMoments();
+    const free = chapter.photos.filter((p) =>
+      !used.has(p.id) && p.id !== notePhoto
+    ).map((p) => p.id);
+    const card = [
+      ...free.filter(captioned),
+      ...free.filter((id) => !captioned(id)),
+    ].slice(0, MAX_NN_CARD_PHOTOS);
+    const wanted = chapter.photos.length >= 6 ? 2 : 1;
+    // Taken from the moments when the free photos don't make a card:
+    // captioned ones first, never below a moment's 2.
+    for (
+      const moment of [...chapter.moments].sort((x, y) =>
+        y.photo_ids.length - x.photo_ids.length
+      )
+    ) {
+      while (card.length < wanted && moment.photo_ids.length > 2) {
+        const pick = [...moment.photo_ids].sort((x, y) =>
+          Number(captioned(y)) - Number(captioned(x))
+        )[0];
+        moment.photo_ids = moment.photo_ids.filter((id) =>
+          id !== pick
+        );
+        card.push(pick);
+      }
+    }
+    chapter.card = card.sort(byTime);
+
+    // 3. Timelines filled with what's left, then every type settled.
+    used = new Set([...inMoments(), ...chapter.card]);
+    for (const moment of chapter.moments) {
+      if (withoutPeak(moment).type !== "timeline") continue;
       const room = NN_TIMELINE_FILL - moment.photo_ids.length;
-      const free = photos.filter((p) => !used.has(p.id));
-      const always = free.filter((p) => p.use_in_wrap_up === true)
-        .slice(0, Math.max(0, room));
+      if (room <= 0) continue;
+      const left = chapter.photos.filter((p) =>
+        !used.has(p.id) && p.id !== notePhoto
+      );
+      const always = left.filter((p) => p.use_in_wrap_up === true)
+        .slice(0, room);
       const added = [
         ...always,
         ...spreadEvenly(
-          free.filter((p) => p.use_in_wrap_up !== true),
-          Math.max(0, room - always.length),
+          left.filter((p) => p.use_in_wrap_up !== true),
+          room - always.length,
         ),
-      ];
-      for (const p of added) used.add(p.id);
-      const ids = [...moment.photo_ids, ...added.map((p) => p.id)].sort((
-        a,
-        b,
-      ) => (at.get(a) ?? 0) - (at.get(b) ?? 0));
-      return { type: "timeline" as const, photo_ids: ids };
+      ].map((p) => p.id);
+      for (const id of added) used.add(id);
+      moment.photo_ids = [...moment.photo_ids, ...added].sort(byTime);
+    }
+    chapter.moments = chapter.moments.flatMap((m) => {
+      const type = settledType(withoutPeak(m).type, m.photo_ids.length);
+      return type ? [{ type, photo_ids: m.photo_ids }] : [];
     });
-  });
+    // Every chapter keeps a moment: from its card when it must.
+    if (chapter.moments.length === 0 && chapter.card.length >= 3) {
+      const ids = chapter.card.splice(1, NN_MOMENT_PHOTOS.split[1]);
+      chapter.moments = [{
+        type: settledType("split", ids.length)!,
+        photo_ids: ids,
+      }];
+    }
+  }
+  return chapters;
 }
 
 // content.neon_night from a valid, current [plan].
@@ -864,19 +1014,19 @@ export function buildNeonNightContent(
       shown.has(p.id)
     )
   );
-  const moments = contentMoments(chapterPhotos, plan);
-  const chapters = plan.chapters.map((chapter, i) => {
-    const photos = chapterPhotos[i];
+  const shaped = shapeChapters(chapterPhotos, plan)
+    // A chapter with no moment left can't play (the app skips it too).
+    .filter((c) => c.moments.length > 0);
+  const chapters = shaped.map((chapter) => {
     return {
       title: chapter.title,
-      photos: photos.map((p) => ({
+      photos: chapter.photos.map((p) => ({
         id: p.id,
         taken_at: p.taken_at ?? p.created_at,
       })),
-      note: chapter.note_id && chapter.note_excerpt
-        ? collapse(chapter.note_excerpt)
-        : null,
-      moments: moments[i].map((m) => ({
+      card_photo_ids: chapter.card,
+      note: chapter.note,
+      moments: chapter.moments.map((m) => ({
         type: m.type,
         photo_ids: m.photo_ids,
         place: m.type === "split"
@@ -920,7 +1070,10 @@ export function buildNeonNightContent(
     heart_photo_ids: decorativePhotos(
       film,
       new Set([
-        ...moments.flat().flatMap((m) => m.photo_ids),
+        ...shaped.flatMap((c) => [
+          ...c.card,
+          ...c.moments.flatMap((m) => m.photo_ids),
+        ]),
         ...(noteMoment?.photo_id ? [noteMoment.photo_id] : []),
       ]),
       MAX_NN_PHOTOS,
