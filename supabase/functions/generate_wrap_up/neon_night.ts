@@ -603,6 +603,7 @@ export function repairNeonNight(
       first.first_photo_id = firstId;
     }
     nn.chapters = chapters;
+    repairMoments(nn, context);
   }
 
   if (typeof nn.note_moment === "object" && nn.note_moment !== null) {
@@ -623,6 +624,119 @@ export function repairNeonNight(
   }
   if (nn.headline === undefined) nn.headline = null;
   return nn;
+}
+
+// The moment types a photo count fits, most flexible first: what a moment
+// becomes when its own type no longer fits (#382).
+function typeFor(type: unknown, count: number): NnMomentType | null {
+  const fits = (t: NnMomentType) =>
+    count >= NN_MOMENT_PHOTOS[t][0] && count <= NN_MOMENT_PHOTOS[t][1];
+  if (NN_MOMENT_TYPES.includes(type as NnMomentType)) {
+    if (fits(type as NnMomentType)) return type as NnMomentType;
+  }
+  for (const t of ["timeline", "burst", "peak", "split"] as const) {
+    if (fits(t)) return t;
+  }
+  return null;
+}
+
+// Fixes moments in code instead of discarding the section (#382): photos
+// from another chapter (or unknown, or used twice) are dropped, a moment
+// whose count no longer fits its type takes one that does (a 2-photo peak
+// becomes a timeline), one under 2 photos goes, a chapter left with none
+// gets a timeline over its photos, and Always picks without a moment join
+// one of their chapter while there's room. Never invents a photo, never
+// moves one out of its chapter, keeps time order.
+function repairMoments(
+  nn: Record<string, unknown>,
+  context: NnCheckContext,
+): void {
+  const chapters = (nn.chapters as unknown[]).filter((c) =>
+    typeof c === "object" && c !== null
+  ) as Record<string, unknown>[];
+  const ordered = [...context.photoOrder.entries()].sort((a, b) => a[1] - b[1])
+    .map(([id]) => id);
+  const starts = chapters.map((c) =>
+    isString(c.first_photo_id)
+      ? context.photoOrder.get(c.first_photo_id) ?? null
+      : null
+  );
+  if (starts.some((s) => s === null)) return;
+  const order = (id: string) => context.photoOrder.get(id)!;
+  const used = new Set<string>();
+  const notePhoto = (nn.note_moment as Record<string, unknown> | null)
+    ?.photo_id;
+
+  chapters.forEach((chapter, i) => {
+    const start = starts[i]!;
+    const end = starts[i + 1] ?? ordered.length;
+    const own = (id: unknown): id is string =>
+      isString(id) && context.photoOrder.has(id) &&
+      !context.excludedIds.has(id) && order(id) >= start && order(id) < end;
+    const moments: Record<string, unknown>[] = [];
+    for (const m of Array.isArray(chapter.moments) ? chapter.moments : []) {
+      if (typeof m !== "object" || m === null) continue;
+      const moment = m as Record<string, unknown>;
+      const ids = (Array.isArray(moment.photo_ids) ? moment.photo_ids : [])
+        .filter((id) => own(id) && !used.has(id))
+        .sort((a, b) => order(a) - order(b))
+        .slice(0, NN_MOMENT_PHOTOS.timeline[1]);
+      const type = typeFor(moment.type, ids.length);
+      if (!type) continue;
+      const max = NN_MOMENT_PHOTOS[type][1];
+      const kept = ids.slice(0, max);
+      for (const id of kept) used.add(id);
+      moments.push({ ...moment, type, photo_ids: kept });
+    }
+    const chapterPhotos = ordered.slice(start, end).filter((id) =>
+      !context.excludedIds.has(id)
+    );
+
+    // Always picks of this chapter without a moment (or the Note scene).
+    const missing = chapterPhotos.filter((id) =>
+      context.mustIncludeIds.has(id) && !used.has(id) && id !== notePhoto
+    );
+    for (const moment of moments) {
+      if (missing.length === 0) break;
+      const ids = moment.photo_ids as string[];
+      let type = moment.type as NnMomentType;
+      while (missing.length > 0) {
+        const grown = typeFor(type, ids.length + 1) ??
+          typeFor("timeline", ids.length + 1);
+        if (!grown) break;
+        type = grown;
+        ids.push(missing.shift()!);
+      }
+      ids.sort((a, b) => order(a) - order(b));
+      moment.type = typeFor(type, ids.length) ?? type;
+      for (const id of ids) used.add(id);
+    }
+    if (missing.length > 0 && moments.length < MAX_NN_MOMENTS) {
+      // A new timeline: the missing picks, paired with an unused photo
+      // when there's only one.
+      const ids = missing.splice(0, NN_MOMENT_PHOTOS.timeline[1]);
+      if (ids.length === 1) {
+        const partner = chapterPhotos.find((id) =>
+          !used.has(id) && id !== ids[0] && id !== notePhoto
+        );
+        if (partner) ids.push(partner);
+      }
+      if (ids.length >= 2) {
+        ids.sort((a, b) => order(a) - order(b));
+        for (const id of ids) used.add(id);
+        moments.push({ type: "timeline", photo_ids: ids });
+      }
+    }
+    if (moments.length === 0) {
+      const free = chapterPhotos.filter((id) => !used.has(id));
+      if (free.length >= 2) {
+        const ids = spreadEvenly(free, NN_MOMENT_PHOTOS.timeline[1]);
+        for (const id of ids) used.add(id);
+        moments.push({ type: "timeline", photo_ids: ids });
+      }
+    }
+    chapter.moments = moments;
+  });
 }
 
 // --- Building content.neon_night -----------------------------------------

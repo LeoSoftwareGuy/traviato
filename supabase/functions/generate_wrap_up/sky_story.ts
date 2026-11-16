@@ -37,7 +37,9 @@ export interface SkyStoryPagePlan {
   // continuation page for a day with more Always picks than one page
   // shows (#378).
   days: [number, number];
-  headline: string;
+  // Null only on a page code added for Always picks (#382):
+  // the app shows the place or "Day N".
+  headline: string | null;
   hero_photo_id: string;
   extra_photo_ids: string[];
   note_id: string | null;
@@ -295,13 +297,6 @@ export function describeSkyStoryProblems(
       return;
     }
     const page = raw as Record<string, unknown>;
-    checkLine(
-      problems,
-      `${where}.headline`,
-      page.headline,
-      MAX_SKY_HEADLINE_CHARS,
-    );
-
     const days = page.days;
     let range: [number, number] | null = null;
     if (
@@ -330,6 +325,16 @@ export function describeSkyStoryProblems(
         lastDay = last;
       }
       previous = range ?? previous;
+    }
+    // A page code added for Always picks (#382) has none; the strict
+    // schema makes the director's always a string.
+    if (page.headline !== null) {
+      checkLine(
+        problems,
+        `${where}.headline`,
+        page.headline,
+        MAX_SKY_HEADLINE_CHARS,
+      );
     }
 
     const inRange = (id: string) => {
@@ -471,7 +476,111 @@ export function repairSkyStory(
     if (page.note_id !== null) page.sky_line = null;
     if (page.sky_line === undefined) page.sky_line = null;
   }
+  placeAlwaysPhotos(sky.pages as unknown[], context);
   return sky;
+}
+
+// Puts Always picks the director left off its pages onto pages of their
+// days (#382), instead of discarding the pages: first into free extra
+// slots, then on continuation pages (no headline, note or sky line) while
+// there are fewer than MAX_SKY_PAGES, then in place of Auto extras, then
+// of Auto heroes. A day with Always picks and no page at all gets a page
+// of its own when there's room. The director's text stays untouched.
+function placeAlwaysPhotos(raw: unknown[], context: SkyCheckContext): void {
+  type Page = Record<string, unknown> & {
+    days: [number, number];
+    hero_photo_id: string;
+    extra_photo_ids: string[];
+  };
+  const valid = (p: unknown): p is Page => {
+    if (typeof p !== "object" || p === null) return false;
+    const page = p as Record<string, unknown>;
+    const days = page.days;
+    return Array.isArray(days) && days.length === 2 &&
+      days.every((d) => Number.isInteger(d)) && isString(page.hero_photo_id) &&
+      Array.isArray(page.extra_photo_ids);
+  };
+  if (!raw.every(valid)) return;
+  const pages = raw as Page[];
+  // Photos in time order (photoDays is built chronologically).
+  const order = new Map([...context.photoDays.keys()].map((id, i) => [id, i]));
+  const at = (id: string) => order.get(id) ?? Infinity;
+  const always = [...context.mustIncludeIds].sort((a, b) => at(a) - at(b));
+  const dayOf = (id: string) => context.photoDays.get(id)!;
+  const continuationOf = (days: [number, number], ids: string[]): Page => ({
+    days: [days[0], days[1]],
+    headline: null,
+    hero_photo_id: ids[0],
+    extra_photo_ids: ids.slice(1, SKY_PAGE_SLOTS),
+    note_id: null,
+    sky_line: null,
+  });
+
+  // Days with Always picks and no page: a page of their own, in day order.
+  const covers = (day: number) =>
+    pages.some((p) => day >= p.days[0] && day <= p.days[1]);
+  for (const day of [...new Set(always.map(dayOf))]) {
+    if (covers(day) || pages.length >= MAX_SKY_PAGES) continue;
+    const ids = always.filter((id) => dayOf(id) === day);
+    const index = pages.findIndex((p) => p.days[0] > day);
+    pages.splice(
+      index === -1 ? pages.length : index,
+      0,
+      continuationOf([day, day], ids),
+    );
+  }
+
+  // Each run of pages sharing a range of days.
+  let i = 0;
+  while (i < pages.length) {
+    const [first, last] = pages[i].days;
+    let end = i + 1;
+    while (
+      end < pages.length && pages[end].days[0] === first &&
+      pages[end].days[1] === last
+    ) end++;
+    const group = () => pages.slice(i, end);
+    const shown = new Set(
+      group().flatMap((p) => [p.hero_photo_id, ...p.extra_photo_ids]),
+    );
+    const missing = always.filter((id) =>
+      !shown.has(id) && dayOf(id) >= first && dayOf(id) <= last
+    );
+    const take = () => {
+      const id = missing.shift()!;
+      shown.add(id);
+      return id;
+    };
+    // 1. Free extra slots.
+    for (const page of group()) {
+      while (
+        missing.length > 0 && page.extra_photo_ids.length < MAX_SKY_EXTRAS
+      ) {
+        page.extra_photo_ids.push(take());
+      }
+    }
+    // 2. Continuation pages.
+    while (missing.length > 0 && pages.length < MAX_SKY_PAGES) {
+      const ids = missing.splice(0, SKY_PAGE_SLOTS);
+      pages.splice(end, 0, continuationOf([first, last], ids));
+      end++;
+    }
+    // 3. In place of Auto extras, then 4. of Auto heroes.
+    for (const page of group()) {
+      page.extra_photo_ids = page.extra_photo_ids.map((id) =>
+        missing.length > 0 && !context.mustIncludeIds.has(id) ? take() : id
+      );
+    }
+    for (const page of group()) {
+      if (
+        missing.length > 0 && !context.mustIncludeIds.has(page.hero_photo_id)
+      ) {
+        page.hero_photo_id = take();
+      }
+    }
+    i = end;
+  }
+  raw.splice(0, raw.length, ...pages);
 }
 
 // --- Building content.sky -------------------------------------------------

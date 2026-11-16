@@ -297,3 +297,74 @@ Deno.test("the heart leaves out Always picks that have their moment", () => {
   // Every photo still plays in its chapter.
   assertEquals(content.chapters.flatMap((c) => c.photos).length, 40);
 });
+
+// --- Repairs instead of discarding (#382) ---------------------------------
+
+function repaired(plan: unknown, data: TripData = directorTripData()) {
+  const context = nnCheckContext(data);
+  const fixed = repairNeonNight(plan, context) as NeonNightPlan;
+  return { fixed, problems: describeNeonNightProblems(fixed, context) };
+}
+
+Deno.test("a moment's photos from another chapter are dropped, its type made to fit", () => {
+  // ADE-Amsterdam 2026's faults: two photos from the next chapter in a
+  // moment, and a 2-photo peak.
+  const plan = neonNightPlan();
+  plan.chapters[1].moments[0].photo_ids = ["p04", "p05", "p08", "p09"];
+  plan.chapters[2].moments[0].photo_ids = ["p08", "p09"];
+  const { fixed, problems } = repaired(plan);
+  assertEquals(problems, []);
+  assertEquals(fixed.chapters[1].moments[0].photo_ids, ["p04", "p05"]);
+  assertEquals(fixed.chapters[2].moments[0], {
+    type: "timeline",
+    photo_ids: ["p08", "p09"],
+  });
+});
+
+Deno.test("a moment left under 2 photos goes; a chapter left without one gets a timeline", () => {
+  const plan = neonNightPlan();
+  plan.chapters[2].moments = [{ type: "peak", photo_ids: ["p01", "p08"] }];
+  const { fixed, problems } = repaired(plan);
+  assertEquals(problems, []);
+  // p01 isn't chapter 3's: one photo left → dropped → a timeline of
+  // chapter 3's photos instead (p10 is the Note scene's, still usable).
+  assertEquals(fixed.chapters[2].moments.length, 1);
+  assertEquals(fixed.chapters[2].moments[0].type, "timeline");
+  assert(
+    fixed.chapters[2].moments[0].photo_ids.every((id) =>
+      ["p08", "p09", "p10", "p11"].includes(id)
+    ),
+  );
+});
+
+Deno.test("Always picks without a moment join one of their chapter", () => {
+  const data = directorTripData();
+  data.photos[11].use_in_wrap_up = true; // chapter 3, in no moment
+  const { fixed, problems } = repaired(neonNightPlan(), data);
+  assertEquals(problems, []);
+  // The 3-photo peak has room for a fourth.
+  assertEquals(fixed.chapters[2].moments[0].photo_ids, [
+    "p08",
+    "p09",
+    "p10",
+    "p11",
+  ]);
+});
+
+Deno.test("a full moment grows into a timeline to take an Always pick", () => {
+  const data = directorTripData();
+  // Chapter 1 has one full split (3 of 3); its Always pick p03 makes it a
+  // 4-photo timeline.
+  const plan = neonNightPlan();
+  plan.chapters[0].moments = [{
+    type: "split",
+    photo_ids: ["p00", "p01", "p02"],
+  }];
+  data.photos[3].use_in_wrap_up = true;
+  const { fixed, problems } = repaired(plan, data);
+  assertEquals(problems, []);
+  assertEquals(fixed.chapters[0].moments, [{
+    type: "timeline",
+    photo_ids: ["p00", "p01", "p02", "p03"],
+  }]);
+});
