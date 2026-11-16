@@ -238,7 +238,7 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   reads as a party, rave, club night, festival, concert or night out —
   ignition, the neon balloon sign, "Tonight's plan" (quests with a time),
   1–5 chapters by time (card with the user's own line, then 1–2 moments:
-  split, burst, timeline or peak), the note written out in neon, a heart
+  split, burst or a timeline of up to 6+ photos; no peak since #386), the note written out in neon, a heart
   of every photo and the end card with real counts; on Summer Party, cut
   to the film's length. Times are the phone's local times. It plays after
   Golden Vows and before Sky Story; any failure hands over to Sky Story,

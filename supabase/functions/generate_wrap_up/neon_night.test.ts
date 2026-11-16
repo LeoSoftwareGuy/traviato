@@ -7,6 +7,7 @@ import {
   describeNeonNightProblems,
   MAX_NN_PHOTOS,
   type NeonNightPlan,
+  neonNightToolProperty,
   nnCheckContext,
   repairNeonNight,
 } from "./neon_night.ts";
@@ -367,4 +368,59 @@ Deno.test("a full moment grows into a timeline to take an Always pick", () => {
     type: "timeline",
     photo_ids: ["p00", "p01", "p02", "p03"],
   }]);
+});
+
+// --- No peak, fuller timelines (#386) --------------------------------------
+
+Deno.test("the director can't plan a peak any more", () => {
+  const json = JSON.stringify(neonNightToolProperty);
+  assert(!json.includes('"peak"'));
+  assert(json.includes('"timeline"'));
+});
+
+Deno.test("a peak in a plan made before plays as photos side by side", () => {
+  // neonNightPlan()'s chapter 3 is a 3-photo peak.
+  const content = buildNeonNightContent(directorTripData(), neonNightPlan());
+  assertEquals(content.chapters[2].moments, [{
+    type: "split",
+    photo_ids: ["p08", "p09", "p10"],
+    place: null,
+  }]);
+  assert(
+    content.chapters.every((c) => c.moments.every((m) => m.type !== "peak")),
+  );
+});
+
+Deno.test("a timeline is filled with its chapter's unused photos, in time order", () => {
+  const plan = neonNightPlan();
+  plan.chapters[1].moments = [{ type: "timeline", photo_ids: ["p07", "p04"] }];
+  const content = buildNeonNightContent(directorTripData(), plan);
+  // Chapter 2 has 4 photos: all of them, never one of another chapter.
+  assertEquals(content.chapters[1].moments[0].photo_ids, [
+    "p04",
+    "p05",
+    "p06",
+    "p07",
+  ]);
+});
+
+Deno.test("the fill takes Always picks first and stops at 6", () => {
+  const data = directorTripData();
+  // 10 more photos on day 2, the last two marked Always.
+  for (let k = 0; k < 10; k++) {
+    data.photos.push({
+      ...data.photos[4],
+      id: `x${k}`,
+      taken_at: `2026-09-02T${String(13 + k).padStart(2, "0")}:00:00Z`,
+      storage_path: `u/t/x${k}.jpg`,
+      use_in_wrap_up: k >= 8 ? true : null,
+    });
+  }
+  const plan = neonNightPlan();
+  plan.chapters[1].moments = [{ type: "timeline", photo_ids: ["p04", "p05"] }];
+  const ids = buildNeonNightContent(data, plan).chapters[1].moments[0]
+    .photo_ids;
+  assertEquals(ids.length, 6);
+  assert(ids.includes("x8") && ids.includes("x9"));
+  assertEquals(ids.slice(0, 2), ["p04", "p05"]);
 });

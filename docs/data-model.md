@@ -166,7 +166,9 @@ Post-MVP: `video_path`, `video_status`.
   (title, photos with `taken_at` — each chapter runs from its first photo
   to the next one's, so new photos join a chapter — the card's typed line as
   an exact excerpt of a note or null, 1–2 moments: split / burst / timeline
-  / peak with their photos and a split's place), the note scene (an exact
+  with their photos and a split's place — no peak since #386: an older
+  plan's peak plays as a split, burst or timeline, and a timeline is
+  filled up to 6 with its chapter's unused photos), the note scene (an exact
   excerpt, its number among the notes, when written, a background photo) or
   null, the director's headline or null, the first name, the totals and
   `heart_photo_ids` (#378: the Finale's heart, photos without a moment,
