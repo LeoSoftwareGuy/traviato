@@ -25,11 +25,9 @@ class FreshNoteIn extends StatefulWidget {
 
 class _FreshNoteInState extends State<FreshNoteIn>
     with SingleTickerProviderStateMixin {
-  // Rebuilds once it's done, to drop the animated wrapper.
-  late final AnimationController _c = AnimationController(vsync: this)
-    ..addStatusListener((status) {
-      if (status == AnimationStatus.completed && mounted) setState(() {});
-    });
+  // Created up front, never lazily: a lazy controller first touched in
+  // dispose() would create a ticker on a deactivated element (#412).
+  late final AnimationController _c;
   var _reducedMotion = false;
 
   late final Animation<double> _slot = CurvedAnimation(
@@ -48,6 +46,16 @@ class _FreshNoteInState extends State<FreshNoteIn>
       curve: AppMotion.noteCurve,
     ),
   );
+
+  @override
+  void initState() {
+    super.initState();
+    // Rebuilds once it's done, to drop the animated wrapper.
+    _c = AnimationController(vsync: this)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed && mounted) setState(() {});
+      });
+  }
 
   @override
   void didChangeDependencies() {

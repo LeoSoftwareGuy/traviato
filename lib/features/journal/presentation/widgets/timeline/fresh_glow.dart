@@ -24,10 +24,9 @@ class FreshGlow extends StatefulWidget {
 
 class _FreshGlowState extends State<FreshGlow>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(
-    vsync: this,
-    duration: AppMotion.noteGlowDelay + AppMotion.noteGlowDuration,
-  );
+  // Created up front, never lazily: a lazy controller first touched in
+  // dispose() would create a ticker on a deactivated element (#412).
+  late final AnimationController _c;
   late final Animation<double> _ring = CurvedAnimation(
     parent: _c,
     curve: Interval(
@@ -36,6 +35,15 @@ class _FreshGlowState extends State<FreshGlow>
       curve: Curves.easeOut,
     ),
   );
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+      vsync: this,
+      duration: AppMotion.noteGlowDelay + AppMotion.noteGlowDuration,
+    );
+  }
 
   @override
   void didChangeDependencies() {
