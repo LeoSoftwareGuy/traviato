@@ -24,4 +24,18 @@ abstract final class L10nDates {
           '${DateFormat.jm(locale).pattern}',
           locale,
         );
+
+  /// A clock time on the journal timeline (#401): "06:45" / "21:16" with
+  /// the 24-hour clock, else "6:45 AM" — following the phone's setting
+  /// (`MediaQuery.alwaysUse24HourFormatOf`).
+  static DateFormat clock(String locale, {required bool use24h}) =>
+      use24h ? DateFormat('HH:mm', locale) : DateFormat('h:mm a', locale);
+
+  /// "Thu 23 Oct" · "чт, 23 окт." — a day header or divider date.
+  static DateFormat weekdayDayMonth(String locale) => locale == 'en'
+      ? DateFormat('EEE d MMM', locale)
+      : DateFormat.MMMEd(locale);
+
+  /// "Thursday" · "четверг".
+  static DateFormat weekday(String locale) => DateFormat.EEEE(locale);
 }

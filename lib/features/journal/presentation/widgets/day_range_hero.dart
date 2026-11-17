@@ -10,7 +10,7 @@ import 'journal_images.dart';
 
 /// The day-range photo strip above the date pills (Figma "current trip -
 /// journal", DIV-38) — placeholder day photography (real per-day photos
-/// aren't captured yet; see `PhotosStrip` for that data once it exists).
+/// aren't captured yet; the day timeline shows the real ones).
 /// The selected day's tile is larger with a golden ring + glow — a
 /// selection cue, independent of [isDayLocked]. A future day (`day_date` >
 /// today) shows a genuinely blurred thumbnail with a lock icon and isn't

@@ -23,6 +23,9 @@ class FakeJournalNoteRepository implements JournalNoteRepository {
   String? lastUpdatedNoteId;
   DateTime? lastGetNoteDay;
   DateTime? lastCreatedTakenAt;
+  DateTime? lastCreatedDay;
+  bool? lastCreatedDictated;
+  bool? lastUpdatedDictated;
   String? lastUpsertedContent;
 
   @override
@@ -58,13 +61,17 @@ class FakeJournalNoteRepository implements JournalNoteRepository {
     createNoteCallCount++;
     lastUpsertedContent = content;
     lastCreatedTakenAt = takenAt;
+    lastCreatedDay = dayDate;
+    lastCreatedDictated = dictated;
     return upsertNoteResult ??
         Right(
           buildJournalNoteEntity(
+            id: 'created-$createNoteCallCount',
             tripId: tripId,
             dayDate: dayDate,
             content: content,
             createdAt: takenAt,
+            dictated: dictated,
           ),
         );
   }
@@ -79,8 +86,24 @@ class FakeJournalNoteRepository implements JournalNoteRepository {
     updateNoteCallCount++;
     lastUpsertedContent = content;
     lastUpdatedNoteId = noteId;
+    lastUpdatedDictated = dictated;
+    final stored = notesForTripResult
+        ?.getOrElse((_) => const [])
+        .where(
+          (n) => n.id == noteId,
+        );
+    final base = stored == null || stored.isEmpty ? null : stored.first;
     return upsertNoteResult ??
-        Right(buildJournalNoteEntity(id: noteId, content: content));
+        Right(
+          buildJournalNoteEntity(
+            id: noteId,
+            tripId: base?.tripId ?? 't1',
+            dayDate: base?.dayDate,
+            createdAt: base?.takenAt,
+            content: content,
+            dictated: dictated,
+          ),
+        );
   }
 
   @override

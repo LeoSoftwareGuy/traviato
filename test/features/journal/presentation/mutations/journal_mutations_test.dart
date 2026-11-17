@@ -30,11 +30,13 @@ class _Harness extends ConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  await runUpsertNote(
+                  await runCreateNote(
                     ref: ref,
                     tripId: _tripId,
                     dayDate: DateTime(2026, 8, 18),
+                    takenAt: DateTime(2026, 8, 19, 1, 10),
                     content: 'Great day.',
+                    dictated: true,
                   );
                 } catch (_) {}
               },
@@ -43,12 +45,12 @@ class _Harness extends ConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  await runUpsertNote(
+                  await runUpdateNote(
                     ref: ref,
                     tripId: _tripId,
-                    dayDate: DateTime(2026, 8, 18),
+                    noteId: 'n1',
                     content: 'Better day.',
-                    existingNoteId: 'n1',
+                    dictated: false,
                   );
                 } catch (_) {}
               },
@@ -60,7 +62,6 @@ class _Harness extends ConsumerWidget {
                   await runDeleteNote(
                     ref: ref,
                     tripId: _tripId,
-                    dayDate: DateTime(2026, 8, 18),
                     noteId: 'n1',
                   );
                 } catch (_) {}
@@ -128,14 +129,18 @@ void main() {
     return events;
   }
 
-  testWidgets('a new note is created timed now', (tester) async {
+  testWidgets('a new note keeps the time, day and dictated flag given', (
+    tester,
+  ) async {
     final noteRepo = FakeJournalNoteRepository();
-    final before = DateTime.now();
     await pumpAndTap(tester, 'Save', noteRepo);
 
     expect(noteRepo.createNoteCallCount, 1);
     expect(noteRepo.updateNoteCallCount, 0);
-    expect(noteRepo.lastCreatedTakenAt!.isBefore(before), isFalse);
+    // 01:10 the next morning, still on the evening's day (#397).
+    expect(noteRepo.lastCreatedTakenAt, DateTime(2026, 8, 19, 1, 10));
+    expect(noteRepo.lastCreatedDay, DateTime(2026, 8, 18));
+    expect(noteRepo.lastCreatedDictated, isTrue);
   });
 
   testWidgets('editing a note updates it and fires nothing (#397)', (

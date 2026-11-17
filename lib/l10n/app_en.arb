@@ -552,27 +552,6 @@
   "@journal_eyebrow": {
     "description": "Mono eyebrow, uppercased in code."
   },
-  "journal_quietOne": "Day 1",
-  "journal_dayQuietOne": "Day {day}",
-  "@journal_dayQuietOne": {
-    "placeholders": {
-      "day": {
-        "type": "int"
-      }
-    }
-  },
-  "journal_noEntries": "No photos, no notes yet",
-  "@journal_noEntries": {
-    "description": "Followed by · and journal_questsDone."
-  },
-  "journal_questsDone": "{count, plural, =1{1 quest done} other{{count} quests done}}",
-  "@journal_questsDone": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "journal_dayTitle": "Day {day} — {name}",
   "@journal_dayTitle": {
     "description": "{name} is the memory's own title (user content).",
@@ -605,19 +584,6 @@
   "@journal_viewWrapUp": {
     "description": "Wrap-up button; the unlocked one appends ▸ in code."
   },
-  "journal_photos": "Photos",
-  "journal_photosSaved": "{count} saved",
-  "@journal_photosSaved": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "journal_addPhotoTile": "Add ✦2",
-  "@journal_addPhotoTile": {
-    "description": "Add-photo tile in the strip; ✦2 is the award."
-  },
   "journal_wrapUpExplainer": "Your film needs a little more to work with. {ask}",
   "@journal_wrapUpExplainer": {
     "description": "{ask} is one of journal_wrapUpAsk*.",
@@ -647,34 +613,11 @@
   "journal_wrapUpReqPhotos": "Five photos in this memory",
   "journal_wrapUpReqNote": "At least one note written",
   "journal_wrapUpFree": "Nothing to buy — this one's the same on every plan.",
-  "journal_nothingYet": "Nothing here yet",
-  "journal_nothingFromDay": "Nothing from Day {day} yet",
-  "@journal_nothingFromDay": {
-    "placeholders": {
-      "day": {
-        "type": "int"
-      }
-    }
-  },
-  "journal_nudgeBody": "Every photo you add will contribute to the final wrap-up.",
-  "journal_addAPhoto": "＋ Add a photo",
-  "journal_writeNote": "Write a note",
-  "journal_addNotesToday": "✎ Add notes about today",
-  "journal_continueEntry": "✎ Continue entry",
   "journal_wordCount": "{count, plural, =1{1 word} other{{count} words}}",
   "@journal_wordCount": {
     "placeholders": {
       "count": {
         "type": "int"
-      }
-    }
-  },
-  "journal_edited": "Edited {time}",
-  "@journal_edited": {
-    "description": "Note card footer, uppercased in code.",
-    "placeholders": {
-      "time": {
-        "type": "String"
       }
     }
   },
@@ -2307,15 +2250,6 @@
   "@film_leftOutPill": {
     "description": "Pill over a left-out photo in the photo viewer (#294)."
   },
-  "film_stripCount": "{count} in the film",
-  "@film_stripCount": {
-    "description": "Journal photo strip, right of the header: that day's photos in the film (#294); shown uppercase.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "film_badgeYourPick": "Your pick",
   "@film_badgeYourPick": {
     "description": "Journal thumbnail badge for an Always photo (#294)."
@@ -2492,5 +2426,65 @@
         "type": "int"
       }
     }
-  }
+  },
+  "timeline_afterMidnight": "After midnight · {date}",
+  "@timeline_afterMidnight": {"description": "Journal timeline (#401): divider before the first item past midnight; uppercased.", "placeholders": {"date": {"type": "String"}}},
+  "timeline_later": "Later",
+  "@timeline_later": {"description": "Journal timeline (#401): rail label and divider for items added after the day was over; uppercased."},
+  "timeline_earlierNote": "Earlier note",
+  "@timeline_earlierNote": {"description": "Journal timeline (#401): chip on a note copied from the old one-note-per-day journal; uppercased."},
+  "timeline_justNow": "Just now",
+  "@timeline_justNow": {"description": "Journal timeline (#401): chip on a note that was just saved; uppercased."},
+  "timeline_writtenOn": "Written {date}",
+  "@timeline_writtenOn": {"description": "Journal timeline (#401): chip on a note written after its day was over; uppercased.", "placeholders": {"date": {"type": "String"}}},
+  "timeline_lastEdited": "Last edited {time} · {words}",
+  "@timeline_lastEdited": {"description": "Journal timeline (#401): footer of an earlier note; {words} is journal_wordCount; uppercased.", "placeholders": {"time": {"type": "String"}, "words": {"type": "String"}}},
+  "timeline_more": "more",
+  "@timeline_more": {"description": "Journal timeline (#401): expands a long note."},
+  "timeline_less": "less",
+  "@timeline_less": {"description": "Journal timeline (#401): collapses an expanded note."},
+  "timeline_onPhoto": "On photo · {time}",
+  "@timeline_onPhoto": {"description": "Journal timeline (#401): chip linking a note to its photo; the caption follows after ' · '.", "placeholders": {"time": {"type": "String"}}},
+  "timeline_photoCount": "{count, plural, =1{1 photo} other{{count} photos}}",
+  "@timeline_photoCount": {"description": "Journal day subtitle (#401).", "placeholders": {"count": {"type": "int"}}},
+  "timeline_noteCount": "{count, plural, =1{1 note} other{{count} notes}}",
+  "@timeline_noteCount": {"description": "Journal day subtitle (#401).", "placeholders": {"count": {"type": "int"}}},
+  "timeline_capturePhoto": "Photo",
+  "@timeline_capturePhoto": {"description": "Journal capture button (#401): left half label."},
+  "timeline_captureNote": "Note",
+  "@timeline_captureNote": {"description": "Journal capture button (#401): right half label."},
+  "timeline_addPhotoSemantics": "Add a photo",
+  "@timeline_addPhotoSemantics": {"description": "Journal capture button (#401): screen-reader label of the Photo half."},
+  "timeline_addNoteSemantics": "Add a note",
+  "@timeline_addNoteSemantics": {"description": "Journal capture button (#401): screen-reader label of the Note half."},
+  "timeline_editNote": "Edit note",
+  "@timeline_editNote": {"description": "Note actions sheet (#401)."},
+  "timeline_deleteNote": "Delete note",
+  "@timeline_deleteNote": {"description": "Note actions sheet (#401)."},
+  "timeline_deleteTitle": "Delete the {time} note?",
+  "@timeline_deleteTitle": {"description": "Delete-note confirm sheet (#401); {time} is the note's time.", "placeholders": {"time": {"type": "String"}}},
+  "timeline_deleteBody": "It's removed from this day and won't appear in your film. Photos stay. This can't be undone.",
+  "@timeline_deleteBody": {"description": "Delete-note confirm sheet (#401)."},
+  "timeline_keep": "Keep",
+  "@timeline_keep": {"description": "Delete-note confirm sheet (#401): keeps the note."},
+  "timeline_noteUpdated": "Note updated",
+  "@timeline_noteUpdated": {"description": "Toast after editing a note (#401); no star."},
+  "timeline_noteDeleted": "Note deleted",
+  "@timeline_noteDeleted": {"description": "Toast after deleting a note (#401)."},
+  "timeline_noteSavedNoStar": "Note saved",
+  "@timeline_noteSavedNoStar": {"description": "Toast after a new note once the day's 3 note-stars are earned (#401)."},
+  "timeline_emptyTitle": "Nothing written for {weekday} yet",
+  "@timeline_emptyTitle": {"description": "Journal empty day (#401); {weekday} is e.g. 'Saturday', capitalised.", "placeholders": {"weekday": {"type": "String"}}},
+  "timeline_emptyBody": "Write a line whenever something happens. Each time you tap Done it's kept as its own note, with the time.",
+  "@timeline_emptyBody": {"description": "Journal empty day (#401)."},
+  "timeline_emptyWrite": "✎ Write the first note ✦1",
+  "@timeline_emptyWrite": {"description": "Journal empty day (#401): primary button."},
+  "timeline_emptyOrPhoto": "or add a photo",
+  "@timeline_emptyOrPhoto": {"description": "Journal empty day (#401): secondary link."},
+  "timeline_emptyLine": "The first line goes here…",
+  "@timeline_emptyLine": {"description": "Journal empty day (#401): faded line on the small notebook page."},
+  "note_stampNew": "New note · {time}",
+  "@note_stampNew": {"description": "Note page stamp for a new note (#401); uppercased.", "placeholders": {"time": {"type": "String"}}},
+  "note_stampEdit": "Edit note · {time}",
+  "@note_stampEdit": {"description": "Note page stamp when editing a note (#401); uppercased.", "placeholders": {"time": {"type": "String"}}}
 }
