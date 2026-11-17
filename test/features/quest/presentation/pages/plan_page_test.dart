@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/theme/app_theme.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/presentation/pages/plan_page.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
@@ -14,7 +14,7 @@ import 'package:traviato/features/quest/presentation/widgets/plan_images.dart';
 import 'package:traviato/features/trip/domain/entities/trip_dates_change_entity.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
-import '../../../journal/fakes/fake_day_note_repository.dart';
+import '../../../journal/fakes/fake_journal_note_repository.dart';
 import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
 import '../../fakes/fake_quest_repository.dart';
@@ -29,7 +29,7 @@ Future<void> _pump(
   required FakeTripRepository tripRepo,
   required FakeQuestRepository questRepo,
   FakePhotoRepository? photoRepo,
-  FakeDayNoteRepository? noteRepo,
+  FakeJournalNoteRepository? noteRepo,
 }) async {
   final router = GoRouter(
     initialLocation: '/plan',
@@ -63,8 +63,8 @@ Future<void> _pump(
         photoRepositoryProvider.overrideWithValue(
           photoRepo ?? FakePhotoRepository(),
         ),
-        dayNoteRepositoryProvider.overrideWithValue(
-          noteRepo ?? FakeDayNoteRepository(),
+        journalNoteRepositoryProvider.overrideWithValue(
+          noteRepo ?? FakeJournalNoteRepository(),
         ),
       ],
       child: MaterialApp.router(theme: AppTheme.dark, routerConfig: router),
@@ -517,8 +517,8 @@ void main() {
           buildPhotoEntity(id: 'p1'),
           buildPhotoEntity(id: 'p2'),
         ]);
-      final noteRepo = FakeDayNoteRepository()
-        ..notesForTripResult = Right([buildDayNoteEntity(id: 'n1')]);
+      final noteRepo = FakeJournalNoteRepository()
+        ..notesForTripResult = Right([buildJournalNoteEntity(id: 'n1')]);
       await _pump(
         tester,
         tripRepo: tripRepo,

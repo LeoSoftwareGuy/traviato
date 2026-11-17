@@ -4,7 +4,7 @@ import 'package:traviato/features/bonus/domain/entities/bonus_task_template_enti
 import 'package:traviato/features/kept_memory/domain/build_kept_memory.dart';
 import 'package:traviato/features/trip/domain/entities/trip_card_entity.dart';
 
-import '../../journal/fakes/fake_day_note_repository.dart';
+import '../../journal/fakes/fake_journal_note_repository.dart';
 import '../../photo/fakes/fake_photo_repository.dart';
 import '../../quest/fakes/fake_quest_repository.dart';
 import '../../trip/fakes/fake_trip_repository.dart';
@@ -76,7 +76,7 @@ void main() {
         buildPhotoEntity(id: 'before', dayDate: DateTime(2026, 8, 1)),
         buildPhotoEntity(id: 'after', dayDate: DateTime(2026, 9, 1)),
       ],
-      notes: [buildDayNoteEntity(dayDate: DateTime(2026, 9, 2))],
+      notes: [buildJournalNoteEntity(dayDate: DateTime(2026, 9, 2))],
       quests: const [],
     );
 
@@ -89,7 +89,10 @@ void main() {
       trip: _trip,
       photos: [buildPhotoEntity(dayDate: DateTime(2026, 8, 12))],
       notes: [
-        buildDayNoteEntity(dayDate: DateTime(2026, 8, 14), content: 'Rain.'),
+        buildJournalNoteEntity(
+          dayDate: DateTime(2026, 8, 14),
+          content: 'Rain.',
+        ),
       ],
       quests: const [],
     );

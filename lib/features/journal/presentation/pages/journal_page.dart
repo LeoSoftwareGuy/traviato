@@ -26,7 +26,7 @@ import '../../../wrap_up/presentation/providers/film_pick_providers.dart';
 import '../controllers/journal_controller.dart';
 import '../controllers/journal_state.dart';
 import '../mutations/journal_mutations.dart';
-import '../widgets/day_note_card.dart';
+import '../widgets/journal_note_card.dart';
 import '../widgets/day_range_hero.dart';
 import '../widgets/day_tabs.dart';
 import '../widgets/empty_day_nudge.dart';
@@ -216,7 +216,7 @@ class _JournalContent extends ConsumerWidget {
               style: AppTypography.screenTitle.copyWith(fontSize: 26),
             ),
             const SizedBox(height: AppSpacing.lg),
-            if (!state.isCurrentDayNoteCached)
+            if (!state.isCurrentJournalNoteCached)
               const Center(
                 child: Padding(
                   padding: EdgeInsets.all(AppSpacing.lg),
@@ -224,10 +224,10 @@ class _JournalContent extends ConsumerWidget {
                 ),
               )
             else
-              DayNoteCard(
+              JournalNoteCard(
                 key: ValueKey(currentDay),
                 content: state.currentNote?.content ?? '',
-                updatedAt: state.currentNote?.updatedAt,
+                updatedAt: state.currentNote?.editedAt,
                 isSaving: isSavingNote,
                 onOpenNotePage: () => _openNotePage(context, ref, currentDay),
               ),
@@ -337,7 +337,13 @@ class _JournalContent extends ConsumerWidget {
       return;
     }
     unawaited(
-      runUpsertNote(ref: ref, tripId: tripId, dayDate: day, content: draft),
+      runUpsertNote(
+        ref: ref,
+        tripId: tripId,
+        dayDate: day,
+        content: draft,
+        existingNoteId: note?.id,
+      ),
     );
     // The toast lands while the save is in flight.
     if (note == null) showStarToast(context, context.l10n.toast_noteSaved);

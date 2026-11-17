@@ -257,4 +257,4 @@ final class EvaluateBonusNotificationsUseCaseProvider
 }
 
 String _$evaluateBonusNotificationsUseCaseHash() =>
-    r'82d3efd0964ea096e3c7e308b3b925509d04002f';
+    r'744ddeaefd9d199214a37d035da18084ffb95255';

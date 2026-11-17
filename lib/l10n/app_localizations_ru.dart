@@ -188,7 +188,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String auth_rewardTease(String stars) {
-    return 'Первое событие принесёт $stars, а до значка «Рассказчик» всего три заметки.';
+    return 'Первое событие принесёт $stars, а каждый день с заметкой приближает значок «Рассказчик».';
   }
 
   @override
@@ -923,7 +923,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get note_deleteBody =>
-      'Заметка за этот день и её звезда ✦1 будут удалены. Это нельзя отменить.';
+      'Заметка за этот день будет удалена. Её звезда ✦1 останется. Это нельзя отменить.';
 
   @override
   String get note_keepNote => 'Оставить';
@@ -2410,7 +2410,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_achievement_storyteller_description =>
-      'Напишите 20 заметок в дневник.';
+      'Напишите заметки за 20 дней.';
 
   @override
   String get content_achievement_jetsetter_title => 'Заядлый путешественник';

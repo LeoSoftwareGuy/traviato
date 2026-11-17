@@ -82,7 +82,7 @@ class KeptMemoryDayChapter extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  KeptMemoryLabels.noteTime(note.createdAt),
+                  KeptMemoryLabels.noteTime(note.takenAt),
                   style: AppTypography.mono.copyWith(
                     fontSize: 9,
                     color: AppColors.textTertiary,

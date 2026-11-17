@@ -19,7 +19,16 @@ Deno.test("gatherTripData maps trip, notes, photos, bonus tasks, stars and trunc
         user_id: "user-1",
       },
     ],
-    day_notes: [{ day_date: "2026-06-01", content: "x".repeat(600) }],
+    journal_notes: [
+      { day_date: "2026-06-01", content: "x".repeat(600) },
+      {
+        id: "n2",
+        day_date: "2026-06-01",
+        content: "Ribs at the bar.",
+        taken_at: "2026-06-01T19:16:00Z",
+        photo_id: "photo-1",
+      },
+    ],
     photos: [
       {
         id: "photo-1",
@@ -55,6 +64,10 @@ Deno.test("gatherTripData maps trip, notes, photos, bonus tasks, stars and trunc
   assertEquals(result.trip.vibes, ["Foodie"]);
   assertEquals(result.trip.cover_image_path, "asset:sunset");
   assertEquals(result.notes[0].content.length, 500);
+  // Many notes a day, each with its own time and photo (#397).
+  assertEquals(result.notes[1].taken_at, "2026-06-01T19:16:00Z");
+  assertEquals(result.notes[1].photo_id, "photo-1");
+  assertEquals(result.notes[0].photo_id, null);
   assertEquals(result.photos[0].storage_path, "u/t/photo-1.jpg");
   assertEquals(result.completedBonusTasks, [
     {
@@ -86,7 +99,7 @@ Deno.test("gatherTripData returns null cover_image_path, empty vibes and zero st
         user_id: "user-1",
       },
     ],
-    day_notes: [],
+    journal_notes: [],
     photos: [],
     bonus_task_assignments: [],
     points_ledger: [],

@@ -6,8 +6,8 @@ import '../../../photo/domain/entities/photo_entity.dart';
 import '../../../photo/presentation/providers/photo_providers.dart';
 import '../../../quest/presentation/providers/quest_providers.dart';
 import '../../../trip/presentation/providers/trip_providers.dart';
-import '../../domain/entities/day_note_entity.dart';
-import '../providers/day_note_providers.dart';
+import '../../domain/entities/journal_note_entity.dart';
+import '../providers/journal_note_providers.dart';
 import 'initial_journal_day.dart';
 import 'journal_state.dart';
 
@@ -19,7 +19,7 @@ class JournalController extends _$JournalController {
   Future<JournalState> build(String tripId) async {
     final tripRepo = ref.watch(tripRepositoryProvider);
     final photoRepo = ref.watch(photoRepositoryProvider);
-    final noteRepo = ref.watch(dayNoteRepositoryProvider);
+    final noteRepo = ref.watch(journalNoteRepositoryProvider);
     final questRepo = ref.watch(questRepositoryProvider);
 
     // Independent reads, fetched together: run back to back they were four
@@ -60,15 +60,15 @@ class JournalController extends _$JournalController {
       today: DateTime.now(),
     );
 
-    var notesByDay = const <DateTime, DayNoteEntity?>{};
+    var notesByDay = const <DateTime, JournalNoteEntity?>{};
     if (initialDay != null) {
-      final noteResult = await noteRepo.getNote(
+      final noteResult = await noteRepo.getNotesForDay(
         tripId: tripId,
         dayDate: initialDay,
       );
       final note = noteResult.fold(
         (failure) => throw PresentationFailureException(failure),
-        (n) => n,
+        _dayNote,
       );
       notesByDay = {initialDay: note};
     }
@@ -89,47 +89,54 @@ class JournalController extends _$JournalController {
     state = AsyncData(current.copyWith(currentDayDate: () => day));
 
     if (current.notesByDay.containsKey(day)) return;
-    final repo = ref.read(dayNoteRepositoryProvider);
-    final result = await repo.getNote(tripId: current.trip.id, dayDate: day);
+    final repo = ref.read(journalNoteRepositoryProvider);
+    final result = await repo.getNotesForDay(
+      tripId: current.trip.id,
+      dayDate: day,
+    );
     final latest = state.value;
     if (latest == null) return;
     result.fold(
       // Leave the day uncached on failure so re-selecting it retries.
       (failure) {},
-      (note) {
-        final updated = Map<DateTime, DayNoteEntity?>.from(latest.notesByDay)
-          ..[day] = note;
+      (notes) {
+        final updated = Map<DateTime, JournalNoteEntity?>.from(
+          latest.notesByDay,
+        )..[day] = _dayNote(notes);
         state = AsyncData(latest.copyWith(notesByDay: updated));
       },
     );
   }
 
   /// Called by the upsert-note mutation after a successful save.
-  void applyNoteUpserted(DateTime day, DayNoteEntity note) {
+  void applyNoteUpserted(DateTime day, JournalNoteEntity note) {
     final current = state.value;
     if (current == null) return;
-    final updated = Map<DateTime, DayNoteEntity?>.from(current.notesByDay)
+    final updated = Map<DateTime, JournalNoteEntity?>.from(current.notesByDay)
       ..[day] = note;
     // Keep the all-trip notes list (wrap-up eligibility, #103) in sync too —
-    // replace an existing day's note or add a newly-created one.
+    // replace the saved note or add a newly-created one.
     final notes = [
       for (final n in current.notes)
-        if (!_isSameDate(n.dayDate, day)) n,
+        if (n.id != note.id) n,
       note,
     ];
     state = AsyncData(current.copyWith(notesByDay: updated, notes: notes));
   }
 
-  /// Called by the delete-note mutation (#276) — the day has no note again.
-  void applyNoteDeleted(DateTime day) {
+  /// Called by the delete-note mutation (#276).
+  void applyNoteDeleted(DateTime day, String noteId) {
     final current = state.value;
     if (current == null) return;
-    final updated = Map<DateTime, DayNoteEntity?>.from(current.notesByDay)
-      ..[day] = null;
     final notes = [
       for (final n in current.notes)
-        if (!_isSameDate(n.dayDate, day)) n,
+        if (n.id != noteId) n,
     ];
+    final updated = Map<DateTime, JournalNoteEntity?>.from(current.notesByDay)
+      ..[day] = _dayNote([
+        for (final n in notes)
+          if (_isSameDate(n.dayDate, day)) n,
+      ]);
     state = AsyncData(current.copyWith(notesByDay: updated, notes: notes));
   }
 
@@ -201,6 +208,11 @@ class JournalController extends _$JournalController {
     state = AsyncData(current.copyWith(photos: photos));
   }
 }
+
+/// The note the one-card day view shows and edits: the day's first. Every
+/// day has at most one until the timeline view (#401) adds more.
+JournalNoteEntity? _dayNote(List<JournalNoteEntity> notes) =>
+    notes.isEmpty ? null : notes.first;
 
 bool _isSameDate(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month && a.day == b.day;

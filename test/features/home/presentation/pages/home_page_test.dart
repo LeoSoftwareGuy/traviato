@@ -19,7 +19,7 @@ import 'package:traviato/features/home/presentation/pages/home_page.dart';
 import 'package:traviato/features/home/presentation/providers/profile_stats_provider.dart';
 import 'package:traviato/features/home/presentation/widgets/home_stats_bar.dart';
 import 'package:traviato/features/home/presentation/widgets/upcoming_hero_card.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/profile/presentation/providers/profile_providers.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
@@ -30,7 +30,7 @@ import '../../../auth/fakes/fake_auth_repository.dart';
 import '../../../bonus/fakes/fake_bonus_task_repository.dart';
 import '../../../checklist/fakes/fake_checklist_repository.dart';
 import '../../../expense/fakes/fake_expense_repository.dart';
-import '../../../journal/fakes/fake_day_note_repository.dart';
+import '../../../journal/fakes/fake_journal_note_repository.dart';
 import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../profile/fakes/fake_profile_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
@@ -65,7 +65,9 @@ Future<void> _pump(
         // The Manage/Delete sheets (issue #115's long-press entry point)
         // fetch photo/note counts for the delete-confirmation copy.
         photoRepositoryProvider.overrideWithValue(FakePhotoRepository()),
-        dayNoteRepositoryProvider.overrideWithValue(FakeDayNoteRepository()),
+        journalNoteRepositoryProvider.overrideWithValue(
+          FakeJournalNoteRepository(),
+        ),
       ],
       child: MaterialApp(theme: AppTheme.dark, home: const HomePage()),
     ),
@@ -522,8 +524,8 @@ void main() {
             bonusTaskRepositoryProvider.overrideWithValue(
               FakeBonusTaskRepository(),
             ),
-            dayNoteRepositoryProvider.overrideWithValue(
-              FakeDayNoteRepository(),
+            journalNoteRepositoryProvider.overrideWithValue(
+              FakeJournalNoteRepository(),
             ),
             photoRepositoryProvider.overrideWithValue(FakePhotoRepository()),
           ],

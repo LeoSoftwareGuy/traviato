@@ -4,7 +4,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../bonus/domain/entities/bonus_task_assignment_entity.dart';
 import '../../../bonus/domain/entities/bonus_task_template_entity.dart';
 import '../../../bonus/domain/usecases/ensure_daily_tray_usecase.dart';
-import '../../../journal/domain/repositories/day_note_repository.dart';
+import '../../../journal/domain/repositories/journal_note_repository.dart';
 import '../../../photo/domain/repositories/photo_repository.dart';
 import '../../../quest/domain/repositories/quest_repository.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
@@ -26,14 +26,14 @@ class EvaluateBonusNotificationsUseCase {
   EvaluateBonusNotificationsUseCase({
     required TripRepository tripRepository,
     required QuestRepository questRepository,
-    required DayNoteRepository dayNoteRepository,
+    required JournalNoteRepository journalNoteRepository,
     required PhotoRepository photoRepository,
     required EnsureDailyTrayUseCase ensureDailyTrayUseCase,
     required BonusNotificationRepository notificationRepository,
     required NotificationPrefsStore prefsStore,
   }) : _tripRepo = tripRepository,
        _questRepo = questRepository,
-       _noteRepo = dayNoteRepository,
+       _noteRepo = journalNoteRepository,
        _photoRepo = photoRepository,
        _ensureDailyTray = ensureDailyTrayUseCase,
        _notificationRepo = notificationRepository,
@@ -41,7 +41,7 @@ class EvaluateBonusNotificationsUseCase {
 
   final TripRepository _tripRepo;
   final QuestRepository _questRepo;
-  final DayNoteRepository _noteRepo;
+  final JournalNoteRepository _noteRepo;
   final PhotoRepository _photoRepo;
   final EnsureDailyTrayUseCase _ensureDailyTray;
   final BonusNotificationRepository _notificationRepo;

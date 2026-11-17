@@ -247,7 +247,28 @@ Deno.test("the plan input carries facts in order and the prompt the rules", () =
     day_date: "2026-09-01",
     text: "Bikes everywhere.",
     written_at: null,
+    photo_id: null,
   });
+  // A note's own time and photo reach the director (#397).
+  const timed = buildPlanInput(
+    {
+      ...data,
+      utc_offset_minutes: 120,
+      notes: [{
+        id: "n9",
+        day_date: "2026-09-01",
+        content: "Ribs at the bar.",
+        created_at: "2026-09-01T08:00:00Z",
+        taken_at: "2026-09-01T19:16:00Z",
+        photo_id: "p02",
+      }],
+    },
+    data.photos,
+    analyses,
+    "en",
+  );
+  assertEquals(timed.notes[0].written_at, "21:16");
+  assertEquals(timed.notes[0].photo_id, "p02");
   assertEquals(input.photos[0].place, "Centraal");
   assertEquals(input.photos[1].bonus_task, "Snap a canal");
   assertEquals(input.photos[2].must_include, true);

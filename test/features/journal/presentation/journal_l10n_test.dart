@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/features/home/presentation/providers/profile_stats_provider.dart';
 import 'package:traviato/features/journal/presentation/pages/journal_page.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/subscription/presentation/providers/subscription_providers.dart';
@@ -18,7 +18,7 @@ import '../../photo/fakes/fake_photo_repository.dart';
 import '../../quest/fakes/fake_quest_repository.dart';
 import '../../subscription/fakes/fake_subscription_repository.dart';
 import '../../trip/fakes/fake_trip_repository.dart';
-import '../fakes/fake_day_note_repository.dart';
+import '../fakes/fake_journal_note_repository.dart';
 
 DateTime get _today {
   final now = DateTime.now();
@@ -71,11 +71,11 @@ Future<void> _pump(
               ],
             ]),
         ),
-        dayNoteRepositoryProvider.overrideWithValue(
-          FakeDayNoteRepository()
+        journalNoteRepositoryProvider.overrideWithValue(
+          FakeJournalNoteRepository()
             ..getNoteResult = Right(
               withEntries
-                  ? buildDayNoteEntity(
+                  ? buildJournalNoteEntity(
                       dayDate: _today,
                       content: 'Old Town walk.',
                     )
@@ -83,7 +83,10 @@ Future<void> _pump(
             )
             ..notesForTripResult = Right([
               if (withEntries)
-                buildDayNoteEntity(dayDate: _today, content: 'Old Town walk.'),
+                buildJournalNoteEntity(
+                  dayDate: _today,
+                  content: 'Old Town walk.',
+                ),
             ]),
         ),
         questRepositoryProvider.overrideWithValue(FakeQuestRepository()),

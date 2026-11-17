@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/errors/presentation_failure_exception.dart';
-import '../../../journal/domain/repositories/day_note_repository.dart';
-import '../../../journal/presentation/providers/day_note_providers.dart';
+import '../../../journal/domain/repositories/journal_note_repository.dart';
+import '../../../journal/presentation/providers/journal_note_providers.dart';
 import '../../../photo/domain/repositories/photo_repository.dart';
 import '../../../photo/presentation/providers/photo_providers.dart';
 import '../../../quest/domain/repositories/quest_repository.dart';
@@ -17,7 +17,7 @@ import 'bonus_tray_state.dart';
 Future<BonusTrayState> loadBonusTrayState(Ref ref, String tripId) async {
   final tripRepo = ref.watch(tripRepositoryProvider);
   final questRepo = ref.watch(questRepositoryProvider);
-  final noteRepo = ref.watch(dayNoteRepositoryProvider);
+  final noteRepo = ref.watch(journalNoteRepositoryProvider);
   final photoRepo = ref.watch(photoRepositoryProvider);
   final useCase = ref.watch(ensureDailyTrayUseCaseProvider);
 
@@ -51,7 +51,7 @@ Future<BonusTrayState> loadBonusTrayState(Ref ref, String tripId) async {
 Future<Set<DateTime>> _activityDatesForTrip({
   required String tripId,
   required QuestRepository questRepo,
-  required DayNoteRepository noteRepo,
+  required JournalNoteRepository noteRepo,
   required PhotoRepository photoRepo,
 }) async {
   final quests = (await questRepo.getQuestsForTrip(tripId)).fold(

@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/features/bonus/presentation/providers/bonus_task_providers.dart';
 import 'package:traviato/features/journal/presentation/controllers/journal_controller.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/domain/entities/film_pick.dart';
 import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
 import 'package:traviato/features/photo/presentation/pages/photo_viewer_page.dart';
@@ -13,7 +13,7 @@ import 'package:traviato/features/quest/presentation/providers/quest_providers.d
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
 import '../../../bonus/fakes/fake_bonus_task_repository.dart';
-import '../../../journal/fakes/fake_day_note_repository.dart';
+import '../../../journal/fakes/fake_journal_note_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
 import '../../fakes/fake_photo_repository.dart';
@@ -69,7 +69,9 @@ Future<ProviderContainer> _open(
       overrides: [
         tripRepositoryProvider.overrideWithValue(FakeTripRepository()),
         photoRepositoryProvider.overrideWithValue(photoRepo),
-        dayNoteRepositoryProvider.overrideWithValue(FakeDayNoteRepository()),
+        journalNoteRepositoryProvider.overrideWithValue(
+          FakeJournalNoteRepository(),
+        ),
         questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
         bonusTaskRepositoryProvider.overrideWithValue(
           FakeBonusTaskRepository(),

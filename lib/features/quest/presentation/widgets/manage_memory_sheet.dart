@@ -11,7 +11,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/bottom_sheet_chrome.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
-import '../../../journal/presentation/providers/day_note_providers.dart';
+import '../../../journal/presentation/providers/journal_note_providers.dart';
 import '../../../photo/presentation/providers/photo_providers.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
 import '../../../trip/presentation/mutations/trip_mutations.dart';
@@ -70,7 +70,7 @@ class _ManageMemorySheetState extends ConsumerState<ManageMemorySheet> {
         .read(photoRepositoryProvider)
         .getPhotosForTrip(widget.tripId);
     final notesResult = await ref
-        .read(dayNoteRepositoryProvider)
+        .read(journalNoteRepositoryProvider)
         .getNotesForTrip(widget.tripId);
     if (!mounted) return;
     setState(() {

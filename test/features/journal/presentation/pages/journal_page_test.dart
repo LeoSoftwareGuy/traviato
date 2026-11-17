@@ -10,7 +10,7 @@ import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/home/domain/entities/profile_stats_entity.dart';
 import 'package:traviato/features/home/presentation/providers/profile_stats_provider.dart';
 import 'package:traviato/features/journal/presentation/pages/journal_page.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/domain/entities/quest_entity.dart';
@@ -23,7 +23,7 @@ import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../subscription/fakes/fake_subscription_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
-import '../../fakes/fake_day_note_repository.dart';
+import '../../fakes/fake_journal_note_repository.dart';
 
 DateTime get _today {
   final now = DateTime.now();
@@ -34,7 +34,7 @@ Future<void> _pump(
   WidgetTester tester, {
   required FakeTripRepository tripRepo,
   required FakePhotoRepository photoRepo,
-  required FakeDayNoteRepository noteRepo,
+  required FakeJournalNoteRepository noteRepo,
   FakeQuestRepository? questRepo,
   FakeProfileStatsRepository? profileStatsRepo,
   FakeSubscriptionRepository? subscriptionRepo,
@@ -62,7 +62,7 @@ Future<void> _pump(
       overrides: [
         tripRepositoryProvider.overrideWithValue(tripRepo),
         photoRepositoryProvider.overrideWithValue(photoRepo),
-        dayNoteRepositoryProvider.overrideWithValue(noteRepo),
+        journalNoteRepositoryProvider.overrideWithValue(noteRepo),
         questRepositoryProvider.overrideWithValue(
           questRepo ?? FakeQuestRepository(),
         ),
@@ -91,10 +91,10 @@ void main() {
       );
     final photoRepo = FakePhotoRepository()
       ..photosResult = Right([buildPhotoEntity(id: 'p1', dayDate: _today)]);
-    final noteRepo = FakeDayNoteRepository()
-      ..getNoteResult = Right(buildDayNoteEntity(content: 'Great day.'))
+    final noteRepo = FakeJournalNoteRepository()
+      ..getNoteResult = Right(buildJournalNoteEntity(content: 'Great day.'))
       ..notesForTripResult = Right([
-        buildDayNoteEntity(dayDate: _today, content: 'Great day.'),
+        buildJournalNoteEntity(dayDate: _today, content: 'Great day.'),
       ]);
     await _pump(
       tester,
@@ -117,7 +117,7 @@ void main() {
     final tripRepo = FakeTripRepository()
       ..tripCardResult = Right(buildTripCard(id: 't1'));
     final photoRepo = FakePhotoRepository();
-    final noteRepo = FakeDayNoteRepository();
+    final noteRepo = FakeJournalNoteRepository();
     await _pump(
       tester,
       tripRepo: tripRepo,
@@ -165,7 +165,7 @@ void main() {
         tester,
         tripRepo: threeDayTrip(),
         photoRepo: photoRepo,
-        noteRepo: FakeDayNoteRepository(),
+        noteRepo: FakeJournalNoteRepository(),
       );
       await tester.pumpAndSettle();
 
@@ -181,7 +181,7 @@ void main() {
     testWidgets('Done with text saves it and shows the star toast only after '
         'the book closes', (tester) async {
       final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
-      final noteRepo = FakeDayNoteRepository();
+      final noteRepo = FakeJournalNoteRepository();
       await _pump(
         tester,
         tripRepo: threeDayTrip(),
@@ -215,10 +215,10 @@ void main() {
       expect(find.textContaining('3 WORDS'), findsOneWidget);
     });
 
-    FakeDayNoteRepository noteRepoWithEntry() => FakeDayNoteRepository()
-      ..getNoteResult = Right(buildDayNoteEntity(content: 'Great day.'))
+    FakeJournalNoteRepository noteRepoWithEntry() => FakeJournalNoteRepository()
+      ..getNoteResult = Right(buildJournalNoteEntity(content: 'Great day.'))
       ..notesForTripResult = Right([
-        buildDayNoteEntity(dayDate: _today, content: 'Great day.'),
+        buildJournalNoteEntity(dayDate: _today, content: 'Great day.'),
       ]);
 
     testWidgets('Continue entry edits the whole note, with no star (#276)', (
@@ -298,7 +298,7 @@ void main() {
       tester,
     ) async {
       final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
-      final noteRepo = FakeDayNoteRepository();
+      final noteRepo = FakeJournalNoteRepository();
       await _pump(
         tester,
         tripRepo: threeDayTrip(),
@@ -320,7 +320,7 @@ void main() {
       tester,
     ) async {
       final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
-      final noteRepo = FakeDayNoteRepository();
+      final noteRepo = FakeJournalNoteRepository();
       await _pump(
         tester,
         tripRepo: threeDayTrip(),
@@ -360,7 +360,7 @@ void main() {
         tester,
         tripRepo: threeDayTrip(),
         photoRepo: photoRepo,
-        noteRepo: FakeDayNoteRepository(),
+        noteRepo: FakeJournalNoteRepository(),
       );
       await tester.pumpAndSettle();
 
@@ -389,7 +389,7 @@ void main() {
         buildPhotoEntity(id: 'p1', dayDate: _today),
         buildPhotoEntity(id: 'p2', dayDate: _today),
       ]);
-    final noteRepo = FakeDayNoteRepository();
+    final noteRepo = FakeJournalNoteRepository();
     await _pump(
       tester,
       tripRepo: tripRepo,
@@ -413,7 +413,7 @@ void main() {
           buildPhotoEntity(id: 'p1', dayDate: _today),
           buildPhotoEntity(id: 'p2', dayDate: _today),
         ]);
-      final noteRepo = FakeDayNoteRepository();
+      final noteRepo = FakeJournalNoteRepository();
       await _pump(
         tester,
         tripRepo: tripRepo,
@@ -439,8 +439,8 @@ void main() {
     final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
     // A note (no photos yet) keeps the day non-"empty" (#140), so the
     // normal photo strip under test renders instead of the nudge.
-    final noteRepo = FakeDayNoteRepository()
-      ..notesForTripResult = Right([buildDayNoteEntity(dayDate: _today)]);
+    final noteRepo = FakeJournalNoteRepository()
+      ..notesForTripResult = Right([buildJournalNoteEntity(dayDate: _today)]);
     await _pump(
       tester,
       tripRepo: tripRepo,
@@ -467,7 +467,7 @@ void main() {
         ),
       );
     final photoRepo = FakePhotoRepository();
-    final noteRepo = FakeDayNoteRepository();
+    final noteRepo = FakeJournalNoteRepository();
     final quest = buildQuestEntity(
       id: 'q1',
       dayDate: _today,
@@ -514,9 +514,9 @@ void main() {
           for (var i = 0; i < 5; i++)
             buildPhotoEntity(id: 'p$i', dayDate: _today),
         ]);
-      final noteRepo = FakeDayNoteRepository()
+      final noteRepo = FakeJournalNoteRepository()
         ..notesForTripResult = Right([
-          buildDayNoteEntity(id: 'n1', dayDate: _today),
+          buildJournalNoteEntity(id: 'n1', dayDate: _today),
         ]);
       await _pump(
         tester,
@@ -550,7 +550,7 @@ void main() {
           ),
         );
       final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
-      final noteRepo = FakeDayNoteRepository();
+      final noteRepo = FakeJournalNoteRepository();
       await _pump(
         tester,
         tripRepo: tripRepo,
@@ -580,9 +580,9 @@ void main() {
         );
       final photoRepo = FakePhotoRepository()
         ..photosResult = Right([buildPhotoEntity(id: 'p1', dayDate: _today)]);
-      final noteRepo = FakeDayNoteRepository()
+      final noteRepo = FakeJournalNoteRepository()
         ..notesForTripResult = Right([
-          buildDayNoteEntity(id: 'n1', dayDate: _today),
+          buildJournalNoteEntity(id: 'n1', dayDate: _today),
         ]);
       await _pump(
         tester,
@@ -624,7 +624,7 @@ void main() {
           ),
         );
       final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
-      final noteRepo = FakeDayNoteRepository();
+      final noteRepo = FakeJournalNoteRepository();
       final profileStatsRepo = FakeProfileStatsRepository()
         ..statsResult = const Right(
           ProfileStatsEntity(
@@ -664,9 +664,9 @@ void main() {
           for (var i = 0; i < 3; i++)
             buildPhotoEntity(id: 'p$i', dayDate: _today),
         ]);
-      final noteRepo = FakeDayNoteRepository()
+      final noteRepo = FakeJournalNoteRepository()
         ..notesForTripResult = Right([
-          buildDayNoteEntity(id: 'n1', dayDate: _today),
+          buildJournalNoteEntity(id: 'n1', dayDate: _today),
         ]);
       final subscriptionRepo = FakeSubscriptionRepository()
         ..entitlementResult = Right(buildProEntitlement());
@@ -718,7 +718,7 @@ void main() {
         tester,
         tripRepo: tripRepo,
         photoRepo: photoRepo,
-        noteRepo: FakeDayNoteRepository(),
+        noteRepo: FakeJournalNoteRepository(),
       );
       await tester.pumpAndSettle();
     }
@@ -753,7 +753,7 @@ void main() {
           buildTripCard(id: 't1', startDate: _today, endDate: _today),
         );
       final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
-      final noteRepo = FakeDayNoteRepository();
+      final noteRepo = FakeJournalNoteRepository();
       await _pump(
         tester,
         tripRepo: tripRepo,
@@ -784,7 +784,7 @@ void main() {
           buildTripCard(id: 't1', startDate: _today, endDate: _today),
         );
       final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
-      final noteRepo = FakeDayNoteRepository();
+      final noteRepo = FakeJournalNoteRepository();
       final subscriptionRepo = FakeSubscriptionRepository()
         ..entitlementResult = Right(buildProEntitlement());
       await _pump(
@@ -809,7 +809,7 @@ void main() {
       );
     final photoRepo = FakePhotoRepository()
       ..photosResult = Right([buildPhotoEntity(id: 'p1', dayDate: _today)]);
-    final noteRepo = FakeDayNoteRepository();
+    final noteRepo = FakeJournalNoteRepository();
     await _pump(
       tester,
       tripRepo: tripRepo,
@@ -829,7 +829,7 @@ void main() {
           buildTripCard(id: 't1', startDate: _today, endDate: _today),
         );
       final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
-      final noteRepo = FakeDayNoteRepository();
+      final noteRepo = FakeJournalNoteRepository();
       await _pump(
         tester,
         tripRepo: tripRepo,
@@ -870,7 +870,7 @@ void main() {
         tester,
         tripRepo: tripRepo,
         photoRepo: photoRepo,
-        noteRepo: FakeDayNoteRepository(),
+        noteRepo: FakeJournalNoteRepository(),
         profileStatsRepo: profileStatsRepo,
       );
       await tester.pumpAndSettle();
@@ -952,7 +952,7 @@ void main() {
         tester,
         tripRepo: tripRepo,
         photoRepo: FakePhotoRepository(),
-        noteRepo: FakeDayNoteRepository(),
+        noteRepo: FakeJournalNoteRepository(),
         questRepo: FakeQuestRepository()..questsResult = Right(quests),
       );
       await tester.pumpAndSettle();

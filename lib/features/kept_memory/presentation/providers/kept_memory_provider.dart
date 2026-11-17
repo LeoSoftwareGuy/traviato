@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/presentation_failure_exception.dart';
 import '../../../bonus/presentation/providers/bonus_task_providers.dart';
-import '../../../journal/presentation/providers/day_note_providers.dart';
+import '../../../journal/presentation/providers/journal_note_providers.dart';
 import '../../../photo/presentation/providers/photo_providers.dart';
 import '../../../quest/presentation/providers/quest_providers.dart';
 import '../../../trip/presentation/providers/trip_providers.dart';
@@ -25,7 +25,7 @@ Future<KeptMemory> keptMemory(Ref ref, String tripId) async {
       .watch(photoRepositoryProvider)
       .getPhotosForTrip(tripId);
   final notesFuture = ref
-      .watch(dayNoteRepositoryProvider)
+      .watch(journalNoteRepositoryProvider)
       .getNotesForTrip(tripId);
   final questsFuture = ref
       .watch(questRepositoryProvider)

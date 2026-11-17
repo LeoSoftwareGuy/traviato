@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/features/journal/presentation/controllers/journal_controller.dart';
 import 'package:traviato/features/journal/presentation/controllers/journal_state.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
@@ -11,12 +11,12 @@ import 'package:traviato/features/trip/presentation/providers/trip_providers.dar
 import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
-import '../../fakes/fake_day_note_repository.dart';
+import '../../fakes/fake_journal_note_repository.dart';
 
 ProviderContainer _buildContainer({
   required FakeTripRepository tripRepo,
   required FakePhotoRepository photoRepo,
-  required FakeDayNoteRepository noteRepo,
+  required FakeJournalNoteRepository noteRepo,
   FakeQuestRepository? questRepo,
 }) {
   return ProviderContainer(
@@ -24,7 +24,7 @@ ProviderContainer _buildContainer({
     overrides: [
       tripRepositoryProvider.overrideWithValue(tripRepo),
       photoRepositoryProvider.overrideWithValue(photoRepo),
-      dayNoteRepositoryProvider.overrideWithValue(noteRepo),
+      journalNoteRepositoryProvider.overrideWithValue(noteRepo),
       questRepositoryProvider.overrideWithValue(
         questRepo ?? FakeQuestRepository(),
       ),
@@ -45,8 +45,8 @@ void main() {
       );
     final photoRepo = FakePhotoRepository()
       ..photosResult = Right([buildPhotoEntity(id: 'p1')]);
-    final noteRepo = FakeDayNoteRepository()
-      ..getNoteResult = Right(buildDayNoteEntity(content: 'Great day.'));
+    final noteRepo = FakeJournalNoteRepository()
+      ..getNoteResult = Right(buildJournalNoteEntity(content: 'Great day.'));
     final container = _buildContainer(
       tripRepo: tripRepo,
       photoRepo: photoRepo,
@@ -77,7 +77,7 @@ void main() {
     final container = _buildContainer(
       tripRepo: tripRepo,
       photoRepo: FakePhotoRepository(),
-      noteRepo: FakeDayNoteRepository(),
+      noteRepo: FakeJournalNoteRepository(),
     );
     addTearDown(container.dispose);
 
@@ -107,7 +107,7 @@ void main() {
         ..photosResult = Right([
           for (var i = 0; i < 5; i++) buildPhotoEntity(id: 'p$i'),
         ]);
-      final noteRepo = FakeDayNoteRepository();
+      final noteRepo = FakeJournalNoteRepository();
       final container = _buildContainer(
         tripRepo: tripRepo,
         photoRepo: photoRepo,
@@ -129,7 +129,7 @@ void main() {
       // unlock wrap-up without needing a full reload.
       notifier.applyNoteUpserted(
         todayDate.subtract(const Duration(days: 1)),
-        buildDayNoteEntity(
+        buildJournalNoteEntity(
           id: 'n1',
           dayDate: todayDate.subtract(const Duration(days: 1)),
         ),
@@ -140,7 +140,10 @@ void main() {
       expect(state.wrapUpAvailability, WrapUpAvailability.unlocked);
 
       // Deleting it (#276) clears the day and locks wrap-up again.
-      notifier.applyNoteDeleted(todayDate.subtract(const Duration(days: 1)));
+      notifier.applyNoteDeleted(
+        todayDate.subtract(const Duration(days: 1)),
+        'n1',
+      );
       state = container.read(journalControllerProvider('t1')).value!;
       expect(state.notes, isEmpty);
       expect(state.currentNote, isNull);
@@ -169,7 +172,7 @@ void main() {
         buildTripCard(id: 't1', startDate: start, endDate: end),
       );
     final photoRepo = FakePhotoRepository();
-    final noteRepo = FakeDayNoteRepository();
+    final noteRepo = FakeJournalNoteRepository();
     final container = _buildContainer(
       tripRepo: tripRepo,
       photoRepo: photoRepo,
@@ -182,7 +185,7 @@ void main() {
     final notifier = container.read(journalControllerProvider('t1').notifier);
     final callsBeforeSwitch = noteRepo.getNoteCallCount;
 
-    noteRepo.getNoteResult = Right(buildDayNoteEntity(content: 'Day two.'));
+    noteRepo.getNoteResult = Right(buildJournalNoteEntity(content: 'Day two.'));
     await notifier.selectDay(start);
 
     final state = container.read(journalControllerProvider('t1')).value!;
@@ -212,7 +215,7 @@ void main() {
         buildTripCard(id: 't1', startDate: start, endDate: end),
       );
     final photoRepo = FakePhotoRepository();
-    final noteRepo = FakeDayNoteRepository();
+    final noteRepo = FakeJournalNoteRepository();
     final container = _buildContainer(
       tripRepo: tripRepo,
       photoRepo: photoRepo,
@@ -241,7 +244,7 @@ void main() {
         buildTripCard(id: 't1', startDate: start, endDate: start),
       );
     final photoRepo = FakePhotoRepository();
-    final noteRepo = FakeDayNoteRepository();
+    final noteRepo = FakeJournalNoteRepository();
     final container = _buildContainer(
       tripRepo: tripRepo,
       photoRepo: photoRepo,
@@ -253,7 +256,7 @@ void main() {
     await container.read(journalControllerProvider('t1').future);
     final notifier = container.read(journalControllerProvider('t1').notifier);
 
-    final note = buildDayNoteEntity(dayDate: start, content: 'Updated.');
+    final note = buildJournalNoteEntity(dayDate: start, content: 'Updated.');
     notifier.applyNoteUpserted(start, note);
 
     final state = container.read(journalControllerProvider('t1')).value!;
@@ -278,7 +281,7 @@ void main() {
             buildPhotoEntity(id: 'p2'),
             buildPhotoEntity(id: 'p3'),
           ]),
-        noteRepo: FakeDayNoteRepository(),
+        noteRepo: FakeJournalNoteRepository(),
       );
       await container.read(journalControllerProvider('t1').future);
       return container;

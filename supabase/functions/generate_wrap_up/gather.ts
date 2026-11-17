@@ -34,11 +34,16 @@ export interface TripData {
   // created_at: when the note was first written — places a one-sentence
   // note in its day for collage captions (#302). Never sent to the AI.
   // id: lets the director (#328) point a scene at a note.
+  // taken_at / photo_id (#397): the note's own time (when Done was first
+  // tapped; a legacy one-per-day note's last edit) and the photo it was
+  // written on. A day holds many notes, oldest first.
   notes: {
     id?: string;
     day_date: string;
     content: string;
     created_at?: string | null;
+    taken_at?: string | null;
+    photo_id?: string | null;
   }[];
   photos: {
     id: string;
@@ -111,10 +116,11 @@ export async function gatherTripData(
     questsRes,
   ] = await Promise.all([
     client
-      .from("day_notes")
-      .select("id, day_date, content, created_at")
+      .from("journal_notes")
+      .select("id, day_date, content, created_at, taken_at, photo_id")
       .eq("trip_id", tripId)
-      .order("day_date"),
+      .order("day_date")
+      .order("taken_at"),
     client
       .from("photos")
       .select(
@@ -165,7 +171,7 @@ export async function gatherTripData(
 
   for (
     const [label, res] of [
-      ["day_notes", notesRes],
+      ["journal_notes", notesRes],
       ["photos", photosRes],
       ["bonus_task_assignments", bonusRes],
       ["points_ledger", pointsRes],
@@ -195,6 +201,8 @@ export async function gatherTripData(
       day_date: n.day_date as string,
       content: (n.content as string).slice(0, MAX_NOTE_CHARS),
       created_at: (n.created_at as string | null) ?? null,
+      taken_at: (n.taken_at as string | null) ?? null,
+      photo_id: (n.photo_id as string | null) ?? null,
     })),
     photos: (photosRes.data ?? []).map((p: Record<string, unknown>) => ({
       id: p.id as string,

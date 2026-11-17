@@ -73,7 +73,7 @@ final class KeptMemoryProvider
   }
 }
 
-String _$keptMemoryHash() => r'601a1c794b9db04807a74433edb551e2b92ef467';
+String _$keptMemoryHash() => r'3bc764b7bbcd1486553b158030011680c21842d4';
 
 /// Everything the Kept Memory page shows (#279), fetched concurrently and
 /// grouped by [buildKeptMemory]. Read-only — the page edits nothing, so

@@ -93,8 +93,15 @@ set. Mockup copy showing other numbers is adjusted at implementation.
 ## 8. Journal ✅ — redesigned
 
 - Day tabs as photo tiles (active = primary border); day title + sub-line; note
-  card (italic serif body, "EDITED · N WORDS" footer, one note/day, ✦1 via RPC; the whole note is editable in the note page, and
-  clearing it + confirming deletes it and takes back the ✦1 — #276);
+  card (italic serif body, "EDITED · N WORDS" footer, ✦1 via RPC; the whole note is editable in the note page, and
+  clearing it + confirming deletes it — #276; since #397 the ✦1 stays);
+- **Many timed notes per day** (#397, Option B, `docs/design/journal-notes/`):
+  every Done saves a separate note with its own time; ✦1 per new note, at
+  most 3 per day; edits and deletes never change stars. Notes and photos
+  after midnight stay on the evening's day (logical-day rule: until 08:00,
+  a new day only after a 4-hour break). Storyteller counts days with notes.
+  Data landed in #400; the "One timeline" day view is #401, photo notes and
+  the Kept Memory list #402. Old day notes became one "earlier note" each.
   photos strip ("TODAY'S PHOTOS · N", **add tile awards ✦2** on successful photo,
   tiles → Photo detail; "▸ N IN THE FILM" + per-thumb film badges, #294);
   "To Do · N left" → Plan; **"View wrap-up ▸"** gradient button;
@@ -197,7 +204,7 @@ set. Mockup copy showing other numbers is adjusted at implementation.
 
 ## 13. Stars ✅
 
-- Ledger server-side; values: note 1 · photo 2 · quest 1 · bonus per template.
+- Ledger server-side; values: note 1 (at most 3 a day, #397) · photo 2 · quest 1 · bonus per template.
 - **Star award toast** (shared component): "✦ +2 stars · photo logged" etc.,
   auto-dismiss ~1.65s; the only success affordance (no snackbars for awards).
   Unchecking never removes stars.
