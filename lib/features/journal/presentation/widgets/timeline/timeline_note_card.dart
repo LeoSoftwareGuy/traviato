@@ -11,6 +11,8 @@ import '../../../../photo/domain/entities/photo_entity.dart';
 import '../../../../photo/presentation/widgets/storage_photo_image.dart';
 import '../../../domain/entities/journal_note_entity.dart';
 import '../../../domain/note_text.dart';
+import 'fresh_glow.dart';
+import 'swipe_to_delete.dart';
 
 /// A note's collapsed body: 4 lines of 14.5 × 1.6 (spec §4 "Long note").
 const noteCollapsedLines = 4;
@@ -33,6 +35,7 @@ class TimelineNoteCard extends StatefulWidget {
     required this.note,
     required this.use24h,
     required this.onLongPress,
+    this.onSwipeDelete,
     this.photo,
     this.onPhotoTap,
     this.isFresh = false,
@@ -43,6 +46,9 @@ class TimelineNoteCard extends StatefulWidget {
   final JournalNoteEntity note;
   final bool use24h;
   final VoidCallback onLongPress;
+
+  /// Swipe left → Delete (iOS, #407); null turns the swipe off.
+  final VoidCallback? onSwipeDelete;
 
   /// The photo the note was written on, when it's still there.
   final PhotoEntity? photo;
@@ -86,6 +92,9 @@ class _TimelineNoteCardState extends State<TimelineNoteCard> {
     final locale = l10n.localeName;
     final clock = L10nDates.clock(locale, use24h: widget.use24h);
     final reducedMotion = MediaQuery.disableAnimationsOf(context);
+    final fade = reducedMotion
+        ? AppMotion.noteReducedMotionFade
+        : const Duration(milliseconds: 300);
     final chips = <Widget>[
       if (note.legacy) _Chip.earlier(l10n.timeline_earlierNote),
       if (widget.isFresh) _Chip.fresh(l10n.timeline_justNow),
@@ -97,7 +106,7 @@ class _TimelineNoteCardState extends State<TimelineNoteCard> {
         ),
     ];
 
-    return RawGestureDetector(
+    final card = RawGestureDetector(
       gestures: {
         LongPressGestureRecognizer:
             GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
@@ -105,64 +114,95 @@ class _TimelineNoteCardState extends State<TimelineNoteCard> {
               (r) => r.onLongPress = _onLongPress,
             ),
       },
-      child: AnimatedContainer(
-        key: Key('timeline-note-${note.id}'),
-        duration: reducedMotion
-            ? AppMotion.pageTurnReducedMotionFade
-            : const Duration(milliseconds: 600),
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: _radius,
-          border: Border.all(
-            color: widget.isFresh
-                ? AppColors.tint(AppColors.primary, .75)
-                : AppColors.hairline,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (chips.isNotEmpty) ...[
-              Wrap(spacing: 6, runSpacing: 6, children: chips),
-              const SizedBox(height: 8),
-            ],
-            _Body(
-              text: note.content,
-              expanded: _expanded,
-              onToggle: () =>
-                  _tap(() => setState(() => _expanded = !_expanded)),
+      child: FreshGlow(
+        isFresh: widget.isFresh,
+        borderRadius: _radius,
+        child: AnimatedContainer(
+          key: Key('timeline-note-${note.id}'),
+          duration: reducedMotion
+              ? AppMotion.pageTurnReducedMotionFade
+              : const Duration(milliseconds: 600),
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: _radius,
+            border: Border.all(
+              color: widget.isFresh
+                  ? AppColors.tint(AppColors.primary, .75)
+                  : AppColors.hairline,
             ),
-            if (widget.photo != null) ...[
-              const SizedBox(height: 10),
-              _OnPhotoChip(
-                photo: widget.photo!,
-                time: clock.format(
-                  (widget.photo!.takenAt ?? widget.photo!.createdAt).toLocal(),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // JUST NOW fades out after 3s (#407).
+              AnimatedSize(
+                duration: fade,
+                curve: AppMotion.noteCurve,
+                alignment: Alignment.topLeft,
+                child: AnimatedSwitcher(
+                  duration: fade,
+                  child: chips.isEmpty
+                      ? const SizedBox(width: double.infinity)
+                      : Padding(
+                          key: ValueKey(chips.length),
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: chips,
+                            ),
+                          ),
+                        ),
                 ),
-                onTap: () => _tap(widget.onPhotoTap),
               ),
-            ],
-            if (note.legacy) ...[
-              const SizedBox(height: 10),
-              Text(
-                l10n
-                    .timeline_lastEdited(
-                      (widget.isLater
-                              ? '${L10nDates.dayMonth(locale).format(note.editedAt.toLocal())} '
-                              : '') +
-                          clock.format(note.editedAt.toLocal()),
-                      l10n.journal_wordCount(countNoteWords(note.content)),
-                    )
-                    .toUpperCase(),
-                style: AppTypography.mono,
+              _Body(
+                text: note.content,
+                expanded: _expanded,
+                onToggle: () =>
+                    _tap(() => setState(() => _expanded = !_expanded)),
               ),
+              if (widget.photo != null) ...[
+                const SizedBox(height: 10),
+                _OnPhotoChip(
+                  photo: widget.photo!,
+                  time: clock.format(
+                    (widget.photo!.takenAt ?? widget.photo!.createdAt)
+                        .toLocal(),
+                  ),
+                  onTap: () => _tap(widget.onPhotoTap),
+                ),
+              ],
+              if (note.legacy) ...[
+                const SizedBox(height: 10),
+                Text(
+                  l10n
+                      .timeline_lastEdited(
+                        (widget.isLater
+                                ? '${L10nDates.dayMonth(locale).format(note.editedAt.toLocal())} '
+                                : '') +
+                            clock.format(note.editedAt.toLocal()),
+                        l10n.journal_wordCount(countNoteWords(note.content)),
+                      )
+                      .toUpperCase(),
+                  style: AppTypography.mono,
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
+    return widget.onSwipeDelete == null
+        ? card
+        : SwipeToDelete(
+            onDelete: widget.onSwipeDelete!,
+            borderRadius: _radius,
+            child: card,
+          );
   }
 }
 

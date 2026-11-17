@@ -56,6 +56,9 @@ abstract class AppColors {
   /// The EARLIER NOTE chip's fill: [accentPurple] at 16%.
   static const Color accentPurpleChip = Color(0x298962C5);
 
+  /// The fill behind a destructive swipe action (a note's Delete, #407).
+  static const Color danger = Color(0xFFE2525F);
+
   /// Destructive text on a dark sheet (the delete-note confirm, #401).
   static const Color dangerText = Color(0xFFFF8A94);
 

@@ -5,6 +5,7 @@ import '../../../../core/l10n/l10n_dates.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/journal_note_entity.dart';
+import 'timeline/fresh_glow.dart';
 import 'timeline/fresh_note_in.dart';
 
 /// Under a photo in the viewer (#402, docs/design/journal-notes/ §6):
@@ -76,10 +77,14 @@ class PhotoNotesPanel extends StatelessWidget {
             FreshNoteIn(
               key: ValueKey('photo-note-${note.id}'),
               isFresh: note.id == freshNoteId,
-              child: _PhotoNoteCard(
-                note: note,
-                time: clock.format(note.takenAt.toLocal()),
+              child: FreshGlow(
                 isFresh: note.id == freshNoteId,
+                borderRadius: BorderRadius.circular(16),
+                child: _PhotoNoteCard(
+                  note: note,
+                  time: clock.format(note.takenAt.toLocal()),
+                  isFresh: note.id == freshNoteId,
+                ),
               ),
             ),
           ],
