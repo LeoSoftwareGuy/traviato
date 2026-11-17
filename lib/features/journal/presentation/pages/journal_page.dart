@@ -13,7 +13,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../../core/widgets/star_award_toast.dart';
@@ -83,7 +82,6 @@ class JournalPage extends ConsumerWidget {
             .stars;
 
     return Scaffold(
-      extendBody: true,
       body: journalAsync.when(
         loading: () => const SafeArea(
           child: Center(child: CircularProgressIndicator()),
@@ -100,23 +98,6 @@ class JournalPage extends ConsumerWidget {
           stars: stars,
           onBack: () => context.pop(),
         ),
-      ),
-      bottomNavigationBar: AppBottomNavBar(
-        onFabTap: () => context.pushNamed(RouteNames.createMemory),
-        items: [
-          AppBottomNavBarItem(
-            icon: Icons.home_rounded,
-            label: context.l10n.nav_home,
-            selected: false,
-            onTap: () => context.goNamed(RouteNames.home),
-          ),
-          AppBottomNavBarItem(
-            icon: Icons.receipt_long_outlined,
-            label: context.l10n.nav_expenses,
-            selected: false,
-            onTap: () => context.goNamed(RouteNames.expenses),
-          ),
-        ],
       ),
     );
   }
@@ -261,9 +242,9 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
           Positioned(
             left: 0,
             right: 0,
-            // Above the bottom bar and its pulled-up ➕ (#401 deviation: the
-            // spec's capsule replaces the bar; ours floats over it).
-            bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.lg,
+            // The Journal's only bottom control — no app bar here (#410,
+            // spec §4) — just above the home indicator.
+            bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.base,
             child: Center(
               child: CaptureCapsule(
                 onPhoto: () => _addPhoto(currentDay),

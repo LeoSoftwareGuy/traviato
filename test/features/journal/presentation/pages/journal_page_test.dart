@@ -8,9 +8,11 @@ import 'package:intl/intl.dart';
 import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/core/theme/app_theme.dart';
+import 'package:traviato/core/widgets/app_bottom_nav_bar.dart';
 import 'package:traviato/features/home/domain/entities/profile_stats_entity.dart';
 import 'package:traviato/features/home/presentation/providers/profile_stats_provider.dart';
 import 'package:traviato/features/journal/presentation/pages/journal_page.dart';
+import 'package:traviato/features/journal/presentation/widgets/journal_action_buttons.dart';
 import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
@@ -1003,6 +1005,51 @@ void main() {
     expect(find.byKey(const Key('timeline-empty-day')), findsNothing);
     expect(find.byKey(const Key('journal-day-timeline')), findsOneWidget);
     expect(find.byKey(const Key('capture-capsule')), findsOneWidget);
+  });
+
+  testWidgets('the Journal has no bottom bar; the capsule sits at the '
+      'bottom on its own (#410)', (tester) async {
+    await _pump(
+      tester,
+      tripRepo: FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(id: 't1', startDate: _today, endDate: _today),
+        ),
+      photoRepo: FakePhotoRepository()
+        ..photosResult = Right([buildPhotoEntity(id: 'p1', dayDate: _today)]),
+      noteRepo: FakeJournalNoteRepository(),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AppBottomNavBar), findsNothing);
+    final screen = tester.getSize(find.byType(JournalPage));
+    final capsule = tester.getRect(find.byKey(const Key('capture-capsule')));
+    expect(screen.height - capsule.bottom, lessThan(40));
+  });
+
+  testWidgets('the last row scrolls clear of the capsule (#410)', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      tripRepo: FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(id: 't1', startDate: _today, endDate: _today),
+        ),
+      photoRepo: FakePhotoRepository()
+        ..photosResult = Right([buildPhotoEntity(id: 'p1', dayDate: _today)]),
+      noteRepo: FakeJournalNoteRepository(),
+    );
+    await tester.pumpAndSettle();
+    await tester.drag(
+      find.byKey(const Key('journal-content-list')),
+      const Offset(0, -3000),
+    );
+    await tester.pumpAndSettle();
+
+    final capsule = tester.getRect(find.byKey(const Key('capture-capsule')));
+    final last = tester.getRect(find.byType(JournalActionButtons));
+    expect(last.bottom, lessThan(capsule.top));
   });
 
   testWidgets('the empty day\'s Write the first note opens the note page', (

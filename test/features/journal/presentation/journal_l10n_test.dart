@@ -119,7 +119,8 @@ void main() {
     expect(find.text('Заметка'), findsOneWidget);
     // The timeline clock follows the phone's 24-hour setting (off here).
     expect(find.textContaining('9:05'), findsWidgets);
-    expect(find.text('Главная'), findsOneWidget);
+    // No app bottom bar on the Journal (#410).
+    expect(find.text('Главная'), findsNothing);
   });
 
   for (final locale in const [Locale('en'), Locale('ru')]) {
