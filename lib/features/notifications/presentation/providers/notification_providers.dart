@@ -2,7 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../bonus/presentation/providers/bonus_task_providers.dart';
-import '../../../journal/presentation/providers/day_note_providers.dart';
+import '../../../journal/presentation/providers/journal_note_providers.dart';
 import '../../../photo/presentation/providers/photo_providers.dart';
 import '../../../quest/presentation/providers/quest_providers.dart';
 import '../../../settings/presentation/controllers/app_language_controller.dart';
@@ -51,7 +51,7 @@ EvaluateBonusNotificationsUseCase evaluateBonusNotificationsUseCase(
 ) => EvaluateBonusNotificationsUseCase(
   tripRepository: ref.watch(tripRepositoryProvider),
   questRepository: ref.watch(questRepositoryProvider),
-  dayNoteRepository: ref.watch(dayNoteRepositoryProvider),
+  journalNoteRepository: ref.watch(journalNoteRepositoryProvider),
   photoRepository: ref.watch(photoRepositoryProvider),
   ensureDailyTrayUseCase: ref.watch(ensureDailyTrayUseCaseProvider),
   notificationRepository: ref.watch(bonusNotificationRepositoryProvider),

@@ -11,7 +11,9 @@ part of 'profile_stats_controller.dart';
 /// Home's stats-bar totals and stars badge. Refetches whenever a
 /// [StarsAwardedDispatched] event arrives — quest check-off, day-note
 /// save, photo add, or bonus-task completion (issue #77) — so the badge
-/// updates live instead of only on the next cold load.
+/// updates live instead of only on the next cold load. Also on
+/// [TripDeletedDispatched]: a deleted memory takes its stars and its
+/// counts with it (#247).
 
 @ProviderFor(ProfileStatsController)
 final profileStatsControllerProvider = ProfileStatsControllerProvider._();
@@ -19,13 +21,17 @@ final profileStatsControllerProvider = ProfileStatsControllerProvider._();
 /// Home's stats-bar totals and stars badge. Refetches whenever a
 /// [StarsAwardedDispatched] event arrives — quest check-off, day-note
 /// save, photo add, or bonus-task completion (issue #77) — so the badge
-/// updates live instead of only on the next cold load.
+/// updates live instead of only on the next cold load. Also on
+/// [TripDeletedDispatched]: a deleted memory takes its stars and its
+/// counts with it (#247).
 final class ProfileStatsControllerProvider
     extends $AsyncNotifierProvider<ProfileStatsController, ProfileStatsEntity> {
   /// Home's stats-bar totals and stars badge. Refetches whenever a
   /// [StarsAwardedDispatched] event arrives — quest check-off, day-note
   /// save, photo add, or bonus-task completion (issue #77) — so the badge
-  /// updates live instead of only on the next cold load.
+  /// updates live instead of only on the next cold load. Also on
+  /// [TripDeletedDispatched]: a deleted memory takes its stars and its
+  /// counts with it (#247).
   ProfileStatsControllerProvider._()
     : super(
         from: null,
@@ -46,12 +52,14 @@ final class ProfileStatsControllerProvider
 }
 
 String _$profileStatsControllerHash() =>
-    r'c436323180a7fffccb20f7a585382a840103f77f';
+    r'c12bf8d653276d4ad171f18e62fb8519e82107fa';
 
 /// Home's stats-bar totals and stars badge. Refetches whenever a
 /// [StarsAwardedDispatched] event arrives — quest check-off, day-note
 /// save, photo add, or bonus-task completion (issue #77) — so the badge
-/// updates live instead of only on the next cold load.
+/// updates live instead of only on the next cold load. Also on
+/// [TripDeletedDispatched]: a deleted memory takes its stars and its
+/// counts with it (#247).
 
 abstract class _$ProfileStatsController
     extends $AsyncNotifier<ProfileStatsEntity> {

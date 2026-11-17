@@ -9,7 +9,7 @@ import 'package:traviato/features/notifications/domain/usecases/evaluate_bonus_n
 import 'package:traviato/features/trip/domain/entities/trip_card_entity.dart';
 
 import '../../../bonus/fakes/fake_bonus_task_repository.dart';
-import '../../../journal/fakes/fake_day_note_repository.dart';
+import '../../../journal/fakes/fake_journal_note_repository.dart';
 import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
@@ -43,7 +43,7 @@ void main() {
   ({
     FakeTripRepository trips,
     FakeQuestRepository quests,
-    FakeDayNoteRepository notes,
+    FakeJournalNoteRepository notes,
     FakePhotoRepository photos,
     FakeBonusTaskRepository bonus,
     FakeBonusNotificationRepository notifications,
@@ -53,7 +53,7 @@ void main() {
   makeHarness() {
     final trips = FakeTripRepository();
     final quests = FakeQuestRepository();
-    final notes = FakeDayNoteRepository();
+    final notes = FakeJournalNoteRepository();
     final photos = FakePhotoRepository();
     final bonus = FakeBonusTaskRepository()..templates = _templates();
     final notifications = FakeBonusNotificationRepository();
@@ -61,7 +61,7 @@ void main() {
     final useCase = EvaluateBonusNotificationsUseCase(
       tripRepository: trips,
       questRepository: quests,
-      dayNoteRepository: notes,
+      journalNoteRepository: notes,
       photoRepository: photos,
       ensureDailyTrayUseCase: EnsureDailyTrayUseCase(repository: bonus),
       notificationRepository: notifications,
@@ -145,7 +145,7 @@ void main() {
     final h = makeHarness();
     h.trips.tripsResult = Right([underway()]);
     h.notes.notesForTripResult = Right([
-      buildDayNoteEntity(tripId: 't1', dayDate: DateTime(2026, 8, 10)),
+      buildJournalNoteEntity(tripId: 't1', dayDate: DateTime(2026, 8, 10)),
     ]);
 
     await h.useCase(now: today);
@@ -160,7 +160,7 @@ void main() {
     final h = makeHarness();
     h.trips.tripsResult = Right([underway()]);
     h.notes.notesForTripResult = Right([
-      buildDayNoteEntity(tripId: 't1', dayDate: DateTime(2026, 8, 10)),
+      buildJournalNoteEntity(tripId: 't1', dayDate: DateTime(2026, 8, 10)),
     ]);
     h.bonus.assignments = [
       for (final (id, templateId) in [('a1', 1), ('a2', 2)])

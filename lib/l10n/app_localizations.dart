@@ -377,7 +377,7 @@ abstract class AppLocalizations {
   /// {stars} is auth_rewardTeaseStars, shown highlighted.
   ///
   /// In en, this message translates to:
-  /// **'Your first memory earns {stars} and the Storyteller badge is only three notes away.'**
+  /// **'Your first memory earns {stars}, and every day you write a note brings the Storyteller badge closer.'**
   String auth_rewardTease(String stars);
 
   /// No description provided for @auth_rewardTeaseStars.
@@ -1463,7 +1463,7 @@ abstract class AppLocalizations {
   /// No description provided for @note_deleteBody.
   ///
   /// In en, this message translates to:
-  /// **'The note for this day and its ✦1 star will be removed. This can\'t be undone.'**
+  /// **'The note for this day will be removed. Its ✦1 star stays. This can\'t be undone.'**
   String get note_deleteBody;
 
   /// No description provided for @note_keepNote.
@@ -3592,7 +3592,7 @@ abstract class AppLocalizations {
   /// Achievement description (DB code storyteller).
   ///
   /// In en, this message translates to:
-  /// **'Write 20 journal notes.'**
+  /// **'Write notes on 20 days.'**
   String get content_achievement_storyteller_description;
 
   /// Achievement title (DB code jetsetter).

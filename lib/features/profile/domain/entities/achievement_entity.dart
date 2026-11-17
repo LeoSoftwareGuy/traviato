@@ -28,7 +28,7 @@ enum AchievementMetric {
     AchievementMetric.daysLogged => 'DAYS',
     AchievementMetric.stars => 'STARS',
     AchievementMetric.photos => 'PHOTOS',
-    AchievementMetric.notes => 'NOTES',
+    AchievementMetric.notes => 'DAYS',
   };
 }
 

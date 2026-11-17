@@ -266,7 +266,9 @@ export function buildPlanInput(
         day: dayNumber(trip.start_date, n.day_date),
         day_date: n.day_date,
         text: n.content,
-        written_at: localClock(n.created_at ?? null, tripData),
+        // The note's own time and photo (#397); legacy notes have no photo.
+        written_at: localClock(n.taken_at ?? n.created_at ?? null, tripData),
+        photo_id: n.photo_id ?? null,
       })),
     // Already in chronological order (day, then time).
     photos: photos.map((p) => {

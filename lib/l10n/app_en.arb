@@ -102,7 +102,7 @@
   "auth_strengthGood": "Good",
   "auth_strengthStrong": "Strong",
   "auth_privacyNote": "Your memories stay yours — nothing is ever published.",
-  "auth_rewardTease": "Your first memory earns {stars} and the Storyteller badge is only three notes away.",
+  "auth_rewardTease": "Your first memory earns {stars}, and every day you write a note brings the Storyteller badge closer.",
   "@auth_rewardTease": {
     "description": "{stars} is auth_rewardTeaseStars, shown highlighted.",
     "placeholders": {
@@ -684,7 +684,7 @@
   },
   "note_discardTitle": "Discard your changes?",
   "note_deleteTitle": "Delete this note?",
-  "note_deleteBody": "The note for this day and its ✦1 star will be removed. This can't be undone.",
+  "note_deleteBody": "The note for this day will be removed. Its ✦1 star stays. This can't be undone.",
   "note_keepNote": "Keep note",
   "note_keepWriting": "Keep writing",
   "note_discard": "Discard",
@@ -2103,7 +2103,7 @@
   "@content_achievement_storyteller_title": {
     "description": "Achievement title (DB code storyteller)."
   },
-  "content_achievement_storyteller_description": "Write 20 journal notes.",
+  "content_achievement_storyteller_description": "Write notes on 20 days.",
   "@content_achievement_storyteller_description": {
     "description": "Achievement description (DB code storyteller)."
   },

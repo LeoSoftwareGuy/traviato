@@ -4,7 +4,7 @@ import '../../../photo/domain/entities/photo_entity.dart';
 import '../../../photo/domain/photo_order.dart';
 import '../../../quest/domain/entities/quest_entity.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
-import '../../domain/entities/day_note_entity.dart';
+import '../../domain/entities/journal_note_entity.dart';
 
 /// Gate on the Journal's "View wrap-up ▸" CTA (#103): wrap-up only makes
 /// sense once the trip has ended, and only once there's enough content to
@@ -42,14 +42,14 @@ class JournalState extends Equatable {
 
   /// Cache of fetched notes, keyed by day. A day present with a `null`
   /// value means "fetched, no note yet" — distinct from "not fetched".
-  final Map<DateTime, DayNoteEntity?> notesByDay;
+  final Map<DateTime, JournalNoteEntity?> notesByDay;
   final List<PhotoEntity> photos;
 
   /// Every day-note across the whole trip (one row per day, per the data
   /// model's unique constraint) — used only to gate wrap-up eligibility and
   /// empty-day detection, distinct from [notesByDay]'s per-day cache used
   /// for editing.
-  final List<DayNoteEntity> notes;
+  final List<JournalNoteEntity> notes;
 
   /// Every quest across the whole trip — fetched for the empty-day nudge's
   /// "N quests done" subtitle (#140) and [showsToDo]; the "To Do" sheet
@@ -84,10 +84,10 @@ class JournalState extends Equatable {
     ];
   }
 
-  bool get isCurrentDayNoteCached =>
+  bool get isCurrentJournalNoteCached =>
       currentDayDate != null && notesByDay.containsKey(currentDayDate);
 
-  DayNoteEntity? get currentNote =>
+  JournalNoteEntity? get currentNote =>
       currentDayDate == null ? null : notesByDay[currentDayDate];
 
   /// The day's photos as they happened, oldest first (#291) — the order the
@@ -180,9 +180,9 @@ class JournalState extends Equatable {
 
   JournalState copyWith({
     DateTime? Function()? currentDayDate,
-    Map<DateTime, DayNoteEntity?>? notesByDay,
+    Map<DateTime, JournalNoteEntity?>? notesByDay,
     List<PhotoEntity>? photos,
-    List<DayNoteEntity>? notes,
+    List<JournalNoteEntity>? notes,
     List<QuestEntity>? quests,
   }) => JournalState(
     trip: trip,

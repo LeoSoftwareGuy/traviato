@@ -7,7 +7,7 @@ import 'package:traviato/l10n/app_localizations.dart';
 import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
-import '../../fakes/fake_day_note_repository.dart';
+import '../../fakes/fake_journal_note_repository.dart';
 
 final _en = lookupAppLocalizations(const Locale('en'));
 
@@ -33,7 +33,7 @@ JournalState _stateWith({
     ],
     notes: [
       for (var i = 0; i < noteCount; i++)
-        buildDayNoteEntity(
+        buildJournalNoteEntity(
           id: 'n$i',
           dayDate: _today.subtract(Duration(days: i)),
         ),
@@ -209,7 +209,7 @@ void main() {
     test('false once the day has a note', () {
       final state = JournalState(
         trip: buildTripCard(id: 't1', startDate: _today, endDate: _today),
-        notes: [buildDayNoteEntity(id: 'n1', dayDate: _today)],
+        notes: [buildJournalNoteEntity(id: 'n1', dayDate: _today)],
       );
       expect(state.isDayEmpty(_today), isFalse);
     });

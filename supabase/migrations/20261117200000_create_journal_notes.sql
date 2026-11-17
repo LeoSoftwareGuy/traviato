@@ -144,6 +144,11 @@ set day_date = n.day_date
 from public.day_notes n
 where l.source = 'note' and l.source_id = n.id;
 
+-- Storyteller counts days with a note from now on (see check_achievements).
+update public.achievement_templates
+set description = 'Write notes on 20 days.'
+where code = 'storyteller';
+
 -- day_notes is read-only for one release, then dropped.
 revoke insert, update, delete on public.day_notes from authenticated;
 drop function public.delete_day_note(uuid);

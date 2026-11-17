@@ -46,9 +46,26 @@ the new range are deleted after a two-step warning. No schema change.
 completed_at?, created_at`. **No per-quest points column** (flat ✦1 rejected the
 mockup's variable values). RLS via parent trip; index (trip_id, day_date).
 
-### `day_notes`
-`id, trip_id (cascade), day_date, content, created_at, updated_at`,
-unique (trip_id, day_date).
+### `journal_notes` (#397, #400)
+`id uuid PK (client-generated), trip_id (cascade), day_date (logical day),
+taken_at, edited_at, content (non-blank), dictated bool, photo_id? → photos
+(on delete set null; same trip, checked in RLS), legacy bool, created_at`.
+Many notes per day, each saved by its own Done and shown at `taken_at`.
+`day_date` is decided by the app when the note is saved, with the shared
+**logical-day rule** (`lib/core/utils/logical_day.dart`): an item from
+00:00 to before 08:00 stays on the previous item's day unless there was a
+gap of ≥ 4 h. Stats, achievements and the film just read `day_date`.
+An update trigger keeps `trip_id`, `taken_at` and `legacy`, and stamps
+`edited_at`. RLS owner-only via the trip; indexes (trip_id, taken_at) and
+photo_id. Stars: ✦1 per new note, at most 3 per day (counted in
+`points_ledger.day_date`); edits and deletes never change stars.
+
+### `day_notes` — read-only, to be dropped
+The old one-note-per-day table (`unique (trip_id, day_date)`). Every
+non-empty row was copied into `journal_notes` as one `legacy` note **with
+the same id** (ledger rows, director plans and kept films keep pointing at
+it), `taken_at = edited_at = updated_at`. Writes revoked; a later migration
+drops it.
 
 ### `photos`
 `id (client-generated), trip_id (cascade), day_date?, storage_path, caption?,
@@ -91,9 +108,14 @@ completed. The daily draw is computed deterministically client-side
 (hash(trip_id, day_date) over eligible templates, phase-filtered, minus the
 10-day repeat set) and inserted idempotently via the unique constraint.
 ### `points_ledger` — values in `award_points` RPC; `trip_id` cascades, so deleting a memory deletes its stars (#247)
+`day_date?` (#400): a note row's day, for the 3-note-stars-a-day cap. A
+deleted note's row stays, so deleting and rewriting can't farm stars;
+`set_trip_dates` removes note stars by this day.
 ### `achievement_templates` / `user_achievements` — unchanged (seeded 8:
 first_adventure, globetrotter, century, star_collector, shutterbug, storyteller
-+ 2 per design; `check_achievements` RPC)
++ 2 per design; `check_achievements` RPC). Storyteller's `notes` metric (and
+`profile_stats_view.notes_count`) counts **days with at least one note**
+since #400, not notes.
 
 ### `wrap_ups` — draft vs frozen (#187)
 `trip_id PK/FK cascade, content jsonb (assembled film), generated_at,

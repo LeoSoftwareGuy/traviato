@@ -7,13 +7,13 @@ import 'package:traviato/core/events/global_event.dart';
 import 'package:traviato/core/events/global_event_bus.dart';
 import 'package:traviato/features/journal/presentation/controllers/journal_controller.dart';
 import 'package:traviato/features/journal/presentation/mutations/journal_mutations.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
 import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
-import '../../fakes/fake_day_note_repository.dart';
+import '../../fakes/fake_journal_note_repository.dart';
 
 const _tripId = 't1';
 
@@ -39,6 +39,20 @@ class _Harness extends ConsumerWidget {
                 } catch (_) {}
               },
               child: const Text('Save'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  await runUpsertNote(
+                    ref: ref,
+                    tripId: _tripId,
+                    dayDate: DateTime(2026, 8, 18),
+                    content: 'Better day.',
+                    existingNoteId: 'n1',
+                  );
+                } catch (_) {}
+              },
+              child: const Text('Edit'),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -73,7 +87,9 @@ void main() {
         overrides: [
           tripRepositoryProvider.overrideWithValue(FakeTripRepository()),
           photoRepositoryProvider.overrideWithValue(FakePhotoRepository()),
-          dayNoteRepositoryProvider.overrideWithValue(FakeDayNoteRepository()),
+          journalNoteRepositoryProvider.overrideWithValue(
+            FakeJournalNoteRepository(),
+          ),
           globalEventBusProvider.overrideWithValue(bus),
         ],
         child: const _Harness(),
@@ -89,7 +105,7 @@ void main() {
   Future<List<GlobalEvent>> pumpAndTap(
     WidgetTester tester,
     String button,
-    FakeDayNoteRepository noteRepo,
+    FakeJournalNoteRepository noteRepo,
   ) async {
     final bus = GlobalEventBus();
     addTearDown(bus.dispose);
@@ -101,7 +117,7 @@ void main() {
         overrides: [
           tripRepositoryProvider.overrideWithValue(FakeTripRepository()),
           photoRepositoryProvider.overrideWithValue(FakePhotoRepository()),
-          dayNoteRepositoryProvider.overrideWithValue(noteRepo),
+          journalNoteRepositoryProvider.overrideWithValue(noteRepo),
           globalEventBusProvider.overrideWithValue(bus),
         ],
         child: const _Harness(),
@@ -112,18 +128,40 @@ void main() {
     return events;
   }
 
-  testWidgets('deleting a note fires StarsAwardedDispatched (#276)', (
+  testWidgets('a new note is created timed now', (tester) async {
+    final noteRepo = FakeJournalNoteRepository();
+    final before = DateTime.now();
+    await pumpAndTap(tester, 'Save', noteRepo);
+
+    expect(noteRepo.createNoteCallCount, 1);
+    expect(noteRepo.updateNoteCallCount, 0);
+    expect(noteRepo.lastCreatedTakenAt!.isBefore(before), isFalse);
+  });
+
+  testWidgets('editing a note updates it and fires nothing (#397)', (
     tester,
   ) async {
-    final noteRepo = FakeDayNoteRepository();
+    final noteRepo = FakeJournalNoteRepository();
+    final events = await pumpAndTap(tester, 'Edit', noteRepo);
+
+    expect(noteRepo.createNoteCallCount, 0);
+    expect(noteRepo.lastUpdatedNoteId, 'n1');
+    expect(noteRepo.lastUpsertedContent, 'Better day.');
+    expect(events, isEmpty);
+  });
+
+  testWidgets('deleting a note keeps its star: no stars event (#397)', (
+    tester,
+  ) async {
+    final noteRepo = FakeJournalNoteRepository();
     final events = await pumpAndTap(tester, 'Delete', noteRepo);
 
     expect(noteRepo.lastDeletedNoteId, 'n1');
-    expect(events.single, isA<StarsAwardedDispatched>());
+    expect(events, isEmpty);
   });
 
   testWidgets('a failed delete fires nothing', (tester) async {
-    final noteRepo = FakeDayNoteRepository()
+    final noteRepo = FakeJournalNoteRepository()
       ..deleteNoteResult = const Left(NetworkFailure());
     final events = await pumpAndTap(tester, 'Delete', noteRepo);
 

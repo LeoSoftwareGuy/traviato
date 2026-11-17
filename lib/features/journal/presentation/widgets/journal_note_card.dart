@@ -15,8 +15,8 @@ final _editedAtFormat = DateFormat('HH:mm');
 /// footer, or an "Add notes about today" prompt when there isn't one yet.
 /// Writing happens on the full-screen note page: the prompt and the
 /// "Continue entry" link both call [onOpenNotePage].
-class DayNoteCard extends StatelessWidget {
-  const DayNoteCard({
+class JournalNoteCard extends StatelessWidget {
+  const JournalNoteCard({
     required this.content,
     required this.updatedAt,
     required this.isSaving,

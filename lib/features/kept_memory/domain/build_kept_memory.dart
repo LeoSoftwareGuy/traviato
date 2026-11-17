@@ -1,6 +1,6 @@
 import '../../bonus/domain/entities/bonus_task_assignment_entity.dart';
 import '../../bonus/domain/entities/bonus_task_template_entity.dart';
-import '../../journal/domain/entities/day_note_entity.dart';
+import '../../journal/domain/entities/journal_note_entity.dart';
 import '../../photo/domain/entities/photo_entity.dart';
 import '../../photo/domain/photo_order.dart';
 import '../../quest/domain/entities/quest_entity.dart';
@@ -20,7 +20,7 @@ import 'entities/kept_memory_plan_item.dart';
 KeptMemory buildKeptMemory({
   required TripCardEntity trip,
   required List<PhotoEntity> photos,
-  required List<DayNoteEntity> notes,
+  required List<JournalNoteEntity> notes,
   required List<QuestEntity> quests,
   List<BonusTaskAssignmentEntity> bonusAssignments = const [],
   List<BonusTaskTemplateEntity> bonusTemplates = const [],
@@ -56,7 +56,7 @@ KeptMemory buildKeptMemory({
     );
   }
 
-  final notesByDay = <int, List<DayNoteEntity>>{};
+  final notesByDay = <int, List<JournalNoteEntity>>{};
   for (final note in notes) {
     (notesByDay[dayIndexOf(note.dayDate)] ??= []).add(note);
   }
@@ -67,7 +67,7 @@ KeptMemory buildKeptMemory({
   for (final dayIndex in dayIndexes) {
     final dayPhotos = (photosByDay[dayIndex] ?? [])..sort(_byTime);
     final dayNotes = (notesByDay[dayIndex] ?? [])
-      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      ..sort((a, b) => a.takenAt.compareTo(b.takenAt));
     days.add(
       KeptMemoryDay(
         dayIndex: dayIndex,
@@ -107,7 +107,7 @@ DateTime _dateOnly(DateTime d) => DateTime.utc(d.year, d.month, d.day);
 
 // Undated trips are unreachable since #270; these only keep the grouping
 // total if one ever shows up.
-DateTime _earliest(List<PhotoEntity> photos, List<DayNoteEntity> notes) {
+DateTime _earliest(List<PhotoEntity> photos, List<JournalNoteEntity> notes) {
   final dates = [
     for (final p in photos) p.dayDate ?? (p.takenAt ?? p.createdAt).toLocal(),
     for (final n in notes) n.dayDate,
@@ -119,7 +119,7 @@ DateTime _earliest(List<PhotoEntity> photos, List<DayNoteEntity> notes) {
 int _spanDays(
   DateTime start,
   List<PhotoEntity> photos,
-  List<DayNoteEntity> notes,
+  List<JournalNoteEntity> notes,
 ) {
   var last = 1;
   for (final date in [

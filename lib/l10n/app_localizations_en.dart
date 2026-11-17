@@ -181,7 +181,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String auth_rewardTease(String stars) {
-    return 'Your first memory earns $stars and the Storyteller badge is only three notes away.';
+    return 'Your first memory earns $stars, and every day you write a note brings the Storyteller badge closer.';
   }
 
   @override
@@ -894,7 +894,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get note_deleteBody =>
-      'The note for this day and its ✦1 star will be removed. This can\'t be undone.';
+      'The note for this day will be removed. Its ✦1 star stays. This can\'t be undone.';
 
   @override
   String get note_keepNote => 'Keep note';
@@ -2366,7 +2366,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_achievement_storyteller_description =>
-      'Write 20 journal notes.';
+      'Write notes on 20 days.';
 
   @override
   String get content_achievement_jetsetter_title => 'Wanderlust Certified';
