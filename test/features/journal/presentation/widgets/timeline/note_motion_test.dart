@@ -193,4 +193,37 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     });
   });
+
+  testWidgets('idle motion widgets mount and unmount cleanly (#412)', (
+    tester,
+  ) async {
+    // Never fresh, leaving or swiped: their controllers must still exist
+    // before dispose, not be created by it.
+    for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
+      debugDefaultTargetPlatformOverride = platform;
+      await tester.pumpWidget(
+        _host(
+          Column(
+            children: [
+              const FreshNoteIn(isFresh: false, child: _card),
+              FreshGlow(
+                isFresh: false,
+                borderRadius: BorderRadius.circular(16),
+                child: _card,
+              ),
+              const FoldAway(isLeaving: false, child: _card),
+              SwipeToDelete(
+                onDelete: () {},
+                borderRadius: BorderRadius.circular(16),
+                child: _card,
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpWidget(const SizedBox());
+      expect(tester.takeException(), isNull);
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
 }
