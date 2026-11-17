@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/l10n/context_l10n.dart';
 import '../../../../../core/l10n/l10n_dates.dart';
-import '../../../../../core/theme/app_motion.dart';
 import '../../../../photo/domain/entities/photo_entity.dart';
 import '../../../domain/day_timeline.dart';
 import '../../../domain/entities/journal_note_entity.dart';
+import 'fresh_note_in.dart';
 import 'timeline_note_card.dart';
 import 'timeline_photo_group.dart';
 import 'timeline_rail.dart';
-
-const _freshSlide = Duration(milliseconds: 420);
 
 /// A day's "One timeline" (#401, docs/design/journal-notes/ §2–4): photos
 /// and notes on one rail, oldest first, with the AFTER MIDNIGHT and LATER
@@ -79,7 +77,7 @@ class DayTimelineView extends StatelessWidget {
           filmMomentIds: filmMomentIds,
         ),
       ),
-      TimelineNoteRow(:final note, :final isLater) => _FreshIn(
+      TimelineNoteRow(:final note, :final isLater) => FreshNoteIn(
         key: ValueKey('timeline-note-row-${note.id}'),
         isFresh: note.id == freshNoteId,
         child: TimelineRailRow(
@@ -116,36 +114,6 @@ class DayTimelineView extends StatelessWidget {
           children: [for (final entry in entries) row(entry)],
         ),
       ],
-    );
-  }
-}
-
-/// The freshly saved note's entrance: up 14px and in, or a plain fade
-/// under reduced motion (spec §7).
-class _FreshIn extends StatelessWidget {
-  const _FreshIn({required this.isFresh, required this.child, super.key});
-
-  final bool isFresh;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!isFresh) return child;
-    final reducedMotion = MediaQuery.disableAnimationsOf(context);
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: reducedMotion
-          ? AppMotion.pageTurnReducedMotionFade
-          : _freshSlide,
-      curve: AppMotion.progressCurve,
-      builder: (context, t, child) => Opacity(
-        opacity: t,
-        child: Transform.translate(
-          offset: Offset(0, reducedMotion ? 0 : (1 - t) * 14),
-          child: child,
-        ),
-      ),
-      child: child,
     );
   }
 }

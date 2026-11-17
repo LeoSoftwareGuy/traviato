@@ -25,6 +25,7 @@ class FakeJournalNoteRepository implements JournalNoteRepository {
   DateTime? lastCreatedTakenAt;
   DateTime? lastCreatedDay;
   bool? lastCreatedDictated;
+  String? lastCreatedPhotoId;
   bool? lastUpdatedDictated;
   String? lastUpsertedContent;
 
@@ -63,6 +64,7 @@ class FakeJournalNoteRepository implements JournalNoteRepository {
     lastCreatedTakenAt = takenAt;
     lastCreatedDay = dayDate;
     lastCreatedDictated = dictated;
+    lastCreatedPhotoId = photoId;
     return upsertNoteResult ??
         Right(
           buildJournalNoteEntity(
@@ -72,6 +74,7 @@ class FakeJournalNoteRepository implements JournalNoteRepository {
             content: content,
             createdAt: takenAt,
             dictated: dictated,
+            photoId: photoId,
           ),
         );
   }

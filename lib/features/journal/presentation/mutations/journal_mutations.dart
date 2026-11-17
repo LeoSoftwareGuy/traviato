@@ -13,7 +13,7 @@ final createNoteMutation = Mutation<JournalNoteEntity>();
 
 /// Every Done on a new note saves a separate note at [takenAt] (#397,
 /// #401) on [dayDate] — the logical day the page decided. ✦1, at most 3 a
-/// day (the server caps it).
+/// day (the server caps it). [photoId] writes it on that photo (#402).
 Future<JournalNoteEntity> runCreateNote({
   required WidgetRef ref,
   required String tripId,
@@ -21,6 +21,7 @@ Future<JournalNoteEntity> runCreateNote({
   required DateTime takenAt,
   required String content,
   bool dictated = false,
+  String? photoId,
 }) {
   return createNoteMutation.run(ref, (tsx) async {
     final repo = tsx.get(journalNoteRepositoryProvider);
@@ -31,6 +32,7 @@ Future<JournalNoteEntity> runCreateNote({
       takenAt: takenAt,
       content: content,
       dictated: dictated,
+      photoId: photoId,
     );
     return result.fold(
       (failure) => throw PresentationFailureException(failure),

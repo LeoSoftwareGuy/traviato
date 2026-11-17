@@ -70,6 +70,8 @@ final _notes = [
     dayDate: DateTime(2026, 8, 14),
     content: 'Rain all day. Cards and soup.',
     createdAt: DateTime(2026, 8, 14, 20),
+    // An old one-a-day note: no real time of its own (#402).
+    legacy: true,
   ),
 ];
 
@@ -165,7 +167,10 @@ void main() {
     expect(find.text('2 PHOTOS ›'), findsOneWidget);
     // Notes in full, exactly as written, with their time.
     expect(find.text('“Before either of us was awake.”'), findsOneWidget);
-    expect(find.text('21:04'), findsOneWidget);
+    // The phone's clock: 12-hour in tests.
+    expect(find.text('9:04 PM'), findsOneWidget);
+    expect(find.text('EARLIER NOTE'), findsOneWidget);
+    expect(find.text('8:00 PM'), findsNothing);
     expect(find.text('KEPT FOREVER · SINCE 17 AUG 2026'), findsOneWidget);
     // The film's length, once its schedule is known.
     expect(

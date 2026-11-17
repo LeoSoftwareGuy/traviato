@@ -2486,5 +2486,17 @@
   "note_stampNew": "New note · {time}",
   "@note_stampNew": {"description": "Note page stamp for a new note (#401); uppercased.", "placeholders": {"time": {"type": "String"}}},
   "note_stampEdit": "Edit note · {time}",
-  "@note_stampEdit": {"description": "Note page stamp when editing a note (#401); uppercased.", "placeholders": {"time": {"type": "String"}}}
+  "@note_stampEdit": {"description": "Note page stamp when editing a note (#401); uppercased.", "placeholders": {"time": {"type": "String"}}},
+  "photoNote_add": "✎ Add a note to this photo",
+  "@photoNote_add": {"description": "Photo viewer (#402): opens the note page for a note on this photo."},
+  "photoNote_listLabel": "Notes on this photo · {count}",
+  "@photoNote_listLabel": {"description": "Photo viewer (#402): label over the notes written on this photo, uppercased in code.", "placeholders": {"count": {"type": "int"}}},
+  "photoNote_none": "No notes on this photo yet.",
+  "@photoNote_none": {"description": "Photo viewer (#402): when the photo has no notes."},
+  "note_stampPhoto": "Photo note · {time}",
+  "@note_stampPhoto": {"description": "Note page stamp for a note on a photo (#402), uppercased in code.", "placeholders": {"time": {"type": "String"}}},
+  "note_onThisPhoto": "On this photo · {time}",
+  "@note_onThisPhoto": {"description": "Note page (#402): label beside the photo a note is written on, uppercased in code.", "placeholders": {"time": {"type": "String"}}},
+  "note_photoHint": "What was happening here? Type, or tap the mic.",
+  "@note_photoHint": {"description": "Note page (#402): placeholder for a note on a photo."}
 }

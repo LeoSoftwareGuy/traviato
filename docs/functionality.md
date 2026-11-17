@@ -100,8 +100,11 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   most 3 per day; edits and deletes never change stars. Notes and photos
   after midnight stay on the evening's day (logical-day rule: until 08:00,
   a new day only after a 4-hour break). Storyteller counts days with notes.
-  Data landed in #400; photo notes and the Kept Memory list are #402. Old
-  day notes became one "earlier note" each.
+  Data landed in #400. Old day notes became one "earlier note" each.
+- **Photo notes** (#402): the photo viewer has "✎ Add a note to this
+  photo" and lists NOTES ON THIS PHOTO · N. The note page shows the photo's
+  polaroid with its time and caption (else its place). A photo note keeps
+  its own time on the timeline, with an "On photo" chip; the photo gets ✎.
 - **One timeline** (#401): the day is one rail of photos and notes by time
   (photos ≤ 20 min apart share a row: 1 / 2 / 3 + "+N"), an AFTER MIDNIGHT
   divider, and a LATER section for things added after the day was over.
@@ -279,7 +282,8 @@ set. Mockup copy showing other numbers is adjusted at implementation.
 - Hero (cover, KEPT FOREVER · dates, title, days · photos · notes · ✦),
   **Play the film** (ends on "Back to memory") and **Slideshow**.
 - One chapter per day with content: photo strip (bonus-task photos marked
-  ✦) and every note in full. The plan, read-only and collapsed, at the end.
+  ✦) and every note in full, in time order with its time on the phone's
+  clock (an old one-a-day note says EARLIER NOTE instead, #402). The plan, read-only and collapsed, at the end.
 - Full-screen viewer over all photos: swipe / tap zones, pinch, swipe down
   to close, progress split by day, caption + bonus task; slideshow every
   3.2s with crossfade and slow zoom (no zoom under reduced motion).

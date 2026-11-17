@@ -398,6 +398,99 @@ void main() {
     });
   });
 
+  group('photo notes (#402)', () {
+    Future<FakeJournalNoteRepository> openPhoto(
+      WidgetTester tester, {
+      List<String> notesOnPhoto = const [],
+    }) async {
+      final noteRepo = FakeJournalNoteRepository()
+        ..notesForTripResult = Right([
+          for (var i = 0; i < notesOnPhoto.length; i++)
+            buildJournalNoteEntity(
+              id: 'pn$i',
+              dayDate: _today,
+              content: notesOnPhoto[i],
+              photoId: 'p1',
+              createdAt: _today.add(Duration(hours: 9, minutes: i)),
+            ),
+        ]);
+      await _pump(
+        tester,
+        tripRepo: FakeTripRepository()
+          ..tripCardResult = Right(
+            buildTripCard(id: 't1', startDate: _today, endDate: _today),
+          ),
+        photoRepo: FakePhotoRepository()
+          ..photosResult = Right([
+            buildPhotoEntity(id: 'p1', dayDate: _today, caption: 'Canal'),
+          ]),
+        noteRepo: noteRepo,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('timeline-photo-p1')));
+      await tester.pumpAndSettle();
+      return noteRepo;
+    }
+
+    testWidgets('a photo without notes says so', (tester) async {
+      await openPhoto(tester);
+
+      expect(find.byKey(const Key('photo-notes-panel')), findsOneWidget);
+      expect(find.text('No notes on this photo yet.'), findsOneWidget);
+    });
+
+    testWidgets("the viewer lists the photo's notes", (tester) async {
+      await openPhoto(tester, notesOnPhoto: ['Ducks.', 'More ducks.']);
+
+      expect(find.text('NOTES ON THIS PHOTO · 2'), findsOneWidget);
+      final panel = find.byKey(const Key('photo-notes-panel'));
+      expect(
+        find.descendant(of: panel, matching: find.text('Ducks.')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: panel, matching: find.text('More ducks.')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('Add a note writes it on the photo; it shows under the '
+        'photo and on the timeline', (tester) async {
+      final noteRepo = await openPhoto(tester);
+
+      await tester.tap(find.byKey(const Key('photo-notes-add')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('note-page-attached-photo')), findsOneWidget);
+      expect(find.textContaining('· PHOTO NOTE ·'), findsOneWidget);
+      expect(
+        find.text('What was happening here? Type, or tap the mic.'),
+        findsOneWidget,
+      );
+      expect(find.text('Canal'), findsWidgets);
+
+      await tester.enterText(
+        find.byKey(const Key('note-page-field')),
+        'Boats everywhere.',
+      );
+      await tester.tap(find.byKey(const Key('note-page-done')));
+      await tester.pumpAndSettle();
+
+      expect(noteRepo.lastCreatedPhotoId, 'p1');
+      final panel = find.byKey(const Key('photo-notes-panel'));
+      expect(
+        find.descendant(of: panel, matching: find.text('Boats everywhere.')),
+        findsOneWidget,
+      );
+      expect(find.text('NOTES ON THIS PHOTO · 1'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('photo-viewer-close')));
+      await tester.pumpAndSettle();
+      expect(find.text('Boats everywhere.'), findsOneWidget);
+      expect(find.byKey(const Key('timeline-note-on-photo')), findsOneWidget);
+      expect(find.byKey(const Key('timeline-photo-noted')), findsOneWidget);
+    });
+  });
+
   testWidgets('shows the day\'s photos on the timeline', (tester) async {
     final tripRepo = FakeTripRepository()
       ..tripCardResult = Right(

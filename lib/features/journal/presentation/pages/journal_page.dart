@@ -23,9 +23,7 @@ import '../../../photo/domain/entities/photo_entity.dart';
 import '../../../photo/presentation/mutations/photo_mutations.dart';
 import '../../../photo/presentation/pages/photo_viewer_page.dart';
 import '../../../photo/presentation/widgets/add_photo_sheet.dart';
-import '../../../photo/presentation/widgets/storage_photo_image.dart';
 import '../../../wrap_up/presentation/providers/film_pick_providers.dart';
-import '../../domain/day_timeline.dart';
 import '../../domain/entities/journal_note_entity.dart';
 import '../controllers/journal_controller.dart';
 import '../controllers/journal_state.dart';
@@ -34,13 +32,12 @@ import '../widgets/day_range_hero.dart';
 import '../widgets/day_tabs.dart';
 import '../widgets/journal_action_buttons.dart';
 import '../widgets/journal_header.dart';
-import '../widgets/note_page/note_title_page.dart';
 import '../widgets/timeline/capture_capsule.dart';
 import '../widgets/timeline/day_timeline_view.dart';
 import '../widgets/timeline/empty_day_notebook.dart';
 import '../widgets/timeline/note_sheets.dart';
 import '../widgets/to_do_sheet.dart';
-import 'note_page.dart';
+import '../note_composer.dart';
 
 class JournalPage extends ConsumerWidget {
   const JournalPage({required this.tripId, super.key});
@@ -215,7 +212,7 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
                 const SizedBox(height: AppSpacing.base),
                 if (isEmptyDay)
                   EmptyDayNotebook(
-                    stamp: _dayStamp(context, currentDay),
+                    stamp: noteDayStamp(context, state, currentDay),
                     weekday: _capitalised(
                       L10nDates.weekday(
                         context.l10n.localeName,
@@ -275,14 +272,6 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
     );
   }
 
-  String _dayStamp(BuildContext context, DateTime day) {
-    final l10n = context.l10n;
-    final date = L10nDates.weekdayDayMonth(l10n.localeName).format(day);
-    return _state.isSingleDay
-        ? date
-        : l10n.journal_noteStamp(_state.currentDayNumber ?? 1, date);
-  }
-
   void _addPhoto(DateTime day) =>
       AddPhotoSheet.show(context, tripId: _tripId, dayDate: day);
 
@@ -299,101 +288,19 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
     );
   }
 
-  /// Best effort: the polaroid is usually cached already; never hold the
-  /// page back for a slow download.
-  Future<void> _precachePolaroid(PhotoEntity? photo) async {
-    final url = photo?.imageUrl;
-    if (url == null) return;
-    await precacheImage(
-      StoragePhotoImage.providerFor(
-        url: url,
-        storagePath: photo!.storagePath,
-        maxDecodeDimension: StoragePhotoImage.maxDecodeDimensionFor(
-          notePolaroidPhotoSize,
-          MediaQuery.devicePixelRatioOf(context),
-        ),
-      ),
-      context,
-    ).timeout(const Duration(milliseconds: 300), onTimeout: () {});
-  }
-
-  Future<String?> _pushNotePage({
-    required DateTime day,
-    required String stamp,
-    required String existingText,
-    required ValueNotifier<bool> dictated,
-  }) async {
-    final photos = _state.photosForDay(day);
-    final firstPhoto = photos.isEmpty ? null : photos.first;
-    await _precachePolaroid(firstPhoto);
-    if (!mounted) return null;
-    return Navigator.of(context).push(
-      NotePageRoute(
-        stamp: stamp,
-        title: _state.trip.name,
-        existingText: existingText,
-        photoCount: photos.length,
-        photo: firstPhoto,
-        dictated: dictated,
-      ),
-    );
-  }
-
-  /// Opens an empty page; every Done saves a separate note, timed at Done
-  /// (#397), on the logical day — after midnight that's still the evening's.
   Future<void> _newNote(DateTime selectedDay) async {
-    final l10n = context.l10n;
-    final use24h = MediaQuery.alwaysUse24HourFormatOf(context);
-    final dictated = ValueNotifier(false);
-    final draft = await _pushNotePage(
-      day: selectedDay,
-      stamp:
-          '${_dayStamp(context, selectedDay)} · '
-          '${l10n.note_stampNew(L10nDates.clock(l10n.localeName, use24h: use24h).format(DateTime.now()))}',
-      existingText: '',
-      dictated: dictated,
-    );
-    dictated.dispose();
-    final content = draft?.trim() ?? '';
-    if (content.isEmpty || !mounted) return;
-
-    final state = ref.read(journalControllerProvider(_tripId)).value ?? _state;
-    final now = DateTime.now();
-    final latest = state.latestItemBefore(now);
-    final day = _clampToTrip(
-      state,
-      dayForNewItem(
-        selectedDay: selectedDay,
-        now: now,
-        previousAt: latest?.at,
-        previousDay: latest?.day,
-      ),
-    );
-    // The server gives ✦1 to a day's first 3 notes; this is the same count
-    // as far as the app can see it.
-    final earnsStar = state.notesForDay(day).length < maxStarredNotesPerDay;
-    showStarToast(
+    final note = await composeNewNote(
       context,
-      earnsStar ? l10n.toast_noteSaved : l10n.timeline_noteSavedNoStar,
+      ref,
+      tripId: _tripId,
+      selectedDay: selectedDay,
     );
-
-    final JournalNoteEntity note;
-    try {
-      note = await runCreateNote(
-        ref: ref,
-        tripId: _tripId,
-        dayDate: day,
-        takenAt: now,
-        content: content,
-        dictated: dictated.value,
-      );
-    } on Object {
-      // Surfaced by the createNoteMutation listener in JournalPage.
-      return;
-    }
-    if (!mounted) return;
+    if (note == null || !mounted) return;
     final notifier = ref.read(journalControllerProvider(_tripId).notifier);
-    if (state.currentDayDate != day) notifier.selectDay(day);
+    if (ref.read(journalControllerProvider(_tripId)).value?.currentDayDate !=
+        note.dayDate) {
+      notifier.selectDay(note.dayDate);
+    }
     _markFresh(note.id);
   }
 
@@ -440,14 +347,21 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
     final l10n = context.l10n;
     final use24h = MediaQuery.alwaysUse24HourFormatOf(context);
     final dictated = ValueNotifier(note.dictated);
-    final draft = await _pushNotePage(
+    final photo = note.photoId == null
+        ? null
+        : _state.photos.where((p) => p.id == note.photoId).firstOrNull;
+    final draft = await pushNotePage(
+      context,
+      state: _state,
       day: note.dayDate,
       stamp:
-          '${_dayStamp(context, note.dayDate)} · '
+          '${noteDayStamp(context, _state, note.dayDate)} · '
           '${l10n.note_stampEdit(L10nDates.clock(l10n.localeName, use24h: use24h).format(note.takenAt.toLocal()))}',
       existingText: note.content,
       dictated: dictated,
+      onPhoto: photo == null ? null : notePhotoAttachment(context, photo),
     );
+    final wasDictated = dictated.value;
     dictated.dispose();
     if (draft == null || !mounted) return;
     final content = draft.trim();
@@ -465,7 +379,7 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
         tripId: _tripId,
         noteId: note.id,
         content: content,
-        dictated: dictated.value,
+        dictated: wasDictated,
       ).then((_) {}, onError: (Object _) {}),
     );
   }
@@ -491,15 +405,6 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
       ).then((_) {}, onError: (Object _) {}),
     );
   }
-}
-
-/// The memory's days, so a new note never lands outside them.
-DateTime _clampToTrip(JournalState state, DateTime day) {
-  final dates = state.dayDates;
-  if (dates.isEmpty) return day;
-  if (day.isBefore(dates.first)) return dates.first;
-  if (day.isAfter(dates.last)) return dates.last;
-  return day;
 }
 
 String _capitalised(String s) =>
