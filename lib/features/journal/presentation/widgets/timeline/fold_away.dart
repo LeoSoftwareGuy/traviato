@@ -23,7 +23,9 @@ class FoldAway extends StatefulWidget {
 
 class _FoldAwayState extends State<FoldAway>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(vsync: this);
+  // Created up front, never lazily: a lazy controller first touched in
+  // dispose() would create a ticker on a deactivated element (#412).
+  late final AnimationController _c;
   var _reducedMotion = false;
 
   late final Animation<double> _fade = CurvedAnimation(
@@ -38,6 +40,12 @@ class _FoldAwayState extends State<FoldAway>
     parent: _c,
     curve: AppMotion.noteCurve,
   );
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(vsync: this);
+  }
 
   @override
   void didChangeDependencies() {

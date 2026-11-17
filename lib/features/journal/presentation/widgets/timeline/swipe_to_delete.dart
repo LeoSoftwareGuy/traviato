@@ -30,10 +30,18 @@ class SwipeToDelete extends StatefulWidget {
 class _SwipeToDeleteState extends State<SwipeToDelete>
     with SingleTickerProviderStateMixin {
   /// 0 closed … 1 open.
-  late final AnimationController _open = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 220),
-  );
+  // Created up front, never lazily: a lazy controller first touched in
+  // dispose() would create a ticker on a deactivated element (#412).
+  late final AnimationController _open;
+
+  @override
+  void initState() {
+    super.initState();
+    _open = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 220),
+    );
+  }
 
   @override
   void dispose() {
