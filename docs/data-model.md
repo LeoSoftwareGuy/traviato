@@ -60,12 +60,11 @@ An update trigger keeps `trip_id`, `taken_at` and `legacy`, and stamps
 photo_id. Stars: ✦1 per new note, at most 3 per day (counted in
 `points_ledger.day_date`); edits and deletes never change stars.
 
-### `day_notes` — read-only, to be dropped
-The old one-note-per-day table (`unique (trip_id, day_date)`). Every
-non-empty row was copied into `journal_notes` as one `legacy` note **with
-the same id** (ledger rows, director plans and kept films keep pointing at
-it), `taken_at = edited_at = updated_at`. Writes revoked; a later migration
-drops it.
+### `day_notes` — dropped (#406)
+The old one-note-per-day table (`unique (trip_id, day_date)`). #400 copied
+every non-empty row into `journal_notes` as one `legacy` note **with the
+same id** (ledger rows, director plans and kept films keep pointing at it),
+`taken_at = edited_at = updated_at`, and made it read-only; #406 dropped it.
 
 ### `photos`
 `id (client-generated), trip_id (cascade), day_date?, storage_path, caption?,

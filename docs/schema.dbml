@@ -146,19 +146,24 @@ Table checklist_suggestions {
   Note: 'Global catalog, seeded (35 rows). Select-only for clients.'
 }
 
-Table day_notes {
-  id uuid [pk]
+Table journal_notes {
+  id uuid [pk, note: 'client-generated']
   trip_id uuid [not null]
-  day_date date [not null]
-  content text [not null]
+  day_date date [not null, note: 'logical day']
+  taken_at timestamp [not null]
+  edited_at timestamp [not null]
+  content text [not null, note: 'non-blank']
+  dictated boolean [not null, default: false]
+  photo_id uuid [note: 'on photo delete set null; same trip']
+  legacy boolean [not null, default: false]
   created_at timestamp
-  updated_at timestamp
 
   indexes {
-    (trip_id, day_date) [unique]
+    (trip_id, taken_at)
+    photo_id
   }
 
-  Note: 'unique(trip_id, day_date) — one note per day.'
+  Note: 'Many timed notes per day (#397, #400). Replaced day_notes (dropped, #406).'
 }
 
 Table photos {
@@ -292,12 +297,12 @@ Table profile_stats_view {
   memories_count integer
   places_count integer [note: 'distinct place_text across quests ∪ photos']
   countries_count integer
-  days_logged integer [note: 'distinct day_date across day_notes ∪ photos']
+  days_logged integer [note: 'distinct day_date across journal_notes ∪ photos']
   stars_total integer
   photos_count integer
   notes_count integer
 
-  Note: 'VIEW — derived from trips, quests, photos, day_notes, points_ledger.'
+  Note: 'VIEW — derived from trips, quests, photos, journal_notes, points_ledger.'
 }
 
 Table expense_summary_view {
@@ -316,7 +321,8 @@ Ref: profiles.id > auth_users.id
 Ref: trips.user_id > profiles.id
 Ref: quests.trip_id > trips.id
 Ref: checklist_items.trip_id > trips.id
-Ref: day_notes.trip_id > trips.id
+Ref: journal_notes.trip_id > trips.id
+Ref: journal_notes.photo_id > photos.id
 Ref: photos.trip_id > trips.id
 Ref: expenses.trip_id > trips.id
 Ref: points_ledger.user_id > profiles.id

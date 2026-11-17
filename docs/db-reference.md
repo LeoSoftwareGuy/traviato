@@ -179,9 +179,12 @@ travel_essentials/clothing_shoes/toiletries_health/gadgets_tech/nice_to_haves) �
 `id` · `title` · `category` (same check) · `is_essential`. Select-only for
 authenticated. Seeded: 35 rows (8/7/8/7/7 across the 5 categories).
 
-### `day_notes`
-`id` · `trip_id` FK cascade · `day_date` · `content` · `created_at`/`updated_at`.
-**unique(trip_id, day_date)** — one note per day. Owner-via-parent-trip, all ops.
+### `journal_notes` (#400; replaced `day_notes`, dropped in #406)
+`id` (client-generated) · `trip_id` FK cascade · `day_date` (logical day) ·
+`taken_at` · `edited_at` · `content` (non-blank) · `dictated` · `photo_id` FK →
+photos SET NULL (same trip, checked in RLS) · `legacy` · `created_at`. Many per
+day. Owner-via-parent-trip, all ops; an update trigger keeps `trip_id`,
+`taken_at`, `legacy` and stamps `edited_at`.
 
 ### `photos`
 `id` (client-generated, drives storage path `{user_id}/{trip_id}/{photo_id}.{ext}`) ·
@@ -254,7 +257,7 @@ RLS: select-own; update-own grant is **column-scoped to `published_at` only**
   just to count them).
 - **`profile_stats_view`** — per profile: `memories_count`, `places_count`
   (distinct place_text across quests ∪ photos), `countries_count`,
-  `days_logged` (distinct day_date across day_notes ∪ photos), `stars_total`,
+  `days_logged` (distinct day_date across journal_notes ∪ photos), `stars_total`,
   `photos_count`, `notes_count`.
 - **`expense_summary_view`** — per trip: `total_amount`, `item_count`.
 
@@ -266,7 +269,7 @@ RLS: select-own; update-own grant is **column-scoped to `published_at` only**
   DEFINER. Creates the `profiles` row; sources username/avatar from
   email/password, Google, or Apple OAuth metadata shapes.
 - **`set_updated_at()`** — generic trigger, sets `updated_at = now()` (used by
-  `trips`, `day_notes`).
+  `trips`).
 - **`award_points(p_source, p_source_id, p_trip_id) → int`** — SECURITY
   DEFINER. Verifies trip ownership + that the source row is real, derives the
   point value **server-side** (note=1, photo=2, quest=1 flat, bonus_task=
@@ -307,7 +310,7 @@ Files: `index.ts` (bootstrap) · `handler.ts` (request logic) · `gather.ts`
 3. Looks up the trip via a **service-role** client; 403 if not the owner.
 4. **Idempotent short-circuit**: if `wrap_ups.content` already exists, returns
    it without calling Anthropic.
-5. `gather.ts` fetches: trip fields, day_notes, up to 500 photos, up to 500
+5. `gather.ts` fetches: trip fields, journal_notes, up to 500 photos, up to 500
    completed bonus_task_assignments (joined with template title/points), all
    points_ledger rows (summed → `starsEarned`), and the most recent
    achievement earned since trip start. **Quests are deliberately never
