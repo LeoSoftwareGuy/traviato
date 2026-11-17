@@ -59,6 +59,10 @@ class NoteDictationController extends ChangeNotifier {
   String? _lastApplied;
 
   bool get isListening => _listening;
+
+  /// Some speech made it into the draft this session (#397's `dictated`).
+  bool get hasDictated => _hasDictated;
+  var _hasDictated = false;
   Duration get elapsed => _elapsed;
   DictationNotice get notice => _notice;
 
@@ -166,6 +170,7 @@ class NoteDictationController extends ChangeNotifier {
     // something the user typed in the meantime.
     if (insertion == null || (!_listening && !isFinal)) return;
     if (draft.text != _lastApplied) return;
+    if (words.trim().isNotEmpty) _hasDictated = true;
     draft.applyDictation(
       insertion.apply(words),
       pending: isFinal || !_listening

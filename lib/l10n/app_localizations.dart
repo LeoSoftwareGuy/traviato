@@ -4080,6 +4080,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, other{+{count} more}}'**
   String neonNight_planMore(int count);
+
+  /// Journal timeline (#401): divider before the first item past midnight; uppercased.
+  ///
+  /// In en, this message translates to:
+  /// **'After midnight · {date}'**
+  String timeline_afterMidnight(String date);
+
+  /// Journal timeline (#401): rail label and divider for items added after the day was over; uppercased.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get timeline_later;
+
+  /// Journal timeline (#401): chip on a note copied from the old one-note-per-day journal; uppercased.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier note'**
+  String get timeline_earlierNote;
+
+  /// Journal timeline (#401): chip on a note that was just saved; uppercased.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get timeline_justNow;
+
+  /// Journal timeline (#401): chip on a note written after its day was over; uppercased.
+  ///
+  /// In en, this message translates to:
+  /// **'Written {date}'**
+  String timeline_writtenOn(String date);
+
+  /// Journal timeline (#401): footer of an earlier note; {words} is journal_wordCount; uppercased.
+  ///
+  /// In en, this message translates to:
+  /// **'Last edited {time} · {words}'**
+  String timeline_lastEdited(String time, String words);
+
+  /// Journal timeline (#401): expands a long note.
+  ///
+  /// In en, this message translates to:
+  /// **'more'**
+  String get timeline_more;
+
+  /// Journal timeline (#401): collapses an expanded note.
+  ///
+  /// In en, this message translates to:
+  /// **'less'**
+  String get timeline_less;
+
+  /// Journal timeline (#401): chip linking a note to its photo; the caption follows after ' · '.
+  ///
+  /// In en, this message translates to:
+  /// **'On photo · {time}'**
+  String timeline_onPhoto(String time);
+
+  /// Journal day subtitle (#401).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 photo} other{{count} photos}}'**
+  String timeline_photoCount(int count);
+
+  /// Journal day subtitle (#401).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 note} other{{count} notes}}'**
+  String timeline_noteCount(int count);
+
+  /// Journal capture button (#401): left half label.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get timeline_capturePhoto;
+
+  /// Journal capture button (#401): right half label.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get timeline_captureNote;
+
+  /// Journal capture button (#401): screen-reader label of the Photo half.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a photo'**
+  String get timeline_addPhotoSemantics;
+
+  /// Journal capture button (#401): screen-reader label of the Note half.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note'**
+  String get timeline_addNoteSemantics;
+
+  /// Note actions sheet (#401).
+  ///
+  /// In en, this message translates to:
+  /// **'Edit note'**
+  String get timeline_editNote;
+
+  /// Note actions sheet (#401).
+  ///
+  /// In en, this message translates to:
+  /// **'Delete note'**
+  String get timeline_deleteNote;
+
+  /// Delete-note confirm sheet (#401); {time} is the note's time.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the {time} note?'**
+  String timeline_deleteTitle(String time);
+
+  /// Delete-note confirm sheet (#401).
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s removed from this day and won\'t appear in your film. Photos stay. This can\'t be undone.'**
+  String get timeline_deleteBody;
+
+  /// Delete-note confirm sheet (#401): keeps the note.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep'**
+  String get timeline_keep;
+
+  /// Toast after editing a note (#401); no star.
+  ///
+  /// In en, this message translates to:
+  /// **'Note updated'**
+  String get timeline_noteUpdated;
+
+  /// Toast after deleting a note (#401).
+  ///
+  /// In en, this message translates to:
+  /// **'Note deleted'**
+  String get timeline_noteDeleted;
+
+  /// Toast after a new note once the day's 3 note-stars are earned (#401).
+  ///
+  /// In en, this message translates to:
+  /// **'Note saved'**
+  String get timeline_noteSavedNoStar;
+
+  /// Journal empty day (#401); {weekday} is e.g. 'Saturday', capitalised.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing written for {weekday} yet'**
+  String timeline_emptyTitle(String weekday);
+
+  /// Journal empty day (#401).
+  ///
+  /// In en, this message translates to:
+  /// **'Write a line whenever something happens. Each time you tap Done it\'s kept as its own note, with the time.'**
+  String get timeline_emptyBody;
+
+  /// Journal empty day (#401): primary button.
+  ///
+  /// In en, this message translates to:
+  /// **'✎ Write the first note ✦1'**
+  String get timeline_emptyWrite;
+
+  /// Journal empty day (#401): secondary link.
+  ///
+  /// In en, this message translates to:
+  /// **'or add a photo'**
+  String get timeline_emptyOrPhoto;
+
+  /// Journal empty day (#401): faded line on the small notebook page.
+  ///
+  /// In en, this message translates to:
+  /// **'The first line goes here…'**
+  String get timeline_emptyLine;
+
+  /// Note page stamp for a new note (#401); uppercased.
+  ///
+  /// In en, this message translates to:
+  /// **'New note · {time}'**
+  String note_stampNew(String time);
+
+  /// Note page stamp when editing a note (#401); uppercased.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit note · {time}'**
+  String note_stampEdit(String time);
 }
 
 class _AppLocalizationsDelegate

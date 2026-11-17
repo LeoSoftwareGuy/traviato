@@ -2712,4 +2712,128 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String timeline_afterMidnight(String date) {
+    return 'After midnight · $date';
+  }
+
+  @override
+  String get timeline_later => 'Later';
+
+  @override
+  String get timeline_earlierNote => 'Earlier note';
+
+  @override
+  String get timeline_justNow => 'Just now';
+
+  @override
+  String timeline_writtenOn(String date) {
+    return 'Written $date';
+  }
+
+  @override
+  String timeline_lastEdited(String time, String words) {
+    return 'Last edited $time · $words';
+  }
+
+  @override
+  String get timeline_more => 'more';
+
+  @override
+  String get timeline_less => 'less';
+
+  @override
+  String timeline_onPhoto(String time) {
+    return 'On photo · $time';
+  }
+
+  @override
+  String timeline_photoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos',
+      one: '1 photo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeline_noteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count notes',
+      one: '1 note',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get timeline_capturePhoto => 'Photo';
+
+  @override
+  String get timeline_captureNote => 'Note';
+
+  @override
+  String get timeline_addPhotoSemantics => 'Add a photo';
+
+  @override
+  String get timeline_addNoteSemantics => 'Add a note';
+
+  @override
+  String get timeline_editNote => 'Edit note';
+
+  @override
+  String get timeline_deleteNote => 'Delete note';
+
+  @override
+  String timeline_deleteTitle(String time) {
+    return 'Delete the $time note?';
+  }
+
+  @override
+  String get timeline_deleteBody =>
+      'It\'s removed from this day and won\'t appear in your film. Photos stay. This can\'t be undone.';
+
+  @override
+  String get timeline_keep => 'Keep';
+
+  @override
+  String get timeline_noteUpdated => 'Note updated';
+
+  @override
+  String get timeline_noteDeleted => 'Note deleted';
+
+  @override
+  String get timeline_noteSavedNoStar => 'Note saved';
+
+  @override
+  String timeline_emptyTitle(String weekday) {
+    return 'Nothing written for $weekday yet';
+  }
+
+  @override
+  String get timeline_emptyBody =>
+      'Write a line whenever something happens. Each time you tap Done it\'s kept as its own note, with the time.';
+
+  @override
+  String get timeline_emptyWrite => '✎ Write the first note ✦1';
+
+  @override
+  String get timeline_emptyOrPhoto => 'or add a photo';
+
+  @override
+  String get timeline_emptyLine => 'The first line goes here…';
+
+  @override
+  String note_stampNew(String time) {
+    return 'New note · $time';
+  }
+
+  @override
+  String note_stampEdit(String time) {
+    return 'Edit note · $time';
+  }
 }

@@ -2768,4 +2768,132 @@ class AppLocalizationsRu extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String timeline_afterMidnight(String date) {
+    return 'После полуночи · $date';
+  }
+
+  @override
+  String get timeline_later => 'Позже';
+
+  @override
+  String get timeline_earlierNote => 'Прежняя заметка';
+
+  @override
+  String get timeline_justNow => 'Только что';
+
+  @override
+  String timeline_writtenOn(String date) {
+    return 'Написано $date';
+  }
+
+  @override
+  String timeline_lastEdited(String time, String words) {
+    return 'Изменено $time · $words';
+  }
+
+  @override
+  String get timeline_more => 'ещё';
+
+  @override
+  String get timeline_less => 'свернуть';
+
+  @override
+  String timeline_onPhoto(String time) {
+    return 'К фото · $time';
+  }
+
+  @override
+  String timeline_photoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count фото',
+      many: '$count фото',
+      few: '$count фото',
+      one: '$count фото',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeline_noteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count заметки',
+      many: '$count заметок',
+      few: '$count заметки',
+      one: '$count заметка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get timeline_capturePhoto => 'Фото';
+
+  @override
+  String get timeline_captureNote => 'Заметка';
+
+  @override
+  String get timeline_addPhotoSemantics => 'Добавить фото';
+
+  @override
+  String get timeline_addNoteSemantics => 'Добавить заметку';
+
+  @override
+  String get timeline_editNote => 'Изменить заметку';
+
+  @override
+  String get timeline_deleteNote => 'Удалить заметку';
+
+  @override
+  String timeline_deleteTitle(String time) {
+    return 'Удалить заметку от $time?';
+  }
+
+  @override
+  String get timeline_deleteBody =>
+      'Она исчезнет из этого дня и не попадёт в фильм. Фото останутся. Это нельзя отменить.';
+
+  @override
+  String get timeline_keep => 'Оставить';
+
+  @override
+  String get timeline_noteUpdated => 'Заметка изменена';
+
+  @override
+  String get timeline_noteDeleted => 'Заметка удалена';
+
+  @override
+  String get timeline_noteSavedNoStar => 'Заметка сохранена';
+
+  @override
+  String timeline_emptyTitle(String weekday) {
+    return '$weekday: пока ни строчки';
+  }
+
+  @override
+  String get timeline_emptyBody =>
+      'Пишите строчку, когда что-то происходит. Каждое нажатие «Готово» сохраняет отдельную заметку со временем.';
+
+  @override
+  String get timeline_emptyWrite => '✎ Первая заметка ✦1';
+
+  @override
+  String get timeline_emptyOrPhoto => 'или добавьте фото';
+
+  @override
+  String get timeline_emptyLine => 'Первая строчка будет здесь…';
+
+  @override
+  String note_stampNew(String time) {
+    return 'Новая заметка · $time';
+  }
+
+  @override
+  String note_stampEdit(String time) {
+    return 'Правка заметки · $time';
+  }
 }

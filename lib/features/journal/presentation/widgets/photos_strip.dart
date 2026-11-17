@@ -1,9 +1,6 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/context_l10n.dart';
-import '../../../../core/l10n/l10n_dates.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -13,6 +10,7 @@ import '../../../../core/widgets/dashed_rrect_border.dart';
 import '../../../photo/domain/entities/film_pick.dart';
 import '../../../photo/domain/entities/photo_entity.dart';
 import '../../../photo/presentation/widgets/storage_photo_image.dart';
+import 'photo_tile_badges.dart';
 
 const _photoTileWidth = 80.0;
 const _photoTileHeight = 100.0;
@@ -232,9 +230,9 @@ class _PhotoTile extends StatelessWidget {
     final takenAt = photo.takenAt;
     final pick = photo.filmPick;
     final badge = switch (pick) {
-      FilmPick.always => const _FilmBadge.yourPick(),
-      FilmPick.never => const _FilmBadge.leftOut(),
-      FilmPick.auto when isAutoPicked => const _FilmBadge.autoPicked(),
+      FilmPick.always => const FilmBadge.yourPick(),
+      FilmPick.never => const FilmBadge.leftOut(),
+      FilmPick.auto when isAutoPicked => const FilmBadge.autoPicked(),
       FilmPick.auto => null,
     };
     return GestureDetector(
@@ -274,105 +272,9 @@ class _PhotoTile extends StatelessWidget {
                       left: 6,
                       right: 6,
                       bottom: 6,
-                      child: Center(child: _TimePill(takenAt: takenAt)),
+                      child: Center(child: PhotoTimePill(takenAt: takenAt)),
                     ),
                 ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-enum _FilmBadgeKind { autoPicked, yourPick, leftOut }
-
-/// A thumb's film marker (#294): "▸" when the film chose it, "▸ Your pick"
-/// for Always, "Left out" for Leave out.
-class _FilmBadge extends StatelessWidget {
-  const _FilmBadge.autoPicked() : _kind = _FilmBadgeKind.autoPicked;
-  const _FilmBadge.yourPick() : _kind = _FilmBadgeKind.yourPick;
-  const _FilmBadge.leftOut() : _kind = _FilmBadgeKind.leftOut;
-
-  final _FilmBadgeKind _kind;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final (label, foreground, background, border) = switch (_kind) {
-      _FilmBadgeKind.autoPicked => (
-        '▸',
-        AppColors.primaryLight,
-        AppColors.tint(AppColors.filmBackground, .6),
-        AppColors.tint(AppColors.primary, .45),
-      ),
-      _FilmBadgeKind.yourPick => (
-        '▸ ${l10n.film_badgeYourPick}',
-        AppColors.background,
-        AppColors.primary,
-        AppColors.primary,
-      ),
-      _FilmBadgeKind.leftOut => (
-        l10n.film_badgeLeftOut,
-        AppColors.textSecondary,
-        AppColors.tint(AppColors.filmBackground, .7),
-        AppColors.tint(AppColors.textSecondary, .3),
-      ),
-    };
-    return Container(
-      key: Key('journal-photo-film-badge-${_kind.name}'),
-      constraints: const BoxConstraints(
-        maxWidth: _photoTileWidth - 14,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: border),
-      ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: AppTypography.caption.copyWith(
-          fontSize: 9,
-          height: 1.2,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0,
-          color: foreground,
-        ),
-      ),
-    );
-  }
-}
-
-/// Frosted time label over the bottom of a thumbnail — only rendered when
-/// the photo has a `takenAt` (#149).
-class _TimePill extends StatelessWidget {
-  const _TimePill({required this.takenAt});
-
-  final DateTime takenAt;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.all(Radius.circular(AppSpacing.xs)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-        child: ColoredBox(
-          color: AppColors.tint(AppColors.background50, .7),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            child: Text(
-              L10nDates.time(context.l10n.localeName).format(takenAt),
-              key: const Key('journal-photo-time-pill'),
-              maxLines: 1,
-              style: AppTypography.caption.copyWith(
-                fontSize: 9,
-                height: 1.2,
-                letterSpacing: 0,
-                color: AppColors.textPrimary,
               ),
             ),
           ),

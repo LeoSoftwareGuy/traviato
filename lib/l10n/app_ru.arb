@@ -2613,21 +2613,162 @@
     "x-review": "pending"
   },
   "neonNight_burst": "Серия",
-  "@neonNight_burst": {"description": "Neon Night film (#363): the label word on a burst of photos taken within a minute, shown in capitals as 'BURST · 23:41'.", "x-review": "pending"},
+  "@neonNight_burst": {
+    "description": "Neon Night film (#363): the label word on a burst of photos taken within a minute, shown in capitals as 'BURST · 23:41'.",
+    "x-review": "pending"
+  },
   "neonNight_noteTag": "Заметка {number}",
-  "@neonNight_noteTag": {"x-review": "pending", "description": "Neon Night film (#363): the tag over the note written in neon, shown in capitals as 'NOTE 04 · 00:31'. number is the note's place among the memory's notes, already zero-padded.", "placeholders": {"number": {"type": "String"}}},
+  "@neonNight_noteTag": {
+    "x-review": "pending",
+    "description": "Neon Night film (#363): the tag over the note written in neon, shown in capitals as 'NOTE 04 · 00:31'. number is the note's place among the memory's notes, already zero-padded.",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
   "neonNight_headline": "Вот это ночь",
-  "@neonNight_headline": {"x-review": "pending"},
+  "@neonNight_headline": {
+    "x-review": "pending"
+  },
   "neonNight_moments": "{count, plural, one{{count} момент} few{{count} момента} many{{count} моментов} other{{count} момента}}",
-  "@neonNight_moments": {"x-review": "pending"},
+  "@neonNight_moments": {
+    "x-review": "pending"
+  },
   "neonNight_photos": "{count, plural, other{{count} фото}}",
-  "@neonNight_photos": {"x-review": "pending"},
+  "@neonNight_photos": {
+    "x-review": "pending"
+  },
   "neonNight_notes": "{count, plural, one{{count} заметка} few{{count} заметки} many{{count} заметок} other{{count} заметки}}",
-  "@neonNight_notes": {"x-review": "pending"},
+  "@neonNight_notes": {
+    "x-review": "pending"
+  },
   "neonNight_ticks": "{count, plural, one{{count} отметка} few{{count} отметки} many{{count} отметок} other{{count} отметки}}",
-  "@neonNight_ticks": {"x-review": "pending"},
+  "@neonNight_ticks": {
+    "x-review": "pending"
+  },
   "neonNight_planMore": "{count, plural, other{и ещё {count}}}",
   "@neonNight_planMore": {
+    "x-review": "pending"
+  },
+  "timeline_afterMidnight": "После полуночи · {date}",
+  "@timeline_afterMidnight": {
+    "x-review": "pending"
+  },
+  "timeline_later": "Позже",
+  "@timeline_later": {
+    "x-review": "pending"
+  },
+  "timeline_earlierNote": "Прежняя заметка",
+  "@timeline_earlierNote": {
+    "x-review": "pending"
+  },
+  "timeline_justNow": "Только что",
+  "@timeline_justNow": {
+    "x-review": "pending"
+  },
+  "timeline_writtenOn": "Написано {date}",
+  "@timeline_writtenOn": {
+    "x-review": "pending"
+  },
+  "timeline_lastEdited": "Изменено {time} · {words}",
+  "@timeline_lastEdited": {
+    "x-review": "pending"
+  },
+  "timeline_more": "ещё",
+  "@timeline_more": {
+    "x-review": "pending"
+  },
+  "timeline_less": "свернуть",
+  "@timeline_less": {
+    "x-review": "pending"
+  },
+  "timeline_onPhoto": "К фото · {time}",
+  "@timeline_onPhoto": {
+    "x-review": "pending"
+  },
+  "timeline_photoCount": "{count, plural, one{{count} фото} few{{count} фото} many{{count} фото} other{{count} фото}}",
+  "@timeline_photoCount": {
+    "x-review": "pending"
+  },
+  "timeline_noteCount": "{count, plural, one{{count} заметка} few{{count} заметки} many{{count} заметок} other{{count} заметки}}",
+  "@timeline_noteCount": {
+    "x-review": "pending"
+  },
+  "timeline_capturePhoto": "Фото",
+  "@timeline_capturePhoto": {
+    "x-review": "pending"
+  },
+  "timeline_captureNote": "Заметка",
+  "@timeline_captureNote": {
+    "x-review": "pending"
+  },
+  "timeline_addPhotoSemantics": "Добавить фото",
+  "@timeline_addPhotoSemantics": {
+    "x-review": "pending"
+  },
+  "timeline_addNoteSemantics": "Добавить заметку",
+  "@timeline_addNoteSemantics": {
+    "x-review": "pending"
+  },
+  "timeline_editNote": "Изменить заметку",
+  "@timeline_editNote": {
+    "x-review": "pending"
+  },
+  "timeline_deleteNote": "Удалить заметку",
+  "@timeline_deleteNote": {
+    "x-review": "pending"
+  },
+  "timeline_deleteTitle": "Удалить заметку от {time}?",
+  "@timeline_deleteTitle": {
+    "x-review": "pending"
+  },
+  "timeline_deleteBody": "Она исчезнет из этого дня и не попадёт в фильм. Фото останутся. Это нельзя отменить.",
+  "@timeline_deleteBody": {
+    "x-review": "pending"
+  },
+  "timeline_keep": "Оставить",
+  "@timeline_keep": {
+    "x-review": "pending"
+  },
+  "timeline_noteUpdated": "Заметка изменена",
+  "@timeline_noteUpdated": {
+    "x-review": "pending"
+  },
+  "timeline_noteDeleted": "Заметка удалена",
+  "@timeline_noteDeleted": {
+    "x-review": "pending"
+  },
+  "timeline_noteSavedNoStar": "Заметка сохранена",
+  "@timeline_noteSavedNoStar": {
+    "x-review": "pending"
+  },
+  "timeline_emptyTitle": "{weekday}: пока ни строчки",
+  "@timeline_emptyTitle": {
+    "x-review": "pending"
+  },
+  "timeline_emptyBody": "Пишите строчку, когда что-то происходит. Каждое нажатие «Готово» сохраняет отдельную заметку со временем.",
+  "@timeline_emptyBody": {
+    "x-review": "pending"
+  },
+  "timeline_emptyWrite": "✎ Первая заметка ✦1",
+  "@timeline_emptyWrite": {
+    "x-review": "pending"
+  },
+  "timeline_emptyOrPhoto": "или добавьте фото",
+  "@timeline_emptyOrPhoto": {
+    "x-review": "pending"
+  },
+  "timeline_emptyLine": "Первая строчка будет здесь…",
+  "@timeline_emptyLine": {
+    "x-review": "pending"
+  },
+  "note_stampNew": "Новая заметка · {time}",
+  "@note_stampNew": {
+    "x-review": "pending"
+  },
+  "note_stampEdit": "Правка заметки · {time}",
+  "@note_stampEdit": {
     "x-review": "pending"
   }
 }
