@@ -33,7 +33,7 @@ class JournalNoteEntity extends Equatable {
   /// The photo the note was written on, if any.
   final String? photoId;
 
-  /// Copied from the old one-note-per-day model (`day_notes`), shown at its
+  /// Copied from the old one-note-per-day model (dropped, #406), shown at its
   /// last edit.
   final bool legacy;
 
