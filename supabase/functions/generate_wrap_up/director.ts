@@ -55,10 +55,12 @@ import {
   type GoldenVowsPlan,
   goldenVowsToolProperty,
   gvCheckContext,
+  healGoldenVows,
   repairGoldenVows,
 } from "./golden_vows.ts";
 import {
   describeNeonNightProblems,
+  healNeonNight,
   NEON_NIGHT_PROMPT_RULES,
   type NeonNightPlan,
   neonNightToolProperty,
@@ -844,34 +846,42 @@ export function currentSkyStory(
     : null;
 }
 
-// The director's Golden Vows section if it still fits the memory as it is
-// now (no deleted or left-out photos, notes still saying those words) —
-// otherwise null, and Sky Story plays (#346).
+// The director's Golden Vows section fitted to the memory as it is now:
+// as stored while it fits, else healed in code — photos deleted or left
+// out since, notes reworded (#393). Null when even the healed section
+// breaks the rules, and Sky Story plays (#346).
 export function currentGoldenVows(
   record: unknown,
   tripData: TripData,
 ): GoldenVowsPlan | null {
   if (!isDirectorRecord(record) || !record.golden_vows) return null;
-  const problems = describeGoldenVowsProblems(
-    record.golden_vows,
-    gvCheckContext(tripData, new Set(record.failed_ids ?? [])),
-  );
-  return problems.length === 0 ? record.golden_vows : null;
+  const context = gvCheckContext(tripData, new Set(record.failed_ids ?? []));
+  if (describeGoldenVowsProblems(record.golden_vows, context).length === 0) {
+    return record.golden_vows;
+  }
+  const healed = healGoldenVows(record.golden_vows, context);
+  return describeGoldenVowsProblems(healed, context).length === 0
+    ? healed as GoldenVowsPlan
+    : null;
 }
 
-// The director's Neon Night section if it still fits the memory as it is
-// now (no deleted or left-out photos, notes still saying those words) —
-// otherwise null, and the next film plays (#363).
+// The director's Neon Night section fitted to the memory as it is now:
+// as stored while it fits, else healed in code — photos deleted or left
+// out since, notes reworded (#393). Null when even the healed section
+// breaks the rules, and the next film plays (#363).
 export function currentNeonNight(
   record: unknown,
   tripData: TripData,
 ): NeonNightPlan | null {
   if (!isDirectorRecord(record) || !record.neon_night) return null;
-  const problems = describeNeonNightProblems(
-    record.neon_night,
-    nnCheckContext(tripData, new Set(record.failed_ids ?? [])),
-  );
-  return problems.length === 0 ? record.neon_night : null;
+  const context = nnCheckContext(tripData, new Set(record.failed_ids ?? []));
+  if (describeNeonNightProblems(record.neon_night, context).length === 0) {
+    return record.neon_night;
+  }
+  const healed = healNeonNight(record.neon_night, context);
+  return describeNeonNightProblems(healed, context).length === 0
+    ? healed as NeonNightPlan
+    : null;
 }
 
 // [iso] as 'HH:MM' on the app's clock (TripData.utc_offset_minutes, #363),

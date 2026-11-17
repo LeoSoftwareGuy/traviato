@@ -590,6 +590,91 @@ export function repairGoldenVows(
   return gv;
 }
 
+// A stored section healed to the memory as it is now (#393): a photo
+// deleted or left out since the director ran no longer throws the whole
+// album away. A hero whose photo is gone is dropped (its label was written
+// for that photo). A chapter photo that's gone is replaced by a photo used
+// nowhere else that keeps the chapters' time order — an Always pick first,
+// else the one in the middle of the gap — and a chapter that can't be
+// refilled is dropped. Then [repairGoldenVows] drops note cards whose note
+// no longer says those words. Never invents a photo; the caller still
+// checks the result. Never throws.
+export function healGoldenVows(
+  data: unknown,
+  context: GvCheckContext,
+): unknown {
+  if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    return data;
+  }
+  const gv = structuredClone(data) as Record<string, unknown>;
+  const known = (id: unknown): id is string =>
+    isString(id) && context.photoOrder.has(id) && !context.excludedIds.has(id);
+  const order = (id: string) => context.photoOrder.get(id)!;
+  const used = new Set<string>();
+
+  if (Array.isArray(gv.heroes)) {
+    gv.heroes = (gv.heroes as unknown[]).filter((raw) => {
+      if (typeof raw !== "object" || raw === null) return true;
+      const id = (raw as Record<string, unknown>).photo_id;
+      if (!known(id)) return false;
+      used.add(id);
+      return true;
+    });
+  }
+
+  if (Array.isArray(gv.chapters)) {
+    const chapters = (gv.chapters as unknown[]).filter((c) =>
+      typeof c === "object" && c !== null &&
+      Array.isArray((c as Record<string, unknown>).photo_ids)
+    ) as Record<string, unknown>[];
+    for (const chapter of chapters) {
+      for (const id of chapter.photo_ids as unknown[]) {
+        if (known(id)) used.add(id);
+      }
+    }
+    const ordered = [...context.photoOrder.entries()]
+      .sort((a, b) => a[1] - b[1]).map(([id]) => id)
+      .filter((id) => !context.excludedIds.has(id));
+    let last = -1;
+    gv.chapters = chapters.filter((chapter, c) => {
+      const ids = chapter.photo_ids as unknown[];
+      const healed: string[] = [];
+      for (let k = 0; k < ids.length; k++) {
+        const id = ids[k];
+        if (known(id)) {
+          healed.push(id);
+          last = Math.max(last, order(id));
+          continue;
+        }
+        // The next photo still shown after this slot, in this chapter or
+        // a later one: the gap the replacement has to fit in.
+        const later = [
+          ...ids.slice(k + 1),
+          ...chapters.slice(c + 1).flatMap((n) => n.photo_ids as unknown[]),
+        ].find(known);
+        const upper = later === undefined ? Infinity : order(later);
+        const fits = ordered.filter((p) =>
+          !used.has(p) && order(p) > last && order(p) < upper
+        );
+        const pick = fits.find((p) => context.mustIncludeIds.has(p)) ??
+          fits[Math.floor((fits.length - 1) / 2)];
+        if (pick === undefined) {
+          // No photo fits: the chapter goes, and what it kept goes back to
+          // the pool for the carousel and the heart.
+          for (const p of [...healed, ...ids.filter(known)]) used.delete(p);
+          return false;
+        }
+        used.add(pick);
+        healed.push(pick);
+        last = order(pick);
+      }
+      chapter.photo_ids = healed;
+      return true;
+    });
+  }
+  return repairGoldenVows(gv, context);
+}
+
 // --- Building content.golden_vows ----------------------------------------
 
 // The chapter's layout from its photos' orientations: a landscape first →

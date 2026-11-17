@@ -184,6 +184,18 @@ Post-MVP: `video_path`, `video_status`.
   photo. Up to 200 photos (more are sampled evenly). The app sends
   `utc_offset_minutes` so the director reads photo times as local times.
   Kept films follow Golden Vows' rules.
+- **Healing a stored section** (#393, no schema change): when a photo is
+  deleted or left out, or a note reworded, after the director ran, the
+  `golden_vows` / `neon_night` section is fitted to the memory in code on
+  open (no AI call) instead of being discarded — which used to switch the
+  film to Sky Story for good, as the director only re-runs when photo days
+  change. Neon Night: gone photos leave their moments (which retype), a
+  chapter whose first photo is gone starts at its earliest remaining
+  moment photo, an emptied chapter folds into the one before, the note
+  scene loses a gone photo. Golden Vows: a gone hero is dropped, a gone
+  chapter photo is replaced by an unused one that keeps time order, else
+  the chapter goes. Lines whose note no longer says those words are
+  dropped. Only a section that still breaks the rules falls back.
 
 ### `photo_analysis` (#328)
 `photo_id PK/FK photos cascade, trip_id FK cascade, storage_path (the file
