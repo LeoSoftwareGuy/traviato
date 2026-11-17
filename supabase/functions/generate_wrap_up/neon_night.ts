@@ -638,6 +638,57 @@ export function repairNeonNight(
   return nn;
 }
 
+// A stored section healed to the memory as it is now (#393): a photo
+// deleted or left out since the director ran no longer throws the whole
+// film away. A chapter whose first photo is gone starts at its earliest
+// remaining moment photo — inside its old span, so its moments stay its
+// own — and one with none left folds into the chapter before. The note
+// scene loses a background photo that's gone. Then [repairNeonNight]
+// drops gone photos from moments, retypes them, and drops card lines or a
+// note scene whose note no longer says those words. Never invents a
+// photo; the caller still checks the result. Never throws.
+export function healNeonNight(
+  data: unknown,
+  context: NnCheckContext,
+): unknown {
+  if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    return data;
+  }
+  const nn = structuredClone(data) as Record<string, unknown>;
+  const known = (id: unknown): id is string =>
+    isString(id) && context.photoOrder.has(id) && !context.excludedIds.has(id);
+  if (Array.isArray(nn.chapters)) {
+    nn.chapters = (nn.chapters as unknown[]).filter((raw) => {
+      if (typeof raw !== "object" || raw === null) return true;
+      const chapter = raw as Record<string, unknown>;
+      if (known(chapter.first_photo_id)) return true;
+      const remaining: string[] = [];
+      for (const m of Array.isArray(chapter.moments) ? chapter.moments : []) {
+        const ids = (m as Record<string, unknown> | null)?.photo_ids;
+        if (Array.isArray(ids)) remaining.push(...ids.filter(known));
+      }
+      remaining.sort((a, b) =>
+        context.photoOrder.get(a)! - context.photoOrder.get(b)!
+      );
+      if (remaining.length > 0) {
+        chapter.first_photo_id = remaining[0];
+        return true;
+      }
+      // Nothing of it left: the chapter before takes its span (for the
+      // first chapter, repair starts the next one at the first photo).
+      return false;
+    });
+  }
+  const note = nn.note_moment as Record<string, unknown> | null | undefined;
+  if (
+    note && typeof note === "object" && note.photo_id != null &&
+    !known(note.photo_id)
+  ) {
+    note.photo_id = null;
+  }
+  return repairNeonNight(nn, context);
+}
+
 // The moment types a photo count fits, most flexible first: what a moment
 // becomes when its own type no longer fits (#382).
 function typeFor(type: unknown, count: number): NnMomentType | null {

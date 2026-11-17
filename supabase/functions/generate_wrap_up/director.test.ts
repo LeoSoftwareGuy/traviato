@@ -32,6 +32,7 @@ import {
   toolResponse,
 } from "./director_fixtures.ts";
 import type { TripData } from "./gather.ts";
+import type { NeonNightPlan } from "./neon_night.ts";
 
 const TRIP_ID = "trip-1";
 
@@ -705,16 +706,71 @@ Deno.test("currentGoldenVows: the stored section while it fits the memory", () =
     currentGoldenVows(record, directorTripData()),
     goldenVowsPlan(),
   );
-  const deleted = directorTripData();
-  deleted.photos = deleted.photos.filter((p) => p.id !== "p05");
-  assertEquals(currentGoldenVows(record, deleted), null);
-  const reworded = directorTripData();
-  reworded.notes[0].content = "Bicycles all over the place.";
-  assertEquals(currentGoldenVows(record, reworded), null);
   assertEquals(
     currentGoldenVows({ ...record, golden_vows: null }, directorTripData()),
     null,
   );
+});
+
+const without = (...gone: string[]) => {
+  const data = directorTripData();
+  data.photos = data.photos.filter((p) => !gone.includes(p.id));
+  return data;
+};
+
+Deno.test("currentGoldenVows heals a section the memory has outgrown (#393)", () => {
+  const ids = DIRECTOR_PHOTO_IDS;
+  const record = {
+    status: "planned",
+    plan: keepsakePlan(),
+    problems: [],
+    failed_ids: [],
+    golden_vows: goldenVowsPlan(),
+  } as unknown as DirectorRecord;
+
+  // A chapter photo with no unused photo in its gap: the chapter goes.
+  const dropped = currentGoldenVows(record, without(ids[5]))!;
+  assertEquals(dropped.chapters.map((c) => c.title), [
+    "Getting ready",
+    "Just married",
+  ]);
+  // One with an unused photo in its gap is refilled, in time order.
+  const refilled = currentGoldenVows(record, without(ids[10]))!;
+  assertEquals(refilled.chapters[2].photo_ids, [ids[7], ids[8], ids[11]]);
+  // Left out counts as gone.
+  const leftOut = directorTripData();
+  leftOut.photos[10].use_in_wrap_up = false;
+  assertEquals(
+    currentGoldenVows(record, leftOut)!.chapters[2].photo_ids,
+    [ids[7], ids[8], ids[11]],
+  );
+  // A hero whose photo is gone goes; the album needs 2 heroes, so a third
+  // is needed to keep it.
+  assertEquals(currentGoldenVows(record, without(ids[9])), null);
+  const threeHeroes = {
+    ...record,
+    golden_vows: {
+      ...goldenVowsPlan(),
+      heroes: [
+        ...goldenVowsPlan().heroes,
+        { photo_id: ids[11], label: "Cake", note_id: null, note_excerpt: null },
+      ],
+    },
+  } as unknown as DirectorRecord;
+  assertEquals(
+    currentGoldenVows(threeHeroes, without(ids[9]))!.heroes.map((h) =>
+      h.photo_id
+    ),
+    [ids[1], ids[11]],
+  );
+  // A reworded note loses its card, the album stays.
+  const reworded = directorTripData();
+  reworded.notes[0].content = "Bicycles all over the place.";
+  const healed = currentGoldenVows(record, reworded)!;
+  assertEquals(healed.heroes[0].note_id, null);
+  assertEquals(healed.heroes[0].note_excerpt, null);
+  // The stored record itself is never changed.
+  assertEquals(record.golden_vows, goldenVowsPlan());
 });
 
 // --- Neon Night (#363), its own call since #380 ---
@@ -835,14 +891,62 @@ Deno.test("currentNeonNight: the stored section while it fits the memory", () =>
     neon_night: neonNightPlan(),
   } as unknown as DirectorRecord;
   assertEquals(currentNeonNight(record, directorTripData()), neonNightPlan());
-  const deleted = directorTripData();
-  deleted.photos = deleted.photos.filter((p) => p.id !== "p09");
-  assertEquals(currentNeonNight(record, deleted), null);
-  const reworded = directorTripData();
-  reworded.notes[1].content = "Sun, then pancakes.";
-  assertEquals(currentNeonNight(record, reworded), null);
   assertEquals(
     currentNeonNight({ ...record, neon_night: null }, directorTripData()),
     null,
   );
+});
+
+Deno.test("currentNeonNight heals a section the memory has outgrown (#393)", () => {
+  const ids = DIRECTOR_PHOTO_IDS;
+  const record = {
+    status: "planned",
+    plan: keepsakePlan(),
+    problems: [],
+    failed_ids: [],
+    neon_night: neonNightPlan(),
+  } as unknown as DirectorRecord;
+  const momentsOf = (plan: NeonNightPlan | null) =>
+    plan!.chapters.map((c) => c.moments.map((m) => [m.type, ...m.photo_ids]));
+
+  // A moment photo: the moment keeps the rest, in a type that fits.
+  assertEquals(momentsOf(currentNeonNight(record, without(ids[9])))[2], [
+    ["timeline", ids[8], ids[10]],
+  ]);
+  // A chapter's first photo: it starts at its earliest remaining one.
+  const lateStart = currentNeonNight(record, without(ids[4]))!;
+  assertEquals(lateStart.chapters[1].first_photo_id, ids[5]);
+  assertEquals(momentsOf(lateStart)[1], [
+    ["timeline", ids[5], ids[6], ids[7]],
+  ]);
+  // The first chapter's first photo: it starts at the night's first photo.
+  const first = currentNeonNight(record, without(ids[0]))!;
+  assertEquals(first.chapters[0].first_photo_id, ids[1]);
+  // A whole chapter: it folds into the one before.
+  const folded = currentNeonNight(
+    record,
+    without(ids[4], ids[5], ids[6], ids[7]),
+  )!;
+  assertEquals(folded.chapters.map((c) => c.title), [
+    "Doors open",
+    "Peak time",
+  ]);
+  // The note scene's photo: the note stays, without it.
+  const noPhoto = currentNeonNight(record, without(ids[10]))!;
+  assertEquals(noPhoto.note_moment?.excerpt, "Rain, then stroopwafels.");
+  assertEquals(noPhoto.note_moment?.photo_id, null);
+  // Left out counts as gone.
+  const leftOut = directorTripData();
+  leftOut.photos[9].use_in_wrap_up = false;
+  assertEquals(momentsOf(currentNeonNight(record, leftOut))[2], [
+    ["timeline", ids[8], ids[10]],
+  ]);
+  // A reworded note: no Note scene, the film stays.
+  const reworded = directorTripData();
+  reworded.notes[1].content = "Sun, then pancakes.";
+  assertEquals(currentNeonNight(record, reworded)!.note_moment, null);
+  // Nothing left to make a moment from: the next film plays.
+  assertEquals(currentNeonNight(record, without(...ids.slice(1))), null);
+  // The stored record itself is never changed.
+  assertEquals(record.neon_night, neonNightPlan());
 });
