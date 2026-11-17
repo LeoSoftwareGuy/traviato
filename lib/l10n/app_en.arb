@@ -552,27 +552,6 @@
   "@journal_eyebrow": {
     "description": "Mono eyebrow, uppercased in code."
   },
-  "journal_quietOne": "Day 1",
-  "journal_dayQuietOne": "Day {day}",
-  "@journal_dayQuietOne": {
-    "placeholders": {
-      "day": {
-        "type": "int"
-      }
-    }
-  },
-  "journal_noEntries": "No photos, no notes yet",
-  "@journal_noEntries": {
-    "description": "Followed by · and journal_questsDone."
-  },
-  "journal_questsDone": "{count, plural, =1{1 quest done} other{{count} quests done}}",
-  "@journal_questsDone": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "journal_dayTitle": "Day {day} — {name}",
   "@journal_dayTitle": {
     "description": "{name} is the memory's own title (user content).",
@@ -605,19 +584,6 @@
   "@journal_viewWrapUp": {
     "description": "Wrap-up button; the unlocked one appends ▸ in code."
   },
-  "journal_photos": "Photos",
-  "journal_photosSaved": "{count} saved",
-  "@journal_photosSaved": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "journal_addPhotoTile": "Add ✦2",
-  "@journal_addPhotoTile": {
-    "description": "Add-photo tile in the strip; ✦2 is the award."
-  },
   "journal_wrapUpExplainer": "Your film needs a little more to work with. {ask}",
   "@journal_wrapUpExplainer": {
     "description": "{ask} is one of journal_wrapUpAsk*.",
@@ -647,34 +613,11 @@
   "journal_wrapUpReqPhotos": "Five photos in this memory",
   "journal_wrapUpReqNote": "At least one note written",
   "journal_wrapUpFree": "Nothing to buy — this one's the same on every plan.",
-  "journal_nothingYet": "Nothing here yet",
-  "journal_nothingFromDay": "Nothing from Day {day} yet",
-  "@journal_nothingFromDay": {
-    "placeholders": {
-      "day": {
-        "type": "int"
-      }
-    }
-  },
-  "journal_nudgeBody": "Every photo you add will contribute to the final wrap-up.",
-  "journal_addAPhoto": "＋ Add a photo",
-  "journal_writeNote": "Write a note",
-  "journal_addNotesToday": "✎ Add notes about today",
-  "journal_continueEntry": "✎ Continue entry",
   "journal_wordCount": "{count, plural, =1{1 word} other{{count} words}}",
   "@journal_wordCount": {
     "placeholders": {
       "count": {
         "type": "int"
-      }
-    }
-  },
-  "journal_edited": "Edited {time}",
-  "@journal_edited": {
-    "description": "Note card footer, uppercased in code.",
-    "placeholders": {
-      "time": {
-        "type": "String"
       }
     }
   },
@@ -2306,15 +2249,6 @@
   "film_leftOutPill": "Left out of the film",
   "@film_leftOutPill": {
     "description": "Pill over a left-out photo in the photo viewer (#294)."
-  },
-  "film_stripCount": "{count} in the film",
-  "@film_stripCount": {
-    "description": "Journal photo strip, right of the header: that day's photos in the film (#294); shown uppercase.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "film_badgeYourPick": "Your pick",
   "@film_badgeYourPick": {

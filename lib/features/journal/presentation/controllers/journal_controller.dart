@@ -31,9 +31,8 @@ class JournalController extends _$JournalController {
       // All-trip notes: the day timeline, wrap-up eligibility (#103) and
       // empty days (#140) all read this one list (#401).
       noteRepo.getNotesForTrip(tripId),
-      // Used for the empty-day nudge's "N quests done" subtitle (#140) and
-      // to decide whether "To Do" is offered at all (#164) — the sheet
-      // itself fetches its own day-scoped copy lazily.
+      // Decides whether "To Do" is offered at all (#164) — the sheet itself
+      // fetches its own day-scoped copy lazily.
       questRepo.getQuestsForTrip(tripId),
     ).wait;
 

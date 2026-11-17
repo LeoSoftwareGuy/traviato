@@ -772,30 +772,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get journal_eyebrow => 'Дневник';
 
   @override
-  String get journal_quietOne => 'День 1';
-
-  @override
-  String journal_dayQuietOne(int day) {
-    return 'День $day';
-  }
-
-  @override
-  String get journal_noEntries => 'Пока ни фото, ни заметок';
-
-  @override
-  String journal_questsDone(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'сделано $count дела',
-      many: 'сделано $count дел',
-      few: 'сделано $count дела',
-      one: 'сделано $count дело',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String journal_dayTitle(int day, String name) {
     return 'День $day — $name';
   }
@@ -819,17 +795,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get journal_viewWrapUp => 'Смотреть итоги';
-
-  @override
-  String get journal_photos => 'Фото';
-
-  @override
-  String journal_photosSaved(int count) {
-    return 'сохранено: $count';
-  }
-
-  @override
-  String get journal_addPhotoTile => 'Добавить ✦2';
 
   @override
   String journal_wrapUpExplainer(String ask) {
@@ -871,30 +836,6 @@ class AppLocalizationsRu extends AppLocalizations {
       'Ничего покупать не нужно — на любом тарифе всё одинаково.';
 
   @override
-  String get journal_nothingYet => 'Как прошёл день?';
-
-  @override
-  String journal_nothingFromDay(int day) {
-    return 'Как прошёл день?';
-  }
-
-  @override
-  String get journal_nudgeBody =>
-      'Каждое фото, которое вы добавите, станет частью финального фильма.';
-
-  @override
-  String get journal_addAPhoto => '＋ Добавить фото';
-
-  @override
-  String get journal_writeNote => 'Написать заметку';
-
-  @override
-  String get journal_addNotesToday => '✎ Добавить заметку о сегодняшнем дне';
-
-  @override
-  String get journal_continueEntry => '✎ Продолжить запись';
-
-  @override
   String journal_wordCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -905,11 +846,6 @@ class AppLocalizationsRu extends AppLocalizations {
       one: '$count слово',
     );
     return '$_temp0';
-  }
-
-  @override
-  String journal_edited(String time) {
-    return 'Изменено $time';
   }
 
   @override
@@ -2569,11 +2505,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get film_leftOutPill => 'Не войдёт в фильм';
-
-  @override
-  String film_stripCount(int count) {
-    return '$count в фильме';
-  }
 
   @override
   String get film_badgeYourPick => 'Ваш выбор';

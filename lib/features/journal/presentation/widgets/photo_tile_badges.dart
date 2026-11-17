@@ -8,8 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
-/// Markers on a journal photo tile, shared by the photo strip and the day
-/// timeline (#401).
+/// Markers on a photo tile of the day timeline (#401).
 enum _FilmBadgeKind { autoPicked, yourPick, leftOut }
 
 /// A thumb's film marker (#294): "▸" when the film chose it, "▸ Your pick"
@@ -75,16 +74,14 @@ class FilmBadge extends StatelessWidget {
   }
 }
 
-/// Frosted time label over the bottom of a thumbnail — only rendered when
-/// the photo has a `takenAt` (#149).
+/// Frosted time label on a tile of a photo group (#149, #401).
 class PhotoTimePill extends StatelessWidget {
-  const PhotoTimePill({required this.takenAt, this.use24h, super.key});
+  const PhotoTimePill({required this.takenAt, required this.use24h, super.key});
 
   final DateTime takenAt;
 
-  /// The journal timeline's clock (#401): `HH:mm` or `h:mm a` per the
-  /// phone. Null keeps the UI language's time format.
-  final bool? use24h;
+  /// `HH:mm` or `h:mm a`, following the phone.
+  final bool use24h;
 
   @override
   Widget build(BuildContext context) {
@@ -97,13 +94,10 @@ class PhotoTimePill extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             child: Text(
-              (use24h == null
-                      ? L10nDates.time(context.l10n.localeName)
-                      : L10nDates.clock(
-                          context.l10n.localeName,
-                          use24h: use24h!,
-                        ))
-                  .format(takenAt.toLocal()),
+              L10nDates.clock(
+                context.l10n.localeName,
+                use24h: use24h,
+              ).format(takenAt.toLocal()),
               key: const Key('journal-photo-time-pill'),
               maxLines: 1,
               style: AppTypography.caption.copyWith(

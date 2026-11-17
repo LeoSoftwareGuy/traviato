@@ -776,22 +776,6 @@
   "@journal_eyebrow": {
     "x-review": "pending"
   },
-  "journal_quietOne": "День 1",
-  "@journal_quietOne": {
-    "x-review": "pending"
-  },
-  "journal_dayQuietOne": "День {day}",
-  "@journal_dayQuietOne": {
-    "x-review": "pending"
-  },
-  "journal_noEntries": "Пока ни фото, ни заметок",
-  "@journal_noEntries": {
-    "x-review": "pending"
-  },
-  "journal_questsDone": "{count, plural, one{сделано {count} дело} few{сделано {count} дела} many{сделано {count} дел} other{сделано {count} дела}}",
-  "@journal_questsDone": {
-    "x-review": "pending"
-  },
   "journal_dayTitle": "День {day} — {name}",
   "@journal_dayTitle": {
     "x-review": "pending"
@@ -818,18 +802,6 @@
   },
   "journal_viewWrapUp": "Смотреть итоги",
   "@journal_viewWrapUp": {
-    "x-review": "pending"
-  },
-  "journal_photos": "Фото",
-  "@journal_photos": {
-    "x-review": "pending"
-  },
-  "journal_photosSaved": "сохранено: {count}",
-  "@journal_photosSaved": {
-    "x-review": "pending"
-  },
-  "journal_addPhotoTile": "Добавить ✦2",
-  "@journal_addPhotoTile": {
     "x-review": "pending"
   },
   "journal_wrapUpExplainer": "Фильму пока не хватает материала. {ask}",
@@ -860,40 +832,8 @@
   "@journal_wrapUpFree": {
     "x-review": "pending"
   },
-  "journal_nothingYet": "Как прошёл день?",
-  "@journal_nothingYet": {
-    "x-review": "pending"
-  },
-  "journal_nothingFromDay": "Как прошёл день?",
-  "@journal_nothingFromDay": {
-    "x-review": "pending"
-  },
-  "journal_nudgeBody": "Каждое фото, которое вы добавите, станет частью финального фильма.",
-  "@journal_nudgeBody": {
-    "x-review": "pending"
-  },
-  "journal_addAPhoto": "＋ Добавить фото",
-  "@journal_addAPhoto": {
-    "x-review": "pending"
-  },
-  "journal_writeNote": "Написать заметку",
-  "@journal_writeNote": {
-    "x-review": "pending"
-  },
-  "journal_addNotesToday": "✎ Добавить заметку о сегодняшнем дне",
-  "@journal_addNotesToday": {
-    "x-review": "pending"
-  },
-  "journal_continueEntry": "✎ Продолжить запись",
-  "@journal_continueEntry": {
-    "x-review": "pending"
-  },
   "journal_wordCount": "{count, plural, one{{count} слово} few{{count} слова} many{{count} слов} other{{count} слова}}",
   "@journal_wordCount": {
-    "x-review": "pending"
-  },
-  "journal_edited": "Изменено {time}",
-  "@journal_edited": {
     "x-review": "pending"
   },
   "toast_noteSaved": "+1 ✦ · заметка сохранена",
@@ -2518,10 +2458,6 @@
   },
   "film_leftOutPill": "Не войдёт в фильм",
   "@film_leftOutPill": {
-    "x-review": "pending"
-  },
-  "film_stripCount": "{count} в фильме",
-  "@film_stripCount": {
     "x-review": "pending"
   },
   "film_badgeYourPick": "Ваш выбор",

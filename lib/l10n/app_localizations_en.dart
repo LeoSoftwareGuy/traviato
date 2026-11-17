@@ -745,28 +745,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journal_eyebrow => 'Journal';
 
   @override
-  String get journal_quietOne => 'Day 1';
-
-  @override
-  String journal_dayQuietOne(int day) {
-    return 'Day $day';
-  }
-
-  @override
-  String get journal_noEntries => 'No photos, no notes yet';
-
-  @override
-  String journal_questsDone(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count quests done',
-      one: '1 quest done',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String journal_dayTitle(int day, String name) {
     return 'Day $day — $name';
   }
@@ -791,17 +769,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get journal_viewWrapUp => 'View wrap-up';
-
-  @override
-  String get journal_photos => 'Photos';
-
-  @override
-  String journal_photosSaved(int count) {
-    return '$count saved';
-  }
-
-  @override
-  String get journal_addPhotoTile => 'Add ✦2';
 
   @override
   String journal_wrapUpExplainer(String ask) {
@@ -844,30 +811,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Nothing to buy — this one\'s the same on every plan.';
 
   @override
-  String get journal_nothingYet => 'Nothing here yet';
-
-  @override
-  String journal_nothingFromDay(int day) {
-    return 'Nothing from Day $day yet';
-  }
-
-  @override
-  String get journal_nudgeBody =>
-      'Every photo you add will contribute to the final wrap-up.';
-
-  @override
-  String get journal_addAPhoto => '＋ Add a photo';
-
-  @override
-  String get journal_writeNote => 'Write a note';
-
-  @override
-  String get journal_addNotesToday => '✎ Add notes about today';
-
-  @override
-  String get journal_continueEntry => '✎ Continue entry';
-
-  @override
   String journal_wordCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -876,11 +819,6 @@ class AppLocalizationsEn extends AppLocalizations {
       one: '1 word',
     );
     return '$_temp0';
-  }
-
-  @override
-  String journal_edited(String time) {
-    return 'Edited $time';
   }
 
   @override
@@ -2522,11 +2460,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get film_leftOutPill => 'Left out of the film';
-
-  @override
-  String film_stripCount(int count) {
-    return '$count in the film';
-  }
 
   @override
   String get film_badgeYourPick => 'Your pick';

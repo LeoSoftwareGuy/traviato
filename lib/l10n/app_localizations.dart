@@ -1262,30 +1262,6 @@ abstract class AppLocalizations {
   /// **'Journal'**
   String get journal_eyebrow;
 
-  /// No description provided for @journal_quietOne.
-  ///
-  /// In en, this message translates to:
-  /// **'Day 1'**
-  String get journal_quietOne;
-
-  /// No description provided for @journal_dayQuietOne.
-  ///
-  /// In en, this message translates to:
-  /// **'Day {day}'**
-  String journal_dayQuietOne(int day);
-
-  /// Followed by · and journal_questsDone.
-  ///
-  /// In en, this message translates to:
-  /// **'No photos, no notes yet'**
-  String get journal_noEntries;
-
-  /// No description provided for @journal_questsDone.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{1 quest done} other{{count} quests done}}'**
-  String journal_questsDone(int count);
-
   /// {name} is the memory's own title (user content).
   ///
   /// In en, this message translates to:
@@ -1327,24 +1303,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View wrap-up'**
   String get journal_viewWrapUp;
-
-  /// No description provided for @journal_photos.
-  ///
-  /// In en, this message translates to:
-  /// **'Photos'**
-  String get journal_photos;
-
-  /// No description provided for @journal_photosSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} saved'**
-  String journal_photosSaved(int count);
-
-  /// Add-photo tile in the strip; ✦2 is the award.
-  ///
-  /// In en, this message translates to:
-  /// **'Add ✦2'**
-  String get journal_addPhotoTile;
 
   /// {ask} is one of journal_wrapUpAsk*.
   ///
@@ -1388,59 +1346,11 @@ abstract class AppLocalizations {
   /// **'Nothing to buy — this one\'s the same on every plan.'**
   String get journal_wrapUpFree;
 
-  /// No description provided for @journal_nothingYet.
-  ///
-  /// In en, this message translates to:
-  /// **'Nothing here yet'**
-  String get journal_nothingYet;
-
-  /// No description provided for @journal_nothingFromDay.
-  ///
-  /// In en, this message translates to:
-  /// **'Nothing from Day {day} yet'**
-  String journal_nothingFromDay(int day);
-
-  /// No description provided for @journal_nudgeBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Every photo you add will contribute to the final wrap-up.'**
-  String get journal_nudgeBody;
-
-  /// No description provided for @journal_addAPhoto.
-  ///
-  /// In en, this message translates to:
-  /// **'＋ Add a photo'**
-  String get journal_addAPhoto;
-
-  /// No description provided for @journal_writeNote.
-  ///
-  /// In en, this message translates to:
-  /// **'Write a note'**
-  String get journal_writeNote;
-
-  /// No description provided for @journal_addNotesToday.
-  ///
-  /// In en, this message translates to:
-  /// **'✎ Add notes about today'**
-  String get journal_addNotesToday;
-
-  /// No description provided for @journal_continueEntry.
-  ///
-  /// In en, this message translates to:
-  /// **'✎ Continue entry'**
-  String get journal_continueEntry;
-
   /// No description provided for @journal_wordCount.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 word} other{{count} words}}'**
   String journal_wordCount(int count);
-
-  /// Note card footer, uppercased in code.
-  ///
-  /// In en, this message translates to:
-  /// **'Edited {time}'**
-  String journal_edited(String time);
 
   /// Star award toast (spec copy table).
   ///
@@ -3894,12 +3804,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Left out of the film'**
   String get film_leftOutPill;
-
-  /// Journal photo strip, right of the header: that day's photos in the film (#294); shown uppercase.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} in the film'**
-  String film_stripCount(int count);
 
   /// Journal thumbnail badge for an Always photo (#294).
   ///

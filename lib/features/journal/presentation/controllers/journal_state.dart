@@ -45,9 +45,8 @@ class JournalState extends Equatable {
   /// timeline, wrap-up eligibility and empty-day detection all read it.
   final List<JournalNoteEntity> notes;
 
-  /// Every quest across the whole trip — fetched for the empty-day nudge's
-  /// "N quests done" subtitle (#140) and [showsToDo]; the "To Do" sheet
-  /// fetches its own day-scoped copy lazily and doesn't read this.
+  /// Every quest across the whole trip — fetched for [showsToDo]; the "To
+  /// Do" sheet fetches its own day-scoped copy lazily and doesn't read this.
   final List<QuestEntity> quests;
 
   /// "To Do" is hidden for a memory logged after its trip ended (#164) —
@@ -129,14 +128,11 @@ class JournalState extends Equatable {
   bool _hasNoteForDay(DateTime day) =>
       notes.any((n) => _isSameDate(n.dayDate, day));
 
-  /// A day with zero photos AND zero notes — the empty-day nudge's trigger
-  /// (#140/M6-4b). Both lists are already loaded for the whole trip, so this
-  /// works for every day in the strip, not just the one currently open.
+  /// A day with zero photos AND zero notes — shows the empty-day notebook
+  /// page (#140, #401). Both lists are already loaded for the whole trip, so
+  /// this works for every day tab, not just the one currently open.
   bool isDayEmpty(DateTime day) =>
       photosForDay(day).isEmpty && !_hasNoteForDay(day);
-
-  int completedQuestCountForDay(DateTime day) =>
-      quests.where((q) => _isSameDate(q.dayDate, day) && q.isCompleted).length;
 
   /// A day is locked once the trip hasn't gotten there yet — past days and
   /// today stay open, but a future day can't be opened ahead of time (#118).
