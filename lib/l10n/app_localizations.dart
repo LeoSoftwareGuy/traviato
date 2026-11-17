@@ -4164,6 +4164,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit note · {time}'**
   String note_stampEdit(String time);
+
+  /// Photo viewer (#402): opens the note page for a note on this photo.
+  ///
+  /// In en, this message translates to:
+  /// **'✎ Add a note to this photo'**
+  String get photoNote_add;
+
+  /// Photo viewer (#402): label over the notes written on this photo, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes on this photo · {count}'**
+  String photoNote_listLabel(int count);
+
+  /// Photo viewer (#402): when the photo has no notes.
+  ///
+  /// In en, this message translates to:
+  /// **'No notes on this photo yet.'**
+  String get photoNote_none;
+
+  /// Note page stamp for a note on a photo (#402), uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo note · {time}'**
+  String note_stampPhoto(String time);
+
+  /// Note page (#402): label beside the photo a note is written on, uppercased in code.
+  ///
+  /// In en, this message translates to:
+  /// **'On this photo · {time}'**
+  String note_onThisPhoto(String time);
+
+  /// Note page (#402): placeholder for a note on a photo.
+  ///
+  /// In en, this message translates to:
+  /// **'What was happening here? Type, or tap the mic.'**
+  String get note_photoHint;
 }
 
 class _AppLocalizationsDelegate

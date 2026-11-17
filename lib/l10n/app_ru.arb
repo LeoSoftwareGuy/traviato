@@ -2706,5 +2706,17 @@
   "note_stampEdit": "Правка заметки · {time}",
   "@note_stampEdit": {
     "x-review": "pending"
-  }
+  },
+  "photoNote_add": "✎ Написать заметку к фото",
+  "@photoNote_add": {"x-review": "pending"},
+  "photoNote_listLabel": "Заметки к фото · {count}",
+  "@photoNote_listLabel": {"x-review": "pending"},
+  "photoNote_none": "К этому фото пока нет заметок.",
+  "@photoNote_none": {"x-review": "pending"},
+  "note_stampPhoto": "Заметка к фото · {time}",
+  "@note_stampPhoto": {"x-review": "pending"},
+  "note_onThisPhoto": "К этому фото · {time}",
+  "@note_onThisPhoto": {"x-review": "pending"},
+  "note_photoHint": "Что здесь происходило? Пишите или нажмите на микрофон.",
+  "@note_photoHint": {"x-review": "pending"}
 }

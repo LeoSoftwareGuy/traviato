@@ -2769,4 +2769,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String note_stampEdit(String time) {
     return 'Edit note · $time';
   }
+
+  @override
+  String get photoNote_add => '✎ Add a note to this photo';
+
+  @override
+  String photoNote_listLabel(int count) {
+    return 'Notes on this photo · $count';
+  }
+
+  @override
+  String get photoNote_none => 'No notes on this photo yet.';
+
+  @override
+  String note_stampPhoto(String time) {
+    return 'Photo note · $time';
+  }
+
+  @override
+  String note_onThisPhoto(String time) {
+    return 'On this photo · $time';
+  }
+
+  @override
+  String get note_photoHint => 'What was happening here? Type, or tap the mic.';
 }

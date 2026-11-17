@@ -2827,4 +2827,29 @@ class AppLocalizationsRu extends AppLocalizations {
   String note_stampEdit(String time) {
     return 'Правка заметки · $time';
   }
+
+  @override
+  String get photoNote_add => '✎ Написать заметку к фото';
+
+  @override
+  String photoNote_listLabel(int count) {
+    return 'Заметки к фото · $count';
+  }
+
+  @override
+  String get photoNote_none => 'К этому фото пока нет заметок.';
+
+  @override
+  String note_stampPhoto(String time) {
+    return 'Заметка к фото · $time';
+  }
+
+  @override
+  String note_onThisPhoto(String time) {
+    return 'К этому фото · $time';
+  }
+
+  @override
+  String get note_photoHint =>
+      'Что здесь происходило? Пишите или нажмите на микрофон.';
 }
