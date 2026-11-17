@@ -113,12 +113,12 @@ void main() {
     expect(find.text('ДНЕВНИК'), findsOneWidget);
     expect(find.text('День 2 — Tallinn'), findsOneWidget);
     expect(find.text('Old Town walk.'), findsOneWidget);
-    expect(find.textContaining('3 СЛОВА'), findsOneWidget);
-    expect(find.text('✎ Продолжить запись'), findsOneWidget);
+    // The day subtitle and the capture capsule (#401).
+    expect(find.textContaining('2 фото · 1 заметка'), findsOneWidget);
     expect(find.text('Фото'), findsOneWidget);
-    expect(find.text('сохранено: 2'), findsOneWidget);
-    expect(find.text('Добавить ✦2'), findsOneWidget);
-    expect(find.text('21:05'), findsOneWidget);
+    expect(find.text('Заметка'), findsOneWidget);
+    // The timeline clock follows the phone's 24-hour setting (off here).
+    expect(find.textContaining('9:05'), findsWidgets);
     expect(find.text('Главная'), findsOneWidget);
   });
 

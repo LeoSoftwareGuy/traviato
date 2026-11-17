@@ -25,7 +25,6 @@ class JournalState extends Equatable {
   const JournalState({
     required this.trip,
     this.currentDayDate,
-    this.notesByDay = const {},
     this.photos = const [],
     this.notes = const [],
     this.quests = const [],
@@ -40,15 +39,10 @@ class JournalState extends Equatable {
   final TripCardEntity trip;
   final DateTime? currentDayDate;
 
-  /// Cache of fetched notes, keyed by day. A day present with a `null`
-  /// value means "fetched, no note yet" — distinct from "not fetched".
-  final Map<DateTime, JournalNoteEntity?> notesByDay;
   final List<PhotoEntity> photos;
 
-  /// Every day-note across the whole trip (one row per day, per the data
-  /// model's unique constraint) — used only to gate wrap-up eligibility and
-  /// empty-day detection, distinct from [notesByDay]'s per-day cache used
-  /// for editing.
+  /// Every note across the whole trip, many per day (#397) — the day
+  /// timeline, wrap-up eligibility and empty-day detection all read it.
   final List<JournalNoteEntity> notes;
 
   /// Every quest across the whole trip — fetched for the empty-day nudge's
@@ -84,11 +78,35 @@ class JournalState extends Equatable {
     ];
   }
 
-  bool get isCurrentJournalNoteCached =>
-      currentDayDate != null && notesByDay.containsKey(currentDayDate);
+  /// The day's notes as they were written, oldest first.
+  List<JournalNoteEntity> notesForDay(DateTime day) =>
+      notes.where((n) => _isSameDate(n.dayDate, day)).toList()
+        ..sort((a, b) => a.takenAt.compareTo(b.takenAt));
 
-  JournalNoteEntity? get currentNote =>
-      currentDayDate == null ? null : notesByDay[currentDayDate];
+  List<JournalNoteEntity> get notesForCurrentDay {
+    final day = currentDayDate;
+    return day == null ? const [] : notesForDay(day);
+  }
+
+  /// The trip's latest photo or note before [at] and the day it's on — what
+  /// the logical-day rule needs for a new item (#397).
+  ({DateTime at, DateTime day})? latestItemBefore(DateTime at) {
+    ({DateTime at, DateTime day})? latest;
+    void consider(DateTime time, DateTime? day) {
+      if (day == null || time.isAfter(at)) return;
+      if (latest == null || time.isAfter(latest!.at)) {
+        latest = (at: time, day: day);
+      }
+    }
+
+    for (final p in photos) {
+      consider((p.takenAt ?? p.createdAt).toLocal(), p.dayDate);
+    }
+    for (final n in notes) {
+      consider(n.takenAt.toLocal(), n.dayDate);
+    }
+    return latest;
+  }
 
   /// The day's photos as they happened, oldest first (#291) — the order the
   /// strip, the day-tab thumbnail and the viewer all share.
@@ -180,7 +198,6 @@ class JournalState extends Equatable {
 
   JournalState copyWith({
     DateTime? Function()? currentDayDate,
-    Map<DateTime, JournalNoteEntity?>? notesByDay,
     List<PhotoEntity>? photos,
     List<JournalNoteEntity>? notes,
     List<QuestEntity>? quests,
@@ -189,7 +206,6 @@ class JournalState extends Equatable {
     currentDayDate: currentDayDate != null
         ? currentDayDate()
         : this.currentDayDate,
-    notesByDay: notesByDay ?? this.notesByDay,
     photos: photos ?? this.photos,
     notes: notes ?? this.notes,
     quests: quests ?? this.quests,
@@ -199,7 +215,6 @@ class JournalState extends Equatable {
   List<Object?> get props => [
     trip,
     currentDayDate,
-    notesByDay,
     photos,
     notes,
     quests,

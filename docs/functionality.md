@@ -100,8 +100,15 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   most 3 per day; edits and deletes never change stars. Notes and photos
   after midnight stay on the evening's day (logical-day rule: until 08:00,
   a new day only after a 4-hour break). Storyteller counts days with notes.
-  Data landed in #400; the "One timeline" day view is #401, photo notes and
-  the Kept Memory list #402. Old day notes became one "earlier note" each.
+  Data landed in #400; photo notes and the Kept Memory list are #402. Old
+  day notes became one "earlier note" each.
+- **One timeline** (#401): the day is one rail of photos and notes by time
+  (photos ≤ 20 min apart share a row: 1 / 2 / 3 + "+N"), an AFTER MIDNIGHT
+  divider, and a LATER section for things added after the day was over.
+  Notes fold at 4 lines ("more" / "less"); long-press → Edit / Delete (with
+  a confirm). A Photo | Note capsule floats above the bottom bar; an empty
+  day shows a notebook page with "Write the first note ✦1". The Journal
+  opens on the logical today (after midnight, the evening before).
   photos strip ("TODAY'S PHOTOS · N", **add tile awards ✦2** on successful photo,
   tiles → Photo detail; "▸ N IN THE FILM" + per-thumb film badges, #294);
   "To Do · N left" → Plan; **"View wrap-up ▸"** gradient button;

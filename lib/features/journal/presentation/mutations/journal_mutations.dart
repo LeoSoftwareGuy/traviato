@@ -9,41 +9,62 @@ import '../../domain/entities/journal_note_entity.dart';
 import '../controllers/journal_controller.dart';
 import '../providers/journal_note_providers.dart';
 
-final upsertNoteMutation = Mutation<JournalNoteEntity>();
+final createNoteMutation = Mutation<JournalNoteEntity>();
 
-/// Saves the note page's text: new text for [existingNoteId] when the day
-/// already has a note (its time stays, no star), else a new note timed now
-/// (✦1, at most 3 a day). Until the timeline view (#401) each day shows one
-/// note, so the note page edits it.
-Future<JournalNoteEntity> runUpsertNote({
+/// Every Done on a new note saves a separate note at [takenAt] (#397,
+/// #401) on [dayDate] — the logical day the page decided. ✦1, at most 3 a
+/// day (the server caps it).
+Future<JournalNoteEntity> runCreateNote({
   required WidgetRef ref,
   required String tripId,
   required DateTime dayDate,
+  required DateTime takenAt,
   required String content,
-  String? existingNoteId,
+  bool dictated = false,
 }) {
-  return upsertNoteMutation.run(ref, (tsx) async {
+  return createNoteMutation.run(ref, (tsx) async {
     final repo = tsx.get(journalNoteRepositoryProvider);
     final controller = tsx.get(journalControllerProvider(tripId).notifier);
-    final result = existingNoteId == null
-        ? await repo.createNote(
-            tripId: tripId,
-            dayDate: dayDate,
-            takenAt: DateTime.now(),
-            content: content,
-          )
-        : await repo.updateNote(
-            noteId: existingNoteId,
-            content: content,
-            dictated: false,
-          );
+    final result = await repo.createNote(
+      tripId: tripId,
+      dayDate: dayDate,
+      takenAt: takenAt,
+      content: content,
+      dictated: dictated,
+    );
     return result.fold(
       (failure) => throw PresentationFailureException(failure),
       (note) {
-        controller.applyNoteUpserted(dayDate, note);
-        if (existingNoteId == null) {
-          tsx.get(globalEventBusProvider).add(const StarsAwardedDispatched());
-        }
+        controller.applyNoteSaved(note);
+        tsx.get(globalEventBusProvider).add(const StarsAwardedDispatched());
+        return note;
+      },
+    );
+  });
+}
+
+final updateNoteMutation = Mutation<JournalNoteEntity>();
+
+/// New text for a note: its time and day stay, stars don't change.
+Future<JournalNoteEntity> runUpdateNote({
+  required WidgetRef ref,
+  required String tripId,
+  required String noteId,
+  required String content,
+  required bool dictated,
+}) {
+  return updateNoteMutation.run(ref, (tsx) async {
+    final repo = tsx.get(journalNoteRepositoryProvider);
+    final controller = tsx.get(journalControllerProvider(tripId).notifier);
+    final result = await repo.updateNote(
+      noteId: noteId,
+      content: content,
+      dictated: dictated,
+    );
+    return result.fold(
+      (failure) => throw PresentationFailureException(failure),
+      (note) {
+        controller.applyNoteSaved(note);
         return note;
       },
     );
@@ -52,24 +73,22 @@ Future<JournalNoteEntity> runUpsertNote({
 
 final deleteNoteMutation = Mutation<Unit>();
 
-/// Clearing the note page's text and confirming (#276): deletes the day's
-/// note. Its ✦1 stays (#397).
+/// Deletes one note (#401's long-press, or clearing it on the note page,
+/// #276). It leaves the timeline at once and comes back if the delete
+/// fails. Its ✦1 stays (#397), so no stars event.
 Future<Unit> runDeleteNote({
   required WidgetRef ref,
   required String tripId,
-  required DateTime dayDate,
   required String noteId,
 }) {
   return deleteNoteMutation.run(ref, (tsx) async {
     final repo = tsx.get(journalNoteRepositoryProvider);
     final controller = tsx.get(journalControllerProvider(tripId).notifier);
+    final removed = controller.applyNoteDeleted(noteId);
     final result = await repo.deleteNote(noteId);
-    return result.fold(
-      (failure) => throw PresentationFailureException(failure),
-      (_) {
-        controller.applyNoteDeleted(dayDate, noteId);
-        return unit;
-      },
-    );
+    return result.fold((failure) {
+      if (removed != null) controller.applyNoteSaved(removed);
+      throw PresentationFailureException(failure);
+    }, (_) => unit);
   });
 }

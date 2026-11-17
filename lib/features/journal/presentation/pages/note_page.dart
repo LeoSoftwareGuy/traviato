@@ -30,6 +30,7 @@ class NotePageRoute extends PageRouteBuilder<String> {
     required String existingText,
     required int photoCount,
     PhotoEntity? photo,
+    ValueNotifier<bool>? dictated,
   }) : super(
          opaque: false,
          transitionDuration: Duration.zero,
@@ -40,6 +41,7 @@ class NotePageRoute extends PageRouteBuilder<String> {
            existingText: existingText,
            photoCount: photoCount,
            photo: photo,
+           dictated: dictated,
          ),
        );
 }
@@ -57,6 +59,7 @@ class NotePage extends ConsumerStatefulWidget {
     required this.existingText,
     required this.photoCount,
     this.photo,
+    this.dictated,
     super.key,
   });
 
@@ -68,6 +71,10 @@ class NotePage extends ConsumerStatefulWidget {
 
   /// The day's first photo, shown in the title page's polaroid.
   final PhotoEntity? photo;
+
+  /// Set to true on Done when any speech went into the text (#397's
+  /// `dictated`); left as it was otherwise, so an edit keeps the flag.
+  final ValueNotifier<bool>? dictated;
 
   @override
   ConsumerState<NotePage> createState() => _NotePageState();
@@ -165,6 +172,7 @@ class _NotePageState extends ConsumerState<NotePage>
     _turn.duration = _reducedMotion
         ? AppMotion.pageTurnReducedMotionFade
         : AppMotion.pageTurnCloseDuration;
+    if (result != null && _dictation.hasDictated) widget.dictated?.value = true;
     await _turn.forward(from: 0).orCancel.catchError((_) {});
     if (mounted) Navigator.of(context).pop(result);
   }
