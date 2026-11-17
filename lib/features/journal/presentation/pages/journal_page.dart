@@ -35,6 +35,7 @@ import '../widgets/journal_header.dart';
 import '../widgets/timeline/capture_capsule.dart';
 import '../widgets/timeline/day_timeline_view.dart';
 import '../widgets/timeline/empty_day_notebook.dart';
+import '../widgets/timeline/fold_away.dart';
 import '../widgets/timeline/note_sheets.dart';
 import '../widgets/to_do_sheet.dart';
 import '../note_composer.dart';
@@ -139,10 +140,10 @@ class _JournalContent extends ConsumerStatefulWidget {
 }
 
 class _JournalContentState extends ConsumerState<_JournalContent> {
-  /// How long a just-saved note wears JUST NOW (spec §7).
-  static const _freshFor = Duration(seconds: 3);
-
   String? _freshNoteId;
+
+  /// Notes folding away after a confirmed delete (#407).
+  final _leavingNoteIds = <String>{};
   Timer? _freshTimer;
   final _freshKey = GlobalKey();
 
@@ -233,6 +234,8 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
                     filmMomentIds: ref.watch(filmMomentIdsProvider(_tripId)),
                     onPhotoTap: _openPhoto,
                     onNoteLongPress: _noteActions,
+                    onNoteSwipeDelete: _confirmDelete,
+                    leavingNoteIds: _leavingNoteIds,
                     freshNoteId: _freshNoteId,
                     freshNoteKey: _freshKey,
                   ),
@@ -310,16 +313,20 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final target = _freshKey.currentContext;
       if (target == null || !target.mounted) return;
+      // Its slot ends up ~250px from the top, then opens (spec §7).
+      final viewport = Scrollable.maybeOf(target)?.position.viewportDimension;
       Scrollable.ensureVisible(
         target,
-        alignment: .5,
+        alignment: viewport == null || viewport <= 0
+            ? .5
+            : (AppMotion.noteScrollTarget / viewport).clamp(0.0, 1.0),
         duration: MediaQuery.disableAnimationsOf(context)
             ? Duration.zero
-            : const Duration(milliseconds: 380),
-        curve: AppMotion.progressCurve,
+            : AppMotion.noteScrollDuration,
+        curve: AppMotion.noteCurve,
       );
     });
-    _freshTimer = Timer(_freshFor, () {
+    _freshTimer = Timer(AppMotion.noteFreshFor, () {
       if (mounted) setState(() => _freshNoteId = null);
     });
   }
@@ -394,16 +401,27 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
     }
   }
 
+  /// The card folds away first (#407, spec §7); then the note goes and the
+  /// toast shows.
   void _delete(JournalNoteEntity note) {
-    showStarToast(context, context.l10n.timeline_noteDeleted);
+    if (!_leavingNoteIds.add(note.id)) return;
+    final fold = FoldAway.durationFor(context);
+    setState(() {});
     unawaited(
       // Failures put the note back and surface via the listener.
       runDeleteNote(
         ref: ref,
         tripId: _tripId,
         noteId: note.id,
+        foldFor: fold,
       ).then((_) {}, onError: (Object _) {}),
     );
+    Timer(fold, () {
+      if (!mounted) return;
+      showStarToast(context, context.l10n.timeline_noteDeleted);
+      // The note has just left the state; it no longer needs the flag.
+      setState(() => _leavingNoteIds.remove(note.id));
+    });
   }
 }
 

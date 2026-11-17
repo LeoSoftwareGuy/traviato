@@ -76,18 +76,23 @@ Future<JournalNoteEntity> runUpdateNote({
 final deleteNoteMutation = Mutation<Unit>();
 
 /// Deletes one note (#401's long-press, or clearing it on the note page,
-/// #276). It leaves the timeline at once and comes back if the delete
-/// fails. Its ✦1 stays (#397), so no stars event.
+/// #276). It leaves the timeline after [foldFor] — the card's fold-away
+/// (#407) — while the delete is already under way, and comes back if the
+/// delete fails. Its ✦1 stays (#397), so no stars event. The wait lives
+/// here, not in the page, so leaving the Journal mid-fold still deletes.
 Future<Unit> runDeleteNote({
   required WidgetRef ref,
   required String tripId,
   required String noteId,
+  Duration foldFor = Duration.zero,
 }) {
   return deleteNoteMutation.run(ref, (tsx) async {
     final repo = tsx.get(journalNoteRepositoryProvider);
     final controller = tsx.get(journalControllerProvider(tripId).notifier);
+    final deleting = repo.deleteNote(noteId);
+    if (foldFor > Duration.zero) await Future<void>.delayed(foldFor);
     final removed = controller.applyNoteDeleted(noteId);
-    final result = await repo.deleteNote(noteId);
+    final result = await deleting;
     return result.fold((failure) {
       if (removed != null) controller.applyNoteSaved(removed);
       throw PresentationFailureException(failure);

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -336,6 +337,52 @@ void main() {
 
       expect(noteRepo.lastDeletedNoteId, 'n1');
       expect(find.text('Great day.'), findsNothing);
+    });
+
+    testWidgets('a deleted note folds away before it leaves (#407)', (
+      tester,
+    ) async {
+      final noteRepo = repoWith(['Great day.', 'Then rain.']);
+      await pumpDay(tester, noteRepo);
+
+      await longPressNote(tester, 'n1');
+      await tester.tap(find.byKey(const Key('note-sheet-delete')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('note-delete-confirm')));
+      await tester.pump(); // the sheet starts closing
+      await tester.pump(const Duration(milliseconds: 300)); // sheet gone
+      // Mid-fold: the delete is under way, the card is still leaving.
+      expect(noteRepo.deleteNoteCallCount, 1);
+      await tester.pump(const Duration(milliseconds: 100)); // fold done
+      await tester.pump();
+
+      expect(find.text('Great day.'), findsNothing);
+      expect(find.text('Then rain.'), findsOneWidget);
+      expect(find.text('Note deleted'), findsOneWidget);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('on iOS a left swipe on a note offers Delete (#407)', (
+      tester,
+    ) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      final noteRepo = repoWith(['Great day.']);
+      await pumpDay(tester, noteRepo);
+
+      await tester.drag(
+        find.byKey(const Key('timeline-note-n1')),
+        const Offset(-120, 0),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('note-swipe-delete')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('note?'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('note-delete-confirm')));
+      await tester.pumpAndSettle();
+
+      expect(noteRepo.lastDeletedNoteId, 'n1');
+      expect(find.text('Great day.'), findsNothing);
+      debugDefaultTargetPlatformOverride = null;
     });
 
     testWidgets('a failed delete puts the note back', (tester) async {

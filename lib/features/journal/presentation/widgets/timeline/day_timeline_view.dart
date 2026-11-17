@@ -5,6 +5,7 @@ import '../../../../../core/l10n/l10n_dates.dart';
 import '../../../../photo/domain/entities/photo_entity.dart';
 import '../../../domain/day_timeline.dart';
 import '../../../domain/entities/journal_note_entity.dart';
+import 'fold_away.dart';
 import 'fresh_note_in.dart';
 import 'timeline_note_card.dart';
 import 'timeline_photo_group.dart';
@@ -24,6 +25,8 @@ class DayTimelineView extends StatelessWidget {
     required this.filmMomentIds,
     required this.onPhotoTap,
     required this.onNoteLongPress,
+    this.onNoteSwipeDelete,
+    this.leavingNoteIds = const {},
     this.freshNoteId,
     this.freshNoteKey,
     super.key,
@@ -40,6 +43,12 @@ class DayTimelineView extends StatelessWidget {
   final Set<String> filmMomentIds;
   final ValueChanged<PhotoEntity> onPhotoTap;
   final ValueChanged<JournalNoteEntity> onNoteLongPress;
+
+  /// iOS swipe → Delete on a note (#407).
+  final ValueChanged<JournalNoteEntity>? onNoteSwipeDelete;
+
+  /// Notes folding away after a confirmed delete (#407).
+  final Set<String> leavingNoteIds;
   final String? freshNoteId;
   final GlobalKey? freshNoteKey;
 
@@ -77,29 +86,36 @@ class DayTimelineView extends StatelessWidget {
           filmMomentIds: filmMomentIds,
         ),
       ),
-      TimelineNoteRow(:final note, :final isLater) => FreshNoteIn(
-        key: ValueKey('timeline-note-row-${note.id}'),
-        isFresh: note.id == freshNoteId,
-        child: TimelineRailRow(
-          key: note.id == freshNoteId ? freshNoteKey : null,
-          label: isLater
-              ? l10n.timeline_later.toUpperCase()
-              : clock.format(note.takenAt.toLocal()),
-          isNote: true,
-          dictated: note.dictated,
-          child: TimelineNoteCard(
-            note: note,
-            use24h: use24h,
-            isFresh: note.id == freshNoteId,
-            isLater: isLater,
-            photo: note.photoId == null ? null : photosById[note.photoId],
-            onPhotoTap: note.photoId == null
-                ? null
-                : () {
-                    final photo = photosById[note.photoId];
-                    if (photo != null) onPhotoTap(photo);
-                  },
-            onLongPress: () => onNoteLongPress(note),
+      TimelineNoteRow(:final note, :final isLater) => FoldAway(
+        key: ValueKey('timeline-note-fold-${note.id}'),
+        isLeaving: leavingNoteIds.contains(note.id),
+        child: FreshNoteIn(
+          key: ValueKey('timeline-note-row-${note.id}'),
+          isFresh: note.id == freshNoteId,
+          child: TimelineRailRow(
+            key: note.id == freshNoteId ? freshNoteKey : null,
+            label: isLater
+                ? l10n.timeline_later.toUpperCase()
+                : clock.format(note.takenAt.toLocal()),
+            isNote: true,
+            dictated: note.dictated,
+            child: TimelineNoteCard(
+              note: note,
+              use24h: use24h,
+              isFresh: note.id == freshNoteId,
+              isLater: isLater,
+              photo: note.photoId == null ? null : photosById[note.photoId],
+              onPhotoTap: note.photoId == null
+                  ? null
+                  : () {
+                      final photo = photosById[note.photoId];
+                      if (photo != null) onPhotoTap(photo);
+                    },
+              onLongPress: () => onNoteLongPress(note),
+              onSwipeDelete: onNoteSwipeDelete == null
+                  ? null
+                  : () => onNoteSwipeDelete!(note),
+            ),
           ),
         ),
       ),

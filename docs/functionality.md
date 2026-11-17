@@ -109,7 +109,9 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   (photos ≤ 20 min apart share a row: 1 / 2 / 3 + "+N"), an AFTER MIDNIGHT
   divider, and a LATER section for things added after the day was over.
   Notes fold at 4 lines ("more" / "less"); long-press → Edit / Delete (with
-  a confirm). A Photo | Note capsule floats above the bottom bar; an empty
+  a confirm), or on iOS swipe left → Delete. A saved note's slot opens and
+  the card drops in with one orange glow; a deleted one folds away (#407;
+  crossfades under reduced motion). A Photo | Note capsule floats above the bottom bar; an empty
   day shows a notebook page with "Write the first note ✦1". The Journal
   opens on the logical today (after midnight, the evening before).
   photos strip ("TODAY'S PHOTOS · N", **add tile awards ✦2** on successful photo,

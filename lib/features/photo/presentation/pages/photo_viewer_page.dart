@@ -11,6 +11,7 @@ import '../../../../core/errors/failure_message.dart';
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/l10n/l10n_dates.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -300,7 +301,7 @@ class _PhotoViewerPageState extends ConsumerState<PhotoViewerPage>
     if (note == null || !mounted) return;
     _freshTimer?.cancel();
     setState(() => _freshNoteId = note.id);
-    _freshTimer = Timer(const Duration(seconds: 3), () {
+    _freshTimer = Timer(AppMotion.noteFreshFor, () {
       if (mounted) setState(() => _freshNoteId = null);
     });
   }
