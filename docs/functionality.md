@@ -111,7 +111,7 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   Notes fold at 4 lines ("more" / "less"); long-press → Edit / Delete (with
   a confirm), or on iOS swipe left → Delete. A saved note's slot opens and
   the card drops in with one orange glow; a deleted one folds away (#407;
-  crossfades under reduced motion). A Photo | Note capsule floats above the bottom bar; an empty
+  crossfades under reduced motion). A Photo | Note capsule is the Journal's only bottom control — no app bottom bar there (#410); an empty
   day shows a notebook page with "Write the first note ✦1". The Journal
   opens on the logical today (after midnight, the evening before).
   photos strip ("TODAY'S PHOTOS · N", **add tile awards ✦2** on successful photo,
