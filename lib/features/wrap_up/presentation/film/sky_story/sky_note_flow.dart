@@ -4,8 +4,11 @@ import 'sky_story_texts.dart';
 
 /// Long notes continue across a day's pages (#383, folded into #399).
 ///
-/// When the server chose the day's best lines (#419, `SkyPage.noteLines`)
-/// those are flowed instead of the note's sentences, in the same way.
+/// When the server chose lines for the pages (#419, #422,
+/// `SkyPage.noteLines`), each page shows its own lines that fit it — the
+/// server already put each line on the page nearest it in time — and
+/// nothing flows over; a page without lines shows its note's sentences, or
+/// its fallback.
 ///
 /// A page shows only what fits it whole: three lines on a note card, four
 /// on the fly-out's sky. A day's note is split at sentence ends, in order:
@@ -36,12 +39,34 @@ SkyStory flowSkyNotes(
       for (final j in run) pages[j].note?.trim(),
     ].nonNulls.where((n) => n.isNotEmpty).firstOrNull;
     final signature = [for (final j in run) pages[j].signature].nonNulls;
-    // The day's chosen lines (#419), else the note's own sentences.
-    final chosen = [
-      for (final j in run) pages[j].noteLines,
-    ].firstWhere((lines) => lines.isNotEmpty, orElse: () => const []);
+    // The server gave each page its own lines, by time (#422): each page
+    // shows the ones that fit it, nothing flows over.
+    if (run.any((j) => pages[j].noteLines.isNotEmpty)) {
+      final chunks = <int, String>{};
+      for (final j in run) {
+        final own = pages[j].noteLines.isNotEmpty
+            ? pages[j].noteLines
+            : FilmTextRules.sentences(pages[j].note?.trim() ?? '');
+        final shown = <String>[];
+        for (final line in own) {
+          if (fits([...shown, line].join(' '), layouts[j])) shown.add(line);
+        }
+        if (shown.isNotEmpty) chunks[j] = shown.join(' ');
+      }
+      final lastWords = chunks.keys.lastOrNull;
+      final name = signature.firstOrNull ?? story.names;
+      for (final j in run) {
+        pages[j] = _withNote(
+          pages[j],
+          note: chunks[j],
+          signature: j == lastWords ? name : null,
+        );
+      }
+      i = end;
+      continue;
+    }
     if (note != null) {
-      var rest = chosen.isNotEmpty ? chosen : FilmTextRules.sentences(note);
+      var rest = FilmTextRules.sentences(note);
       final chunks = <int, String>{};
       for (final j in run) {
         // Skip sentences too long for this page on their own.

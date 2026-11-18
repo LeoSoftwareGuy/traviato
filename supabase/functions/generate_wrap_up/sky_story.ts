@@ -18,6 +18,7 @@ import { sortPhotosChronologically, spreadEvenly } from "./assemble.ts";
 import { decorativePhotos } from "./decorative.ts";
 import { bannedPhraseIn, cleanLine } from "./film_plan.ts";
 import { bestLines } from "./excerpts.ts";
+import { onLogicalDays } from "./logical_day.ts";
 
 export const SKY_VERSION = 1;
 export const MAX_SKY_PAGES = 5;
@@ -70,10 +71,10 @@ export interface SkyPageContent {
   // film can't read the viewer's notes). Drafts rebuild on every open, so
   // it follows edits.
   note: string | null;
-  // The best lines of the page's days' notes (#419), in note order, for
-  // the app to flow across the days' pages instead of the note's leading
-  // sentences; only on the page with the note. Empty = nothing specific:
-  // the note plays as before. Older content has none.
+  // The best lines of the page's days' notes (#419), in note order: the
+  // ones nearest this page's photos in time (#422). Empty = nothing
+  // specific here: the page keeps its note or fallback. Older content has
+  // none.
   excerpts: { note_id: string; text: string }[];
   sky_line: string | null;
 }
@@ -203,6 +204,8 @@ function memoryDayCount(tripData: TripData): number {
 // Photos a page may show, chronological: not left out, on a day of the
 // memory.
 export function skyPhotos(tripData: TripData): Photo[] {
+  // Logical days, as the director sees them (#422).
+  tripData = onLogicalDays(tripData);
   const start = tripData.trip.start_date;
   const dayCount = memoryDayCount(tripData);
   if (!start) return [];
@@ -219,6 +222,8 @@ export function skyCheckContext(
   tripData: TripData,
   notRequiredIds: ReadonlySet<string> = new Set(),
 ): SkyCheckContext {
+  // Logical days, as the director sees them (#422).
+  tripData = onLogicalDays(tripData);
   const start = tripData.trip.start_date ?? "1970-01-01";
   const photos = skyPhotos(tripData);
   return {
@@ -781,6 +786,8 @@ export function codeSkyPages(
   tripData: TripData,
   heroScores: Readonly<Record<string, number>> = {},
 ): SkyPageContent[] {
+  // Logical days, as the director sees them (#422).
+  tripData = onLogicalDays(tripData);
   const start = tripData.trip.start_date;
   if (!start) return [];
   const photos = skyPhotos(tripData);
@@ -815,6 +822,8 @@ export function directorSkyPages(
   tripData: TripData,
   plan: SkyStoryPlan,
 ): SkyPageContent[] {
+  // Logical days, as the director sees them (#422).
+  tripData = onLogicalDays(tripData);
   const start = tripData.trip.start_date!;
   const photos = skyPhotos(tripData);
   const groups = groupsOf(photos, start, plan.pages.map((p) => p.days));
@@ -845,6 +854,8 @@ export function buildSkyContent(
   plan: SkyStoryPlan | null,
   heroScores: Readonly<Record<string, number>> = {},
 ): SkyContent | null {
+  // Logical days, as the director sees them (#422).
+  tripData = onLogicalDays(tripData);
   const pages = plan
     ? directorSkyPages(tripData, plan)
     : codeSkyPages(tripData, heroScores);
@@ -878,34 +889,74 @@ export function buildSkyContent(
 // Lines a Sky Story page can carry (#419): about two a note card.
 export const SKY_LINES_PER_PAGE = 2;
 
-// Each note page's best lines (#419): from every note of its days, in
-// time order, SKY_LINES_PER_PAGE for each page of those days.
+// The best lines of a note page's days (#419), page by page (#422): a run
+// of pages for the same days shares its days' notes, and each line goes on
+// the page whose photos are nearest the note in time — a note on one of a
+// page's photos on that page — so the rave note lands on the rave photos.
+// Each page keeps its best SKY_LINES_PER_PAGE, in note order; a page with
+// none keeps its fallback. Runs without a note page (the director wrote on
+// the sky instead) get none.
 function addSkyExcerpts(tripData: TripData, pages: SkyPageContent[]): void {
   const start = tripData.trip.start_date;
-  const timeOf = (n: TripData["notes"][number]) =>
-    n.legacy ? "" : n.taken_at ?? n.created_at ?? "";
+  const ms = (iso: string | null | undefined) => iso ? Date.parse(iso) : NaN;
+  const noteTime = (n: TripData["notes"][number]) =>
+    n.legacy ? NaN : ms(n.taken_at ?? n.created_at);
   const notes = tripData.notes
     .filter((n) => n.id && n.content.trim())
     .sort((a, b) =>
       a.day_date.localeCompare(b.day_date) ||
-      timeOf(a).localeCompare(timeOf(b))
+      (noteTime(a) || 0) - (noteTime(b) || 0)
     );
+  const photoTimes = new Map(
+    tripData.photos.map((p) => [p.id, ms(p.taken_at ?? p.created_at)]),
+  );
   for (const page of pages) page.excerpts = [];
   if (!start) return;
-  for (const page of pages) {
-    if (!page.note) continue;
-    const last = page.last_day ?? page.first_day;
-    const sameDays = pages.filter((p) =>
-      p.first_day === page.first_day && (p.last_day ?? p.first_day) === last
-    ).length;
+  const lastOf = (p: SkyPageContent) => p.last_day ?? p.first_day;
+  let i = 0;
+  while (i < pages.length) {
+    let end = i + 1;
+    while (
+      end < pages.length && pages[end].first_day === pages[i].first_day &&
+      lastOf(pages[end]) === lastOf(pages[i])
+    ) end++;
+    const run = pages.slice(i, end);
+    i = end;
+    if (!run.some((p) => p.note)) continue;
+    const ids = run.map((p) => [p.hero_photo_id, ...p.extra_photo_ids]);
     const own = notes.filter((n) => {
       const day = dayNumberOf(start, n.day_date);
-      return day >= page.first_day && day <= last;
+      return day >= run[0].first_day && day <= lastOf(run[0]);
     });
-    page.excerpts = bestLines(
-      own.map((n) => ({ id: n.id!, content: n.content })),
-      SKY_LINES_PER_PAGE * sameDays,
-    ).map(({ note_id, text }) => ({ note_id, text }));
+    const pageOf = (n: TripData["notes"][number]): number => {
+      const tagged = ids.findIndex((page) => page.includes(n.photo_id ?? ""));
+      if (tagged >= 0) return tagged;
+      const t = noteTime(n);
+      if (Number.isNaN(t)) return 0;
+      let best = 0;
+      let gap = Infinity;
+      ids.forEach((page, k) => {
+        for (const id of page) {
+          const d = Math.abs((photoTimes.get(id) ?? NaN) - t);
+          if (d < gap) {
+            gap = d;
+            best = k;
+          }
+        }
+      });
+      return best;
+    };
+    const byPage = run.map(() => [] as typeof own);
+    for (const n of own) byPage[pageOf(n)].push(n);
+    const shown = new Set<string>();
+    run.forEach((page, k) => {
+      page.excerpts = bestLines(
+        byPage[k].map((n) => ({ id: n.id!, content: n.content })),
+        SKY_LINES_PER_PAGE,
+      ).filter((l) => !shown.has(l.text))
+        .map(({ note_id, text }) => ({ note_id, text }));
+      for (const l of page.excerpts) shown.add(l.text);
+    });
   }
 }
 

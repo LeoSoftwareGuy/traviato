@@ -236,7 +236,13 @@ Post-MVP: `video_path`, `video_status`.
   plays as before. Golden Vows: a hero without a caption or a director's
   excerpt gets its day's best line (`MAX_GV_HERO_LINE_CHARS` 90) in its
   `note`, from a note on that photo first, else its logical day's notes;
-  never a line another hero shows.
+  never a line another hero shows. Since #422 a run of Sky pages for the
+  same days shares their notes: each line goes on the page whose photos
+  are nearest its note in time, best 2 a page, so `excerpts` can be on
+  any page of the run. Sky Story groups photos and notes by logical day
+  (`onLogicalDays`: a stored day moves at most one day back, onto the
+  evening); an untimed photo keeps its stored day; a Neon day chapter
+  keeps at most 2 moments (the rest become one timeline).
 - **Healing a stored section** (#393, no schema change): when a photo is
   deleted or left out, or a note reworded, after the director ran, the
   `golden_vows` / `neon_night` section is fitted to the memory in code on

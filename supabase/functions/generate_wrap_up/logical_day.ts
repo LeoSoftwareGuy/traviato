@@ -83,7 +83,10 @@ export function tripLogicalDays(
     [
       ...tripData.photos.map((p) => ({
         id: p.id,
-        at: p.taken_at ?? p.created_at,
+        // An untimed photo keeps its stored day (#422): its upload time
+        // says when it was added, not when it happened. Only a photo with
+        // neither falls back to the upload.
+        at: p.taken_at ?? (p.day_date ? null : p.created_at),
         fallbackDay: p.day_date,
       })),
       ...tripData.notes.filter((n) => n.id).map((n) => ({
@@ -95,4 +98,29 @@ export function tripLogicalDays(
     ],
     tripData.utc_offset_minutes ?? 0,
   );
+}
+
+// [tripData] with every photo's and note's day_date set to its logical day
+// (#422), for films that group by day_date: Sky Story then sees the same
+// days the director does. The rule only ever keeps a night on the evening
+// before, so a stored day moves at most one day back; a row without a day
+// keeps none. Idempotent.
+export function onLogicalDays(tripData: TripData): TripData {
+  const days = tripLogicalDays(tripData);
+  const moved = (stored: string | null, day: string | null | undefined) => {
+    if (!stored || !day || day === stored) return null;
+    const before = dateOf(Date.parse(`${stored}T00:00:00Z`) - DAY_MS);
+    return day === before ? day : null;
+  };
+  return {
+    ...tripData,
+    photos: tripData.photos.map((p) => {
+      const day = moved(p.day_date, days.get(p.id));
+      return day ? { ...p, day_date: day } : p;
+    }),
+    notes: tripData.notes.map((n) => {
+      const day = moved(n.day_date, n.id ? days.get(`note:${n.id}`) : null);
+      return day ? { ...n, day_date: day } : n;
+    }),
+  };
 }

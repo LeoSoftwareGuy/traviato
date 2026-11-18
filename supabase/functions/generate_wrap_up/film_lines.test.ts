@@ -98,3 +98,72 @@ Deno.test("Golden Vows: a note on the photo first; a caption always wins", () =>
     "Our first dance",
   );
 });
+
+// --- #422 -------------------------------------------------------------------
+
+import { skyCheckContext } from "./sky_story.ts";
+
+// One day with a morning and a night out past midnight (UTC = the clock).
+function longDay(): TripData {
+  const base = directorTripData().photos[0];
+  const at = (id: string, day: string, time: string) => ({
+    ...base,
+    id,
+    day_date: day,
+    taken_at: `${day}T${time}:00Z`,
+    storage_path: `u/t/${id}.jpg`,
+    place_text: null,
+  });
+  return directorTripData({
+    trip: { ...directorTripData().trip, end_date: "2026-09-02" },
+    photos: [
+      ...["09", "10", "11", "12", "13"].map((h, k) =>
+        at(`m${k}`, "2026-09-01", `${h}:00`)
+      ),
+      ...["22", "23"].map((h, k) => at(`n${k}`, "2026-09-01", `${h}:30`)),
+      ...["01", "02", "03"].map((h, k) => at(`r${k}`, "2026-09-02", `${h}:00`)),
+    ],
+    notes: [],
+  });
+}
+
+Deno.test("Sky Story sees logical days: the night after midnight is the evening's", () => {
+  const context = skyCheckContext(longDay());
+  assertEquals(context.photoDays.get("r2"), 1);
+  assertEquals(context.photoDays.get("m0"), 1);
+});
+
+Deno.test("Sky lines go on the page whose photos are nearest in time", () => {
+  const data = longDay();
+  data.notes = [
+    {
+      id: "morning",
+      day_date: "2026-09-01",
+      taken_at: "2026-09-01T09:30:00Z",
+      content: RIBS,
+    },
+    {
+      id: "set",
+      day_date: "2026-09-01",
+      taken_at: "2026-09-02T02:30:00Z",
+      content: "Это самый крутой сет который я слышал или это М?",
+    },
+  ];
+  // Every photo Always: more than one page shows, so day 1 gets two pages
+  // (#378) — the morning, then the night.
+  data.photos = data.photos.map((p) => ({ ...p, use_in_wrap_up: true }));
+  const sky = buildSkyContent(data, null)!;
+  const pages = sky.pages.map((p) => ({
+    ids: [p.hero_photo_id, ...p.extra_photo_ids],
+    lines: p.excerpts.map((e) => e.text),
+  }));
+  const morning = pages.find((p) => p.ids.includes("m0"))!;
+  const night = pages.find((p) => p.ids.includes("r2"))!;
+  assert(morning !== night, "day 1 has two pages");
+  assertEquals(morning.lines, [RIBS]);
+  assertEquals(night.lines, [
+    "Это самый крутой сет который я слышал или это М?",
+  ]);
+  // Every line is on exactly one page.
+  assertEquals(pages.flatMap((p) => p.lines).length, 2);
+});

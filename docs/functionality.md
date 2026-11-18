@@ -287,7 +287,13 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   sentences, continued over the day's pages; with nothing specific the
   note plays as before. A Golden Vows photo page without a caption or a
   director's line gets its day's best line — from a note on that photo
-  first — never one another page already shows.
+  first — never one another page already shows. **Per page (#422):** a
+  day spread over several Sky pages puts each line on the page whose
+  photos are nearest it in time (the rave note on the rave photos); each
+  page shows its own lines, nothing flows over. Sky Story uses logical
+  days too (the night is the evening's), and a page with time to spare
+  deals its photos slower — up to 1.2 s apart, over about half the page —
+  instead of all at once and a long hold; the note's timing is unchanged.
 - **The user's words (#399, display only; which words are chosen is #398,
   multi-excerpt note moments #416):** captions and notes are never cut
   with "…". A text that doesn't fit gets smaller type or more lines, then

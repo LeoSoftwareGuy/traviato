@@ -34,18 +34,26 @@ final class SkyChapterSpec extends SkySceneSpec {
     required this.index,
     required this.count,
     SkyPageLayout? layout,
+    this.dealGap,
+    this.heroAt,
   }) : _layout = layout;
 
   final int index;
   final int count;
   final SkyPageLayout? _layout;
 
+  /// Seconds between two dealt photos, and when the hero lands (s after
+  /// the page's start), when the page has time to deal slower (#422);
+  /// null = the reference's pace (`SkyPageBeats`).
+  final double? dealGap;
+  final double? heroAt;
+
   bool get isLast => index == count - 1;
 
   SkyPageLayout get layout => _layout ?? SkyPageLayout.forChapter(index, count);
 
   @override
-  List<Object?> get props => [index, count, layout];
+  List<Object?> get props => [index, count, layout, dealGap, heroAt];
 }
 
 /// The sky flattens into night and the photo tiles swirl up.
