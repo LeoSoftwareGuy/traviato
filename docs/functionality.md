@@ -281,7 +281,13 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   plays the others one after another, each in neon over its own photo
   (else one of the chapter's) for its reading time, in whole bars. A
   chapter without more lines has no such scene, and the Note scene is
-  left out when its line already played. Sky Story and Golden Vows: #419.
+  left out when its line already played. **Sky Story and Golden Vows
+  (#419):** a Sky Story note page shows the best lines of its days' notes
+  (about two per page, in the notes' order) instead of the note's first
+  sentences, continued over the day's pages; with nothing specific the
+  note plays as before. A Golden Vows photo page without a caption or a
+  director's line gets its day's best line — from a note on that photo
+  first — never one another page already shows.
 - **The user's words (#399, display only; which words are chosen is #398,
   multi-excerpt note moments #416):** captions and notes are never cut
   with "…". A text that doesn't fit gets smaller type or more lines, then

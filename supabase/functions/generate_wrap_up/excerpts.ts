@@ -118,3 +118,38 @@ const SENSITIVE = [
 export function isSensitive(text: string): boolean {
   return SENSITIVE.some((s) => s.test(text));
 }
+
+export interface PickedLine {
+  note_id: string;
+  text: string;
+  score: number;
+}
+
+// The best lines of [notes] (#419), given in time order: their specific
+// candidates (score ≥ SPECIFIC_SCORE, nothing sensitive, at most
+// [maxChars]), the [max] highest-scoring, then back in the notes' order —
+// so a page reads like the note did. Never a line twice. Empty when the
+// notes have nothing specific: the film shows the note as before.
+export function bestLines(
+  notes: readonly { id: string; content: string }[],
+  max: number,
+  maxChars = MAX_EXCERPT_CHARS,
+): PickedLine[] {
+  const seen = new Set<string>();
+  const candidates: (PickedLine & { at: number })[] = [];
+  for (const note of notes) {
+    for (const text of excerptCandidates(note.content)) {
+      if (seen.has(text) || isSensitive(text)) continue;
+      if ([...text].length > maxChars) continue;
+      const score = excerptScore(text);
+      if (score < SPECIFIC_SCORE) continue;
+      seen.add(text);
+      candidates.push({ note_id: note.id, text, score, at: candidates.length });
+    }
+  }
+  return candidates
+    .sort((a, b) => b.score - a.score || a.at - b.at)
+    .slice(0, max)
+    .sort((a, b) => a.at - b.at)
+    .map(({ at: _at, ...line }) => line);
+}

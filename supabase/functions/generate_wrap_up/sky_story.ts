@@ -17,6 +17,7 @@ import type { TripData } from "./gather.ts";
 import { sortPhotosChronologically, spreadEvenly } from "./assemble.ts";
 import { decorativePhotos } from "./decorative.ts";
 import { bannedPhraseIn, cleanLine } from "./film_plan.ts";
+import { bestLines } from "./excerpts.ts";
 
 export const SKY_VERSION = 1;
 export const MAX_SKY_PAGES = 5;
@@ -69,6 +70,11 @@ export interface SkyPageContent {
   // film can't read the viewer's notes). Drafts rebuild on every open, so
   // it follows edits.
   note: string | null;
+  // The best lines of the page's days' notes (#419), in note order, for
+  // the app to flow across the days' pages instead of the note's leading
+  // sentences; only on the page with the note. Empty = nothing specific:
+  // the note plays as before. Older content has none.
+  excerpts: { note_id: string; text: string }[];
   sky_line: string | null;
 }
 
@@ -748,6 +754,7 @@ function pageContent(
     end_date: multi ? dateOfDay(start, group.last) : null,
     photo_count: group.photos.length,
     note: null,
+    excerpts: [],
     ...fields,
   };
 }
@@ -849,6 +856,7 @@ export function buildSkyContent(
     page.note = page.note_id ? notes.get(page.note_id) || null : null;
     if (!page.note) page.note_id = null;
   }
+  addSkyExcerpts(tripData, pages);
   // The balloon is decoration: Always picks already have their page, so
   // it's made from the other photos (#378).
   const mosaic = decorativePhotos(
@@ -865,6 +873,40 @@ export function buildSkyContent(
     mosaic_photo_ids: mosaic.map((p) => p.id),
     pages,
   };
+}
+
+// Lines a Sky Story page can carry (#419): about two a note card.
+export const SKY_LINES_PER_PAGE = 2;
+
+// Each note page's best lines (#419): from every note of its days, in
+// time order, SKY_LINES_PER_PAGE for each page of those days.
+function addSkyExcerpts(tripData: TripData, pages: SkyPageContent[]): void {
+  const start = tripData.trip.start_date;
+  const timeOf = (n: TripData["notes"][number]) =>
+    n.legacy ? "" : n.taken_at ?? n.created_at ?? "";
+  const notes = tripData.notes
+    .filter((n) => n.id && n.content.trim())
+    .sort((a, b) =>
+      a.day_date.localeCompare(b.day_date) ||
+      timeOf(a).localeCompare(timeOf(b))
+    );
+  for (const page of pages) page.excerpts = [];
+  if (!start) return;
+  for (const page of pages) {
+    if (!page.note) continue;
+    const last = page.last_day ?? page.first_day;
+    const sameDays = pages.filter((p) =>
+      p.first_day === page.first_day && (p.last_day ?? p.first_day) === last
+    ).length;
+    const own = notes.filter((n) => {
+      const day = dayNumberOf(start, n.day_date);
+      return day >= page.first_day && day <= last;
+    });
+    page.excerpts = bestLines(
+      own.map((n) => ({ id: n.id!, content: n.content })),
+      SKY_LINES_PER_PAGE * sameDays,
+    ).map(({ note_id, text }) => ({ note_id, text }));
+  }
 }
 
 function shownOnPages(pages: SkyPageContent[]): Set<string> {

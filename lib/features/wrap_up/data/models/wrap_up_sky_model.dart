@@ -57,6 +57,10 @@ WrapUpSkyPage? _page(dynamic json) {
     ).where((id) => id != hero).toList(),
     noteId: _optionalString(json['note_id']),
     note: _optionalString(json['note']),
+    excerpts: [
+      for (final e in json['excerpts'] is List ? json['excerpts'] as List : [])
+        if (e is Map) ?_optionalString(e['text']),
+    ],
     skyLine: _optionalString(json['sky_line']),
   );
 }

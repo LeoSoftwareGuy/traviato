@@ -22,7 +22,7 @@ import { decorativePhotos } from "./decorative.ts";
 import { bannedPhraseIn, cleanLine } from "./film_plan.ts";
 import { isExcerptOf } from "./golden_vows.ts";
 import { firstNameOf } from "./sky_story.ts";
-import { logicalDays } from "./logical_day.ts";
+import { tripLogicalDays } from "./logical_day.ts";
 import {
   excerptCandidates,
   excerptScore,
@@ -344,26 +344,8 @@ export interface NnCheckContext {
   photoPlaces?: ReadonlyMap<string, string>;
 }
 
-// Every photo's and note's logical day (#398 R1), photos and notes taken
-// together in time order, on the app's clock.
-export function nnLogicalDays(tripData: TripData): Map<string, string | null> {
-  return logicalDays(
-    [
-      ...tripData.photos.map((p) => ({
-        id: p.id,
-        at: p.taken_at ?? p.created_at,
-        fallbackDay: p.day_date,
-      })),
-      ...tripData.notes.filter((n) => n.id).map((n) => ({
-        id: `note:${n.id}`,
-        // A legacy note's time is its last edit: its day is its own.
-        at: n.legacy ? null : n.taken_at ?? null,
-        fallbackDay: n.day_date,
-      })),
-    ],
-    tripData.utc_offset_minutes ?? 0,
-  );
-}
+// Every photo's and note's logical day (#398 R1); notes as `note:<id>`.
+export const nnLogicalDays = tripLogicalDays;
 
 // The days the film's photos fall on, in order, each with the index of
 // its first photo; [photoDays] maps a photo to its day.

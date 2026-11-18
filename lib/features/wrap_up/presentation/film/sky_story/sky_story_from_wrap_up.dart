@@ -35,6 +35,7 @@ SkyStory? skyStoryFromWrapUp(
             ].take(SkyPage.maxExtras).toList(),
           ),
           note: page.note,
+          noteLines: page.note == null ? const [] : page.excerpts,
           signature: page.note == null ? null : sky.firstName,
           skyLine: page.note == null ? page.skyLine : null,
         ),

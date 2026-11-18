@@ -240,6 +240,8 @@ Deno.test("buildSkyContent: the director's pages, with counts and dates from cod
     extra_photo_ids: ["p00", "p02", "p03"],
     note_id: "n1",
     note: "Bikes everywhere.",
+    // Nothing specific in "Bikes everywhere.": the note plays as before.
+    excerpts: [],
     sky_line: null,
   });
   assertEquals(

@@ -58,6 +58,8 @@ void main() {
       expect(page.noteId, 'n1');
       expect(page.note, startsWith('Took the 28 tram'));
       expect(page.skyLine, isNull);
+      // Older content has no chosen lines (#419).
+      expect(page.excerpts, isEmpty);
     });
 
     test('code-built pages and day ranges', () {
@@ -106,6 +108,20 @@ void main() {
       )!;
       expect(sky.pages.single.lastDay, isNull);
     });
+  });
+
+  test("a page's chosen lines, in order; malformed ones dropped (#419)", () {
+    final page = _page()
+      ..['excerpts'] = [
+        {'note_id': 'n1', 'text': 'Took the 28 tram the wrong way, twice.'},
+        {'note_id': 'n2', 'text': '  '},
+        'not a line',
+        {'note_id': 'n3', 'text': 'Pastéis at 8 am.'},
+      ];
+    expect(parseWrapUpSky(_content(pages: [page]))!.pages.single.excerpts, [
+      'Took the 28 tram the wrong way, twice.',
+      'Pastéis at 8 am.',
+    ]);
   });
 
   test('WrapUpModel carries content.sky', () {
