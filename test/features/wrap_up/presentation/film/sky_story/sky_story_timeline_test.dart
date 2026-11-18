@@ -66,4 +66,91 @@ void main() {
     ]);
     expect(_specLayouts(sparse), sparse.layouts);
   });
+
+  group('pace (#422)', () {
+    SkyPage page({int extras = 4, String? note, String? caption}) => SkyPage(
+      firstDay: 1,
+      date: DateTime(2026, 6, 1),
+      photoCount: extras + 1,
+      hero: SkyPhoto(id: 'h', caption: caption),
+      extras: [for (var k = 0; k < extras; k++) SkyPhoto(id: 'e$k')],
+      note: note,
+    );
+
+    test('a page with time to spare deals its photos over half of it', () {
+      final pace = SkyStoryTimeline.paceFor(
+        page(),
+        SkyPageLayout.fan,
+        13,
+        isLast: false,
+      )!;
+      // 4 photos then the hero, from 0.9 s before the page: at most
+      // maxDealGap apart, so the hero lands at −0.9 + 5 × 1.2 = 5.1 s.
+      expect(pace.dealGap, SkyStoryTimeline.maxDealGap);
+      expect(pace.heroAt, closeTo(5.1, 1e-9));
+      // A shorter page spreads them over half of it.
+      final short = SkyStoryTimeline.paceFor(
+        page(),
+        SkyPageLayout.fan,
+        9.5,
+        isLast: false,
+      )!;
+      expect(short.heroAt, closeTo(4.75, 1e-9));
+      expect(short.dealGap, closeTo(5.65 / 5, 1e-9));
+    });
+
+    test("the hero lands in time for its caption to be read", () {
+      final pace = SkyStoryTimeline.paceFor(
+        page(caption: 'a' * 96), // 8.8 s to read
+        SkyPageLayout.fan,
+        9.5,
+        isLast: false,
+      );
+      // 9.5 − 0.25 − 8.8 = 0.45 s: hardly later than the reference's 0.35.
+      expect(pace!.heroAt, closeTo(0.45, 1e-9));
+    });
+
+    test('a fly-out page keeps its orbit', () {
+      expect(
+        SkyStoryTimeline.paceFor(
+          page(),
+          SkyPageLayout.flyOut,
+          13,
+          isLast: false,
+        ),
+        isNull,
+      );
+    });
+
+    test(
+      'forStory puts the pace on the page specs; the length is unchanged',
+      () {
+        final story = SkyStory(
+          title: 'Memory',
+          startDate: DateTime(2026, 6, 1),
+          endDate: DateTime(2026, 6, 3),
+          pages: [
+            page(note: 'a' * 130),
+            page(),
+            page(),
+          ],
+        );
+        final timeline = SkyStoryTimeline.forStory(story);
+        final specs = [
+          for (final s in timeline.scenes)
+            if (s.spec case final SkyChapterSpec c) c,
+        ];
+        expect(specs.first.dealGap, isNotNull);
+        expect(specs.first.heroAt, greaterThan(0.35));
+        final lengths = [
+          for (final s in timeline.scenes)
+            if (s.spec is SkyChapterSpec) s.duration,
+        ];
+        expect(lengths.skip(1), [
+          SkyStoryTimeline.chapterDur,
+          SkyStoryTimeline.lastChapterDur,
+        ]);
+      },
+    );
+  });
 }

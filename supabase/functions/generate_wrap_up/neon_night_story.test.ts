@@ -4,6 +4,7 @@ import {
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
   buildNeonNightContent,
+  dayChapterStarts,
   describeNeonNightProblems,
   type NeonNightPlan,
   nnCheckContext,
@@ -230,4 +231,50 @@ Deno.test("one night is still split by the director, by time", () => {
   assertEquals(describeNeonNightProblems(plan, context), []);
   const repaired = repairNeonNight(plan, context) as NeonNightPlan;
   assertEquals(repaired.chapters.map((c) => c.first_photo_id), ["a0", "a4"]);
+});
+
+// --- #422: Amsterdam feedback ------------------------------------------------
+
+Deno.test("an untimed photo keeps its stored day: no 1-photo day chapter", () => {
+  const data = amsterdam();
+  data.photos.push({
+    ...data.photos[data.photos.length - 1],
+    id: "untimed",
+    taken_at: null,
+    created_at: "2026-10-27T10:00:00Z", // uploaded two days later
+    storage_path: "u/t/untimed.jpg",
+  });
+  const context = nnCheckContext(data);
+  assertEquals(context.photoDays!.get("untimed"), "2026-09-03");
+  assertEquals(dayChapterStarts(context).length, 3);
+});
+
+Deno.test("a day the director split by time keeps at most 2 moments", () => {
+  const context = nnCheckContext(amsterdam());
+  const plan: NeonNightPlan = {
+    chapters: [
+      ["a0", ["a0", "a1"]],
+      ["a2", ["a2", "a3"]],
+      ["a4", ["a4", "a5"]],
+      ["b0", ["b0", "b1"]],
+      ["c0", ["c0", "c1"]],
+    ].map(([first, ids], k) => ({
+      title: `Part ${k + 1}`,
+      first_photo_id: first as string,
+      note_id: null,
+      note_excerpt: null,
+      moments: [{ type: "split" as const, photo_ids: ids as string[] }],
+      excerpts: [],
+    })),
+    note_moment: null,
+    headline: null,
+  };
+  const repaired = repairNeonNight(plan, context) as NeonNightPlan;
+  assertEquals(describeNeonNightProblems(repaired, context), []);
+  const day1 = repaired.chapters[0];
+  assertEquals(day1.moments.length, 2);
+  // The first stays; the others' photos make one timeline, in time order.
+  assertEquals(day1.moments[0].photo_ids, ["a0", "a1"]);
+  assertEquals(day1.moments[1].type, "timeline");
+  assertEquals(day1.moments[1].photo_ids, ["a2", "a3", "a4", "a5"]);
 });

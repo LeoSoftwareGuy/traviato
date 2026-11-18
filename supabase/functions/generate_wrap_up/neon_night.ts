@@ -1125,6 +1125,17 @@ function repairMoments(
       for (const id of kept) used.add(id);
       moments.push({ ...moment, type, photo_ids: kept });
     }
+    // A chapter keeps at most MAX_NN_MOMENTS (#422): a day chapter can
+    // inherit the moments of every chapter the director made of that day.
+    // The first stays; the others become one timeline of their photos.
+    if (moments.length > MAX_NN_MOMENTS) {
+      const rest = moments.splice(1).flatMap((m) => m.photo_ids as string[])
+        .sort((a, b) => order(a) - order(b));
+      for (const id of rest) used.delete(id);
+      const ids = spreadEvenly(rest, NN_MOMENT_PHOTOS.timeline[1]);
+      for (const id of ids) used.add(id);
+      moments.push({ type: "timeline", photo_ids: ids });
+    }
     const chapterPhotos = ordered.slice(start, end).filter((id) =>
       !context.excludedIds.has(id)
     );

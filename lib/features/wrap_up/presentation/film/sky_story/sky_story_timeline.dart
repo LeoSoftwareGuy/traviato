@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import '../../../domain/film_text_rules.dart';
 import '../timeline/film_timeline.dart';
+import 'sky_page_beats.dart';
 import 'sky_scene_spec.dart';
 import 'sky_story.dart';
 
@@ -46,13 +47,81 @@ abstract final class SkyStoryTimeline {
   static FilmTimeline<SkySceneSpec> forStory(SkyStory story) {
     final layouts = story.layouts;
     final count = story.pages.length;
+    final mins = [
+      for (final (i, page) in story.pages.indexed)
+        readingDur(page, layouts[i], isLast: i == count - 1),
+    ];
+    final paces = [
+      for (final (i, page) in story.pages.indexed)
+        paceFor(
+          page,
+          layouts[i],
+          chapterDurFor(i, count, mins[i]),
+          isLast: i == count - 1,
+        ),
+    ];
     return forChapters(
       count,
       layouts: layouts,
-      minChapterDurs: [
-        for (final (i, page) in story.pages.indexed)
-          readingDur(page, layouts[i], isLast: i == count - 1),
-      ],
+      minChapterDurs: mins,
+      paces: paces,
+    );
+  }
+
+  /// The slowest a page deals its photos (#422), s between two.
+  static const maxDealGap = 1.2;
+
+  /// The share of a page by which its hero has landed when it deals slower:
+  /// the rest is for seeing the whole page.
+  static const dealShare = 0.5;
+
+  /// How a page of [duration] s deals its photos (#422): one after another
+  /// over about half the page instead of all within its first second, then
+  /// the hero. The note's timing doesn't move, so its reading time holds;
+  /// the hero still lands in time for its caption to be read. Null for the
+  /// reference's pace: a fly-out page, or no time to spare.
+  static ({double dealGap, double heroAt})? paceFor(
+    SkyPage page,
+    SkyPageLayout layout,
+    double duration, {
+    required bool isLast,
+  }) {
+    final (from, baseHero) = switch (layout) {
+      SkyPageLayout.fan => (-0.9, 0.35),
+      SkyPageLayout.taped => (-0.75, 0.75),
+      SkyPageLayout.flyOut => (0.0, 0.0),
+    };
+    if (layout == SkyPageLayout.flyOut) return null;
+    final deals = math.min(page.extras.length, SkyPage.maxExtras);
+    final exitLead = isLast ? 1.75 : 0.25;
+    final caption = page.hero.caption?.trim() ?? '';
+    final latestHero =
+        duration -
+        exitLead -
+        (caption.isEmpty ? 1.5 : FilmTextRules.readingTime(caption));
+    final hero = math.min(duration * dealShare, latestHero);
+    final gap = ((hero - from) / (deals + 1)).clamp(
+      SkyPageBeats.fanDealGap,
+      maxDealGap,
+    );
+    if (gap <= SkyPageBeats.fanDealGap + 1e-9) return null;
+    return (
+      dealGap: gap,
+      heroAt: math.max(baseHero, from + gap * (deals + 1)),
+    );
+  }
+
+  /// Chapter [i] of [count]'s length: the reference's, or longer for its
+  /// words ([min]).
+  static double chapterDurFor(int i, int count, double min) {
+    final isLast = i == count - 1;
+    return math.max(
+      count == 1
+          ? onlyChapterDur
+          : isLast
+          ? lastChapterDur
+          : (count == maxChapters ? shortChapterDur : chapterDur),
+      min,
     );
   }
 
@@ -98,10 +167,10 @@ abstract final class SkyStoryTimeline {
     int count, {
     List<SkyPageLayout>? layouts,
     List<double>? minChapterDurs,
+    List<({double dealGap, double heroAt})?>? paces,
   }) {
     assert(count >= 1 && count <= maxChapters, 'chapters: $count');
     assert(layouts == null || layouts.length == count, 'layouts: $layouts');
-    final long = count == maxChapters;
     final scenes = <(double, SkySceneSpec)>[
       (openingDur, const SkyOpeningSpec()),
     ];
@@ -110,19 +179,19 @@ abstract final class SkyStoryTimeline {
       final interlude = i == 0
           ? firstInterludeDur
           : (isLast ? lastInterludeDur : interludeDur);
-      final chapter = math.max(
-        count == 1
-            ? onlyChapterDur
-            : isLast
-            ? lastChapterDur
-            : (long ? shortChapterDur : chapterDur),
-        minChapterDurs?[i] ?? 0,
-      );
+      final chapter = chapterDurFor(i, count, minChapterDurs?[i] ?? 0);
+      final pace = paces?[i];
       scenes
         ..add((interlude, SkyInterludeSpec(index: i)))
         ..add((
           chapter,
-          SkyChapterSpec(index: i, count: count, layout: layouts?[i]),
+          SkyChapterSpec(
+            index: i,
+            count: count,
+            layout: layouts?[i],
+            dealGap: pace?.dealGap,
+            heroAt: pace?.heroAt,
+          ),
         ));
     }
     scenes

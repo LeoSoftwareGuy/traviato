@@ -71,15 +71,18 @@ class SkyPageBeats {
       : math.max(start - 1.3, previousEnd + 0.6);
 
   /// When dealt photo [i] arrives (or, fly-out, leaves the balloon).
+  /// The pace can slow down when the page has time (#422,
+  /// `SkyChapterSpec.dealGap`): the photos keep arriving while the note is
+  /// read, instead of all at once and then a long hold.
   double dealAt(int i) => switch (layout) {
-    SkyPageLayout.fan => start - 0.9 + fanDealGap * i,
-    SkyPageLayout.taped => start - 0.75 + fanDealGap * i,
+    SkyPageLayout.fan => start - 0.9 + (spec.dealGap ?? fanDealGap) * i,
+    SkyPageLayout.taped => start - 0.75 + (spec.dealGap ?? fanDealGap) * i,
     SkyPageLayout.flyOut => start - 0.5 + orbitStagger * i,
   };
 
   double get heroAt => switch (layout) {
-    SkyPageLayout.fan => start + 0.35,
-    SkyPageLayout.taped => start + 0.75,
+    SkyPageLayout.fan => start + (spec.heroAt ?? 0.35),
+    SkyPageLayout.taped => start + (spec.heroAt ?? 0.75),
     SkyPageLayout.flyOut => SkyBalloonPath.flyOutRelease(start),
   };
 
