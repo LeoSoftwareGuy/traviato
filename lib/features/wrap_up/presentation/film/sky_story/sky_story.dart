@@ -78,6 +78,7 @@ class SkyPage extends Equatable {
     this.note,
     this.signature,
     this.skyLine,
+    this.noteLines = const [],
   });
 
   /// Day numbers within the memory; [lastDay] is set when the page covers
@@ -108,6 +109,10 @@ class SkyPage extends Equatable {
   /// The director's line for a page without a note, written on the sky.
   final String? skyLine;
 
+  /// The chosen lines of the day's notes (#419), flowed over the day's
+  /// pages instead of [note]'s sentences (`flowSkyNotes`); empty after.
+  final List<String> noteLines;
+
   static const maxExtras = 4;
 
   @override
@@ -123,6 +128,7 @@ class SkyPage extends Equatable {
     note,
     signature,
     skyLine,
+    noteLines,
   ];
 }
 

@@ -52,6 +52,7 @@ class WrapUpSkyPage extends Equatable {
     this.extraPhotoIds = const [],
     this.noteId,
     this.note,
+    this.excerpts = const [],
     this.skyLine,
   });
 
@@ -72,6 +73,11 @@ class WrapUpSkyPage extends Equatable {
   /// The note's text, the user's own words.
   final String? note;
 
+  /// The best lines of the page's days' notes (#419), exact words in note
+  /// order: flowed over the days' pages instead of [note]'s leading
+  /// sentences. Empty = the note plays as before.
+  final List<String> excerpts;
+
   /// The director's line for a page without a note.
   final String? skyLine;
 
@@ -87,6 +93,7 @@ class WrapUpSkyPage extends Equatable {
     extraPhotoIds,
     noteId,
     note,
+    excerpts,
     skyLine,
   ];
 }

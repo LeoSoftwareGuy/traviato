@@ -227,6 +227,16 @@ Post-MVP: `video_path`, `video_status`.
   a code-picked line. `director.director_version` (2): an older record
   re-runs once, within the 4-run cap. `journal_notes.legacy` is read so a
   legacy note's edit time never places it.
+- **Chosen lines in Sky Story and Golden Vows** (#419, no schema
+  change): `content.sky.pages[].excerpts: [{note_id, text}]` — on a page
+  with a note, the best lines of its days' notes (`bestLines` in
+  `excerpts.ts`: specific only, nothing sensitive, `SKY_LINES_PER_PAGE` ×
+  the days' pages, in note order); the app flows them over the days'
+  pages instead of the note's leading sentences, and empty means the note
+  plays as before. Golden Vows: a hero without a caption or a director's
+  excerpt gets its day's best line (`MAX_GV_HERO_LINE_CHARS` 90) in its
+  `note`, from a note on that photo first, else its logical day's notes;
+  never a line another hero shows.
 - **Healing a stored section** (#393, no schema change): when a photo is
   deleted or left out, or a note reworded, after the director ran, the
   `golden_vows` / `neon_night` section is fitted to the memory in code on

@@ -4,6 +4,9 @@ import 'sky_story_texts.dart';
 
 /// Long notes continue across a day's pages (#383, folded into #399).
 ///
+/// When the server chose the day's best lines (#419, `SkyPage.noteLines`)
+/// those are flowed instead of the note's sentences, in the same way.
+///
 /// A page shows only what fits it whole: three lines on a note card, four
 /// on the fly-out's sky. A day's note is split at sentence ends, in order:
 /// its first page gets the first sentences that fit, the day's next page
@@ -33,8 +36,12 @@ SkyStory flowSkyNotes(
       for (final j in run) pages[j].note?.trim(),
     ].nonNulls.where((n) => n.isNotEmpty).firstOrNull;
     final signature = [for (final j in run) pages[j].signature].nonNulls;
+    // The day's chosen lines (#419), else the note's own sentences.
+    final chosen = [
+      for (final j in run) pages[j].noteLines,
+    ].firstWhere((lines) => lines.isNotEmpty, orElse: () => const []);
     if (note != null) {
-      var rest = FilmTextRules.sentences(note);
+      var rest = chosen.isNotEmpty ? chosen : FilmTextRules.sentences(note);
       final chunks = <int, String>{};
       for (final j in run) {
         // Skip sentences too long for this page on their own.

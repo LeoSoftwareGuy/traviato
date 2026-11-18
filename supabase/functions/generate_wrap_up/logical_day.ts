@@ -1,3 +1,5 @@
+import type { TripData } from "./gather.ts";
+
 // The journal's "logical day" rule (#397), the same as the app's
 // lib/core/utils/logical_day.dart, for the film (#398 R1): an item (a
 // photo or a note) from 00:00 to before 08:00 local time stays on the
@@ -70,4 +72,27 @@ export function logicalDays(
     previous = { localMs, day };
   }
   return days;
+}
+
+// Every photo's and note's logical day (#398 R1), photos and notes taken
+// together in time order, on the app's clock.
+export function tripLogicalDays(
+  tripData: TripData,
+): Map<string, string | null> {
+  return logicalDays(
+    [
+      ...tripData.photos.map((p) => ({
+        id: p.id,
+        at: p.taken_at ?? p.created_at,
+        fallbackDay: p.day_date,
+      })),
+      ...tripData.notes.filter((n) => n.id).map((n) => ({
+        id: `note:${n.id}`,
+        // A legacy note's time is its last edit: its day is its own.
+        at: n.legacy ? null : n.taken_at ?? null,
+        fallbackDay: n.day_date,
+      })),
+    ],
+    tripData.utc_offset_minutes ?? 0,
+  );
 }

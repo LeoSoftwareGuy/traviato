@@ -14,6 +14,8 @@
 // exact words), the carousel, the heart and the chapter layouts.
 
 import type { TripData } from "./gather.ts";
+import { bestLines } from "./excerpts.ts";
+import { tripLogicalDays } from "./logical_day.ts";
 import {
   inclusiveDayCount,
   sortPhotosChronologically,
@@ -737,6 +739,53 @@ function carouselPhotos(photos: Photo[], used: ReadonlySet<string>): string[] {
   return left.filter((p) => picked.has(p)).map((p) => p.id);
 }
 
+// The longest line a hero's card shows whole: 3 lines at the smallest
+// size (#399's fitGvNote); a longer one would only show its first sentence.
+export const MAX_GV_HERO_LINE_CHARS = 90;
+
+// A hero without a caption or a director's excerpt gets its day's best
+// line (#419): from a note on that photo, else from the notes of its
+// logical day, never a line another hero shows. The user's exact words;
+// none when nothing specific is there.
+function fillHeroLines(
+  tripData: TripData,
+  heroes: { photo_id: string; note: string | null }[],
+): void {
+  const days = tripLogicalDays(tripData);
+  const timeOf = (n: TripData["notes"][number]) =>
+    n.legacy ? "" : n.taken_at ?? n.created_at ?? "";
+  const notes = tripData.notes
+    .filter((n) => n.id && n.content.trim())
+    .sort((a, b) => timeOf(a).localeCompare(timeOf(b)));
+  const shown = new Set(
+    heroes.flatMap((h) => h.note ? [collapse(h.note)] : []),
+  );
+  for (const hero of heroes) {
+    if (hero.note) continue;
+    const day = days.get(hero.photo_id);
+    const sources = [
+      notes.filter((n) => n.photo_id === hero.photo_id),
+      notes.filter((n) =>
+        n.photo_id !== hero.photo_id &&
+        (days.get(`note:${n.id}`) ?? n.day_date) === day
+      ),
+    ];
+    for (const source of sources) {
+      const line = bestLines(
+        source.map((n) => ({ id: n.id!, content: n.content })),
+        8,
+        MAX_GV_HERO_LINE_CHARS,
+      ).filter((l) => !shown.has(collapse(l.text)))
+        .sort((a, b) => b.score - a.score)[0];
+      if (line) {
+        hero.note = line.text;
+        shown.add(collapse(line.text));
+        break;
+      }
+    }
+  }
+}
+
 // content.golden_vows from a valid, current [plan].
 export function buildGoldenVowsContent(
   tripData: TripData,
@@ -764,6 +813,7 @@ export function buildGoldenVowsContent(
       note: note || null,
     };
   });
+  fillHeroLines(tripData, heroes);
   const chapters = plan.chapters.map((chapter, i) => {
     for (const id of chapter.photo_ids) used.add(id);
     return {

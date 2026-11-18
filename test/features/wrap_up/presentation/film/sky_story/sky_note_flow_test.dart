@@ -44,6 +44,33 @@ void main() {
   bool fits(String text, SkyPageLayout layout) => text.length <= 40;
 
   group('flowSkyNotes', () {
+    test(
+      "the day's chosen lines flow instead of the note's sentences (#419)",
+      () {
+        const ribs = 'Ribs: 4.5 kg for three!';
+        const bikes = 'Rode 12 km to Zaandam.';
+        final flowed = flowSkyNotes(
+          story([
+            SkyPage(
+              firstDay: 1,
+              date: DateTime(2026, 6, 12),
+              photoCount: 10,
+              hero: const SkyPhoto(id: 'h'),
+              note: 'It was fun. $ribs We went home. $bikes',
+              signature: 'Leo',
+              noteLines: const [ribs, bikes],
+            ),
+            page(1, hero: 'h2'),
+          ]),
+          fits: (text, _) => text.length <= 25,
+        );
+        expect(flowed.pages[0].note, ribs);
+        expect(flowed.pages[1].note, bikes);
+        expect(flowed.pages[1].signature, 'Leo');
+        expect(flowed.pages.every((p) => p.noteLines.isEmpty), isTrue);
+      },
+    );
+
     test("a long note continues on the day's next page, by sentence", () {
       final flowed = flowSkyNotes(
         story([
