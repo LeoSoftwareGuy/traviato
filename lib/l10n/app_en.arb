@@ -600,6 +600,22 @@
   "journal_noDates": "Add dates to this memory to start your journal.",
   "journal_dayNotYet": "This day hasn't happened yet",
   "journal_toDo": "To Do",
+  "journal_barPhoto": "Photo",
+  "@journal_barPhoto": {
+    "description": "Journal balloon bar (#414): label under the camera icon. Keep short (≈8 chars)."
+  },
+  "journal_barNote": "Note",
+  "@journal_barNote": {
+    "description": "Journal balloon bar (#414): label under the note icon. Keep short (≈8 chars)."
+  },
+  "journal_barPhotoA11y": "Add a photo",
+  "@journal_barPhotoA11y": {
+    "description": "Screen-reader label for the balloon bar's Photo button."
+  },
+  "journal_barNoteA11y": "Add a note",
+  "@journal_barNoteA11y": {
+    "description": "Screen-reader label for the balloon bar's Note button."
+  },
   "journal_todayToDo": "Today's to do",
   "journal_viewWrapUp": "View wrap-up",
   "@journal_viewWrapUp": {

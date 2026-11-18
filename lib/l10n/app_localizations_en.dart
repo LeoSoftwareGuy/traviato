@@ -787,6 +787,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journal_toDo => 'To Do';
 
   @override
+  String get journal_barPhoto => 'Photo';
+
+  @override
+  String get journal_barNote => 'Note';
+
+  @override
+  String get journal_barPhotoA11y => 'Add a photo';
+
+  @override
+  String get journal_barNoteA11y => 'Add a note';
+
+  @override
   String get journal_todayToDo => 'Today\'s to do';
 
   @override

@@ -319,4 +319,48 @@ void main() {
       expect(state.thumbnailForDay(day)?.id, 'morning');
     });
   });
+
+  group('showsBalloonBar (#414)', () {
+    test('is shown on an open day with a photo', () {
+      final state = JournalState(
+        trip: buildTripCard(startDate: _today, endDate: _today),
+        currentDayDate: _today,
+        photos: [buildPhotoEntity(dayDate: _today)],
+      );
+      expect(state.showsBalloonBar, isTrue);
+    });
+
+    test('is shown on an open day with only a note', () {
+      final state = JournalState(
+        trip: buildTripCard(startDate: _today, endDate: _today),
+        currentDayDate: _today,
+        notes: [buildDayNoteEntity(dayDate: _today)],
+      );
+      expect(state.showsBalloonBar, isTrue);
+    });
+
+    test('is hidden on an empty day — the nudge has its own buttons', () {
+      final state = JournalState(
+        trip: buildTripCard(startDate: _today, endDate: _today),
+        currentDayDate: _today,
+      );
+      expect(state.showsBalloonBar, isFalse);
+    });
+
+    test('is hidden on a locked (future) day', () {
+      final tomorrow = _today.add(const Duration(days: 1));
+      final state = JournalState(
+        trip: buildTripCard(startDate: _today, endDate: tomorrow),
+        currentDayDate: tomorrow,
+      );
+      expect(state.showsBalloonBar, isFalse);
+    });
+
+    test('is hidden for a memory with no dates', () {
+      final state = JournalState(
+        trip: buildTripCard(startDate: null, endDate: null),
+      );
+      expect(state.showsBalloonBar, isFalse);
+    });
+  });
 }

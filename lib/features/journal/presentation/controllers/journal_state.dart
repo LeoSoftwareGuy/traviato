@@ -64,6 +64,14 @@ class JournalState extends Equatable {
 
   bool get hasDateRange => trip.startDate != null && trip.endDate != null;
 
+  /// The Photo · Note balloon bar (#414) floats over an open day that already
+  /// has something in it. An empty day has the nudge's own buttons instead,
+  /// and a locked (future) or undated day takes no entries at all.
+  bool get showsBalloonBar {
+    final day = currentDayDate;
+    return hasDateRange && day != null && !isDayLocked(day) && !isDayEmpty(day);
+  }
+
   int get totalDays =>
       hasDateRange ? trip.endDate!.difference(trip.startDate!).inDays + 1 : 0;
 

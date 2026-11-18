@@ -1316,6 +1316,30 @@ abstract class AppLocalizations {
   /// **'To Do'**
   String get journal_toDo;
 
+  /// Journal balloon bar (#414): label under the camera icon. Keep short (≈8 chars).
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get journal_barPhoto;
+
+  /// Journal balloon bar (#414): label under the note icon. Keep short (≈8 chars).
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get journal_barNote;
+
+  /// Screen-reader label for the balloon bar's Photo button.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a photo'**
+  String get journal_barPhotoA11y;
+
+  /// Screen-reader label for the balloon bar's Note button.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note'**
+  String get journal_barNoteA11y;
+
   /// No description provided for @journal_todayToDo.
   ///
   /// In en, this message translates to:

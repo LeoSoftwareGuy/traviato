@@ -531,6 +531,11 @@ void main() {
         find.byKey(const Key('journal-content-list')),
         const Offset(0, -200),
       );
+      // Clear of the floating balloon bar (#414).
+      await tester.ensureVisible(
+        find.byKey(const Key('journal-view-wrap-up-action')),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('journal-view-wrap-up-action')));
       await tester.pumpAndSettle();
 
@@ -849,6 +854,67 @@ void main() {
       );
     },
   );
+
+  group('balloon bar (#414)', () {
+    Future<void> pumpDay(
+      WidgetTester tester, {
+      required bool hasPhoto,
+    }) async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(id: 't1', startDate: _today, endDate: _today),
+        );
+      final photoRepo = FakePhotoRepository()
+        ..photosResult = Right([
+          if (hasPhoto) buildPhotoEntity(id: 'p1', dayDate: _today),
+        ]);
+      await _pump(
+        tester,
+        tripRepo: tripRepo,
+        photoRepo: photoRepo,
+        noteRepo: FakeDayNoteRepository(),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('floats over a day with content, with no app nav', (
+      tester,
+    ) async {
+      await pumpDay(tester, hasPhoto: true);
+
+      expect(find.byKey(const Key('journal-balloon-bar')), findsOneWidget);
+      expect(find.text('Home'), findsNothing);
+      expect(find.text('Expenses'), findsNothing);
+    });
+
+    testWidgets('is hidden on an empty day, which has the nudge instead', (
+      tester,
+    ) async {
+      await pumpDay(tester, hasPhoto: false);
+
+      expect(find.byKey(const Key('empty-day-nudge')), findsOneWidget);
+      expect(find.byKey(const Key('journal-balloon-bar')), findsNothing);
+    });
+
+    testWidgets('Photo opens the photo capture entry sheet', (tester) async {
+      await pumpDay(tester, hasPhoto: true);
+
+      await tester.tap(find.byKey(const Key('journal-balloon-bar-photo')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Take a photo'), findsOneWidget);
+      expect(find.text('Choose from gallery'), findsOneWidget);
+    });
+
+    testWidgets("Note opens the day's note page", (tester) async {
+      await pumpDay(tester, hasPhoto: true);
+
+      await tester.tap(find.byKey(const Key('journal-balloon-bar-note')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('note-page-field')), findsOneWidget);
+    });
+  });
 
   group('deleting a photo (#165)', () {
     Future<FakePhotoRepository> openViewerOnFirstPhoto(

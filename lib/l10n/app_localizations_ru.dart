@@ -815,6 +815,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get journal_toDo => 'Дела';
 
   @override
+  String get journal_barPhoto => 'Фото';
+
+  @override
+  String get journal_barNote => 'Заметка';
+
+  @override
+  String get journal_barPhotoA11y => 'Добавить фото';
+
+  @override
+  String get journal_barNoteA11y => 'Добавить заметку';
+
+  @override
   String get journal_todayToDo => 'Дела на сегодня';
 
   @override

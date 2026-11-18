@@ -812,6 +812,22 @@
   "@journal_toDo": {
     "x-review": "pending"
   },
+  "journal_barPhoto": "Фото",
+  "@journal_barPhoto": {
+    "x-review": "pending"
+  },
+  "journal_barNote": "Заметка",
+  "@journal_barNote": {
+    "x-review": "pending"
+  },
+  "journal_barPhotoA11y": "Добавить фото",
+  "@journal_barPhotoA11y": {
+    "x-review": "pending"
+  },
+  "journal_barNoteA11y": "Добавить заметку",
+  "@journal_barNoteA11y": {
+    "x-review": "pending"
+  },
   "journal_todayToDo": "Дела на сегодня",
   "@journal_todayToDo": {
     "x-review": "pending"

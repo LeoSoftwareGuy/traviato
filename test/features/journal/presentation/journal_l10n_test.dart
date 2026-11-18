@@ -7,6 +7,8 @@ import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/features/home/presentation/providers/profile_stats_provider.dart';
 import 'package:traviato/features/journal/presentation/pages/journal_page.dart';
 import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/widgets/journal_balloon_bar.dart';
+import 'package:traviato/features/journal/presentation/widgets/photos_strip.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/subscription/presentation/providers/subscription_providers.dart';
@@ -112,11 +114,26 @@ void main() {
     expect(find.text('Old Town walk.'), findsOneWidget);
     expect(find.textContaining('3 СЛОВА'), findsOneWidget);
     expect(find.text('✎ Продолжить запись'), findsOneWidget);
-    expect(find.text('Фото'), findsOneWidget);
+    // The strip header and the balloon bar's label (#414) both read Фото.
+    expect(
+      find.descendant(
+        of: find.byType(PhotosStrip),
+        matching: find.text('Фото'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(JournalBalloonBar),
+        matching: find.text('Заметка'),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('сохранено: 2'), findsOneWidget);
     expect(find.text('Добавить ✦2'), findsOneWidget);
     expect(find.text('21:05'), findsOneWidget);
-    expect(find.text('Главная'), findsOneWidget);
+    // No app nav on the Journal since the balloon bar (#414).
+    expect(find.text('Главная'), findsNothing);
   });
 
   for (final locale in const [Locale('en'), Locale('ru')]) {

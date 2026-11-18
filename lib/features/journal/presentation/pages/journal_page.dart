@@ -12,7 +12,6 @@ import '../../../../core/l10n/l10n_dates.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../../../core/widgets/star_award_toast.dart';
@@ -31,6 +30,7 @@ import '../widgets/day_range_hero.dart';
 import '../widgets/day_tabs.dart';
 import '../widgets/empty_day_nudge.dart';
 import '../widgets/journal_action_buttons.dart';
+import '../widgets/journal_balloon_bar.dart';
 import '../widgets/journal_header.dart';
 import '../widgets/note_page/note_title_page.dart';
 import '../widgets/photos_strip.dart';
@@ -80,46 +80,33 @@ class JournalPage extends ConsumerWidget {
                 const ProfileStatsEntity.zero())
             .stars;
 
+    // No app nav here (#414): the balloon bar is the Journal's only bottom
+    // chrome, and the header's back arrow leads out.
     return Scaffold(
-      extendBody: true,
-      body: SafeArea(
-        child: journalAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => AsyncErrorRetryScaffold(
+      body: journalAsync.when(
+        loading: () =>
+            const SafeArea(child: Center(child: CircularProgressIndicator())),
+        error: (error, _) => SafeArea(
+          child: AsyncErrorRetryScaffold(
             message: presentationFailureMessage(error, context.l10n),
             onRetry: () => ref.invalidate(journalControllerProvider(tripId)),
           ),
-          data: (state) => _JournalContent(
-            tripId: tripId,
-            state: state,
-            stars: stars,
-            onBack: () => context.pop(),
-          ),
         ),
-      ),
-      bottomNavigationBar: AppBottomNavBar(
-        onFabTap: () => context.pushNamed(RouteNames.createMemory),
-        items: [
-          AppBottomNavBarItem(
-            icon: Icons.home_rounded,
-            label: context.l10n.nav_home,
-            selected: false,
-            onTap: () => context.goNamed(RouteNames.home),
-          ),
-          AppBottomNavBarItem(
-            icon: Icons.receipt_long_outlined,
-            label: context.l10n.nav_expenses,
-            selected: false,
-            onTap: () => context.goNamed(RouteNames.expenses),
-          ),
-        ],
+        data: (state) => _JournalDay(
+          tripId: tripId,
+          state: state,
+          stars: stars,
+          onBack: () => context.pop(),
+        ),
       ),
     );
   }
 }
 
-class _JournalContent extends ConsumerWidget {
-  const _JournalContent({
+/// The day's feed with the balloon bar floating over it when
+/// [JournalState.showsBalloonBar].
+class _JournalDay extends ConsumerWidget {
+  const _JournalDay({
     required this.tripId,
     required this.state,
     required this.stars,
@@ -130,6 +117,68 @@ class _JournalContent extends ConsumerWidget {
   final JournalState state;
   final int stars;
   final VoidCallback onBack;
+
+  /// The balloon bar's distance from the screen's bottom edge (spec § Layout).
+  static const _barBottom = 30.0;
+
+  /// Room under the feed so its last item can scroll clear of the bar.
+  static const _feedBottomWithBar = 110.0;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showsBar = state.showsBalloonBar;
+    final currentDay = state.currentDayDate;
+    return Stack(
+      children: [
+        SafeArea(
+          child: _JournalContent(
+            tripId: tripId,
+            state: state,
+            stars: stars,
+            onBack: onBack,
+            bottomPadding: showsBar ? _feedBottomWithBar : AppSpacing.xxl,
+          ),
+        ),
+        if (showsBar && currentDay != null)
+          Positioned(
+            left: AppSpacing.lg,
+            right: AppSpacing.lg,
+            bottom: _barBottom,
+            child: JournalBalloonBar(
+              key: const Key('journal-balloon-bar'),
+              onPhotoTap: () => AddPhotoSheet.show(
+                context,
+                tripId: tripId,
+                dayDate: currentDay,
+              ),
+              onNoteTap: () => _openNotePage(
+                context,
+                ref,
+                tripId: tripId,
+                state: state,
+                day: currentDay,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _JournalContent extends ConsumerWidget {
+  const _JournalContent({
+    required this.tripId,
+    required this.state,
+    required this.stars,
+    required this.onBack,
+    required this.bottomPadding,
+  });
+
+  final String tripId;
+  final JournalState state;
+  final int stars;
+  final VoidCallback onBack;
+  final double bottomPadding;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -143,11 +192,11 @@ class _JournalContent extends ConsumerWidget {
 
     return ListView(
       key: const Key('journal-content-list'),
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         AppSpacing.base,
         AppSpacing.sm,
         AppSpacing.base,
-        AppSpacing.xxl,
+        bottomPadding,
       ),
       children: [
         JournalHeader(
@@ -203,7 +252,13 @@ class _JournalContent extends ConsumerWidget {
                 tripId: tripId,
                 dayDate: currentDay,
               ),
-              onWriteNote: () => _openNotePage(context, ref, currentDay),
+              onWriteNote: () => _openNotePage(
+                context,
+                ref,
+                tripId: tripId,
+                state: state,
+                day: currentDay,
+              ),
             ),
           ] else ...[
             Text(
@@ -229,7 +284,13 @@ class _JournalContent extends ConsumerWidget {
                 content: state.currentNote?.content ?? '',
                 updatedAt: state.currentNote?.updatedAt,
                 isSaving: isSavingNote,
-                onOpenNotePage: () => _openNotePage(context, ref, currentDay),
+                onOpenNotePage: () => _openNotePage(
+                  context,
+                  ref,
+                  tripId: tripId,
+                  state: state,
+                  day: currentDay,
+                ),
               ),
             const SizedBox(height: AppSpacing.xl),
             PhotosStrip(
@@ -268,80 +329,82 @@ class _JournalContent extends ConsumerWidget {
       ],
     );
   }
+}
 
-  /// Opens the full-screen note page (docs/design/JOURNAL_NOTE_PAGETURN_SPEC.md
-  /// §1) and, once the book has closed, saves the edited entry — or deletes
-  /// the note when it was cleared (#276). The day's first note earns the
-  /// star, shown as a toast on the Journal after the close (§5); deleting
-  /// takes it back.
-  Future<void> _openNotePage(
-    BuildContext context,
-    WidgetRef ref,
-    DateTime day,
-  ) async {
-    final photos = state.photosForCurrentDay;
-    final firstPhoto = photos.isEmpty ? null : photos.first;
-    final url = firstPhoto?.imageUrl;
-    if (url != null) {
-      // Best effort: the polaroid is usually already cached from the strip;
-      // never hold the page back for a slow download.
-      await precacheImage(
-        StoragePhotoImage.providerFor(
-          url: url,
-          storagePath: firstPhoto!.storagePath,
-          maxDecodeDimension: StoragePhotoImage.maxDecodeDimensionFor(
-            notePolaroidPhotoSize,
-            MediaQuery.devicePixelRatioOf(context),
-          ),
+/// Opens the full-screen note page (docs/design/JOURNAL_NOTE_PAGETURN_SPEC.md
+/// §1) and, once the book has closed, saves the edited entry — or deletes
+/// the note when it was cleared (#276). The day's first note earns the
+/// star, shown as a toast on the Journal after the close (§5); deleting
+/// takes it back.
+Future<void> _openNotePage(
+  BuildContext context,
+  WidgetRef ref, {
+  required String tripId,
+  required JournalState state,
+  required DateTime day,
+}) async {
+  final photos = state.photosForCurrentDay;
+  final firstPhoto = photos.isEmpty ? null : photos.first;
+  final url = firstPhoto?.imageUrl;
+  if (url != null) {
+    // Best effort: the polaroid is usually already cached from the strip;
+    // never hold the page back for a slow download.
+    await precacheImage(
+      StoragePhotoImage.providerFor(
+        url: url,
+        storagePath: firstPhoto!.storagePath,
+        maxDecodeDimension: StoragePhotoImage.maxDecodeDimensionFor(
+          notePolaroidPhotoSize,
+          MediaQuery.devicePixelRatioOf(context),
         ),
-        context,
-      ).timeout(const Duration(milliseconds: 300), onTimeout: () {});
-      if (!context.mounted) return;
-    }
-
-    final note = state.currentNote;
-    final existing = note?.content.trim() ?? '';
-    final dateLabel = L10nDates.dayMonth(
-      context.l10n.localeName,
-    ).format(day);
-    final draft = await Navigator.of(context).push(
-      NotePageRoute(
-        stamp: state.isSingleDay
-            ? dateLabel
-            : context.l10n.journal_noteStamp(
-                state.currentDayNumber ?? 1,
-                dateLabel,
-              ),
-        title: state.trip.name,
-        existingText: existing,
-        photoCount: photos.length,
-        photo: firstPhoto,
       ),
-    );
-    if (draft == null || draft == existing || !context.mounted) return;
-
-    // Fire-and-forget: failures surface via the upsertNoteMutation /
-    // deleteNoteMutation listeners in JournalPage.
-    if (draft.isEmpty) {
-      // The note page already confirmed the delete (#276).
-      if (note != null) {
-        unawaited(
-          runDeleteNote(
-            ref: ref,
-            tripId: tripId,
-            dayDate: day,
-            noteId: note.id,
-          ),
-        );
-      }
-      return;
-    }
-    unawaited(
-      runUpsertNote(ref: ref, tripId: tripId, dayDate: day, content: draft),
-    );
-    // The toast lands while the save is in flight.
-    if (note == null) showStarToast(context, context.l10n.toast_noteSaved);
+      context,
+    ).timeout(const Duration(milliseconds: 300), onTimeout: () {});
+    if (!context.mounted) return;
   }
+
+  final note = state.currentNote;
+  final existing = note?.content.trim() ?? '';
+  final dateLabel = L10nDates.dayMonth(
+    context.l10n.localeName,
+  ).format(day);
+  final draft = await Navigator.of(context).push(
+    NotePageRoute(
+      stamp: state.isSingleDay
+          ? dateLabel
+          : context.l10n.journal_noteStamp(
+              state.currentDayNumber ?? 1,
+              dateLabel,
+            ),
+      title: state.trip.name,
+      existingText: existing,
+      photoCount: photos.length,
+      photo: firstPhoto,
+    ),
+  );
+  if (draft == null || draft == existing || !context.mounted) return;
+
+  // Fire-and-forget: failures surface via the upsertNoteMutation /
+  // deleteNoteMutation listeners in JournalPage.
+  if (draft.isEmpty) {
+    // The note page already confirmed the delete (#276).
+    if (note != null) {
+      unawaited(
+        runDeleteNote(
+          ref: ref,
+          tripId: tripId,
+          dayDate: day,
+          noteId: note.id,
+        ),
+      );
+    }
+    return;
+  }
+  unawaited(
+    runUpsertNote(ref: ref, tripId: tripId, dayDate: day, content: draft),
+  );
+  // The toast lands while the save is in flight.
+  if (note == null) showStarToast(context, context.l10n.toast_noteSaved);
 }
 
 class _NoDatesYet extends StatelessWidget {
