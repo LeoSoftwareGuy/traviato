@@ -205,6 +205,28 @@ Post-MVP: `video_path`, `video_status`.
   photo. Up to 200 photos (more are sampled evenly). The app sends
   `utc_offset_minutes` so the director reads photo times as local times.
   Kept films follow Golden Vows' rules.
+- **The real story** (#398, no schema change): notes reach the director
+  whole (up to 4000 characters, was 500), and photos and notes carry their
+  **logical day** — recomputed from their times on the phone's clock with
+  the journal's rule (`logical_day.ts`, a port of the app's), so after
+  midnight stays on the evening's day even for rows saved with their
+  calendar date. A memory over several days gets **one Neon Night chapter
+  per logical day** (neighbouring days grouped past 5); repair rebuilds a
+  plan that folded days, keeping the director's titles, moments and lines
+  per day, and those chapters never merge. Each chapter carries
+  `excerpts` (0–4 `{note_id, text, photo_id}` in the plan; in content
+  `chapters[].excerpts: [{text, note_id, photo_id, source, score}]`, plus
+  `days` and `rejected_excerpts` for the inspector): exact sentences or
+  clauses of its notes, scored for detail (numbers, names, food, firsts,
+  feelings) over generic summaries ("it was fun", "все устали"), which a
+  specific line replaces; code fills up to 2. Each plays over its note's
+  photo, else the chapter's photo nearest in time. `note` stays the card's
+  line. Strict chronology: moments and their photos in time order, card
+  photos are the chapter's earliest free ones. Drug references and
+  profanity (EN/RU) never become a title, the headline, the note scene or
+  a code-picked line. `director.director_version` (2): an older record
+  re-runs once, within the 4-run cap. `journal_notes.legacy` is read so a
+  legacy note's edit time never places it.
 - **Healing a stored section** (#393, no schema change): when a photo is
   deleted or left out, or a note reworded, after the director ran, the
   `golden_vows` / `neon_night` section is fitted to the memory in code on

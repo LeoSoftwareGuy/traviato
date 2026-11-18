@@ -65,6 +65,7 @@ import {
   type NeonNightPlan,
   neonNightToolProperty,
   nnCheckContext,
+  nnLogicalDays,
   repairNeonNight,
 } from "./neon_night.ts";
 import {
@@ -92,6 +93,9 @@ export const MIN_PLANNABLE_PHOTOS = 6;
 // (#345), at most this many runs per memory in all. A manual rerun from
 // the Plan inspector is never capped.
 export const MAX_DIRECTOR_RUNS = 4;
+// The director's rules (#398: logical days, excerpts, chronology). A
+// record made under older rules runs again once, within MAX_DIRECTOR_RUNS.
+export const DIRECTOR_VERSION = 2;
 
 // The occasion films with a section of their own (#346, #363), planned in
 // a second call; "none" = Sky Story is the memory's film.
@@ -163,6 +167,8 @@ export type DirectorCall = TokenUsage & {
 };
 
 export interface DirectorRecord {
+  // DIRECTOR_VERSION when it ran; absent = before #398.
+  director_version?: number;
   status: "planned" | "fallback";
   plan: FilmPlan | null;
   // Why the plan fell back (or what the first attempt got wrong).
@@ -248,6 +254,10 @@ export function buildPlanInput(
       .filter((b) => b.photo_id)
       .map((b) => [b.photo_id!, b.title]),
   );
+  // Logical days (#398 R1): the night until about 08:00 is the evening's.
+  const logical = nnLogicalDays(tripData);
+  const dayOf = (id: string, fallback: string | null) =>
+    logical.get(id) ?? fallback;
   return {
     language,
     memory: {
@@ -263,8 +273,8 @@ export function buildPlanInput(
       .filter((n) => n.id)
       .map((n) => ({
         note_id: n.id,
-        day: dayNumber(trip.start_date, n.day_date),
-        day_date: n.day_date,
+        day: dayNumber(trip.start_date, dayOf(`note:${n.id}`, n.day_date)),
+        day_date: dayOf(`note:${n.id}`, n.day_date),
         text: n.content,
         // The note's own time and photo (#397); legacy notes have no photo.
         written_at: localClock(n.taken_at ?? n.created_at ?? null, tripData),
@@ -275,8 +285,8 @@ export function buildPlanInput(
       const a = analyses.get(p.id)!;
       return {
         photo_id: p.id,
-        day: dayNumber(trip.start_date, p.day_date),
-        day_date: p.day_date,
+        day: dayNumber(trip.start_date, dayOf(p.id, p.day_date)),
+        day_date: dayOf(p.id, p.day_date),
         time: localClock(p.taken_at ?? p.created_at, tripData),
         summary: a.summary,
         setting: a.setting,
@@ -548,6 +558,7 @@ export async function runDirector(
   const log = deps.log ?? console.error;
   const calls: DirectorCall[] = [];
   const record: DirectorRecord = {
+    director_version: DIRECTOR_VERSION,
     status: "fallback",
     plan: null,
     problems: [],
@@ -828,6 +839,7 @@ export function photoDaysOf(tripData: TripData): string[] {
 export function directorIsStale(record: unknown, tripData: TripData): boolean {
   if (!isDirectorRecord(record)) return false;
   if ((record.run_count ?? 1) >= MAX_DIRECTOR_RUNS) return false;
+  if ((record.director_version ?? 1) < DIRECTOR_VERSION) return true;
   const before = record.photo_days;
   if (!before) return false;
   const now = photoDaysOf(tripData);

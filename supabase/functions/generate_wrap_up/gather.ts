@@ -16,7 +16,8 @@ type SupabaseClient = any;
 
 const MAX_PHOTOS = 500;
 const MAX_BONUS_ASSIGNMENTS = 500;
-export const MAX_NOTE_CHARS = 500;
+// Whole notes (#398): a 500 cap cut the best lines off long legacy notes.
+export const MAX_NOTE_CHARS = 4000;
 // Golden Vows (#346) shows 5 items but counts them all.
 const MAX_CHECKLIST_ITEMS = 500;
 const MAX_QUESTS = 200;
@@ -44,6 +45,9 @@ export interface TripData {
     created_at?: string | null;
     taken_at?: string | null;
     photo_id?: string | null;
+    // One old one-per-day note (#400): its time is its last edit, not
+    // when it happened.
+    legacy?: boolean;
   }[];
   photos: {
     id: string;
@@ -117,7 +121,7 @@ export async function gatherTripData(
   ] = await Promise.all([
     client
       .from("journal_notes")
-      .select("id, day_date, content, created_at, taken_at, photo_id")
+      .select("id, day_date, content, created_at, taken_at, photo_id, legacy")
       .eq("trip_id", tripId)
       .order("day_date")
       .order("taken_at"),
@@ -203,6 +207,7 @@ export async function gatherTripData(
       created_at: (n.created_at as string | null) ?? null,
       taken_at: (n.taken_at as string | null) ?? null,
       photo_id: (n.photo_id as string | null) ?? null,
+      legacy: n.legacy === true,
     })),
     photos: (photosRes.data ?? []).map((p: Record<string, unknown>) => ({
       id: p.id as string,

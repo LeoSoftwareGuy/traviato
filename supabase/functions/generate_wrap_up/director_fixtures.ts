@@ -255,6 +255,7 @@ export function neonNightPlan(ids = DIRECTOR_PHOTO_IDS): NeonNightPlan {
         first_photo_id: ids[0],
         note_id: "n1",
         note_excerpt: "Bikes everywhere",
+        excerpts: [],
         moments: [
           { type: "split", photo_ids: [ids[0], ids[1]] },
           { type: "burst", photo_ids: [ids[2], ids[3]] },
@@ -265,6 +266,7 @@ export function neonNightPlan(ids = DIRECTOR_PHOTO_IDS): NeonNightPlan {
         first_photo_id: ids[4],
         note_id: null,
         note_excerpt: null,
+        excerpts: [],
         moments: [
           { type: "timeline", photo_ids: [ids[4], ids[5], ids[6], ids[7]] },
         ],
@@ -274,6 +276,7 @@ export function neonNightPlan(ids = DIRECTOR_PHOTO_IDS): NeonNightPlan {
         first_photo_id: ids[8],
         note_id: null,
         note_excerpt: null,
+        excerpts: [],
         moments: [{ type: "peak", photo_ids: [ids[8], ids[9], ids[10]] }],
       },
     ],

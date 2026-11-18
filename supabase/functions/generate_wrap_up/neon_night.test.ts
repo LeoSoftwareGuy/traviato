@@ -460,9 +460,20 @@ Deno.test("the fill takes Always picks first and stops at 6", () => {
 
 // --- Fewer, fuller scenes (#390) --------------------------------------------
 
-Deno.test("small chapters merge into fuller ones", () => {
+// directorTripData() as one night: the 12 photos an hour apart from 10:00.
+function oneNight(): TripData {
+  const data = directorTripData();
+  data.photos = data.photos.map((p, i) => ({
+    ...p,
+    day_date: "2026-09-01",
+    taken_at: `2026-09-01T${String(10 + i).padStart(2, "0")}:00:00Z`,
+  }));
+  return data;
+}
+
+Deno.test("small chapters of one night merge into fuller ones", () => {
   // 3 chapters of 4 photos → one of 12: the first one's title and note.
-  const content = buildNeonNightContent(directorTripData(), neonNightPlan());
+  const content = buildNeonNightContent(oneNight(), neonNightPlan());
   assertEquals(content.chapters.length, 1);
   const [chapter] = content.chapters;
   assertEquals(chapter.title, "Doors open");

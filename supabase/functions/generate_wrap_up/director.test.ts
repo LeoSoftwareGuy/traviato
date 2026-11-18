@@ -496,6 +496,7 @@ Deno.test("the system prompt carries the Sky Story rules", () => {
 
 function skyRecord(overrides: Partial<DirectorRecord> = {}): DirectorRecord {
   return {
+    director_version: 2,
     status: "planned",
     plan: keepsakePlan(),
     problems: [],
@@ -547,6 +548,18 @@ Deno.test("directorIsStale when photo days change, until the run cap", () => {
   assertEquals(directorIsStale(skyRecord(), fewer), true);
   assertEquals(
     directorIsStale(skyRecord({ run_count: MAX_DIRECTOR_RUNS }), fewer),
+    false,
+  );
+  // A record made under older rules runs again once (#398), within the cap.
+  assertEquals(
+    directorIsStale(skyRecord({ director_version: undefined }), data),
+    true,
+  );
+  assertEquals(
+    directorIsStale(
+      skyRecord({ director_version: undefined, run_count: MAX_DIRECTOR_RUNS }),
+      data,
+    ),
     false,
   );
   // Records from before #345 have no photo days: never stale.
