@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import '../timeline/film_scene_spec.dart';
+import 'neon_chapter_card.dart';
 
 /// What one scene of the Neon Night film shows (#363,
 /// NEON_NIGHT_SPEC.md §5). Every scene is a whole number of bars; its
@@ -47,7 +50,10 @@ final class NnChapterCardSpec extends NeonNightSceneSpec {
     required this.chapter,
     required this.chapters,
     required this.zooms,
-  }) : assert(zooms >= 0 && zooms <= 3, 'zooms: $zooms');
+    this.zoomHolds = const [],
+    this.minBeats = 0,
+  }) : assert(zooms >= 0 && zooms <= 3, 'zooms: $zooms'),
+       assert(minBeats % 4 == 0, 'whole bars: $minBeats');
 
   /// Which chapter, from 0.
   final int chapter;
@@ -58,17 +64,25 @@ final class NnChapterCardSpec extends NeonNightSceneSpec {
   /// How many laser zooms the card plays, 0–3.
   final int zooms;
 
+  /// The extra beats each zoom holds on its captioned photo (#399 T1).
+  final List<int> zoomHolds;
+
+  /// The fewest beats the card plays, so its typed line can be read
+  /// (#399 T1); whole bars. 0 = the spec's length.
+  final int minBeats;
+
   bool get hasZooms => zooms > 0;
 
   @override
-  int get beats => switch (zooms) {
-    0 => 8,
-    3 => 16,
-    _ => 12,
-  };
+  int get beats => math.max(
+    NnCardTiming.beatsFor(zooms, [
+      for (var i = 0; i < zooms; i++) i < zoomHolds.length ? zoomHolds[i] : 0,
+    ]),
+    minBeats,
+  );
 
   @override
-  List<Object?> get props => [chapter, chapters, zooms];
+  List<Object?> get props => [chapter, chapters, zooms, zoomHolds, minBeats];
 }
 
 /// The block that shows a chapter's photos after its card (§5.4–5.6, §7).
@@ -92,29 +106,42 @@ enum NnMomentType {
 
 /// One of a chapter's moments (§5.4–5.6).
 final class NnMomentSpec extends NeonNightSceneSpec {
-  const NnMomentSpec({required this.chapter, required this.type});
+  const NnMomentSpec({
+    required this.chapter,
+    required this.type,
+    this.minBeats = 0,
+  }) : assert(minBeats % 4 == 0, 'whole bars: $minBeats');
 
   /// Which chapter, from 0.
   final int chapter;
 
   final NnMomentType type;
 
-  @override
-  int get beats => type.beats;
+  /// The fewest beats the moment plays, so its captions can be read
+  /// (#399 T1); whole bars. 0 = the type's length.
+  final int minBeats;
 
   @override
-  List<Object?> get props => [chapter, type];
+  int get beats => math.max(type.beats, minBeats);
+
+  @override
+  List<Object?> get props => [chapter, type, minBeats];
 }
 
 /// The user's own words in neon tubes, over a blurred photo (§5.7).
 final class NnNoteSpec extends NeonNightSceneSpec {
-  const NnNoteSpec();
+  const NnNoteSpec({this.minBeats = 0})
+    : assert(minBeats % 4 == 0, 'whole bars: $minBeats');
+
+  /// The fewest beats the scene plays, so the note can be read (#399 T1);
+  /// whole bars. 0 = the spec's 12.
+  final int minBeats;
 
   @override
-  int get beats => 12;
+  int get beats => math.max(12, minBeats);
 
   @override
-  List<Object?> get props => const [];
+  List<Object?> get props => [minBeats];
 }
 
 /// The drop: every photo pops into a heart, which beats (§5.8).

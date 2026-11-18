@@ -147,7 +147,8 @@ class NeonScenePainter extends CustomPainter {
 
     final g = 1 + 0.3 * beat.beatEnv(t);
     for (final (i, line) in note.lines.indexed) {
-      final dt = t - _at(cue, 1.0 + 2 * i);
+      final dt =
+          t - _at(cue, 1.0 + NnNoteTexts.staggerFor(note.lines.length) * i);
       if (dt < 0) continue;
       final on = reducedFlashing
           ? NeonBalloon.fadeOn(dt)
@@ -165,7 +166,11 @@ class NeonScenePainter extends CustomPainter {
       final a =
           FilmEases.at(
             t,
-            _at(cue, 1.0 + 2 * note.lines.length),
+            _at(
+              cue,
+              1.0 +
+                  NnNoteTexts.staggerFor(note.lines.length) * note.lines.length,
+            ),
             0.4,
             FilmEases.linear,
           ) *

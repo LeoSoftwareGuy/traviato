@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import 'neon_night_scene_spec.dart';
+import 'neon_type.dart';
 
 /// One row of "Tonight's plan" (#363, NEON_NIGHT_SPEC.md §5.2, §7): a
 /// quest with a time, ticked if it was done.
@@ -252,7 +253,15 @@ class NeonNightStory extends Equatable {
   bool get hasPlan => plan.length >= minPlanRows;
 
   static const minPlanRows = 3;
-  bool get hasNote => note != null;
+
+  /// Whether the Note scene plays: a note with words that fit it whole
+  /// (#399: the scene is skipped rather than the note cut).
+  bool get hasNote => noteLines != null;
+
+  /// The Note scene's lines ([neonNoteLines]), null without a note or
+  /// when none of it fits.
+  List<String>? get noteLines =>
+      note == null ? null : neonNoteLines(note!.text);
 
   /// Every photo of the night, in order.
   List<NnPhoto> get allPhotos => [
@@ -278,7 +287,7 @@ class NeonNightStory extends Equatable {
       totals ??
       NnTotals(
         photos: allPhotos.length,
-        notes: hasNote ? 1 : 0,
+        notes: note == null ? 0 : 1,
         ticks: plan.where((row) => row.done).length,
         moments: allPhotos.length,
       );

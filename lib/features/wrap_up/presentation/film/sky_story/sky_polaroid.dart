@@ -74,9 +74,13 @@ void paintSkyPolaroid(
   canvas.drawRect(paper, Paint()..color = SkyStoryColors.polaroidPaper);
   paintSkyPhoto(canvas, frame.photo, image, zoom: zoom);
   if (caption != null) {
+    // A two-line caption (#399) sits in the middle of the strip.
+    final center = caption.height > frame.strip * 0.45
+        ? Offset(0, frame.photo.bottom + frame.strip / 2)
+        : frame.captionCenter;
     caption.paint(
       canvas,
-      frame.captionCenter - Offset(caption.width / 2, caption.height / 2),
+      center - Offset(caption.width / 2, caption.height / 2),
     );
   }
 }

@@ -51,7 +51,7 @@ NeonNightStory? neonNightFromWrapUp(
       for (final moment in entry.chapter.moments)
         ?_moment(moment, [
           for (final id in moment.photoIds)
-            if (ids.contains(id)) _photo(byId[id]!),
+            if (ids.contains(id)) byId[id]!,
         ]),
     ].take(2).toList();
     chapters.add(
@@ -63,8 +63,11 @@ NeonNightStory? neonNightFromWrapUp(
             : photos.last.takenAt,
         photos: photos,
         cardPhotos: [
-          for (final id in entry.chapter.cardPhotoIds)
-            if (ids.contains(id)) _photo(byId[id]!),
+          for (final photo in [
+            for (final id in entry.chapter.cardPhotoIds)
+              if (ids.contains(id)) byId[id]!,
+          ]..sort((a, b) => a.takenAt.compareTo(b.takenAt)))
+            _photo(photo),
         ],
         note: entry.chapter.note,
         moments: moments.isNotEmpty ? moments : [NnTimeline(_spread(photos))],
@@ -113,7 +116,14 @@ NeonNightStory? neonNightFromWrapUp(
   );
 }
 
-NnMoment? _moment(WrapUpNeonMoment moment, List<NnPhoto> photos) {
+NnMoment? _moment(WrapUpNeonMoment moment, List<WrapUpNeonPhoto> source) {
+  // In the order they were taken (#399 T6), whatever the plan's order.
+  final photos = [
+    for (final photo in [
+      ...source,
+    ]..sort((a, b) => a.takenAt.compareTo(b.takenAt)))
+      _photo(photo),
+  ];
   final type = switch (moment.type) {
     'split' => NnMomentType.split,
     'burst' => NnMomentType.burst,

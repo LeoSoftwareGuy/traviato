@@ -182,4 +182,41 @@ void main() {
     await _pumpFilm(tester, realMemory, const Locale('ru'));
     await _expectAt(tester, const [('10', 10.0)], 'real_ru');
   });
+
+  // The user's caption on the hero's strip (#399), Russian and English
+  // mixed, at its full size.
+  testWidgets("a captioned hero", skip: _skip, (tester) async {
+    final lisbon = SkyStoryFixtures.lisbon;
+    final story = SkyStory(
+      title: lisbon.title,
+      startDate: lisbon.startDate,
+      endDate: lisbon.endDate,
+      names: lisbon.names,
+      momentCount: lisbon.momentCount,
+      mosaicPhotoIds: lisbon.mosaicPhotoIds,
+      pages: [
+        for (final (i, page) in lisbon.pages.indexed)
+          SkyPage(
+            firstDay: page.firstDay,
+            lastDay: page.lastDay,
+            date: page.date,
+            endDate: page.endDate,
+            photoCount: page.photoCount,
+            headline: page.headline,
+            hero: SkyPhoto(
+              id: page.hero.id,
+              place: page.hero.place,
+              takenAt: page.hero.takenAt,
+              caption: i == 0 ? 'боча пролил пиво · our castle' : null,
+            ),
+            extras: page.extras,
+            note: page.note,
+            signature: page.signature,
+            skyLine: page.skyLine,
+          ),
+      ],
+    );
+    await _pumpFilm(tester, story, const Locale('en'));
+    await _expectAt(tester, const [('caption', 9.0)], 'words');
+  });
 }

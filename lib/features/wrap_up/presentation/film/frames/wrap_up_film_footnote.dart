@@ -31,18 +31,22 @@ class WrapUpFilmFootnote extends StatelessWidget {
     final closingRise = rise(t, a + 1.6, 1.6, lift: 24);
 
     final l10n = context.l10n;
+    // A zero is left out (#399 T4): no "0 bonus tasks".
     final bits = [
-      (
-        '${footnote.photoCount}',
-        l10n.wrapUp_photographs(footnote.photoCount),
-        false,
-      ),
-      (
-        '${footnote.bonusCompletedCount}',
-        l10n.wrapUp_bonusTasks(footnote.bonusCompletedCount),
-        false,
-      ),
-      ('✦${footnote.stars}', l10n.wrapUp_stars(footnote.stars), true),
+      if (footnote.photoCount > 0)
+        (
+          '${footnote.photoCount}',
+          l10n.wrapUp_photographs(footnote.photoCount),
+          false,
+        ),
+      if (footnote.bonusCompletedCount > 0)
+        (
+          '${footnote.bonusCompletedCount}',
+          l10n.wrapUp_bonusTasks(footnote.bonusCompletedCount),
+          false,
+        ),
+      if (footnote.stars > 0)
+        ('✦${footnote.stars}', l10n.wrapUp_stars(footnote.stars), true),
     ];
 
     return Positioned(

@@ -223,7 +223,8 @@ void main() {
     test('English plurals', () {
       expect(outro(1, en, 'en').moments, '1 moment');
       expect(outro(2, en, 'en').moments, '2 moments');
-      expect(outro(0, en, 'en').moments, '0 moments');
+      // No "0 moments" (#399 T4).
+      expect(outro(0, en, 'en').moments, isEmpty);
     });
 
     test('Russian plurals', () {

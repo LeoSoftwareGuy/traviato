@@ -7,6 +7,8 @@ import '../../../../../core/constants/app_constants.dart';
 
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../checklist/presentation/widgets/checklist_suggestion_title.dart';
+import '../../../domain/film_text_rules.dart';
+import '../film_text_fit.dart';
 import 'golden_vows_story.dart';
 import 'golden_vows_tokens.dart';
 
@@ -60,32 +62,22 @@ void gvPaintText(
 TextPainter _layout(String text, TextStyle style) => TextPainter(
   text: TextSpan(text: text, style: style),
   textDirection: TextDirection.ltr,
-  maxLines: 1,
-  ellipsis: '…',
 )..layout();
 
-/// [text] on one line in [style], shrunk until it fits [maxWidth] (never
-/// below [minScale] of its size, then cut with an ellipsis).
-TextPainter _fit(
-  String text,
-  TextStyle style,
-  double maxWidth, {
-  double minScale = 0.55,
-}) {
+/// [text] on one line in [style], shrunk until it fits [maxWidth]. Never
+/// cut with "…" (#399): the whole line, smaller.
+TextPainter _fit(String text, TextStyle style, double maxWidth) {
   var painter = _layout(text, style);
   if (painter.width <= maxWidth) return painter;
   final size = style.fontSize!;
-  final scale = (maxWidth / painter.width).clamp(minScale, 1.0);
-  painter.dispose();
-  painter = TextPainter(
-    text: TextSpan(
-      text: text,
-      style: style.copyWith(fontSize: size * scale),
-    ),
-    textDirection: TextDirection.ltr,
-    maxLines: 1,
-    ellipsis: '…',
-  )..layout(maxWidth: maxWidth);
+  var scale = maxWidth / painter.width;
+  // Glyph widths don't scale exactly with the size: step down until it
+  // fits.
+  do {
+    painter.dispose();
+    painter = _layout(text, style.copyWith(fontSize: size * scale));
+    scale *= 0.98;
+  } while (painter.width > maxWidth);
   return painter;
 }
 
@@ -170,8 +162,6 @@ class GvInvitationTexts {
     ),
     textDirection: TextDirection.ltr,
     textAlign: TextAlign.center,
-    maxLines: twoLines ? 2 : null,
-    ellipsis: twoLines ? '…' : null,
   )..layout(maxWidth: twoLines ? maxWidth : double.infinity);
 
   /// The names at [spacing] px between letters.
@@ -237,7 +227,6 @@ class GvPackingTexts {
             ),
             GoldenVowsType.serif(54, color: GoldenVowsColors.ink),
             itemMaxWidth,
-            minScale: 0.7,
           ),
       ];
 
@@ -259,33 +248,36 @@ class GvPackingTexts {
   }
 }
 
-/// [text] centred on up to [maxLines] lines of [maxWidth], shrunk in steps
-/// until it fits (never below [minScale], then cut with an ellipsis).
-TextPainter _fitLines(
-  String text,
-  TextStyle style,
-  double maxWidth, {
-  int maxLines = 2,
-  double minScale = 0.6,
-}) {
-  final size = style.fontSize!;
-  TextPainter? painter;
-  for (var scale = 1.0; ; scale -= 0.1) {
-    final last = scale - 0.1 < minScale - 1e-9;
-    painter?.dispose();
-    painter = TextPainter(
-      text: TextSpan(
-        text: text,
-        style: style.copyWith(fontSize: size * scale),
-      ),
-      textDirection: TextDirection.ltr,
-      textAlign: TextAlign.center,
-      textWidthBasis: TextWidthBasis.longestLine,
-      maxLines: maxLines,
-      ellipsis: last ? '…' : null,
-    )..layout(maxWidth: maxWidth);
-    if (last || !painter.didExceedMaxLines) return painter;
+/// A photo's note on its card (#399 T1): script 66 on up to 2 lines,
+/// shrunk to 40 px, then 3 lines; else its first whole sentences that fit;
+/// else null. Never cut with "…".
+TextPainter? fitGvNote(String note) {
+  TextPainter? fit(String text) {
+    for (final lines in const [2, 3]) {
+      final painter = fitTextPainter(
+        text,
+        (size) => GoldenVowsType.script(size, color: GoldenVowsColors.ink),
+        sizes: fitSizes(66, 40, step: 6.6),
+        maxWidth: GvHeroTexts.noteMaxWidth,
+        maxLines: lines,
+        align: TextAlign.center,
+      );
+      if (painter != null && painter.height <= GvHeroTexts.noteMaxHeight) {
+        return painter;
+      }
+      painter?.dispose();
+    }
+    return null;
   }
+
+  final whole = fit(note);
+  if (whole != null) return whole;
+  final lead = FilmTextRules.leadingSentencesThatFit(note, (text) {
+    final painter = fit(text);
+    painter?.dispose();
+    return painter != null;
+  });
+  return lead == null ? null : fit(lead);
 }
 
 /// A titled page's heading (spec §5.3): the script title at y 268 and the
@@ -338,19 +330,14 @@ class GvHeroTexts {
               ),
               captionMaxWidth,
             ),
-      note = note == null
-          ? null
-          : _fitLines(
-              note,
-              GoldenVowsType.script(66, color: GoldenVowsColors.ink),
-              noteMaxWidth,
-            );
+      note = note == null ? null : fitGvNote(note);
 
   /// The photo's width.
   static const captionMaxWidth = 712.0;
 
   /// The note card (640×190) less its margins.
   static const noteMaxWidth = 560.0;
+  static const noteMaxHeight = 170.0;
 
   final TextPainter? caption;
   final TextPainter? note;
@@ -377,14 +364,23 @@ class GvAlbumTexts {
           : null,
       heart = GvHeadingTexts(
         l10n.goldenVows_heartTitle,
-        '${l10n.goldenVows_moments(story.momentCount)}'
-        ' · ${l10n.goldenVows_days(story.dayCount)}',
+        heartLineFor(story, l10n),
       ),
       endLine = _fit(
         story.endLine ?? l10n.goldenVows_endLine,
         GoldenVowsType.script(88, color: GoldenVowsColors.gold),
         GvHeadingTexts.maxWidth,
       );
+
+  /// "{N} MOMENTS · ONE DAY", leaving out a zero (#399 T4); null when
+  /// both are.
+  static String? heartLineFor(GoldenVowsStory story, AppLocalizations l10n) {
+    final parts = [
+      if (story.momentCount > 0) l10n.goldenVows_moments(story.momentCount),
+      if (story.dayCount > 0) l10n.goldenVows_days(story.dayCount),
+    ];
+    return parts.isEmpty ? null : parts.join(' · ');
+  }
 
   final List<GvHeroTexts> heroes;
   final List<GvHeadingTexts> chapters;

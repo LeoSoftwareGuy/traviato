@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 
+import '../../../domain/film_text_rules.dart';
+
 /// Neon Night's type (#363, NEON_NIGHT_SPEC.md §3.2): Big Shoulders
 /// Display for titles, JetBrains Mono for labels, times and notes. Big
 /// Shoulders has no Cyrillic, so Russian falls back glyph by glyph to Fira
@@ -87,18 +89,12 @@ abstract final class NeonType {
 }
 
 /// The Note's lines (§5.7, app side): uppercase, the user's own line
-/// breaks kept, each wrapped greedily at [width] characters, at most
-/// [maxLines]. A longer note stops at the last whole word that fits and
-/// ends with "…".
+/// breaks kept, each wrapped greedily at [width] characters.
 ///
 /// The spec says 16 characters; the reference render's first line, "WE
 /// LOST EACH OTHER", is 18, and the fit formula's size only matches 18,
 /// so the render wins.
-List<String> neonNoteLines(
-  String note, {
-  int width = 18,
-  int maxLines = 5,
-}) {
+List<String> neonWrapNote(String note, {int width = 18}) {
   final lines = <String>[];
   for (final paragraph in note.toUpperCase().split('\n')) {
     var line = '';
@@ -113,13 +109,26 @@ List<String> neonNoteLines(
     }
     if (line.isNotEmpty) lines.add(line);
   }
-  if (lines.length <= maxLines) return lines;
-  // Too long: the last line drops words until its "…" fits.
-  final kept = lines.take(maxLines).toList();
-  final words = kept.last.split(' ');
-  while (words.length > 1 && words.join(' ').length + 1 > width) {
-    words.removeLast();
-  }
-  kept.last = '${words.join(' ')}…';
-  return kept;
+  return lines;
 }
+
+/// The Note scene's lines for [note] (#399 T1), never cut with "…": the
+/// spec's 18 characters × 5 lines, else narrower type on more lines (up
+/// to [neonNoteLayouts]' last), else the note's first whole sentences
+/// that fit there. Null when not even its first sentence fits: the film
+/// skips the scene rather than cut the user's words.
+List<String>? neonNoteLines(String note) {
+  for (final (width, maxLines) in neonNoteLayouts) {
+    final lines = neonWrapNote(note, width: width);
+    if (lines.isNotEmpty && lines.length <= maxLines) return lines;
+  }
+  final (width, maxLines) = neonNoteLayouts.last;
+  final lead = FilmTextRules.leadingSentencesThatFit(
+    note,
+    (text) => neonWrapNote(text, width: width).length <= maxLines,
+  );
+  return lead == null ? null : neonWrapNote(lead, width: width);
+}
+
+/// (characters per line, lines) the Note scene tries, in order.
+const neonNoteLayouts = [(18, 5), (22, 6), (26, 8)];

@@ -127,9 +127,13 @@ class SkyPage extends Equatable {
 }
 
 class SkyPhoto extends Equatable {
-  const SkyPhoto({required this.id, this.place, this.takenAt});
+  const SkyPhoto({required this.id, this.place, this.takenAt, this.caption});
 
   final String id;
+
+  /// The user's own caption from Photo detail, exact (#399): the hero's
+  /// polaroid shows it instead of place · time.
+  final String? caption;
 
   /// Where it was taken, for the polaroid's caption (`Alfama`).
   final String? place;
@@ -138,7 +142,7 @@ class SkyPhoto extends Equatable {
   final DateTime? takenAt;
 
   @override
-  List<Object?> get props => [id, place, takenAt];
+  List<Object?> get props => [id, place, takenAt, caption];
 }
 
 /// How a page lays out its photos (design-spec §5, the reference's three

@@ -17,6 +17,7 @@ import 'neon_night_story.dart';
 import 'neon_night_texts.dart';
 import 'neon_night_timeline.dart';
 import 'neon_photo_images.dart';
+import 'neon_reading_time.dart';
 import 'neon_scene_painter.dart';
 import 'neon_tokens.dart';
 import 'neon_track.dart';
@@ -46,22 +47,17 @@ class NeonNightCanvas extends StatefulWidget {
   final ImageProvider? Function(String id) photo;
 
   /// The film's schedule for [story]: its chapters (each card's length
-  /// follows its photos) with their moments. The Plan and Note scenes
-  /// play only when the memory has a plan and a note. The Plan scene plays only
-  /// when the memory has a plan.
+  /// follows its photos) with their moments, each long enough to read the
+  /// user's words (#399). The Plan and Note scenes play only when the
+  /// memory has a plan and a note that fits.
   static NeonNightTimeline timelineFor(
     NeonNightStory story, {
     NeonBeat beat = const NeonBeat(),
   }) => NeonNightTimeline(
-    chapters: [
-      for (final chapter in story.chapters)
-        NnChapterShape(
-          moments: [for (final moment in chapter.moments) moment.type],
-          photos: chapter.cardPhotos.length,
-        ),
-    ],
+    chapters: NnReadingTime.chaptersFor(story, beat),
     hasPlan: story.hasPlan,
     hasNote: story.hasNote,
+    noteMinBeats: NnReadingTime.noteBeats(story, beat),
     beat: beat,
   );
 

@@ -51,19 +51,39 @@ void main() {
       expect(neonNoteLines('  one  \n\n two '), ['ONE', 'TWO']);
     });
 
-    test('more than 5 lines: cut at a whole word, ending in "…"', () {
+    test('more than 5 lines: narrower type on more lines, never "…" '
+        '(#399)', () {
       final lines = neonNoteLines(
         'one\ntwo\nthree\nfour\nfive six seven eight nine ten\neleven',
-      );
-      expect(lines, hasLength(5));
-      expect(lines.last, endsWith('…'));
-      expect(lines.last.length, lessThanOrEqualTo(18));
-      expect(lines.last, 'FIVE SIX SEVEN…');
+      )!;
+      expect(lines, hasLength(7));
+      expect(lines.join(' '), isNot(contains('…')));
+      expect(lines.last, 'ELEVEN');
+    });
+
+    test('too long for any layout: its first whole sentences (#399)', () {
+      final long = [
+        'We waited for a metre and a half of ribs.',
+        for (var i = 0; i < 6; i++)
+          'Then we danced all night long until the morning came.',
+      ].join(' ');
+      final lines = neonNoteLines(long)!;
+      expect(lines.length, lessThanOrEqualTo(8));
+      final shown = lines.join(' ');
+      expect(shown, startsWith('WE WAITED FOR A METRE'));
+      expect(shown, endsWith('.'));
+      expect(shown, isNot(contains('…')));
+    });
+
+    test('not even the first sentence fits: no lines, the scene is '
+        'skipped', () {
+      expect(neonNoteLines(List.filled(60, 'word').join(' ')), isNull);
     });
   });
 
   group('the scene', () {
-    test('no note → no Note scene, 12 beats shorter', () {
+    test('no note → no Note scene, 16 beats shorter (its 62 characters '
+        'need 6 s to read, #399)', () {
       final reference = NeonNightFixtures.reference;
       final without = NeonNightStory(
         title: reference.title,
@@ -75,8 +95,8 @@ void main() {
       final short = NeonNightCanvas.timelineFor(without);
       expect(full.scenes.where((s) => s.spec is NnNoteSpec), hasLength(1));
       expect(short.scenes.where((s) => s.spec is NnNoteSpec), isEmpty);
-      expect(full.totalBeats - short.totalBeats, 12);
-      expect(full.total - short.total, closeTo(5.714, 0.001));
+      expect(full.totalBeats - short.totalBeats, 16);
+      expect(full.total - short.total, closeTo(7.619, 0.001));
     });
 
     test("the note's photo decodes small: it is blurred", () {

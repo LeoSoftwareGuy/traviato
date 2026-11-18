@@ -360,4 +360,66 @@ void main() {
       ('end', timeline.endingCue + beat.beatToSec(7)),
     ], 'finale_few');
   });
+
+  // The user's words (#399): a chapter card typing a 3-line excerpt, a
+  // split showing its photos' captions in turn, and a longer note on more,
+  // narrower lines, each held long enough to read.
+  testWidgets("the user's words, whole and readable", skip: _skip, (
+    tester,
+  ) async {
+    final reference = NeonNightFixtures.reference;
+    final first = reference.chapters.first;
+    final captioned = [
+      for (final (i, photo) in first.photos.indexed)
+        NnPhoto(
+          id: photo.id,
+          takenAt: photo.takenAt,
+          caption: switch (i) {
+            0 => 'боча пролил пиво',
+            1 => 'our castle',
+            _ => photo.caption,
+          },
+        ),
+    ];
+    final story = NeonNightStory(
+      title: reference.title,
+      date: reference.date,
+      plan: reference.plan,
+      firstName: reference.firstName,
+      totals: reference.totals,
+      chapters: [
+        NnChapter(
+          title: first.title,
+          from: first.from,
+          to: first.to,
+          photos: captioned,
+          moments: [NnSplit(captioned.take(2).toList())],
+          note:
+              'Ждём полтора метра рёбер: заказали 4,5 килограмма, '
+              'and we ate them all',
+        ),
+        ...reference.chapters.skip(1),
+      ],
+      note: NnNoteMoment(
+        text:
+            'The best set I have ever heard. We stayed until the lights '
+            'came on and walked home at eight.',
+        number: 4,
+        time: '01:04',
+        photo: reference.note!.photo,
+      ),
+    );
+    final timeline = NeonNightCanvas.timelineFor(story);
+    final card = timeline.chapterCard(0);
+    final split = timeline.scenes.firstWhere((s) => s.spec is NnMomentSpec);
+    final note = timeline.film.first<NnNoteSpec>()!;
+    final beat = timeline.beat;
+    await _pumpFilm(tester, story: story);
+    await _expectAt(tester, [
+      ('card_typed', card.end - 0.5),
+      ('split_caption1', split.start + beat.beatToSec(2)),
+      ('split_caption2', split.end - 0.5),
+      ('note', note.end - 0.5),
+    ], 'words');
+  });
 }

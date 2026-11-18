@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+
+import '../../../domain/film_text_rules.dart';
 import '../timeline/film_timeline.dart';
 import 'golden_vows_scene_spec.dart';
 import 'golden_vows_story.dart';
@@ -16,8 +19,9 @@ class GoldenVowsTimeline {
     this.heroes = 4,
     this.chapters = 3,
     this.hasCarousel = true,
+    List<double> heroDwells = const [],
   }) : assert(heroes >= 0 && chapters >= 0, 'pages: $heroes, $chapters'),
-       film = _build(hasPackingCard, heroes, chapters, hasCarousel);
+       film = _build(hasPackingCard, heroes, chapters, hasCarousel, heroDwells);
 
   /// A memory's film: no packed items, no packing card; no carousel
   /// photos, no carousel page.
@@ -27,6 +31,7 @@ class GoldenVowsTimeline {
         heroes: story.heroes.length,
         chapters: story.chapters.length,
         hasCarousel: story.hasCarousel,
+        heroDwells: [for (final hero in story.heroes) heroDwellFor(hero.note)],
       );
 
   /// The reference wedding (spec §5).
@@ -37,6 +42,15 @@ class GoldenVowsTimeline {
   final int chapters;
   final bool hasCarousel;
   final FilmTimeline<GoldenVowsSceneSpec> film;
+
+  /// How long a photo-with-note page lies open (#399 T1): the spec's 3 s,
+  /// or long enough to read its note — seen from the turn that uncovers it
+  /// to its own turn.
+  static double heroDwellFor(String? note) {
+    final text = note?.trim();
+    if (text == null || text.isEmpty) return heroDwell;
+    return math.max(heroDwell, FilmTextRules.readingTime(text) - turnDur);
+  }
 
   static const invitationDur = 5.4;
   static const packingCardDur = 6.5;
@@ -64,6 +78,7 @@ class GoldenVowsTimeline {
     int heroes,
     int chapters,
     bool hasCarousel,
+    List<double> heroDwells,
   ) {
     var number = 0;
     GvPageSpec page(GvPageKind kind, int index) =>
@@ -73,7 +88,10 @@ class GoldenVowsTimeline {
       if (hasPackingCard) (packingCardDur, const GvPackingCardSpec()),
       (albumRiseDur + turnDur, const GvAlbumOpenSpec()),
       for (var i = 0; i < heroes; i++)
-        (heroDwell + turnDur, page(GvPageKind.hero, i)),
+        (
+          (i < heroDwells.length ? heroDwells[i] : heroDwell) + turnDur,
+          page(GvPageKind.hero, i),
+        ),
       for (var i = 0; i < chapters; i++)
         (chapterDwell + turnDur, page(GvPageKind.chapter, i)),
       if (hasCarousel) (carouselDwell + turnDur, page(GvPageKind.carousel, 0)),
