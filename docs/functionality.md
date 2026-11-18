@@ -276,7 +276,12 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   to a real detail. Everything plays in time order. Drug references and
   swearing never become a headline, title or the note scene. The plan
   inspector shows each chapter's days, photos, lines (score, director or
-  code) and the lines left out. Playing the lines is #416.
+  code) and the lines left out. **The film plays them (#416):** a chapter
+  card types its first line; after the chapter's moments a Lines scene
+  plays the others one after another, each in neon over its own photo
+  (else one of the chapter's) for its reading time, in whole bars. A
+  chapter without more lines has no such scene, and the Note scene is
+  left out when its line already played. Sky Story and Golden Vows: #419.
 - **The user's words (#399, display only; which words are chosen is #398,
   multi-excerpt note moments #416):** captions and notes are never cut
   with "…". A text that doesn't fit gets smaller type or more lines, then
