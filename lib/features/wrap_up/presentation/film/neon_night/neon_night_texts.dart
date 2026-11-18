@@ -24,6 +24,13 @@ class NeonNightTexts {
         for (var i = 0; i < story.chapters.length; i++)
           NnChapterTexts(story, i, l10n),
       ],
+      lines = [
+        for (final chapter in story.chapters)
+          [
+            for (final line in chapter.lines)
+              NnLinesTexts(neonNoteLines(line.text)!),
+          ],
+      ],
       note = switch (story.noteLines) {
         final lines? => NnNoteTexts(story, l10n, lines),
         null => null,
@@ -39,6 +46,9 @@ class NeonNightTexts {
   /// One per chapter, in order.
   final List<NnChapterTexts> chapters;
 
+  /// Per chapter, its Lines scene's lines (#416), in order.
+  final List<List<NnLinesTexts>> lines;
+
   /// Null when the memory has no note (the scene is cut).
   final NnNoteTexts? note;
 
@@ -50,6 +60,11 @@ class NeonNightTexts {
     plan?.dispose();
     for (final chapter in chapters) {
       chapter.dispose();
+    }
+    for (final chapter in lines) {
+      for (final line in chapter) {
+        line.dispose();
+      }
     }
     note?.dispose();
     finale.dispose();
@@ -622,6 +637,51 @@ class NnNoteTexts {
       line.dispose();
     }
     signature?.dispose();
+  }
+}
+
+/// One line of a chapter's Lines scene (#416): the excerpt as neon
+/// tubes, sized like the Note scene's, lit one row a beat.
+class NnLinesTexts {
+  NnLinesTexts(List<String> rows)
+    : rows = [
+        for (final (i, row) in rows.indexed)
+          NeonTubeText(
+            row,
+            size: NeonType.fit(rows.join('\n'), lineWidth, 170, 0.43),
+            maxWidth: lineWidth,
+            stroke: 4,
+            weight: 600,
+            color: NnNoteTexts.colors[i % NnNoteTexts.colors.length],
+          ),
+      ],
+      text = rows.join(' ');
+
+  static const lineWidth = 900.0;
+
+  /// Rows light from this local beat, one a beat.
+  static const litFrom = 0.5;
+
+  /// How many beats a line of [rows] holds on [beat]'s clock: lit row by
+  /// row, then on screen for its reading time (#399 T1), before its
+  /// 0.25 s exit. At least 2 bars; whole bars, so cuts stay on the beat.
+  static int beatsFor(List<String> rows, NeonBeat beat) {
+    final lit = litFrom + rows.length;
+    final read =
+        litFrom + beat.secToBeat(FilmTextRules.readingTime(rows.join(' ')));
+    final need = math.max(lit, read) + beat.secToBeat(0.25);
+    return math.max(8, ((need - 1e-9) / 4).ceil() * 4);
+  }
+
+  final List<NeonTubeText> rows;
+
+  /// The words shown, as one line.
+  final String text;
+
+  void dispose() {
+    for (final row in rows) {
+      row.dispose();
+    }
   }
 }
 

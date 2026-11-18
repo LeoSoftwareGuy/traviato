@@ -422,4 +422,61 @@ void main() {
       ('note', note.end - 0.5),
     ], 'words');
   });
+
+  // The chapter's lines (#416): three excerpts one after another, each in
+  // neon over its own photo, each held for its reading time.
+  testWidgets("a chapter's lines over their photos", skip: _skip, (
+    tester,
+  ) async {
+    final reference = NeonNightFixtures.reference;
+    final first = reference.chapters.first;
+    final story = NeonNightStory(
+      title: reference.title,
+      date: reference.date,
+      plan: reference.plan,
+      firstName: reference.firstName,
+      totals: reference.totals,
+      chapters: [
+        NnChapter(
+          title: first.title,
+          from: first.from,
+          to: first.to,
+          photos: first.photos,
+          cardPhotos: first.cardPhotos,
+          moments: first.moments,
+          note: first.note,
+          lines: [
+            NnLine(
+              text: 'Заказали 4,5 кг рёбер на троих!',
+              photo: first.photos[0],
+            ),
+            NnLine(
+              text:
+                  'Danced at Shelter until 3, first time in a club since '
+                  '2019!',
+              photo: first.photos[1],
+            ),
+            NnLine(
+              text: 'Rented 3 bikes and rode 12 km to Zaandam.',
+              photo: first.photos.last,
+            ),
+          ],
+        ),
+        ...reference.chapters.skip(1),
+      ],
+      note: reference.note,
+    );
+    final timeline = NeonNightCanvas.timelineFor(story);
+    final scene = timeline.scenes.firstWhere((s) => s.spec is NnLinesSpec);
+    final spec = scene.spec as NnLinesSpec;
+    final beat = timeline.beat;
+    double end(int k) =>
+        scene.start + beat.beatToSec(spec.startOf(k) + spec.lineBeats[k]);
+    await _pumpFilm(tester, story: story);
+    await _expectAt(tester, [
+      ('line1', end(0) - 0.5),
+      ('line2', end(1) - 0.5),
+      ('line3', end(2) - 0.5),
+    ], 'lines');
+  });
 }

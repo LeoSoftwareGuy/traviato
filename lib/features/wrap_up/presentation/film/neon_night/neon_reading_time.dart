@@ -6,6 +6,7 @@ import 'neon_chapter_card.dart';
 import 'neon_night_story.dart';
 import 'neon_night_texts.dart';
 import 'neon_night_timeline.dart';
+import 'neon_type.dart';
 import 'neon_zoom_picks.dart';
 
 /// How long Neon Night holds the user's words (#399 T1): every caption,
@@ -31,6 +32,10 @@ abstract final class NnReadingTime {
           cardMinBeats: cardBeats(chapter, beat),
           momentMinBeats: [
             for (final moment in chapter.moments) momentBeats(moment, beat),
+          ],
+          lineBeats: [
+            for (final line in chapter.lines)
+              NnLinesTexts.beatsFor(neonNoteLines(line.text)!, beat),
           ],
         ),
     ];

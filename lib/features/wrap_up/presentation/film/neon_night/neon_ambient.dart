@@ -75,12 +75,12 @@ class NeonAmbient {
   }
 
   /// The beams' opacity at [t]: `amt × (0.45 + punch × 0.5 × beatEnv)`.
-  /// amt is 0.6 in Note, falls to 0 over Ending's first 3 beats, else 1;
+  /// amt is 0.6 in Note and Lines, falls to 0 over Ending's first 3 beats, else 1;
   /// punch is 1 in Finale, else 0.6, × 0.4 when reduced.
   double laserOpacity(double t) {
     final (:scene, :lb) = timeline.sceneAt(t);
     final amt = switch (scene.spec) {
-      NnNoteSpec() => 0.6,
+      NnNoteSpec() || NnLinesSpec() => 0.6,
       NnEndingSpec() => 1 - (lb / 3).clamp(0.0, 1.0),
       _ => 1.0,
     };

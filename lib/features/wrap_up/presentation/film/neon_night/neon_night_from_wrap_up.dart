@@ -1,6 +1,7 @@
 import '../../../domain/entities/wrap_up_neon_night.dart';
 import 'neon_night_scene_spec.dart';
 import 'neon_night_story.dart';
+import 'neon_type.dart';
 
 /// How many photos each moment plays with (as the server checks them).
 const neonMomentPhotos = {
@@ -71,6 +72,7 @@ NeonNightStory? neonNightFromWrapUp(
         ],
         note: entry.chapter.note,
         moments: moments.isNotEmpty ? moments : [NnTimeline(_spread(photos))],
+        lines: _lines(entry.chapter, photos),
       ),
     );
   }
@@ -80,7 +82,16 @@ NeonNightStory? neonNightFromWrapUp(
       startDate ??
       nn.startDate ??
       DateTime(firstPhoto.year, firstPhoto.month, firstPhoto.day);
-  final note = nn.note;
+  // The Note scene only with a line no chapter already plays (#416).
+  final shown = {
+    for (final chapter in chapters) ...[
+      ?_same(chapter.note),
+      for (final line in chapter.lines) _same(line.text),
+    ],
+  };
+  final note = nn.note == null || shown.contains(_same(nn.note!.text))
+      ? null
+      : nn.note;
   final notePhoto = note?.photoId == null ? null : byId[note!.photoId];
   return NeonNightStory(
     title: nn.title,
@@ -115,6 +126,34 @@ NeonNightStory? neonNightFromWrapUp(
     ],
   );
 }
+
+/// A chapter's excerpts after the card's typed one (#416), each over its
+/// photo: its own when the app can show it, else the chapter's photos in
+/// turn, spread through the chapter. Lines the scene can't show whole are
+/// left out.
+List<NnLine> _lines(WrapUpNeonChapter chapter, List<NnPhoto> photos) {
+  final byId = {for (final photo in photos) photo.id: photo};
+  final card = _same(chapter.note);
+  final excerpts = [
+    for (final e in chapter.excerpts)
+      if (_same(e.text) != card && neonNoteLines(e.text) != null) e,
+  ];
+  return [
+    for (final (k, e) in excerpts.indexed)
+      NnLine(
+        text: e.text,
+        photo:
+            byId[e.photoId] ??
+            photos[((k + 1) * photos.length / (excerpts.length + 1))
+                .floor()
+                .clamp(0, photos.length - 1)],
+      ),
+  ];
+}
+
+/// [text] compared loosely: spacing and case.
+String? _same(String? text) =>
+    text?.replaceAll(RegExp(r'\s+'), ' ').trim().toLowerCase();
 
 NnMoment? _moment(WrapUpNeonMoment moment, List<WrapUpNeonPhoto> source) {
   // In the order they were taken (#399 T6), whatever the plan's order.
