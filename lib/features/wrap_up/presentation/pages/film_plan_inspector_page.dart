@@ -19,6 +19,7 @@ import '../../domain/entities/film_plan_inspection.dart';
 import '../../domain/entities/film_plan_scene.dart';
 import '../controllers/wrap_up_controller.dart';
 import '../film/golden_vows/golden_vows_timeline.dart';
+import '../../domain/entities/wrap_up_neon_night.dart';
 import '../film/neon_night/neon_night_canvas.dart';
 import '../film/neon_night/neon_track.dart';
 import '../film/sky_story/sky_story.dart';
@@ -556,6 +557,10 @@ class _NeonNightCard extends ConsumerWidget {
                     '${chapter.moments.map((m) => m.type.name).join(' + ')}'
                     ' · ${chapter.note ?? '— (no line)'}',
               ),
+            for (final chapter
+                in data.wrapUp.neonNight?.chapters ??
+                    const <WrapUpNeonChapter>[])
+              _NeonChapterLines(chapter),
             _Line(
               'Note',
               story.note == null
@@ -565,6 +570,51 @@ class _NeonNightCard extends ConsumerWidget {
             _Line('Headline', story.headline ?? '—'),
           ];
         },
+      ),
+    );
+  }
+}
+
+/// One Neon Night chapter's real story (#398): its logical days, photos in
+/// order, the lines it plays (score, director or code, over which photo)
+/// and the best ones left out.
+class _NeonChapterLines extends StatelessWidget {
+  const _NeonChapterLines(this.chapter);
+
+  final WrapUpNeonChapter chapter;
+
+  static String _day(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-'
+      '${d.day.toString().padLeft(2, '0')}';
+
+  @override
+  Widget build(BuildContext context) {
+    final days = chapter.days.isEmpty
+        ? '— (older content)'
+        : chapter.days.length == 1
+        ? _day(chapter.days.first)
+        : '${_day(chapter.days.first)} – ${_day(chapter.days.last)}';
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _Line(chapter.title, days),
+          _Line('Photos', chapter.photos.map((p) => p.id).join(' · ')),
+          if (chapter.excerpts.isEmpty) const _Line('Lines', '— (none)'),
+          for (final e in chapter.excerpts)
+            _Line(
+              '${e.fromDirector ? 'director' : 'code'} · ${e.score}',
+              '${e.text} → ${e.photoId ?? '—'}',
+            ),
+          for (final r in chapter.rejectedExcerpts)
+            Text(
+              '✗ ${r.score} · ${r.text}',
+              style: AppTypography.caption.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+        ],
       ),
     );
   }

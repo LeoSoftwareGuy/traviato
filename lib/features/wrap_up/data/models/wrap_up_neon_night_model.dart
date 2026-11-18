@@ -82,6 +82,38 @@ WrapUpNeonChapter? _chapter(dynamic json) {
     note: _string(json['note']),
     moments: moments,
     cardPhotoIds: _ids(json['card_photo_ids']),
+    excerpts: _list(json['excerpts']).map(_excerpt).nonNulls.toList(),
+    days: _list(json['days']).map(_date).nonNulls.toList(),
+    rejectedExcerpts: _list(
+      json['rejected_excerpts'],
+    ).map(_rejected).nonNulls.toList(),
+  );
+}
+
+/// One of a chapter's lines (#398); one without words or note is dropped.
+WrapUpNeonExcerpt? _excerpt(dynamic json) {
+  if (json is! Map) return null;
+  final text = _string(json['text']);
+  final noteId = _string(json['note_id']);
+  if (text == null || noteId == null) return null;
+  final score = json['score'];
+  return WrapUpNeonExcerpt(
+    text: text,
+    noteId: noteId,
+    photoId: _string(json['photo_id']),
+    fromDirector: json['source'] == 'director',
+    score: score is num ? score.round() : 0,
+  );
+}
+
+WrapUpNeonRejectedExcerpt? _rejected(dynamic json) {
+  if (json is! Map) return null;
+  final text = _string(json['text']);
+  if (text == null) return null;
+  final score = json['score'];
+  return WrapUpNeonRejectedExcerpt(
+    text: text,
+    score: score is num ? score.round() : 0,
   );
 }
 

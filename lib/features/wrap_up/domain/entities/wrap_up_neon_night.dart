@@ -94,6 +94,9 @@ class WrapUpNeonChapter extends Equatable {
     required this.moments,
     this.note,
     this.cardPhotoIds = const [],
+    this.excerpts = const [],
+    this.days = const [],
+    this.rejectedExcerpts = const [],
   });
 
   final String title;
@@ -109,8 +112,63 @@ class WrapUpNeonChapter extends Equatable {
   final String? note;
   final List<WrapUpNeonMoment> moments;
 
+  /// The chapter's lines (#398), in time order, each over its photo.
+  /// Empty in older content.
+  final List<WrapUpNeonExcerpt> excerpts;
+
+  /// The chapter's logical days (#398), in order. Empty in older content.
+  final List<DateTime> days;
+
+  /// The best lines the director and code left out (plan inspector).
+  final List<WrapUpNeonRejectedExcerpt> rejectedExcerpts;
+
   @override
-  List<Object?> get props => [title, photos, note, moments, cardPhotoIds];
+  List<Object?> get props => [
+    title,
+    photos,
+    note,
+    moments,
+    cardPhotoIds,
+    excerpts,
+    days,
+    rejectedExcerpts,
+  ];
+}
+
+/// An exact excerpt of one of the user's notes (#398).
+class WrapUpNeonExcerpt extends Equatable {
+  const WrapUpNeonExcerpt({
+    required this.text,
+    required this.noteId,
+    this.photoId,
+    this.fromDirector = false,
+    this.score = 0,
+  });
+
+  final String text;
+  final String noteId;
+
+  /// The chapter photo it plays over; null = the app picks.
+  final String? photoId;
+
+  /// Chosen by the director, else picked by code.
+  final bool fromDirector;
+
+  /// How specific it is (numbers, names, food, firsts… minus summaries).
+  final int score;
+
+  @override
+  List<Object?> get props => [text, noteId, photoId, fromDirector, score];
+}
+
+class WrapUpNeonRejectedExcerpt extends Equatable {
+  const WrapUpNeonRejectedExcerpt({required this.text, required this.score});
+
+  final String text;
+  final int score;
+
+  @override
+  List<Object?> get props => [text, score];
 }
 
 /// `split`, `burst`, `timeline` or `peak`, over some of a chapter's photos.

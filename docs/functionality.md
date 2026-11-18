@@ -268,6 +268,15 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   then the classic film. **Reduce flashing** plays its softer version.
   Kept films follow Golden Vows' rules.
 
+- **The real story (#398):** the director reads every note whole and
+  each photo's logical day. Neon Night gives a memory over several days
+  one chapter per day (after midnight belongs to the evening), and each
+  chapter up to 4 of the notes' most specific lines — exact words, cut at
+  sentence or clause ends, each tied to its photo; generic summaries lose
+  to a real detail. Everything plays in time order. Drug references and
+  swearing never become a headline, title or the note scene. The plan
+  inspector shows each chapter's days, photos, lines (score, director or
+  code) and the lines left out. Playing the lines is #416.
 - **The user's words (#399, display only; which words are chosen is #398,
   multi-excerpt note moments #416):** captions and notes are never cut
   with "…". A text that doesn't fit gets smaller type or more lines, then

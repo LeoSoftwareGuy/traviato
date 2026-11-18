@@ -1,3 +1,4 @@
+import { MAX_NOTE_CHARS } from "./gather.ts";
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
   assembleWrapUpContent,
@@ -768,10 +769,13 @@ Deno.test("noteExcerpts cuts an over-long sentence at a word, on its own", () =>
   assertEquals(noteExcerpts("Supercalifragilistic", 6), ["Super…"]);
 });
 
-Deno.test("noteExcerpts drops the unfinished tail of a note cut at 500 chars", () => {
-  const head = `${"Fine day. ".repeat(48)}`; // 480 chars
-  const note = `${head}We walked to the old harbour and`.slice(0, 500);
-  assertEquals(note.length, 500);
+Deno.test("noteExcerpts drops the unfinished tail of a note cut at MAX_NOTE_CHARS", () => {
+  const head = "Fine day. ".repeat(Math.floor(MAX_NOTE_CHARS / 10) - 2);
+  const note = `${head}We walked to the old harbour and`.slice(
+    0,
+    MAX_NOTE_CHARS,
+  );
+  assertEquals(note.length, MAX_NOTE_CHARS);
   const excerpts = noteExcerpts(note);
   assertEquals(excerpts.some((e) => e.includes("walked")), false);
   // A short note without a final full stop keeps its last sentence.

@@ -20,7 +20,7 @@ Deno.test("gatherTripData maps trip, notes, photos, bonus tasks, stars and trunc
       },
     ],
     journal_notes: [
-      { day_date: "2026-06-01", content: "x".repeat(600) },
+      { day_date: "2026-06-01", content: "x".repeat(4100) },
       {
         id: "n2",
         day_date: "2026-06-01",
@@ -63,7 +63,7 @@ Deno.test("gatherTripData maps trip, notes, photos, bonus tasks, stars and trunc
   assertEquals(result.trip.name, "Lisbon");
   assertEquals(result.trip.vibes, ["Foodie"]);
   assertEquals(result.trip.cover_image_path, "asset:sunset");
-  assertEquals(result.notes[0].content.length, 500);
+  assertEquals(result.notes[0].content.length, 4000);
   // Many notes a day, each with its own time and photo (#397).
   assertEquals(result.notes[1].taken_at, "2026-06-01T19:16:00Z");
   assertEquals(result.notes[1].photo_id, "photo-1");

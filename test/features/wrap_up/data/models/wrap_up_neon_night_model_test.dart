@@ -101,6 +101,48 @@ void main() {
     expect(parseWrapUpNeonNight(content)!.heartPhotoIds, isEmpty);
   });
 
+  test("a chapter's days and lines (#398); older content has none", () {
+    final content = _content();
+    final chapter =
+        ((content['neon_night'] as Map)['chapters'] as List).first as Map;
+    chapter['days'] = ['2026-11-14', 'not a day'];
+    chapter['excerpts'] = [
+      {
+        'text': 'Заказали 4,5 кг рёбер!',
+        'note_id': 'n1',
+        'photo_id': 'p2',
+        'source': 'director',
+        'score': 4,
+      },
+      {'text': 'Lost the keys at 2.', 'note_id': 'n2', 'source': 'code'},
+      {'text': '  ', 'note_id': 'n3'},
+      {'text': 'No note'},
+    ];
+    chapter['rejected_excerpts'] = [
+      {'text': 'It was fun.', 'score': -2},
+      7,
+    ];
+    final parsed = parseWrapUpNeonNight(content)!.chapters.first;
+    expect(parsed.days, [DateTime(2026, 11, 14)]);
+    expect(parsed.excerpts, const [
+      WrapUpNeonExcerpt(
+        text: 'Заказали 4,5 кг рёбер!',
+        noteId: 'n1',
+        photoId: 'p2',
+        fromDirector: true,
+        score: 4,
+      ),
+      WrapUpNeonExcerpt(text: 'Lost the keys at 2.', noteId: 'n2'),
+    ]);
+    expect(parsed.rejectedExcerpts, const [
+      WrapUpNeonRejectedExcerpt(text: 'It was fun.', score: -2),
+    ]);
+
+    final older = parseWrapUpNeonNight(_content())!.chapters.first;
+    expect(older.excerpts, isEmpty);
+    expect(older.days, isEmpty);
+  });
+
   test('no title, no chapter with photos, or another version: none', () {
     for (final edit in <void Function(Map<String, dynamic>)>[
       (nn) => nn['nn_version'] = 2,
