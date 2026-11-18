@@ -94,7 +94,8 @@ class WrapUpController extends _$WrapUpController {
       skyStory: switch (wrapUp.sky) {
         final sky? => skyStoryFromWrapUp(
           sky,
-          // Only photos the film can show; captions read place and time.
+          // Only photos the film can show; captions: the user's own
+          // (#399), else place and time.
           photos: {
             for (final photo in photos)
               if (photo.imageUrl != null)
@@ -102,6 +103,7 @@ class WrapUpController extends _$WrapUpController {
                   id: photo.id,
                   place: photo.placeText,
                   takenAt: photo.takenAt?.toLocal(),
+                  caption: photo.caption,
                 ),
           },
           startDate: trip?.startDate,

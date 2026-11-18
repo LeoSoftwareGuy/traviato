@@ -135,7 +135,7 @@ void main() {
         story.title.toUpperCase(),
         for (final row in story.plan) ...[row.time, row.item.toUpperCase()],
         for (final chapter in story.chapters) chapter.title.toUpperCase(),
-        ...neonNoteLines(story.note!.text),
+        ...?neonNoteLines(story.note!.text),
         story.headline!.toUpperCase(),
       ],
       for (final l10n in [en, ru]) ...[

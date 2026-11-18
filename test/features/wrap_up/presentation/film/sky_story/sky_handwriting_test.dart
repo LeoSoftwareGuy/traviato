@@ -18,28 +18,14 @@ void main() {
       expect(wrapWords('   ', 200, _measure), isEmpty);
     });
 
-    test('past the last line it ends in an ellipsis that fits', () {
+    test('never cut: every word stays, with no "…" (#399)', () {
       final lines = wrapWords(
         'aaa bbb ccc ddd eee fff ggg hhh, iii jjj',
         70,
         _measure,
-        maxLines: 3,
       );
-      expect(lines, hasLength(3));
-      expect(lines.last, endsWith('…'));
-      for (final line in lines) {
-        expect(_measure(line), lessThanOrEqualTo(70), reason: line);
-      }
-    });
-
-    test('the ellipsis replaces trailing punctuation', () {
-      final lines = wrapWords(
-        'aaa, bbb, ccc, ddd',
-        50,
-        _measure,
-        maxLines: 2,
-      );
-      expect(lines, ['aaa,', 'bbb…']);
+      expect(lines.join(' '), 'aaa bbb ccc ddd eee fff ggg hhh, iii jjj');
+      expect(lines.join(), isNot(contains('…')));
     });
 
     test('a word wider than the line keeps a line of its own', () {
@@ -47,6 +33,21 @@ void main() {
         wrapWords('a extraordinarily b', 60, _measure),
         ['a', 'extraordinarily', 'b'],
       );
+    });
+  });
+
+  group('fitsWords', () {
+    test('fits within the lines and the width', () {
+      expect(fitsWords('one two three', 100, _measure, maxLines: 2), isTrue);
+      expect(
+        fitsWords('one two three four five', 100, _measure, maxLines: 2),
+        isFalse,
+      );
+    });
+
+    test('a word wider than the line never fits; nothing never does', () {
+      expect(fitsWords('extraordinarily', 60, _measure, maxLines: 3), isFalse);
+      expect(fitsWords('  ', 60, _measure, maxLines: 3), isFalse);
     });
   });
 

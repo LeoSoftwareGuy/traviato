@@ -1,13 +1,12 @@
 /// Wraps [text] into lines no wider than [maxWidth], as [measure] sizes
-/// them (#345). Past [maxLines] the last line is cut at a word and ends in
-/// `…`, so a long note never runs off its card. A single word wider than
-/// the line keeps its own line rather than being split.
+/// them (#345). Never cut (#399): a caller checks [fitsWords] first and
+/// shows fewer whole sentences instead. A single word wider than the line
+/// keeps its own line rather than being split.
 List<String> wrapWords(
   String text,
   double maxWidth,
-  double Function(String) measure, {
-  int maxLines = 3,
-}) {
+  double Function(String) measure,
+) {
   final words = text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty);
   final lines = <String>[];
   var current = '';
@@ -21,19 +20,22 @@ List<String> wrapWords(
     }
   }
   if (current.isNotEmpty) lines.add(current);
-  if (lines.length <= maxLines) return lines;
-
-  final kept = lines.take(maxLines).toList();
-  var last = kept.last.split(' ');
-  while (last.length > 1 && measure('${last.join(' ')}…') > maxWidth) {
-    last = last.sublist(0, last.length - 1);
-  }
-  kept[maxLines - 1] = '${_trimTrailingPunctuation(last.join(' '))}…';
-  return kept;
+  return lines;
 }
 
-String _trimTrailingPunctuation(String s) =>
-    s.replaceFirst(RegExp(r'[\s,;:.\-–—]+$'), '');
+/// Whether [text] wraps into at most [maxLines] lines of [maxWidth], none
+/// of them wider (a single over-wide word doesn't fit).
+bool fitsWords(
+  String text,
+  double maxWidth,
+  double Function(String) measure, {
+  required int maxLines,
+}) {
+  final lines = wrapWords(text, maxWidth, measure);
+  return lines.isNotEmpty &&
+      lines.length <= maxLines &&
+      lines.every((line) => measure(line) <= maxWidth);
+}
 
 /// When each handwritten line writes on (#345): left to right at a steady
 /// hand's [speed] (px/s), a short [gap] between lines, as the reference's

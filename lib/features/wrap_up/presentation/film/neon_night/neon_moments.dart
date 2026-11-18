@@ -102,10 +102,11 @@ abstract final class NnBurstLayout {
   }
 }
 
-/// Timeline (§5.5b): 2–8 photos in a two-column masonry, highlighted one
-/// per beat while the list scrolls under a fixed title.
+/// Timeline (§5.5b): 2–8 photos in a two-column masonry, highlighted in
+/// turn while the list scrolls under a fixed title. An item holds the
+/// highlight for one beat, or longer while its caption is read (#399 T1).
 class NnTimelineLayout {
-  factory NnTimelineLayout(int m) {
+  factory NnTimelineLayout(int m, {List<int> holds = const []}) {
     assert(m >= 2 && m <= 8, 'timeline: $m items');
     final columns = [top, top];
     final items = <Rect>[];
@@ -116,10 +117,20 @@ class NnTimelineLayout {
       columns[c] += h + 100;
     }
     final bottom = items.map((r) => r.bottom).reduce(math.max);
-    return NnTimelineLayout._(items, bottom + timeGap + timeHeight);
+    final starts = <double>[];
+    var at = 2.0;
+    for (var i = 0; i < m; i++) {
+      starts.add(at);
+      at += i < holds.length ? math.max(1, holds[i]) : 1;
+    }
+    return NnTimelineLayout._(
+      items,
+      bottom + timeGap + timeHeight,
+      List.unmodifiable(starts),
+    );
   }
 
-  NnTimelineLayout._(this.items, this.contentBottom);
+  NnTimelineLayout._(this.items, this.contentBottom, this._starts);
 
   static const top = 330.0;
   static const width = 440.0;
@@ -134,7 +145,14 @@ class NnTimelineLayout {
   /// Where the list ends (the last time label's foot).
   final double contentBottom;
 
+  /// When each item takes the highlight, in local beats.
+  final List<double> _starts;
+
   int get length => items.length;
+
+  /// When item [i] takes the highlight: lb 2, then one beat (or its hold)
+  /// after the item before.
+  double highlightStart(int i) => _starts[i];
 
   /// How far the list can scroll: `contentBottom − 1540`, at least 0.
   double get maxScroll => math.max(0, contentBottom - 1540);
@@ -142,11 +160,14 @@ class NnTimelineLayout {
   /// The scroll that centres item [j] (at y 900).
   double scrollFor(int j) => (items[j].center.dy - 900).clamp(0.0, maxScroll);
 
-  /// The item highlighted at [lb]: one per beat from lb 2, holding on the
-  /// last. Null before lb 2.
+  /// The item highlighted at [lb], holding on the last. Null before lb 2.
   int? highlightAt(double lb) {
-    if (lb < 2) return null;
-    return math.min((lb - 2).floor(), length - 1);
+    if (lb < _starts.first) return null;
+    var j = 0;
+    while (j + 1 < length && lb >= _starts[j + 1]) {
+      j++;
+    }
+    return j;
   }
 
   /// The list's scroll at [lb]: each new highlight scrolls to centre it
@@ -156,8 +177,7 @@ class NnTimelineLayout {
     if (j == null) return 0;
     final from = j == 0 ? 0.0 : scrollFor(j - 1);
     final to = scrollFor(j);
-    if (j < (lb - 2).floor()) return to;
-    final since = beat.beatToSec(lb - 2 - j);
+    final since = beat.beatToSec(lb - _starts[j]);
     return from + (to - from) * NeonEases.scroll((since / 0.35).clamp(0, 1));
   }
 

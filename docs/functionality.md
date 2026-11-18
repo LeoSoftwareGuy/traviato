@@ -268,6 +268,18 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   then the classic film. **Reduce flashing** plays its softer version.
   Kept films follow Golden Vows' rules.
 
+- **The user's words (#399, display only; which words are chosen is #398,
+  multi-excerpt note moments #416):** captions and notes are never cut
+  with "…". A text that doesn't fit gets smaller type or more lines, then
+  only its first whole sentences, else it isn't shown. Each one stays on
+  screen for at least 0.8 s + 1 s per 12 characters; scenes grow to make
+  room (Neon Night by whole bars, so it stays on the beat). Captions:
+  ≥ 40 px, the user's caption on Sky Story's hero (else place · time),
+  Neon Night captions on zooms, splits and bursts in turn, and on a
+  timeline only the lit photo's caption, large. Sky Story continues a
+  long note on the day's next pages, sentence by sentence (#383). No zero
+  counts on end cards or stats. Photos in a scene play in time order.
+
 ## 16. Profile ("You") ✅ — redesigned
 
 - Avatar with stars pill, name, @handle, bio, joined date; stats row (Memories ·

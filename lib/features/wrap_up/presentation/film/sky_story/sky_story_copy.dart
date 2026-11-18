@@ -34,7 +34,10 @@ class SkyStoryCopy extends Equatable {
         SkyPageCopy.resolve(page, layout, l10n, locale),
     ],
     outro: SkyOutroCopy(
-      moments: l10n.skyStory_moments(story.momentCount),
+      // No "0 moments" (#399 T4).
+      moments: story.momentCount > 0
+          ? l10n.skyStory_moments(story.momentCount)
+          : '',
       tagline: l10n.skyStory_tagline,
     ),
   );
@@ -99,6 +102,7 @@ class SkyPageCopy extends Equatable {
     required this.eyebrow,
     required this.headline,
     required this.heroCaption,
+    this.placeCaption,
     this.note,
     this.signature,
     this.skyText,
@@ -116,7 +120,10 @@ class SkyPageCopy extends Equatable {
     final trimmed = page.note?.trim();
     final note = (trimmed == null || trimmed.isEmpty) ? null : trimmed;
     final signature = page.signature?.trim();
-    final caption = captionFor(page.hero, page.date, l10n, locale);
+    final place = captionFor(page.hero, page.date, l10n, locale);
+    // The user's own caption first (#399), else place · time.
+    final own = page.hero.caption?.trim();
+    final caption = own == null || own.isEmpty ? place : own;
     final skyLine = page.skyLine?.trim();
     // No note: the director's line on the sky, else the caption moves up
     // onto the sky, bigger, and leaves the polaroid's strip blank (#345:
@@ -130,6 +137,7 @@ class SkyPageCopy extends Equatable {
       eyebrow: eyebrowFor(page, l10n, locale, withCount: !badge),
       headline: headlineFor(page, l10n),
       heroCaption: captionOnSky ? '' : caption,
+      placeCaption: captionOnSky || caption == place ? null : place,
       note: note,
       skyText: skyText == null || skyText.isEmpty ? null : skyText,
       signature: (signature == null || signature.isEmpty || note == null)
@@ -229,8 +237,13 @@ class SkyPageCopy extends Equatable {
   final String eyebrow;
   final String headline;
 
-  /// On the hero's strip; empty when it's on the sky instead ([skyText]).
+  /// On the hero's strip: the user's caption, else place · time; empty
+  /// when it's on the sky instead ([skyText]).
   final String heroCaption;
+
+  /// Place · time, for when the user's [heroCaption] is too long for the
+  /// strip (#399); null when [heroCaption] is already that.
+  final String? placeCaption;
   final String? note;
 
   /// Written on the sky when the page has no note: the director's line,
@@ -250,6 +263,7 @@ class SkyPageCopy extends Equatable {
     eyebrow,
     headline,
     heroCaption,
+    placeCaption,
     note,
     skyText,
     signature,

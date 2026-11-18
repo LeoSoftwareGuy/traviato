@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'neon_beat.dart';
@@ -69,8 +70,13 @@ class NnCardTiming {
     required this.beats,
     required this.zooms,
     required this.tiles,
+    List<int> zoomHolds = const [],
     this.beat = const NeonBeat(),
-  }) : zoomTiles = zooms == 0
+  }) : zoomHolds = [
+         for (var i = 0; i < zooms; i++)
+           i < zoomHolds.length ? zoomHolds[i] : 0,
+       ],
+       zoomTiles = zooms == 0
            ? const []
            : NeonZoomPicks.pick(
                chapterNumber: chapterNumber,
@@ -85,13 +91,17 @@ class NnCardTiming {
   /// From 1, as on the card.
   final int chapterNumber;
 
-  /// The card's length: 16, 12 or 8.
+  /// The card's length: 16, 12 or 8, longer when a caption needs it.
   final int beats;
 
   /// 0–3 laser zooms.
   final int zooms;
   final int tiles;
   final NeonBeat beat;
+
+  /// The extra beats each zoom holds its photo in the big frame, so its
+  /// caption can be read (#399 T1). 0 = the spec's 3-beat cycle.
+  final List<int> zoomHolds;
 
   /// The tiles the zooms pick, in order.
   final List<int> zoomTiles;
@@ -144,30 +154,55 @@ class NnCardTiming {
     return out;
   }
 
+  /// Zoom [cycle]'s start, in local beats: lb 6, then each cycle 3 beats
+  /// (plus its hold) after the one before.
+  double cycleStart(int cycle) => cycleStartFor(cycle, zoomHolds);
+
+  /// [cycleStart] for zooms holding [holds] extra beats.
+  static double cycleStartFor(int cycle, List<int> holds) {
+    var c = NeonZoomPicks.cycleStarts.first.toDouble();
+    for (var i = 0; i < cycle; i++) {
+      c += 3 + (i < holds.length ? holds[i] : 0);
+    }
+    return c;
+  }
+
+  /// How many beats a card with [zooms] zooms holding [holds] needs: the
+  /// spec's 16 / 12 / 8, or the last zoom's end rounded up to a bar.
+  static int beatsFor(int zooms, List<int> holds) {
+    if (zooms == 0) return 8;
+    final end = cycleStartFor(zooms - 1, holds) + 3 + holds[zooms - 1];
+    final bars = (end / 4).ceil() * 4;
+    return math.max(zooms == 3 ? 16 : 12, bars);
+  }
+
+  int _hold(int cycle) => zoomHolds[cycle];
+
   /// Which zoom cycle is under way at [lb] (from 0), or null.
   int? zoomAt(double lb) {
     for (var i = 0; i < zoomTiles.length; i++) {
-      final c = NeonZoomPicks.cycleStarts[i];
-      if (lb >= c && lb < c + 3) return i;
+      final c = cycleStart(i);
+      if (lb >= c && lb < c + 3 + _hold(i)) return i;
     }
     return null;
   }
 
   /// How far the zoom photo is from its tile to the big frame at [lb]
-  /// (0–1): flies out over ½ beat from c + ½, back over ½ beat from
-  /// c + 2½ (ease in-out).
-  static double zoomAmount(double lb, int cycle) {
-    final c = NeonZoomPicks.cycleStarts[cycle].toDouble();
-    if (lb < c + 0.5 || lb >= c + 3) return 0;
+  /// (0–1): flies out over ½ beat from c + ½, holds, then back over ½ beat
+  /// from c + 2½ + hold (ease in-out).
+  double zoomAmount(double lb, int cycle) {
+    final c = cycleStart(cycle);
+    final back = c + 2.5 + _hold(cycle);
+    if (lb < c + 0.5 || lb >= back + 0.5) return 0;
     if (lb < c + 1) return NeonEases.enter((lb - c - 0.5) / 0.5);
-    if (lb < c + 2.5) return 1;
-    return 1 - NeonEases.scroll((lb - c - 2.5) / 0.5);
+    if (lb < back) return 1;
+    return 1 - NeonEases.scroll((lb - back) / 0.5);
   }
 
   /// How much of the laser has grown at [lb] (0–1, over the first ½
   /// beat) and how bright it is (fading out from c + 2 over ½ beat).
-  static (double length, double alpha) laserAt(double lb, int cycle) {
-    final c = NeonZoomPicks.cycleStarts[cycle].toDouble();
+  (double length, double alpha) laserAt(double lb, int cycle) {
+    final c = cycleStart(cycle);
     if (lb < c || lb >= c + 2.5) return (0, 0);
     final length = NeonEases.enter(((lb - c) / 0.5).clamp(0.0, 1.0));
     final alpha = 1 - ((lb - c - 2) / 0.5).clamp(0.0, 1.0);
@@ -177,7 +212,7 @@ class NnCardTiming {
   /// The zoom's two hits, s after the cue: the laser landing (c + ½) and
   /// the photo landing (c + 1).
   (double hit, double land) zoomHits(int cycle) {
-    final c = NeonZoomPicks.cycleStarts[cycle];
+    final c = cycleStart(cycle);
     return (beat.beatToSec(c + 0.5), beat.beatToSec(c + 1));
   }
 

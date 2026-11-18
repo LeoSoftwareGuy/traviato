@@ -1,5 +1,6 @@
 import 'package:flutter/painting.dart';
 
+import '../film_text_fit.dart';
 import 'sky_handwriting.dart';
 import 'sky_polaroid.dart';
 import 'sky_story.dart';
@@ -104,7 +105,8 @@ class SkyTitleTexts {
   final TextPainter subtitle;
   final Offset subtitleAt;
 
-  /// 148 px (the reference measures larger than the spec's ~130), smaller until it fits in three lines.
+  /// 148 px (the reference measures larger than the spec's ~130), smaller
+  /// until it fits in three lines; past that, wrapped at 80 (never cut).
   static TextPainter _fitTitle(String text) {
     TextPainter? painter;
     for (var size = 148.0; size >= 80; size -= 6) {
@@ -123,7 +125,6 @@ class SkyTitleTexts {
       SkyStoryText.display(text, size: 80, height: 1.0),
       maxWidth: maxWidth,
       align: TextAlign.center,
-      maxLines: 3,
     );
   }
 
@@ -157,21 +158,21 @@ class SkyPageTexts {
         margin,
         320 - lift - headline.computeLineMetrics().first.baseline,
       ),
-      caption: _layout(
-        copy.heroCaption,
-        SkyStoryText.hand(size: 44),
-        maxWidth: SkyPolaroidFrame.hero.photo.width,
-        maxLines: 1,
-      ),
-      noteLines: note == null || onSky
+      caption: heroCaptionFor(copy),
+      noteLines: note == null || onSky || !noteFits(note, layout)
           ? const []
           : [
               for (final line in wrapWords(note, noteWidth, _measureNote))
                 _layout(line, _noteStyle),
             ],
+      // Only words that fit whole (#399): the note was split to fit its
+      // page (`flowSkyNotes`); a sky line too long for it is left out.
       quote: switch ((note, copy.skyText)) {
-        (final note?, _) when onSky => SkyQuoteTexts(note),
-        (null, final line?) => SkyQuoteTexts(line),
+        (final note?, _) when onSky && SkyQuoteTexts.fits(note) =>
+          SkyQuoteTexts(note),
+        (null, final line?) when SkyQuoteTexts.fits(line) => SkyQuoteTexts(
+          line,
+        ),
         _ => null,
       },
       signature: copy.signature == null
@@ -225,6 +226,44 @@ class SkyPageTexts {
   static const margin = 76.0;
   static const headlineMaxWidth = 760.0;
 
+  /// The hero's strip (#399 T1): the user's caption at 44 px, down to 40,
+  /// on one line or two; one that still doesn't fit gives way to the
+  /// place · time line, never cut with "…".
+  static TextPainter heroCaptionFor(SkyPageCopy copy) {
+    final width = SkyPolaroidFrame.hero.photo.width;
+    for (final text in [copy.heroCaption, ?copy.placeCaption]) {
+      if (text.isEmpty) return _layout('', SkyStoryText.hand(size: 44));
+      final fitted = fitTextPainter(
+        text,
+        (size) => SkyStoryText.hand(size: size),
+        sizes: fitSizes(44, 40),
+        maxWidth: width,
+        maxLines: 2,
+        align: TextAlign.center,
+      );
+      if (fitted != null) return fitted;
+    }
+    // Place · time is the app's own words: shrunk to one line.
+    final place = copy.placeCaption ?? copy.heroCaption;
+    return fitTextPainter(
+          place,
+          (size) => SkyStoryText.hand(size: size),
+          sizes: fitSizes(40, 24),
+          maxWidth: width,
+          maxLines: 1,
+        ) ??
+        _layout('', SkyStoryText.hand(size: 44));
+  }
+
+  /// Whether [text] fits a page of [layout] whole (#383, #399): three lines
+  /// on a note card, four on the fly-out's sky.
+  static bool noteFits(String text, SkyPageLayout layout) =>
+      layout == SkyPageLayout.flyOut
+      ? SkyQuoteTexts.fits(text)
+      : fitsWords(text, noteWidth, _measureNote, maxLines: noteMaxLines);
+
+  static const noteMaxLines = 3;
+
   /// The note's lines on its card; three at most, the signature on the
   /// fourth rule.
   static const noteWidth = 635.0;
@@ -254,7 +293,8 @@ class SkyPageTexts {
   final TextPainter? badgeCount;
   final TextPainter? badgeLabel;
 
-  /// 92 px on one line, down to 64; past that, two lines at 64.
+  /// 92 px on one line, down to 64; past that, wrapped at 64 (never cut,
+  /// #399).
   static TextPainter _fitHeadline(String text) {
     for (var size = 92.0; size >= 64; size -= 4) {
       final painter = _layout(
@@ -269,7 +309,6 @@ class SkyPageTexts {
       text,
       SkyStoryText.display(text, size: 64, height: 1.05),
       maxWidth: headlineMaxWidth,
-      maxLines: 2,
     );
   }
 
@@ -304,7 +343,7 @@ class SkyQuoteTexts {
 
     final space = measure('a a') - measure('aa');
     final words = <(TextPainter, Offset)>[];
-    final lines = wrapWords(note, maxWidth, measure, maxLines: 4);
+    final lines = wrapWords(note, maxWidth, measure);
     for (final (row, line) in lines.indexed) {
       final painters = [for (final w in line.split(' ')) _layout(w, style)];
       final width =
@@ -321,6 +360,21 @@ class SkyQuoteTexts {
   }
 
   SkyQuoteTexts._(this.words, this.lineCount);
+
+  static final _style = SkyStoryText.hand(
+    size: 64,
+    color: SkyStoryColors.headlineCream,
+  );
+
+  /// Whether [text] fits the sky whole: four lines (#399).
+  static bool fits(String text) => fitsWords(text, maxWidth, (line) {
+    final painter = _layout(line, _style);
+    final width = painter.width;
+    painter.dispose();
+    return width;
+  }, maxLines: maxLines);
+
+  static const maxLines = 4;
 
   static const maxWidth = 616.0;
   static const firstBaseline = 1440.0;

@@ -26,9 +26,14 @@ class NnMomentPainter {
     required this.photos,
     required this.beat,
     required this.reducedFlashing,
-  }) : timeline = moment is NnTimeline
-           ? NnTimelineLayout(moment.photos.length)
-           : null;
+  }) : timeline = switch ((moment, texts)) {
+         (NnTimeline(:final photos), final NnTimelineTexts texts) =>
+           NnTimelineLayout(
+             photos.length,
+             holds: NnTimelineTexts.holdsFor(texts.captions, beat),
+           ),
+         _ => null,
+       };
 
   final NnMomentSpec spec;
   final NnMoment moment;
@@ -68,10 +73,10 @@ class NnMomentPainter {
     if (alpha <= 0) return;
     double kbT(double kb) => _kb(kb, t, cue, duration);
     switch ((moment, texts)) {
-      case (NnSplit(), NnLabelTexts(:final label)):
+      case (NnSplit(), final NnLabelTexts label):
         _split(canvas, t, cue, lb, alpha, kbT(NnMomentLayout.kbSplit));
         _label(canvas, t, cue, label, alpha);
-      case (NnBurst(), NnLabelTexts(:final label)):
+      case (NnBurst(), final NnLabelTexts label):
         _burst(canvas, t, cue, lb, alpha, kbT(NnMomentLayout.kbBurst));
         _label(canvas, t, cue, label, alpha);
       case (NnTimeline(), final NnTimelineTexts texts):
@@ -91,16 +96,50 @@ class NnMomentPainter {
     }
   }
 
-  /// The label box fades in at lb 1 over 0.3 s.
+  /// The label box fades in at lb 1 over 0.3 s. With captions it shows
+  /// each in turn for its reading time (#399 T1), crossfading over 0.2 s;
+  /// the last one stays.
   void _label(
     Canvas canvas,
     double t,
     double cue,
-    NeonLabelBox label,
+    NnLabelTexts texts,
     double alpha,
   ) {
-    final a = FilmEases.at(t, _at(cue, 1), 0.3, FilmEases.linear) * alpha;
-    label.paint(canvas, NnMomentLayout.labelAt, alpha: a);
+    final from = _at(cue, 1);
+    final a = FilmEases.at(t, from, 0.3, FilmEases.linear) * alpha;
+    final captions = texts.captions;
+    if (captions.isEmpty) {
+      texts.label.paint(canvas, _labelAt(texts.label), alpha: a);
+      return;
+    }
+    var start = from;
+    final readings = texts.readings;
+    for (final (i, caption) in captions.indexed) {
+      final end = i == captions.length - 1
+          ? double.infinity
+          : start + readings[i];
+      if (t >= start - 0.2 && t < end + 0.2) {
+        final fadeIn = i == 0
+            ? 1.0
+            : FilmEases.at(t, start - 0.2, 0.2, FilmEases.linear);
+        final fadeOut = 1 - FilmEases.at(t, end, 0.2, FilmEases.linear);
+        caption.paint(
+          canvas,
+          _labelAt(caption),
+          alpha: a * fadeIn * fadeOut,
+        );
+      }
+      start = end;
+    }
+  }
+
+  /// A label box sits with its foot where the one-line box's does, so a
+  /// caption on 2–3 lines grows upwards, clear of the safe zone.
+  static Offset _labelAt(NeonLabelBox box) {
+    const oneLine = 38 * 1.2;
+    final grow = box.size.height - (oneLine + NeonLabelBox.padding.vertical);
+    return NnMomentLayout.labelAt - Offset(0, grow < 0 ? 0 : grow);
   }
 
   /// Paints photo [i] in a neon frame [rect] (rounded [radius], [border]
@@ -252,12 +291,15 @@ class NnMomentPainter {
       if (lit == i) {
         on = 1;
         if (reducedFlashing) {
-          final from = _at(cue, 2.0 + i);
+          final from = _at(cue, layout.highlightStart(i));
           on = ((t - from) / 0.15).clamp(0.0, 1.0);
         }
       }
       final f =
-          on * (0.4 + NeonBeat.flare(t, _at(cue, 2.0 + i), 0.3) * _flareScale);
+          on *
+          (0.4 +
+              NeonBeat.flare(t, _at(cue, layout.highlightStart(i)), 0.3) *
+                  _flareScale);
       final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(10));
       neonPaintPhoto(
         canvas,
@@ -336,6 +378,22 @@ class NnMomentPainter {
       alpha: alpha,
       paintAt: (dx, a) => title.paint(canvas, at + Offset(dx, 0), alpha: a),
     );
+
+    // The lit item's caption, large at the foot (#399 T2).
+    if (lit != null) {
+      final caption = texts.captions[lit];
+      if (caption != null) {
+        final a =
+            FilmEases.at(
+              t,
+              _at(cue, layout.highlightStart(lit)),
+              0.2,
+              FilmEases.linear,
+            ) *
+            alpha;
+        caption.paint(canvas, _labelAt(caption), alpha: a);
+      }
+    }
   }
 
   // ---- Peak (§5.6b) -------------------------------------------------

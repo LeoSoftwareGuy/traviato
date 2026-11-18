@@ -160,7 +160,8 @@ void main() {
     );
     expect(
       NeonNightCanvas.timelineFor(NeonNightFixtures.reference).totalBeats,
-      136,
+      // The spec's 136, plus a bar to read the note (#399).
+      140,
     );
   });
 
@@ -247,20 +248,30 @@ void main() {
       moments: [NnTimeline(photos)],
     );
 
-    test("a timeline item shows its caption on one line, else its time", () {
+    test('a timeline item shows its time; the lit one its caption, large, '
+        'and holds the highlight while it is read (#399 T2)', () {
       final photos = [
         const NnPhoto(id: 'a', takenAt: '22:10', caption: 'Lost the keys'),
         const NnPhoto(id: 'b', takenAt: '22:20'),
         NnPhoto(id: 'c', takenAt: '22:30', caption: 'word ' * 40),
       ];
       final texts = NnTimelineTexts(NnTimeline(photos), chapter(photos));
-      String text(int i) => (texts.times[i].$1.text! as TextSpan).text!;
-      expect(text(0), 'Lost the keys');
-      expect(text(1), '22:20');
-      // A long caption is cut to the column.
-      final long = texts.times[2].$1;
-      expect(long.width, lessThanOrEqualTo(NnTimelineLayout.width));
-      expect(long.didExceedMaxLines, isTrue);
+      String time(int i) => (texts.times[i].$1.text! as TextSpan).text!;
+      expect([time(0), time(1), time(2)], ['22:10', '22:20', '22:30']);
+      expect(texts.captions[0]!.text, 'Lost the keys');
+      expect(texts.captions[1], isNull);
+      // Too long for 3 lines: left out, never cut.
+      expect(texts.captions[2], isNull);
+      // 'Lost the keys': 0.8 + 13/12 s ≈ 1.9 s → 4 beats at 126 bpm.
+      expect(NnTimelineTexts.holdsFor(texts.captions, const NeonBeat()), [
+        4,
+        1,
+        1,
+      ]);
+      final layout = NnTimelineLayout(3, holds: const [4, 1, 1]);
+      expect(layout.highlightAt(5.9), 0);
+      expect(layout.highlightAt(6), 1);
+      expect(layout.highlightAt(7), 2);
       texts.dispose();
     });
 

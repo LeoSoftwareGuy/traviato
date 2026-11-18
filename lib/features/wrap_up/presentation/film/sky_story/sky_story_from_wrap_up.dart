@@ -1,4 +1,5 @@
 import '../../../domain/entities/wrap_up_sky.dart';
+import 'sky_note_flow.dart';
 import 'sky_story.dart';
 
 /// The Sky Story film for a wrap-up's `content.sky` (#345): its pages
@@ -8,7 +9,8 @@ import 'sky_story.dart';
 /// plays.
 ///
 /// [startDate] / [endDate] are the memory's live dates (they follow a date
-/// edit); without them the pages' own dates are used.
+/// edit); without them the pages' own dates are used. Long notes are
+/// spread over their day's pages ([flowSkyNotes]).
 SkyStory? skyStoryFromWrapUp(
   WrapUpSky sky, {
   required Map<String, SkyPhoto> photos,
@@ -26,25 +28,46 @@ SkyStory? skyStoryFromWrapUp(
           photoCount: page.photoCount,
           headline: page.headline,
           hero: hero,
-          extras: [
-            for (final id in page.extraPhotoIds) ?photos[id],
-          ].take(SkyPage.maxExtras).toList(),
+          // In the order they were taken (#399 T6).
+          extras: _byTime(
+            [
+              for (final id in page.extraPhotoIds) ?photos[id],
+            ].take(SkyPage.maxExtras).toList(),
+          ),
           note: page.note,
           signature: page.note == null ? null : sky.firstName,
           skyLine: page.note == null ? page.skyLine : null,
         ),
   ];
   if (pages.isEmpty) return null;
-  return SkyStory(
-    title: sky.title,
-    startDate: startDate ?? pages.first.date,
-    endDate: endDate ?? pages.last.endDate ?? pages.last.date,
-    names: sky.firstName,
-    pages: pages,
-    momentCount: sky.momentCount,
-    mosaicPhotoIds: [
-      for (final id in sky.mosaicPhotoIds)
-        if (photos.containsKey(id)) id,
-    ],
+  return flowSkyNotes(
+    SkyStory(
+      title: sky.title,
+      startDate: startDate ?? pages.first.date,
+      endDate: endDate ?? pages.last.endDate ?? pages.last.date,
+      names: sky.firstName,
+      pages: pages,
+      momentCount: sky.momentCount,
+      mosaicPhotoIds: [
+        for (final id in sky.mosaicPhotoIds)
+          if (photos.containsKey(id)) id,
+      ],
+    ),
   );
+}
+
+/// [photos] by when they were taken; untimed ones keep their place at the
+/// end, in order.
+List<SkyPhoto> _byTime(List<SkyPhoto> photos) {
+  final indexed = [...photos.indexed];
+  indexed.sort((a, b) {
+    final (ia, pa) = a;
+    final (ib, pb) = b;
+    final ta = pa.takenAt;
+    final tb = pb.takenAt;
+    if (ta != null && tb != null && ta != tb) return ta.compareTo(tb);
+    if ((ta == null) != (tb == null)) return ta == null ? 1 : -1;
+    return ia.compareTo(ib);
+  });
+  return [for (final (_, photo) in indexed) photo];
 }

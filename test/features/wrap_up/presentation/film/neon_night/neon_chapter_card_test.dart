@@ -138,21 +138,44 @@ void main() {
     });
 
     test('flies out over lb c+½…c+1, holds, flies back from c+2½', () {
-      expect(NnCardTiming.zoomAmount(6.4, 0), 0);
-      expect(NnCardTiming.zoomAmount(6.75, 0), inExclusiveRange(0, 1));
-      expect(NnCardTiming.zoomAmount(7, 0), 1);
-      expect(NnCardTiming.zoomAmount(8.4, 0), 1);
-      expect(NnCardTiming.zoomAmount(8.75, 0), closeTo(0.5, 1e-9));
-      expect(NnCardTiming.zoomAmount(9, 0), 0);
+      final t = NnCardTiming(chapterNumber: 1, beats: 16, zooms: 3, tiles: 6);
+      expect(t.zoomAmount(6.4, 0), 0);
+      expect(t.zoomAmount(6.75, 0), inExclusiveRange(0, 1));
+      expect(t.zoomAmount(7, 0), 1);
+      expect(t.zoomAmount(8.4, 0), 1);
+      expect(t.zoomAmount(8.75, 0), closeTo(0.5, 1e-9));
+      expect(t.zoomAmount(9, 0), 0);
     });
 
     test('the laser grows over ½ beat and fades from c + 2', () {
-      expect(NnCardTiming.laserAt(5.9, 0), (0.0, 0.0));
-      expect(NnCardTiming.laserAt(6.5, 0), (1.0, 1.0));
-      final (length, alpha) = NnCardTiming.laserAt(8.25, 0);
+      final t = NnCardTiming(chapterNumber: 1, beats: 16, zooms: 3, tiles: 6);
+      expect(t.laserAt(5.9, 0), (0.0, 0.0));
+      expect(t.laserAt(6.5, 0), (1.0, 1.0));
+      final (length, alpha) = t.laserAt(8.25, 0);
       expect(length, 1);
       expect(alpha, closeTo(0.5, 1e-9));
-      expect(NnCardTiming.laserAt(8.5, 0), (0.0, 0.0));
+      expect(t.laserAt(8.5, 0), (0.0, 0.0));
+    });
+
+    test('a captioned zoom holds its photo; later zooms and the card move '
+        'on by whole bars (#399)', () {
+      final t = NnCardTiming(
+        chapterNumber: 1,
+        beats: 20,
+        zooms: 3,
+        tiles: 6,
+        zoomHolds: const [3, 0, 0],
+      );
+      expect(t.cycleStart(1), 12);
+      expect(t.cycleStart(2), 15);
+      expect(t.zoomAmount(11.4, 0), 1);
+      expect(t.zoomAmount(12, 0), 0);
+      expect(t.zoomAt(17.9), 2);
+      expect(NnCardTiming.beatsFor(3, const [3, 0, 0]), 20);
+      expect(NnCardTiming.beatsFor(3, const [0, 0, 0]), 16);
+      expect(NnCardTiming.beatsFor(2, const [0, 0]), 12);
+      expect(NnCardTiming.beatsFor(1, const [0]), 12);
+      expect(NnCardTiming.beatsFor(0, const []), 8);
     });
   });
 

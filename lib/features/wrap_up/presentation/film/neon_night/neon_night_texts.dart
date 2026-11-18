@@ -1,10 +1,13 @@
+import 'dart:math' as math;
+
 import 'package:flutter/painting.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
 import '../../../../../core/constants/app_constants.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../domain/film_text_rules.dart';
+import 'neon_beat.dart';
 import 'neon_chapter_card.dart';
-import 'neon_moments.dart';
 import 'neon_night_story.dart';
 import 'neon_text_fx.dart';
 import 'neon_tokens.dart';
@@ -21,7 +24,10 @@ class NeonNightTexts {
         for (var i = 0; i < story.chapters.length; i++)
           NnChapterTexts(story, i, l10n),
       ],
-      note = story.note == null ? null : NnNoteTexts(story, l10n),
+      note = switch (story.noteLines) {
+        final lines? => NnNoteTexts(story, l10n, lines),
+        null => null,
+      },
       finale = NnFinaleTexts(story, l10n),
       ending = NnEndingTexts(story, l10n);
 
@@ -210,10 +216,6 @@ class NnPlanRowTexts {
   }
 }
 
-/// A zoom's label fits under the 900-wide zoom, padding included (#387).
-final double _zoomLabelWidth =
-    NnCardTiming.zoomRect.width - NeonLabelBox.padding.horizontal;
-
 /// A chapter card (§5.3): header, time range, ghost numeral (pink, then
 /// the accent), title, the typed line and each zoom's label (caption or
 /// time, #387).
@@ -236,20 +238,8 @@ class NnChapterTexts {
       mono: true,
     );
     final title = NeonType.splitTitle(chapter.title.toUpperCase());
-    final note = chapter.note;
-    final typed =
-        note == null
-              ? null
-              : TextPainter(
-                  text: TextSpan(
-                    text: '> ${note.toUpperCase()}',
-                    style: NeonType.mono(40, color: accent, height: 52 / 40),
-                  ),
-                  textDirection: TextDirection.ltr,
-                  maxLines: 2,
-                  ellipsis: '…',
-                )
-          ?..layout(maxWidth: typedWidth);
+    final typedText = typedTextFor(chapter.note);
+    final typed = typedText == null ? null : _typedPainter(typedText, accent);
     final sheet = NnContactSheet.forPhotos(chapter.cardPhotos.length);
     final tiles = sheet.tiles.length;
     final timing = NnCardTiming(
@@ -283,12 +273,9 @@ class NnChapterTexts {
       ],
       tileLabels: {
         for (final k in timing.zoomTiles)
-          // The caption (up to 3 lines) or the time, under the zoom (#387).
-          k: NeonLabelBox(
-            chapter.cardPhotos[k].label,
-            maxLines: 3,
-            maxWidth: _zoomLabelWidth,
-          ),
+          // The caption (up to 3 lines, never cut) or the time, under the
+          // zoom (#387, #399).
+          k: zoomLabelFor(chapter.cardPhotos[k]),
       },
     );
   }
@@ -307,6 +294,51 @@ class NnChapterTexts {
 
   static const typedWidth = 936.0;
 
+  /// The typed line's mono size; it may wrap to [typedMaxLines] lines.
+  static const typedSize = 40.0;
+  static const typedMaxLines = 3;
+
+  /// What the card types for [note] (#399 T1): the whole note when it fits
+  /// on [typedMaxLines] lines, else its first whole sentences that do, else
+  /// nothing. Never cut with "…".
+  static String? typedTextFor(String? note) {
+    final text = note?.trim();
+    if (text == null || text.isEmpty) return null;
+    bool fits(String candidate) {
+      final painter = TextPainter(
+        text: TextSpan(
+          text: '> ${candidate.toUpperCase()}',
+          style: NeonType.mono(typedSize, height: 52 / 40),
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: typedMaxLines,
+      )..layout(maxWidth: typedWidth);
+      final ok = !painter.didExceedMaxLines;
+      painter.dispose();
+      return ok;
+    }
+
+    if (fits(text)) return text;
+    return FilmTextRules.leadingSentencesThatFit(text, fits);
+  }
+
+  static TextPainter _typedPainter(String text, Color accent) => TextPainter(
+    text: TextSpan(
+      text: '> ${text.toUpperCase()}',
+      style: NeonType.mono(typedSize, color: accent, height: 52 / 40),
+    ),
+    textDirection: TextDirection.ltr,
+  )..layout(maxWidth: typedWidth);
+
+  /// A zoom's label: [photo]'s caption when it fits, else its time.
+  static NeonLabelBox zoomLabelFor(NnPhoto photo) {
+    final caption = photo.caption?.trim();
+    final box = caption == null || caption.isEmpty
+        ? null
+        : NeonLabelBox.caption(caption, maxWidth: NnCardTiming.zoomRect.width);
+    return box ?? NeonLabelBox(photo.takenAt);
+  }
+
   final Color accent;
   final TextPainter header;
   final TextPainter range;
@@ -314,7 +346,8 @@ class NnChapterTexts {
   final NeonTubeText numeral;
   final NeonChromaticText title;
 
-  /// `> NOTE`, at most 2 lines; null when the chapter has no note.
+  /// `> NOTE`, at most 3 lines; null when the chapter has no note (or none
+  /// of it fits).
   final TextPainter? typed;
 
   /// The time label of each tile a zoom can pick.
@@ -357,9 +390,11 @@ sealed class NnMomentTexts {
       place == null
           ? photos.first.takenAt
           : '${photos.first.takenAt} · ${place.toUpperCase()}',
+      photos,
     ),
     NnBurst(:final photos) => NnLabelTexts(
       '${l10n.neonNight_burst.toUpperCase()} · ${photos.first.takenAt}',
+      photos,
     ),
     NnTimeline() => NnTimelineTexts(moment, chapter),
     NnPeak() => NnPeakTexts(moment, chapter),
@@ -368,18 +403,49 @@ sealed class NnMomentTexts {
   void dispose();
 }
 
-/// Split's and Burst's label box at (48, 1760): mono 38, no wrap.
+/// The label boxes' width at (48, 1760): the frame less both margins.
+const double nnLabelWidth = 1080 - 2 * 48;
+
+/// [photo]'s caption in a label box [maxWidth] wide, or null when it has
+/// none or it doesn't fit (#399 T1: left out, never cut).
+NeonLabelBox? nnCaptionBox(NnPhoto photo, {double maxWidth = nnLabelWidth}) {
+  final caption = photo.caption?.trim();
+  if (caption == null || caption.isEmpty) return null;
+  return NeonLabelBox.caption(caption, maxWidth: maxWidth);
+}
+
+/// Split's and Burst's label box at (48, 1760): mono 38, no wrap. When the
+/// moment's photos have captions, the box shows those instead, one after
+/// another in photo order, each for its reading time (#399 T1).
 class NnLabelTexts implements NnMomentTexts {
-  NnLabelTexts(String text) : label = NeonLabelBox(text);
+  NnLabelTexts(String text, List<NnPhoto> photos)
+    : label = NeonLabelBox(text),
+      captions = [
+        for (final photo in photos) ?nnCaptionBox(photo),
+      ];
 
   final NeonLabelBox label;
 
+  /// The captions that fit, in photo order.
+  final List<NeonLabelBox> captions;
+
+  /// How long each caption stays up, s.
+  List<double> get readings => [
+    for (final c in captions) FilmTextRules.readingTime(c.text),
+  ];
+
   @override
-  void dispose() => label.dispose();
+  void dispose() {
+    label.dispose();
+    for (final caption in captions) {
+      caption.dispose();
+    }
+  }
 }
 
 /// Timeline: the chapter's title as a pink tube, and each item's time,
-/// plain and lit.
+/// plain and lit. The lit item's caption shows large at the foot (#399 T2:
+/// no small captions under the tiles).
 class NnTimelineTexts implements NnMomentTexts {
   NnTimelineTexts(NnTimeline moment, NnChapter chapter)
     : title = NeonTubeText(
@@ -392,24 +458,27 @@ class NnTimelineTexts implements NnMomentTexts {
       ),
       times = [
         for (final photo in moment.photos)
-          (
-            _label(photo, plainTime),
-            _label(photo, NeonColors.tintGreen),
-          ),
-      ];
+          (_time(photo, plainTime), _time(photo, NeonColors.tintGreen)),
+      ],
+      captions = [for (final photo in moment.photos) nnCaptionBox(photo)];
 
-  /// The item's caption on one line within its column (#387), else its
-  /// time at the spec's size.
-  static TextPainter _label(NnPhoto photo, Color color) => photo.caption == null
-      ? neonLayout(
-          photo.takenAt,
-          NeonType.mono(44, color: color, letterSpacing: 2),
-        )
-      : neonLayout(
-          photo.caption!,
-          NeonType.mono(34, color: color, letterSpacing: 1),
-          maxWidth: NnTimelineLayout.width,
-        );
+  static TextPainter _time(NnPhoto photo, Color color) => neonLayout(
+    photo.takenAt,
+    NeonType.mono(44, color: color, letterSpacing: 2),
+  );
+
+  /// How many beats each item holds the highlight on [beat]'s clock: one,
+  /// or as many as its caption takes to read.
+  static List<int> holdsFor(List<NeonLabelBox?> captions, NeonBeat beat) => [
+    for (final caption in captions)
+      caption == null
+          ? 1
+          : math.max(
+              1,
+              (beat.secToBeat(FilmTextRules.readingTime(caption.text)) - 1e-9)
+                  .ceil(),
+            ),
+  ];
 
   static const titleWidth = 760.0;
   static const plainTime = Color(0xFFECE8F6);
@@ -419,12 +488,18 @@ class NnTimelineTexts implements NnMomentTexts {
   /// Each item's time: (plain, lit).
   final List<(TextPainter, TextPainter)> times;
 
+  /// Each item's caption box, null without one.
+  final List<NeonLabelBox?> captions;
+
   @override
   void dispose() {
     title.dispose();
     for (final (plain, lit) in times) {
       plain.dispose();
       lit.dispose();
+    }
+    for (final caption in captions) {
+      caption?.dispose();
     }
   }
 }
@@ -459,12 +534,15 @@ class NnPeakTexts implements NnMomentTexts {
 
 /// The Note scene (§5.7): its tag, the lines as tubes and the signature.
 class NnNoteTexts {
-  factory NnNoteTexts(NeonNightStory story, AppLocalizations l10n) {
+  factory NnNoteTexts(
+    NeonNightStory story,
+    AppLocalizations l10n,
+    List<String> lines,
+  ) {
     final note = story.note!;
     final word = l10n
         .neonNight_noteTag(note.number.toString().padLeft(2, '0'))
         .toUpperCase();
-    final lines = neonNoteLines(note.text);
     final size = NeonType.fit(lines.join('\n'), lineWidth, 210, 0.43);
     final name = story.firstName;
     return NnNoteTexts._(
@@ -481,9 +559,10 @@ class NnNoteTexts {
             maxWidth: lineWidth,
             stroke: 4,
             weight: 600,
-            color: colors[i],
+            color: colors[i % colors.length],
           ),
       ],
+      text: lines.join(' '),
       fontSize: size,
       signature: name == null
           ? null
@@ -497,9 +576,24 @@ class NnNoteTexts {
   NnNoteTexts._({
     required this.tag,
     required this.lines,
+    required this.text,
     required this.fontSize,
     required this.signature,
   });
+
+  /// The beats between two lines lighting up: 2, or 1 for a note on more
+  /// than 5 lines so it is all lit in time to be read.
+  static int staggerFor(int lines) => lines > 5 ? 1 : 2;
+
+  /// How many beats the scene needs on [beat]'s clock for [lines] to be
+  /// read (#399 T1): lit from lb 1, then on screen for the note's reading
+  /// time, before its 0.25 s exit. The spec's 12 at least; whole bars.
+  static int beatsFor(List<String> lines, NeonBeat beat) {
+    final lit = 1.0 + staggerFor(lines.length) * (lines.length - 1) + 1;
+    final read = 1 + beat.secToBeat(FilmTextRules.readingTime(lines.join(' ')));
+    final need = math.max(lit, read) + beat.secToBeat(0.25);
+    return math.max(12, ((need - 1e-9) / 4).ceil() * 4);
+  }
 
   static const lineWidth = 900.0;
   static const colors = [
@@ -512,6 +606,9 @@ class NnNoteTexts {
 
   final NeonLabelBox tag;
   final List<NeonTubeText> lines;
+
+  /// The words shown, as one line.
+  final String text;
 
   /// The lines' size: fit(900, 210, 0.43) on the longest.
   final double fontSize;
@@ -545,15 +642,16 @@ class NnFinaleTexts {
 
   final NeonChromaticText headline;
 
-  /// The memory's own headline, else its note's first line, else "What
-  /// a night"; in capitals, without a cut-off "…".
+  /// The memory's own headline, else its note when it fits on one line,
+  /// else "What a night"; in capitals.
   static String headlineFor(NeonNightStory story, AppLocalizations l10n) {
     final own = story.headline?.trim();
     if (own != null && own.isNotEmpty) return own.toUpperCase();
     final note = story.note;
     if (note != null) {
-      final lines = neonNoteLines(note.text);
-      if (lines.isNotEmpty && !lines.first.endsWith('…')) return lines.first;
+      // Only a note short enough to be the headline whole (#399: never cut).
+      final lines = neonWrapNote(note.text);
+      if (lines.length == 1) return lines.first;
     }
     return l10n.neonNight_headline.toUpperCase();
   }
@@ -573,11 +671,7 @@ class NnEndingTexts {
         weight: 800,
       ),
       totals = neonLayout(
-        [
-          l10n.neonNight_photos(story.endTotals.photos),
-          l10n.neonNight_notes(story.endTotals.notes),
-          l10n.neonNight_ticks(story.endTotals.ticks),
-        ].join(' · ').toUpperCase(),
+        totalsFor(story, l10n),
         NeonType.mono(36, color: NeonColors.body, letterSpacing: 3),
       ),
       titleDate = neonLayout(
@@ -595,6 +689,16 @@ class NnEndingTexts {
         color: NeonColors.pink,
         core: NeonColors.tintPink,
       );
+
+  /// `142 PHOTOS · 9 NOTES · 3 TICKS`, leaving out a zero (#399 T4).
+  static String totalsFor(NeonNightStory story, AppLocalizations l10n) {
+    final totals = story.endTotals;
+    return [
+      if (totals.photos > 0) l10n.neonNight_photos(totals.photos),
+      if (totals.notes > 0) l10n.neonNight_notes(totals.notes),
+      if (totals.ticks > 0) l10n.neonNight_ticks(totals.ticks),
+    ].join(' · ').toUpperCase();
+  }
 
   final NeonChromaticText moments;
   final TextPainter totals;

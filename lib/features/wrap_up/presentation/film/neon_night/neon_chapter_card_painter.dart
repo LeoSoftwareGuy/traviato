@@ -16,7 +16,6 @@ import 'neon_night_texts.dart';
 import 'neon_photo.dart';
 import 'neon_text_fx.dart';
 import 'neon_tokens.dart';
-import 'neon_zoom_picks.dart';
 
 /// Where the film's photos come from, decoded: small for the contact
 /// sheets, large for the laser zooms. Null → not loaded (an empty mat).
@@ -45,6 +44,7 @@ class NnChapterCardPainter {
          chapterNumber: spec.chapter + 1,
          beats: spec.beats,
          zooms: spec.zooms,
+         zoomHolds: spec.zoomHolds,
          tiles: NnContactSheet.forPhotos(
            chapter.cardPhotos.length,
          ).tiles.length,
@@ -85,7 +85,7 @@ class NnChapterCardPainter {
     if (alpha <= 0) return;
 
     final zoom = timing.zoomAt(lb);
-    final z = zoom == null ? 0.0 : NnCardTiming.zoomAmount(lb, zoom);
+    final z = zoom == null ? 0.0 : timing.zoomAmount(lb, zoom);
 
     _header(canvas, t, cue, alpha);
     _numeral(canvas, t, cue, lb, alpha);
@@ -345,8 +345,14 @@ class NnChapterCardPainter {
         rect,
         Radius.circular(10 + 12 * z),
       );
-      final c = NeonZoomPicks.cycleStarts[cycle].toDouble();
-      final kb = 1.08 - 0.08 * ((lb - c - 0.5) / 2.5).clamp(0.0, 1.0);
+      final c = timing.cycleStart(cycle);
+      final kb =
+          1.08 -
+          0.08 *
+              ((lb - c - 0.5) / (2.5 + timing.zoomHolds[cycle])).clamp(
+                0.0,
+                1.0,
+              );
       final id = chapter.cardPhotos[k].id;
       neonPaintPhoto(
         canvas,
@@ -371,7 +377,7 @@ class NnChapterCardPainter {
       );
     }
 
-    final (length, laserAlpha) = NnCardTiming.laserAt(lb, cycle);
+    final (length, laserAlpha) = timing.laserAt(lb, cycle);
     if (length <= 0 || laserAlpha <= 0) return;
     const from = NeonBalloon.emitter;
     final tip = Offset.lerp(from, rect.center, length)!;

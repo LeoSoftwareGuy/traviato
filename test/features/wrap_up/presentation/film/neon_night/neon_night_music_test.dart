@@ -71,8 +71,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
     }
 
-    // The reference night: its Finale is 27 bars in.
-    expect(parts, NeonTrack.partsFor(27));
+    // The reference night: its Finale is 28 bars in (27, plus a bar to
+    // read the note, #399).
+    expect(parts, NeonTrack.partsFor(28));
     expect(player.calls.take(2), ['load', 'play']);
     expect(player.seeks.first, lessThan(0.3));
     expect(player.volumes.last, 1);

@@ -6,11 +6,26 @@ import 'neon_zoom_picks.dart';
 /// What the timeline needs to know about one chapter: the moments that
 /// follow its card, and how many photos it has (for its laser zooms).
 class NnChapterShape {
-  const NnChapterShape({required this.moments, required this.photos})
-    : assert(photos >= 1, 'a chapter has photos');
+  const NnChapterShape({
+    required this.moments,
+    required this.photos,
+    this.zoomHolds = const [],
+    this.cardMinBeats = 0,
+    this.momentMinBeats = const [],
+  }) : assert(photos >= 1, 'a chapter has photos');
 
   final List<NnMomentType> moments;
   final int photos;
+
+  /// Extra beats each zoom holds on a captioned photo (#399 T1).
+  final List<int> zoomHolds;
+
+  /// The fewest beats the card plays so its typed line can be read; whole
+  /// bars, 0 = the spec's length.
+  final int cardMinBeats;
+
+  /// The same for each of [moments] (their captions), in order.
+  final List<int> momentMinBeats;
 }
 
 /// Neon Night's scenes on the film clock (#363, NEON_NIGHT_SPEC.md §5, §9).
@@ -30,6 +45,7 @@ class NeonNightTimeline {
     required List<NnChapterShape> chapters,
     bool hasPlan = true,
     bool hasNote = true,
+    int noteMinBeats = 0,
     NeonBeat beat = const NeonBeat(),
   }) {
     assert(
@@ -51,11 +67,21 @@ class NeonNightTimeline {
           zooms: i == 0 || i == count - 1
               ? NeonZoomPicks.countFor(chapters[i].photos)
               : 0,
+          zoomHolds: i == 0 || i == count - 1
+              ? chapters[i].zoomHolds
+              : const [],
+          minBeats: chapters[i].cardMinBeats,
         ),
-        for (final type in chapters[i].moments)
-          NnMomentSpec(chapter: i, type: type),
+        for (final (j, type) in chapters[i].moments.indexed)
+          NnMomentSpec(
+            chapter: i,
+            type: type,
+            minBeats: j < chapters[i].momentMinBeats.length
+                ? chapters[i].momentMinBeats[j]
+                : 0,
+          ),
       ],
-      if (hasNote) const NnNoteSpec(),
+      if (hasNote) NnNoteSpec(minBeats: noteMinBeats),
       const NnFinaleSpec(),
       const NnEndingSpec(),
     ];

@@ -2,21 +2,21 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 
+import '../film_text_fit.dart';
 import 'neon_random.dart';
 import 'neon_tokens.dart';
 import 'neon_type.dart';
 
-/// Lays out [text] on one line in [style] (no wrapping).
+/// Lays out [text] in [style], on one line unless [maxWidth] wraps it.
+/// Never cut with "…" (#399): text that must fit goes through
+/// [fitTextPainter] instead.
 TextPainter neonLayout(
   String text,
   TextStyle style, {
-  int maxLines = 1,
   double maxWidth = double.infinity,
 }) => TextPainter(
   text: TextSpan(text: text, style: style),
   textDirection: TextDirection.ltr,
-  maxLines: maxLines,
-  ellipsis: maxWidth.isFinite ? '…' : null,
 )..layout(maxWidth: maxWidth);
 
 /// Paints [draw] through one layer at [alpha], blurred by [sigma] (a
@@ -335,18 +335,27 @@ class NeonChromaticText {
 /// A label box (§5.4a): mono 500 38 px, white on `rgba(5,3,10,.8)`,
 /// padding 10/18, a 1 px white@14 % border.
 class NeonLabelBox {
-  NeonLabelBox(
-    this.text, {
-    double size = 38,
-    this.border,
-    int maxLines = 1,
-    double maxWidth = double.infinity,
-  }) : _text = neonLayout(
-         text,
-         NeonType.mono(size, color: NeonColors.white, letterSpacing: 2),
-         maxLines: maxLines,
-         maxWidth: maxWidth,
-       );
+  NeonLabelBox(this.text, {double size = 38, this.border})
+    : _text = neonLayout(text, style(size));
+
+  NeonLabelBox._(this.text, this._text) : border = null;
+
+  /// The user's [caption] in a box no wider than [maxWidth] (#399 T1): mono
+  /// 44, else down to [NeonCaption.minSize], on up to [NeonCaption.maxLines]
+  /// lines. Null when it fits at none: the caption is left out, never cut.
+  static NeonLabelBox? caption(String caption, {required double maxWidth}) {
+    final painter = fitTextPainter(
+      caption,
+      style,
+      sizes: fitSizes(NeonCaption.size, NeonCaption.minSize),
+      maxWidth: maxWidth - padding.horizontal,
+      maxLines: NeonCaption.maxLines,
+    );
+    return painter == null ? null : NeonLabelBox._(caption, painter);
+  }
+
+  static TextStyle style(double size) =>
+      NeonType.mono(size, color: NeonColors.white, letterSpacing: 2);
 
   final String text;
 
@@ -382,4 +391,12 @@ class NeonLabelBox {
   }
 
   void dispose() => _text.dispose();
+}
+
+/// How Neon Night shows a caption (#399 T1): ≥ 40 px at 1080 wide, up to 3
+/// lines, never cut.
+abstract final class NeonCaption {
+  static const size = 44.0;
+  static const minSize = 40.0;
+  static const maxLines = 3;
 }
