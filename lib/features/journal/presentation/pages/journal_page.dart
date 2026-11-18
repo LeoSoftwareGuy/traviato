@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/experimental/mutation.dart';
@@ -31,10 +32,10 @@ import '../widgets/day_range_hero.dart';
 import '../widgets/day_tabs.dart';
 import '../widgets/journal_action_buttons.dart';
 import '../widgets/journal_header.dart';
-import '../widgets/timeline/capture_capsule.dart';
 import '../widgets/timeline/day_timeline_view.dart';
 import '../widgets/timeline/empty_day_notebook.dart';
 import '../widgets/timeline/fold_away.dart';
+import '../widgets/timeline/journal_balloon_bar.dart';
 import '../widgets/timeline/note_sheets.dart';
 import '../widgets/to_do_sheet.dart';
 import '../note_composer.dart';
@@ -161,7 +162,11 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
               AppSpacing.base,
               MediaQuery.paddingOf(context).bottom +
                   AppSpacing.xxl +
-                  (showsCapsule ? capsuleHeight + AppSpacing.lg : 0),
+                  (showsCapsule
+                      ? JournalBalloonBar.height +
+                            JournalBalloonBar.balloonOverhang +
+                            AppSpacing.lg
+                      : 0),
             ),
             children: [
               JournalHeader(
@@ -240,16 +245,18 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
         ),
         if (showsCapsule)
           Positioned(
-            left: 0,
-            right: 0,
-            // The Journal's only bottom control — no app bar here (#410,
-            // spec §4) — just above the home indicator.
-            bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.base,
-            child: Center(
-              child: CaptureCapsule(
-                onPhoto: () => _addPhoto(currentDay),
-                onNote: () => _newNote(currentDay),
-              ),
+            // The Journal's only bottom control — no app bar here (#410).
+            // 20pt side insets, 30pt up (#414), never into the home
+            // indicator.
+            left: AppSpacing.lg,
+            right: AppSpacing.lg,
+            bottom: math.max(
+              30,
+              MediaQuery.paddingOf(context).bottom + AppSpacing.sm,
+            ),
+            child: JournalBalloonBar(
+              onPhotoTap: () => _addPhoto(currentDay),
+              onNoteTap: () => _newNote(currentDay),
             ),
           ),
       ],

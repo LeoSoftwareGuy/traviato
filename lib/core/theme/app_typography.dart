@@ -159,14 +159,6 @@ abstract class AppTypography {
     color: AppColors.textSecondary,
   );
 
-  /// Journal capture capsule: "Photo" / "Note" (Roboto 600 9.5).
-  static TextStyle get captureLabel => GoogleFonts.roboto(
-    fontSize: 9.5,
-    height: 1.2,
-    fontWeight: FontWeight.w600,
-    color: AppColors.background,
-  );
-
   /// Journal timeline: the "On photo" chip and day subtitle (Roboto 500).
   static TextStyle get timelineMeta => GoogleFonts.roboto(
     fontSize: 10.5,
@@ -223,6 +215,16 @@ abstract class AppTypography {
     fontWeight: FontWeight.w500,
     letterSpacing: 0.25,
     color: AppColors.textMuted,
+  );
+
+  /// Journal balloon bar labels ("Photo" / "Note", #414): Roboto 600 10,
+  /// tracking .04em, ink on the orange bar.
+  static TextStyle get balloonBarLabel => GoogleFonts.roboto(
+    fontSize: 10,
+    height: 1.2,
+    letterSpacing: 0.4,
+    fontWeight: FontWeight.w600,
+    color: AppColors.background,
   );
 
   // --- Journal note page (docs/design/JOURNAL_NOTE_PAGETURN_SPEC.md §2–4,

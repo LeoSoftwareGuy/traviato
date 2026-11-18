@@ -105,6 +105,23 @@ abstract class AppColors {
   // Drop shadow under the turning page — black @ 25%.
   static const Color paperDropShadow = Color(0x40000000);
 
+  // --- Journal balloon bar (#414, JOURNAL_NAVBAR_SPEC.md) ---
+  // Bar fill, left → right.
+  static const Color balloonBarStart = Color(0xFFF28A12);
+  static const Color balloonBarEnd = Color(0xFFE07A00);
+  // Icons, labels and the balloon's cut-out (the screen showing through) are
+  // `background`; the balloon's outline and press fill:
+  static const Color balloonBarOutline = Color(0xFFF2852A);
+  // Glow under the bar — primary @ 28%.
+  static const Color balloonBarGlow = Color(0x47F29520);
+  // Hover / press washes on a half of the bar.
+  static const Color balloonBarHover = Color(0x24FFFFFF);
+  static const Color balloonBarPressed = Color(0x1A0C0F27);
+  // Top-edge highlight — white @ 28%.
+  static const Color balloonBarHighlight = Color(0x47FFFFFF);
+  // Drop shadow — black @ 45%.
+  static const Color balloonBarShadow = Color(0x73000000);
+
   /// Tints an accent [color] to the given [opacity] (0–1) for icon-chip
   /// fills, card washes and borders — the 10–18% alpha fills used throughout
   /// the redesign (e.g. `AppColors.tint(AppColors.primary, .16)`).
