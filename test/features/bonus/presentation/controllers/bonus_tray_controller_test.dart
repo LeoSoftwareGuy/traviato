@@ -5,12 +5,12 @@ import 'package:traviato/features/bonus/domain/entities/bonus_task_assignment_en
 import 'package:traviato/features/bonus/domain/entities/bonus_task_template_entity.dart';
 import 'package:traviato/features/bonus/presentation/controllers/bonus_tray_controller.dart';
 import 'package:traviato/features/bonus/presentation/providers/bonus_task_providers.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
-import '../../../journal/fakes/fake_day_note_repository.dart';
+import '../../../journal/fakes/fake_journal_note_repository.dart';
 import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
@@ -39,7 +39,7 @@ ProviderContainer _buildContainer({
   required FakeTripRepository tripRepo,
   required FakeBonusTaskRepository bonusRepo,
   FakeQuestRepository? questRepo,
-  FakeDayNoteRepository? noteRepo,
+  FakeJournalNoteRepository? noteRepo,
   FakePhotoRepository? photoRepo,
 }) {
   return ProviderContainer(
@@ -50,8 +50,8 @@ ProviderContainer _buildContainer({
       questRepositoryProvider.overrideWithValue(
         questRepo ?? FakeQuestRepository(),
       ),
-      dayNoteRepositoryProvider.overrideWithValue(
-        noteRepo ?? FakeDayNoteRepository(),
+      journalNoteRepositoryProvider.overrideWithValue(
+        noteRepo ?? FakeJournalNoteRepository(),
       ),
       photoRepositoryProvider.overrideWithValue(
         photoRepo ?? FakePhotoRepository(),

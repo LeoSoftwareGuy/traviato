@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../journal/domain/entities/day_note_entity.dart';
+import '../../../journal/domain/entities/journal_note_entity.dart';
 import 'kept_memory_photo.dart';
 
 /// One chapter of the Kept Memory page (#279): a day's photos in time
@@ -18,7 +18,7 @@ class KeptMemoryDay extends Equatable {
   final int dayIndex;
   final DateTime date;
   final List<KeptMemoryPhoto> photos;
-  final List<DayNoteEntity> notes;
+  final List<JournalNoteEntity> notes;
 
   /// Index of this day's first photo in [KeptMemory.photos] — where the
   /// viewer opens from the day's "N photos ›" link.

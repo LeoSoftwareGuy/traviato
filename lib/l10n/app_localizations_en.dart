@@ -181,7 +181,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String auth_rewardTease(String stars) {
-    return 'Your first memory earns $stars and the Storyteller badge is only three notes away.';
+    return 'Your first memory earns $stars, and every day you write a note brings the Storyteller badge closer.';
   }
 
   @override
@@ -745,28 +745,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journal_eyebrow => 'Journal';
 
   @override
-  String get journal_quietOne => 'Day 1';
-
-  @override
-  String journal_dayQuietOne(int day) {
-    return 'Day $day';
-  }
-
-  @override
-  String get journal_noEntries => 'No photos, no notes yet';
-
-  @override
-  String journal_questsDone(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count quests done',
-      one: '1 quest done',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String journal_dayTitle(int day, String name) {
     return 'Day $day — $name';
   }
@@ -787,33 +765,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journal_toDo => 'To Do';
 
   @override
-  String get journal_barPhoto => 'Photo';
-
-  @override
-  String get journal_barNote => 'Note';
-
-  @override
-  String get journal_barPhotoA11y => 'Add a photo';
-
-  @override
-  String get journal_barNoteA11y => 'Add a note';
-
-  @override
   String get journal_todayToDo => 'Today\'s to do';
 
   @override
   String get journal_viewWrapUp => 'View wrap-up';
-
-  @override
-  String get journal_photos => 'Photos';
-
-  @override
-  String journal_photosSaved(int count) {
-    return '$count saved';
-  }
-
-  @override
-  String get journal_addPhotoTile => 'Add ✦2';
 
   @override
   String journal_wrapUpExplainer(String ask) {
@@ -856,30 +811,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Nothing to buy — this one\'s the same on every plan.';
 
   @override
-  String get journal_nothingYet => 'Nothing here yet';
-
-  @override
-  String journal_nothingFromDay(int day) {
-    return 'Nothing from Day $day yet';
-  }
-
-  @override
-  String get journal_nudgeBody =>
-      'Every photo you add will contribute to the final wrap-up.';
-
-  @override
-  String get journal_addAPhoto => '＋ Add a photo';
-
-  @override
-  String get journal_writeNote => 'Write a note';
-
-  @override
-  String get journal_addNotesToday => '✎ Add notes about today';
-
-  @override
-  String get journal_continueEntry => '✎ Continue entry';
-
-  @override
   String journal_wordCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -888,11 +819,6 @@ class AppLocalizationsEn extends AppLocalizations {
       one: '1 word',
     );
     return '$_temp0';
-  }
-
-  @override
-  String journal_edited(String time) {
-    return 'Edited $time';
   }
 
   @override
@@ -906,7 +832,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get note_deleteBody =>
-      'The note for this day and its ✦1 star will be removed. This can\'t be undone.';
+      'The note for this day will be removed. Its ✦1 star stays. This can\'t be undone.';
 
   @override
   String get note_keepNote => 'Keep note';
@@ -2378,7 +2304,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content_achievement_storyteller_description =>
-      'Write 20 journal notes.';
+      'Write notes on 20 days.';
 
   @override
   String get content_achievement_jetsetter_title => 'Wanderlust Certified';
@@ -2534,11 +2460,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get film_leftOutPill => 'Left out of the film';
-
-  @override
-  String film_stripCount(int count) {
-    return '$count in the film';
-  }
 
   @override
   String get film_badgeYourPick => 'Your pick';
@@ -2724,4 +2645,152 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String timeline_afterMidnight(String date) {
+    return 'After midnight · $date';
+  }
+
+  @override
+  String get timeline_later => 'Later';
+
+  @override
+  String get timeline_earlierNote => 'Earlier note';
+
+  @override
+  String get timeline_justNow => 'Just now';
+
+  @override
+  String timeline_writtenOn(String date) {
+    return 'Written $date';
+  }
+
+  @override
+  String timeline_lastEdited(String time, String words) {
+    return 'Last edited $time · $words';
+  }
+
+  @override
+  String get timeline_more => 'more';
+
+  @override
+  String get timeline_less => 'less';
+
+  @override
+  String timeline_onPhoto(String time) {
+    return 'On photo · $time';
+  }
+
+  @override
+  String timeline_photoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos',
+      one: '1 photo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeline_noteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count notes',
+      one: '1 note',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get timeline_capturePhoto => 'Photo';
+
+  @override
+  String get timeline_captureNote => 'Note';
+
+  @override
+  String get timeline_addPhotoSemantics => 'Add a photo';
+
+  @override
+  String get timeline_addNoteSemantics => 'Add a note';
+
+  @override
+  String get timeline_editNote => 'Edit note';
+
+  @override
+  String get timeline_deleteNote => 'Delete note';
+
+  @override
+  String timeline_deleteTitle(String time) {
+    return 'Delete the $time note?';
+  }
+
+  @override
+  String get timeline_deleteBody =>
+      'It\'s removed from this day and won\'t appear in your film. Photos stay. This can\'t be undone.';
+
+  @override
+  String get timeline_keep => 'Keep';
+
+  @override
+  String get timeline_noteUpdated => 'Note updated';
+
+  @override
+  String get timeline_noteDeleted => 'Note deleted';
+
+  @override
+  String get timeline_noteSavedNoStar => 'Note saved';
+
+  @override
+  String timeline_emptyTitle(String weekday) {
+    return 'Nothing written for $weekday yet';
+  }
+
+  @override
+  String get timeline_emptyBody =>
+      'Write a line whenever something happens. Each time you tap Done it\'s kept as its own note, with the time.';
+
+  @override
+  String get timeline_emptyWrite => '✎ Write the first note ✦1';
+
+  @override
+  String get timeline_emptyOrPhoto => 'or add a photo';
+
+  @override
+  String get timeline_emptyLine => 'The first line goes here…';
+
+  @override
+  String note_stampNew(String time) {
+    return 'New note · $time';
+  }
+
+  @override
+  String note_stampEdit(String time) {
+    return 'Edit note · $time';
+  }
+
+  @override
+  String get photoNote_add => '✎ Add a note to this photo';
+
+  @override
+  String photoNote_listLabel(int count) {
+    return 'Notes on this photo · $count';
+  }
+
+  @override
+  String get photoNote_none => 'No notes on this photo yet.';
+
+  @override
+  String note_stampPhoto(String time) {
+    return 'Photo note · $time';
+  }
+
+  @override
+  String note_onThisPhoto(String time) {
+    return 'On this photo · $time';
+  }
+
+  @override
+  String get note_photoHint => 'What was happening here? Type, or tap the mic.';
 }

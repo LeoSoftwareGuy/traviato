@@ -11,11 +11,15 @@ import '../../../../core/errors/failure_message.dart';
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/l10n/l10n_dates.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
+import '../../../journal/domain/entities/journal_note_entity.dart';
 import '../../../journal/presentation/controllers/journal_controller.dart';
+import '../../../journal/presentation/note_composer.dart';
+import '../../../journal/presentation/widgets/photo_notes_panel.dart';
 import '../../../wrap_up/presentation/providers/film_pick_providers.dart';
 import '../../domain/entities/film_pick.dart';
 import '../../domain/entities/photo_entity.dart';
@@ -68,6 +72,7 @@ int wrappedPhotoIndex(int page, int photoCount) =>
 /// When [filmTripId] is given, an "▸ IN THE FILM" panel under the photo
 /// sets its Wrap-Up Film pick (#294) — saved at once, read back from that
 /// memory's Journal state — and a left-out photo is dimmed with a pill.
+/// Under it, the photo's notes and "✎ Add a note to this photo" (#402).
 ///
 /// Otherwise deliberately minimal: no place row, people tagging, caption
 /// editing, or Set-as-cover actions — those belong to the M3-8 detail
@@ -139,6 +144,13 @@ class _PhotoViewerPageState extends ConsumerState<PhotoViewerPage>
   /// messenger sits behind this overlay, so its snackbars wouldn't show.
   late BuildContext _overlayContext;
 
+  /// The memory's notes, from its Journal state (#402).
+  List<JournalNoteEntity> _tripNotes = const [];
+
+  /// A note just written on this photo: slides in, JUST NOW for 3s.
+  String? _freshNoteId;
+  Timer? _freshTimer;
+
   /// Live film picks by photo id, and the photos the film gives a main
   /// moment to — read from the Journal each build, so a change shows at
   /// once (the viewer's own [_photos] copy keeps the picks it opened with).
@@ -165,6 +177,7 @@ class _PhotoViewerPageState extends ConsumerState<PhotoViewerPage>
 
   @override
   void dispose() {
+    _freshTimer?.cancel();
     _track.dispose();
     super.dispose();
   }
@@ -271,6 +284,28 @@ class _PhotoViewerPageState extends ConsumerState<PhotoViewerPage>
     }
   }
 
+  List<JournalNoteEntity> _notesOn(PhotoEntity photo) =>
+      _tripNotes.where((n) => n.photoId == photo.id).toList()
+        ..sort((a, b) => a.takenAt.compareTo(b.takenAt));
+
+  /// The note page on this photo; back here on Done, where the note slides
+  /// in under the photo (#402, spec §6).
+  Future<void> _addNote(PhotoEntity photo) async {
+    final note = await composeNewNote(
+      _overlayContext,
+      ref,
+      tripId: widget.filmTripId!,
+      selectedDay: photo.dayDate!,
+      photo: photo,
+    );
+    if (note == null || !mounted) return;
+    _freshTimer?.cancel();
+    setState(() => _freshNoteId = note.id);
+    _freshTimer = Timer(AppMotion.noteFreshFor, () {
+      if (mounted) setState(() => _freshNoteId = null);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final filmTripId = widget.filmTripId;
@@ -280,6 +315,9 @@ class _PhotoViewerPageState extends ConsumerState<PhotoViewerPage>
           const <PhotoEntity>[];
       _filmPicks = {for (final p in journalPhotos) p.id: p.filmPick};
       _filmMomentIds = ref.watch(filmMomentIdsProvider(filmTripId));
+      _tripNotes =
+          ref.watch(journalControllerProvider(filmTripId)).value?.notes ??
+          const [];
     }
     // A general-dialog route has no Material of its own — the transparent
     // Scaffold supplies the default text style and ink surface, and its
@@ -347,6 +385,21 @@ class _PhotoViewerPageState extends ConsumerState<PhotoViewerPage>
                             _photos[_currentIndex].id,
                           ),
                           onChanged: _setFilmPick,
+                        ),
+                      ),
+                    if (widget.filmTripId != null &&
+                        _photos[_currentIndex].dayDate != null)
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: MediaQuery.sizeOf(context).height * .3,
+                        ),
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.only(top: 14),
+                          child: PhotoNotesPanel(
+                            notes: _notesOn(_photos[_currentIndex]),
+                            freshNoteId: _freshNoteId,
+                            onAdd: () => _addNote(_photos[_currentIndex]),
+                          ),
                         ),
                       ),
                   ],

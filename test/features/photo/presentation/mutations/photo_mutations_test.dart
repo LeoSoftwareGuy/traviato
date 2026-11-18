@@ -7,7 +7,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/core/errors/presentation_failure_exception.dart';
 import 'package:traviato/features/journal/presentation/controllers/journal_controller.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/data/services/photo_compressor.dart';
 import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
 import 'package:traviato/features/photo/presentation/mutations/photo_mutations.dart';
@@ -17,7 +17,7 @@ import 'package:traviato/features/subscription/presentation/controllers/entitlem
 import 'package:traviato/features/subscription/presentation/providers/subscription_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
-import '../../../journal/fakes/fake_day_note_repository.dart';
+import '../../../journal/fakes/fake_journal_note_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../subscription/fakes/fake_subscription_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
@@ -96,7 +96,9 @@ Future<ProviderContainer> _pumpHarness(
       overrides: [
         tripRepositoryProvider.overrideWithValue(FakeTripRepository()),
         photoRepositoryProvider.overrideWithValue(photoRepo),
-        dayNoteRepositoryProvider.overrideWithValue(FakeDayNoteRepository()),
+        journalNoteRepositoryProvider.overrideWithValue(
+          FakeJournalNoteRepository(),
+        ),
         questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
         subscriptionRepositoryProvider.overrideWithValue(subscriptionRepo),
         photoCompressorProvider.overrideWithValue(const _IdentityCompressor()),

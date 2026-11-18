@@ -12,14 +12,14 @@ import 'package:traviato/features/bonus/presentation/pages/bonus_empty_state_pag
 import 'package:traviato/features/bonus/presentation/pages/stars_by_memory_page.dart';
 import 'package:traviato/features/bonus/presentation/providers/bonus_empty_state_providers.dart';
 import 'package:traviato/features/bonus/presentation/providers/bonus_task_providers.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/trip/domain/entities/trip_card_entity.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
 import '../../../../helpers/localized_app.dart';
-import '../../../journal/fakes/fake_day_note_repository.dart';
+import '../../../journal/fakes/fake_journal_note_repository.dart';
 import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
@@ -147,7 +147,9 @@ Future<void> _pump(
         ),
         bonusClockProvider.overrideWithValue(clock ?? () => _now),
         questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
-        dayNoteRepositoryProvider.overrideWithValue(FakeDayNoteRepository()),
+        journalNoteRepositoryProvider.overrideWithValue(
+          FakeJournalNoteRepository(),
+        ),
         photoRepositoryProvider.overrideWithValue(FakePhotoRepository()),
       ],
       child: localizedRouterApp(locale: locale, routerConfig: router),

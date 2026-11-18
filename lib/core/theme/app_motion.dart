@@ -110,4 +110,36 @@ abstract class AppMotion {
   /// Waveform fallback when the mic reports no usable level: each bar
   /// loops .3 ↔ 1, staggered.
   static const waveformLoopDuration = Duration(milliseconds: 900);
+
+  // Journal timeline notes (#407, docs/design/journal-notes/ §7).
+  /// A saved note's slot opens this long after the page scrolls to it...
+  static const noteSlotOpenDelay = Duration(milliseconds: 420);
+  static const noteSlotOpenDuration = Duration(milliseconds: 340);
+
+  /// ...and the card drops in this long after the slot starts opening.
+  static const noteDropDelay = Duration(milliseconds: 120);
+  static const noteDropDuration = Duration(milliseconds: 700);
+  static const noteDropOffset = 18.0;
+  static const noteDropScale = .96;
+
+  /// One orange ring around a saved note, after it lands.
+  static const noteGlowDelay = Duration(milliseconds: 800);
+  static const noteGlowDuration = Duration(milliseconds: 1400);
+  static const noteGlowSpread = 14.0;
+
+  /// How long a saved note keeps its primary border and JUST NOW.
+  static const noteFreshFor = Duration(seconds: 3);
+
+  /// Scrolling to a saved note: its slot ends up this far from the top.
+  static const noteScrollDuration = Duration(milliseconds: 350);
+  static const noteScrollTarget = 250.0;
+
+  /// A deleted note fades while its height folds away.
+  static const noteDeleteFadeDuration = Duration(milliseconds: 250);
+  static const noteDeleteFoldDuration = Duration(milliseconds: 340);
+
+  /// Under reduced motion every note motion is this crossfade.
+  static const noteReducedMotionFade = Duration(milliseconds: 200);
+
+  static const noteCurve = Cubic(.2, .8, .2, 1);
 }

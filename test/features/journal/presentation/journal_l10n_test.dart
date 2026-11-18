@@ -6,9 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/features/home/presentation/providers/profile_stats_provider.dart';
 import 'package:traviato/features/journal/presentation/pages/journal_page.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
-import 'package:traviato/features/journal/presentation/widgets/journal_balloon_bar.dart';
-import 'package:traviato/features/journal/presentation/widgets/photos_strip.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/subscription/presentation/providers/subscription_providers.dart';
@@ -20,7 +18,7 @@ import '../../photo/fakes/fake_photo_repository.dart';
 import '../../quest/fakes/fake_quest_repository.dart';
 import '../../subscription/fakes/fake_subscription_repository.dart';
 import '../../trip/fakes/fake_trip_repository.dart';
-import '../fakes/fake_day_note_repository.dart';
+import '../fakes/fake_journal_note_repository.dart';
 
 DateTime get _today {
   final now = DateTime.now();
@@ -73,11 +71,11 @@ Future<void> _pump(
               ],
             ]),
         ),
-        dayNoteRepositoryProvider.overrideWithValue(
-          FakeDayNoteRepository()
+        journalNoteRepositoryProvider.overrideWithValue(
+          FakeJournalNoteRepository()
             ..getNoteResult = Right(
               withEntries
-                  ? buildDayNoteEntity(
+                  ? buildJournalNoteEntity(
                       dayDate: _today,
                       content: 'Old Town walk.',
                     )
@@ -85,7 +83,10 @@ Future<void> _pump(
             )
             ..notesForTripResult = Right([
               if (withEntries)
-                buildDayNoteEntity(dayDate: _today, content: 'Old Town walk.'),
+                buildJournalNoteEntity(
+                  dayDate: _today,
+                  content: 'Old Town walk.',
+                ),
             ]),
         ),
         questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
@@ -112,27 +113,13 @@ void main() {
     expect(find.text('ДНЕВНИК'), findsOneWidget);
     expect(find.text('День 2 — Tallinn'), findsOneWidget);
     expect(find.text('Old Town walk.'), findsOneWidget);
-    expect(find.textContaining('3 СЛОВА'), findsOneWidget);
-    expect(find.text('✎ Продолжить запись'), findsOneWidget);
-    // The strip header and the balloon bar's label (#414) both read Фото.
-    expect(
-      find.descendant(
-        of: find.byType(PhotosStrip),
-        matching: find.text('Фото'),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(
-        of: find.byType(JournalBalloonBar),
-        matching: find.text('Заметка'),
-      ),
-      findsOneWidget,
-    );
-    expect(find.text('сохранено: 2'), findsOneWidget);
-    expect(find.text('Добавить ✦2'), findsOneWidget);
-    expect(find.text('21:05'), findsOneWidget);
-    // No app nav on the Journal since the balloon bar (#414).
+    // The day subtitle and the capture capsule (#401).
+    expect(find.textContaining('2 фото · 1 заметка'), findsOneWidget);
+    expect(find.text('Фото'), findsOneWidget);
+    expect(find.text('Заметка'), findsOneWidget);
+    // The timeline clock follows the phone's 24-hour setting (off here).
+    expect(find.textContaining('9:05'), findsWidgets);
+    // No app bottom bar on the Journal (#410).
     expect(find.text('Главная'), findsNothing);
   });
 

@@ -10,7 +10,7 @@ abstract class Tables {
   static const profiles = 'profiles';
   static const trips = 'trips';
   static const quests = 'quests';
-  static const dayNotes = 'day_notes';
+  static const journalNotes = 'journal_notes';
   static const photos = 'photos';
   static const checklistItems = 'checklist_items';
   static const checklistSuggestions = 'checklist_suggestions';
@@ -43,7 +43,6 @@ abstract class DBFunctions {
   static const setTripDates = 'set_trip_dates';
   static const checkAchievements = 'check_achievements';
   static const deletePhoto = 'delete_photo';
-  static const deleteDayNote = 'delete_day_note';
 }
 
 /// Deno edge functions, invoked via `SupabaseClient.functions.invoke` rather

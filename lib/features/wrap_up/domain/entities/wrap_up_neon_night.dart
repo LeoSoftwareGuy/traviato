@@ -16,6 +16,7 @@ class WrapUpNeonNight extends Equatable {
     this.headline,
     this.firstName,
     this.totals,
+    this.heartPhotoIds = const [],
   });
 
   /// The memory's name.
@@ -33,6 +34,11 @@ class WrapUpNeonNight extends Equatable {
   final String? firstName;
   final WrapUpNeonTotals? totals;
 
+  /// The Finale's heart (#378): the photos without a moment of their own,
+  /// Always picks only to top it up. Empty in older content → every
+  /// chapter photo.
+  final List<String> heartPhotoIds;
+
   @override
   List<Object?> get props => [
     title,
@@ -44,6 +50,7 @@ class WrapUpNeonNight extends Equatable {
     headline,
     firstName,
     totals,
+    heartPhotoIds,
   ];
 }
 
@@ -64,13 +71,20 @@ class WrapUpNeonPlanRow extends Equatable {
 }
 
 class WrapUpNeonPhoto extends Equatable {
-  const WrapUpNeonPhoto({required this.id, required this.takenAt});
+  const WrapUpNeonPhoto({
+    required this.id,
+    required this.takenAt,
+    this.caption,
+  });
 
   final String id;
   final DateTime takenAt;
 
+  /// The user's own caption from Photo detail (#387), exact; null = none.
+  final String? caption;
+
   @override
-  List<Object?> get props => [id, takenAt];
+  List<Object?> get props => [id, takenAt, caption];
 }
 
 class WrapUpNeonChapter extends Equatable {
@@ -79,6 +93,7 @@ class WrapUpNeonChapter extends Equatable {
     required this.photos,
     required this.moments,
     this.note,
+    this.cardPhotoIds = const [],
   });
 
   final String title;
@@ -86,12 +101,16 @@ class WrapUpNeonChapter extends Equatable {
   /// In time order.
   final List<WrapUpNeonPhoto> photos;
 
+  /// The card's own photos (#390), ids of [photos]: its grid and zooms,
+  /// never a moment's. Empty in older content: the card shows [photos].
+  final List<String> cardPhotoIds;
+
   /// The user's own words for the card, or null for no typed line.
   final String? note;
   final List<WrapUpNeonMoment> moments;
 
   @override
-  List<Object?> get props => [title, photos, note, moments];
+  List<Object?> get props => [title, photos, note, moments, cardPhotoIds];
 }
 
 /// `split`, `burst`, `timeline` or `peak`, over some of a chapter's photos.

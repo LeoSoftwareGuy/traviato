@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 
+import '../../../core/l10n/l10n_dates.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/entities/kept_memory.dart';
 
@@ -28,9 +29,12 @@ abstract class KeptMemoryLabels {
   static String keptDate(DateTime date, String locale) =>
       DateFormat('d MMM y', locale).format(date.toLocal());
 
-  /// `05:48` — a note's time, 24-hour like the design's mono stamps.
-  static String noteTime(DateTime time) =>
-      DateFormat('HH:mm').format(time.toLocal());
+  /// `05:48` / `5:48 AM` — a note's time on the phone's clock (#402).
+  static String noteTime(
+    DateTime time,
+    String locale, {
+    required bool use24h,
+  }) => L10nDates.clock(locale, use24h: use24h).format(time.toLocal());
 
   /// `1:19` — the film's length.
   static String filmDuration(Duration duration) {

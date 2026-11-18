@@ -7,7 +7,7 @@ import 'package:traviato/features/checklist/presentation/providers/checklist_pro
 import 'package:traviato/features/home/domain/entities/profile_stats_entity.dart';
 import 'package:traviato/features/home/presentation/pages/home_page.dart';
 import 'package:traviato/features/home/presentation/providers/profile_stats_provider.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/profile/presentation/providers/profile_providers.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
@@ -17,7 +17,7 @@ import 'package:traviato/features/trip/presentation/providers/trip_providers.dar
 import '../../../../helpers/localized_app.dart';
 import '../../../auth/fakes/fake_auth_repository.dart';
 import '../../../checklist/fakes/fake_checklist_repository.dart';
-import '../../../journal/fakes/fake_day_note_repository.dart';
+import '../../../journal/fakes/fake_journal_note_repository.dart';
 import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../profile/fakes/fake_profile_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
@@ -85,7 +85,9 @@ Future<void> _pump(WidgetTester tester, Locale locale) async {
             ),
         ),
         photoRepositoryProvider.overrideWithValue(FakePhotoRepository()),
-        dayNoteRepositoryProvider.overrideWithValue(FakeDayNoteRepository()),
+        journalNoteRepositoryProvider.overrideWithValue(
+          FakeJournalNoteRepository(),
+        ),
         profileRepositoryProvider.overrideWithValue(
           FakeProfileRepository()
             ..profileResult = Right(buildProfile(username: null)),

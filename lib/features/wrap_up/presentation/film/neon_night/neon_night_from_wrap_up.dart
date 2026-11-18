@@ -62,6 +62,10 @@ NeonNightStory? neonNightFromWrapUp(
             ? _clock(kept[index + 1].photos.first.takenAt)
             : photos.last.takenAt,
         photos: photos,
+        cardPhotos: [
+          for (final id in entry.chapter.cardPhotoIds)
+            if (ids.contains(id)) _photo(byId[id]!),
+        ],
         note: entry.chapter.note,
         moments: moments.isNotEmpty ? moments : [NnTimeline(_spread(photos))],
       ),
@@ -102,6 +106,10 @@ NeonNightStory? neonNightFromWrapUp(
       ),
       null => null,
     },
+    heartPhotoIds: [
+      for (final id in nn.heartPhotoIds)
+        if (photoIds.contains(id)) id,
+    ],
   );
 }
 
@@ -135,8 +143,11 @@ List<NnPhoto> _spread(List<NnPhoto> photos) {
   ];
 }
 
-NnPhoto _photo(WrapUpNeonPhoto photo) =>
-    NnPhoto(id: photo.id, takenAt: _clock(photo.takenAt));
+NnPhoto _photo(WrapUpNeonPhoto photo) => NnPhoto(
+  id: photo.id,
+  takenAt: _clock(photo.takenAt),
+  caption: photo.caption,
+);
 
 /// 'HH:MM' on the phone's clock.
 String _clock(DateTime instant) {

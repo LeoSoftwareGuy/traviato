@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,10 +8,12 @@ import 'package:intl/intl.dart';
 import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/core/theme/app_theme.dart';
+import 'package:traviato/core/widgets/app_bottom_nav_bar.dart';
 import 'package:traviato/features/home/domain/entities/profile_stats_entity.dart';
 import 'package:traviato/features/home/presentation/providers/profile_stats_provider.dart';
 import 'package:traviato/features/journal/presentation/pages/journal_page.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/widgets/journal_action_buttons.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/domain/entities/quest_entity.dart';
@@ -23,7 +26,7 @@ import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../subscription/fakes/fake_subscription_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
-import '../../fakes/fake_day_note_repository.dart';
+import '../../fakes/fake_journal_note_repository.dart';
 
 DateTime get _today {
   final now = DateTime.now();
@@ -34,11 +37,16 @@ Future<void> _pump(
   WidgetTester tester, {
   required FakeTripRepository tripRepo,
   required FakePhotoRepository photoRepo,
-  required FakeDayNoteRepository noteRepo,
+  required FakeJournalNoteRepository noteRepo,
   FakeQuestRepository? questRepo,
   FakeProfileStatsRepository? profileStatsRepo,
   FakeSubscriptionRepository? subscriptionRepo,
 }) async {
+  // A tall phone, so a whole day's timeline is laid out (#401).
+  tester.view
+    ..physicalSize = const Size(390 * 3, 1600 * 3)
+    ..devicePixelRatio = 3;
+  addTearDown(tester.view.reset);
   final router = GoRouter(
     initialLocation: '/journal',
     routes: [
@@ -62,7 +70,7 @@ Future<void> _pump(
       overrides: [
         tripRepositoryProvider.overrideWithValue(tripRepo),
         photoRepositoryProvider.overrideWithValue(photoRepo),
-        dayNoteRepositoryProvider.overrideWithValue(noteRepo),
+        journalNoteRepositoryProvider.overrideWithValue(noteRepo),
         questRepositoryProvider.overrideWithValue(
           questRepo ?? FakeQuestRepository(),
         ),
@@ -91,10 +99,9 @@ void main() {
       );
     final photoRepo = FakePhotoRepository()
       ..photosResult = Right([buildPhotoEntity(id: 'p1', dayDate: _today)]);
-    final noteRepo = FakeDayNoteRepository()
-      ..getNoteResult = Right(buildDayNoteEntity(content: 'Great day.'))
+    final noteRepo = FakeJournalNoteRepository()
       ..notesForTripResult = Right([
-        buildDayNoteEntity(dayDate: _today, content: 'Great day.'),
+        buildJournalNoteEntity(dayDate: _today, content: 'Great day.'),
       ]);
     await _pump(
       tester,
@@ -117,7 +124,7 @@ void main() {
     final tripRepo = FakeTripRepository()
       ..tripCardResult = Right(buildTripCard(id: 't1'));
     final photoRepo = FakePhotoRepository();
-    final noteRepo = FakeDayNoteRepository();
+    final noteRepo = FakeJournalNoteRepository();
     await _pump(
       tester,
       tripRepo: tripRepo,
@@ -132,7 +139,7 @@ void main() {
     );
   });
 
-  group('note page (#205)', () {
+  group('timeline notes (#401)', () {
     final dayWithPhoto = Right<Failure, List<PhotoEntity>>([
       buildPhotoEntity(id: 'p1', dayDate: _today),
     ]);
@@ -147,118 +154,140 @@ void main() {
             ),
           );
 
-    Future<void> openAndType(
+    Future<void> pumpDay(
       WidgetTester tester,
-      Key entry,
-      String text,
+      FakeJournalNoteRepository noteRepo,
     ) async {
-      await tester.tap(find.byKey(entry));
+      await _pump(
+        tester,
+        tripRepo: threeDayTrip(),
+        photoRepo: FakePhotoRepository()..photosResult = dayWithPhoto,
+        noteRepo: noteRepo,
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> openNewAndType(WidgetTester tester, String text) async {
+      await tester.tap(find.byKey(const Key('capture-note')));
       await tester.pumpAndSettle(); // the full turn
       await tester.enterText(find.byKey(const Key('note-page-field')), text);
       await tester.pump();
     }
 
-    testWidgets('the Journal has no inline note field; the add prompt opens '
-        'the note page', (tester) async {
-      final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
-      await _pump(
-        tester,
-        tripRepo: threeDayTrip(),
-        photoRepo: photoRepo,
-        noteRepo: FakeDayNoteRepository(),
-      );
+    Future<void> longPressNote(WidgetTester tester, String id) async {
+      await tester.longPress(find.byKey(Key('timeline-note-$id')));
       await tester.pumpAndSettle();
+    }
+
+    FakeJournalNoteRepository repoWith(List<String> contents) {
+      final notes = [
+        for (var i = 0; i < contents.length; i++)
+          buildJournalNoteEntity(
+            id: 'n${i + 1}',
+            dayDate: _today,
+            content: contents[i],
+            createdAt: _today.add(Duration(hours: 9 + i)),
+          ),
+      ];
+      return FakeJournalNoteRepository()..notesForTripResult = Right(notes);
+    }
+
+    testWidgets('the capsule opens an empty NEW page for the day', (
+      tester,
+    ) async {
+      await pumpDay(tester, repoWith(['Great day.']));
 
       expect(find.byType(TextField), findsNothing);
-      await tester.tap(find.byKey(const Key('journal-note-add-prompt')));
+      await tester.tap(find.byKey(const Key('capture-note')));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('note-page-field')), findsOneWidget);
-      final date = DateFormat('d MMM').format(_today).toUpperCase();
-      expect(find.text('DAY 2 · $date'), findsOneWidget);
+      final field = find.byKey(const Key('note-page-field'));
+      expect(tester.widget<TextField>(field).controller!.text, isEmpty);
+      expect(find.textContaining('· NEW NOTE ·'), findsOneWidget);
     });
 
-    testWidgets('Done with text saves it and shows the star toast only after '
-        'the book closes', (tester) async {
-      final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
-      final noteRepo = FakeDayNoteRepository();
-      await _pump(
-        tester,
-        tripRepo: threeDayTrip(),
-        photoRepo: photoRepo,
-        noteRepo: noteRepo,
-      );
-      await tester.pumpAndSettle();
+    testWidgets('every Done saves a separate note, with the star toast '
+        'after the book closes', (tester) async {
+      final noteRepo = repoWith(['Great day.']);
+      await pumpDay(tester, noteRepo);
 
-      await openAndType(
-        tester,
-        const Key('journal-note-add-prompt'),
-        '  What a trip.  ',
-      );
+      await openNewAndType(tester, '  What a trip.  ');
       await tester.tap(find.byKey(const Key('note-page-done')));
       await tester.pump(); // the close starts ticking
       await tester.pump(const Duration(milliseconds: 400)); // mid-close
-
-      expect(noteRepo.upsertNoteCallCount, 0);
+      expect(noteRepo.createNoteCallCount, 0);
       expect(find.text('+1 ✦ · note saved'), findsNothing);
 
       await tester.pump(const Duration(milliseconds: 600)); // route popped
       await tester.pump();
-
-      expect(find.byKey(const Key('note-page-field')), findsNothing);
-      expect(noteRepo.upsertNoteCallCount, 1);
+      expect(noteRepo.createNoteCallCount, 1);
+      expect(noteRepo.updateNoteCallCount, 0);
       expect(noteRepo.lastUpsertedContent, 'What a trip.');
+      expect(noteRepo.lastCreatedDay, isNotNull);
       expect(find.text('+1 ✦ · note saved'), findsOneWidget);
 
-      await tester.pumpAndSettle(); // let the toast's own timer finish
+      await tester.pump();
+      expect(find.text('Great day.'), findsOneWidget);
       expect(find.text('What a trip.'), findsOneWidget);
-      expect(find.textContaining('3 WORDS'), findsOneWidget);
+      expect(find.text('JUST NOW'), findsOneWidget);
+
+      await tester.pumpAndSettle(const Duration(seconds: 4));
+      expect(find.text('JUST NOW'), findsNothing);
     });
 
-    FakeDayNoteRepository noteRepoWithEntry() => FakeDayNoteRepository()
-      ..getNoteResult = Right(buildDayNoteEntity(content: 'Great day.'))
-      ..notesForTripResult = Right([
-        buildDayNoteEntity(dayDate: _today, content: 'Great day.'),
-      ]);
-
-    testWidgets('Continue entry edits the whole note, with no star (#276)', (
+    testWidgets('a 4th note of the day says "Note saved" with no star', (
       tester,
     ) async {
-      final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
-      final noteRepo = noteRepoWithEntry();
-      await _pump(
-        tester,
-        tripRepo: threeDayTrip(),
-        photoRepo: photoRepo,
-        noteRepo: noteRepo,
-      );
+      final noteRepo = repoWith(['One.', 'Two.', 'Three.']);
+      await pumpDay(tester, noteRepo);
+
+      await openNewAndType(tester, 'Four.');
+      await tester.tap(find.byKey(const Key('note-page-done')));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('journal-note-continue')));
+      expect(noteRepo.createNoteCallCount, 1);
+      expect(find.text('+1 ✦ · note saved'), findsNothing);
+    });
+
+    testWidgets('notes sit on the timeline in time order', (tester) async {
+      await pumpDay(tester, repoWith(['Morning.', 'Evening.']));
+
+      final morning = tester.getTopLeft(find.text('Morning.')).dy;
+      final evening = tester.getTopLeft(find.text('Evening.')).dy;
+      expect(morning, lessThan(evening));
+      expect(find.textContaining('2 notes'), findsOneWidget);
+      expect(find.textContaining('1 photo'), findsOneWidget);
+    });
+
+    testWidgets('long-press → Edit edits that note, with no star', (
+      tester,
+    ) async {
+      final noteRepo = repoWith(['Great day.']);
+      await pumpDay(tester, noteRepo);
+
+      await longPressNote(tester, 'n1');
+      await tester.tap(find.byKey(const Key('note-sheet-edit')));
       await tester.pumpAndSettle();
       final field = find.byKey(const Key('note-page-field'));
       expect(tester.widget<TextField>(field).controller!.text, 'Great day.');
+      expect(find.textContaining('· EDIT NOTE ·'), findsOneWidget);
       await tester.enterText(field, 'Great day. Fixed a typo.');
       await tester.tap(find.byKey(const Key('note-page-done')));
       await tester.pumpAndSettle();
 
+      expect(noteRepo.createNoteCallCount, 0);
+      expect(noteRepo.lastUpdatedNoteId, 'n1');
       expect(noteRepo.lastUpsertedContent, 'Great day. Fixed a typo.');
       expect(find.textContaining('note saved'), findsNothing);
       expect(find.text('Great day. Fixed a typo.'), findsOneWidget);
     });
 
     testWidgets('Done on an unchanged note saves nothing', (tester) async {
-      final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
-      final noteRepo = noteRepoWithEntry();
-      await _pump(
-        tester,
-        tripRepo: threeDayTrip(),
-        photoRepo: photoRepo,
-        noteRepo: noteRepo,
-      );
-      await tester.pumpAndSettle();
+      final noteRepo = repoWith(['Great day.']);
+      await pumpDay(tester, noteRepo);
 
-      await tester.tap(find.byKey(const Key('journal-note-continue')));
+      await longPressNote(tester, 'n1');
+      await tester.tap(find.byKey(const Key('note-sheet-edit')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('note-page-done')));
       await tester.pumpAndSettle();
@@ -267,84 +296,137 @@ void main() {
       expect(noteRepo.deleteNoteCallCount, 0);
     });
 
-    testWidgets('clearing the note and confirming deletes it (#276)', (
-      tester,
-    ) async {
-      final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
-      final noteRepo = noteRepoWithEntry();
-      await _pump(
-        tester,
-        tripRepo: threeDayTrip(),
-        photoRepo: photoRepo,
-        noteRepo: noteRepo,
-      );
-      await tester.pumpAndSettle();
+    testWidgets('clearing a note on its page and confirming deletes it '
+        '(#276)', (tester) async {
+      final noteRepo = repoWith(['Great day.', 'Then rain.']);
+      await pumpDay(tester, noteRepo);
 
-      await openAndType(tester, const Key('journal-note-continue'), '');
+      await longPressNote(tester, 'n1');
+      await tester.tap(find.byKey(const Key('note-sheet-edit')));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('note-page-field')), '');
       await tester.tap(find.byKey(const Key('note-page-done')));
       await tester.pumpAndSettle();
-      expect(find.text('Delete this note?'), findsOneWidget);
       await tester.tap(find.byKey(const Key('note-page-delete-note')));
       await tester.pumpAndSettle();
 
-      expect(noteRepo.deleteNoteCallCount, 1);
       expect(noteRepo.lastDeletedNoteId, 'n1');
       expect(noteRepo.upsertNoteCallCount, 0);
       expect(find.text('Great day.'), findsNothing);
-      expect(find.byKey(const Key('journal-note-add-prompt')), findsOneWidget);
+      expect(find.text('Then rain.'), findsOneWidget);
+    });
+
+    testWidgets('long-press → Delete asks; Keep keeps it, Delete removes it', (
+      tester,
+    ) async {
+      final noteRepo = repoWith(['Great day.']);
+      await pumpDay(tester, noteRepo);
+
+      await longPressNote(tester, 'n1');
+      await tester.tap(find.byKey(const Key('note-sheet-delete')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('note?'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('note-delete-keep')));
+      await tester.pumpAndSettle();
+      expect(noteRepo.deleteNoteCallCount, 0);
+      expect(find.text('Great day.'), findsOneWidget);
+
+      await longPressNote(tester, 'n1');
+      await tester.tap(find.byKey(const Key('note-sheet-delete')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('note-delete-confirm')));
+      await tester.pumpAndSettle();
+
+      expect(noteRepo.lastDeletedNoteId, 'n1');
+      expect(find.text('Great day.'), findsNothing);
+    });
+
+    testWidgets('a deleted note folds away before it leaves (#407)', (
+      tester,
+    ) async {
+      final noteRepo = repoWith(['Great day.', 'Then rain.']);
+      await pumpDay(tester, noteRepo);
+
+      await longPressNote(tester, 'n1');
+      await tester.tap(find.byKey(const Key('note-sheet-delete')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('note-delete-confirm')));
+      await tester.pump(); // the sheet starts closing
+      await tester.pump(const Duration(milliseconds: 300)); // sheet gone
+      // Mid-fold: the delete is under way, the card is still leaving.
+      expect(noteRepo.deleteNoteCallCount, 1);
+      await tester.pump(const Duration(milliseconds: 100)); // fold done
+      await tester.pump();
+
+      expect(find.text('Great day.'), findsNothing);
+      expect(find.text('Then rain.'), findsOneWidget);
+      expect(find.text('Note deleted'), findsOneWidget);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('on iOS a left swipe on a note offers Delete (#407)', (
+      tester,
+    ) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      final noteRepo = repoWith(['Great day.']);
+      await pumpDay(tester, noteRepo);
+
+      await tester.drag(
+        find.byKey(const Key('timeline-note-n1')),
+        const Offset(-120, 0),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('note-swipe-delete')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('note?'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('note-delete-confirm')));
+      await tester.pumpAndSettle();
+
+      expect(noteRepo.lastDeletedNoteId, 'n1');
+      expect(find.text('Great day.'), findsNothing);
+      debugDefaultTargetPlatformOverride = null;
+    });
+
+    testWidgets('a failed delete puts the note back', (tester) async {
+      final noteRepo = repoWith(['Great day.', 'Then rain.'])
+        ..deleteNoteResult = const Left(NetworkFailure());
+      await pumpDay(tester, noteRepo);
+
+      await longPressNote(tester, 'n1');
+      await tester.tap(find.byKey(const Key('note-sheet-delete')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('note-delete-confirm')));
+      await tester.pumpAndSettle();
+
+      expect(noteRepo.deleteNoteCallCount, 1);
+      expect(find.text('Great day.'), findsOneWidget);
     });
 
     testWidgets('Done with an empty draft writes nothing and shows no toast', (
       tester,
     ) async {
-      final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
-      final noteRepo = FakeDayNoteRepository();
-      await _pump(
-        tester,
-        tripRepo: threeDayTrip(),
-        photoRepo: photoRepo,
-        noteRepo: noteRepo,
-      );
-      await tester.pumpAndSettle();
+      final noteRepo = repoWith(['Great day.']);
+      await pumpDay(tester, noteRepo);
 
-      await openAndType(tester, const Key('journal-note-add-prompt'), '   ');
+      await openNewAndType(tester, '   ');
       await tester.tap(find.byKey(const Key('note-page-done')));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('note-page-field')), findsNothing);
       expect(noteRepo.upsertNoteCallCount, 0);
-      expect(find.textContaining('✦ +1 star'), findsNothing);
+      expect(find.textContaining('note saved'), findsNothing);
     });
 
     testWidgets('Cancel with text asks first; Discard saves nothing', (
       tester,
     ) async {
-      final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
-      final noteRepo = FakeDayNoteRepository();
-      await _pump(
-        tester,
-        tripRepo: threeDayTrip(),
-        photoRepo: photoRepo,
-        noteRepo: noteRepo,
-      );
-      await tester.pumpAndSettle();
+      final noteRepo = repoWith(['Great day.']);
+      await pumpDay(tester, noteRepo);
 
-      await openAndType(
-        tester,
-        const Key('journal-note-add-prompt'),
-        'Scribbled.',
-      );
+      await openNewAndType(tester, 'Scribbled.');
       await tester.tap(find.byKey(const Key('note-page-cancel')));
       await tester.pumpAndSettle();
       expect(find.text('Discard your changes?'), findsOneWidget);
-
-      await tester.tap(find.byKey(const Key('note-page-keep-writing')));
-      await tester.pumpAndSettle();
-      expect(find.byKey(const Key('note-page-field')), findsOneWidget);
-      expect(find.text('Scribbled.'), findsOneWidget);
-
-      await tester.tap(find.byKey(const Key('note-page-cancel')));
-      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('note-page-discard')));
       await tester.pumpAndSettle();
 
@@ -352,57 +434,167 @@ void main() {
       expect(noteRepo.upsertNoteCallCount, 0);
     });
 
-    testWidgets('system back with an empty draft closes without asking', (
+    testWidgets('a long note folds to 4 lines and "more" opens it', (
       tester,
     ) async {
-      final photoRepo = FakePhotoRepository()..photosResult = dayWithPhoto;
-      await _pump(
-        tester,
-        tripRepo: threeDayTrip(),
-        photoRepo: photoRepo,
-        noteRepo: FakeDayNoteRepository(),
-      );
-      await tester.pumpAndSettle();
+      await pumpDay(tester, repoWith(['A long day. ' * 40]));
 
-      await tester.tap(find.byKey(const Key('journal-note-add-prompt')));
+      expect(find.byKey(const Key('timeline-note-collapsed')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('timeline-note-more')));
       await tester.pumpAndSettle();
-      await tester.binding.handlePopRoute();
-      await tester.pumpAndSettle();
-
-      expect(find.text('Discard your changes?'), findsNothing);
-      expect(find.byKey(const Key('note-page-field')), findsNothing);
-      expect(find.byKey(const Key('journal-note-add-prompt')), findsOneWidget);
+      expect(find.byKey(const Key('timeline-note-collapsed')), findsNothing);
+      expect(find.text('less'), findsOneWidget);
     });
   });
 
-  testWidgets('shows saved photos for the current day', (tester) async {
+  group('photo notes (#402)', () {
+    Future<FakeJournalNoteRepository> openPhoto(
+      WidgetTester tester, {
+      List<String> notesOnPhoto = const [],
+    }) async {
+      final noteRepo = FakeJournalNoteRepository()
+        ..notesForTripResult = Right([
+          for (var i = 0; i < notesOnPhoto.length; i++)
+            buildJournalNoteEntity(
+              id: 'pn$i',
+              dayDate: _today,
+              content: notesOnPhoto[i],
+              photoId: 'p1',
+              createdAt: _today.add(Duration(hours: 9, minutes: i)),
+            ),
+        ]);
+      await _pump(
+        tester,
+        tripRepo: FakeTripRepository()
+          ..tripCardResult = Right(
+            buildTripCard(id: 't1', startDate: _today, endDate: _today),
+          ),
+        photoRepo: FakePhotoRepository()
+          ..photosResult = Right([
+            buildPhotoEntity(id: 'p1', dayDate: _today, caption: 'Canal'),
+          ]),
+        noteRepo: noteRepo,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('timeline-photo-p1')));
+      await tester.pumpAndSettle();
+      return noteRepo;
+    }
+
+    testWidgets('a photo without notes says so', (tester) async {
+      await openPhoto(tester);
+
+      expect(find.byKey(const Key('photo-notes-panel')), findsOneWidget);
+      expect(find.text('No notes on this photo yet.'), findsOneWidget);
+    });
+
+    testWidgets("the viewer lists the photo's notes", (tester) async {
+      await openPhoto(tester, notesOnPhoto: ['Ducks.', 'More ducks.']);
+
+      expect(find.text('NOTES ON THIS PHOTO · 2'), findsOneWidget);
+      final panel = find.byKey(const Key('photo-notes-panel'));
+      expect(
+        find.descendant(of: panel, matching: find.text('Ducks.')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: panel, matching: find.text('More ducks.')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('Add a note writes it on the photo; it shows under the '
+        'photo and on the timeline', (tester) async {
+      final noteRepo = await openPhoto(tester);
+
+      await tester.tap(find.byKey(const Key('photo-notes-add')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('note-page-attached-photo')), findsOneWidget);
+      expect(find.textContaining('· PHOTO NOTE ·'), findsOneWidget);
+      expect(
+        find.text('What was happening here? Type, or tap the mic.'),
+        findsOneWidget,
+      );
+      expect(find.text('Canal'), findsWidgets);
+
+      await tester.enterText(
+        find.byKey(const Key('note-page-field')),
+        'Boats everywhere.',
+      );
+      await tester.tap(find.byKey(const Key('note-page-done')));
+      await tester.pumpAndSettle();
+
+      expect(noteRepo.lastCreatedPhotoId, 'p1');
+      final panel = find.byKey(const Key('photo-notes-panel'));
+      expect(
+        find.descendant(of: panel, matching: find.text('Boats everywhere.')),
+        findsOneWidget,
+      );
+      expect(find.text('NOTES ON THIS PHOTO · 1'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('photo-viewer-close')));
+      await tester.pumpAndSettle();
+      expect(find.text('Boats everywhere.'), findsOneWidget);
+      expect(find.byKey(const Key('timeline-note-on-photo')), findsOneWidget);
+      expect(find.byKey(const Key('timeline-photo-noted')), findsOneWidget);
+    });
+  });
+
+  testWidgets('shows the day\'s photos on the timeline', (tester) async {
     final tripRepo = FakeTripRepository()
       ..tripCardResult = Right(
-        buildTripCard(
-          id: 't1',
-          startDate: _today,
-          endDate: _today,
-        ),
+        buildTripCard(id: 't1', startDate: _today, endDate: _today),
       );
     final photoRepo = FakePhotoRepository()
       ..photosResult = Right([
         buildPhotoEntity(id: 'p1', dayDate: _today),
         buildPhotoEntity(id: 'p2', dayDate: _today),
       ]);
-    final noteRepo = FakeDayNoteRepository();
     await _pump(
       tester,
       tripRepo: tripRepo,
       photoRepo: photoRepo,
-      noteRepo: noteRepo,
+      noteRepo: FakeJournalNoteRepository(),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('2 saved'), findsOneWidget);
+    expect(find.byKey(const Key('timeline-photo-p1')), findsOneWidget);
+    expect(find.byKey(const Key('timeline-photo-p2')), findsOneWidget);
+    expect(find.textContaining('2 photos'), findsOneWidget);
+  });
+
+  testWidgets('a group of 5 photos shows 3 and "+2" opens the rest', (
+    tester,
+  ) async {
+    final tripRepo = FakeTripRepository()
+      ..tripCardResult = Right(
+        buildTripCard(id: 't1', startDate: _today, endDate: _today),
+      );
+    final photoRepo = FakePhotoRepository()
+      ..photosResult = Right([
+        for (var i = 0; i < 5; i++)
+          buildPhotoEntity(id: 'p$i', dayDate: _today),
+      ]);
+    await _pump(
+      tester,
+      tripRepo: tripRepo,
+      photoRepo: photoRepo,
+      noteRepo: FakeJournalNoteRepository(),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('+2'), findsOneWidget);
+    expect(find.byKey(const Key('timeline-photo-p4')), findsNothing);
+    await tester.tap(find.byKey(const Key('timeline-photos-more')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('timeline-photo-p4')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('timeline-photos-less')));
+    await tester.pumpAndSettle();
+    expect(find.text('+2'), findsOneWidget);
   });
 
   testWidgets(
-    'tapping a photo tile opens the day-scoped viewer at that index (#117)',
+    'tapping a photo opens the day-scoped viewer at that index (#117)',
     (tester) async {
       final tripRepo = FakeTripRepository()
         ..tripCardResult = Right(
@@ -413,23 +605,22 @@ void main() {
           buildPhotoEntity(id: 'p1', dayDate: _today),
           buildPhotoEntity(id: 'p2', dayDate: _today),
         ]);
-      final noteRepo = FakeDayNoteRepository();
       await _pump(
         tester,
         tripRepo: tripRepo,
         photoRepo: photoRepo,
-        noteRepo: noteRepo,
+        noteRepo: FakeJournalNoteRepository(),
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('journal-photo-tile-p2')));
+      await tester.tap(find.byKey(const Key('timeline-photo-p2')));
       await tester.pumpAndSettle();
 
       expect(find.text('2 / 2'), findsOneWidget);
     },
   );
 
-  testWidgets('tapping the Add tile opens the photo capture entry sheet', (
+  testWidgets("the capsule's Photo opens the photo capture entry sheet", (
     tester,
   ) async {
     final tripRepo = FakeTripRepository()
@@ -437,10 +628,9 @@ void main() {
         buildTripCard(id: 't1', startDate: _today, endDate: _today),
       );
     final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
-    // A note (no photos yet) keeps the day non-"empty" (#140), so the
-    // normal photo strip under test renders instead of the nudge.
-    final noteRepo = FakeDayNoteRepository()
-      ..notesForTripResult = Right([buildDayNoteEntity(dayDate: _today)]);
+    // A note keeps the day non-empty, so the timeline and capsule show.
+    final noteRepo = FakeJournalNoteRepository()
+      ..notesForTripResult = Right([buildJournalNoteEntity(dayDate: _today)]);
     await _pump(
       tester,
       tripRepo: tripRepo,
@@ -449,10 +639,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('journal-add-photo')));
+    await tester.tap(find.byKey(const Key('capture-photo')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Add a photo'), findsOneWidget);
     expect(find.text('Take a photo'), findsOneWidget);
     expect(find.text('Choose from gallery'), findsOneWidget);
   });
@@ -467,7 +656,7 @@ void main() {
         ),
       );
     final photoRepo = FakePhotoRepository();
-    final noteRepo = FakeDayNoteRepository();
+    final noteRepo = FakeJournalNoteRepository();
     final quest = buildQuestEntity(
       id: 'q1',
       dayDate: _today,
@@ -514,9 +703,9 @@ void main() {
           for (var i = 0; i < 5; i++)
             buildPhotoEntity(id: 'p$i', dayDate: _today),
         ]);
-      final noteRepo = FakeDayNoteRepository()
+      final noteRepo = FakeJournalNoteRepository()
         ..notesForTripResult = Right([
-          buildDayNoteEntity(id: 'n1', dayDate: _today),
+          buildJournalNoteEntity(id: 'n1', dayDate: _today),
         ]);
       await _pump(
         tester,
@@ -531,9 +720,10 @@ void main() {
         find.byKey(const Key('journal-content-list')),
         const Offset(0, -200),
       );
-      // Clear of the floating balloon bar (#414).
-      await tester.ensureVisible(
-        find.byKey(const Key('journal-view-wrap-up-action')),
+      // Clear of the floating capture capsule.
+      await tester.drag(
+        find.byKey(const Key('journal-content-list')),
+        const Offset(0, -400),
       );
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('journal-view-wrap-up-action')));
@@ -555,7 +745,7 @@ void main() {
           ),
         );
       final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
-      final noteRepo = FakeDayNoteRepository();
+      final noteRepo = FakeJournalNoteRepository();
       await _pump(
         tester,
         tripRepo: tripRepo,
@@ -585,9 +775,9 @@ void main() {
         );
       final photoRepo = FakePhotoRepository()
         ..photosResult = Right([buildPhotoEntity(id: 'p1', dayDate: _today)]);
-      final noteRepo = FakeDayNoteRepository()
+      final noteRepo = FakeJournalNoteRepository()
         ..notesForTripResult = Right([
-          buildDayNoteEntity(id: 'n1', dayDate: _today),
+          buildJournalNoteEntity(id: 'n1', dayDate: _today),
         ]);
       await _pump(
         tester,
@@ -629,7 +819,7 @@ void main() {
           ),
         );
       final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
-      final noteRepo = FakeDayNoteRepository();
+      final noteRepo = FakeJournalNoteRepository();
       final profileStatsRepo = FakeProfileStatsRepository()
         ..statsResult = const Right(
           ProfileStatsEntity(
@@ -669,9 +859,9 @@ void main() {
           for (var i = 0; i < 3; i++)
             buildPhotoEntity(id: 'p$i', dayDate: _today),
         ]);
-      final noteRepo = FakeDayNoteRepository()
+      final noteRepo = FakeJournalNoteRepository()
         ..notesForTripResult = Right([
-          buildDayNoteEntity(id: 'n1', dayDate: _today),
+          buildJournalNoteEntity(id: 'n1', dayDate: _today),
         ]);
       final subscriptionRepo = FakeSubscriptionRepository()
         ..entitlementResult = Right(buildProEntitlement());
@@ -723,7 +913,7 @@ void main() {
         tester,
         tripRepo: tripRepo,
         photoRepo: photoRepo,
-        noteRepo: FakeDayNoteRepository(),
+        noteRepo: FakeJournalNoteRepository(),
       );
       await tester.pumpAndSettle();
     }
@@ -750,170 +940,147 @@ void main() {
     });
   });
 
+  testWidgets('an empty day shows the notebook page and no capsule', (
+    tester,
+  ) async {
+    final tripRepo = FakeTripRepository()
+      ..tripCardResult = Right(
+        buildTripCard(id: 't1', startDate: _today, endDate: _today),
+      );
+    await _pump(
+      tester,
+      tripRepo: tripRepo,
+      photoRepo: FakePhotoRepository()..photosResult = const Right([]),
+      noteRepo: FakeJournalNoteRepository(),
+    );
+    await tester.pumpAndSettle();
+
+    final weekday = DateFormat.EEEE('en').format(_today);
+    expect(find.byKey(const Key('timeline-empty-day')), findsOneWidget);
+    expect(find.text('Nothing written for $weekday yet'), findsOneWidget);
+    expect(find.byKey(const Key('capture-capsule')), findsNothing);
+    expect(find.byKey(const Key('journal-day-timeline')), findsNothing);
+  });
+
   testWidgets(
-    'an empty day shows the nudge card and no photo grid or note card',
+    'an empty day looks identical for a Pro user — no upsell on the page',
     (tester) async {
       final tripRepo = FakeTripRepository()
         ..tripCardResult = Right(
           buildTripCard(id: 't1', startDate: _today, endDate: _today),
         );
-      final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
-      final noteRepo = FakeDayNoteRepository();
-      await _pump(
-        tester,
-        tripRepo: tripRepo,
-        photoRepo: photoRepo,
-        noteRepo: noteRepo,
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('empty-day-nudge')), findsOneWidget);
-      // Just the day, no "a quiet one" (#274).
-      expect(find.text('Day 1'), findsOneWidget);
-      expect(
-        find.text('Every photo you add will contribute to the final wrap-up.'),
-        findsOneWidget,
-      );
-      expect(find.text('Nothing here yet'), findsOneWidget);
-      expect(find.textContaining('No photos, no notes yet'), findsOneWidget);
-      expect(find.byKey(const Key('journal-add-photo')), findsNothing);
-      expect(find.byKey(const Key('journal-note-add-prompt')), findsNothing);
-    },
-  );
-
-  testWidgets(
-    'an empty day looks identical for a Pro user — no upsell in the nudge',
-    (tester) async {
-      final tripRepo = FakeTripRepository()
-        ..tripCardResult = Right(
-          buildTripCard(id: 't1', startDate: _today, endDate: _today),
-        );
-      final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
-      final noteRepo = FakeDayNoteRepository();
       final subscriptionRepo = FakeSubscriptionRepository()
         ..entitlementResult = Right(buildProEntitlement());
       await _pump(
         tester,
         tripRepo: tripRepo,
-        photoRepo: photoRepo,
-        noteRepo: noteRepo,
+        photoRepo: FakePhotoRepository()..photosResult = const Right([]),
+        noteRepo: FakeJournalNoteRepository(),
         subscriptionRepo: subscriptionRepo,
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('empty-day-nudge')), findsOneWidget);
+      expect(find.byKey(const Key('timeline-empty-day')), findsOneWidget);
       expect(find.textContaining('Upgrade'), findsNothing);
       expect(find.textContaining(r'$'), findsNothing);
     },
   );
 
-  testWidgets('a day with a photo shows no empty-day nudge', (tester) async {
+  testWidgets('a day with a photo shows the timeline and capsule', (
+    tester,
+  ) async {
     final tripRepo = FakeTripRepository()
       ..tripCardResult = Right(
         buildTripCard(id: 't1', startDate: _today, endDate: _today),
       );
-    final photoRepo = FakePhotoRepository()
-      ..photosResult = Right([buildPhotoEntity(id: 'p1', dayDate: _today)]);
-    final noteRepo = FakeDayNoteRepository();
     await _pump(
       tester,
       tripRepo: tripRepo,
-      photoRepo: photoRepo,
+      photoRepo: FakePhotoRepository()
+        ..photosResult = Right([buildPhotoEntity(id: 'p1', dayDate: _today)]),
+      noteRepo: FakeJournalNoteRepository(),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('timeline-empty-day')), findsNothing);
+    expect(find.byKey(const Key('journal-day-timeline')), findsOneWidget);
+    expect(find.byKey(const Key('capture-capsule')), findsOneWidget);
+  });
+
+  testWidgets('the Journal has no bottom bar; the capsule sits at the '
+      'bottom on its own (#410)', (tester) async {
+    await _pump(
+      tester,
+      tripRepo: FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(id: 't1', startDate: _today, endDate: _today),
+        ),
+      photoRepo: FakePhotoRepository()
+        ..photosResult = Right([buildPhotoEntity(id: 'p1', dayDate: _today)]),
+      noteRepo: FakeJournalNoteRepository(),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AppBottomNavBar), findsNothing);
+    final screen = tester.getSize(find.byType(JournalPage));
+    final capsule = tester.getRect(find.byKey(const Key('capture-capsule')));
+    expect(screen.height - capsule.bottom, lessThan(40));
+  });
+
+  testWidgets('the last row scrolls clear of the capsule (#410)', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      tripRepo: FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(id: 't1', startDate: _today, endDate: _today),
+        ),
+      photoRepo: FakePhotoRepository()
+        ..photosResult = Right([buildPhotoEntity(id: 'p1', dayDate: _today)]),
+      noteRepo: FakeJournalNoteRepository(),
+    );
+    await tester.pumpAndSettle();
+    await tester.drag(
+      find.byKey(const Key('journal-content-list')),
+      const Offset(0, -3000),
+    );
+    await tester.pumpAndSettle();
+
+    final capsule = tester.getRect(find.byKey(const Key('capture-capsule')));
+    final last = tester.getRect(find.byType(JournalActionButtons));
+    expect(last.bottom, lessThan(capsule.top));
+  });
+
+  testWidgets('the empty day\'s Write the first note opens the note page', (
+    tester,
+  ) async {
+    final tripRepo = FakeTripRepository()
+      ..tripCardResult = Right(
+        buildTripCard(id: 't1', startDate: _today, endDate: _today),
+      );
+    final noteRepo = FakeJournalNoteRepository();
+    await _pump(
+      tester,
+      tripRepo: tripRepo,
+      photoRepo: FakePhotoRepository()..photosResult = const Right([]),
       noteRepo: noteRepo,
     );
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('empty-day-nudge')), findsNothing);
-  });
+    await tester.tap(find.byKey(const Key('timeline-empty-write')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('note-page-field')), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const Key('note-page-field')),
+      'First line.',
+    );
+    await tester.tap(find.byKey(const Key('note-page-done')));
+    await tester.pumpAndSettle();
 
-  testWidgets(
-    'the empty-day nudge\'s Write a note action opens the note page (#205)',
-    (tester) async {
-      final tripRepo = FakeTripRepository()
-        ..tripCardResult = Right(
-          buildTripCard(id: 't1', startDate: _today, endDate: _today),
-        );
-      final photoRepo = FakePhotoRepository()..photosResult = const Right([]);
-      final noteRepo = FakeDayNoteRepository();
-      await _pump(
-        tester,
-        tripRepo: tripRepo,
-        photoRepo: photoRepo,
-        noteRepo: noteRepo,
-      );
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(const Key('empty-day-nudge-write-note')));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('note-page-field')), findsOneWidget);
-      // Single-day memory: the stamp is just the date.
-      expect(
-        find.text(DateFormat('d MMM').format(_today).toUpperCase()),
-        findsOneWidget,
-      );
-    },
-  );
-
-  group('balloon bar (#414)', () {
-    Future<void> pumpDay(
-      WidgetTester tester, {
-      required bool hasPhoto,
-    }) async {
-      final tripRepo = FakeTripRepository()
-        ..tripCardResult = Right(
-          buildTripCard(id: 't1', startDate: _today, endDate: _today),
-        );
-      final photoRepo = FakePhotoRepository()
-        ..photosResult = Right([
-          if (hasPhoto) buildPhotoEntity(id: 'p1', dayDate: _today),
-        ]);
-      await _pump(
-        tester,
-        tripRepo: tripRepo,
-        photoRepo: photoRepo,
-        noteRepo: FakeDayNoteRepository(),
-      );
-      await tester.pumpAndSettle();
-    }
-
-    testWidgets('floats over a day with content, with no app nav', (
-      tester,
-    ) async {
-      await pumpDay(tester, hasPhoto: true);
-
-      expect(find.byKey(const Key('journal-balloon-bar')), findsOneWidget);
-      expect(find.text('Home'), findsNothing);
-      expect(find.text('Expenses'), findsNothing);
-    });
-
-    testWidgets('is hidden on an empty day, which has the nudge instead', (
-      tester,
-    ) async {
-      await pumpDay(tester, hasPhoto: false);
-
-      expect(find.byKey(const Key('empty-day-nudge')), findsOneWidget);
-      expect(find.byKey(const Key('journal-balloon-bar')), findsNothing);
-    });
-
-    testWidgets('Photo opens the photo capture entry sheet', (tester) async {
-      await pumpDay(tester, hasPhoto: true);
-
-      await tester.tap(find.byKey(const Key('journal-balloon-bar-photo')));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Take a photo'), findsOneWidget);
-      expect(find.text('Choose from gallery'), findsOneWidget);
-    });
-
-    testWidgets("Note opens the day's note page", (tester) async {
-      await pumpDay(tester, hasPhoto: true);
-
-      await tester.tap(find.byKey(const Key('journal-balloon-bar-note')));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('note-page-field')), findsOneWidget);
-    });
+    expect(noteRepo.createNoteCallCount, 1);
+    expect(find.text('First line.'), findsOneWidget);
+    expect(find.byKey(const Key('timeline-empty-day')), findsNothing);
   });
 
   group('deleting a photo (#165)', () {
@@ -936,16 +1103,16 @@ void main() {
         tester,
         tripRepo: tripRepo,
         photoRepo: photoRepo,
-        noteRepo: FakeDayNoteRepository(),
+        noteRepo: FakeJournalNoteRepository(),
         profileStatsRepo: profileStatsRepo,
       );
       await tester.pumpAndSettle();
       await tester.dragUntilVisible(
-        find.byKey(const Key('journal-photo-tile-p1')),
+        find.byKey(const Key('timeline-photo-p1')),
         find.byKey(const Key('journal-content-list')),
         const Offset(0, -200),
       );
-      await tester.tap(find.byKey(const Key('journal-photo-tile-p1')));
+      await tester.tap(find.byKey(const Key('timeline-photo-p1')));
       await tester.pumpAndSettle();
       return photoRepo;
     }
@@ -955,7 +1122,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('removes it from the strip and the count immediately', (
+    testWidgets('removes it from the timeline and the count immediately', (
       tester,
     ) async {
       final photoRepo = await openViewerOnFirstPhoto(tester);
@@ -965,9 +1132,9 @@ void main() {
       await closeViewer(tester);
 
       expect(photoRepo.deletedPhotoIds, ['p1']);
-      expect(find.byKey(const Key('journal-photo-tile-p1')), findsNothing);
-      expect(find.byKey(const Key('journal-photo-tile-p2')), findsOneWidget);
-      expect(find.text('1 saved'), findsOneWidget);
+      expect(find.byKey(const Key('timeline-photo-p1')), findsNothing);
+      expect(find.byKey(const Key('timeline-photo-p2')), findsOneWidget);
+      expect(find.textContaining('1 photo'), findsOneWidget);
     });
 
     testWidgets('refetches the star total, since the photo ✦2 is taken '
@@ -982,7 +1149,7 @@ void main() {
       expect(statsRepo.getStatsCallCount, greaterThan(before));
     });
 
-    testWidgets('a failed delete puts it back in the strip', (tester) async {
+    testWidgets('a failed delete puts it back on the timeline', (tester) async {
       await openViewerOnFirstPhoto(
         tester,
         deleteResult: const Left(NetworkFailure()),
@@ -992,8 +1159,8 @@ void main() {
       await tester.pumpAndSettle();
       await closeViewer(tester);
 
-      expect(find.byKey(const Key('journal-photo-tile-p1')), findsOneWidget);
-      expect(find.text('2 saved'), findsOneWidget);
+      expect(find.byKey(const Key('timeline-photo-p1')), findsOneWidget);
+      expect(find.textContaining('2 photos'), findsOneWidget);
     });
   });
 
@@ -1018,7 +1185,7 @@ void main() {
         tester,
         tripRepo: tripRepo,
         photoRepo: FakePhotoRepository(),
-        noteRepo: FakeDayNoteRepository(),
+        noteRepo: FakeJournalNoteRepository(),
         questRepo: FakeQuestRepository()..questsResult = Right(quests),
       );
       await tester.pumpAndSettle();

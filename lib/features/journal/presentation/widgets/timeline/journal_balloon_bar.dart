@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../core/l10n/context_l10n.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../../core/l10n/context_l10n.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_typography.dart';
 
 /// The Journal day's floating Photo · Note bar (#414,
-/// docs/design/JOURNAL_NAVBAR_SPEC.md): an orange bar with a hot-air balloon
+/// docs/design/JOURNAL_NAVBAR_SPEC.md) — the Journal's only bottom control
+/// (#410), replacing the #401 capture capsule: an orange bar with a hot-air balloon
 /// cut out of its centre, poking [balloonOverhang] above the top edge.
 /// Pressing (or hovering) one half fills the matching half of the balloon.
 ///
@@ -59,6 +61,7 @@ class _JournalBalloonBarState extends State<JournalBalloonBar> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Stack(
+      key: const Key('capture-capsule'),
       clipBehavior: Clip.none,
       children: [
         DecoratedBox(
@@ -92,10 +95,10 @@ class _JournalBalloonBarState extends State<JournalBalloonBar> {
                       children: [
                         Expanded(
                           child: _BarButton(
-                            key: const Key('journal-balloon-bar-photo'),
+                            key: const Key('capture-photo'),
                             icon: _BarIcons.camera,
-                            label: l10n.journal_barPhoto,
-                            semanticLabel: l10n.journal_barPhotoA11y,
+                            label: l10n.timeline_capturePhoto,
+                            semanticLabel: l10n.timeline_addPhotoSemantics,
                             borderRadius: const BorderRadius.horizontal(
                               left: Radius.circular(_radius),
                             ),
@@ -107,10 +110,10 @@ class _JournalBalloonBarState extends State<JournalBalloonBar> {
                         const SizedBox(width: _BalloonCutout.width),
                         Expanded(
                           child: _BarButton(
-                            key: const Key('journal-balloon-bar-note'),
+                            key: const Key('capture-note'),
                             icon: _BarIcons.note,
-                            label: l10n.journal_barNote,
-                            semanticLabel: l10n.journal_barNoteA11y,
+                            label: l10n.timeline_captureNote,
+                            semanticLabel: l10n.timeline_addNoteSemantics,
                             borderRadius: const BorderRadius.horizontal(
                               right: Radius.circular(_radius),
                             ),
@@ -179,7 +182,10 @@ class _BarButton extends StatelessWidget {
       button: true,
       label: semanticLabel,
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
         onHover: onHover,
         onHighlightChanged: onPressed,
         borderRadius: borderRadius,

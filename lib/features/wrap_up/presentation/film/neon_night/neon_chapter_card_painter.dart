@@ -40,12 +40,14 @@ class NnChapterCardPainter {
     required this.photos,
     required this.beat,
     required this.reducedFlashing,
-  }) : sheet = NnContactSheet.forPhotos(chapter.photos.length),
+  }) : sheet = NnContactSheet.forPhotos(chapter.cardPhotos.length),
        timing = NnCardTiming(
          chapterNumber: spec.chapter + 1,
          beats: spec.beats,
          zooms: spec.zooms,
-         tiles: NnContactSheet.forPhotos(chapter.photos.length).tiles.length,
+         tiles: NnContactSheet.forPhotos(
+           chapter.cardPhotos.length,
+         ).tiles.length,
          beat: beat,
        );
 
@@ -208,7 +210,7 @@ class NnChapterCardPainter {
       }
       neonPaintPhoto(
         canvas,
-        photos.thumb(chapter.photos[k].id),
+        photos.thumb(chapter.cardPhotos[k].id),
         rrect,
         brightness: 1 + 0.5 * s,
         alpha: a,
@@ -345,7 +347,7 @@ class NnChapterCardPainter {
       );
       final c = NeonZoomPicks.cycleStarts[cycle].toDouble();
       final kb = 1.08 - 0.08 * ((lb - c - 0.5) / 2.5).clamp(0.0, 1.0);
-      final id = chapter.photos[k].id;
+      final id = chapter.cardPhotos[k].id;
       neonPaintPhoto(
         canvas,
         photos.large(id) ?? photos.thumb(id),

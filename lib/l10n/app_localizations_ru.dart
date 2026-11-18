@@ -188,7 +188,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String auth_rewardTease(String stars) {
-    return 'Первое событие принесёт $stars, а до значка «Рассказчик» всего три заметки.';
+    return 'Первое событие принесёт $stars, а каждый день с заметкой приближает значок «Рассказчик».';
   }
 
   @override
@@ -772,30 +772,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get journal_eyebrow => 'Дневник';
 
   @override
-  String get journal_quietOne => 'День 1';
-
-  @override
-  String journal_dayQuietOne(int day) {
-    return 'День $day';
-  }
-
-  @override
-  String get journal_noEntries => 'Пока ни фото, ни заметок';
-
-  @override
-  String journal_questsDone(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'сделано $count дела',
-      many: 'сделано $count дел',
-      few: 'сделано $count дела',
-      one: 'сделано $count дело',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String journal_dayTitle(int day, String name) {
     return 'День $day — $name';
   }
@@ -815,33 +791,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get journal_toDo => 'Дела';
 
   @override
-  String get journal_barPhoto => 'Фото';
-
-  @override
-  String get journal_barNote => 'Заметка';
-
-  @override
-  String get journal_barPhotoA11y => 'Добавить фото';
-
-  @override
-  String get journal_barNoteA11y => 'Добавить заметку';
-
-  @override
   String get journal_todayToDo => 'Дела на сегодня';
 
   @override
   String get journal_viewWrapUp => 'Смотреть итоги';
-
-  @override
-  String get journal_photos => 'Фото';
-
-  @override
-  String journal_photosSaved(int count) {
-    return 'сохранено: $count';
-  }
-
-  @override
-  String get journal_addPhotoTile => 'Добавить ✦2';
 
   @override
   String journal_wrapUpExplainer(String ask) {
@@ -883,30 +836,6 @@ class AppLocalizationsRu extends AppLocalizations {
       'Ничего покупать не нужно — на любом тарифе всё одинаково.';
 
   @override
-  String get journal_nothingYet => 'Как прошёл день?';
-
-  @override
-  String journal_nothingFromDay(int day) {
-    return 'Как прошёл день?';
-  }
-
-  @override
-  String get journal_nudgeBody =>
-      'Каждое фото, которое вы добавите, станет частью финального фильма.';
-
-  @override
-  String get journal_addAPhoto => '＋ Добавить фото';
-
-  @override
-  String get journal_writeNote => 'Написать заметку';
-
-  @override
-  String get journal_addNotesToday => '✎ Добавить заметку о сегодняшнем дне';
-
-  @override
-  String get journal_continueEntry => '✎ Продолжить запись';
-
-  @override
   String journal_wordCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -920,11 +849,6 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String journal_edited(String time) {
-    return 'Изменено $time';
-  }
-
-  @override
   String get toast_noteSaved => '+1 ✦ · заметка сохранена';
 
   @override
@@ -935,7 +859,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get note_deleteBody =>
-      'Заметка за этот день и её звезда ✦1 будут удалены. Это нельзя отменить.';
+      'Заметка за этот день будет удалена. Её звезда ✦1 останется. Это нельзя отменить.';
 
   @override
   String get note_keepNote => 'Оставить';
@@ -2422,7 +2346,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get content_achievement_storyteller_description =>
-      'Напишите 20 заметок в дневник.';
+      'Напишите заметки за 20 дней.';
 
   @override
   String get content_achievement_jetsetter_title => 'Заядлый путешественник';
@@ -2581,11 +2505,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get film_leftOutPill => 'Не войдёт в фильм';
-
-  @override
-  String film_stripCount(int count) {
-    return '$count в фильме';
-  }
 
   @override
   String get film_badgeYourPick => 'Ваш выбор';
@@ -2780,4 +2699,157 @@ class AppLocalizationsRu extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String timeline_afterMidnight(String date) {
+    return 'После полуночи · $date';
+  }
+
+  @override
+  String get timeline_later => 'Позже';
+
+  @override
+  String get timeline_earlierNote => 'Прежняя заметка';
+
+  @override
+  String get timeline_justNow => 'Только что';
+
+  @override
+  String timeline_writtenOn(String date) {
+    return 'Написано $date';
+  }
+
+  @override
+  String timeline_lastEdited(String time, String words) {
+    return 'Изменено $time · $words';
+  }
+
+  @override
+  String get timeline_more => 'ещё';
+
+  @override
+  String get timeline_less => 'свернуть';
+
+  @override
+  String timeline_onPhoto(String time) {
+    return 'К фото · $time';
+  }
+
+  @override
+  String timeline_photoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count фото',
+      many: '$count фото',
+      few: '$count фото',
+      one: '$count фото',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeline_noteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count заметки',
+      many: '$count заметок',
+      few: '$count заметки',
+      one: '$count заметка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get timeline_capturePhoto => 'Фото';
+
+  @override
+  String get timeline_captureNote => 'Заметка';
+
+  @override
+  String get timeline_addPhotoSemantics => 'Добавить фото';
+
+  @override
+  String get timeline_addNoteSemantics => 'Добавить заметку';
+
+  @override
+  String get timeline_editNote => 'Изменить заметку';
+
+  @override
+  String get timeline_deleteNote => 'Удалить заметку';
+
+  @override
+  String timeline_deleteTitle(String time) {
+    return 'Удалить заметку от $time?';
+  }
+
+  @override
+  String get timeline_deleteBody =>
+      'Она исчезнет из этого дня и не попадёт в фильм. Фото останутся. Это нельзя отменить.';
+
+  @override
+  String get timeline_keep => 'Оставить';
+
+  @override
+  String get timeline_noteUpdated => 'Заметка изменена';
+
+  @override
+  String get timeline_noteDeleted => 'Заметка удалена';
+
+  @override
+  String get timeline_noteSavedNoStar => 'Заметка сохранена';
+
+  @override
+  String timeline_emptyTitle(String weekday) {
+    return '$weekday: пока ни строчки';
+  }
+
+  @override
+  String get timeline_emptyBody =>
+      'Пишите строчку, когда что-то происходит. Каждое нажатие «Готово» сохраняет отдельную заметку со временем.';
+
+  @override
+  String get timeline_emptyWrite => '✎ Первая заметка ✦1';
+
+  @override
+  String get timeline_emptyOrPhoto => 'или добавьте фото';
+
+  @override
+  String get timeline_emptyLine => 'Первая строчка будет здесь…';
+
+  @override
+  String note_stampNew(String time) {
+    return 'Новая заметка · $time';
+  }
+
+  @override
+  String note_stampEdit(String time) {
+    return 'Правка заметки · $time';
+  }
+
+  @override
+  String get photoNote_add => '✎ Написать заметку к фото';
+
+  @override
+  String photoNote_listLabel(int count) {
+    return 'Заметки к фото · $count';
+  }
+
+  @override
+  String get photoNote_none => 'К этому фото пока нет заметок.';
+
+  @override
+  String note_stampPhoto(String time) {
+    return 'Заметка к фото · $time';
+  }
+
+  @override
+  String note_onThisPhoto(String time) {
+    return 'К этому фото · $time';
+  }
+
+  @override
+  String get note_photoHint =>
+      'Что здесь происходило? Пишите или нажмите на микрофон.';
 }

@@ -126,6 +126,47 @@ abstract class AppTypography {
     color: AppColors.textTertiary,
   );
 
+  /// Journal timeline (#401, docs/design/journal-notes/ §3): a note's body.
+  static TextStyle get timelineNote => serif(
+    fontSize: 14.5,
+    height: 1.6,
+    fontStyle: FontStyle.italic,
+    color: AppColors.textPrimary,
+  );
+
+  /// Journal timeline: a time on the rail or a photo's pill (Mono 500 11).
+  static TextStyle get timelineTime => GoogleFonts.jetBrainsMono(
+    fontSize: 11,
+    height: 1.3,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 11 * .03,
+    color: AppColors.primaryLight,
+  );
+
+  /// Journal timeline: "more" / "less" / "＋ Add a note" (Roboto 600 11).
+  static TextStyle get timelineLink => GoogleFonts.roboto(
+    fontSize: 11,
+    height: 1.3,
+    fontWeight: FontWeight.w600,
+    color: AppColors.primary,
+  );
+
+  /// Journal timeline: a photo's caption (Roboto 400 11.5/1.4).
+  static TextStyle get timelineCaption => GoogleFonts.roboto(
+    fontSize: 11.5,
+    height: 1.4,
+    fontWeight: FontWeight.w400,
+    color: AppColors.textSecondary,
+  );
+
+  /// Journal timeline: the "On photo" chip and day subtitle (Roboto 500).
+  static TextStyle get timelineMeta => GoogleFonts.roboto(
+    fontSize: 10.5,
+    height: 1.3,
+    fontWeight: FontWeight.w500,
+    color: AppColors.textMuted,
+  );
+
   static TextStyle get displaySerif => serif(
     fontSize: 22,
     height: 33 / 22,

@@ -20,15 +20,21 @@ class NnPlanRow extends Equatable {
 
 /// One photo of the night (§7): its id and when it was taken.
 class NnPhoto extends Equatable {
-  const NnPhoto({required this.id, required this.takenAt});
+  const NnPhoto({required this.id, required this.takenAt, this.caption});
 
   final String id;
 
   /// 'HH:MM'.
   final String takenAt;
 
+  /// The user's caption (#387), shown instead of [takenAt]; null = none.
+  final String? caption;
+
+  /// What labels the photo: its caption, else its time (#387).
+  String get label => caption ?? takenAt;
+
   @override
-  List<Object?> get props => [id, takenAt];
+  List<Object?> get props => [id, takenAt, caption];
 }
 
 /// A block that shows a few of a chapter's photos after its card
@@ -103,7 +109,11 @@ class NnChapter extends Equatable {
     required this.photos,
     required this.moments,
     this.note,
-  }) : assert(photos.isNotEmpty, 'a chapter has photos'),
+    List<NnPhoto>? cardPhotos,
+  }) : cardPhotos = cardPhotos == null || cardPhotos.isEmpty
+           ? photos
+           : cardPhotos,
+       assert(photos.isNotEmpty, 'a chapter has photos'),
        assert(
          moments.isNotEmpty && moments.length <= 2,
          'a chapter has 1–2 moments',
@@ -116,8 +126,12 @@ class NnChapter extends Equatable {
   final String from;
   final String to;
 
-  /// In order; the contact sheet shows the first 34.
+  /// In order: the chapter's range of the night.
   final List<NnPhoto> photos;
+
+  /// What the card's contact sheet and zooms show, in order (the first
+  /// 34): its own photos (#390), else all of [photos].
+  final List<NnPhoto> cardPhotos;
 
   /// The user's own words, typed out on the card; none → no typed line.
   final String? note;
@@ -126,7 +140,15 @@ class NnChapter extends Equatable {
   final List<NnMoment> moments;
 
   @override
-  List<Object?> get props => [title, from, to, photos, note, moments];
+  List<Object?> get props => [
+    title,
+    from,
+    to,
+    photos,
+    cardPhotos,
+    note,
+    moments,
+  ];
 }
 
 /// The note the film writes out in neon (§5.7, §7): the user's own words,
@@ -191,6 +213,7 @@ class NeonNightStory extends Equatable {
     this.firstName,
     this.headline,
     this.totals,
+    this.heartPhotoIds = const [],
   }) : assert(
          chapters.isNotEmpty && chapters.length <= 5,
          '1–5 chapters',
@@ -221,13 +244,33 @@ class NeonNightStory extends Equatable {
   /// The end card's numbers; none → counted from the story.
   final NnTotals? totals;
 
-  bool get hasPlan => plan.isNotEmpty;
+  /// The photos the Finale's heart is made of (#378), ids of [allPhotos];
+  /// empty → all of them.
+  final List<String> heartPhotoIds;
+
+  /// One or two rows aren't worth a scene (#390).
+  bool get hasPlan => plan.length >= minPlanRows;
+
+  static const minPlanRows = 3;
   bool get hasNote => note != null;
 
-  /// Every photo of the night, in order: what the Finale's heart shows.
+  /// Every photo of the night, in order.
   List<NnPhoto> get allPhotos => [
     for (final chapter in chapters) ...chapter.photos,
   ];
+
+  /// What the Finale's heart shows, in order: [heartPhotoIds] that are
+  /// photos of the night, else every photo. Always picks already had their
+  /// moment, so the heart is made of the others (#378).
+  List<String> get heartIds {
+    final all = [for (final photo in allPhotos) photo.id];
+    final known = all.toSet();
+    final heart = [
+      for (final id in heartPhotoIds)
+        if (known.contains(id)) id,
+    ];
+    return heart.isNotEmpty ? heart : all;
+  }
 
   /// [totals], or what the story itself has: its photos, its note, the
   /// plan's done rows.
@@ -250,6 +293,7 @@ class NeonNightStory extends Equatable {
     firstName,
     headline,
     totals,
+    heartPhotoIds,
   ];
 }
 

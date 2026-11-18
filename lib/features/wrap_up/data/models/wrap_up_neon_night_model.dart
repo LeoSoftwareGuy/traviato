@@ -26,6 +26,7 @@ WrapUpNeonNight? parseWrapUpNeonNight(Map<String, dynamic> content) {
     headline: _string(nn['headline']),
     firstName: _string(nn['first_name']),
     totals: _totals(nn['totals']),
+    heartPhotoIds: _ids(nn['heart_photo_ids']),
   );
 }
 
@@ -53,7 +54,13 @@ WrapUpNeonChapter? _chapter(dynamic json) {
     final id = _string(photo['id']);
     final takenAt = _instant(photo['taken_at']);
     if (id == null || takenAt == null) continue;
-    photos.add(WrapUpNeonPhoto(id: id, takenAt: takenAt));
+    photos.add(
+      WrapUpNeonPhoto(
+        id: id,
+        takenAt: takenAt,
+        caption: _string(photo['caption']),
+      ),
+    );
   }
   if (photos.isEmpty) return null;
   final moments = <WrapUpNeonMoment>[];
@@ -74,6 +81,7 @@ WrapUpNeonChapter? _chapter(dynamic json) {
     photos: photos,
     note: _string(json['note']),
     moments: moments,
+    cardPhotoIds: _ids(json['card_photo_ids']),
   );
 }
 

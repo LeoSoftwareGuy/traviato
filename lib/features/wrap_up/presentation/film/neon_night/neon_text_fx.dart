@@ -7,11 +7,17 @@ import 'neon_tokens.dart';
 import 'neon_type.dart';
 
 /// Lays out [text] on one line in [style] (no wrapping).
-TextPainter neonLayout(String text, TextStyle style) => TextPainter(
+TextPainter neonLayout(
+  String text,
+  TextStyle style, {
+  int maxLines = 1,
+  double maxWidth = double.infinity,
+}) => TextPainter(
   text: TextSpan(text: text, style: style),
   textDirection: TextDirection.ltr,
-  maxLines: 1,
-)..layout();
+  maxLines: maxLines,
+  ellipsis: maxWidth.isFinite ? '…' : null,
+)..layout(maxWidth: maxWidth);
 
 /// Paints [draw] through one layer at [alpha], blurred by [sigma] (a
 /// Gaussian's standard deviation; CSS blur radius ÷ 2) when given.
@@ -329,11 +335,18 @@ class NeonChromaticText {
 /// A label box (§5.4a): mono 500 38 px, white on `rgba(5,3,10,.8)`,
 /// padding 10/18, a 1 px white@14 % border.
 class NeonLabelBox {
-  NeonLabelBox(this.text, {double size = 38, this.border})
-    : _text = neonLayout(
-        text,
-        NeonType.mono(size, color: NeonColors.white, letterSpacing: 2),
-      );
+  NeonLabelBox(
+    this.text, {
+    double size = 38,
+    this.border,
+    int maxLines = 1,
+    double maxWidth = double.infinity,
+  }) : _text = neonLayout(
+         text,
+         NeonType.mono(size, color: NeonColors.white, letterSpacing: 2),
+         maxLines: maxLines,
+         maxWidth: maxWidth,
+       );
 
   final String text;
 

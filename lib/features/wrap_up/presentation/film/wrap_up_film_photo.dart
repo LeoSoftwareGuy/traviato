@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/storage_cache_key.dart';
+
 /// A photo inside the film — the Moment print, collage tiles and Flurry
 /// small prints all render through this, and the page precaches with the
 /// same [providerFor], so a precached photo is always the exact cache entry
@@ -29,8 +31,11 @@ class WrapUpFilmPhoto extends StatelessWidget {
   /// white flash, #178). Fit within 1200×1200 (~4.3 MB) still covers the
   /// largest frame — the 698×860 print at its ~1.04 swell — at the 1080×1920
   /// canvas's ≈1:1 device scale, in either orientation.
+  ///
+  /// Cached under the photo's storage path, not the signed link, so a
+  /// re-signed link doesn't download the photo again (#376).
   static ImageProvider providerFor(String url) => ResizeImage(
-    CachedNetworkImageProvider(url),
+    CachedNetworkImageProvider(url, cacheKey: storageCacheKey(url)),
     width: _maxDecodeDimension,
     height: _maxDecodeDimension,
     policy: ResizeImagePolicy.fit,

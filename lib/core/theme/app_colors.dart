@@ -49,6 +49,19 @@ abstract class AppColors {
   // Success / positive — Activities category color.
   static const Color success = Color(0xFF5FBF8E);
 
+  /// Journal timeline (#401, docs/design/journal-notes/): a photo row's dot
+  /// on the rail (notes use [primary]).
+  static const Color timelinePhotoDot = Color(0xFF4B4A63);
+
+  /// The EARLIER NOTE chip's fill: [accentPurple] at 16%.
+  static const Color accentPurpleChip = Color(0x298962C5);
+
+  /// The fill behind a destructive swipe action (a note's Delete, #407).
+  static const Color danger = Color(0xFFE2525F);
+
+  /// Destructive text on a dark sheet (the delete-note confirm, #401).
+  static const Color dangerText = Color(0xFFFF8A94);
+
   // Modal barrier scrim — #07091A @ 72%.
   static const Color scrim = Color(0xB807091A);
   // Wrap-Up Film's own background (docs/design/WRAP_UP_FILM_FLUTTER_SPEC.md `bg`) —

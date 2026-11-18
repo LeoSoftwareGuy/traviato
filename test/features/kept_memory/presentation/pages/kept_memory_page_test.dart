@@ -7,8 +7,8 @@ import 'package:traviato/core/config/router/route_constants.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/bonus/presentation/providers/bonus_task_providers.dart';
-import 'package:traviato/features/journal/domain/entities/day_note_entity.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/domain/entities/journal_note_entity.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/kept_memory/presentation/pages/kept_memory_page.dart';
 import 'package:traviato/features/kept_memory/presentation/pages/kept_memory_viewer_page.dart';
 import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
@@ -21,7 +21,7 @@ import 'package:traviato/features/wrap_up/domain/entities/wrap_up_moment.dart';
 import 'package:traviato/features/wrap_up/presentation/providers/wrap_up_providers.dart';
 
 import '../../../bonus/fakes/fake_bonus_task_repository.dart';
-import '../../../journal/fakes/fake_day_note_repository.dart';
+import '../../../journal/fakes/fake_journal_note_repository.dart';
 import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
@@ -59,17 +59,19 @@ final _photos = [
 ];
 
 final _notes = [
-  buildDayNoteEntity(
+  buildJournalNoteEntity(
     dayDate: DateTime(2026, 8, 12),
     content: 'Before either of us was awake.',
     createdAt: DateTime(2026, 8, 12, 21, 4),
   ),
   // Day 3 has a note and no photos.
-  buildDayNoteEntity(
+  buildJournalNoteEntity(
     id: 'n3',
     dayDate: DateTime(2026, 8, 14),
     content: 'Rain all day. Cards and soup.',
     createdAt: DateTime(2026, 8, 14, 20),
+    // An old one-a-day note: no real time of its own (#402).
+    legacy: true,
   ),
 ];
 
@@ -89,7 +91,7 @@ final _quests = [
 Future<void> _pump(
   WidgetTester tester, {
   List<PhotoEntity>? photos,
-  List<DayNoteEntity>? notes,
+  List<JournalNoteEntity>? notes,
   List<QuestEntity> quests = const [],
   Failure? tripFailure,
   FakeWrapUpRepository? wrapUpRepo,
@@ -129,8 +131,9 @@ Future<void> _pump(
         photoRepositoryProvider.overrideWithValue(
           FakePhotoRepository()..photosResult = Right(photos ?? _photos),
         ),
-        dayNoteRepositoryProvider.overrideWithValue(
-          FakeDayNoteRepository()..notesForTripResult = Right(notes ?? _notes),
+        journalNoteRepositoryProvider.overrideWithValue(
+          FakeJournalNoteRepository()
+            ..notesForTripResult = Right(notes ?? _notes),
         ),
         questRepositoryProvider.overrideWithValue(
           FakeQuestRepository()..questsResult = Right(quests),
@@ -164,7 +167,10 @@ void main() {
     expect(find.text('2 PHOTOS ›'), findsOneWidget);
     // Notes in full, exactly as written, with their time.
     expect(find.text('“Before either of us was awake.”'), findsOneWidget);
-    expect(find.text('21:04'), findsOneWidget);
+    // The phone's clock: 12-hour in tests.
+    expect(find.text('9:04 PM'), findsOneWidget);
+    expect(find.text('EARLIER NOTE'), findsOneWidget);
+    expect(find.text('8:00 PM'), findsNothing);
     expect(find.text('KEPT FOREVER · SINCE 17 AUG 2026'), findsOneWidget);
     // The film's length, once its schedule is known.
     expect(

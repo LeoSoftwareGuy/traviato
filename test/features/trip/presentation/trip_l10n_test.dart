@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/trip/presentation/pages/create_memory_page.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 import 'package:traviato/features/trip/presentation/widgets/delete_memory_sheet.dart';
 
 import '../../../helpers/localized_app.dart';
-import '../../journal/fakes/fake_day_note_repository.dart';
+import '../../journal/fakes/fake_journal_note_repository.dart';
 import '../../photo/fakes/fake_photo_repository.dart';
 import '../fakes/fake_trip_repository.dart';
 
@@ -67,10 +67,10 @@ void main() {
                 for (var i = 0; i < 5; i++) buildPhotoEntity(id: 'p$i'),
               ]),
           ),
-          dayNoteRepositoryProvider.overrideWithValue(
-            FakeDayNoteRepository()
+          journalNoteRepositoryProvider.overrideWithValue(
+            FakeJournalNoteRepository()
               ..notesForTripResult = Right([
-                for (var i = 0; i < 3; i++) buildDayNoteEntity(id: 'n$i'),
+                for (var i = 0; i < 3; i++) buildJournalNoteEntity(id: 'n$i'),
               ]),
           ),
         ],

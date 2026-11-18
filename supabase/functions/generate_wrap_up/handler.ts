@@ -58,7 +58,7 @@ import {
   type DirectorRecord,
   isDirectorRecord,
 } from "./director.ts";
-import { buildSkyContent } from "./sky_story.ts";
+import { alwaysWithoutPage, buildSkyContent } from "./sky_story.ts";
 import { buildGoldenVowsContent } from "./golden_vows.ts";
 import { buildNeonNightContent } from "./neon_night.ts";
 
@@ -288,6 +288,17 @@ export async function handleRequest(
     directorOn ? currentSkyStory(director, tripData) : null,
     isDirectorRecord(director) ? director.hero_scores ?? {} : {},
   );
+  if (sky) {
+    // More Always picks than Sky Story's pages hold: they're in the
+    // mosaic instead (#378's known limit).
+    const withoutPage = alwaysWithoutPage(tripData, sky);
+    if (withoutPage.length > 0) {
+      logEvent(deps.log ?? console.error, "sky_always_without_page", {
+        trip_id: tripId,
+        count: withoutPage.length,
+      });
+    }
+  }
   const goldenVows = directorOn
     ? goldenVowsContentFor(director, tripData)
     : null;

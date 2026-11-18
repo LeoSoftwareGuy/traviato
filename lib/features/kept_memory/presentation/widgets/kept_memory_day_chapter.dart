@@ -82,7 +82,14 @@ class KeptMemoryDayChapter extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  KeptMemoryLabels.noteTime(note.createdAt),
+                  // An old one-a-day note has no real time of its own.
+                  note.legacy
+                      ? context.l10n.timeline_earlierNote.toUpperCase()
+                      : KeptMemoryLabels.noteTime(
+                          note.takenAt,
+                          context.l10n.localeName,
+                          use24h: MediaQuery.alwaysUse24HourFormatOf(context),
+                        ),
                   style: AppTypography.mono.copyWith(
                     fontSize: 9,
                     color: AppColors.textTertiary,

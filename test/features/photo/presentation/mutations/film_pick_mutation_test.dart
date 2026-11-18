@@ -7,7 +7,7 @@ import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/core/events/global_event.dart';
 import 'package:traviato/core/events/global_event_bus.dart';
 import 'package:traviato/features/journal/presentation/controllers/journal_controller.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/domain/entities/film_pick.dart';
 import 'package:traviato/features/photo/domain/entities/photo_entity.dart';
 import 'package:traviato/features/photo/presentation/mutations/photo_mutations.dart';
@@ -15,7 +15,7 @@ import 'package:traviato/features/photo/presentation/providers/photo_providers.d
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 
-import '../../../journal/fakes/fake_day_note_repository.dart';
+import '../../../journal/fakes/fake_journal_note_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
 import '../../fakes/fake_photo_repository.dart';
@@ -64,7 +64,9 @@ Future<ProviderContainer> _pump(
       overrides: [
         tripRepositoryProvider.overrideWithValue(FakeTripRepository()),
         photoRepositoryProvider.overrideWithValue(photoRepo),
-        dayNoteRepositoryProvider.overrideWithValue(FakeDayNoteRepository()),
+        journalNoteRepositoryProvider.overrideWithValue(
+          FakeJournalNoteRepository(),
+        ),
         questRepositoryProvider.overrideWithValue(FakeQuestRepository()),
       ],
       child: Builder(

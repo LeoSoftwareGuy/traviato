@@ -5,11 +5,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/constants/supabase_constants.dart';
 import '../../../../core/errors/exceptions.dart';
-import '../models/day_note_model.dart';
-import 'day_note_remote_data_source.dart';
+import '../models/journal_note_model.dart';
+import 'journal_note_remote_data_source.dart';
 
-class SupabaseDayNoteRemoteDataSource implements DayNoteRemoteDataSource {
-  SupabaseDayNoteRemoteDataSource({required SupabaseClient client})
+class SupabaseJournalNoteRemoteDataSource
+    implements JournalNoteRemoteDataSource {
+  SupabaseJournalNoteRemoteDataSource({required SupabaseClient client})
     : _client = client;
 
   final SupabaseClient _client;
@@ -23,37 +24,19 @@ class SupabaseDayNoteRemoteDataSource implements DayNoteRemoteDataSource {
   }
 
   @override
-  Future<DayNoteModel?> getNote({
+  Future<List<JournalNoteModel>> getNotesForDay({
     required String tripId,
     required DateTime dayDate,
   }) async {
-    _guardAuthenticated();
-    try {
-      final row = await _client
-          .from(Tables.dayNotes)
-          .select()
-          .eq('trip_id', tripId)
-          .eq('day_date', _dateOnly(dayDate))
-          .maybeSingle();
-      return row == null ? null : DayNoteModel.fromJson(row);
-    } on PostgrestException catch (e) {
-      throw _mapPostgrestException(e);
-    } on SocketException {
-      throw const NetworkException();
-    } catch (e) {
-      throw UnknownException(message: e.toString());
-    }
-  }
-
-  @override
-  Future<List<DayNoteModel>> getNotesForTrip(String tripId) async {
     _guardAuthenticated();
     try {
       final rows = await _client
-          .from(Tables.dayNotes)
+          .from(Tables.journalNotes)
           .select()
-          .eq('trip_id', tripId);
-      return rows.map(DayNoteModel.fromJson).toList(growable: false);
+          .eq('trip_id', tripId)
+          .eq('day_date', _dateOnly(dayDate))
+          .order('taken_at');
+      return rows.map(JournalNoteModel.fromJson).toList(growable: false);
     } on PostgrestException catch (e) {
       throw _mapPostgrestException(e);
     } on SocketException {
@@ -64,43 +47,54 @@ class SupabaseDayNoteRemoteDataSource implements DayNoteRemoteDataSource {
   }
 
   @override
-  Future<DayNoteModel> upsertNote({
+  Future<List<JournalNoteModel>> getNotesForTrip(String tripId) async {
+    _guardAuthenticated();
+    try {
+      final rows = await _client
+          .from(Tables.journalNotes)
+          .select()
+          .eq('trip_id', tripId)
+          .order('taken_at');
+      return rows.map(JournalNoteModel.fromJson).toList(growable: false);
+    } on PostgrestException catch (e) {
+      throw _mapPostgrestException(e);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<JournalNoteModel> createNote({
     required String id,
     required String tripId,
     required DateTime dayDate,
+    required DateTime takenAt,
     required String content,
+    required bool dictated,
+    String? photoId,
   }) async {
     _guardAuthenticated();
     try {
-      // Update-then-insert rather than a Postgres upsert, so an edit keeps
-      // its original row id instead of the payload's id overwriting it on
-      // conflict.
-      final updated = await _client
-          .from(Tables.dayNotes)
-          .update({'content': content})
-          .eq('trip_id', tripId)
-          .eq('day_date', _dateOnly(dayDate))
-          .select();
-      final DayNoteModel model;
-      if (updated.isNotEmpty) {
-        model = DayNoteModel.fromJson(updated.first);
-      } else {
-        final inserted = await _client
-            .from(Tables.dayNotes)
-            .insert({
-              'id': id,
-              'trip_id': tripId,
-              'day_date': _dateOnly(dayDate),
-              'content': content,
-            })
-            .select()
-            .single();
-        model = DayNoteModel.fromJson(inserted);
-      }
+      final inserted = await _client
+          .from(Tables.journalNotes)
+          .insert({
+            'id': id,
+            'trip_id': tripId,
+            'day_date': _dateOnly(dayDate),
+            'taken_at': takenAt.toUtc().toIso8601String(),
+            'edited_at': takenAt.toUtc().toIso8601String(),
+            'content': content,
+            'dictated': dictated,
+            'photo_id': ?photoId,
+          })
+          .select()
+          .single();
+      final model = JournalNoteModel.fromJson(inserted);
 
-      // Idempotent via the ledger's unique (user_id, source, source_id)
-      // constraint — the note keeps its original id across edits, so only
-      // the first save actually inserts a row.
+      // Idempotent via the ledger's unique (user_id, source, source_id);
+      // the server skips it once the day has 3 note-stars.
       await _awardPointsQuietly(sourceId: model.id, tripId: tripId);
 
       return model;
@@ -114,10 +108,36 @@ class SupabaseDayNoteRemoteDataSource implements DayNoteRemoteDataSource {
   }
 
   @override
+  Future<JournalNoteModel> updateNote({
+    required String id,
+    required String content,
+    required bool dictated,
+  }) async {
+    _guardAuthenticated();
+    try {
+      // taken_at, legacy and edited_at are kept or stamped by a trigger.
+      final updated = await _client
+          .from(Tables.journalNotes)
+          .update({'content': content, 'dictated': dictated})
+          .eq('id', id)
+          .select()
+          .single();
+      return JournalNoteModel.fromJson(updated);
+    } on PostgrestException catch (e) {
+      throw _mapPostgrestException(e);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
   Future<void> deleteNote(String id) async {
     _guardAuthenticated();
     try {
-      await _client.rpc(DBFunctions.deleteDayNote, params: {'p_note_id': id});
+      // A plain RLS delete: the note's star stays (#397).
+      await _client.from(Tables.journalNotes).delete().eq('id', id);
     } on PostgrestException catch (e) {
       throw _mapPostgrestException(e);
     } on SocketException {

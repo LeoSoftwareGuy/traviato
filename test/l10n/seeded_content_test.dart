@@ -100,6 +100,24 @@ void main() {
         m[2]!: _unquote(m[1]!),
     };
 
+    // Later rewordings of a description (#397), in migration order.
+    final descriptions = <String, String>{};
+    final names =
+        Directory('supabase/migrations')
+            .listSync()
+            .map((f) => f.uri.pathSegments.last)
+            .where((n) => n.endsWith('.sql'))
+            .toList()
+          ..sort();
+    for (final name in names) {
+      for (final m in RegExp(
+        r"update public\.achievement_templates\s+set description = "
+        r"'((?:[^']|'')*)'\s+where code = '([a-z_]+)';",
+      ).allMatches(_sql(name))) {
+        descriptions[m[2]!] = _unquote(m[1]!);
+      }
+    }
+
     test('every achievement has English copy equal to the DB', () {
       expect(seeded, hasLength(8));
       for (final row in seeded) {
@@ -108,7 +126,7 @@ void main() {
           id: 1,
           code: code,
           title: renames[code] ?? _unquote(row[2]!),
-          description: _unquote(row[3]!),
+          description: descriptions[code] ?? _unquote(row[3]!),
           metric: AchievementMetric.trips,
           target: 1,
           position: 1,

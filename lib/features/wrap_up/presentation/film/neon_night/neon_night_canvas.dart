@@ -57,7 +57,7 @@ class NeonNightCanvas extends StatefulWidget {
       for (final chapter in story.chapters)
         NnChapterShape(
           moments: [for (final moment in chapter.moments) moment.type],
-          photos: chapter.photos.length,
+          photos: chapter.cardPhotos.length,
         ),
     ],
     hasPlan: story.hasPlan,

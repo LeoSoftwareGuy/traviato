@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/theme/app_theme.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
 import 'package:traviato/features/trip/presentation/widgets/delete_memory_sheet.dart';
 
-import '../../../journal/fakes/fake_day_note_repository.dart';
+import '../../../journal/fakes/fake_journal_note_repository.dart';
 import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../fakes/fake_trip_repository.dart';
 
@@ -16,7 +16,7 @@ Future<void> _pump(
   WidgetTester tester, {
   required FakeTripRepository tripRepo,
   FakePhotoRepository? photoRepo,
-  FakeDayNoteRepository? noteRepo,
+  FakeJournalNoteRepository? noteRepo,
   String tripName = 'Atlas high road',
 }) async {
   await tester.pumpWidget(
@@ -26,8 +26,8 @@ Future<void> _pump(
         photoRepositoryProvider.overrideWithValue(
           photoRepo ?? FakePhotoRepository(),
         ),
-        dayNoteRepositoryProvider.overrideWithValue(
-          noteRepo ?? FakeDayNoteRepository(),
+        journalNoteRepositoryProvider.overrideWithValue(
+          noteRepo ?? FakeJournalNoteRepository(),
         ),
       ],
       child: MaterialApp(
@@ -74,8 +74,8 @@ void main() {
         buildPhotoEntity(id: 'p1'),
         buildPhotoEntity(id: 'p2'),
       ]);
-    final noteRepo = FakeDayNoteRepository()
-      ..notesForTripResult = Right([buildDayNoteEntity(id: 'n1')]);
+    final noteRepo = FakeJournalNoteRepository()
+      ..notesForTripResult = Right([buildJournalNoteEntity(id: 'n1')]);
     await _pump(
       tester,
       tripRepo: tripRepo,

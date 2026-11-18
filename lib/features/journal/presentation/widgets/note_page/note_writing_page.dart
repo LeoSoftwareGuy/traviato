@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/l10n/context_l10n.dart';
+import 'attached_polaroid.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import 'note_dictation_controller.dart';
@@ -29,6 +30,7 @@ class NoteWritingPage extends StatelessWidget {
     required this.languageCode,
     required this.isLanguageAvailable,
     required this.onLanguageTap,
+    this.onPhoto,
     super.key,
   });
 
@@ -51,6 +53,9 @@ class NoteWritingPage extends StatelessWidget {
   final String languageCode;
   final bool isLanguageAvailable;
   final VoidCallback onLanguageTap;
+
+  /// The photo this note is written on (#402).
+  final NotePhotoAttachment? onPhoto;
 
   @override
   Widget build(BuildContext context) {
@@ -78,9 +83,12 @@ class NoteWritingPage extends StatelessWidget {
                 ),
                 Expanded(
                   child: _RuledScroll(
-                    hintText: isLanguageAvailable
-                        ? context.l10n.note_bodyHint
-                        : context.l10n.note_bodyHintUnavailable,
+                    hintText: !isLanguageAvailable
+                        ? context.l10n.note_bodyHintUnavailable
+                        : onPhoto != null
+                        ? context.l10n.note_photoHint
+                        : context.l10n.note_bodyHint,
+                    onPhoto: onPhoto,
                     controller: controller,
                     focusNode: focusNode,
                     onFieldTap: onFieldTap,
@@ -166,9 +174,11 @@ class _RuledScroll extends StatelessWidget {
     required this.controller,
     required this.focusNode,
     required this.onFieldTap,
+    this.onPhoto,
   });
 
   final String hintText;
+  final NotePhotoAttachment? onPhoto;
   final TextEditingController controller;
   final FocusNode focusNode;
   final VoidCallback onFieldTap;
@@ -201,27 +211,30 @@ class _RuledScroll extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(30, 0, 22, 0),
               // Keeps the field at its own height (on the rule grid) rather
               // than stretched to the page's minHeight.
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: TextField(
-                  key: const Key('note-page-field'),
-                  controller: controller,
-                  focusNode: focusNode,
-                  onTap: onFieldTap,
-                  maxLines: null,
-                  minLines: _minFieldLines,
-                  keyboardType: TextInputType.multiline,
-                  textCapitalization: TextCapitalization.sentences,
-                  style: bodyStyle,
-                  strutStyle: AppTypography.noteBodyStrut,
-                  cursorColor: AppColors.paperInk,
-                  decoration: InputDecoration.collapsed(
-                    hintText: hintText,
-                    hintStyle: bodyStyle.copyWith(
-                      color: AppColors.tint(AppColors.paperInkMuted, .7),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (onPhoto != null) AttachedPolaroid(attachment: onPhoto!),
+                  TextField(
+                    key: const Key('note-page-field'),
+                    controller: controller,
+                    focusNode: focusNode,
+                    onTap: onFieldTap,
+                    maxLines: null,
+                    minLines: _minFieldLines,
+                    keyboardType: TextInputType.multiline,
+                    textCapitalization: TextCapitalization.sentences,
+                    style: bodyStyle,
+                    strutStyle: AppTypography.noteBodyStrut,
+                    cursorColor: AppColors.paperInk,
+                    decoration: InputDecoration.collapsed(
+                      hintText: hintText,
+                      hintStyle: bodyStyle.copyWith(
+                        color: AppColors.tint(AppColors.paperInkMuted, .7),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
           ),

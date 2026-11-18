@@ -83,7 +83,7 @@ void main() {
           currentValue: 1,
           target: 20,
         ).progressLabel,
-        '1 OF 20 NOTES',
+        '1 OF 20 DAYS',
       );
     });
   });

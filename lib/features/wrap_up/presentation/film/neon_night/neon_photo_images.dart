@@ -73,9 +73,9 @@ class NeonPhotoImages implements NeonPhotoSource {
     for (final scene in timeline.scenes) {
       if (scene.spec case final NnChapterCardSpec spec) {
         final chapter = story.chapters[spec.chapter];
-        final sheet = NnContactSheet.forPhotos(chapter.photos.length);
+        final sheet = NnContactSheet.forPhotos(chapter.cardPhotos.length);
         thumbs.addAll([
-          for (var k = 0; k < sheet.tiles.length; k++) chapter.photos[k].id,
+          for (var k = 0; k < sheet.tiles.length; k++) chapter.cardPhotos[k].id,
         ]);
         final timing = NnCardTiming(
           chapterNumber: spec.chapter + 1,
@@ -85,7 +85,7 @@ class NeonPhotoImages implements NeonPhotoSource {
           beat: timeline.beat,
         );
         large.addAll([
-          for (final k in timing.zoomTiles) chapter.photos[k].id,
+          for (final k in timing.zoomTiles) chapter.cardPhotos[k].id,
           for (final moment in chapter.moments)
             for (final photo in moment.photos) photo.id,
         ]);
@@ -93,10 +93,10 @@ class NeonPhotoImages implements NeonPhotoSource {
     }
     // The Note's background is blurred: the small decode is plenty.
     if (story.note?.photo case final photo?) thumbs.add(photo.id);
-    final all = story.allPhotos;
+    final all = story.heartIds;
     final heart = NnHeart(photos: all.length);
     final tiles = {
-      for (var k = 0; k < heart.cells.length; k++) all[heart.photoFor(k)].id,
+      for (var k = 0; k < heart.cells.length; k++) all[heart.photoFor(k)],
     };
     return (
       thumbs: thumbs.toSet().toList(),

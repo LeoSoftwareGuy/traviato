@@ -235,4 +235,74 @@ void main() {
     });
     texts.dispose();
   });
+
+  group('captions (#387)', () {
+    setUpAll(loadNeonNightFonts);
+
+    NnChapter chapter(List<NnPhoto> photos) => NnChapter(
+      title: 'Doors open',
+      from: '22:00',
+      to: '23:00',
+      photos: photos,
+      moments: [NnTimeline(photos)],
+    );
+
+    test("a timeline item shows its caption on one line, else its time", () {
+      final photos = [
+        const NnPhoto(id: 'a', takenAt: '22:10', caption: 'Lost the keys'),
+        const NnPhoto(id: 'b', takenAt: '22:20'),
+        NnPhoto(id: 'c', takenAt: '22:30', caption: 'word ' * 40),
+      ];
+      final texts = NnTimelineTexts(NnTimeline(photos), chapter(photos));
+      String text(int i) => (texts.times[i].$1.text! as TextSpan).text!;
+      expect(text(0), 'Lost the keys');
+      expect(text(1), '22:20');
+      // A long caption is cut to the column.
+      final long = texts.times[2].$1;
+      expect(long.width, lessThanOrEqualTo(NnTimelineLayout.width));
+      expect(long.didExceedMaxLines, isTrue);
+      texts.dispose();
+    });
+
+    test("a zoom's label is the photo's caption, else its time", () {
+      final story = NeonNightFixtures.reference;
+      final first = story.chapters.first;
+      final captioned = NeonNightStory(
+        title: story.title,
+        date: story.date,
+        plan: story.plan,
+        chapters: [
+          NnChapter(
+            title: first.title,
+            from: first.from,
+            to: first.to,
+            photos: [
+              for (final p in first.photos)
+                NnPhoto(
+                  id: p.id,
+                  takenAt: p.takenAt,
+                  caption: 'Caption ${p.id}',
+                ),
+            ],
+            moments: first.moments,
+            note: first.note,
+          ),
+          ...story.chapters.skip(1),
+        ],
+        note: story.note,
+        headline: story.headline,
+        firstName: story.firstName,
+        totals: story.totals,
+      );
+      final texts = NeonNightTexts(captioned, en);
+      final labels = texts.chapters.first.tileLabels;
+      expect(labels, isNotEmpty);
+      for (final MapEntry(:key, :value) in labels.entries) {
+        expect(value.text, 'Caption ${first.photos[key].id}');
+      }
+      final plain = NeonNightTexts(story, en).chapters.first.tileLabels;
+      expect(plain.values.first.text, matches(RegExp(r'^\d\d:\d\d$')));
+      texts.dispose();
+    });
+  });
 }

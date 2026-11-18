@@ -46,9 +46,25 @@ the new range are deleted after a two-step warning. No schema change.
 completed_at?, created_at`. **No per-quest points column** (flat ✦1 rejected the
 mockup's variable values). RLS via parent trip; index (trip_id, day_date).
 
-### `day_notes`
-`id, trip_id (cascade), day_date, content, created_at, updated_at`,
-unique (trip_id, day_date).
+### `journal_notes` (#397, #400)
+`id uuid PK (client-generated), trip_id (cascade), day_date (logical day),
+taken_at, edited_at, content (non-blank), dictated bool, photo_id? → photos
+(on delete set null; same trip, checked in RLS), legacy bool, created_at`.
+Many notes per day, each saved by its own Done and shown at `taken_at`.
+`day_date` is decided by the app when the note is saved, with the shared
+**logical-day rule** (`lib/core/utils/logical_day.dart`): an item from
+00:00 to before 08:00 stays on the previous item's day unless there was a
+gap of ≥ 4 h. Stats, achievements and the film just read `day_date`.
+An update trigger keeps `trip_id`, `taken_at` and `legacy`, and stamps
+`edited_at`. RLS owner-only via the trip; indexes (trip_id, taken_at) and
+photo_id. Stars: ✦1 per new note, at most 3 per day (counted in
+`points_ledger.day_date`); edits and deletes never change stars.
+
+### `day_notes` — dropped (#406)
+The old one-note-per-day table (`unique (trip_id, day_date)`). #400 copied
+every non-empty row into `journal_notes` as one `legacy` note **with the
+same id** (ledger rows, director plans and kept films keep pointing at it),
+`taken_at = edited_at = updated_at`, and made it read-only; #406 dropped it.
 
 ### `photos`
 `id (client-generated), trip_id (cascade), day_date?, storage_path, caption?,
@@ -91,9 +107,14 @@ completed. The daily draw is computed deterministically client-side
 (hash(trip_id, day_date) over eligible templates, phase-filtered, minus the
 10-day repeat set) and inserted idempotently via the unique constraint.
 ### `points_ledger` — values in `award_points` RPC; `trip_id` cascades, so deleting a memory deletes its stars (#247)
+`day_date?` (#400): a note row's day, for the 3-note-stars-a-day cap. A
+deleted note's row stays, so deleting and rewriting can't farm stars;
+`set_trip_dates` removes note stars by this day.
 ### `achievement_templates` / `user_achievements` — unchanged (seeded 8:
 first_adventure, globetrotter, century, star_collector, shutterbug, storyteller
-+ 2 per design; `check_achievements` RPC)
++ 2 per design; `check_achievements` RPC). Storyteller's `notes` metric (and
+`profile_stats_view.notes_count`) counts **days with at least one note**
+since #400, not notes.
 
 ### `wrap_ups` — draft vs frozen (#187)
 `trip_id PK/FK cascade, content jsonb (assembled film), generated_at,
@@ -112,7 +133,18 @@ ai_generation_count int default 0`.
 Post-MVP: `video_path`, `video_status`.
 - `director jsonb?` (#328, Wrap-Up Film v2): the last director run — the
   `plan_version: 2` film plan or why it fell back, token usage + estimated
-  cost. Service-role writes, owner reads (debug Plan inspector). A draft's
+  cost. Service-role writes, owner reads (debug Plan inspector). Since
+  #380 the plan is two strict Anthropic calls: `emit_film_plan` (classic
+  plan, Sky Story, and `special_film`: golden_vows / neon_night / none),
+  then — only for golden_vows or neon_night — that film's section alone
+  (`section_attempts`; usage `call: "section"`). One tool with every
+  film's section compiled to a grammar Anthropic rejected as too large.
+  Since #382 code repairs what it can before checking a section instead
+  of discarding it: Sky Story Always picks the director left off go into
+  free slots, then onto continuation pages (headline null), then in place
+  of Auto photos; Neon Night moment photos from another chapter are
+  dropped, a moment whose count no longer fits takes a type that does, and
+  Always picks join a moment of their chapter. A draft's
   `content` carries `plan_version` + `plan` while that plan still fits.
   Since #345 the record also holds the Sky Story pages (`sky_story`,
   `sky_problems`), every analysed photo's `hero_scores`, and `photo_days` +
@@ -123,7 +155,11 @@ Post-MVP: `video_path`, `video_status`.
   with photos — per page its days, photo count, headline (null = the app
   shows the place or "Day N"), hero + up to 4 extra photo ids, the note's id
   and text, and a director's sky line; plus title, first name (signature),
-  moment count and up to 60 mosaic photo ids. The director's pages while they
+  moment count and up to 60 mosaic photo ids. A page may repeat the
+  previous page's days: a continuation page for a day with more Always
+  photos than one page shows (#378). The mosaic is Auto photos plus Always
+  photos without a page, topped up with Always photos below 12. The
+  director's pages while they
   still fit the memory, else built by code. The app plays Sky Story whenever
   it's there. A film kept as a Sky Story keeps it, and "Rebuild film"
   rebuilds its pages too (no AI call); a film kept before Sky Story never
@@ -137,7 +173,9 @@ Post-MVP: `video_path`, `video_status`.
   none), 2–6 heroes (photo, label, `taken_at`, note = caption or an exact
   excerpt of that day's note), 1–4 chapters of 3 photos with an A/B/C
   layout, a carousel of 6–12 unused photos (or none), up to 200 heart
-  photos, the moment count and the end line. No section = Sky Story plays.
+  photos (#378: those without a hero, chapter or carousel slot, Always
+  photos only to top up below 12), the moment count and the end line. Every
+  Always photo is a hero, a chapter photo or on the carousel. No section = Sky Story plays.
   A film kept as Golden Vows rebuilds it while the section fits, else plays
   its Sky Story; no kept film gains one. The edge function reads
   `checklist_items` for this (service-role select grant).
@@ -149,12 +187,36 @@ Post-MVP: `video_path`, `video_status`.
   (title, photos with `taken_at` — each chapter runs from its first photo
   to the next one's, so new photos join a chapter — the card's typed line as
   an exact excerpt of a note or null, 1–2 moments: split / burst / timeline
-  / peak with their photos and a split's place), the note scene (an exact
+  with their photos and a split's place — no peak since #386: an older
+  plan's peak plays as a split, burst or timeline, and a timeline is
+  filled up to 6 with its chapter's unused photos). Since #390 the content
+  merges neighbouring chapters until each has ≥ 8 photos (the first
+  one's title, first note line; its first moment plus one timeline of the
+  others'), gives each card its own `card_photo_ids` (up to 4, captioned
+  first — never a moment's photo), plays a timeline only with ≥ 5 photos
+  (else a split or burst), and keeps plan rows only when there are ≥ 3.
+  Each chapter photo carries its trimmed `caption` (#387) for the zoom and
+  timeline labels, the note scene (an exact
   excerpt, its number among the notes, when written, a background photo) or
-  null, the director's headline or null, the first name and the totals. Up
-  to 200 photos (more are sampled evenly). The app sends
+  null, the director's headline or null, the first name, the totals and
+  `heart_photo_ids` (#378: the Finale's heart, photos without a moment,
+  Always photos only to top up below 12; absent in older content = every
+  chapter photo). Every Always photo is in a moment or is the note scene's
+  photo. Up to 200 photos (more are sampled evenly). The app sends
   `utc_offset_minutes` so the director reads photo times as local times.
   Kept films follow Golden Vows' rules.
+- **Healing a stored section** (#393, no schema change): when a photo is
+  deleted or left out, or a note reworded, after the director ran, the
+  `golden_vows` / `neon_night` section is fitted to the memory in code on
+  open (no AI call) instead of being discarded — which used to switch the
+  film to Sky Story for good, as the director only re-runs when photo days
+  change. Neon Night: gone photos leave their moments (which retype), a
+  chapter whose first photo is gone starts at its earliest remaining
+  moment photo, an emptied chapter folds into the one before, the note
+  scene loses a gone photo. Golden Vows: a gone hero is dropped, a gone
+  chapter photo is replaced by an unused one that keeps time order, else
+  the chapter goes. Lines whose note no longer says those words are
+  dropped. Only a section that still breaks the rules falls back.
 
 ### `photo_analysis` (#328)
 `photo_id PK/FK photos cascade, trip_id FK cascade, storage_path (the file

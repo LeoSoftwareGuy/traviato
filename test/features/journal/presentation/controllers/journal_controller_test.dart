@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:traviato/features/journal/presentation/controllers/journal_controller.dart';
 import 'package:traviato/features/journal/presentation/controllers/journal_state.dart';
-import 'package:traviato/features/journal/presentation/providers/day_note_providers.dart';
+import 'package:traviato/features/journal/presentation/providers/journal_note_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/quest/presentation/providers/quest_providers.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
@@ -11,12 +11,12 @@ import 'package:traviato/features/trip/presentation/providers/trip_providers.dar
 import '../../../photo/fakes/fake_photo_repository.dart';
 import '../../../quest/fakes/fake_quest_repository.dart';
 import '../../../trip/fakes/fake_trip_repository.dart';
-import '../../fakes/fake_day_note_repository.dart';
+import '../../fakes/fake_journal_note_repository.dart';
 
 ProviderContainer _buildContainer({
   required FakeTripRepository tripRepo,
   required FakePhotoRepository photoRepo,
-  required FakeDayNoteRepository noteRepo,
+  required FakeJournalNoteRepository noteRepo,
   FakeQuestRepository? questRepo,
 }) {
   return ProviderContainer(
@@ -24,7 +24,7 @@ ProviderContainer _buildContainer({
     overrides: [
       tripRepositoryProvider.overrideWithValue(tripRepo),
       photoRepositoryProvider.overrideWithValue(photoRepo),
-      dayNoteRepositoryProvider.overrideWithValue(noteRepo),
+      journalNoteRepositoryProvider.overrideWithValue(noteRepo),
       questRepositoryProvider.overrideWithValue(
         questRepo ?? FakeQuestRepository(),
       ),
@@ -33,7 +33,7 @@ ProviderContainer _buildContainer({
 }
 
 void main() {
-  test('loads the trip, photos, and the current day note', () async {
+  test("loads the trip, photos and the whole trip's notes", () async {
     final today = DateTime.now();
     final tripRepo = FakeTripRepository()
       ..tripCardResult = Right(
@@ -45,8 +45,21 @@ void main() {
       );
     final photoRepo = FakePhotoRepository()
       ..photosResult = Right([buildPhotoEntity(id: 'p1')]);
-    final noteRepo = FakeDayNoteRepository()
-      ..getNoteResult = Right(buildDayNoteEntity(content: 'Great day.'));
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final noteRepo = FakeJournalNoteRepository()
+      ..notesForTripResult = Right([
+        buildJournalNoteEntity(
+          id: 'n2',
+          dayDate: todayDate,
+          content: 'Later.',
+          createdAt: todayDate.add(const Duration(hours: 9)),
+        ),
+        buildJournalNoteEntity(
+          dayDate: todayDate,
+          content: 'Great day.',
+          createdAt: todayDate.add(const Duration(hours: 8)),
+        ),
+      ]);
     final container = _buildContainer(
       tripRepo: tripRepo,
       photoRepo: photoRepo,
@@ -57,8 +70,11 @@ void main() {
     final state = await container.read(journalControllerProvider('t1').future);
 
     expect(state.photos, hasLength(1));
-    expect(state.currentNote?.content, 'Great day.');
-    expect(noteRepo.getNoteCallCount, 1);
+    expect(state.notesForCurrentDay.map((n) => n.content), [
+      'Great day.',
+      'Later.',
+    ]);
+    expect(noteRepo.getNoteCallCount, 0);
     expect(noteRepo.getNotesForTripCallCount, 1);
   });
 
@@ -77,7 +93,7 @@ void main() {
     final container = _buildContainer(
       tripRepo: tripRepo,
       photoRepo: FakePhotoRepository(),
-      noteRepo: FakeDayNoteRepository(),
+      noteRepo: FakeJournalNoteRepository(),
     );
     addTearDown(container.dispose);
 
@@ -87,7 +103,7 @@ void main() {
   });
 
   test(
-    'applyNoteUpserted keeps the all-trip notes count in sync for wrap-up '
+    'applyNoteSaved keeps the all-trip notes count in sync for wrap-up '
     'eligibility (#103/#140)',
     () async {
       final today = DateTime.now();
@@ -107,7 +123,7 @@ void main() {
         ..photosResult = Right([
           for (var i = 0; i < 5; i++) buildPhotoEntity(id: 'p$i'),
         ]);
-      final noteRepo = FakeDayNoteRepository();
+      final noteRepo = FakeJournalNoteRepository();
       final container = _buildContainer(
         tripRepo: tripRepo,
         photoRepo: photoRepo,
@@ -120,16 +136,15 @@ void main() {
       final notifier = container.read(journalControllerProvider('t1').notifier);
       // A finished memory opens on Day 1 (#163); the wrap-up CTA lives on
       // the last day (#107).
-      await notifier.selectDay(todayDate.subtract(const Duration(days: 1)));
+      notifier.selectDay(todayDate.subtract(const Duration(days: 1)));
 
       var state = container.read(journalControllerProvider('t1')).value!;
       expect(state.wrapUpAvailability, WrapUpAvailability.locked);
 
       // Saving a note — as if it happened before the trip ended — should
       // unlock wrap-up without needing a full reload.
-      notifier.applyNoteUpserted(
-        todayDate.subtract(const Duration(days: 1)),
-        buildDayNoteEntity(
+      notifier.applyNoteSaved(
+        buildJournalNoteEntity(
           id: 'n1',
           dayDate: todayDate.subtract(const Duration(days: 1)),
         ),
@@ -140,59 +155,75 @@ void main() {
       expect(state.wrapUpAvailability, WrapUpAvailability.unlocked);
 
       // Deleting it (#276) clears the day and locks wrap-up again.
-      notifier.applyNoteDeleted(todayDate.subtract(const Duration(days: 1)));
+      expect(notifier.applyNoteDeleted('n1')?.id, 'n1');
       state = container.read(journalControllerProvider('t1')).value!;
       expect(state.notes, isEmpty);
-      expect(state.currentNote, isNull);
+      expect(state.notesForCurrentDay, isEmpty);
       expect(state.wrapUpAvailability, WrapUpAvailability.locked);
     },
   );
 
-  test('selectDay switches the day and lazily fetches its note', () async {
-    // A wide range so "today" (the initial day) lands strictly between
-    // start and end — keeps this test's manual selectDay call (to a past
-    // day, since future days are locked per #118) independent of the
-    // initial fetch build() already did.
+  test('selectDay switches the day without fetching', () async {
     final today = DateTime.now();
-    final start = DateTime(
-      today.year,
-      today.month,
-      today.day,
-    ).subtract(const Duration(days: 10));
-    final end = DateTime(
-      today.year,
-      today.month,
-      today.day,
-    ).add(const Duration(days: 10));
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final start = todayDate.subtract(const Duration(days: 10));
+    final end = todayDate.add(const Duration(days: 10));
     final tripRepo = FakeTripRepository()
       ..tripCardResult = Right(
         buildTripCard(id: 't1', startDate: start, endDate: end),
       );
-    final photoRepo = FakePhotoRepository();
-    final noteRepo = FakeDayNoteRepository();
+    final noteRepo = FakeJournalNoteRepository()
+      ..notesForTripResult = Right([
+        buildJournalNoteEntity(dayDate: start, content: 'Day one.'),
+      ]);
     final container = _buildContainer(
       tripRepo: tripRepo,
-      photoRepo: photoRepo,
+      photoRepo: FakePhotoRepository(),
       noteRepo: noteRepo,
     );
     addTearDown(container.dispose);
     container.listen(journalControllerProvider('t1'), (_, _) {});
 
     await container.read(journalControllerProvider('t1').future);
-    final notifier = container.read(journalControllerProvider('t1').notifier);
-    final callsBeforeSwitch = noteRepo.getNoteCallCount;
-
-    noteRepo.getNoteResult = Right(buildDayNoteEntity(content: 'Day two.'));
-    await notifier.selectDay(start);
+    container.read(journalControllerProvider('t1').notifier).selectDay(start);
 
     final state = container.read(journalControllerProvider('t1')).value!;
     expect(state.currentDayDate, start);
-    expect(state.currentNote?.content, 'Day two.');
-    expect(noteRepo.getNoteCallCount, callsBeforeSwitch + 1);
+    expect(state.notesForCurrentDay.single.content, 'Day one.');
+    expect(noteRepo.getNotesForTripCallCount, 1);
+  });
 
-    // Switching back to the already-cached day doesn't refetch.
-    await notifier.selectDay(start);
-    expect(noteRepo.getNoteCallCount, callsBeforeSwitch + 1);
+  test('opens on the evening before after midnight (#397)', () async {
+    // Built around the real clock: the evening before `now` has a photo
+    // 30 min ago only if that's before midnight — so check the rule by its
+    // own helper instead of a wall-clock assertion.
+    final now = DateTime.now();
+    final todayDate = DateTime(now.year, now.month, now.day);
+    final yesterday = todayDate.subtract(const Duration(days: 1));
+    final tripRepo = FakeTripRepository()
+      ..tripCardResult = Right(
+        buildTripCard(
+          id: 't1',
+          startDate: yesterday,
+          endDate: todayDate.add(const Duration(days: 1)),
+        ),
+      );
+    final recent = now.subtract(const Duration(minutes: 30));
+    final noteRepo = FakeJournalNoteRepository()
+      ..notesForTripResult = Right([
+        buildJournalNoteEntity(dayDate: yesterday, createdAt: recent),
+      ]);
+    final container = _buildContainer(
+      tripRepo: tripRepo,
+      photoRepo: FakePhotoRepository(),
+      noteRepo: noteRepo,
+    );
+    addTearDown(container.dispose);
+
+    final state = await container.read(journalControllerProvider('t1').future);
+
+    final expected = now.hour < 8 ? yesterday : todayDate;
+    expect(state.currentDayDate, expected);
   });
 
   test('selectDay ignores a future day — locked per #118', () async {
@@ -212,7 +243,7 @@ void main() {
         buildTripCard(id: 't1', startDate: start, endDate: end),
       );
     final photoRepo = FakePhotoRepository();
-    final noteRepo = FakeDayNoteRepository();
+    final noteRepo = FakeJournalNoteRepository();
     final container = _buildContainer(
       tripRepo: tripRepo,
       photoRepo: photoRepo,
@@ -224,24 +255,20 @@ void main() {
     final initial = await container.read(
       journalControllerProvider('t1').future,
     );
-    final notifier = container.read(journalControllerProvider('t1').notifier);
-    final callsBeforeSwitch = noteRepo.getNoteCallCount;
-
-    await notifier.selectDay(end);
+    container.read(journalControllerProvider('t1').notifier).selectDay(end);
 
     final state = container.read(journalControllerProvider('t1')).value!;
     expect(state.currentDayDate, initial.currentDayDate);
-    expect(noteRepo.getNoteCallCount, callsBeforeSwitch);
   });
 
-  test('applyNoteUpserted updates the cached note for that day', () async {
+  test('applyNoteSaved adds a new note and replaces an edited one', () async {
     final start = DateTime(2026, 8, 18);
     final tripRepo = FakeTripRepository()
       ..tripCardResult = Right(
         buildTripCard(id: 't1', startDate: start, endDate: start),
       );
     final photoRepo = FakePhotoRepository();
-    final noteRepo = FakeDayNoteRepository();
+    final noteRepo = FakeJournalNoteRepository();
     final container = _buildContainer(
       tripRepo: tripRepo,
       photoRepo: photoRepo,
@@ -253,11 +280,20 @@ void main() {
     await container.read(journalControllerProvider('t1').future);
     final notifier = container.read(journalControllerProvider('t1').notifier);
 
-    final note = buildDayNoteEntity(dayDate: start, content: 'Updated.');
-    notifier.applyNoteUpserted(start, note);
+    notifier
+      ..applyNoteSaved(buildJournalNoteEntity(dayDate: start, content: 'A.'))
+      ..applyNoteSaved(
+        buildJournalNoteEntity(id: 'n2', dayDate: start, content: 'B.'),
+      )
+      ..applyNoteSaved(
+        buildJournalNoteEntity(dayDate: start, content: 'A, edited.'),
+      );
 
     final state = container.read(journalControllerProvider('t1')).value!;
-    expect(state.currentNote?.content, 'Updated.');
+    expect(state.notesForDay(start).map((n) => n.content).toSet(), {
+      'A, edited.',
+      'B.',
+    });
   });
 
   group('photo delete/restore (#165)', () {
@@ -278,7 +314,7 @@ void main() {
             buildPhotoEntity(id: 'p2'),
             buildPhotoEntity(id: 'p3'),
           ]),
-        noteRepo: FakeDayNoteRepository(),
+        noteRepo: FakeJournalNoteRepository(),
       );
       await container.read(journalControllerProvider('t1').future);
       return container;

@@ -19,6 +19,7 @@ import {
   sortPhotosChronologically,
   spreadEvenly,
 } from "./assemble.ts";
+import { decorativePhotos } from "./decorative.ts";
 import { bannedPhraseIn, cleanLine } from "./film_plan.ts";
 
 export const GV_VERSION = 1;
@@ -233,6 +234,10 @@ export const GOLDEN_VOWS_PROMPT_RULES = [
   "- No photo twice across heroes and chapters. Photos used nowhere else ",
   "fill the carousel page; give it a title and line, or null if fewer ",
   `than ${MIN_GV_CAROUSEL} photos are left.\n`,
+  "- Every must_include photo is a hero, a chapter photo or left for the ",
+  `carousel (which shows up to ${MAX_GV_CAROUSEL}, must_include first, `,
+  `and only with ${MIN_GV_CAROUSEL} or more photos left over). If the `,
+  "carousel can't show it, make it a hero or put it in a chapter.\n",
   "- occasion_line, titles, lines and end_line: warm and simple, in the ",
   "occasion's tone, in the film's language.",
 ].join("");
@@ -244,6 +249,9 @@ export interface GvCheckContext {
   photoOrder: ReadonlyMap<string, number>;
   photoDates: ReadonlyMap<string, string | null>;
   excludedIds: ReadonlySet<string>;
+  // "Always" picks (#294): each a hero, a chapter photo or in the
+  // carousel (#378).
+  mustIncludeIds: ReadonlySet<string>;
   notes: ReadonlyMap<string, { day_date: string; content: string }>;
 }
 
@@ -254,7 +262,10 @@ export function gvPhotos(tripData: TripData): Photo[] {
   );
 }
 
-export function gvCheckContext(tripData: TripData): GvCheckContext {
+export function gvCheckContext(
+  tripData: TripData,
+  notRequiredIds: ReadonlySet<string> = new Set(),
+): GvCheckContext {
   const photos = gvPhotos(tripData);
   return {
     photoOrder: new Map(photos.map((p, i) => [p.id, i])),
@@ -263,6 +274,11 @@ export function gvCheckContext(tripData: TripData): GvCheckContext {
       tripData.photos.filter((p) => p.use_in_wrap_up === false).map((p) =>
         p.id
       ),
+    ),
+    mustIncludeIds: new Set(
+      photos.filter((p) =>
+        p.use_in_wrap_up === true && !notRequiredIds.has(p.id)
+      ).map((p) => p.id),
     ),
     notes: new Map(
       tripData.notes.filter((n) => n.id).map((n) => [
@@ -461,6 +477,34 @@ export function describeGoldenVowsProblems(
       );
     }
   }
+
+  // Every Always pick a hero, a chapter photo or in the carousel (#378).
+  // The carousel takes leftover Always picks first, up to MAX_GV_CAROUSEL,
+  // and only plays with MIN_GV_CAROUSEL or more photos left over. Only
+  // once every slot holds an Always pick may the rest go without one.
+  const always = [...context.mustIncludeIds];
+  const leftoverAlways = always.filter((id) => !used.has(id));
+  if (leftoverAlways.length > 0) {
+    const leftover = [...context.photoOrder.keys()].filter((id) =>
+      !used.has(id)
+    );
+    const carouselOn = carousel !== null && carousel !== undefined &&
+      leftover.length >= MIN_GV_CAROUSEL;
+    const inCarousel = carouselOn
+      ? Math.min(leftoverAlways.length, MAX_GV_CAROUSEL)
+      : 0;
+    const shown = always.length - leftoverAlways.length + inCarousel;
+    const slots = MAX_GV_HEROES + MAX_GV_CHAPTERS * GV_CHAPTER_PHOTOS +
+      MAX_GV_CAROUSEL;
+    if (inCarousel < leftoverAlways.length && shown < slots) {
+      const id = leftoverAlways[inCarousel];
+      problems.push(
+        carouselOn
+          ? `golden_vows: photo "${id}" is marked Always but is no hero or chapter photo, and the carousel is full`
+          : `golden_vows: photo "${id}" is marked Always but is no hero or chapter photo, and there's no carousel to show it`,
+      );
+    }
+  }
   return problems;
 }
 
@@ -544,6 +588,91 @@ export function repairGoldenVows(
   }
   if (gv.carousel === undefined) gv.carousel = null;
   return gv;
+}
+
+// A stored section healed to the memory as it is now (#393): a photo
+// deleted or left out since the director ran no longer throws the whole
+// album away. A hero whose photo is gone is dropped (its label was written
+// for that photo). A chapter photo that's gone is replaced by a photo used
+// nowhere else that keeps the chapters' time order — an Always pick first,
+// else the one in the middle of the gap — and a chapter that can't be
+// refilled is dropped. Then [repairGoldenVows] drops note cards whose note
+// no longer says those words. Never invents a photo; the caller still
+// checks the result. Never throws.
+export function healGoldenVows(
+  data: unknown,
+  context: GvCheckContext,
+): unknown {
+  if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    return data;
+  }
+  const gv = structuredClone(data) as Record<string, unknown>;
+  const known = (id: unknown): id is string =>
+    isString(id) && context.photoOrder.has(id) && !context.excludedIds.has(id);
+  const order = (id: string) => context.photoOrder.get(id)!;
+  const used = new Set<string>();
+
+  if (Array.isArray(gv.heroes)) {
+    gv.heroes = (gv.heroes as unknown[]).filter((raw) => {
+      if (typeof raw !== "object" || raw === null) return true;
+      const id = (raw as Record<string, unknown>).photo_id;
+      if (!known(id)) return false;
+      used.add(id);
+      return true;
+    });
+  }
+
+  if (Array.isArray(gv.chapters)) {
+    const chapters = (gv.chapters as unknown[]).filter((c) =>
+      typeof c === "object" && c !== null &&
+      Array.isArray((c as Record<string, unknown>).photo_ids)
+    ) as Record<string, unknown>[];
+    for (const chapter of chapters) {
+      for (const id of chapter.photo_ids as unknown[]) {
+        if (known(id)) used.add(id);
+      }
+    }
+    const ordered = [...context.photoOrder.entries()]
+      .sort((a, b) => a[1] - b[1]).map(([id]) => id)
+      .filter((id) => !context.excludedIds.has(id));
+    let last = -1;
+    gv.chapters = chapters.filter((chapter, c) => {
+      const ids = chapter.photo_ids as unknown[];
+      const healed: string[] = [];
+      for (let k = 0; k < ids.length; k++) {
+        const id = ids[k];
+        if (known(id)) {
+          healed.push(id);
+          last = Math.max(last, order(id));
+          continue;
+        }
+        // The next photo still shown after this slot, in this chapter or
+        // a later one: the gap the replacement has to fit in.
+        const later = [
+          ...ids.slice(k + 1),
+          ...chapters.slice(c + 1).flatMap((n) => n.photo_ids as unknown[]),
+        ].find(known);
+        const upper = later === undefined ? Infinity : order(later);
+        const fits = ordered.filter((p) =>
+          !used.has(p) && order(p) > last && order(p) < upper
+        );
+        const pick = fits.find((p) => context.mustIncludeIds.has(p)) ??
+          fits[Math.floor((fits.length - 1) / 2)];
+        if (pick === undefined) {
+          // No photo fits: the chapter goes, and what it kept goes back to
+          // the pool for the carousel and the heart.
+          for (const p of [...healed, ...ids.filter(known)]) used.delete(p);
+          return false;
+        }
+        used.add(pick);
+        healed.push(pick);
+        last = order(pick);
+      }
+      chapter.photo_ids = healed;
+      return true;
+    });
+  }
+  return repairGoldenVows(gv, context);
 }
 
 // --- Building content.golden_vows ----------------------------------------
@@ -645,6 +774,9 @@ export function buildGoldenVowsContent(
     };
   });
   const carouselIds = plan.carousel ? carouselPhotos(photos, used) : [];
+  const carouselOn = plan.carousel !== null &&
+    carouselIds.length >= MIN_GV_CAROUSEL;
+  if (carouselOn) { for (const id of carouselIds) used.add(id); }
   const { start_date, end_date } = tripData.trip;
   return {
     gv_version: GV_VERSION,
@@ -658,10 +790,13 @@ export function buildGoldenVowsContent(
     packing: packingOf(tripData),
     heroes,
     chapters,
-    carousel: plan.carousel && carouselIds.length >= MIN_GV_CAROUSEL
+    carousel: plan.carousel && carouselOn
       ? { ...plan.carousel, photo_ids: carouselIds }
       : null,
-    heart_photo_ids: spreadEvenly(photos, MAX_GV_HEART).map((p) => p.id),
+    // The heart is decoration: Always picks already have their moment, so
+    // it's made from the other photos (#378).
+    heart_photo_ids: decorativePhotos(tripData.photos, used, MAX_GV_HEART)
+      .map((p) => p.id),
     moment_count: photos.length,
     end_line: plan.end_line,
   };

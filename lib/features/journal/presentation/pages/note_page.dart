@@ -8,6 +8,7 @@ import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../photo/domain/entities/photo_entity.dart';
+import '../widgets/note_page/attached_polaroid.dart';
 import '../../domain/note_text.dart';
 import '../providers/dictation_providers.dart';
 import '../widgets/note_page/dictation_language_sheet.dart';
@@ -30,6 +31,8 @@ class NotePageRoute extends PageRouteBuilder<String> {
     required String existingText,
     required int photoCount,
     PhotoEntity? photo,
+    ValueNotifier<bool>? dictated,
+    NotePhotoAttachment? onPhoto,
   }) : super(
          opaque: false,
          transitionDuration: Duration.zero,
@@ -40,6 +43,8 @@ class NotePageRoute extends PageRouteBuilder<String> {
            existingText: existingText,
            photoCount: photoCount,
            photo: photo,
+           dictated: dictated,
+           onPhoto: onPhoto,
          ),
        );
 }
@@ -57,6 +62,8 @@ class NotePage extends ConsumerStatefulWidget {
     required this.existingText,
     required this.photoCount,
     this.photo,
+    this.dictated,
+    this.onPhoto,
     super.key,
   });
 
@@ -68,6 +75,14 @@ class NotePage extends ConsumerStatefulWidget {
 
   /// The day's first photo, shown in the title page's polaroid.
   final PhotoEntity? photo;
+
+  /// Set to true on Done when any speech went into the text (#397's
+  /// `dictated`); left as it was otherwise, so an edit keeps the flag.
+  final ValueNotifier<bool>? dictated;
+
+  /// Writing a note on this photo (#402): its polaroid sits at the top of
+  /// the ruled page, and the title page shows it instead of [photo].
+  final NotePhotoAttachment? onPhoto;
 
   @override
   ConsumerState<NotePage> createState() => _NotePageState();
@@ -165,6 +180,7 @@ class _NotePageState extends ConsumerState<NotePage>
     _turn.duration = _reducedMotion
         ? AppMotion.pageTurnReducedMotionFade
         : AppMotion.pageTurnCloseDuration;
+    if (result != null && _dictation.hasDictated) widget.dictated?.value = true;
     await _turn.forward(from: 0).orCancel.catchError((_) {});
     if (mounted) Navigator.of(context).pop(result);
   }
@@ -307,6 +323,7 @@ class _NotePageState extends ConsumerState<NotePage>
         languageCode: dictationLanguage.language.code!,
         isLanguageAvailable: dictationLanguage.isAvailable,
         onLanguageTap: () => DictationLanguageSheet.show(context),
+        onPhoto: widget.onPhoto,
       ),
     );
 
@@ -316,7 +333,7 @@ class _NotePageState extends ConsumerState<NotePage>
         stamp: widget.stamp,
         title: widget.title,
         meta: _meta,
-        photo: widget.photo,
+        photo: widget.onPhoto?.photo ?? widget.photo,
       ),
     );
 

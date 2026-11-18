@@ -1,9 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:traviato/features/journal/presentation/widgets/journal_balloon_bar.dart';
+import 'package:traviato/features/journal/presentation/widgets/timeline/journal_balloon_bar.dart';
 
-import '../../../../helpers/localized_app.dart';
+import '../../../../../helpers/localized_app.dart';
 
 Future<void> _pump(
   WidgetTester tester, {
@@ -60,8 +60,8 @@ void main() {
       onNoteTap: () => noteTaps++,
     );
 
-    await tester.tap(find.byKey(const Key('journal-balloon-bar-photo')));
-    await tester.tap(find.byKey(const Key('journal-balloon-bar-note')));
+    await tester.tap(find.byKey(const Key('capture-photo')));
+    await tester.tap(find.byKey(const Key('capture-note')));
 
     expect(photoTaps, 1);
     expect(noteTaps, 1);
@@ -84,7 +84,7 @@ void main() {
     expect(_fillOpacity(tester, 'right'), 0);
 
     final photo = await tester.startGesture(
-      tester.getCenter(find.byKey(const Key('journal-balloon-bar-photo'))),
+      tester.getCenter(find.byKey(const Key('capture-photo'))),
     );
     await tester.pump(const Duration(milliseconds: 200));
     expect(_fillOpacity(tester, 'left'), 1);
@@ -95,7 +95,7 @@ void main() {
     expect(_fillOpacity(tester, 'left'), 0);
 
     final note = await tester.startGesture(
-      tester.getCenter(find.byKey(const Key('journal-balloon-bar-note'))),
+      tester.getCenter(find.byKey(const Key('capture-note'))),
     );
     await tester.pump(const Duration(milliseconds: 200));
     expect(_fillOpacity(tester, 'left'), 0);
@@ -113,7 +113,7 @@ void main() {
     addTearDown(mouse.removePointer);
 
     await mouse.moveTo(
-      tester.getCenter(find.byKey(const Key('journal-balloon-bar-note'))),
+      tester.getCenter(find.byKey(const Key('capture-note'))),
     );
     await tester.pumpAndSettle();
     expect(_fillOpacity(tester, 'right'), 1);

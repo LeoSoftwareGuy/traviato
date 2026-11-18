@@ -15,11 +15,14 @@
 
 import type { TripData } from "./gather.ts";
 import { sortPhotosChronologically, spreadEvenly } from "./assemble.ts";
+import { decorativePhotos } from "./decorative.ts";
 import { bannedPhraseIn, cleanLine } from "./film_plan.ts";
 
 export const SKY_VERSION = 1;
 export const MAX_SKY_PAGES = 5;
 export const MAX_SKY_EXTRAS = 4;
+// Photos one page shows: its hero and the extras.
+export const SKY_PAGE_SLOTS = 1 + MAX_SKY_EXTRAS;
 export const MAX_SKY_MOSAIC_PHOTOS = 60;
 // One line at the headline's 88 px, two at its 64 px minimum.
 export const MAX_SKY_HEADLINE_CHARS = 32;
@@ -30,9 +33,13 @@ type Photo = TripData["photos"][number];
 // The director's choices for one page.
 export interface SkyStoryPagePlan {
   // First and last day number (1 = the memory's first day); equal for a
-  // single day.
+  // single day. A page may repeat the previous page's days exactly: a
+  // continuation page for a day with more Always picks than one page
+  // shows (#378).
   days: [number, number];
-  headline: string;
+  // Null only on a page code added for Always picks (#382):
+  // the app shows the place or "Day N".
+  headline: string | null;
   hero_photo_id: string;
   extra_photo_ids: string[];
   note_id: string | null;
@@ -139,9 +146,13 @@ export const SKY_STORY_PROMPT_RULES = [
   `- 1–${MAX_SKY_PAGES} pages, in day order, their days never overlapping. `,
   `Up to ${MAX_SKY_PAGES} days with photos: one page per day. More: group `,
   "neighbouring days into pages (days [4, 7]) or pick the best days.\n",
-  "- Every day with a must_include photo is on a page, and that page ",
-  "shows its must_include photos (hero or extras) as far as its 5 slots ",
-  "allow.\n",
+  "- Every must_include photo is shown (hero or extras) on a page of its ",
+  "day. A page shows 5 photos; when a day (or a run of days) has more ",
+  "must_include photos than its page shows, add a continuation page with ",
+  "exactly the same days right after it (days [1, 1], then [1, 1] again) ",
+  `while there are fewer than ${MAX_SKY_PAGES} pages, and split them `,
+  "between the pages in time order. A continuation page has its own ",
+  "headline and usually no note.\n",
   "- hero_photo_id: the page's best photo — sharp, hero_score ≥ 3, from the ",
   "page's days.\n",
   `- extra_photo_ids: up to ${MAX_SKY_EXTRAS} more photos from the page's `,
@@ -274,7 +285,10 @@ export function describeSkyStoryProblems(
   }
   const used = new Set<string>();
   const covered: [number, number][] = [];
+  // Photos shown per range of days; continuation pages share their range.
+  const shownByRange = new Map<string, { pages: number; shown: string[] }>();
   let lastDay = 0;
+  let previous: [number, number] | null = null;
 
   pages.forEach((raw, i) => {
     const where = `sky_story.pages[${i}]`;
@@ -283,13 +297,6 @@ export function describeSkyStoryProblems(
       return;
     }
     const page = raw as Record<string, unknown>;
-    checkLine(
-      problems,
-      `${where}.headline`,
-      page.headline,
-      MAX_SKY_HEADLINE_CHARS,
-    );
-
     const days = page.days;
     let range: [number, number] | null = null;
     if (
@@ -303,6 +310,11 @@ export function describeSkyStoryProblems(
         problems.push(
           `${where}.days: [${first}, ${last}] is not within days 1–${context.dayCount}`,
         );
+      } else if (
+        previous !== null && first === previous[0] && last === previous[1]
+      ) {
+        // A continuation page of the previous page's days.
+        range = [first, last];
       } else if (first <= lastDay) {
         problems.push(
           `${where}.days: [${first}, ${last}] overlaps or comes before the previous page`,
@@ -312,6 +324,17 @@ export function describeSkyStoryProblems(
         covered.push(range);
         lastDay = last;
       }
+      previous = range ?? previous;
+    }
+    // A page code added for Always picks (#382) has none; the strict
+    // schema makes the director's always a string.
+    if (page.headline !== null) {
+      checkLine(
+        problems,
+        `${where}.headline`,
+        page.headline,
+        MAX_SKY_HEADLINE_CHARS,
+      );
     }
 
     const inRange = (id: string) => {
@@ -371,24 +394,42 @@ export function describeSkyStoryProblems(
       );
     }
 
-    // Always picks of the page's days, as far as its slots allow.
     if (range) {
-      const always = [...context.mustIncludeIds].filter(inRange);
-      const shown = [
-        page.hero_photo_id,
-        ...(Array.isArray(extras) ? extras : []),
-      ];
-      const missing = always.filter((id) => !shown.includes(id));
-      const slots = 1 + MAX_SKY_EXTRAS;
-      if (missing.length > 0 && always.length - missing.length < slots) {
-        problems.push(
-          `${where}: photo "${
-            missing[0]
-          }" is marked Always but not on its page`,
-        );
-      }
+      const key = `${range[0]}-${range[1]}`;
+      const entry = shownByRange.get(key) ?? { pages: 0, shown: [] };
+      entry.pages++;
+      entry.shown.push(
+        ...[page.hero_photo_id, ...(Array.isArray(extras) ? extras : [])]
+          .filter(isString),
+      );
+      shownByRange.set(key, entry);
     }
   });
+
+  // Every Always pick on a page of its days (#378). Only once all
+  // MAX_SKY_PAGES pages are used and a range's slots all hold Always picks
+  // may the rest go without a page.
+  for (const [key, { pages: count, shown }] of shownByRange) {
+    const [first, last] = key.split("-").map(Number);
+    const always = [...context.mustIncludeIds].filter((id) => {
+      const day = context.photoDays.get(id)!;
+      return day >= first && day <= last;
+    });
+    const missing = always.filter((id) => !shown.includes(id));
+    if (missing.length === 0) continue;
+    const full = always.length - missing.length >= count * SKY_PAGE_SLOTS;
+    if (full && pages.length >= MAX_SKY_PAGES) continue;
+    const days = first === last ? `day ${first}` : `days ${first}–${last}`;
+    problems.push(
+      full
+        ? `sky_story: ${days} has ${missing.length} more photos marked Always than its pages show (first: "${
+          missing[0]
+        }") — add a continuation page with the same days`
+        : `sky_story: photo "${
+          missing[0]
+        }" is marked Always but not on a page of ${days}`,
+    );
+  }
 
   for (const id of context.mustIncludeIds) {
     const day = context.photoDays.get(id)!;
@@ -435,7 +476,111 @@ export function repairSkyStory(
     if (page.note_id !== null) page.sky_line = null;
     if (page.sky_line === undefined) page.sky_line = null;
   }
+  placeAlwaysPhotos(sky.pages as unknown[], context);
   return sky;
+}
+
+// Puts Always picks the director left off its pages onto pages of their
+// days (#382), instead of discarding the pages: first into free extra
+// slots, then on continuation pages (no headline, note or sky line) while
+// there are fewer than MAX_SKY_PAGES, then in place of Auto extras, then
+// of Auto heroes. A day with Always picks and no page at all gets a page
+// of its own when there's room. The director's text stays untouched.
+function placeAlwaysPhotos(raw: unknown[], context: SkyCheckContext): void {
+  type Page = Record<string, unknown> & {
+    days: [number, number];
+    hero_photo_id: string;
+    extra_photo_ids: string[];
+  };
+  const valid = (p: unknown): p is Page => {
+    if (typeof p !== "object" || p === null) return false;
+    const page = p as Record<string, unknown>;
+    const days = page.days;
+    return Array.isArray(days) && days.length === 2 &&
+      days.every((d) => Number.isInteger(d)) && isString(page.hero_photo_id) &&
+      Array.isArray(page.extra_photo_ids);
+  };
+  if (!raw.every(valid)) return;
+  const pages = raw as Page[];
+  // Photos in time order (photoDays is built chronologically).
+  const order = new Map([...context.photoDays.keys()].map((id, i) => [id, i]));
+  const at = (id: string) => order.get(id) ?? Infinity;
+  const always = [...context.mustIncludeIds].sort((a, b) => at(a) - at(b));
+  const dayOf = (id: string) => context.photoDays.get(id)!;
+  const continuationOf = (days: [number, number], ids: string[]): Page => ({
+    days: [days[0], days[1]],
+    headline: null,
+    hero_photo_id: ids[0],
+    extra_photo_ids: ids.slice(1, SKY_PAGE_SLOTS),
+    note_id: null,
+    sky_line: null,
+  });
+
+  // Days with Always picks and no page: a page of their own, in day order.
+  const covers = (day: number) =>
+    pages.some((p) => day >= p.days[0] && day <= p.days[1]);
+  for (const day of [...new Set(always.map(dayOf))]) {
+    if (covers(day) || pages.length >= MAX_SKY_PAGES) continue;
+    const ids = always.filter((id) => dayOf(id) === day);
+    const index = pages.findIndex((p) => p.days[0] > day);
+    pages.splice(
+      index === -1 ? pages.length : index,
+      0,
+      continuationOf([day, day], ids),
+    );
+  }
+
+  // Each run of pages sharing a range of days.
+  let i = 0;
+  while (i < pages.length) {
+    const [first, last] = pages[i].days;
+    let end = i + 1;
+    while (
+      end < pages.length && pages[end].days[0] === first &&
+      pages[end].days[1] === last
+    ) end++;
+    const group = () => pages.slice(i, end);
+    const shown = new Set(
+      group().flatMap((p) => [p.hero_photo_id, ...p.extra_photo_ids]),
+    );
+    const missing = always.filter((id) =>
+      !shown.has(id) && dayOf(id) >= first && dayOf(id) <= last
+    );
+    const take = () => {
+      const id = missing.shift()!;
+      shown.add(id);
+      return id;
+    };
+    // 1. Free extra slots.
+    for (const page of group()) {
+      while (
+        missing.length > 0 && page.extra_photo_ids.length < MAX_SKY_EXTRAS
+      ) {
+        page.extra_photo_ids.push(take());
+      }
+    }
+    // 2. Continuation pages.
+    while (missing.length > 0 && pages.length < MAX_SKY_PAGES) {
+      const ids = missing.splice(0, SKY_PAGE_SLOTS);
+      pages.splice(end, 0, continuationOf([first, last], ids));
+      end++;
+    }
+    // 3. In place of Auto extras, then 4. of Auto heroes.
+    for (const page of group()) {
+      page.extra_photo_ids = page.extra_photo_ids.map((id) =>
+        missing.length > 0 && !context.mustIncludeIds.has(id) ? take() : id
+      );
+    }
+    for (const page of group()) {
+      if (
+        missing.length > 0 && !context.mustIncludeIds.has(page.hero_photo_id)
+      ) {
+        page.hero_photo_id = take();
+      }
+    }
+    i = end;
+  }
+  raw.splice(0, raw.length, ...pages);
 }
 
 // --- Building content.sky -------------------------------------------------
@@ -524,6 +669,51 @@ export function pickExtras(photos: Photo[], hero: Photo): Photo[] {
   return others.filter((p) => picked.has(p));
 }
 
+// How many pages each range of days gets: one each, then, while there are
+// fewer than [maxPages], one more for the range whose Always picks most
+// overflow its pages (earliest on a tie) — a busy day split across
+// continuation pages (#378).
+export function pagesPerRange(
+  alwaysCounts: number[],
+  maxPages = MAX_SKY_PAGES,
+): number[] {
+  const pages = alwaysCounts.map(() => 1);
+  let total = pages.length;
+  while (total < maxPages) {
+    let best = -1;
+    let bestShortfall = 0;
+    alwaysCounts.forEach((count, i) => {
+      const shortfall = count - pages[i] * SKY_PAGE_SLOTS;
+      if (shortfall > bestShortfall) {
+        best = i;
+        bestShortfall = shortfall;
+      }
+    });
+    if (best < 0) break;
+    pages[best]++;
+    total++;
+  }
+  return pages;
+}
+
+// Splits a range's photos (chronological) into [parts] runs, each starting
+// at an Always pick, so every part holds an even share of them (15 → 5, 5,
+// 5). Auto photos stay with the part they fall in. Needs at least [parts]
+// Always picks.
+export function splitAtAlways(photos: Photo[], parts: number): Photo[][] {
+  if (parts <= 1) return [photos];
+  const always = photos.flatMap((p, i) => p.use_in_wrap_up === true ? [i] : []);
+  const starts = [0];
+  let taken = 0;
+  for (let k = 1; k < parts; k++) {
+    taken += Math.ceil((always.length - taken) / (parts - k + 1));
+    starts.push(always[taken]);
+  }
+  return starts.map((start, k) =>
+    photos.slice(start, starts[k + 1] ?? photos.length)
+  );
+}
+
 function noteFor(
   tripData: TripData,
   group: DayGroup,
@@ -578,7 +768,8 @@ function groupsOf(
 }
 
 // Code-built pages: one per day with photos, or five groups of neighbouring
-// days on a longer memory.
+// days on a longer memory; a range with more Always picks than one page
+// shows gets continuation pages while there's room (#378).
 export function codeSkyPages(
   tripData: TripData,
   heroScores: Readonly<Record<string, number>> = {},
@@ -593,17 +784,22 @@ export function codeSkyPages(
   }
   const days = [...counts.entries()].sort((a, b) => a[0] - b[0])
     .map(([day, count]) => ({ day, count }));
-  return groupsOf(photos, start, groupDays(days, MAX_SKY_PAGES)).map(
-    (group) => {
-      const hero = pickHero(group.photos, heroScores);
+  const groups = groupsOf(photos, start, groupDays(days, MAX_SKY_PAGES));
+  const pageCounts = pagesPerRange(
+    groups.map((g) => g.photos.filter((p) => p.use_in_wrap_up === true).length),
+  );
+  return groups.flatMap((group, i) =>
+    splitAtAlways(group.photos, pageCounts[i]).map((part, k) => {
+      const hero = pickHero(part, heroScores);
       return pageContent(start, group, {
         headline: null,
         hero_photo_id: hero.id,
-        extra_photo_ids: pickExtras(group.photos, hero).map((p) => p.id),
-        note_id: noteFor(tripData, group, start),
+        extra_photo_ids: pickExtras(part, hero).map((p) => p.id),
+        // One note per range: on its first page.
+        note_id: k === 0 ? noteFor(tripData, group, start) : null,
         sky_line: null,
       });
-    },
+    })
   );
 }
 
@@ -653,8 +849,12 @@ export function buildSkyContent(
     page.note = page.note_id ? notes.get(page.note_id) || null : null;
     if (!page.note) page.note_id = null;
   }
-  const mosaic = sortPhotosChronologically(
-    tripData.photos.filter((p) => p.use_in_wrap_up !== false),
+  // The balloon is decoration: Always picks already have their page, so
+  // it's made from the other photos (#378).
+  const mosaic = decorativePhotos(
+    tripData.photos,
+    shownOnPages(pages),
+    MAX_SKY_MOSAIC_PHOTOS,
   );
   return {
     sky_version: SKY_VERSION,
@@ -662,9 +862,24 @@ export function buildSkyContent(
     title: tripData.trip.name,
     first_name: firstNameOf(tripData.username),
     moment_count: tripData.photos.length,
-    mosaic_photo_ids: spreadEvenly(mosaic, MAX_SKY_MOSAIC_PHOTOS).map((p) =>
-      p.id
-    ),
+    mosaic_photo_ids: mosaic.map((p) => p.id),
     pages,
   };
+}
+
+function shownOnPages(pages: SkyPageContent[]): Set<string> {
+  return new Set(pages.flatMap((p) => [p.hero_photo_id, ...p.extra_photo_ids]));
+}
+
+// Always picks a Sky Story can't give a page: more than its
+// MAX_SKY_PAGES pages hold. The film's known limit (#378) — they're in the
+// mosaic instead, and the handler logs them.
+export function alwaysWithoutPage(
+  tripData: TripData,
+  sky: SkyContent,
+): string[] {
+  const shown = shownOnPages(sky.pages);
+  return skyPhotos(tripData)
+    .filter((p) => p.use_in_wrap_up === true && !shown.has(p.id))
+    .map((p) => p.id);
 }

@@ -44,7 +44,7 @@ function baseDeps(overrides: Partial<Deps> = {}): Deps {
         vibes: [],
       }],
       wrap_ups: [],
-      day_notes: [],
+      journal_notes: [],
       photos: [],
       bonus_task_assignments: [],
       points_ledger: [],
@@ -184,7 +184,10 @@ function keptClient() {
       ai_input_hash: "old",
       ai_generation_count: 1,
     }],
-    day_notes: [{ day_date: "2026-06-01", content: "Changed after keeping." }],
+    journal_notes: [{
+      day_date: "2026-06-01",
+      content: "Changed after keeping.",
+    }],
     photos: [
       {
         id: "kept",
@@ -327,7 +330,7 @@ const DRAFT_TABLES = {
     cover_image_path: null,
     vibes: ["Foodie"],
   }],
-  day_notes: [{ day_date: "2026-06-01", content: "Tram 28." }],
+  journal_notes: [{ day_date: "2026-06-01", content: "Tram 28." }],
   photos: [
     {
       id: "p-new",
@@ -616,7 +619,7 @@ function directorClient(wrapUps: Record<string, unknown>[] = []) {
   return fakeSupabaseClient({
     trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
     wrap_ups: wrapUps,
-    day_notes: data.notes,
+    journal_notes: data.notes,
     photos: data.photos,
     bonus_task_assignments: [],
     points_ledger: [],
@@ -830,7 +833,7 @@ Deno.test("content.sky signs with the profile's first name", async () => {
   const client = fakeSupabaseClient({
     trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
     wrap_ups: [],
-    day_notes: data.notes,
+    journal_notes: data.notes,
     photos: data.photos,
     bonus_task_assignments: [],
     points_ledger: [],
@@ -850,7 +853,7 @@ Deno.test("a memory without photos gets no content.sky", async () => {
   const client = fakeSupabaseClient({
     trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
     wrap_ups: [],
-    day_notes: data.notes,
+    journal_notes: data.notes,
     photos: [],
     bonus_task_assignments: [],
     points_ledger: [],
@@ -916,7 +919,7 @@ Deno.test("rebuilding a film kept as a Sky Story rebuilds its pages (#345)", asy
       ai_generation_count: 1,
       director: { ...plannedRecord(), sky_story: skyStoryPlan() },
     }],
-    day_notes: data.notes,
+    journal_notes: data.notes,
     // A photo of day 2's page was deleted since: the director's pages no
     // longer fit, so they're rebuilt by code.
     photos: data.photos.filter((p) => p.id !== "p05"),
@@ -948,7 +951,7 @@ Deno.test("rebuilding a film kept as a Sky Story rebuilds its pages (#345)", asy
       ai_generation_count: 1,
       director: { ...plannedRecord(), sky_story: skyStoryPlan() },
     }],
-    day_notes: data.notes,
+    journal_notes: data.notes,
     photos: data.photos,
     bonus_task_assignments: [],
     points_ledger: [],
@@ -989,7 +992,7 @@ function keptGoldenVowsClient(photos = directorTripData().photos) {
       ai_generation_count: 1,
       director: goldenVowsRecord(),
     }],
-    day_notes: data.notes,
+    journal_notes: data.notes,
     photos,
     bonus_task_assignments: [],
     points_ledger: [],
@@ -1037,8 +1040,9 @@ Deno.test("no section, the director off, or a section that no longer fits: no Go
   const deleted = fakeSupabaseClient({
     trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
     wrap_ups: [],
-    day_notes: data.notes,
-    photos: data.photos.filter((p) => p.id !== "p05"),
+    journal_notes: data.notes,
+    // Both heroes' photos: too few heroes left to heal (#393).
+    photos: data.photos.filter((p) => p.id !== "p01" && p.id !== "p09"),
     bonus_task_assignments: [],
     points_ledger: [],
     user_achievements: [],
@@ -1049,6 +1053,25 @@ Deno.test("no section, the director off, or a section that no longer fits: no Go
   )).json();
   assertEquals("golden_vows" in gone.content, false);
   assertEquals(gone.content.sky.pages.length, 3);
+});
+
+Deno.test("a deleted photo heals Golden Vows instead of dropping it (#393)", async () => {
+  const data = directorTripData();
+  const client = fakeSupabaseClient({
+    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+    wrap_ups: [],
+    journal_notes: data.notes,
+    photos: data.photos.filter((p) => p.id !== "p05"),
+    bonus_task_assignments: [],
+    points_ledger: [],
+    user_achievements: [],
+  });
+  const json = await (await handleRequest(
+    request({ trip_id: TRIP_ID }),
+    directorDeps(client, { record: goldenVowsRecord() }).deps,
+  )).json();
+  assertEquals(json.content.golden_vows.chapters.length, 2);
+  assertEquals(JSON.stringify(json.content).includes('"p05"'), false);
 });
 
 Deno.test("rebuilding a film kept as Golden Vows rebuilds it while it fits, else Sky Story", async () => {
@@ -1071,8 +1094,20 @@ Deno.test("rebuilding a film kept as Golden Vows rebuilds it while it fits, else
       ),
     ).deps,
   )).json();
-  assertEquals("golden_vows" in changed.content, false);
-  assertEquals(changed.content.sky.pages.length, 3);
+  assertEquals(changed.content.golden_vows.chapters.length, 2);
+
+  const unhealable = await (await handleRequest(
+    request({ trip_id: TRIP_ID, rebuild: true }),
+    directorDeps(
+      keptGoldenVowsClient(
+        directorTripData().photos.filter((p) =>
+          p.id !== "p01" && p.id !== "p09"
+        ),
+      ),
+    ).deps,
+  )).json();
+  assertEquals("golden_vows" in unhealable.content, false);
+  assertEquals(unhealable.content.sky.pages.length, 3);
 });
 
 Deno.test("a film kept as a Sky Story never gains Golden Vows", async () => {
@@ -1088,7 +1123,7 @@ Deno.test("a film kept as a Sky Story never gains Golden Vows", async () => {
       ai_generation_count: 1,
       director: goldenVowsRecord(),
     }],
-    day_notes: data.notes,
+    journal_notes: data.notes,
     photos: data.photos,
     bonus_task_assignments: [],
     points_ledger: [],
@@ -1128,7 +1163,7 @@ function keptNeonClient(
       ai_generation_count: 1,
       director: neonNightRecord(),
     }],
-    day_notes: data.notes,
+    journal_notes: data.notes,
     photos,
     bonus_task_assignments: [],
     points_ledger: [],
@@ -1145,7 +1180,8 @@ Deno.test("a draft gets content.neon_night from the director's section", async (
 
   const nn = json.content.neon_night;
   assertEquals(nn.nn_version, 1);
-  assertEquals(nn.chapters.length, 3);
+  // The fixture's 3 chapters of 4 photos merge into one (#390).
+  assertEquals(nn.chapters.length, 1);
   assertEquals(nn.chapters[0].note, "Bikes everywhere");
   assertEquals(nn.note.text, "Rain, then stroopwafels.");
   // Sky Story is there too: the app falls back to it.
@@ -1173,18 +1209,36 @@ Deno.test("no section, the director off, or a section that no longer fits: no Ne
   const deleted = fakeSupabaseClient({
     trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
     wrap_ups: [],
-    day_notes: data.notes,
+    journal_notes: data.notes,
     photos: data.photos.filter((p) => p.id !== "p09"),
+    bonus_task_assignments: [],
+    points_ledger: [],
+    user_achievements: [],
+  });
+  const healed = await (await handleRequest(
+    request({ trip_id: TRIP_ID }),
+    directorDeps(deleted, { record: neonNightRecord() }).deps,
+  )).json();
+  // A deleted photo heals the section instead of dropping it (#393).
+  assertEquals(healed.content.neon_night.chapters.length > 0, true);
+  assertEquals(JSON.stringify(healed.content).includes('"p09"'), false);
+
+  // One photo left: no moment to make, so Sky Story plays.
+  const lone = fakeSupabaseClient({
+    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+    wrap_ups: [],
+    journal_notes: data.notes,
+    photos: data.photos.slice(0, 1),
     bonus_task_assignments: [],
     points_ledger: [],
     user_achievements: [],
   });
   const gone = await (await handleRequest(
     request({ trip_id: TRIP_ID }),
-    directorDeps(deleted, { record: neonNightRecord() }).deps,
+    directorDeps(lone, { record: neonNightRecord() }).deps,
   )).json();
   assertEquals("neon_night" in gone.content, false);
-  assertEquals(gone.content.sky.pages.length, 3);
+  assertEquals("sky" in gone.content, true);
 });
 
 Deno.test("the app's UTC offset reaches the director", async () => {
@@ -1228,7 +1282,7 @@ Deno.test("rebuilding a film kept as Neon Night rebuilds it while it fits, else 
     deps,
   )).json();
   assertEquals(runs, []);
-  assertEquals(kept.content.neon_night.chapters.length, 3);
+  assertEquals(kept.content.neon_night.chapters.length, 1);
   assertEquals(client.writes[0].values.content.neon_night.nn_version, 1);
 
   const changed = await (await handleRequest(
@@ -1240,8 +1294,15 @@ Deno.test("rebuilding a film kept as Neon Night rebuilds it while it fits, else 
       ),
     ).deps,
   )).json();
-  assertEquals("neon_night" in changed.content, false);
-  assertEquals(changed.content.sky.pages.length, 3);
+  assertEquals(changed.content.neon_night.nn_version, 1);
+
+  const unhealable = await (await handleRequest(
+    request({ trip_id: TRIP_ID, rebuild: true }),
+    directorDeps(
+      keptNeonClient(content, directorTripData().photos.slice(0, 1)),
+    ).deps,
+  )).json();
+  assertEquals("neon_night" in unhealable.content, false);
 });
 
 Deno.test("a film kept as a Sky Story never gains Neon Night", async () => {
