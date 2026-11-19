@@ -220,8 +220,16 @@ void main() {
     });
   });
 
-  group('delete (#165)', () {
+  group('delete (#165, confirmed since #424)', () {
     final delete = find.byKey(const Key('photo-viewer-delete'));
+    final confirm = find.byKey(const Key('photo-delete-confirm'));
+
+    Future<void> deleteAndConfirm(WidgetTester tester) async {
+      await tester.tap(delete);
+      await tester.pumpAndSettle();
+      await tester.tap(confirm);
+      await tester.pumpAndSettle();
+    }
 
     List<PhotoEntity> captioned(int count) => [
       for (var i = 1; i <= count; i++)
@@ -233,8 +241,54 @@ void main() {
       expect(delete, findsNothing);
     });
 
-    testWidgets('deletes at once — no confirmation — and shows the next '
-        'photo', (tester) async {
+    testWidgets('close is top-left and delete is top-right (#424)', (
+      tester,
+    ) async {
+      await _openViewer(
+        tester,
+        photos: _photos(2),
+        initialIndex: 0,
+        onDelete: (_) async {},
+      );
+
+      final close = tester.getCenter(
+        find.byKey(const Key('photo-viewer-close')),
+      );
+      final trash = tester.getCenter(delete);
+      expect(close.dx, lessThan(trash.dx));
+      expect(close.dy, closeTo(trash.dy, .5));
+    });
+
+    testWidgets('asks first; Keep leaves the photo (#424)', (tester) async {
+      final deleted = <String>[];
+      await _openViewer(
+        tester,
+        photos: captioned(2),
+        initialIndex: 0,
+        onDelete: (photo) async => deleted.add(photo.id),
+      );
+
+      await tester.tap(delete);
+      await tester.pumpAndSettle();
+      expect(find.text('Delete this photo?'), findsOneWidget);
+      expect(
+        find.text(
+          "It's removed from this day and won't appear in your film. "
+          "This can't be undone.",
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byKey(const Key('photo-delete-keep')));
+      await tester.pumpAndSettle();
+      expect(deleted, isEmpty);
+      expect(find.text('Photo 1'), findsOneWidget);
+      expect(find.text('1 / 2'), findsOneWidget);
+    });
+
+    testWidgets('deletes once confirmed and shows the next photo', (
+      tester,
+    ) async {
       final deleted = <String>[];
       await _openViewer(
         tester,
@@ -243,11 +297,9 @@ void main() {
         onDelete: (photo) async => deleted.add(photo.id),
       );
 
-      await tester.tap(delete);
-      await tester.pumpAndSettle();
+      await deleteAndConfirm(tester);
 
       expect(deleted, ['p2']);
-      expect(find.byType(AlertDialog), findsNothing);
       expect(find.text('Photo 3'), findsOneWidget);
       expect(find.text('2 / 2'), findsOneWidget);
     });
@@ -262,8 +314,7 @@ void main() {
         onDelete: (_) async {},
       );
 
-      await tester.tap(delete);
-      await tester.pumpAndSettle();
+      await deleteAndConfirm(tester);
 
       expect(find.text('Photo 1'), findsOneWidget);
       expect(find.text('1 / 2'), findsOneWidget);
@@ -281,8 +332,7 @@ void main() {
       );
 
       for (var i = 0; i < 3; i++) {
-        await tester.tap(delete);
-        await tester.pumpAndSettle();
+        await deleteAndConfirm(tester);
       }
 
       expect(deleted, ['p1', 'p2', 'p3']);
@@ -300,8 +350,7 @@ void main() {
         onDelete: (_) async => throw const NetworkFailure(),
       );
 
-      await tester.tap(delete);
-      await tester.pumpAndSettle();
+      await deleteAndConfirm(tester);
 
       expect(find.text('Photo 1'), findsOneWidget);
       expect(find.text('1 / 2'), findsOneWidget);

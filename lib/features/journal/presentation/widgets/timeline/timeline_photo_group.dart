@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../../core/l10n/context_l10n.dart';
 import '../../../../../core/theme/app_colors.dart';
@@ -8,6 +10,7 @@ import '../../../../photo/domain/entities/film_pick.dart';
 import '../../../../photo/domain/entities/photo_entity.dart';
 import '../../../../photo/presentation/widgets/storage_photo_image.dart';
 import '../photo_tile_badges.dart';
+import 'fold_away.dart';
 
 const _gap = 6.0;
 const _radius = BorderRadius.all(Radius.circular(12));
@@ -16,18 +19,22 @@ const _singleHeight = 196.0;
 const _pairHeight = 150.0;
 const _gridHeight = 112.0;
 const _gridVisible = 3;
+const _longPressDuration = Duration(milliseconds: 450);
 
 /// A row of photos on the day timeline (#401, docs/design/journal-notes/
 /// §4): one photo up to 236×196, two at 150 high, three or more at 112
 /// with "+N" on the third. Tapping "+N" shows the whole group, three to a
 /// line, and "less" folds it again. Each tile in a group has its own time
 /// pill; a caption sits under its tile (2 lines). A photo with notes on it
-/// gets a ✎ badge.
+/// gets a ✎ badge. Long-pressing a tile asks for Delete (#424); a deleted
+/// one folds away like a note.
 class TimelinePhotoGroup extends StatefulWidget {
   const TimelinePhotoGroup({
     required this.photos,
     required this.use24h,
     required this.onPhotoTap,
+    this.onPhotoLongPress,
+    this.leavingPhotoIds = const {},
     this.notedPhotoIds = const {},
     this.filmMomentIds = const {},
     super.key,
@@ -36,6 +43,13 @@ class TimelinePhotoGroup extends StatefulWidget {
   final List<PhotoEntity> photos;
   final bool use24h;
   final ValueChanged<PhotoEntity> onPhotoTap;
+
+  /// Long-press (450ms) on a photo tile asks for Delete (#424); the "+N"
+  /// tile only unfolds the group.
+  final ValueChanged<PhotoEntity>? onPhotoLongPress;
+
+  /// Photos folding away after a confirmed delete (#424).
+  final Set<String> leavingPhotoIds;
 
   /// Photos that have at least one note written on them.
   final Set<String> notedPhotoIds;
@@ -50,19 +64,25 @@ class TimelinePhotoGroup extends StatefulWidget {
 class _TimelinePhotoRowState extends State<TimelinePhotoGroup> {
   var _expanded = false;
 
-  Widget _tile(PhotoEntity photo, double height, {String? overlay}) =>
-      _PhotoTile(
-        photo: photo,
-        height: height,
-        showTime: widget.photos.length > 1,
-        use24h: widget.use24h,
-        hasNotes: widget.notedPhotoIds.contains(photo.id),
-        isAutoPicked: widget.filmMomentIds.contains(photo.id),
-        overlay: overlay,
-        onTap: overlay == null
-            ? () => widget.onPhotoTap(photo)
-            : () => setState(() => _expanded = true),
-      );
+  Widget _tile(PhotoEntity photo, double height, {String? overlay}) => FoldAway(
+    key: ValueKey('timeline-photo-fold-${photo.id}'),
+    isLeaving: overlay == null && widget.leavingPhotoIds.contains(photo.id),
+    child: _PhotoTile(
+      photo: photo,
+      height: height,
+      showTime: widget.photos.length > 1,
+      use24h: widget.use24h,
+      hasNotes: widget.notedPhotoIds.contains(photo.id),
+      isAutoPicked: widget.filmMomentIds.contains(photo.id),
+      overlay: overlay,
+      onTap: overlay == null
+          ? () => widget.onPhotoTap(photo)
+          : () => setState(() => _expanded = true),
+      onLongPress: overlay == null && widget.onPhotoLongPress != null
+          ? () => widget.onPhotoLongPress!(photo)
+          : null,
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -146,6 +166,7 @@ class _PhotoTile extends StatelessWidget {
     required this.hasNotes,
     required this.isAutoPicked,
     required this.onTap,
+    this.onLongPress,
     this.overlay,
   });
 
@@ -156,6 +177,7 @@ class _PhotoTile extends StatelessWidget {
   final bool hasNotes;
   final bool isAutoPicked;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   /// "+N" over the last visible tile of a folded group.
   final String? overlay;
@@ -170,12 +192,29 @@ class _PhotoTile extends StatelessWidget {
       FilmPick.auto when isAutoPicked => const FilmBadge.autoPicked(),
       FilmPick.auto => null,
     };
-    return GestureDetector(
+    // One detector for both, so a long press wins the arena and its
+    // release never also opens the photo (#424).
+    return RawGestureDetector(
       key: Key(
         overlay == null ? 'timeline-photo-${photo.id}' : 'timeline-photos-more',
       ),
       behavior: HitTestBehavior.opaque,
-      onTap: onTap,
+      gestures: {
+        TapGestureRecognizer:
+            GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+              TapGestureRecognizer.new,
+              (r) => r.onTap = onTap,
+            ),
+        if (onLongPress != null)
+          LongPressGestureRecognizer:
+              GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+                () => LongPressGestureRecognizer(duration: _longPressDuration),
+                (r) => r.onLongPress = () {
+                  HapticFeedback.lightImpact();
+                  onLongPress!();
+                },
+              ),
+      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

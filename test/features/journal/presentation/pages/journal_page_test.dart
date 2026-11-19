@@ -1117,6 +1117,13 @@ void main() {
       return photoRepo;
     }
 
+    Future<void> deleteFromViewer(WidgetTester tester) async {
+      await tester.tap(find.byKey(const Key('photo-viewer-delete')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('photo-delete-confirm')));
+      await tester.pumpAndSettle();
+    }
+
     Future<void> closeViewer(WidgetTester tester) async {
       await tester.tap(find.byKey(const Key('photo-viewer-close')));
       await tester.pumpAndSettle();
@@ -1127,8 +1134,7 @@ void main() {
     ) async {
       final photoRepo = await openViewerOnFirstPhoto(tester);
 
-      await tester.tap(find.byKey(const Key('photo-viewer-delete')));
-      await tester.pumpAndSettle();
+      await deleteFromViewer(tester);
       await closeViewer(tester);
 
       expect(photoRepo.deletedPhotoIds, ['p1']);
@@ -1143,8 +1149,7 @@ void main() {
       await openViewerOnFirstPhoto(tester, profileStatsRepo: statsRepo);
       final before = statsRepo.getStatsCallCount;
 
-      await tester.tap(find.byKey(const Key('photo-viewer-delete')));
-      await tester.pumpAndSettle();
+      await deleteFromViewer(tester);
 
       expect(statsRepo.getStatsCallCount, greaterThan(before));
     });
@@ -1155,12 +1160,139 @@ void main() {
         deleteResult: const Left(NetworkFailure()),
       );
 
-      await tester.tap(find.byKey(const Key('photo-viewer-delete')));
-      await tester.pumpAndSettle();
+      await deleteFromViewer(tester);
       await closeViewer(tester);
 
       expect(find.byKey(const Key('timeline-photo-p1')), findsOneWidget);
       expect(find.textContaining('2 photos'), findsOneWidget);
+    });
+  });
+
+  group('long-press on a timeline photo (#424)', () {
+    Future<FakePhotoRepository> pumpDay(
+      WidgetTester tester, {
+      Either<Failure, void>? deleteResult,
+    }) async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(id: 't1', startDate: _today, endDate: _today),
+        );
+      final photoRepo = FakePhotoRepository()
+        ..photosResult = Right([
+          buildPhotoEntity(id: 'p1', dayDate: _today, caption: 'Canal boat'),
+          buildPhotoEntity(id: 'p2', dayDate: _today),
+        ])
+        ..deletePhotoResult = deleteResult;
+      await _pump(
+        tester,
+        tripRepo: tripRepo,
+        photoRepo: photoRepo,
+        noteRepo: FakeJournalNoteRepository(),
+      );
+      await tester.pumpAndSettle();
+      await tester.dragUntilVisible(
+        find.byKey(const Key('timeline-photo-p1')),
+        find.byKey(const Key('journal-content-list')),
+        const Offset(0, -200),
+      );
+      return photoRepo;
+    }
+
+    Future<void> longPressP1(WidgetTester tester) async {
+      await tester.longPress(find.byKey(const Key('timeline-photo-p1')));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('opens the photo sheet with a preview, not the photo', (
+      tester,
+    ) async {
+      await pumpDay(tester);
+
+      await longPressP1(tester);
+
+      expect(find.byKey(const Key('photo-sheet-preview')), findsOneWidget);
+      expect(find.byKey(const Key('photo-sheet-delete')), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('photo-sheet-preview')),
+          matching: find.text('Canal boat'),
+        ),
+        findsOneWidget,
+      );
+      // The release didn't also open the viewer.
+      expect(find.byKey(const Key('photo-viewer-close')), findsNothing);
+    });
+
+    testWidgets('Delete photo → confirm folds it away, updates the count '
+        'and shows a toast', (tester) async {
+      final photoRepo = await pumpDay(tester);
+
+      await longPressP1(tester);
+      await tester.tap(find.byKey(const Key('photo-sheet-delete')));
+      await tester.pumpAndSettle();
+      expect(find.text('Delete this photo?'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('photo-delete-confirm')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byKey(const Key('fold-away')), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.text('Photo deleted'), findsOneWidget);
+
+      await tester.pumpAndSettle();
+      expect(photoRepo.deletedPhotoIds, ['p1']);
+      expect(find.byKey(const Key('timeline-photo-p1')), findsNothing);
+      expect(find.byKey(const Key('timeline-photo-p2')), findsOneWidget);
+      expect(find.textContaining('1 photo'), findsOneWidget);
+    });
+
+    testWidgets('Keep on the confirm leaves the photo', (tester) async {
+      final photoRepo = await pumpDay(tester);
+
+      await longPressP1(tester);
+      await tester.tap(find.byKey(const Key('photo-sheet-delete')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('photo-delete-keep')));
+      await tester.pumpAndSettle();
+
+      expect(photoRepo.deletedPhotoIds, isEmpty);
+      expect(find.byKey(const Key('timeline-photo-p1')), findsOneWidget);
+    });
+
+    testWidgets('Cancel closes the sheet and deletes nothing', (
+      tester,
+    ) async {
+      final photoRepo = await pumpDay(tester);
+
+      await longPressP1(tester);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('photo-sheet-preview')), findsNothing);
+      expect(photoRepo.deletedPhotoIds, isEmpty);
+    });
+
+    testWidgets('a failed delete puts it back', (tester) async {
+      await pumpDay(tester, deleteResult: const Left(NetworkFailure()));
+
+      await longPressP1(tester);
+      await tester.tap(find.byKey(const Key('photo-sheet-delete')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('photo-delete-confirm')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('timeline-photo-p1')), findsOneWidget);
+      expect(find.textContaining('2 photos'), findsOneWidget);
+    });
+
+    testWidgets('a tap still opens the photo', (tester) async {
+      await pumpDay(tester);
+
+      await tester.tap(find.byKey(const Key('timeline-photo-p1')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('photo-viewer-close')), findsOneWidget);
     });
   });
 
