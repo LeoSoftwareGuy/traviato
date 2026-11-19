@@ -8,6 +8,7 @@ import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/film_text_rules.dart';
 import 'neon_beat.dart';
 import 'neon_chapter_card.dart';
+import 'neon_moments.dart';
 import 'neon_night_story.dart';
 import 'neon_text_fx.dart';
 import 'neon_tokens.dart';
@@ -24,13 +25,6 @@ class NeonNightTexts {
         for (var i = 0; i < story.chapters.length; i++)
           NnChapterTexts(story, i, l10n),
       ],
-      lines = [
-        for (final chapter in story.chapters)
-          [
-            for (final line in chapter.lines)
-              NnLinesTexts(neonNoteLines(line.text)!),
-          ],
-      ],
       note = switch (story.noteLines) {
         final lines? => NnNoteTexts(story, l10n, lines),
         null => null,
@@ -46,9 +40,6 @@ class NeonNightTexts {
   /// One per chapter, in order.
   final List<NnChapterTexts> chapters;
 
-  /// Per chapter, its Lines scene's lines (#416), in order.
-  final List<List<NnLinesTexts>> lines;
-
   /// Null when the memory has no note (the scene is cut).
   final NnNoteTexts? note;
 
@@ -60,11 +51,6 @@ class NeonNightTexts {
     plan?.dispose();
     for (final chapter in chapters) {
       chapter.dispose();
-    }
-    for (final chapter in lines) {
-      for (final line in chapter) {
-        line.dispose();
-      }
     }
     note?.dispose();
     finale.dispose();
@@ -422,11 +408,21 @@ sealed class NnMomentTexts {
 const double nnLabelWidth = 1080 - 2 * 48;
 
 /// [photo]'s caption in a label box [maxWidth] wide, or null when it has
-/// none or it doesn't fit (#399 T1: left out, never cut).
-NeonLabelBox? nnCaptionBox(NnPhoto photo, {double maxWidth = nnLabelWidth}) {
-  final caption = photo.caption?.trim();
-  if (caption == null || caption.isEmpty) return null;
-  return NeonLabelBox.caption(caption, maxWidth: maxWidth);
+/// none or it doesn't fit (#399 T1: left out, never cut). With
+/// [withLine], the note line it plays comes first (#426), the caption
+/// when the line doesn't fit.
+NeonLabelBox? nnCaptionBox(
+  NnPhoto photo, {
+  double maxWidth = nnLabelWidth,
+  bool withLine = false,
+}) {
+  for (final text in [if (withLine) photo.line, photo.caption]) {
+    final words = text?.trim();
+    if (words == null || words.isEmpty) continue;
+    final box = NeonLabelBox.caption(words, maxWidth: maxWidth);
+    if (box != null) return box;
+  }
+  return null;
 }
 
 /// Split's and Burst's label box at (48, 1760): mono 38, no wrap. When the
@@ -436,7 +432,7 @@ class NnLabelTexts implements NnMomentTexts {
   NnLabelTexts(String text, List<NnPhoto> photos)
     : label = NeonLabelBox(text),
       captions = [
-        for (final photo in photos) ?nnCaptionBox(photo),
+        for (final photo in photos) ?nnCaptionBox(photo, withLine: true),
       ];
 
   final NeonLabelBox label;
@@ -459,8 +455,8 @@ class NnLabelTexts implements NnMomentTexts {
 }
 
 /// Timeline: the chapter's title as a pink tube, and each item's time,
-/// plain and lit. The lit item's caption shows large at the foot (#399 T2:
-/// no small captions under the tiles).
+/// plain and lit. A lit item with words — its note line, else its caption
+/// — zooms in with them under it (#426).
 class NnTimelineTexts implements NnMomentTexts {
   NnTimelineTexts(NnTimeline moment, NnChapter chapter)
     : title = NeonTubeText(
@@ -475,7 +471,14 @@ class NnTimelineTexts implements NnMomentTexts {
         for (final photo in moment.photos)
           (_time(photo, plainTime), _time(photo, NeonColors.tintGreen)),
       ],
-      captions = [for (final photo in moment.photos) nnCaptionBox(photo)];
+      captions = [
+        for (final photo in moment.photos)
+          nnCaptionBox(
+            photo,
+            maxWidth: NnTimelineLayout.zoomWidth,
+            withLine: true,
+          ),
+      ];
 
   static TextPainter _time(NnPhoto photo, Color color) => neonLayout(
     photo.takenAt,
@@ -483,14 +486,20 @@ class NnTimelineTexts implements NnMomentTexts {
   );
 
   /// How many beats each item holds the highlight on [beat]'s clock: one,
-  /// or as many as its caption takes to read.
+  /// or — zoomed in with its words under it (#426) — the zoom in, its
+  /// reading time and the zoom out.
   static List<int> holdsFor(List<NeonLabelBox?> captions, NeonBeat beat) => [
     for (final caption in captions)
       caption == null
           ? 1
           : math.max(
-              1,
-              (beat.secToBeat(FilmTextRules.readingTime(caption.text)) - 1e-9)
+              2,
+              (beat.secToBeat(
+                        NnTimelineLayout.zoomIn +
+                            FilmTextRules.readingTime(caption.text) +
+                            NnTimelineLayout.zoomOut,
+                      ) -
+                      1e-9)
                   .ceil(),
             ),
   ];
@@ -637,51 +646,6 @@ class NnNoteTexts {
       line.dispose();
     }
     signature?.dispose();
-  }
-}
-
-/// One line of a chapter's Lines scene (#416): the excerpt as neon
-/// tubes, sized like the Note scene's, lit one row a beat.
-class NnLinesTexts {
-  NnLinesTexts(List<String> rows)
-    : rows = [
-        for (final (i, row) in rows.indexed)
-          NeonTubeText(
-            row,
-            size: NeonType.fit(rows.join('\n'), lineWidth, 170, 0.43),
-            maxWidth: lineWidth,
-            stroke: 4,
-            weight: 600,
-            color: NnNoteTexts.colors[i % NnNoteTexts.colors.length],
-          ),
-      ],
-      text = rows.join(' ');
-
-  static const lineWidth = 900.0;
-
-  /// Rows light from this local beat, one a beat.
-  static const litFrom = 0.5;
-
-  /// How many beats a line of [rows] holds on [beat]'s clock: lit row by
-  /// row, then on screen for its reading time (#399 T1), before its
-  /// 0.25 s exit. At least 2 bars; whole bars, so cuts stay on the beat.
-  static int beatsFor(List<String> rows, NeonBeat beat) {
-    final lit = litFrom + rows.length;
-    final read =
-        litFrom + beat.secToBeat(FilmTextRules.readingTime(rows.join(' ')));
-    final need = math.max(lit, read) + beat.secToBeat(0.25);
-    return math.max(8, ((need - 1e-9) / 4).ceil() * 4);
-  }
-
-  final List<NeonTubeText> rows;
-
-  /// The words shown, as one line.
-  final String text;
-
-  void dispose() {
-    for (final row in rows) {
-      row.dispose();
-    }
   }
 }
 

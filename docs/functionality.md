@@ -285,12 +285,19 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   to a real detail. Everything plays in time order. Drug references and
   swearing never become a headline, title or the note scene. The plan
   inspector shows each chapter's days, photos, lines (score, director or
-  code) and the lines left out. **The film plays them (#416):** a chapter
-  card types its first line; after the chapter's moments a Lines scene
-  plays the others one after another, each in neon over its own photo
-  (else one of the chapter's) for its reading time, in whole bars. A
-  chapter without more lines has no such scene, and the Note scene is
-  left out when its line already played. **Sky Story and Golden Vows
+  code) and the lines left out. **The film plays them (#416, #426):** a
+  chapter card types its first line; the others play inside the moments,
+  on their own photo (else the moment photo nearest in time, one without
+  a caption first): a timeline's lit photo zooms in with its line under
+  it — or its caption — for the reading time; a split or burst shows it
+  under the photos. No separate Lines scene, so no photo plays twice; a
+  line no photo is left for is left out, and the Note scene is left out
+  when its line already played. **A day in parts (#426):** a long day
+  breaks into chapters at its long breaks (2 h or more, each part at
+  least 4 photos, up to 5 chapters in all; a part the director didn't
+  title is titled by its place, else its first photo's time), and inside
+  a chapter the card opens with its earliest photos, then each moment
+  takes the next stretch — nothing goes back in time. **Sky Story and Golden Vows
   (#419):** a Sky Story note page shows the best lines of its days' notes
   (about two per page, in the notes' order) instead of the note's first
   sentences, continued over the day's pages; with nothing specific the

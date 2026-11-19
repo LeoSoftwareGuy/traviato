@@ -80,7 +80,7 @@ class NeonAmbient {
   double laserOpacity(double t) {
     final (:scene, :lb) = timeline.sceneAt(t);
     final amt = switch (scene.spec) {
-      NnNoteSpec() || NnLinesSpec() => 0.6,
+      NnNoteSpec() => 0.6,
       NnEndingSpec() => 1 - (lb / 3).clamp(0.0, 1.0),
       _ => 1.0,
     };

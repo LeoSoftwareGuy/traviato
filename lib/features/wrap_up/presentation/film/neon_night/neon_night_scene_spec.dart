@@ -128,44 +128,6 @@ final class NnMomentSpec extends NeonNightSceneSpec {
   List<Object?> get props => [chapter, type, minBeats];
 }
 
-/// A chapter's lines (#416): the excerpts of its notes after the card's
-/// typed one, one after another, each in neon tubes over its own photo.
-/// Each line holds [lineBeats] (whole bars, its reading time); a chapter
-/// without more lines has no such scene.
-final class NnLinesSpec extends NeonNightSceneSpec {
-  NnLinesSpec({required this.chapter, required List<int> lineBeats})
-    : lineBeats = List.unmodifiable(lineBeats),
-      assert(lineBeats.isNotEmpty, 'a lines scene has lines'),
-      assert(lineBeats.every((b) => b > 0 && b % 4 == 0), 'whole bars');
-
-  /// Which chapter, from 0.
-  final int chapter;
-
-  /// Each line's beats, in order.
-  final List<int> lineBeats;
-
-  /// The beat line [k] starts on, from the scene's cue.
-  int startOf(int k) => lineBeats.take(k).fold(0, (a, b) => a + b);
-
-  /// The line playing at local beat [lb], and the beat it started on.
-  ({int line, int from}) lineAt(double lb) {
-    var from = 0;
-    for (final (k, beats) in lineBeats.indexed) {
-      if (lb < from + beats || k == lineBeats.length - 1) {
-        return (line: k, from: from);
-      }
-      from += beats;
-    }
-    return (line: 0, from: 0);
-  }
-
-  @override
-  int get beats => lineBeats.fold(0, (a, b) => a + b);
-
-  @override
-  List<Object?> get props => [chapter, lineBeats];
-}
-
 /// The user's own words in neon tubes, over a blurred photo (§5.7).
 final class NnNoteSpec extends NeonNightSceneSpec {
   const NnNoteSpec({this.minBeats = 0})

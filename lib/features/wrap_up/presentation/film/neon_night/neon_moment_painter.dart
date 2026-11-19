@@ -365,6 +365,52 @@ class NnMomentPainter {
       )
       ..restore();
 
+    // A lit item with words zooms in, its words under it (#426): its note
+    // line, else its caption.
+    if (lit != null) {
+      final words = texts.captions[lit];
+      final z = words == null ? 0.0 : layout.zoomAt(lit, lb, beat);
+      if (words != null && z > 0.002) {
+        final enter = NeonEases.enter(
+          ((t - cue - layout.enterAt(lit, beat)) / 0.4).clamp(0.0, 1.0),
+        );
+        final from = layout.items[lit].shift(
+          Offset(0, 40 * (1 - enter) - scroll),
+        );
+        final to = layout.zoomRect(lit, words.size.height);
+        final rect = Rect.lerp(from, to, z)!;
+        // The list steps back behind it.
+        canvas.drawRect(
+          bounds,
+          Paint()..color = NeonColors.black.withValues(alpha: 0.82 * z * alpha),
+        );
+        final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(14));
+        neonPaintPhoto(
+          canvas,
+          _image(lit),
+          rrect,
+          kenBurns: kb,
+          alpha: alpha,
+        );
+        neonPaintFrame(
+          canvas,
+          rrect,
+          NeonColors.green,
+          border: 8,
+          f: 0.4,
+          alpha: alpha,
+        );
+        words.paint(
+          canvas,
+          Offset(
+            (1080 - words.size.width) / 2,
+            to.bottom + NnTimelineLayout.zoomGap,
+          ),
+          alpha: z * z * alpha,
+        );
+      }
+    }
+
     // The title stays put above the list.
     final title = texts.title;
     const at = Offset(72, 110);
@@ -378,22 +424,6 @@ class NnMomentPainter {
       alpha: alpha,
       paintAt: (dx, a) => title.paint(canvas, at + Offset(dx, 0), alpha: a),
     );
-
-    // The lit item's caption, large at the foot (#399 T2).
-    if (lit != null) {
-      final caption = texts.captions[lit];
-      if (caption != null) {
-        final a =
-            FilmEases.at(
-              t,
-              _at(cue, layout.highlightStart(lit)),
-              0.2,
-              FilmEases.linear,
-            ) *
-            alpha;
-        caption.paint(canvas, _labelAt(caption), alpha: a);
-      }
-    }
   }
 
   // ---- Peak (§5.6b) -------------------------------------------------

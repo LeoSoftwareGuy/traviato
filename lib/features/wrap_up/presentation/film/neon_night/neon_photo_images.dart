@@ -88,8 +88,6 @@ class NeonPhotoImages implements NeonPhotoSource {
           for (final k in timing.zoomTiles) chapter.cardPhotos[k].id,
           for (final moment in chapter.moments)
             for (final photo in moment.photos) photo.id,
-          // The Lines scene shows each line's photo sharp (#416).
-          for (final line in chapter.lines) line.photo.id,
         ]);
       }
     }

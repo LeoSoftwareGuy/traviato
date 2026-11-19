@@ -12,7 +12,6 @@ class NnChapterShape {
     this.zoomHolds = const [],
     this.cardMinBeats = 0,
     this.momentMinBeats = const [],
-    this.lineBeats = const [],
   }) : assert(photos >= 1, 'a chapter has photos');
 
   final List<NnMomentType> moments;
@@ -25,18 +24,16 @@ class NnChapterShape {
   /// bars, 0 = the spec's length.
   final int cardMinBeats;
 
-  /// The same for each of [moments] (their captions), in order.
+  /// The same for each of [moments] (their captions and note lines), in
+  /// order.
   final List<int> momentMinBeats;
-
-  /// Each of the chapter's lines' beats (#416); none → no Lines scene.
-  final List<int> lineBeats;
 }
 
 /// Neon Night's scenes on the film clock (#363, NEON_NIGHT_SPEC.md §5, §9).
 ///
 /// Laid out in beats and cut hard on every cue: Ignition, the optional
-/// Plan, then per chapter its card, its moments and its optional Lines
-/// (#416), the optional Note, the
+/// Plan, then per chapter its card and its moments (which play its note
+/// lines, #426), the optional Note, the
 /// Finale (the drop) and the Ending. Every scene is a whole number of bars,
 /// so every cue — and the drop — falls on a downbeat.
 ///
@@ -85,8 +82,6 @@ class NeonNightTimeline {
                 ? chapters[i].momentMinBeats[j]
                 : 0,
           ),
-        if (chapters[i].lineBeats.isNotEmpty)
-          NnLinesSpec(chapter: i, lineBeats: chapters[i].lineBeats),
       ],
       if (hasNote) NnNoteSpec(minBeats: noteMinBeats),
       const NnFinaleSpec(),

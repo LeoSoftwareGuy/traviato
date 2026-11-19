@@ -6,9 +6,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_grain.dart';
+import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_moments.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_scene_spec.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_story.dart';
+import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_texts.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_photo_images.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_placeholder_photo.dart';
 import 'package:traviato/l10n/app_localizations.dart';
@@ -423,60 +425,52 @@ void main() {
     ], 'words');
   });
 
-  // The chapter's lines (#416): three excerpts one after another, each in
-  // neon over its own photo, each held for its reading time.
-  testWidgets("a chapter's lines over their photos", skip: _skip, (
+  // A note line in a timeline (#426): the lit photo zooms in, the line
+  // under it, the list dimmed behind.
+  testWidgets('a timeline zooms a photo with its line', skip: _skip, (
     tester,
   ) async {
     final reference = NeonNightFixtures.reference;
-    final first = reference.chapters.first;
+    final second = reference.chapters[1];
+    final moment = second.moments.first as NnTimeline;
+    final lined = NnTimeline([
+      for (final (k, photo) in moment.photos.indexed)
+        k == 1 ? photo.withLine('Заказали 4,5 кг рёбер на троих!') : photo,
+    ]);
+    final chapter = NnChapter(
+      title: second.title,
+      from: second.from,
+      to: second.to,
+      photos: second.photos,
+      cardPhotos: second.cardPhotos,
+      moments: [lined],
+      note: second.note,
+    );
     final story = NeonNightStory(
       title: reference.title,
       date: reference.date,
       plan: reference.plan,
       firstName: reference.firstName,
       totals: reference.totals,
-      chapters: [
-        NnChapter(
-          title: first.title,
-          from: first.from,
-          to: first.to,
-          photos: first.photos,
-          cardPhotos: first.cardPhotos,
-          moments: first.moments,
-          note: first.note,
-          lines: [
-            NnLine(
-              text: 'Заказали 4,5 кг рёбер на троих!',
-              photo: first.photos[0],
-            ),
-            NnLine(
-              text:
-                  'Danced at Shelter until 3, first time in a club since '
-                  '2019!',
-              photo: first.photos[1],
-            ),
-            NnLine(
-              text: 'Rented 3 bikes and rode 12 km to Zaandam.',
-              photo: first.photos.last,
-            ),
-          ],
-        ),
-        ...reference.chapters.skip(1),
-      ],
+      chapters: [reference.chapters[0], chapter, ...reference.chapters.skip(2)],
       note: reference.note,
     );
     final timeline = NeonNightCanvas.timelineFor(story);
-    final scene = timeline.scenes.firstWhere((s) => s.spec is NnLinesSpec);
-    final spec = scene.spec as NnLinesSpec;
+    final scene = timeline.scenes.firstWhere(
+      (s) => s.spec is NnMomentSpec && (s.spec as NnMomentSpec).chapter == 1,
+    );
     final beat = timeline.beat;
-    double end(int k) =>
-        scene.start + beat.beatToSec(spec.startOf(k) + spec.lineBeats[k]);
+    final texts = NnTimelineTexts(lined, chapter);
+    final layout = NnTimelineLayout(
+      lined.photos.length,
+      holds: NnTimelineTexts.holdsFor(texts.captions, beat),
+    );
+    texts.dispose();
+    final lit = scene.start + beat.beatToSec(layout.highlightStart(1));
     await _pumpFilm(tester, story: story);
     await _expectAt(tester, [
-      ('line1', end(0) - 0.5),
-      ('line2', end(1) - 0.5),
-      ('line3', end(2) - 0.5),
-    ], 'lines');
+      ('zoom_in', lit + 0.15),
+      ('zoom_held', lit + 1.2),
+    ], 'timeline_line');
   });
 }

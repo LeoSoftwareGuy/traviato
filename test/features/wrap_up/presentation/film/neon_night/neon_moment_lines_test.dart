@@ -2,17 +2,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_neon_night.dart';
 import 'package:traviato/features/wrap_up/domain/film_text_rules.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_beat.dart';
+import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_moments.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_from_wrap_up.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_scene_spec.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_story.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_texts.dart';
-import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_photo_images.dart';
-import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_type.dart';
+import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_reading_time.dart';
 
 import 'neon_test_fonts.dart';
 
-/// Neon Night plays each chapter's excerpts (#416).
+/// Neon Night plays each chapter's note lines inside its moments (#426):
+/// on their photos, zoomed in a timeline, under the photos in a split or
+/// burst — no scene of their own.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(loadNeonNightFonts);
@@ -26,6 +28,12 @@ void main() {
     List<WrapUpNeonExcerpt> excerpts = const [],
     String? card,
     WrapUpNeonNote? note,
+    List<WrapUpNeonMoment> moments = const [
+      WrapUpNeonMoment(
+        type: 'timeline',
+        photoIds: ['a0', 'a1', 'a2', 'a3', 'a4', 'a5'],
+      ),
+    ],
   }) => WrapUpNeonNight(
     title: 'Amsterdam',
     startDate: DateTime(2026, 9, 1),
@@ -35,18 +43,23 @@ void main() {
         photos: photos,
         note: card,
         excerpts: excerpts,
-        moments: const [
-          WrapUpNeonMoment(type: 'split', photoIds: ['a1', 'a2']),
-        ],
+        moments: moments,
       ),
     ],
     note: note,
   );
 
-  NeonNightStory story(WrapUpNeonNight nn) => neonNightFromWrapUp(
-    nn,
-    photoIds: {for (final photo in photos) photo.id},
-  )!;
+  NeonNightStory story(WrapUpNeonNight nn, {Set<String>? shown}) =>
+      neonNightFromWrapUp(
+        nn,
+        photoIds: shown ?? {for (final photo in photos) photo.id},
+      )!;
+
+  Map<String, String> linesOf(NnChapter chapter) => {
+    for (final moment in chapter.moments)
+      for (final photo in moment.photos)
+        if (photo.line != null) photo.id: photo.line!,
+  };
 
   const ribs = WrapUpNeonExcerpt(
     text: 'Заказали 4,5 кг рёбер на троих!',
@@ -64,37 +77,62 @@ void main() {
   );
 
   group('the story', () {
-    test("the card types its line; the others play over their photos", () {
+    test('the card types its line; the others go on their photos', () {
       final chapter = story(
         nn(excerpts: const [ribs, rave, bikes], card: ribs.text),
       ).chapters.single;
       expect(chapter.note, ribs.text);
-      expect([for (final l in chapter.lines) l.text], [rave.text, bikes.text]);
-      expect(chapter.lines.first.photo.id, 'a4');
-      // No photo of its own: one of the chapter's, never none.
-      expect(chapter.lines.last.photo.id, isIn([for (final x in photos) x.id]));
+      final lines = linesOf(chapter);
+      expect(lines['a4'], rave.text);
+      // The card's line isn't repeated.
+      expect(lines.values, isNot(contains(ribs.text)));
+      // Without a photo of its own: one of the moment's, never none.
+      expect(lines.values, contains(bikes.text));
+      expect(lines, hasLength(2));
     });
 
-    test('a photo the app cannot show falls back to the chapter', () {
-      final chapter = neonNightFromWrapUp(
+    test("a line whose photo isn't in a moment goes on the nearest one", () {
+      final chapter = story(
+        nn(
+          excerpts: const [rave],
+          moments: const [
+            WrapUpNeonMoment(type: 'split', photoIds: ['a1', 'a2', 'a5']),
+          ],
+        ),
+      ).chapters.single;
+      // a4 is nearest a5.
+      expect(linesOf(chapter), {'a5': rave.text});
+    });
+
+    test('a photo the app cannot show falls back to a moment photo', () {
+      final chapter = story(
         nn(excerpts: const [rave]),
-        photoIds: {for (final photo in photos) photo.id}..remove('a4'),
-      )!.chapters.single;
-      expect(chapter.lines.single.photo.id, isNot('a4'));
+        shown: {for (final photo in photos) photo.id}..remove('a4'),
+      ).chapters.single;
+      expect(linesOf(chapter).keys.single, isNot('a4'));
     });
 
-    test('a line too long to show whole is left out', () {
+    test('a line too long to show is left out; more lines than photos too', () {
       final huge = WrapUpNeonExcerpt(
-        text: List.filled(60, 'unbelievably').join(' '),
+        text: List.filled(20, 'unbelievably').join(' '),
         noteId: 'n9',
       );
-      expect(neonNoteLines(huge.text), isNull);
-      expect(story(nn(excerpts: [huge, bikes])).chapters.single.lines, [
-        isA<NnLine>().having((l) => l.text, 'text', bikes.text),
-      ]);
+      expect(
+        linesOf(story(nn(excerpts: [huge, bikes])).chapters.single).values,
+        [bikes.text],
+      );
+      final two = story(
+        nn(
+          excerpts: const [ribs, rave, bikes],
+          moments: const [
+            WrapUpNeonMoment(type: 'split', photoIds: ['a1', 'a4']),
+          ],
+        ),
+      ).chapters.single;
+      expect(linesOf(two), {'a1': ribs.text, 'a4': rave.text});
     });
 
-    test('the Note scene drops a line a chapter already plays', () {
+    test('the Note scene drops a line a moment already plays', () {
       final played = WrapUpNeonNote(text: rave.text, number: 2);
       expect(story(nn(excerpts: const [rave], note: played)).note, isNull);
       const other = WrapUpNeonNote(text: 'Best night ever', number: 3);
@@ -103,52 +141,61 @@ void main() {
   });
 
   group('the timeline', () {
-    test('a chapter with lines gets a Lines scene after its moments', () {
-      final night = story(nn(excerpts: const [ribs, rave, bikes]));
+    test('lines play in their moments: no scene of their own', () {
+      final night = story(nn(excerpts: const [rave, bikes]));
       final timeline = NeonNightCanvas.timelineFor(night);
-      final specs = [for (final s in timeline.scenes) s.spec];
-      final at = specs.indexWhere((s) => s is NnLinesSpec);
-      expect(specs[at - 1], isA<NnMomentSpec>());
-      final lines = specs[at] as NnLinesSpec;
-      expect(lines.lineBeats, hasLength(3));
-      for (final (k, b) in lines.lineBeats.indexed) {
-        expect(b % 4, 0);
-        // Each line is on screen for its reading time.
-        final read = FilmTextRules.readingTime(night.chapters[0].lines[k].text);
-        expect(beat.beatToSec(b), greaterThan(read));
-      }
-      // Its photos are decoded large.
-      final (:thumbs, :large, :tiles) = NeonPhotoImages.idsFor(
-        night,
-        timeline,
+      final kinds = {for (final s in timeline.scenes) s.spec.runtimeType};
+      expect(kinds, {
+        NnIgnitionSpec,
+        NnChapterCardSpec,
+        NnMomentSpec,
+        NnFinaleSpec,
+        NnEndingSpec,
+      });
+      // The moment grows so each line can be read.
+      final plain = NnReadingTime.momentBeats(
+        story(nn()).chapters.single.moments.single,
+        beat,
       );
-      expect(large, contains('a4'));
-    });
-
-    test('a chapter without excerpts has no Lines scene', () {
-      final timeline = NeonNightCanvas.timelineFor(story(nn()));
-      expect(timeline.scenes.where((s) => s.spec is NnLinesSpec), isEmpty);
-      // Only the card's line: nothing left to play either.
-      final card = NeonNightCanvas.timelineFor(
-        story(nn(excerpts: const [ribs], card: ribs.text)),
+      final lined = NnReadingTime.momentBeats(
+        night.chapters.single.moments.single,
+        beat,
       );
-      expect(card.scenes.where((s) => s.spec is NnLinesSpec), isEmpty);
+      expect(lined, greaterThan(plain));
+      expect(lined % 4, 0);
     });
 
-    test('a short line holds 2 bars, a long one more', () {
-      expect(NnLinesTexts.beatsFor(neonNoteLines('Ribs!')!, beat), 8);
-      final long = neonNoteLines(rave.text)!;
-      expect(NnLinesTexts.beatsFor(long, beat), greaterThan(8));
-    });
-
-    test('lineAt walks the lines in order', () {
-      final spec = NnLinesSpec(chapter: 0, lineBeats: const [8, 12, 8]);
-      expect(spec.beats, 28);
-      expect(spec.lineAt(0), (line: 0, from: 0));
-      expect(spec.lineAt(8), (line: 1, from: 8));
-      expect(spec.lineAt(19.9), (line: 1, from: 8));
-      expect(spec.lineAt(20), (line: 2, from: 20));
-      expect(spec.startOf(2), 20);
+    test('a lit item with words zooms in for its reading time', () {
+      final moment =
+          story(nn(excerpts: const [rave])).chapters.single.moments.single
+              as NnTimeline;
+      final texts = NnTimelineTexts(moment, story(nn()).chapters.single);
+      final k = moment.photos.indexWhere((p) => p.line != null);
+      expect(k, 4);
+      expect(texts.captions[k]!.text, rave.text);
+      final holds = NnTimelineTexts.holdsFor(texts.captions, beat);
+      expect(
+        beat.beatToSec(holds[k]),
+        greaterThanOrEqualTo(
+          FilmTextRules.readingTime(rave.text) +
+              NnTimelineLayout.zoomIn +
+              NnTimelineLayout.zoomOut,
+        ),
+      );
+      final layout = NnTimelineLayout(moment.photos.length, holds: holds);
+      final from = layout.highlightStart(k);
+      expect(layout.zoomAt(k, from - 0.1, beat), 0);
+      expect(layout.zoomAt(k, from + holds[k] / 2, beat), 1);
+      expect(layout.zoomAt(k, from + holds[k], beat), 0);
+      // Big, centred, inside the frame with its words under it.
+      final rect = layout.zoomRect(k, texts.captions[k]!.size.height);
+      expect(rect.width, greaterThan(NnTimelineLayout.width * 1.5));
+      expect(rect.center.dx, closeTo(540, 0.01));
+      expect(
+        rect.bottom + NnTimelineLayout.zoomGap + texts.captions[k]!.size.height,
+        lessThan(1760),
+      );
+      texts.dispose();
     });
   });
 }

@@ -113,8 +113,6 @@ class NeonScenePainter extends CustomPainter {
         _moments[scene.start]?.paint(canvas, t, scene.start, scene.duration);
       case NnFinaleSpec() || NnEndingSpec():
         _heart.paint(canvas, t);
-      case final NnLinesSpec spec:
-        _lines(canvas, t, scene.start, spec);
       case NnNoteSpec():
         final note = texts.note;
         if (note != null) _note(canvas, t, scene.start, scene.duration, note);
@@ -241,84 +239,6 @@ class NeonScenePainter extends CustomPainter {
           NeonColors.black.withValues(alpha: 0.55 * a),
         ]),
     );
-  }
-
-  // ---- Lines (#416) --------------------------------------------------
-
-  /// The chapter's lines one after another: each over its own photo —
-  /// sharp, dimmed, slowly zooming out — its rows lit one a beat, then a
-  /// 0.25 s fade before the next line's photo comes up.
-  void _lines(Canvas canvas, double t, double cue, NnLinesSpec spec) {
-    final chapter = story.chapters[spec.chapter];
-    final rows = texts.lines[spec.chapter];
-    final (:line, :from) = spec.lineAt(beat.secToBeat(t - cue));
-    if (line >= rows.length || line >= chapter.lines.length) return;
-    final start = _at(cue, from.toDouble());
-    final duration = beat.beatToSec(spec.lineBeats[line]);
-    final exit = 1 - ((t - (start + duration - 0.25)) / 0.25).clamp(0.0, 1.0);
-    if (exit <= 0) return;
-
-    final a = FilmEases.at(t, start, 0.2, FilmEases.linear) * exit;
-    const frame = Rect.fromLTWH(0, 0, NeonAmbient.width, NeonAmbient.height);
-    final id = chapter.lines[line].photo.id;
-    final image = photos.large(id) ?? photos.thumb(id);
-    if (image != null && a > 0.002) {
-      final p = ((t - start) / duration).clamp(0.0, 1.0);
-      final scale = 1.08 - 0.06 * p;
-      canvas
-        ..save()
-        ..translate(frame.center.dx, frame.center.dy)
-        ..scale(scale)
-        ..translate(-frame.center.dx, -frame.center.dy);
-      neonPaintPhoto(
-        canvas,
-        image,
-        RRect.fromRectAndRadius(frame, Radius.zero),
-        brightness: 0.6,
-        alpha: a,
-      );
-      canvas.restore();
-    }
-    // Darker where the words sit, so they read over any photo.
-    canvas.drawRect(
-      frame,
-      Paint()
-        ..shader = ui.Gradient.linear(
-          frame.topCenter,
-          frame.bottomCenter,
-          [
-            NeonColors.black.withValues(alpha: 0.1 * a),
-            NeonColors.black.withValues(alpha: 0.7 * a),
-            NeonColors.black.withValues(alpha: 0.5 * a),
-          ],
-          const [0, 0.6, 1],
-        ),
-    );
-
-    final text = rows[line];
-    final g = 1 + 0.3 * beat.beatEnv(t);
-    for (final (i, row) in text.rows.indexed) {
-      final dt = t - _at(cue, from + NnLinesTexts.litFrom + i);
-      if (dt < 0) continue;
-      final on = reducedFlashing
-          ? NeonBalloon.fadeOn(dt)
-          : NeonBalloon.flicker(dt);
-      row.paint(
-        canvas,
-        Offset(
-          (NeonAmbient.width - row.size.width) / 2,
-          linesTop(text) + i * 1.06 * row.size.height,
-        ),
-        alpha: on * exit,
-        g: g,
-      );
-    }
-  }
-
-  /// Where a line's first row sits: the block centred on y 1180.
-  static double linesTop(NnLinesTexts text) {
-    final height = text.rows.fold(0.0, (h, r) => h + 1.06 * r.size.height);
-    return 1180 - height / 2;
   }
 
   // ---- Ignition (§5.1) ------------------------------------------------

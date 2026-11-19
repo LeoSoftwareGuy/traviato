@@ -1,7 +1,6 @@
 import '../../../domain/entities/wrap_up_neon_night.dart';
 import 'neon_night_scene_spec.dart';
 import 'neon_night_story.dart';
-import 'neon_type.dart';
 
 /// How many photos each moment plays with (as the server checks them).
 const neonMomentPhotos = {
@@ -71,8 +70,11 @@ NeonNightStory? neonNightFromWrapUp(
             _photo(photo),
         ],
         note: entry.chapter.note,
-        moments: moments.isNotEmpty ? moments : [NnTimeline(_spread(photos))],
-        lines: _lines(entry.chapter, photos),
+        moments: _withLines(
+          moments.isNotEmpty ? moments : [NnTimeline(_spread(photos))],
+          entry.chapter,
+          photos,
+        ),
       ),
     );
   }
@@ -86,7 +88,8 @@ NeonNightStory? neonNightFromWrapUp(
   final shown = {
     for (final chapter in chapters) ...[
       ?_same(chapter.note),
-      for (final line in chapter.lines) _same(line.text),
+      for (final moment in chapter.moments)
+        for (final photo in moment.photos) ?_same(photo.line),
     ],
   };
   final note = nn.note == null || shown.contains(_same(nn.note!.text))
@@ -127,29 +130,74 @@ NeonNightStory? neonNightFromWrapUp(
   );
 }
 
-/// A chapter's excerpts after the card's typed one (#416), each over its
-/// photo: its own when the app can show it, else the chapter's photos in
-/// turn, spread through the chapter. Lines the scene can't show whole are
-/// left out.
-List<NnLine> _lines(WrapUpNeonChapter chapter, List<NnPhoto> photos) {
-  final byId = {for (final photo in photos) photo.id: photo};
+/// The longest line a photo plays under it (#426): the server's cap.
+const int _maxLineChars = 140;
+
+/// [moments] with the chapter's note lines on their photos (#426), so each
+/// line plays when the film reaches its photo — under it, in the moment —
+/// instead of in a scene of its own. A line goes on its own photo when a
+/// moment shows it, else on the moment photo nearest it in time that has
+/// no line yet (one without a caption first). The card's typed line isn't
+/// repeated; a line no photo is left for is left out.
+List<NnMoment> _withLines(
+  List<NnMoment> moments,
+  WrapUpNeonChapter chapter,
+  List<NnPhoto> photos,
+) {
+  final order = {for (final (i, p) in photos.indexed) p.id: i};
   final card = _same(chapter.note);
-  final excerpts = [
-    for (final e in chapter.excerpts)
-      if (_same(e.text) != card && neonNoteLines(e.text) != null) e,
+  final lines = <(int, int), String>{};
+  final slots = [
+    for (final (m, moment) in moments.indexed)
+      for (final (k, photo) in moment.photos.indexed) (m, k, photo),
   ];
+  for (final (n, e) in chapter.excerpts.indexed) {
+    if (_same(e.text) == card || e.text.runes.length > _maxLineChars) {
+      continue;
+    }
+    final free = [
+      for (final slot in slots)
+        if (!lines.containsKey((slot.$1, slot.$2))) slot,
+    ];
+    if (free.isEmpty) break;
+    // Where the line belongs in the chapter: its photo, else spread.
+    final at =
+        order[e.photoId] ??
+        ((n + 1) * photos.length / (chapter.excerpts.length + 1)).floor();
+    (int, int, NnPhoto)? best;
+    var bestCost = double.infinity;
+    for (final slot in free) {
+      final own = slot.$3.id == e.photoId;
+      final cost = own
+          ? -1.0
+          : (order[slot.$3.id]! - at).abs() +
+                (slot.$3.caption == null ? 0.0 : 0.5);
+      if (cost < bestCost) {
+        bestCost = cost;
+        best = slot;
+      }
+    }
+    lines[(best!.$1, best.$2)] = e.text;
+  }
+  if (lines.isEmpty) return moments;
   return [
-    for (final (k, e) in excerpts.indexed)
-      NnLine(
-        text: e.text,
-        photo:
-            byId[e.photoId] ??
-            photos[((k + 1) * photos.length / (excerpts.length + 1))
-                .floor()
-                .clamp(0, photos.length - 1)],
-      ),
+    for (final (m, moment) in moments.indexed)
+      _rebuilt(moment, [
+        for (final (k, photo) in moment.photos.indexed)
+          switch (lines[(m, k)]) {
+            final line? => photo.withLine(line),
+            null => photo,
+          },
+      ]),
   ];
 }
+
+NnMoment _rebuilt(NnMoment moment, List<NnPhoto> photos) => switch (moment) {
+  NnSplit(:final place) => NnSplit(photos, place: place),
+  NnBurst() => NnBurst(photos),
+  NnTimeline() => NnTimeline(photos),
+  NnPeak() => NnPeak(photos),
+};
 
 /// [text] compared loosely: spacing and case.
 String? _same(String? text) =>

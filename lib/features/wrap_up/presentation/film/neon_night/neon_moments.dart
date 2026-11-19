@@ -186,6 +186,51 @@ class NnTimelineLayout {
 
   /// The list's mask: clear above 250, solid 330–1470, clear by 1600.
   static const maskStops = [250.0, 330.0, 1470.0, 1600.0];
+
+  /// A lit item with words zooms to this width (#426), its words under it.
+  static const zoomWidth = 900.0;
+  static const zoomMaxHeight = 1000.0;
+
+  /// The zoom's top bound (under the title) and the block's centre line.
+  static const zoomTop = 340.0;
+  static const zoomCentre = 920.0;
+
+  /// The gap between the zoomed photo and its words.
+  static const zoomGap = 36.0;
+
+  /// How long the zoom takes in and out, s.
+  static const zoomIn = 0.35;
+  static const zoomOut = 0.3;
+
+  /// Item [i] zoomed, with [wordsHeight] px of words under it: as wide as
+  /// [zoomWidth] allows at its own aspect, at most [zoomMaxHeight] tall,
+  /// the photo and its words centred on [zoomCentre] (never above
+  /// [zoomTop]).
+  Rect zoomRect(int i, double wordsHeight) {
+    final item = items[i];
+    var w = zoomWidth;
+    var h = w * item.height / item.width;
+    if (h > zoomMaxHeight) {
+      h = zoomMaxHeight;
+      w = h * item.width / item.height;
+    }
+    final block = h + zoomGap + wordsHeight;
+    final top = math.max(zoomTop, zoomCentre - block / 2);
+    return Rect.fromLTWH((1080 - w) / 2, top, w, h);
+  }
+
+  /// How far item [i] is zoomed at [lb], 0–1 (#426): in over [zoomIn]
+  /// from its highlight, out over [zoomOut] before the next one's (the
+  /// last stays in; the scene fades out).
+  double zoomAt(int i, double lb, NeonBeat beat) {
+    final since = beat.beatToSec(lb - _starts[i]);
+    if (since < 0) return 0;
+    final grow = NeonEases.enter((since / zoomIn).clamp(0.0, 1.0));
+    if (i + 1 >= length) return grow;
+    final left = beat.beatToSec(_starts[i + 1] - lb);
+    if (left <= 0) return 0;
+    return grow * NeonEases.enter((left / zoomOut).clamp(0.0, 1.0));
+  }
 }
 
 /// Peak (§5.6b): 3–5 tapered strips fanned over a laser fan.
