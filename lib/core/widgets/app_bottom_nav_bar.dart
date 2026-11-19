@@ -3,14 +3,14 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
-import '../theme/app_gradients.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
+import 'balloon_create_button.dart';
 import 'shrink_to_floor_text.dart';
 
 /// One tab in [AppBottomNavBar] (Home, Expenses, ...). The center action is
-/// always the FAB — see [AppBottomNavBar.onFabTap].
+/// always the balloon "+" — see [AppBottomNavBar.onFabTap].
 class AppBottomNavBarItem {
   const AppBottomNavBarItem({
     required this.icon,
@@ -25,21 +25,28 @@ class AppBottomNavBarItem {
   final VoidCallback onTap;
 }
 
-/// Shared bottom nav chrome: blurred surface bar, radius 22, a fade above it,
-/// and a center primary→coral gradient FAB pulled up 16px above the bar.
-/// `docs/design/README.md` § Shared: Bottom nav.
+/// Shared bottom nav chrome: an [AppBottomBarSurface] with a fade above it,
+/// and the center [BalloonCreateButton] rising [_fabPullUp] above the bar
+/// (#424; it was a square gradient FAB). `docs/design/README.md` § Shared:
+/// Bottom nav.
 class AppBottomNavBar extends StatelessWidget {
   const AppBottomNavBar({
     required this.items,
     required this.onFabTap,
+    required this.fabSemanticLabel,
     super.key,
   });
 
   final List<AppBottomNavBarItem> items;
   final VoidCallback onFabTap;
 
-  static const _fabPullUp = 16.0;
-  static const _fabSize = 52.0;
+  /// Screen-reader label of the balloon ("Create a memory").
+  final String fabSemanticLabel;
+
+  static const _fabPullUp = 22.0;
+
+  /// Icon size of a tab (#424: was 15).
+  static const double iconSize = 28;
 
   @override
   Widget build(BuildContext context) {
@@ -71,32 +78,29 @@ class AppBottomNavBar extends StatelessWidget {
             clipBehavior: Clip.none,
             alignment: Alignment.topCenter,
             children: [
-              ClipRRect(
-                borderRadius: AppRadius.mediaRadius,
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: AppSpacing.sm,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.tint(AppColors.surface, .92),
-                      border: Border.all(color: AppColors.surfaceBorder),
-                      borderRadius: AppRadius.mediaRadius,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        for (final item in items) _NavTab(item: item),
-                      ],
-                    ),
-                  ),
+              AppBottomBarSurface(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    for (final item in items)
+                      AppBottomBarTab(
+                        icon: item.icon,
+                        label: item.label,
+                        color: item.selected
+                            ? AppColors.primary
+                            : AppColors.textTertiary,
+                        onTap: item.onTap,
+                      ),
+                  ],
                 ),
               ),
               Positioned(
                 top: -_fabPullUp,
-                child: _NavFab(size: _fabSize, onTap: onFabTap),
+                child: BalloonCreateButton(
+                  onTap: onFabTap,
+                  semanticLabel: fabSemanticLabel,
+                ),
               ),
             ],
           ),
@@ -106,41 +110,58 @@ class AppBottomNavBar extends StatelessWidget {
   }
 }
 
-class _NavTab extends StatelessWidget {
-  const _NavTab({required this.item});
+/// One icon-over-label button of a bottom bar — a Home nav tab, or the
+/// Journal's Photo / Note (#424). At least 66 × 48.
+class AppBottomBarTab extends StatelessWidget {
+  const AppBottomBarTab({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+    this.semanticLabel,
+    super.key,
+  });
 
-  final AppBottomNavBarItem item;
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  /// Read instead of [label] when given.
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
-    final color = item.selected ? AppColors.primary : AppColors.textTertiary;
-    return InkWell(
-      onTap: item.onTap,
-      borderRadius: AppRadius.badgeRadius,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 66),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(item.icon, color: color, size: 15),
-              const SizedBox(height: AppSpacing.xs),
-              // Spec 4t "Bottom nav": always one line, scaling down a step
-              // for a long label (translator limit: 9 chars).
-              ShrinkToFloorText(
-                item.label,
-                minFontSize: 8.5,
-                style: AppTypography.buttonLabel.copyWith(
-                  fontSize: 9.5,
-                  height: 1,
-                  color: color,
-                ),
-              ),
-            ],
+    final content = Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, color: color, size: AppBottomNavBar.iconSize),
+        const SizedBox(height: AppSpacing.xs),
+        // Spec 4t "Bottom nav": always one line, scaling down a step
+        // for a long label (translator limit: 9 chars).
+        ShrinkToFloorText(
+          label,
+          minFontSize: 8.5,
+          style: AppBottomBarSurface.labelStyle(color),
+        ),
+      ],
+    );
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      excludeSemantics: semanticLabel != null,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: AppRadius.badgeRadius,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 66, minHeight: 48),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
+            child: content,
           ),
         ),
       ),
@@ -148,35 +169,34 @@ class _NavTab extends StatelessWidget {
   }
 }
 
-class _NavFab extends StatelessWidget {
-  const _NavFab({required this.size, required this.onTap});
+/// The bottom bars' shared surface (#424): the Home nav and the Journal's
+/// Photo · Note bar look the same — blurred surface, radius 22, hairline
+/// border.
+class AppBottomBarSurface extends StatelessWidget {
+  const AppBottomBarSurface({required this.child, this.padding, super.key});
 
-  final double size;
-  final VoidCallback onTap;
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+
+  /// A tab's / action's label under its icon.
+  static TextStyle labelStyle(Color color) => AppTypography.buttonLabel
+      .copyWith(fontSize: 9.5, height: 1, color: color);
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      customBorder: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(18)),
-      ),
-      child: Container(
-        width: size,
-        height: size,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          gradient: AppGradients.primaryCta,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.tint(AppColors.primary, .34),
-              blurRadius: 26,
-              offset: const Offset(0, 10),
-            ),
-          ],
+    return ClipRRect(
+      borderRadius: AppRadius.mediaRadius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: AppColors.tint(AppColors.surface, .92),
+            border: Border.all(color: AppColors.surfaceBorder),
+            borderRadius: AppRadius.mediaRadius,
+          ),
+          child: child,
         ),
-        child: const Icon(Icons.add, color: AppColors.background, size: 22),
       ),
     );
   }
