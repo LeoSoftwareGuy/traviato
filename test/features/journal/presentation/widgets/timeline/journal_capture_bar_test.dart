@@ -1,7 +1,7 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:traviato/features/journal/presentation/widgets/timeline/journal_balloon_bar.dart';
+import 'package:traviato/core/widgets/app_bottom_nav_bar.dart';
+import 'package:traviato/features/journal/presentation/widgets/timeline/journal_capture_bar.dart';
 
 import '../../../../../helpers/localized_app.dart';
 
@@ -18,8 +18,8 @@ Future<void> _pump(
         body: Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
-            child: JournalBalloonBar(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: JournalCaptureBar(
               onPhotoTap: onPhotoTap ?? () {},
               onNoteTap: onNoteTap ?? () {},
             ),
@@ -29,10 +29,6 @@ Future<void> _pump(
     ),
   );
 }
-
-double _fillOpacity(WidgetTester tester, String half) => tester
-    .widget<AnimatedOpacity>(find.byKey(Key('journal-balloon-fill-$half')))
-    .opacity;
 
 void main() {
   testWidgets('shows the Photo and Note labels with no star count', (
@@ -45,10 +41,30 @@ void main() {
     expect(find.textContaining('✦'), findsNothing);
   });
 
-  testWidgets('is 60 tall', (tester) async {
+  testWidgets('wears the Home nav surface and tabs, no balloon (#424)', (
+    tester,
+  ) async {
     await _pump(tester);
 
-    expect(tester.getSize(find.byType(JournalBalloonBar)).height, 60);
+    expect(find.byType(AppBottomBarSurface), findsOneWidget);
+    expect(find.byType(AppBottomBarTab), findsNWidgets(2));
+    expect(find.byKey(const Key('journal-balloon-fill-left')), findsNothing);
+    for (final icon in [Icons.photo_camera_outlined, Icons.edit_note_rounded]) {
+      expect(tester.widget<Icon>(find.byIcon(icon)).size, 28);
+    }
+  });
+
+  testWidgets('the two halves are equal and at least 48 tall', (tester) async {
+    await _pump(tester);
+
+    final photo = tester.getSize(find.byKey(const Key('capture-photo')));
+    final note = tester.getSize(find.byKey(const Key('capture-note')));
+    expect(photo.width, closeTo(note.width, .5));
+    expect(photo.height, greaterThanOrEqualTo(48));
+    expect(
+      tester.getSize(find.byType(JournalCaptureBar)).height,
+      closeTo(JournalCaptureBar.height, 4),
+    );
   });
 
   testWidgets('each half calls its own action', (tester) async {
@@ -74,53 +90,6 @@ void main() {
     expect(find.bySemanticsLabel('Add a photo'), findsOneWidget);
     expect(find.bySemanticsLabel('Add a note'), findsOneWidget);
     handle.dispose();
-  });
-
-  testWidgets('pressing a half fills that half of the balloon, then clears', (
-    tester,
-  ) async {
-    await _pump(tester);
-    expect(_fillOpacity(tester, 'left'), 0);
-    expect(_fillOpacity(tester, 'right'), 0);
-
-    final photo = await tester.startGesture(
-      tester.getCenter(find.byKey(const Key('capture-photo'))),
-    );
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(_fillOpacity(tester, 'left'), 1);
-    expect(_fillOpacity(tester, 'right'), 0);
-
-    await photo.up();
-    await tester.pumpAndSettle();
-    expect(_fillOpacity(tester, 'left'), 0);
-
-    final note = await tester.startGesture(
-      tester.getCenter(find.byKey(const Key('capture-note'))),
-    );
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(_fillOpacity(tester, 'left'), 0);
-    expect(_fillOpacity(tester, 'right'), 1);
-    await note.up();
-    await tester.pumpAndSettle();
-  });
-
-  testWidgets('hovering a half fills it and leaving clears it', (
-    tester,
-  ) async {
-    await _pump(tester);
-    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await mouse.addPointer(location: Offset.zero);
-    addTearDown(mouse.removePointer);
-
-    await mouse.moveTo(
-      tester.getCenter(find.byKey(const Key('capture-note'))),
-    );
-    await tester.pumpAndSettle();
-    expect(_fillOpacity(tester, 'right'), 1);
-
-    await mouse.moveTo(Offset.zero);
-    await tester.pumpAndSettle();
-    expect(_fillOpacity(tester, 'right'), 0);
   });
 
   testWidgets('reads in Russian', (tester) async {

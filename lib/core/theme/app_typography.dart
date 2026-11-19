@@ -217,16 +217,6 @@ abstract class AppTypography {
     color: AppColors.textMuted,
   );
 
-  /// Journal balloon bar labels ("Photo" / "Note", #414): Roboto 600 10,
-  /// tracking .04em, ink on the orange bar.
-  static TextStyle get balloonBarLabel => GoogleFonts.roboto(
-    fontSize: 10,
-    height: 1.2,
-    letterSpacing: 0.4,
-    fontWeight: FontWeight.w600,
-    color: AppColors.background,
-  );
-
   // --- Journal note page (docs/design/JOURNAL_NOTE_PAGETURN_SPEC.md §2–4,
   // #205) ----------------------------------------------------------------
 
