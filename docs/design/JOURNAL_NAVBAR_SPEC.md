@@ -1,5 +1,10 @@
 # Journal Day — Bottom Action Bar (Balloon Bar)
 
+> **Superseded by #424.** The Journal bar now uses the Home nav's style
+> (`AppBottomBarSurface` / `AppBottomBarTab`) with no balloon; the balloon
+> silhouette became the Home nav's centre "+" (`BalloonCreateButton`).
+> Kept for the balloon geometry.
+
 Replaces the previous pill-shaped FAB on the Journal Day screen (Option B, "One timeline"). Shown only when the day has content (hidden on the empty-day state, which has its own CTA).
 
 ## Layout
