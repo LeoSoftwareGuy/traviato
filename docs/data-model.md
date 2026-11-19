@@ -211,9 +211,16 @@ Post-MVP: `video_path`, `video_status`.
   the journal's rule (`logical_day.ts`, a port of the app's), so after
   midnight stays on the evening's day even for rows saved with their
   calendar date. A memory over several days gets **one Neon Night chapter
-  per logical day** (neighbouring days grouped past 5); repair rebuilds a
-  plan that folded days, keeping the director's titles, moments and lines
-  per day, and those chapters never merge. Each chapter carries
+  per logical day** (neighbouring days grouped past 5) — since #426 one
+  per *part* of a day: `nnChapterStarts` also starts a chapter after a
+  break of ≥ 2 h within a day when both sides keep ≥ 4 photos (longest
+  breaks first, up to 5 chapters); the director sees these as
+  `chapter_start` on its photos. Repair rebuilds a plan that folded days
+  or parts, keeping the director's titles, moments and lines per part (an
+  untitled part: its place, else its first photo's `HH:MM`), and those
+  chapters never merge. In content a chapter's card and moments are dealt
+  its shown photos in time order (card first), so no scene goes back in
+  time; the app plays the excerpts on the moments' photos (#426). Each chapter carries
   `excerpts` (0–4 `{note_id, text, photo_id}` in the plan; in content
   `chapters[].excerpts: [{text, note_id, photo_id, source, score}]`, plus
   `days` and `rejected_excerpts` for the inspector): exact sentences or

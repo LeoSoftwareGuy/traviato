@@ -21,7 +21,12 @@ class NnPlanRow extends Equatable {
 
 /// One photo of the night (§7): its id and when it was taken.
 class NnPhoto extends Equatable {
-  const NnPhoto({required this.id, required this.takenAt, this.caption});
+  const NnPhoto({
+    required this.id,
+    required this.takenAt,
+    this.caption,
+    this.line,
+  });
 
   final String id;
 
@@ -31,11 +36,19 @@ class NnPhoto extends Equatable {
   /// The user's caption (#387), shown instead of [takenAt]; null = none.
   final String? caption;
 
+  /// A line of the user's notes this photo plays (#426): in a moment, it
+  /// shows under the photo instead of the caption. Null = none.
+  final String? line;
+
   /// What labels the photo: its caption, else its time (#387).
   String get label => caption ?? takenAt;
 
+  /// This photo carrying [line].
+  NnPhoto withLine(String line) =>
+      NnPhoto(id: id, takenAt: takenAt, caption: caption, line: line);
+
   @override
-  List<Object?> get props => [id, takenAt, caption];
+  List<Object?> get props => [id, takenAt, caption, line];
 }
 
 /// A block that shows a few of a chapter's photos after its card
@@ -110,7 +123,6 @@ class NnChapter extends Equatable {
     required this.photos,
     required this.moments,
     this.note,
-    this.lines = const [],
     List<NnPhoto>? cardPhotos,
   }) : cardPhotos = cardPhotos == null || cardPhotos.isEmpty
            ? photos
@@ -138,12 +150,9 @@ class NnChapter extends Equatable {
   /// The user's own words, typed out on the card; none → no typed line.
   final String? note;
 
-  /// The 1–2 blocks after the card, in order.
+  /// The 1–2 blocks after the card, in order. Their photos carry the
+  /// chapter's note lines (#426).
   final List<NnMoment> moments;
-
-  /// The lines its Lines scene plays after the moments (#416), in order;
-  /// none → no scene.
-  final List<NnLine> lines;
 
   @override
   List<Object?> get props => [
@@ -154,22 +163,7 @@ class NnChapter extends Equatable {
     cardPhotos,
     note,
     moments,
-    lines,
   ];
-}
-
-/// One excerpt of the user's notes (#398) and the photo it plays over.
-class NnLine extends Equatable {
-  const NnLine({required this.text, required this.photo});
-
-  /// Exact words of a note.
-  final String text;
-
-  /// Never null: a line never plays on an empty screen.
-  final NnPhoto photo;
-
-  @override
-  List<Object?> get props => [text, photo];
 }
 
 /// The note the film writes out in neon (§5.7, §7): the user's own words,

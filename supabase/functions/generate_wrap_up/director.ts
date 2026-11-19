@@ -64,6 +64,7 @@ import {
   NEON_NIGHT_PROMPT_RULES,
   type NeonNightPlan,
   neonNightToolProperty,
+  nnChapterStarts,
   nnCheckContext,
   nnLogicalDays,
   repairNeonNight,
@@ -258,6 +259,22 @@ export function buildPlanInput(
   const logical = nnLogicalDays(tripData);
   const dayOf = (id: string, fallback: string | null) =>
     logical.get(id) ?? fallback;
+  // Where Neon Night's chapters must start (#426): each day and each part
+  // of a day after a long break.
+  // The same photos the check sees: the listed ones (and those left out).
+  const listed = new Set(photos.map((p) => p.id));
+  const nnContext = nnCheckContext({
+    ...tripData,
+    photos: tripData.photos.filter((p) =>
+      listed.has(p.id) || p.use_in_wrap_up === false
+    ),
+  });
+  const nnOrdered = [...nnContext.photoOrder.entries()].sort((a, b) =>
+    a[1] - b[1]
+  ).map(([id]) => id);
+  const chapterStarts = new Set(
+    nnChapterStarts(nnContext).map((at) => nnOrdered[at]),
+  );
   return {
     language,
     memory: {
@@ -301,6 +318,7 @@ export function buildPlanInput(
         caption: p.caption,
         bonus_task: bonusByPhoto.get(p.id) ?? null,
         must_include: p.use_in_wrap_up === true,
+        chapter_start: chapterStarts.has(p.id),
       };
     }),
   };

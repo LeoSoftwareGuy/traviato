@@ -3,10 +3,10 @@ import 'dart:math' as math;
 import '../../../domain/film_text_rules.dart';
 import 'neon_beat.dart';
 import 'neon_chapter_card.dart';
+import 'neon_moments.dart';
 import 'neon_night_story.dart';
 import 'neon_night_texts.dart';
 import 'neon_night_timeline.dart';
-import 'neon_type.dart';
 import 'neon_zoom_picks.dart';
 
 /// How long Neon Night holds the user's words (#399 T1): every caption,
@@ -32,10 +32,6 @@ abstract final class NnReadingTime {
           cardMinBeats: cardBeats(chapter, beat),
           momentMinBeats: [
             for (final moment in chapter.moments) momentBeats(moment, beat),
-          ],
-          lineBeats: [
-            for (final line in chapter.lines)
-              NnLinesTexts.beatsFor(neonNoteLines(line.text)!, beat),
           ],
         ),
     ];
@@ -95,7 +91,14 @@ abstract final class NnReadingTime {
   /// A moment's fewest beats for its captions; 0 when it shows none.
   static int momentBeats(NnMoment moment, NeonBeat beat) {
     final boxes = [
-      for (final photo in moment.photos) nnCaptionBox(photo),
+      for (final photo in moment.photos)
+        moment is NnTimeline
+            ? nnCaptionBox(
+                photo,
+                maxWidth: NnTimelineLayout.zoomWidth,
+                withLine: true,
+              )
+            : nnCaptionBox(photo, withLine: true),
     ];
     final captions = boxes.nonNulls.toList();
     final int need;

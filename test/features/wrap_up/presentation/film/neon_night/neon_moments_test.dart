@@ -262,9 +262,10 @@ void main() {
       expect(texts.captions[1], isNull);
       // Too long for 3 lines: left out, never cut.
       expect(texts.captions[2], isNull);
-      // 'Lost the keys': 0.8 + 13/12 s ≈ 1.9 s → 4 beats at 126 bpm.
+      // 'Lost the keys': zoom in 0.35 + 0.8 + 13/12 + zoom out 0.3 s
+      // ≈ 2.5 s → 6 beats at 126 bpm (#426).
       expect(NnTimelineTexts.holdsFor(texts.captions, const NeonBeat()), [
-        4,
+        6,
         1,
         1,
       ]);
