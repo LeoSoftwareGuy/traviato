@@ -2852,4 +2852,20 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get note_photoHint =>
       'Что здесь происходило? Пишите или нажмите на микрофон.';
+
+  @override
+  String get nav_createMemory => 'Создать событие';
+
+  @override
+  String get timeline_deletePhoto => 'Удалить фото';
+
+  @override
+  String get timeline_deletePhotoTitle => 'Удалить это фото?';
+
+  @override
+  String get timeline_deletePhotoBody =>
+      'Оно исчезнет из этого дня и не попадёт в фильм. Это нельзя отменить.';
+
+  @override
+  String get timeline_photoDeleted => 'Фото удалено';
 }

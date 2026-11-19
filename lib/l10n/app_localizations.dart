@@ -4200,6 +4200,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'What was happening here? Type, or tap the mic.'**
   String get note_photoHint;
+
+  /// Bottom nav (#424): screen-reader label of the centre balloon button.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a memory'**
+  String get nav_createMemory;
+
+  /// Photo actions sheet (#424), from a long-press on a timeline photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete photo'**
+  String get timeline_deletePhoto;
+
+  /// Delete-photo confirm sheet (#424).
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this photo?'**
+  String get timeline_deletePhotoTitle;
+
+  /// Delete-photo confirm sheet (#424).
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s removed from this day and won\'t appear in your film. This can\'t be undone.'**
+  String get timeline_deletePhotoBody;
+
+  /// Toast after deleting a photo from the timeline (#424).
+  ///
+  /// In en, this message translates to:
+  /// **'Photo deleted'**
+  String get timeline_photoDeleted;
 }
 
 class _AppLocalizationsDelegate
