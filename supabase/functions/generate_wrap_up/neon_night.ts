@@ -909,6 +909,11 @@ export function repairNeonNight(
   if (isString(nn.headline)) {
     nn.headline = cleanLine(nn.headline) || null;
     if (isString(nn.headline) && isSensitive(nn.headline)) nn.headline = null;
+    // Too long: whole words off its end, else none — the headline is
+    // optional, never a reason to lose the film (#428).
+    if (isString(nn.headline)) {
+      nn.headline = wholeWords(nn.headline, MAX_NN_HEADLINE_CHARS);
+    }
   }
   if (nn.headline === undefined) nn.headline = null;
   return nn;
@@ -1019,6 +1024,18 @@ function splitByDays(
   });
 }
 
+// [text] within [max] characters (#428): as it is, else with whole words
+// dropped from its end (and any dangling punctuation), keeping at least
+// two words; else null. Never cut inside a word.
+export function wholeWords(text: string, max: number): string | null {
+  const trimmed = text.trim();
+  if ([...trimmed].length <= max) return trimmed || null;
+  const words = trimmed.split(/\s+/u);
+  while (words.length > 2 && [...words.join(" ")].length > max) words.pop();
+  const out = words.join(" ").replace(/[\s,;:—–·.-]+$/u, "");
+  return words.length >= 2 && [...out].length <= max ? out : null;
+}
+
 // Every chapter keeps a title that fits (#426): one over
 // MAX_NN_TITLE_CHARS loses whole words from its end (never cut inside a
 // word) — rather than the whole film falling back for one character; a
@@ -1031,18 +1048,7 @@ function fitTitles(chapters: unknown[], context: NnCheckContext): void {
     if (typeof raw !== "object" || raw === null) continue;
     const chapter = raw as Record<string, unknown>;
     let title = isString(chapter.title) ? chapter.title.trim() : "";
-    if ([...title].length > MAX_NN_TITLE_CHARS) {
-      const words = title.split(/\s+/u);
-      while (
-        words.length > 1 && [...words.join(" ")].length > MAX_NN_TITLE_CHARS
-      ) {
-        words.pop();
-      }
-      title = words.join(" ").replace(/[\s,;:—–·-]+$/u, "");
-      if ([...title].length > MAX_NN_TITLE_CHARS || words.length < 2) {
-        title = "";
-      }
-    }
+    title = wholeWords(title, MAX_NN_TITLE_CHARS) ?? "";
     if (title && isSensitive(title)) title = "";
     if (!title && isString(chapter.first_photo_id)) {
       const start = context.photoOrder.get(chapter.first_photo_id);
