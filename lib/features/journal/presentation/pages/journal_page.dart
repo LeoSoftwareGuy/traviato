@@ -35,7 +35,7 @@ import '../widgets/journal_header.dart';
 import '../widgets/timeline/day_timeline_view.dart';
 import '../widgets/timeline/empty_day_notebook.dart';
 import '../widgets/timeline/fold_away.dart';
-import '../widgets/timeline/journal_balloon_bar.dart';
+import '../widgets/timeline/journal_capture_bar.dart';
 import '../widgets/timeline/note_sheets.dart';
 import '../widgets/to_do_sheet.dart';
 import '../note_composer.dart';
@@ -126,6 +126,7 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
 
   /// Notes folding away after a confirmed delete (#407).
   final _leavingNoteIds = <String>{};
+  final _leavingPhotoIds = <String>{};
   Timer? _freshTimer;
   final _freshKey = GlobalKey();
 
@@ -162,11 +163,7 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
               AppSpacing.base,
               MediaQuery.paddingOf(context).bottom +
                   AppSpacing.xxl +
-                  (showsCapsule
-                      ? JournalBalloonBar.height +
-                            JournalBalloonBar.balloonOverhang +
-                            AppSpacing.lg
-                      : 0),
+                  (showsCapsule ? JournalCaptureBar.height + AppSpacing.lg : 0),
             ),
             children: [
               JournalHeader(
@@ -220,8 +217,10 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
                     filmMomentIds: ref.watch(filmMomentIdsProvider(_tripId)),
                     onPhotoTap: _openPhoto,
                     onNoteLongPress: _noteActions,
+                    onPhotoLongPress: _photoActions,
                     onNoteSwipeDelete: _confirmDelete,
                     leavingNoteIds: _leavingNoteIds,
+                    leavingPhotoIds: _leavingPhotoIds,
                     freshNoteId: _freshNoteId,
                     freshNoteKey: _freshKey,
                   ),
@@ -246,15 +245,15 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
         if (showsCapsule)
           Positioned(
             // The Journal's only bottom control — no app bar here (#410).
-            // 20pt side insets, 30pt up (#414), never into the home
-            // indicator.
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
+            // Placed like the Home nav (#424): its side insets, just above
+            // the home indicator.
+            left: AppSpacing.base,
+            right: AppSpacing.base,
             bottom: math.max(
-              30,
-              MediaQuery.paddingOf(context).bottom + AppSpacing.sm,
+              MediaQuery.paddingOf(context).bottom,
+              AppSpacing.sm,
             ),
-            child: JournalBalloonBar(
+            child: JournalCaptureBar(
               onPhotoTap: () => _addPhoto(currentDay),
               onNoteTap: () => _newNote(currentDay),
             ),
@@ -277,6 +276,42 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
           runDeletePhoto(ref: ref, tripId: _tripId, photo: photo),
       filmTripId: _tripId,
     );
+  }
+
+  /// Long-press on a timeline photo (#424): the photo sheet, then the
+  /// confirm sheet.
+  Future<void> _photoActions(PhotoEntity photo) async {
+    final action = await PhotoActionsSheet.show(
+      context,
+      photo: photo,
+      use24h: MediaQuery.alwaysUse24HourFormatOf(context),
+    );
+    if (!mounted || action != PhotoAction.delete) return;
+    if (await DeletePhotoSheet.confirm(context) && mounted) {
+      _deletePhoto(photo);
+    }
+  }
+
+  /// The tile folds away first, as a deleted note does (#407); then the
+  /// photo goes and the toast shows.
+  void _deletePhoto(PhotoEntity photo) {
+    if (!_leavingPhotoIds.add(photo.id)) return;
+    final fold = FoldAway.durationFor(context);
+    setState(() {});
+    unawaited(
+      // Failures put the photo back and surface via the listener.
+      runDeletePhoto(
+        ref: ref,
+        tripId: _tripId,
+        photo: photo,
+        foldFor: fold,
+      ).then((_) {}, onError: (Object _) {}),
+    );
+    Timer(fold, () {
+      if (!mounted) return;
+      showStarToast(context, context.l10n.timeline_photoDeleted);
+      setState(() => _leavingPhotoIds.remove(photo.id));
+    });
   }
 
   Future<void> _newNote(DateTime selectedDay) async {

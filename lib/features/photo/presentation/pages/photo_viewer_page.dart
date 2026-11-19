@@ -20,6 +20,7 @@ import '../../../journal/domain/entities/journal_note_entity.dart';
 import '../../../journal/presentation/controllers/journal_controller.dart';
 import '../../../journal/presentation/note_composer.dart';
 import '../../../journal/presentation/widgets/photo_notes_panel.dart';
+import '../../../journal/presentation/widgets/timeline/note_sheets.dart';
 import '../../../wrap_up/presentation/providers/film_pick_providers.dart';
 import '../../domain/entities/film_pick.dart';
 import '../../domain/entities/photo_entity.dart';
@@ -46,7 +47,8 @@ const _commitVelocity = 600.0;
 /// peeks in from the clipped edge while dragging.
 const _slidePadding = 40.0;
 
-/// How far the close button hangs outside the track's top-right corner.
+/// How far the close and delete buttons hang outside the track's top
+/// corners.
 const _closeOverhangTop = 16.0;
 const _closeOverhangRight = 12.0;
 
@@ -64,9 +66,9 @@ int wrappedPhotoIndex(int page, int photoCount) =>
 /// cubic on release — past [_commitDistance] (or a fast flick) to the
 /// neighbour, otherwise back to centre. Paging wraps at both ends.
 ///
-/// When [onDelete] is given, a trash button (top-left, mirroring close)
-/// deletes the current photo at once — no confirmation (#165), so clearing
-/// several photos stays one tap each. The viewer moves on to the next photo,
+/// When [onDelete] is given, a trash button (top-right, opposite close on
+/// the left — #424) deletes the current photo once the "Delete this
+/// photo?" sheet is confirmed (#424; #165 had none). The viewer moves on to the next photo,
 /// closes once none are left, and puts the photo back if [onDelete] throws.
 ///
 /// When [filmTripId] is given, an "▸ IN THE FILM" panel under the photo
@@ -230,6 +232,8 @@ class _PhotoViewerPageState extends ConsumerState<PhotoViewerPage>
   Future<void> _deleteCurrent() async {
     final onDelete = widget.onDelete;
     if (onDelete == null) return;
+    // Asked first, as from the timeline (#424; #165 had no confirmation).
+    if (!await DeletePhotoSheet.confirm(context) || !mounted) return;
     final index = _currentIndex;
     final photo = _photos[index];
     if (_count == 1) {
@@ -433,9 +437,10 @@ class _PhotoViewerPageState extends ConsumerState<PhotoViewerPage>
                 right: _closeOverhangRight,
                 child: _buildTrack(maxImageHeight),
               ),
+              // Close on the left, delete on the right (#424).
               Positioned(
                 top: 0,
-                right: 0,
+                left: 0,
                 child: _RoundIconButton(
                   key: const Key('photo-viewer-close'),
                   icon: Icons.close,
@@ -447,7 +452,7 @@ class _PhotoViewerPageState extends ConsumerState<PhotoViewerPage>
               if (widget.onDelete != null)
                 Positioned(
                   top: 0,
-                  left: 0,
+                  right: 0,
                   child: _RoundIconButton(
                     key: const Key('photo-viewer-delete'),
                     icon: Icons.delete_outline,

@@ -10,6 +10,12 @@ import '../../../trip/domain/entities/trip_card_entity.dart';
 import '../../../trip/presentation/widgets/trip_cover_image.dart';
 import 'trip_card_pill.dart';
 
+/// Gap between the grid's two columns (and its rows).
+const double memoryGridGap = AppSpacing.md;
+
+/// The tiles' width ÷ height (the original 161.5 × 160 tile).
+const double _tileAspectRatio = 161.5 / 160;
+
 /// "Kept forever" grid: finished trips. Where a tap goes is the page's
 /// call — Journal for a memory not kept yet (#101), the Kept Memory page
 /// for a kept one (#279).
@@ -45,16 +51,32 @@ class MemoriesGridSection extends StatelessWidget {
             ),
           )
         else
-          Wrap(
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.md,
+          // Two columns that fill the page's own side padding, so the left
+          // and right gaps match on every phone (#424).
+          Column(
             children: [
-              for (final trip in trips)
-                _MemoryGridCard(
-                  trip: trip,
-                  onTap: () => onTripTap(trip),
-                  onLongPress: () => onTripLongPress(trip),
+              for (var i = 0; i < trips.length; i += 2) ...[
+                if (i > 0) const SizedBox(height: memoryGridGap),
+                Row(
+                  children: [
+                    for (var j = i; j < i + 2; j++) ...[
+                      if (j > i) const SizedBox(width: memoryGridGap),
+                      Expanded(
+                        child: AspectRatio(
+                          aspectRatio: _tileAspectRatio,
+                          child: j < trips.length
+                              ? _MemoryGridCard(
+                                  trip: trips[j],
+                                  onTap: () => onTripTap(trips[j]),
+                                  onLongPress: () => onTripLongPress(trips[j]),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
+              ],
             ],
           ),
       ],
@@ -80,8 +102,6 @@ class _MemoryGridCard extends StatelessWidget {
       onLongPress: onLongPress,
       borderRadius: AppRadius.mediaRadius,
       child: Container(
-        width: 161.5,
-        height: 160,
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           borderRadius: AppRadius.mediaRadius,

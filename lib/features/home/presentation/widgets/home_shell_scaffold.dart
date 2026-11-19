@@ -5,8 +5,8 @@ import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 
-/// Persistent bottom nav for the Home/Expenses tabs, with a centered ➕
-/// action button that pushes create-memory rather than switching tabs
+/// Persistent bottom nav for the Home/Expenses tabs, with a centered
+/// balloon "+" (#424) that pushes create-memory rather than switching tabs
 /// (guidelines doc 07). Chrome lives in [AppBottomNavBar].
 class HomeShellScaffold extends StatelessWidget {
   const HomeShellScaffold({required this.navigationShell, super.key});
@@ -20,6 +20,7 @@ class HomeShellScaffold extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: AppBottomNavBar(
         onFabTap: () => context.pushNamed(RouteNames.createMemory),
+        fabSemanticLabel: context.l10n.nav_createMemory,
         items: [
           AppBottomNavBarItem(
             icon: Icons.home_rounded,

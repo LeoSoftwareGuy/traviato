@@ -84,21 +84,28 @@ Future<PhotoEntity> runAddPhoto({
 }
 
 /// Deletes a photo optimistically (#165): the Journal's strip, day-tab
-/// thumbnail and counts drop it at once — no confirmation, so deleting
-/// several in a row stays one tap each — and it's put back where it was if
+/// thumbnail and counts drop it at once (the caller has asked first, #424)
+/// — and it's put back where it was if
 /// the delete fails. The server takes back the photo's ✦2 (kept for a
 /// bonus-task photo), so the star badges refetch on success.
+///
+/// From the timeline's long-press sheet (#424) it leaves after [foldFor] —
+/// the tile's fold-away — while the delete is already under way, as a
+/// deleted note does (#407).
 Future<void> runDeletePhoto({
   required WidgetRef ref,
   required String tripId,
   required PhotoEntity photo,
+  Duration foldFor = Duration.zero,
 }) {
   return deletePhotoMutation.run(ref, (tsx) async {
     final repo = tsx.get(photoRepositoryProvider);
     final controller = tsx.get(journalControllerProvider(tripId).notifier);
 
+    final deleting = repo.deletePhoto(photo);
+    if (foldFor > Duration.zero) await Future<void>.delayed(foldFor);
     final index = controller.applyPhotoDeleted(photo.id);
-    final result = await repo.deletePhoto(photo);
+    final result = await deleting;
     result.fold(
       (failure) {
         if (index != -1) controller.applyPhotoRestored(photo, index);

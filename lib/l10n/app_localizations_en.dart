@@ -2793,4 +2793,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get note_photoHint => 'What was happening here? Type, or tap the mic.';
+
+  @override
+  String get nav_createMemory => 'Create a memory';
+
+  @override
+  String get timeline_deletePhoto => 'Delete photo';
+
+  @override
+  String get timeline_deletePhotoTitle => 'Delete this photo?';
+
+  @override
+  String get timeline_deletePhotoBody =>
+      'It\'s removed from this day and won\'t appear in your film. This can\'t be undone.';
+
+  @override
+  String get timeline_photoDeleted => 'Photo deleted';
 }

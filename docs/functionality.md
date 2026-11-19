@@ -53,7 +53,11 @@ set. Mockup copy showing other numbers is adjusted at implementation.
 - **Kept forever**: finished-memory grid, ▸ Recap badge, days + photo count.
   Tap: a memory not kept yet → Journal (#101); a kept one → the **Kept
   Memory page** (§17, #279, #281).
-- Bottom nav: Home · **FAB ➕** · Expenses.
+- Bottom nav: Home · **balloon ＋** · Expenses — 28 pt tab icons; the centre is
+  the Journal's hot-air balloon in the CTA gradient with a "+" on its
+  envelope, rising above the bar; tap creates a memory (#424).
+- **Kept forever** grid: two columns that fill Home's side padding (equal
+  left/right gaps on every phone), tiles keep their aspect (#424).
 
 ## 4. Create memory ✅ — redesigned, + cover picker
 
@@ -111,11 +115,16 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   Notes fold at 4 lines ("more" / "less"); long-press → Edit / Delete (with
   a confirm), or on iOS swipe left → Delete. A saved note's slot opens and
   the card drops in with one orange glow; a deleted one folds away (#407;
-  crossfades under reduced motion). A floating Photo | Note balloon bar (#414, `docs/design/JOURNAL_NAVBAR_SPEC.md`; pressing a half fills that half of the balloon) is the Journal's only bottom control — no app bottom bar there (#410); an empty
+  crossfades under reduced motion). A floating Photo | Note bar — since #424 in the Home nav's style (same surface,
+  icons and labels, two equal halves, no balloon; the balloon moved to Home's
+  "+") — is the Journal's only bottom control — no app bottom bar there (#410); an empty
   day shows a notebook page with "Write the first note ✦1". The Journal
   opens on the logical today (after midnight, the evening before).
   photos strip ("TODAY'S PHOTOS · N", **add tile awards ✦2** on successful photo,
-  tiles → Photo detail; "▸ N IN THE FILM" + per-thumb film badges, #294);
+  tiles → Photo detail; long-press a timeline photo (450 ms) → a sheet with
+  its preview and Delete photo → "Delete this photo?" confirm, then it folds
+  away like a note (#424). The photo viewer has close top-left, delete
+  top-right, and asks the same confirm before deleting (#424); "▸ N IN THE FILM" + per-thumb film badges, #294);
   "To Do · N left" → Plan; **"View wrap-up ▸"** gradient button;
   achievement-nudge card with progress ring.
 - **In the film** (#294, `docs/design/photo-pick/`): the day's photo viewer

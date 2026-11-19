@@ -2718,5 +2718,15 @@
   "note_onThisPhoto": "К этому фото · {time}",
   "@note_onThisPhoto": {"x-review": "pending"},
   "note_photoHint": "Что здесь происходило? Пишите или нажмите на микрофон.",
-  "@note_photoHint": {"x-review": "pending"}
+  "@note_photoHint": {"x-review": "pending"},
+  "nav_createMemory": "Создать событие",
+  "@nav_createMemory": {"x-review": "pending"},
+  "timeline_deletePhoto": "Удалить фото",
+  "@timeline_deletePhoto": {"x-review": "pending"},
+  "timeline_deletePhotoTitle": "Удалить это фото?",
+  "@timeline_deletePhotoTitle": {"x-review": "pending"},
+  "timeline_deletePhotoBody": "Оно исчезнет из этого дня и не попадёт в фильм. Это нельзя отменить.",
+  "@timeline_deletePhotoBody": {"x-review": "pending"},
+  "timeline_photoDeleted": "Фото удалено",
+  "@timeline_photoDeleted": {"x-review": "pending"}
 }

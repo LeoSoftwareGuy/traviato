@@ -25,8 +25,10 @@ class DayTimelineView extends StatelessWidget {
     required this.filmMomentIds,
     required this.onPhotoTap,
     required this.onNoteLongPress,
+    this.onPhotoLongPress,
     this.onNoteSwipeDelete,
     this.leavingNoteIds = const {},
+    this.leavingPhotoIds = const {},
     this.freshNoteId,
     this.freshNoteKey,
     super.key,
@@ -44,11 +46,17 @@ class DayTimelineView extends StatelessWidget {
   final ValueChanged<PhotoEntity> onPhotoTap;
   final ValueChanged<JournalNoteEntity> onNoteLongPress;
 
+  /// Long-press on a photo tile → Delete (#424).
+  final ValueChanged<PhotoEntity>? onPhotoLongPress;
+
   /// iOS swipe → Delete on a note (#407).
   final ValueChanged<JournalNoteEntity>? onNoteSwipeDelete;
 
   /// Notes folding away after a confirmed delete (#407).
   final Set<String> leavingNoteIds;
+
+  /// Photos folding away after a confirmed delete (#424).
+  final Set<String> leavingPhotoIds;
   final String? freshNoteId;
   final GlobalKey? freshNoteKey;
 
@@ -82,6 +90,8 @@ class DayTimelineView extends StatelessWidget {
           photos: photos,
           use24h: use24h,
           onPhotoTap: onPhotoTap,
+          onPhotoLongPress: onPhotoLongPress,
+          leavingPhotoIds: leavingPhotoIds,
           notedPhotoIds: notedPhotoIds,
           filmMomentIds: filmMomentIds,
         ),

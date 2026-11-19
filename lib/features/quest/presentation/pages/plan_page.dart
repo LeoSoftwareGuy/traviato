@@ -72,6 +72,7 @@ class PlanPage extends ConsumerWidget {
       ),
       bottomNavigationBar: AppBottomNavBar(
         onFabTap: () => context.pushNamed(RouteNames.createMemory),
+        fabSemanticLabel: context.l10n.nav_createMemory,
         items: [
           AppBottomNavBarItem(
             icon: Icons.home_rounded,
