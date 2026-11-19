@@ -7,6 +7,7 @@ import {
   dayChapterStarts,
   describeNeonNightProblems,
   type NeonNightPlan,
+  nnChapterStarts,
   nnCheckContext,
   repairNeonNight,
 } from "./neon_night.ts";
@@ -121,7 +122,7 @@ Deno.test("several days need one chapter per logical day", () => {
   assertEquals(context.photoDays!.get("b0"), "2026-09-02");
   const problems = describeNeonNightProblems(foldedPlan(), context);
   assert(
-    problems.some((p) => p.includes("one chapter per day")),
+    problems.some((p) => p.includes("chapter_start")),
     problems.join("\n"),
   );
   assert(problems.some((p) => p.includes("headline")), problems.join("\n"));
@@ -277,4 +278,126 @@ Deno.test("a day the director split by time keeps at most 2 moments", () => {
   assertEquals(day1.moments[0].photo_ids, ["a0", "a1"]);
   assertEquals(day1.moments[1].type, "timeline");
   assertEquals(day1.moments[1].photo_ids, ["a2", "a3", "a4", "a5"]);
+});
+
+// --- A long day in parts (#426) --------------------------------------------
+
+// The ADE memory's shape: day 1 from the airport at 08:40 to the rave at
+// 06:34, with breaks of 3.3 h (after only 3 photos), 2.6 h and 2.3 h; then
+// two shorter days.
+function longDays(): TripData {
+  const base = directorTripData().photos[0];
+  const photos: TripData["photos"] = [];
+  const add = (id: string, calendar: string, h: number, m = 0) =>
+    photos.push({
+      ...base,
+      id,
+      day_date: calendar,
+      taken_at: local(calendar, h, m),
+      storage_path: `u/t/${id}.jpg`,
+      place_text: null,
+      caption: null,
+      use_in_wrap_up: null,
+    });
+  const d1 = "2026-10-23";
+  [[8, 40], [8, 42], [8, 50]].forEach(([h, m], k) => add(`air${k}`, d1, h, m));
+  [[12, 10], [12, 19], [13, 25], [14, 31], [14, 33]].forEach(([h, m], k) =>
+    add(`day${k}`, d1, h, m)
+  );
+  [[17, 10], [17, 42], [20, 25], [21, 30], [23, 14], [23, 46]].forEach((
+    [h, m],
+    k,
+  ) => add(`eve${k}`, d1, h, m));
+  [[3, 4], [3, 5], [6, 34], [6, 35]].forEach(([h, m], k) =>
+    add(`rave${k}`, "2026-10-24", h, m)
+  );
+  [[13, 0], [14, 30], [18, 30], [19, 30]].forEach(([h, m], k) =>
+    add(`d2_${k}`, "2026-10-24", h, m)
+  );
+  [[16, 19], [16, 39], [19, 4], [19, 30]].forEach(([h, m], k) =>
+    add(`d3_${k}`, "2026-10-25", h, m)
+  );
+  return directorTripData({ utc_offset_minutes: OFFSET, photos, notes: [] });
+}
+
+Deno.test("a long day breaks into parts at its long breaks (#426)", () => {
+  const context = nnCheckContext(longDays());
+  const ordered = [...context.photoOrder.entries()].sort((a, b) => a[1] - b[1])
+    .map(([id]) => id);
+  const starts = nnChapterStarts(context).map((at) => ordered[at]);
+  // The longest break, after the airport's 3 photos, would leave too few
+  // for a part; the next (2.7 h, before the bar) and the rave's are parts.
+  // The 2.6 h one would leave the bus 2 photos. Days 2 and 3 stay whole.
+  assertEquals(starts, ["air0", "eve2", "rave0", "d2_0", "d3_0"]);
+  // A memory over a single day keeps the director's split.
+  const oneDay = longDays();
+  oneDay.photos = oneDay.photos.filter((p) =>
+    p.id.startsWith("air") ||
+    p.id.startsWith("day")
+  );
+  assertEquals(nnChapterStarts(nnCheckContext(oneDay)), []);
+});
+
+Deno.test("repair gives each part a chapter, titled by the director or its time", () => {
+  const data = longDays();
+  const context = nnCheckContext(data);
+  const plan: NeonNightPlan = {
+    chapters: [
+      {
+        title: "Прилет",
+        first_photo_id: "air0",
+        note_id: null,
+        note_excerpt: null,
+        moments: [
+          { type: "timeline", photo_ids: ["air1", "day2", "eve2", "rave2"] },
+        ],
+        excerpts: [],
+      },
+      {
+        title: "AMF",
+        first_photo_id: "d2_0",
+        note_id: null,
+        note_excerpt: null,
+        moments: [{ type: "split", photo_ids: ["d2_2", "d2_3"] }],
+        excerpts: [],
+      },
+      {
+        title: "Брюссель",
+        first_photo_id: "d3_0",
+        note_id: null,
+        note_excerpt: null,
+        moments: [{ type: "split", photo_ids: ["d3_0", "d3_1"] }],
+        excerpts: [],
+      },
+    ],
+    note_moment: null,
+    headline: null,
+  };
+  const repaired = repairNeonNight(plan, context) as NeonNightPlan;
+  assertEquals(describeNeonNightProblems(repaired, context), []);
+  assertEquals(repaired.chapters.map((c) => c.title), [
+    "Прилет",
+    "20:25",
+    "03:04",
+    "AMF",
+    "Брюссель",
+  ]);
+  // Content: every chapter in its own stretch, each scene after the last.
+  const content = buildNeonNightContent(data, repaired);
+  let last = -Infinity;
+  for (const chapter of content.chapters) {
+    const at = (id: string) =>
+      Date.parse(chapter.photos.find((p) => p.id === id)!.taken_at);
+    for (
+      const block of [
+        chapter.card_photo_ids,
+        ...chapter.moments.map((m) => m.photo_ids),
+      ]
+    ) {
+      const times = block.map(at);
+      assertEquals(times, [...times].sort((a, b) => a - b));
+      assert(times[0] > last, `${chapter.title} goes back in time`);
+      last = times[times.length - 1];
+    }
+  }
 });

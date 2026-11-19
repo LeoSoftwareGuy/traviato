@@ -220,7 +220,15 @@ Deno.test("content.neon_night: chapters by range, the user's own words, totals",
   assertEquals(content.chapters[0].photos[0].taken_at, "2026-09-01T10:00:00Z");
   assertEquals(content.chapters[0].note, "Bikes everywhere");
   assertEquals(content.chapters[1].note, null);
-  assertEquals(content.chapters[0].moments[0].place, "Centraal");
+  // A split's place is the first one its photos carry (#426: its photos
+  // are dealt in time order after the card).
+  const split = content.chapters[0].moments[0];
+  assertEquals(split.type, "split");
+  assertEquals(
+    split.place,
+    split.photo_ids.map((id) => data.photos.find((p) => p.id === id)!)
+      .find((p) => p.place_text)?.place_text ?? null,
+  );
   // Only a split is labelled with a place.
   assertEquals(content.chapters[0].moments[1].place, null);
   assertEquals(content.note, {
@@ -409,11 +417,10 @@ Deno.test("the director can't plan a peak any more", () => {
 Deno.test("a peak in a plan made before plays as photos side by side", () => {
   // neonNightPlan()'s chapter 3 is a 3-photo peak.
   const content = buildNeonNightContent(fullNight(), neonNightPlan());
-  assertEquals(content.chapters[2].moments, [{
-    type: "split",
-    photo_ids: ["p08", "p09", "p10"],
-    place: null,
-  }]);
+  const moment = content.chapters[2].moments[0];
+  assertEquals(content.chapters[2].moments.length, 1);
+  assertEquals(moment.type, "split");
+  assertEquals(moment.photo_ids.length, 3);
   assert(
     content.chapters.every((c) => c.moments.every((m) => m.type !== "peak")),
   );
@@ -428,8 +435,7 @@ Deno.test("a timeline is filled with what the card leaves, in time order", () =>
   const ids = chapter.moments[0].photo_ids;
   assertEquals(chapter.moments[0].type, "timeline");
   assertEquals(ids.length, 5);
-  assertEquals(ids.slice(0, 1), ["p04"]);
-  assert(ids.includes("p07"));
+  assertStrictlyAfterCard(chapter);
   // Never a card photo, never another chapter's.
   assert(ids.every((id) => !chapter.card_photo_ids.includes(id)));
   assert(ids.every((id) => chapter.photos.some((p) => p.id === id)));
@@ -455,8 +461,28 @@ Deno.test("the fill takes Always picks first and stops at 6", () => {
   const ids = chapter.moments[0].photo_ids;
   assertEquals(ids.length, 6);
   assert(ids.includes("x8") && ids.includes("x9"));
-  assertEquals(ids.slice(0, 2), ["p04", "p05"]);
+  assertStrictlyAfterCard(chapter);
 });
+
+// The card's photos come first in time, then each moment's (#426).
+function assertStrictlyAfterCard(
+  chapter: ReturnType<typeof buildNeonNightContent>["chapters"][number],
+) {
+  const at = new Map(chapter.photos.map((p, i) => [p.id, i]));
+  const blocks = [
+    chapter.card_photo_ids,
+    ...chapter.moments.map((m) => m.photo_ids),
+  ].map((ids) => ids.map((id) => at.get(id)!));
+  for (const block of blocks) {
+    assertEquals(block, [...block].sort((a, b) => a - b));
+  }
+  for (let k = 1; k < blocks.length; k++) {
+    assert(
+      Math.max(...blocks[k - 1]) < Math.min(...blocks[k]),
+      `block ${k} goes back in time: ${JSON.stringify(blocks)}`,
+    );
+  }
+}
 
 // --- Fewer, fuller scenes (#390) --------------------------------------------
 
@@ -544,13 +570,17 @@ Deno.test("Amsterdam's shape: 5 chapters of 3–7 photos become fuller ones", ()
   assert(content.chapters.every((c) => c.moments.length <= 2));
 });
 
-Deno.test("the card takes captioned photos first", () => {
-  const data = fullNight();
-  data.photos.find((p) => p.id === "d1x3")!.caption = "Lost the keys";
-  const plan = neonNightPlan();
-  const chapter = buildNeonNightContent(data, plan).chapters[0];
-  // Chapter 1's free photos: d1x0–d1x4; the captioned one is on the card.
-  assert(chapter.card_photo_ids.includes("d1x3"));
+Deno.test("the card opens a chapter with its earliest photos (#426)", () => {
+  const content = buildNeonNightContent(fullNight(), neonNightPlan());
+  for (const chapter of content.chapters) {
+    const shown = new Set([
+      ...chapter.card_photo_ids,
+      ...chapter.moments.flatMap((m) => m.photo_ids),
+    ]);
+    const first = chapter.photos.find((p) => shown.has(p.id))!;
+    assertEquals(chapter.card_photo_ids[0], first.id);
+    assertStrictlyAfterCard(chapter);
+  }
 });
 
 Deno.test("a timeline under 5 photos plays as a split or burst", () => {

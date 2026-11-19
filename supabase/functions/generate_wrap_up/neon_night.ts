@@ -289,10 +289,10 @@ export const NEON_NIGHT_PROMPT_RULES = [
   "no scene shows a photo older than the scene before.\n",
   `- chapters: ${MIN_NN_CHAPTERS}–${MAX_NN_CHAPTERS}. Each photo's \`day\` is `,
   "its logical day (the night until about 08:00 belongs to the evening ",
-  "before). Several days: exactly one chapter per day, starting at that ",
-  "day's first photo — never two days in one chapter; a day in another ",
-  `place always has its own. More than ${MAX_NN_CHAPTERS} days: group `,
-  "neighbouring days. One day or night: split it by time into parts ",
+  "before). Several days: exactly one chapter per part, starting at each ",
+  "photo marked chapter_start (each day's first photo, and the first ",
+  "after a long break within a day) — never two days or two parts in one ",
+  "chapter, no other chapters. One day or night: split it by time into parts ",
   "(arriving, the peak, late…). first_photo_id is the chapter's first ",
   "photo; the first chapter starts at the first photo. title is short, in ",
   "the night's mood and the notes' language, built on a real detail when ",
@@ -342,6 +342,9 @@ export interface NnCheckContext {
   photoDays?: ReadonlyMap<string, string>;
   // Each photo's tagged place: a title for a day the director folded.
   photoPlaces?: ReadonlyMap<string, string>;
+  // Each timed photo's local wall-clock time as UTC millis (#426): where
+  // a long day breaks into parts. Untimed photos are absent.
+  photoTimes?: ReadonlyMap<string, number>;
 }
 
 // Every photo's and note's logical day (#398 R1); notes as `note:<id>`.
@@ -378,6 +381,47 @@ export function dayChapterStarts(context: NnCheckContext): number[] {
     starts.push(days[Math.floor(g * days.length / MAX_NN_CHAPTERS)].start);
   }
   return starts;
+}
+
+// A day of a several-day memory breaks into parts at a gap of this long
+// or more (#426), each part with at least MIN_NN_PART_PHOTOS photos, so a
+// chapter is one stretch of the day: arriving, the evening, the rave.
+export const NN_PART_GAP_MS = 2 * 60 * 60 * 1000;
+export const MIN_NN_PART_PHOTOS = 4;
+
+// Where the chapters of a several-day memory start (#398 R1, #426): each
+// day's first photo, then — while there are fewer than MAX_NN_CHAPTERS —
+// the longest gaps within a day (NN_PART_GAP_MS or more) that leave each
+// side at least MIN_NN_PART_PHOTOS. A chapter never crosses a day. Empty
+// for a single day: the director splits it.
+export function nnChapterStarts(context: NnCheckContext): number[] {
+  const starts = dayChapterStarts(context);
+  if (starts.length === 0 || starts.length >= MAX_NN_CHAPTERS) return starts;
+  const times = context.photoTimes;
+  if (!times) return starts;
+  const ordered = [...context.photoOrder.entries()].sort((a, b) => a[1] - b[1])
+    .map(([id]) => id);
+  const days = context.photoDays;
+  const gaps: { at: number; gap: number }[] = [];
+  for (let k = 1; k < ordered.length; k++) {
+    const a = times.get(ordered[k - 1]);
+    const b = times.get(ordered[k]);
+    if (a === undefined || b === undefined) continue;
+    if (days?.get(ordered[k - 1]) !== days?.get(ordered[k])) continue;
+    if (b - a >= NN_PART_GAP_MS) gaps.push({ at: k, gap: b - a });
+  }
+  gaps.sort((x, y) => y.gap - x.gap || x.at - y.at);
+  const parts = [...starts];
+  for (const { at } of gaps) {
+    if (parts.length >= MAX_NN_CHAPTERS) break;
+    const sorted = [...parts].sort((x, y) => x - y);
+    const from = [...sorted].reverse().find((s) => s < at)!;
+    const to = sorted.find((s) => s > at) ?? ordered.length;
+    if (at - from >= MIN_NN_PART_PHOTOS && to - at >= MIN_NN_PART_PHOTOS) {
+      parts.push(at);
+    }
+  }
+  return parts.sort((x, y) => x - y);
 }
 
 // Photos the film may show, chronological: not left out.
@@ -420,6 +464,12 @@ export function nnCheckContext(
       photos.filter((p) => p.place_text?.trim()).map((
         p,
       ) => [p.id, p.place_text!]),
+    ),
+    photoTimes: new Map(
+      photos.filter((p) => p.taken_at).map((p) => [
+        p.id,
+        Date.parse(p.taken_at!) + (tripData.utc_offset_minutes ?? 0) * 60_000,
+      ]),
     ),
   };
 }
@@ -690,8 +740,8 @@ export function describeNeonNightProblems(
       });
     });
 
-    // One chapter per logical day (#398 R1).
-    const required = dayChapterStarts(context);
+    // One chapter per part of a day (#398 R1, #426).
+    const required = nnChapterStarts(context);
     if (required.length > 0) {
       const actual = starts.filter((x): x is number => x !== null);
       if (
@@ -699,7 +749,7 @@ export function describeNeonNightProblems(
         actual.some((x, k) => x !== required[k])
       ) {
         problems.push(
-          `neon_night.chapters: the memory has ${required.length} days — one chapter per day, each starting at its first photo`,
+          `neon_night.chapters: the memory has ${required.length} parts — one chapter starting at each chapter_start photo`,
         );
       }
     }
@@ -905,7 +955,7 @@ function splitByDays(
   chapters: unknown[],
   context: NnCheckContext,
 ): unknown[] {
-  const required = dayChapterStarts(context);
+  const required = nnChapterStarts(context);
   if (required.length === 0) return chapters;
   const old = chapters.filter((c) =>
     typeof c === "object" && c !== null &&
@@ -936,6 +986,7 @@ function splitByDays(
       title = fold && !usedTitles.has(fold) ? fold : null;
     }
     title ??= placeOf(ordered.slice(start, end), context) ??
+      clockTitle(ordered[start], context) ??
       (covering.title as string | null) ?? "";
     usedTitles.add(title);
     const moments = old.flatMap((c) =>
@@ -965,6 +1016,14 @@ function splitByDays(
       excerpts: excerpts.slice(0, MAX_NN_EXCERPTS),
     };
   });
+}
+
+// A part's title when nothing better is known (#426): its first photo's
+// time, like a flyer's "22:00".
+function clockTitle(id: string, context: NnCheckContext): string | null {
+  const ms = context.photoTimes?.get(id);
+  if (ms === undefined) return null;
+  return new Date(ms).toISOString().slice(11, 16);
 }
 
 // The place most of [ids] share, short enough for a title; else null.
@@ -1420,6 +1479,23 @@ function shapeChapters(
     chapter.moments.sort((x, y) =>
       byTime([...x.photo_ids].sort(byTime)[0], [...y.photo_ids].sort(byTime)[0])
     );
+    // Strictly (#426): the card opens the chapter with its earliest
+    // photos, then each moment takes the next stretch — the same photos
+    // and sizes, dealt out in time order, so no scene goes back in time.
+    const pool = [
+      ...chapter.card,
+      ...chapter.moments.flatMap((m) => m.photo_ids),
+    ].sort(byTime);
+    let k = chapter.card.length;
+    chapter.card = pool.slice(0, k);
+    chapter.moments = chapter.moments.map((m) => {
+      const ids = pool.slice(k, k + m.photo_ids.length);
+      k += m.photo_ids.length;
+      return {
+        type: settledType(m.type, ids.length) ?? m.type,
+        photo_ids: ids,
+      };
+    });
   }
   return chapters;
 }
@@ -1625,7 +1701,8 @@ export function buildNeonNightContent(
         type: m.type,
         photo_ids: m.photo_ids,
         place: m.type === "split"
-          ? byId.get(m.photo_ids[0])?.place_text?.trim() || null
+          ? m.photo_ids.map((id) => byId.get(id)?.place_text?.trim())
+            .find((place) => place) || null
           : null,
       })),
     };
