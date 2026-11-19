@@ -401,3 +401,18 @@ Deno.test("repair gives each part a chapter, titled by the director or its time"
     }
   }
 });
+
+Deno.test("an overlong title loses whole words, not the film (#426)", () => {
+  const context = nnCheckContext(amsterdam());
+  const plan = foldedPlan();
+  plan.headline = null;
+  plan.chapters[0].title = "Брюссель, ребра и Shelter"; // 25 characters
+  const repaired = repairNeonNight(plan, context) as NeonNightPlan;
+  assertEquals(describeNeonNightProblems(repaired, context), []);
+  assertEquals(repaired.chapters[0].title, "Брюссель, ребра и");
+  // One long word can't be shortened: the part's time instead.
+  plan.chapters[0].title = "Супердлинноеназваниеглавы";
+  const timed = repairNeonNight(plan, context) as NeonNightPlan;
+  assertEquals(describeNeonNightProblems(timed, context), []);
+  assertEquals(timed.chapters[0].title, "20:00");
+});

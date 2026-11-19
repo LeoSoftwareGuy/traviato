@@ -885,6 +885,7 @@ export function repairNeonNight(
       first.first_photo_id = firstId;
     }
     nn.chapters = splitByDays(chapters, context);
+    fitTitles(nn.chapters as unknown[], context);
     repairMoments(nn, context);
     fitExcerptPhotos(nn, context);
   }
@@ -1016,6 +1017,50 @@ function splitByDays(
       excerpts: excerpts.slice(0, MAX_NN_EXCERPTS),
     };
   });
+}
+
+// Every chapter keeps a title that fits (#426): one over
+// MAX_NN_TITLE_CHARS loses whole words from its end (never cut inside a
+// word) — rather than the whole film falling back for one character; a
+// missing one, or one that can't be shortened to at least 2 words' worth,
+// takes its place, else its first photo's time.
+function fitTitles(chapters: unknown[], context: NnCheckContext): void {
+  const ordered = [...context.photoOrder.entries()].sort((a, b) => a[1] - b[1])
+    .map(([id]) => id);
+  for (const raw of chapters) {
+    if (typeof raw !== "object" || raw === null) continue;
+    const chapter = raw as Record<string, unknown>;
+    let title = isString(chapter.title) ? chapter.title.trim() : "";
+    if ([...title].length > MAX_NN_TITLE_CHARS) {
+      const words = title.split(/\s+/u);
+      while (
+        words.length > 1 && [...words.join(" ")].length > MAX_NN_TITLE_CHARS
+      ) {
+        words.pop();
+      }
+      title = words.join(" ").replace(/[\s,;:—–·-]+$/u, "");
+      if ([...title].length > MAX_NN_TITLE_CHARS || words.length < 2) {
+        title = "";
+      }
+    }
+    if (title && isSensitive(title)) title = "";
+    if (!title && isString(chapter.first_photo_id)) {
+      const start = context.photoOrder.get(chapter.first_photo_id);
+      const next = chapters
+        .map((c) => (c as Record<string, unknown> | null)?.first_photo_id)
+        .map((id) => isString(id) ? context.photoOrder.get(id) : undefined)
+        .filter((at): at is number =>
+          at !== undefined && start !== undefined &&
+          at > start
+        )
+        .sort((a, b) => a - b)[0] ?? ordered.length;
+      if (start !== undefined) {
+        title = placeOf(ordered.slice(start, next), context) ??
+          clockTitle(chapter.first_photo_id, context) ?? "";
+      }
+    }
+    if (title) chapter.title = title;
+  }
 }
 
 // A part's title when nothing better is known (#426): its first photo's
