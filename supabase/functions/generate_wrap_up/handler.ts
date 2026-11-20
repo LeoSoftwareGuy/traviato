@@ -37,6 +37,7 @@
 // (`utc_offset_minutes`) so the director sees local photo times.
 
 import { gatherTripData, type TripData } from "./gather.ts";
+import { wrapUpMissing } from "./wrap_up_limits.ts";
 import {
   assembleWrapUpContent,
   type MomentSlots,
@@ -78,6 +79,9 @@ export interface Deps {
   // Defaults to `console.error` — see anthropic.ts's `[generate_wrap_up]`
   // log lines (#166).
   log?: LogLike;
+  // The film's minimum photos and notes (#432). Defaults to the shared
+  // WRAP_UP_LIMITS; tests of the film-building paths pass NO_MINIMUMS.
+  minimums?: { photos: number; notes: number };
   // The director (#328). Absent = off.
   director?: {
     isEnabledFor: (userId: string) => boolean;
@@ -209,6 +213,22 @@ export async function handleRequest(
     }, 500);
   }
   if (utcOffset !== undefined) tripData.utc_offset_minutes = utcOffset;
+
+  // Below the minimum (#432) there's no film to make — the Journal shows
+  // what's missing instead. Checked before any AI call; kept films above
+  // are never affected.
+  const missing = wrapUpMissing(
+    tripData.photos.length,
+    tripData.notes.length,
+    deps.minimums,
+  );
+  if (missing) {
+    return json({
+      error: "this memory doesn't have enough for a film yet",
+      code: "not_eligible",
+      missing,
+    }, 422);
+  }
 
   const inputHash = await computeAiInputHash(tripData, language);
   const storedFields = validateAiGeneratedFields(existing?.ai_fields)
