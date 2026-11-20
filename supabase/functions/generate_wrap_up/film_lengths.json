@@ -1,0 +1,2356 @@
+[
+ {
+  "film": "sky_story",
+  "photos": 15,
+  "photo_ids": [
+   "p00",
+   "p01",
+   "p02",
+   "p03",
+   "p04",
+   "p05",
+   "p06",
+   "p07",
+   "p08",
+   "p09",
+   "p10",
+   "p11",
+   "p12",
+   "p13",
+   "p14"
+  ],
+  "start_date": "2026-09-01",
+  "end_date": "2026-09-03",
+  "content": {
+   "film_style": "sky_story",
+   "film_seconds": 30,
+   "sky": {
+    "sky_version": 1,
+    "source": "code",
+    "title": "Lisbon",
+    "first_name": null,
+    "moment_count": 15,
+    "mosaic_photo_ids": [
+     "p00",
+     "p01",
+     "p02",
+     "p03",
+     "p04",
+     "p05",
+     "p06",
+     "p07",
+     "p08",
+     "p09",
+     "p10",
+     "p11",
+     "p12",
+     "p13",
+     "p14"
+    ],
+    "pages": [
+     {
+      "first_day": 1,
+      "last_day": 3,
+      "date": "2026-09-01",
+      "end_date": "2026-09-03",
+      "photo_count": 15,
+      "note": "Tram 28 up to the castle, the whole city below us.",
+      "excerpts": [
+       {
+        "note_id": "n0",
+        "text": "Tram 28 up to the castle, the whole city below us."
+       },
+       {
+        "note_id": "n2",
+        "text": "Our last sunset at Miradouro da Senhora do Monte."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p07",
+      "extra_photo_ids": [
+       "p01",
+       "p05",
+       "p09",
+       "p13"
+      ],
+      "note_id": "n0",
+      "sky_line": null
+     }
+    ]
+   }
+  }
+ },
+ {
+  "film": "sky_story",
+  "photos": 25,
+  "photo_ids": [
+   "p00",
+   "p01",
+   "p02",
+   "p03",
+   "p04",
+   "p05",
+   "p06",
+   "p07",
+   "p08",
+   "p09",
+   "p10",
+   "p11",
+   "p12",
+   "p13",
+   "p14",
+   "p15",
+   "p16",
+   "p17",
+   "p18",
+   "p19",
+   "p20",
+   "p21",
+   "p22",
+   "p23",
+   "p24"
+  ],
+  "start_date": "2026-09-01",
+  "end_date": "2026-09-03",
+  "content": {
+   "film_style": "sky_story",
+   "film_seconds": 48,
+   "sky": {
+    "sky_version": 1,
+    "source": "code",
+    "title": "Lisbon",
+    "first_name": null,
+    "moment_count": 25,
+    "mosaic_photo_ids": [
+     "p00",
+     "p01",
+     "p02",
+     "p03",
+     "p04",
+     "p05",
+     "p06",
+     "p07",
+     "p08",
+     "p09",
+     "p10",
+     "p11",
+     "p12",
+     "p13",
+     "p14",
+     "p15",
+     "p16",
+     "p18",
+     "p19",
+     "p20",
+     "p21",
+     "p22",
+     "p23",
+     "p24",
+     "p17"
+    ],
+    "pages": [
+     {
+      "first_day": 1,
+      "last_day": null,
+      "date": "2026-09-01",
+      "end_date": null,
+      "photo_count": 9,
+      "note": "Tram 28 up to the castle, the whole city below us.",
+      "excerpts": [
+       {
+        "note_id": "n0",
+        "text": "Tram 28 up to the castle, the whole city below us."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p04",
+      "extra_photo_ids": [
+       "p01",
+       "p03",
+       "p06",
+       "p08"
+      ],
+      "note_id": "n0",
+      "sky_line": null
+     },
+     {
+      "first_day": 2,
+      "last_day": 3,
+      "date": "2026-09-02",
+      "end_date": "2026-09-03",
+      "photo_count": 16,
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "excerpts": [
+       {
+        "note_id": "n1",
+        "text": "Pastéis de nata at Manteigaria, still warm, three each."
+       },
+       {
+        "note_id": "n2",
+        "text": "Our last sunset at Miradouro da Senhora do Monte."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p16",
+      "extra_photo_ids": [
+       "p10",
+       "p14",
+       "p20",
+       "p24"
+      ],
+      "note_id": "n1",
+      "sky_line": null
+     }
+    ]
+   }
+  }
+ },
+ {
+  "film": "sky_story",
+  "photos": 40,
+  "photo_ids": [
+   "p00",
+   "p01",
+   "p02",
+   "p03",
+   "p04",
+   "p05",
+   "p06",
+   "p07",
+   "p08",
+   "p09",
+   "p10",
+   "p11",
+   "p12",
+   "p13",
+   "p14",
+   "p15",
+   "p16",
+   "p17",
+   "p18",
+   "p19",
+   "p20",
+   "p21",
+   "p22",
+   "p23",
+   "p24",
+   "p25",
+   "p26",
+   "p27",
+   "p28",
+   "p29",
+   "p30",
+   "p31",
+   "p32",
+   "p33",
+   "p34",
+   "p35",
+   "p36",
+   "p37",
+   "p38",
+   "p39"
+  ],
+  "start_date": "2026-09-01",
+  "end_date": "2026-09-03",
+  "content": {
+   "film_style": "sky_story",
+   "film_seconds": 75,
+   "sky": {
+    "sky_version": 1,
+    "source": "code",
+    "title": "Lisbon",
+    "first_name": null,
+    "moment_count": 40,
+    "mosaic_photo_ids": [
+     "p00",
+     "p01",
+     "p02",
+     "p03",
+     "p04",
+     "p05",
+     "p06",
+     "p07",
+     "p08",
+     "p09",
+     "p10",
+     "p11",
+     "p12",
+     "p13",
+     "p14",
+     "p15",
+     "p16",
+     "p17",
+     "p18",
+     "p19",
+     "p20",
+     "p21",
+     "p22",
+     "p23",
+     "p24",
+     "p25",
+     "p26",
+     "p28",
+     "p29",
+     "p30",
+     "p31",
+     "p32",
+     "p33",
+     "p34",
+     "p35",
+     "p36",
+     "p37",
+     "p38",
+     "p39",
+     "p27"
+    ],
+    "pages": [
+     {
+      "first_day": 1,
+      "last_day": null,
+      "date": "2026-09-01",
+      "end_date": null,
+      "photo_count": 14,
+      "note": "Tram 28 up to the castle, the whole city below us.",
+      "excerpts": [],
+      "headline": null,
+      "hero_photo_id": "p03",
+      "extra_photo_ids": [
+       "p00",
+       "p02",
+       "p04",
+       "p06"
+      ],
+      "note_id": "n0",
+      "sky_line": null
+     },
+     {
+      "first_day": 1,
+      "last_day": null,
+      "date": "2026-09-01",
+      "end_date": null,
+      "photo_count": 14,
+      "note": null,
+      "excerpts": [
+       {
+        "note_id": "n0",
+        "text": "Tram 28 up to the castle, the whole city below us."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p10",
+      "extra_photo_ids": [
+       "p07",
+       "p09",
+       "p11",
+       "p13"
+      ],
+      "note_id": null,
+      "sky_line": null
+     },
+     {
+      "first_day": 2,
+      "last_day": null,
+      "date": "2026-09-02",
+      "end_date": null,
+      "photo_count": 13,
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "excerpts": [],
+      "headline": null,
+      "hero_photo_id": "p17",
+      "extra_photo_ids": [
+       "p14",
+       "p16",
+       "p18",
+       "p20"
+      ],
+      "note_id": "n1",
+      "sky_line": null
+     },
+     {
+      "first_day": 2,
+      "last_day": null,
+      "date": "2026-09-02",
+      "end_date": null,
+      "photo_count": 13,
+      "note": null,
+      "excerpts": [
+       {
+        "note_id": "n1",
+        "text": "Pastéis de nata at Manteigaria, still warm, three each."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p23",
+      "extra_photo_ids": [
+       "p21",
+       "p22",
+       "p25",
+       "p26"
+      ],
+      "note_id": null,
+      "sky_line": null
+     },
+     {
+      "first_day": 3,
+      "last_day": null,
+      "date": "2026-09-03",
+      "end_date": null,
+      "photo_count": 13,
+      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "excerpts": [
+       {
+        "note_id": "n2",
+        "text": "Our last sunset at Miradouro da Senhora do Monte."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p34",
+      "extra_photo_ids": [
+       "p29",
+       "p32",
+       "p36",
+       "p39"
+      ],
+      "note_id": "n2",
+      "sky_line": null
+     }
+    ]
+   }
+  }
+ },
+ {
+  "film": "golden_vows",
+  "photos": 15,
+  "photo_ids": [
+   "p00",
+   "p01",
+   "p02",
+   "p03",
+   "p04",
+   "p05",
+   "p06",
+   "p07",
+   "p08",
+   "p09",
+   "p10",
+   "p11",
+   "p12",
+   "p13",
+   "p14"
+  ],
+  "start_date": "2026-09-01",
+  "end_date": "2026-09-03",
+  "content": {
+   "film_style": "golden_vows",
+   "film_seconds": 30,
+   "sky": {
+    "sky_version": 1,
+    "source": "code",
+    "title": "Lisbon",
+    "first_name": null,
+    "moment_count": 15,
+    "mosaic_photo_ids": [
+     "p00",
+     "p01",
+     "p02",
+     "p03",
+     "p04",
+     "p05",
+     "p06",
+     "p07",
+     "p08",
+     "p09",
+     "p10",
+     "p11",
+     "p12",
+     "p13",
+     "p14"
+    ],
+    "pages": [
+     {
+      "first_day": 1,
+      "last_day": 3,
+      "date": "2026-09-01",
+      "end_date": "2026-09-03",
+      "photo_count": 15,
+      "note": "Tram 28 up to the castle, the whole city below us.",
+      "excerpts": [
+       {
+        "note_id": "n0",
+        "text": "Tram 28 up to the castle, the whole city below us."
+       },
+       {
+        "note_id": "n2",
+        "text": "Our last sunset at Miradouro da Senhora do Monte."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p07",
+      "extra_photo_ids": [
+       "p01",
+       "p05",
+       "p09",
+       "p13"
+      ],
+      "note_id": "n0",
+      "sky_line": null
+     }
+    ]
+   },
+   "golden_vows": {
+    "gv_version": 1,
+    "occasion": "romance",
+    "occasion_line": "Just us",
+    "names": "Lisbon",
+    "start_date": "2026-09-01",
+    "end_date": "2026-09-03",
+    "day_count": 3,
+    "place": "Netherlands",
+    "packing": null,
+    "heroes": [
+     {
+      "photo_id": "p03",
+      "label": "Just us",
+      "taken_at": "2026-09-01T10:51:00Z",
+      "note": "Tram 28 up to the castle, the whole city below us."
+     }
+    ],
+    "chapters": [],
+    "carousel": null,
+    "heart_photo_ids": [
+     "p00",
+     "p01",
+     "p02",
+     "p03",
+     "p04",
+     "p05",
+     "p06",
+     "p07",
+     "p08",
+     "p09",
+     "p10",
+     "p11",
+     "p12",
+     "p13",
+     "p14"
+    ],
+    "moment_count": 15,
+    "end_line": "Ours, always"
+   }
+  }
+ },
+ {
+  "film": "golden_vows",
+  "photos": 25,
+  "photo_ids": [
+   "p00",
+   "p01",
+   "p02",
+   "p03",
+   "p04",
+   "p05",
+   "p06",
+   "p07",
+   "p08",
+   "p09",
+   "p10",
+   "p11",
+   "p12",
+   "p13",
+   "p14",
+   "p15",
+   "p16",
+   "p17",
+   "p18",
+   "p19",
+   "p20",
+   "p21",
+   "p22",
+   "p23",
+   "p24"
+  ],
+  "start_date": "2026-09-01",
+  "end_date": "2026-09-03",
+  "content": {
+   "film_style": "golden_vows",
+   "film_seconds": 48,
+   "sky": {
+    "sky_version": 1,
+    "source": "code",
+    "title": "Lisbon",
+    "first_name": null,
+    "moment_count": 25,
+    "mosaic_photo_ids": [
+     "p00",
+     "p01",
+     "p02",
+     "p03",
+     "p04",
+     "p05",
+     "p06",
+     "p07",
+     "p08",
+     "p09",
+     "p10",
+     "p11",
+     "p12",
+     "p13",
+     "p14",
+     "p15",
+     "p16",
+     "p18",
+     "p19",
+     "p20",
+     "p21",
+     "p22",
+     "p23",
+     "p24",
+     "p17"
+    ],
+    "pages": [
+     {
+      "first_day": 1,
+      "last_day": null,
+      "date": "2026-09-01",
+      "end_date": null,
+      "photo_count": 9,
+      "note": "Tram 28 up to the castle, the whole city below us.",
+      "excerpts": [
+       {
+        "note_id": "n0",
+        "text": "Tram 28 up to the castle, the whole city below us."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p04",
+      "extra_photo_ids": [
+       "p01",
+       "p03",
+       "p06",
+       "p08"
+      ],
+      "note_id": "n0",
+      "sky_line": null
+     },
+     {
+      "first_day": 2,
+      "last_day": 3,
+      "date": "2026-09-02",
+      "end_date": "2026-09-03",
+      "photo_count": 16,
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "excerpts": [
+       {
+        "note_id": "n1",
+        "text": "Pastéis de nata at Manteigaria, still warm, three each."
+       },
+       {
+        "note_id": "n2",
+        "text": "Our last sunset at Miradouro da Senhora do Monte."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p16",
+      "extra_photo_ids": [
+       "p10",
+       "p14",
+       "p20",
+       "p24"
+      ],
+      "note_id": "n1",
+      "sky_line": null
+     }
+    ]
+   },
+   "golden_vows": {
+    "gv_version": 1,
+    "occasion": "romance",
+    "occasion_line": "Just us",
+    "names": "Lisbon",
+    "start_date": "2026-09-01",
+    "end_date": "2026-09-03",
+    "day_count": 3,
+    "place": "Netherlands",
+    "packing": null,
+    "heroes": [
+     {
+      "photo_id": "p04",
+      "label": "Just us",
+      "taken_at": "2026-09-01T11:28:00Z",
+      "note": "Tram 28 up to the castle, the whole city below us."
+     },
+     {
+      "photo_id": "p12",
+      "label": "Together",
+      "taken_at": "2026-09-02T10:51:00Z",
+      "note": "Pastéis de nata at Manteigaria, still warm, three each."
+     },
+     {
+      "photo_id": "p21",
+      "label": "Our moment",
+      "taken_at": "2026-09-03T10:51:00Z",
+      "note": "Our last sunset at Miradouro da Senhora do Monte."
+     }
+    ],
+    "chapters": [
+     {
+      "title": "The beginning",
+      "line": "Chapter one",
+      "photo_ids": [
+       "p01",
+       "p03",
+       "p06"
+      ],
+      "layout": "A"
+     }
+    ],
+    "carousel": null,
+    "heart_photo_ids": [
+     "p00",
+     "p01",
+     "p02",
+     "p03",
+     "p04",
+     "p05",
+     "p06",
+     "p07",
+     "p08",
+     "p09",
+     "p10",
+     "p11",
+     "p12",
+     "p13",
+     "p14",
+     "p15",
+     "p16",
+     "p18",
+     "p19",
+     "p20",
+     "p21",
+     "p22",
+     "p23",
+     "p24",
+     "p17"
+    ],
+    "moment_count": 25,
+    "end_line": "Ours, always"
+   }
+  }
+ },
+ {
+  "film": "golden_vows",
+  "photos": 40,
+  "photo_ids": [
+   "p00",
+   "p01",
+   "p02",
+   "p03",
+   "p04",
+   "p05",
+   "p06",
+   "p07",
+   "p08",
+   "p09",
+   "p10",
+   "p11",
+   "p12",
+   "p13",
+   "p14",
+   "p15",
+   "p16",
+   "p17",
+   "p18",
+   "p19",
+   "p20",
+   "p21",
+   "p22",
+   "p23",
+   "p24",
+   "p25",
+   "p26",
+   "p27",
+   "p28",
+   "p29",
+   "p30",
+   "p31",
+   "p32",
+   "p33",
+   "p34",
+   "p35",
+   "p36",
+   "p37",
+   "p38",
+   "p39"
+  ],
+  "start_date": "2026-09-01",
+  "end_date": "2026-09-03",
+  "content": {
+   "film_style": "golden_vows",
+   "film_seconds": 75,
+   "sky": {
+    "sky_version": 1,
+    "source": "code",
+    "title": "Lisbon",
+    "first_name": null,
+    "moment_count": 40,
+    "mosaic_photo_ids": [
+     "p00",
+     "p01",
+     "p02",
+     "p03",
+     "p04",
+     "p05",
+     "p06",
+     "p07",
+     "p08",
+     "p09",
+     "p10",
+     "p11",
+     "p12",
+     "p13",
+     "p14",
+     "p15",
+     "p16",
+     "p17",
+     "p18",
+     "p19",
+     "p20",
+     "p21",
+     "p22",
+     "p23",
+     "p24",
+     "p25",
+     "p26",
+     "p28",
+     "p29",
+     "p30",
+     "p31",
+     "p32",
+     "p33",
+     "p34",
+     "p35",
+     "p36",
+     "p37",
+     "p38",
+     "p39",
+     "p27"
+    ],
+    "pages": [
+     {
+      "first_day": 1,
+      "last_day": null,
+      "date": "2026-09-01",
+      "end_date": null,
+      "photo_count": 14,
+      "note": "Tram 28 up to the castle, the whole city below us.",
+      "excerpts": [],
+      "headline": null,
+      "hero_photo_id": "p03",
+      "extra_photo_ids": [
+       "p00",
+       "p02",
+       "p04",
+       "p06"
+      ],
+      "note_id": "n0",
+      "sky_line": null
+     },
+     {
+      "first_day": 1,
+      "last_day": null,
+      "date": "2026-09-01",
+      "end_date": null,
+      "photo_count": 14,
+      "note": null,
+      "excerpts": [
+       {
+        "note_id": "n0",
+        "text": "Tram 28 up to the castle, the whole city below us."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p10",
+      "extra_photo_ids": [
+       "p07",
+       "p09",
+       "p11",
+       "p13"
+      ],
+      "note_id": null,
+      "sky_line": null
+     },
+     {
+      "first_day": 2,
+      "last_day": null,
+      "date": "2026-09-02",
+      "end_date": null,
+      "photo_count": 13,
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "excerpts": [],
+      "headline": null,
+      "hero_photo_id": "p17",
+      "extra_photo_ids": [
+       "p14",
+       "p16",
+       "p18",
+       "p20"
+      ],
+      "note_id": "n1",
+      "sky_line": null
+     },
+     {
+      "first_day": 2,
+      "last_day": null,
+      "date": "2026-09-02",
+      "end_date": null,
+      "photo_count": 13,
+      "note": null,
+      "excerpts": [
+       {
+        "note_id": "n1",
+        "text": "Pastéis de nata at Manteigaria, still warm, three each."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p23",
+      "extra_photo_ids": [
+       "p21",
+       "p22",
+       "p25",
+       "p26"
+      ],
+      "note_id": null,
+      "sky_line": null
+     },
+     {
+      "first_day": 3,
+      "last_day": null,
+      "date": "2026-09-03",
+      "end_date": null,
+      "photo_count": 13,
+      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "excerpts": [
+       {
+        "note_id": "n2",
+        "text": "Our last sunset at Miradouro da Senhora do Monte."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p34",
+      "extra_photo_ids": [
+       "p29",
+       "p32",
+       "p36",
+       "p39"
+      ],
+      "note_id": "n2",
+      "sky_line": null
+     }
+    ]
+   },
+   "golden_vows": {
+    "gv_version": 1,
+    "occasion": "romance",
+    "occasion_line": "Just us",
+    "names": "Lisbon",
+    "start_date": "2026-09-01",
+    "end_date": "2026-09-03",
+    "day_count": 3,
+    "place": "Netherlands",
+    "packing": {
+     "source": "checklist",
+     "items": [
+      {
+       "text": "Passports",
+       "suggestion_code": null
+      },
+      {
+       "text": "Sunscreen",
+       "suggestion_code": null
+      },
+      {
+       "text": "Camera",
+       "suggestion_code": null
+      },
+      {
+       "text": "Sandals",
+       "suggestion_code": null
+      }
+     ],
+     "checked": 4,
+     "total": 4
+    },
+    "heroes": [
+     {
+      "photo_id": "p05",
+      "label": "Just us",
+      "taken_at": "2026-09-01T12:05:00Z",
+      "note": "Tram 28 up to the castle, the whole city below us."
+     },
+     {
+      "photo_id": "p15",
+      "label": "Together",
+      "taken_at": "2026-09-02T09:37:00Z",
+      "note": "Pastéis de nata at Manteigaria, still warm, three each."
+     },
+     {
+      "photo_id": "p25",
+      "label": "Our moment",
+      "taken_at": "2026-09-02T15:47:00Z",
+      "note": null
+     },
+     {
+      "photo_id": "p36",
+      "label": "Close",
+      "taken_at": "2026-09-03T13:56:00Z",
+      "note": "Our last sunset at Miradouro da Senhora do Monte."
+     }
+    ],
+    "chapters": [
+     {
+      "title": "The beginning",
+      "line": "Chapter one",
+      "photo_ids": [
+       "p01",
+       "p04",
+       "p08"
+      ],
+      "layout": "A"
+     },
+     {
+      "title": "Together",
+      "line": "Chapter two",
+      "photo_ids": [
+       "p11",
+       "p14",
+       "p18"
+      ],
+      "layout": "B"
+     },
+     {
+      "title": "The best part",
+      "line": "Chapter three",
+      "photo_ids": [
+       "p21",
+       "p24",
+       "p29"
+      ],
+      "layout": "C"
+     }
+    ],
+    "carousel": {
+     "title": "More of us",
+     "line": "Every little moment",
+     "photo_ids": [
+      "p02",
+      "p06",
+      "p09",
+      "p12",
+      "p17",
+      "p20",
+      "p23",
+      "p28",
+      "p32",
+      "p34",
+      "p37",
+      "p39"
+     ]
+    },
+    "heart_photo_ids": [
+     "p00",
+     "p01",
+     "p02",
+     "p03",
+     "p04",
+     "p05",
+     "p06",
+     "p07",
+     "p08",
+     "p09",
+     "p10",
+     "p11",
+     "p12",
+     "p13",
+     "p14",
+     "p15",
+     "p16",
+     "p17",
+     "p18",
+     "p19",
+     "p20",
+     "p21",
+     "p22",
+     "p23",
+     "p24",
+     "p25",
+     "p26",
+     "p28",
+     "p29",
+     "p30",
+     "p31",
+     "p32",
+     "p33",
+     "p34",
+     "p35",
+     "p36",
+     "p37",
+     "p38",
+     "p39",
+     "p27"
+    ],
+    "moment_count": 40,
+    "end_line": "Ours, always"
+   }
+  }
+ },
+ {
+  "film": "neon_night",
+  "photos": 15,
+  "photo_ids": [
+   "p00",
+   "p01",
+   "p02",
+   "p03",
+   "p04",
+   "p05",
+   "p06",
+   "p07",
+   "p08",
+   "p09",
+   "p10",
+   "p11",
+   "p12",
+   "p13",
+   "p14"
+  ],
+  "start_date": "2026-09-01",
+  "end_date": "2026-09-03",
+  "content": {
+   "film_style": "neon_night",
+   "film_seconds": 30,
+   "sky": {
+    "sky_version": 1,
+    "source": "code",
+    "title": "Lisbon",
+    "first_name": null,
+    "moment_count": 15,
+    "mosaic_photo_ids": [
+     "p00",
+     "p01",
+     "p02",
+     "p03",
+     "p04",
+     "p05",
+     "p06",
+     "p07",
+     "p08",
+     "p09",
+     "p10",
+     "p11",
+     "p12",
+     "p13",
+     "p14"
+    ],
+    "pages": [
+     {
+      "first_day": 1,
+      "last_day": 3,
+      "date": "2026-09-01",
+      "end_date": "2026-09-03",
+      "photo_count": 15,
+      "note": "Tram 28 up to the castle, the whole city below us.",
+      "excerpts": [
+       {
+        "note_id": "n0",
+        "text": "Tram 28 up to the castle, the whole city below us."
+       },
+       {
+        "note_id": "n2",
+        "text": "Our last sunset at Miradouro da Senhora do Monte."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p07",
+      "extra_photo_ids": [
+       "p01",
+       "p05",
+       "p09",
+       "p13"
+      ],
+      "note_id": "n0",
+      "sky_line": null
+     }
+    ]
+   },
+   "neon_night": {
+    "nn_version": 1,
+    "title": "Lisbon",
+    "start_date": "2026-09-01",
+    "place": "Netherlands",
+    "plan": [],
+    "chapters": [
+     {
+      "title": "09:00",
+      "photos": [
+       {
+        "id": "p00",
+        "taken_at": "2026-09-01T09:00:00Z",
+        "caption": null
+       },
+       {
+        "id": "p01",
+        "taken_at": "2026-09-01T09:37:00Z",
+        "caption": null
+       },
+       {
+        "id": "p02",
+        "taken_at": "2026-09-01T10:14:00Z",
+        "caption": null
+       },
+       {
+        "id": "p03",
+        "taken_at": "2026-09-01T10:51:00Z",
+        "caption": null
+       },
+       {
+        "id": "p04",
+        "taken_at": "2026-09-01T11:28:00Z",
+        "caption": null
+       },
+       {
+        "id": "p05",
+        "taken_at": "2026-09-02T09:00:00Z",
+        "caption": null
+       },
+       {
+        "id": "p06",
+        "taken_at": "2026-09-02T09:37:00Z",
+        "caption": null
+       },
+       {
+        "id": "p07",
+        "taken_at": "2026-09-02T10:14:00Z",
+        "caption": null
+       },
+       {
+        "id": "p08",
+        "taken_at": "2026-09-02T10:51:00Z",
+        "caption": null
+       },
+       {
+        "id": "p09",
+        "taken_at": "2026-09-02T11:28:00Z",
+        "caption": null
+       },
+       {
+        "id": "p10",
+        "taken_at": "2026-09-03T09:00:00Z",
+        "caption": null
+       },
+       {
+        "id": "p11",
+        "taken_at": "2026-09-03T09:37:00Z",
+        "caption": null
+       },
+       {
+        "id": "p12",
+        "taken_at": "2026-09-03T10:14:00Z",
+        "caption": null
+       },
+       {
+        "id": "p13",
+        "taken_at": "2026-09-03T10:51:00Z",
+        "caption": null
+       },
+       {
+        "id": "p14",
+        "taken_at": "2026-09-03T11:28:00Z",
+        "caption": null
+       }
+      ],
+      "card_photo_ids": [
+       "p00",
+       "p01"
+      ],
+      "note": "Tram 28 up to the castle, the whole city below us.",
+      "excerpts": [
+       {
+        "text": "Tram 28 up to the castle, the whole city below us.",
+        "note_id": "n0",
+        "photo_id": "p04",
+        "source": "code",
+        "score": 3
+       }
+      ],
+      "days": [
+       "2026-09-01",
+       "2026-09-02",
+       "2026-09-03"
+      ],
+      "rejected_excerpts": [
+       {
+        "text": "Our last sunset at Miradouro da Senhora do Monte.",
+        "score": 3
+       },
+       {
+        "text": "Pastéis de nata at Manteigaria, still warm, three each.",
+        "score": 2
+       }
+      ],
+      "moments": [
+       {
+        "type": "timeline",
+        "photo_ids": [
+         "p07",
+         "p08",
+         "p09",
+         "p10",
+         "p11",
+         "p12",
+         "p13",
+         "p14"
+        ],
+        "place": null
+       }
+      ]
+     }
+    ],
+    "note": null,
+    "headline": null,
+    "first_name": null,
+    "totals": {
+     "photos": 15,
+     "notes": 3,
+     "ticks": 0,
+     "moments": 15
+    },
+    "heart_photo_ids": [
+     "p00",
+     "p01",
+     "p02",
+     "p03",
+     "p04",
+     "p05",
+     "p06",
+     "p07",
+     "p08",
+     "p09",
+     "p10",
+     "p11",
+     "p12",
+     "p13",
+     "p14"
+    ]
+   }
+  }
+ },
+ {
+  "film": "neon_night",
+  "photos": 25,
+  "photo_ids": [
+   "p00",
+   "p01",
+   "p02",
+   "p03",
+   "p04",
+   "p05",
+   "p06",
+   "p07",
+   "p08",
+   "p09",
+   "p10",
+   "p11",
+   "p12",
+   "p13",
+   "p14",
+   "p15",
+   "p16",
+   "p17",
+   "p18",
+   "p19",
+   "p20",
+   "p21",
+   "p22",
+   "p23",
+   "p24"
+  ],
+  "start_date": "2026-09-01",
+  "end_date": "2026-09-03",
+  "content": {
+   "film_style": "neon_night",
+   "film_seconds": 48,
+   "sky": {
+    "sky_version": 1,
+    "source": "code",
+    "title": "Lisbon",
+    "first_name": null,
+    "moment_count": 25,
+    "mosaic_photo_ids": [
+     "p00",
+     "p01",
+     "p02",
+     "p03",
+     "p04",
+     "p05",
+     "p06",
+     "p07",
+     "p08",
+     "p09",
+     "p10",
+     "p11",
+     "p12",
+     "p13",
+     "p14",
+     "p15",
+     "p16",
+     "p18",
+     "p19",
+     "p20",
+     "p21",
+     "p22",
+     "p23",
+     "p24",
+     "p17"
+    ],
+    "pages": [
+     {
+      "first_day": 1,
+      "last_day": null,
+      "date": "2026-09-01",
+      "end_date": null,
+      "photo_count": 9,
+      "note": "Tram 28 up to the castle, the whole city below us.",
+      "excerpts": [
+       {
+        "note_id": "n0",
+        "text": "Tram 28 up to the castle, the whole city below us."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p04",
+      "extra_photo_ids": [
+       "p01",
+       "p03",
+       "p06",
+       "p08"
+      ],
+      "note_id": "n0",
+      "sky_line": null
+     },
+     {
+      "first_day": 2,
+      "last_day": 3,
+      "date": "2026-09-02",
+      "end_date": "2026-09-03",
+      "photo_count": 16,
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "excerpts": [
+       {
+        "note_id": "n1",
+        "text": "Pastéis de nata at Manteigaria, still warm, three each."
+       },
+       {
+        "note_id": "n2",
+        "text": "Our last sunset at Miradouro da Senhora do Monte."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p16",
+      "extra_photo_ids": [
+       "p10",
+       "p14",
+       "p20",
+       "p24"
+      ],
+      "note_id": "n1",
+      "sky_line": null
+     }
+    ]
+   },
+   "neon_night": {
+    "nn_version": 1,
+    "title": "Lisbon",
+    "start_date": "2026-09-01",
+    "place": "Netherlands",
+    "plan": [],
+    "chapters": [
+     {
+      "title": "09:00",
+      "photos": [
+       {
+        "id": "p00",
+        "taken_at": "2026-09-01T09:00:00Z",
+        "caption": null
+       },
+       {
+        "id": "p01",
+        "taken_at": "2026-09-01T09:37:00Z",
+        "caption": null
+       },
+       {
+        "id": "p02",
+        "taken_at": "2026-09-01T10:14:00Z",
+        "caption": null
+       },
+       {
+        "id": "p03",
+        "taken_at": "2026-09-01T10:51:00Z",
+        "caption": null
+       },
+       {
+        "id": "p04",
+        "taken_at": "2026-09-01T11:28:00Z",
+        "caption": null
+       },
+       {
+        "id": "p05",
+        "taken_at": "2026-09-01T12:05:00Z",
+        "caption": null
+       },
+       {
+        "id": "p06",
+        "taken_at": "2026-09-01T12:42:00Z",
+        "caption": null
+       },
+       {
+        "id": "p07",
+        "taken_at": "2026-09-01T13:19:00Z",
+        "caption": null
+       },
+       {
+        "id": "p08",
+        "taken_at": "2026-09-01T13:56:00Z",
+        "caption": null
+       }
+      ],
+      "card_photo_ids": [
+       "p00",
+       "p01"
+      ],
+      "note": "Tram 28 up to the castle, the whole city below us.",
+      "excerpts": [
+       {
+        "text": "Tram 28 up to the castle, the whole city below us.",
+        "note_id": "n0",
+        "photo_id": "p08",
+        "source": "code",
+        "score": 3
+       }
+      ],
+      "days": [
+       "2026-09-01"
+      ],
+      "rejected_excerpts": [],
+      "moments": [
+       {
+        "type": "timeline",
+        "photo_ids": [
+         "p02",
+         "p03",
+         "p04",
+         "p05",
+         "p06",
+         "p07",
+         "p08"
+        ],
+        "place": null
+       }
+      ]
+     },
+     {
+      "title": "09:00 2",
+      "photos": [
+       {
+        "id": "p09",
+        "taken_at": "2026-09-02T09:00:00Z",
+        "caption": null
+       },
+       {
+        "id": "p10",
+        "taken_at": "2026-09-02T09:37:00Z",
+        "caption": null
+       },
+       {
+        "id": "p11",
+        "taken_at": "2026-09-02T10:14:00Z",
+        "caption": null
+       },
+       {
+        "id": "p12",
+        "taken_at": "2026-09-02T10:51:00Z",
+        "caption": null
+       },
+       {
+        "id": "p13",
+        "taken_at": "2026-09-02T11:28:00Z",
+        "caption": null
+       },
+       {
+        "id": "p14",
+        "taken_at": "2026-09-02T12:05:00Z",
+        "caption": null
+       },
+       {
+        "id": "p15",
+        "taken_at": "2026-09-02T12:42:00Z",
+        "caption": null
+       },
+       {
+        "id": "p16",
+        "taken_at": "2026-09-02T13:19:00Z",
+        "caption": null
+       },
+       {
+        "id": "p18",
+        "taken_at": "2026-09-03T09:00:00Z",
+        "caption": null
+       },
+       {
+        "id": "p19",
+        "taken_at": "2026-09-03T09:37:00Z",
+        "caption": null
+       },
+       {
+        "id": "p20",
+        "taken_at": "2026-09-03T10:14:00Z",
+        "caption": null
+       },
+       {
+        "id": "p21",
+        "taken_at": "2026-09-03T10:51:00Z",
+        "caption": null
+       },
+       {
+        "id": "p22",
+        "taken_at": "2026-09-03T11:28:00Z",
+        "caption": null
+       },
+       {
+        "id": "p23",
+        "taken_at": "2026-09-03T12:05:00Z",
+        "caption": null
+       },
+       {
+        "id": "p24",
+        "taken_at": "2026-09-03T12:42:00Z",
+        "caption": null
+       },
+       {
+        "id": "p17",
+        "taken_at": "2026-09-03T13:56:00Z",
+        "caption": null
+       }
+      ],
+      "card_photo_ids": [
+       "p09",
+       "p10"
+      ],
+      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "excerpts": [
+       {
+        "text": "Our last sunset at Miradouro da Senhora do Monte.",
+        "note_id": "n2",
+        "photo_id": "p17",
+        "source": "code",
+        "score": 3
+       }
+      ],
+      "days": [
+       "2026-09-02",
+       "2026-09-03"
+      ],
+      "rejected_excerpts": [
+       {
+        "text": "Pastéis de nata at Manteigaria, still warm, three each.",
+        "score": 2
+       }
+      ],
+      "moments": [
+       {
+        "type": "timeline",
+        "photo_ids": [
+         "p18",
+         "p19",
+         "p20",
+         "p21",
+         "p22",
+         "p23",
+         "p24",
+         "p17"
+        ],
+        "place": null
+       }
+      ]
+     }
+    ],
+    "note": null,
+    "headline": null,
+    "first_name": null,
+    "totals": {
+     "photos": 25,
+     "notes": 3,
+     "ticks": 0,
+     "moments": 25
+    },
+    "heart_photo_ids": [
+     "p00",
+     "p01",
+     "p02",
+     "p03",
+     "p04",
+     "p05",
+     "p06",
+     "p07",
+     "p08",
+     "p09",
+     "p10",
+     "p11",
+     "p12",
+     "p13",
+     "p14",
+     "p15",
+     "p16",
+     "p18",
+     "p19",
+     "p20",
+     "p21",
+     "p22",
+     "p23",
+     "p24",
+     "p17"
+    ]
+   }
+  }
+ },
+ {
+  "film": "neon_night",
+  "photos": 40,
+  "photo_ids": [
+   "p00",
+   "p01",
+   "p02",
+   "p03",
+   "p04",
+   "p05",
+   "p06",
+   "p07",
+   "p08",
+   "p09",
+   "p10",
+   "p11",
+   "p12",
+   "p13",
+   "p14",
+   "p15",
+   "p16",
+   "p17",
+   "p18",
+   "p19",
+   "p20",
+   "p21",
+   "p22",
+   "p23",
+   "p24",
+   "p25",
+   "p26",
+   "p27",
+   "p28",
+   "p29",
+   "p30",
+   "p31",
+   "p32",
+   "p33",
+   "p34",
+   "p35",
+   "p36",
+   "p37",
+   "p38",
+   "p39"
+  ],
+  "start_date": "2026-09-01",
+  "end_date": "2026-09-03",
+  "content": {
+   "film_style": "neon_night",
+   "film_seconds": 75,
+   "sky": {
+    "sky_version": 1,
+    "source": "code",
+    "title": "Lisbon",
+    "first_name": null,
+    "moment_count": 40,
+    "mosaic_photo_ids": [
+     "p00",
+     "p01",
+     "p02",
+     "p03",
+     "p04",
+     "p05",
+     "p06",
+     "p07",
+     "p08",
+     "p09",
+     "p10",
+     "p11",
+     "p12",
+     "p13",
+     "p14",
+     "p15",
+     "p16",
+     "p17",
+     "p18",
+     "p19",
+     "p20",
+     "p21",
+     "p22",
+     "p23",
+     "p24",
+     "p25",
+     "p26",
+     "p28",
+     "p29",
+     "p30",
+     "p31",
+     "p32",
+     "p33",
+     "p34",
+     "p35",
+     "p36",
+     "p37",
+     "p38",
+     "p39",
+     "p27"
+    ],
+    "pages": [
+     {
+      "first_day": 1,
+      "last_day": null,
+      "date": "2026-09-01",
+      "end_date": null,
+      "photo_count": 14,
+      "note": "Tram 28 up to the castle, the whole city below us.",
+      "excerpts": [],
+      "headline": null,
+      "hero_photo_id": "p03",
+      "extra_photo_ids": [
+       "p00",
+       "p02",
+       "p04",
+       "p06"
+      ],
+      "note_id": "n0",
+      "sky_line": null
+     },
+     {
+      "first_day": 1,
+      "last_day": null,
+      "date": "2026-09-01",
+      "end_date": null,
+      "photo_count": 14,
+      "note": null,
+      "excerpts": [
+       {
+        "note_id": "n0",
+        "text": "Tram 28 up to the castle, the whole city below us."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p10",
+      "extra_photo_ids": [
+       "p07",
+       "p09",
+       "p11",
+       "p13"
+      ],
+      "note_id": null,
+      "sky_line": null
+     },
+     {
+      "first_day": 2,
+      "last_day": null,
+      "date": "2026-09-02",
+      "end_date": null,
+      "photo_count": 13,
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "excerpts": [],
+      "headline": null,
+      "hero_photo_id": "p17",
+      "extra_photo_ids": [
+       "p14",
+       "p16",
+       "p18",
+       "p20"
+      ],
+      "note_id": "n1",
+      "sky_line": null
+     },
+     {
+      "first_day": 2,
+      "last_day": null,
+      "date": "2026-09-02",
+      "end_date": null,
+      "photo_count": 13,
+      "note": null,
+      "excerpts": [
+       {
+        "note_id": "n1",
+        "text": "Pastéis de nata at Manteigaria, still warm, three each."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p23",
+      "extra_photo_ids": [
+       "p21",
+       "p22",
+       "p25",
+       "p26"
+      ],
+      "note_id": null,
+      "sky_line": null
+     },
+     {
+      "first_day": 3,
+      "last_day": null,
+      "date": "2026-09-03",
+      "end_date": null,
+      "photo_count": 13,
+      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "excerpts": [
+       {
+        "note_id": "n2",
+        "text": "Our last sunset at Miradouro da Senhora do Monte."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "p34",
+      "extra_photo_ids": [
+       "p29",
+       "p32",
+       "p36",
+       "p39"
+      ],
+      "note_id": "n2",
+      "sky_line": null
+     }
+    ]
+   },
+   "neon_night": {
+    "nn_version": 1,
+    "title": "Lisbon",
+    "start_date": "2026-09-01",
+    "place": "Netherlands",
+    "plan": [
+     {
+      "time": "10:00",
+      "title": "Castle",
+      "done": false
+     },
+     {
+      "time": "13:30",
+      "title": "Lunch in Alfama",
+      "done": false
+     },
+     {
+      "time": "18:00",
+      "title": "Sunset",
+      "done": false
+     },
+     {
+      "time": "21:00",
+      "title": "Fado",
+      "done": false
+     }
+    ],
+    "chapters": [
+     {
+      "title": "09:00",
+      "photos": [
+       {
+        "id": "p00",
+        "taken_at": "2026-09-01T09:00:00Z",
+        "caption": null
+       },
+       {
+        "id": "p01",
+        "taken_at": "2026-09-01T09:37:00Z",
+        "caption": null
+       },
+       {
+        "id": "p02",
+        "taken_at": "2026-09-01T10:14:00Z",
+        "caption": null
+       },
+       {
+        "id": "p03",
+        "taken_at": "2026-09-01T10:51:00Z",
+        "caption": null
+       },
+       {
+        "id": "p04",
+        "taken_at": "2026-09-01T11:28:00Z",
+        "caption": null
+       },
+       {
+        "id": "p05",
+        "taken_at": "2026-09-01T12:05:00Z",
+        "caption": null
+       },
+       {
+        "id": "p06",
+        "taken_at": "2026-09-01T12:42:00Z",
+        "caption": null
+       },
+       {
+        "id": "p07",
+        "taken_at": "2026-09-01T13:19:00Z",
+        "caption": null
+       },
+       {
+        "id": "p08",
+        "taken_at": "2026-09-01T13:56:00Z",
+        "caption": null
+       },
+       {
+        "id": "p09",
+        "taken_at": "2026-09-01T14:33:00Z",
+        "caption": null
+       },
+       {
+        "id": "p10",
+        "taken_at": "2026-09-01T15:10:00Z",
+        "caption": null
+       },
+       {
+        "id": "p11",
+        "taken_at": "2026-09-01T15:47:00Z",
+        "caption": null
+       },
+       {
+        "id": "p12",
+        "taken_at": "2026-09-01T16:24:00Z",
+        "caption": null
+       },
+       {
+        "id": "p13",
+        "taken_at": "2026-09-01T17:01:00Z",
+        "caption": null
+       }
+      ],
+      "card_photo_ids": [
+       "p00",
+       "p01",
+       "p02"
+      ],
+      "note": "Tram 28 up to the castle, the whole city below us.",
+      "excerpts": [
+       {
+        "text": "Tram 28 up to the castle, the whole city below us.",
+        "note_id": "n0",
+        "photo_id": "p13",
+        "source": "code",
+        "score": 3
+       }
+      ],
+      "days": [
+       "2026-09-01"
+      ],
+      "rejected_excerpts": [],
+      "moments": [
+       {
+        "type": "burst",
+        "photo_ids": [
+         "p03",
+         "p04",
+         "p05",
+         "p06"
+        ],
+        "place": null
+       },
+       {
+        "type": "timeline",
+        "photo_ids": [
+         "p07",
+         "p08",
+         "p09",
+         "p10",
+         "p11",
+         "p12",
+         "p13"
+        ],
+        "place": null
+       }
+      ]
+     },
+     {
+      "title": "09:00 2",
+      "photos": [
+       {
+        "id": "p14",
+        "taken_at": "2026-09-02T09:00:00Z",
+        "caption": null
+       },
+       {
+        "id": "p15",
+        "taken_at": "2026-09-02T09:37:00Z",
+        "caption": null
+       },
+       {
+        "id": "p16",
+        "taken_at": "2026-09-02T10:14:00Z",
+        "caption": null
+       },
+       {
+        "id": "p17",
+        "taken_at": "2026-09-02T10:51:00Z",
+        "caption": null
+       },
+       {
+        "id": "p18",
+        "taken_at": "2026-09-02T11:28:00Z",
+        "caption": null
+       },
+       {
+        "id": "p19",
+        "taken_at": "2026-09-02T12:05:00Z",
+        "caption": null
+       },
+       {
+        "id": "p20",
+        "taken_at": "2026-09-02T12:42:00Z",
+        "caption": null
+       },
+       {
+        "id": "p21",
+        "taken_at": "2026-09-02T13:19:00Z",
+        "caption": null
+       },
+       {
+        "id": "p22",
+        "taken_at": "2026-09-02T13:56:00Z",
+        "caption": null
+       },
+       {
+        "id": "p23",
+        "taken_at": "2026-09-02T14:33:00Z",
+        "caption": null
+       },
+       {
+        "id": "p24",
+        "taken_at": "2026-09-02T15:10:00Z",
+        "caption": null
+       },
+       {
+        "id": "p25",
+        "taken_at": "2026-09-02T15:47:00Z",
+        "caption": null
+       },
+       {
+        "id": "p26",
+        "taken_at": "2026-09-02T16:24:00Z",
+        "caption": null
+       }
+      ],
+      "card_photo_ids": [
+       "p14",
+       "p15"
+      ],
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "excerpts": [
+       {
+        "text": "Pastéis de nata at Manteigaria, still warm, three each.",
+        "note_id": "n1",
+        "photo_id": "p26",
+        "source": "code",
+        "score": 2
+       }
+      ],
+      "days": [
+       "2026-09-02"
+      ],
+      "rejected_excerpts": [],
+      "moments": [
+       {
+        "type": "burst",
+        "photo_ids": [
+         "p16",
+         "p17",
+         "p18",
+         "p19"
+        ],
+        "place": null
+       },
+       {
+        "type": "timeline",
+        "photo_ids": [
+         "p20",
+         "p21",
+         "p22",
+         "p23",
+         "p24",
+         "p25",
+         "p26"
+        ],
+        "place": null
+       }
+      ]
+     },
+     {
+      "title": "09:00 3",
+      "photos": [
+       {
+        "id": "p28",
+        "taken_at": "2026-09-03T09:00:00Z",
+        "caption": null
+       },
+       {
+        "id": "p29",
+        "taken_at": "2026-09-03T09:37:00Z",
+        "caption": null
+       },
+       {
+        "id": "p30",
+        "taken_at": "2026-09-03T10:14:00Z",
+        "caption": null
+       },
+       {
+        "id": "p31",
+        "taken_at": "2026-09-03T10:51:00Z",
+        "caption": null
+       },
+       {
+        "id": "p32",
+        "taken_at": "2026-09-03T11:28:00Z",
+        "caption": null
+       },
+       {
+        "id": "p33",
+        "taken_at": "2026-09-03T12:05:00Z",
+        "caption": null
+       },
+       {
+        "id": "p34",
+        "taken_at": "2026-09-03T12:42:00Z",
+        "caption": null
+       },
+       {
+        "id": "p35",
+        "taken_at": "2026-09-03T13:19:00Z",
+        "caption": null
+       },
+       {
+        "id": "p36",
+        "taken_at": "2026-09-03T13:56:00Z",
+        "caption": null
+       },
+       {
+        "id": "p37",
+        "taken_at": "2026-09-03T14:33:00Z",
+        "caption": null
+       },
+       {
+        "id": "p38",
+        "taken_at": "2026-09-03T15:10:00Z",
+        "caption": null
+       },
+       {
+        "id": "p39",
+        "taken_at": "2026-09-03T15:47:00Z",
+        "caption": null
+       },
+       {
+        "id": "p27",
+        "taken_at": "2026-09-03T17:01:00Z",
+        "caption": null
+       }
+      ],
+      "card_photo_ids": [
+       "p28",
+       "p29"
+      ],
+      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "excerpts": [
+       {
+        "text": "Our last sunset at Miradouro da Senhora do Monte.",
+        "note_id": "n2",
+        "photo_id": "p27",
+        "source": "code",
+        "score": 3
+       }
+      ],
+      "days": [
+       "2026-09-03"
+      ],
+      "rejected_excerpts": [],
+      "moments": [
+       {
+        "type": "burst",
+        "photo_ids": [
+         "p30",
+         "p31",
+         "p32",
+         "p33"
+        ],
+        "place": null
+       }
+      ]
+     }
+    ],
+    "note": {
+     "text": "Tram 28 up to the castle, the whole city below us.",
+     "number": 1,
+     "written_at": "2026-09-01T20:00:00Z",
+     "photo_id": null
+    },
+    "headline": null,
+    "first_name": null,
+    "totals": {
+     "photos": 40,
+     "notes": 3,
+     "ticks": 0,
+     "moments": 40
+    },
+    "heart_photo_ids": [
+     "p00",
+     "p01",
+     "p02",
+     "p03",
+     "p04",
+     "p05",
+     "p06",
+     "p07",
+     "p08",
+     "p09",
+     "p10",
+     "p11",
+     "p12",
+     "p13",
+     "p14",
+     "p15",
+     "p16",
+     "p17",
+     "p18",
+     "p19",
+     "p20",
+     "p21",
+     "p22",
+     "p23",
+     "p24",
+     "p25",
+     "p26",
+     "p28",
+     "p29",
+     "p30",
+     "p31",
+     "p32",
+     "p33",
+     "p34",
+     "p35",
+     "p36",
+     "p37",
+     "p38",
+     "p39",
+     "p27"
+    ]
+   }
+  }
+ }
+]
