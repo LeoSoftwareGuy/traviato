@@ -16,4 +16,22 @@ abstract final class WrapUpLimits {
 
   /// The most vibes the create-memory picker allows.
   static const maxVibes = 3;
+
+  /// A film's length (#434): [shortestFilmSeconds] at
+  /// [shortestFilmPhotos] film photos or fewer, growing evenly to
+  /// [longestFilmSeconds] at [longestFilmPhotos] or more.
+  static const shortestFilmSeconds = 30;
+  static const longestFilmSeconds = 75;
+  static const shortestFilmPhotos = 15;
+  static const longestFilmPhotos = 40;
+
+  /// How long a film of [photos] film photos should play, s — the edge
+  /// function's `filmSeconds`, which it writes as `content.film_seconds`.
+  static double filmSeconds(int photos) {
+    final t =
+        ((photos - shortestFilmPhotos) /
+                (longestFilmPhotos - shortestFilmPhotos))
+            .clamp(0.0, 1.0);
+    return shortestFilmSeconds + (longestFilmSeconds - shortestFilmSeconds) * t;
+  }
 }
