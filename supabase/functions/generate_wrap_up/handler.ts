@@ -36,6 +36,7 @@
 // after Golden Vows and before Sky Story. The app sends its UTC offset
 // (`utc_offset_minutes`) so the director sees local photo times.
 
+import { filmSecondsOf } from "./film_length.ts";
 import { gatherTripData, type TripData } from "./gather.ts";
 import { wrapUpMissing } from "./wrap_up_limits.ts";
 import { type PlayedTemplate, playedTemplate } from "./film_template.ts";
@@ -345,6 +346,8 @@ export async function handleRequest(
   const content = {
     ...template,
     film_style: played,
+    // How long the film plays (#434): the app fits its scenes to it.
+    film_seconds: filmSecondsOf(film),
     ...(plan ? { plan_version: 2 as const, plan } : {}),
     ...(sky ? { sky } : {}),
     ...section.content,
@@ -487,6 +490,8 @@ async function rebuildKept(
   const content = {
     ...template,
     ...("film_style" in kept ? { film_style: kept.film_style } : {}),
+    // Rebuilt on the user's tap: its length follows its photos now (#434).
+    film_seconds: filmSecondsOf(film),
     ...(sky ? { sky } : {}),
     ...section.content,
     ...(section.report ? { film_report: section.report } : {}),

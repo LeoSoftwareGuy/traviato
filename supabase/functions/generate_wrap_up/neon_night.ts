@@ -21,6 +21,13 @@ import { decorativePhotos } from "./decorative.ts";
 import { bannedPhraseIn, cleanAiLine, cleanLine } from "./film_plan.ts";
 import type { WrapUpLanguage } from "./language.ts";
 import { WRAP_UP_LIMITS } from "./wrap_up_limits.ts";
+import {
+  filmSecondsOf,
+  NN_MOMENT_BEATS,
+  nnChaptersFor,
+  nnFilmBeats,
+  nnFits,
+} from "./film_length.ts";
 import { wholeWords } from "./text_fit.ts";
 export { wholeWords };
 import { isExcerptOf } from "./golden_vows.ts";
@@ -1568,8 +1575,11 @@ function settledType(type: NnMomentType, count: number): NnMomentType | null {
 function shapeChapters(
   chapterPhotos: Photo[][],
   plan: NeonNightPlan,
-  // A several-day memory's chapters are its days (#398 R1): never merged.
+  // A several-day memory's chapters are its days (#398 R1): never merged
+  // for being small — only past [maxChapters].
   byDays = false,
+  // The most chapters the film's length holds (#434).
+  maxChapters = MAX_NN_CHAPTERS,
 ): ShapedChapter[] {
   const chapters: ShapedChapter[] = plan.chapters.map((chapter, i) => ({
     title: chapter.title,
@@ -1585,11 +1595,16 @@ function shapeChapters(
     excerpts: [...(chapter.excerpts ?? [])],
   }));
 
-  // 1. Merge.
-  while (!byDays && chapters.length > 1) {
+  // 1. Merge: small chapters, then the smallest while there are more than
+  // the film's length holds.
+  while (chapters.length > 1) {
+    const tooMany = chapters.length > maxChapters;
+    if (byDays && !tooMany) break;
     let small = -1;
     for (let i = 0; i < chapters.length; i++) {
-      if (chapters[i].photos.length >= MIN_NN_CHAPTER_PHOTOS) continue;
+      if (!tooMany && chapters[i].photos.length >= MIN_NN_CHAPTER_PHOTOS) {
+        continue;
+      }
       if (
         small === -1 ||
         chapters[i].photos.length < chapters[small].photos.length
@@ -1914,10 +1929,86 @@ export function buildNeonNightContent(
       }),
     ),
   }).length > 0;
-  const shaped = shapeChapters(chapterPhotos, plan, byDays)
+  // The film's length (#434): as many chapters as it holds, then, while
+  // the film runs over, a chapter's second moment goes (the longest
+  // first, from the last chapter), then the Plan scene, then the Note.
+  const seconds = filmSecondsOf(tripData);
+  const shaped = shapeChapters(
+    chapterPhotos,
+    plan,
+    byDays,
+    nnChaptersFor(seconds),
+  )
     // A chapter with no moment left can't play (the app skips it too).
     .filter((c) => c.moments.length > 0);
-  const picked = pickExcerpts(tripData, shaped, days);
+  const plan_ = planRows(tripData);
+  let showsPlan = plan_.length > 0;
+  let noteMoment = plan.note_moment;
+  let picked = pickExcerpts(tripData, shaped, days);
+  // What the app plays (#426): the card types its line; the other lines
+  // go on their own photo's moment, else the first; captions on theirs.
+  const cardLineOf = (i: number) =>
+    shaped[i].note ?? picked[i].excerpts.find((e) =>
+      [...e.text].length <= MAX_NN_CARD_NOTE_CHARS
+    )?.text ?? null;
+  const beats = () =>
+    nnFilmBeats(
+      shaped.map((c, i) => {
+        const card = cardLineOf(i);
+        const lines = c.moments.map((m) =>
+          m.photo_ids.map((id) => byId.get(id)?.caption?.trim() ?? "")
+            .filter((t) => t)
+        );
+        for (const e of picked[i].excerpts) {
+          if (e.text === card) continue;
+          const at = c.moments.findIndex((m) =>
+            e.photo_id !== null && m.photo_ids.includes(e.photo_id)
+          );
+          lines[Math.max(0, at)].push(e.text);
+        }
+        return {
+          // The card zooms its own photos (NnReadingTime: cardPhotos).
+          photos: c.card.length || c.photos.length,
+          cardLine: card,
+          moments: c.moments.map((m, j) => ({
+            type: m.type,
+            photos: m.photo_ids.length,
+            lines: lines[j],
+          })),
+        };
+      }),
+      showsPlan,
+      noteMoment !== null,
+    );
+  while (!nnFits(beats(), seconds)) {
+    const two = shaped.map((c, i) => ({ c, i })).filter(({ c }) =>
+      c.moments.length > 1
+    ).pop();
+    if (two) {
+      const [a, b] = two.c.moments;
+      two.c.moments = [
+        NN_MOMENT_BEATS[a.type] >= NN_MOMENT_BEATS[b.type] ? b : a,
+      ];
+      picked = pickExcerpts(tripData, shaped, days);
+    } else if (showsPlan) showsPlan = false;
+    else if (noteMoment !== null) noteMoment = null;
+    else {
+      // Then a chapter's lines beyond its first, the lowest score first,
+      // from the chapter with the most.
+      const most = picked.map((l, i) => ({ l, i }))
+        .filter(({ l }) => l.excerpts.length > 1)
+        .sort((x, y) =>
+          y.l.excerpts.length - x.l.excerpts.length || y.i - x.i
+        )[0];
+      if (!most) break;
+      const lowest = most.l.excerpts.reduce(
+        (low, e, k) => e.score < most.l.excerpts[low].score ? k : low,
+        most.l.excerpts.length - 1,
+      );
+      const [gone] = most.l.excerpts.splice(lowest, 1);
+      most.l.rejected.unshift({ text: gone.text, score: gone.score });
+    }
+  }
   const chapters = shaped.map((chapter, i) => {
     const lines = picked[i];
     return {
@@ -1950,18 +2041,16 @@ export function buildNeonNightContent(
     };
   });
 
-  const noteMoment = plan.note_moment;
   const noteIndex = noteMoment
     ? notes.findIndex((n) => n.id === noteMoment.note_id)
     : -1;
-  const plan_ = planRows(tripData);
   const { start_date } = tripData.trip;
   return {
     nn_version: NN_VERSION,
     title: tripData.trip.name,
     start_date,
     place: tripData.trip.destination?.trim() || null,
-    plan: plan_,
+    plan: showsPlan ? plan_ : [],
     chapters,
     note: noteMoment && noteIndex >= 0
       ? {

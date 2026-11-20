@@ -13,6 +13,10 @@ import {
 } from "./neon_night.ts";
 import { directorTripData } from "./director_fixtures.ts";
 import type { TripData } from "./gather.ts";
+import { useFilmLengthRuleForTests } from "./film_length.ts";
+
+// These tests are about other rules: every film at its longest (#434).
+useFilmLengthRuleForTests(false);
 
 // The real story (#398): an Amsterdam-shaped memory, Tallinn clock (UTC+2).
 // Day 1 runs 20:00–23:00 local, then 01:00–03:00 after midnight (still day

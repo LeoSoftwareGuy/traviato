@@ -17,6 +17,10 @@ import {
   neonNightPlan,
 } from "./director_fixtures.ts";
 import type { TripData } from "./gather.ts";
+import { useFilmLengthRuleForTests } from "./film_length.ts";
+
+// These tests are about other rules: every film at its longest (#434).
+useFilmLengthRuleForTests(false);
 
 function problemsOf(
   edit: (plan: NeonNightPlan) => void,

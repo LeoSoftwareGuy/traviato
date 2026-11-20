@@ -25,6 +25,7 @@ import { decorativePhotos } from "./decorative.ts";
 import { bannedPhraseIn, cleanAiLine, cleanLine } from "./film_plan.ts";
 import type { WrapUpLanguage } from "./language.ts";
 import { wholeWords } from "./text_fit.ts";
+import { filmSecondsOf, gvHeroSeconds, gvShapeFor } from "./film_length.ts";
 
 export const GV_VERSION = 1;
 
@@ -873,6 +874,22 @@ export function chapterLayout(
   return "B";
 }
 
+// [items] by [priority] (highest first, then their order).
+function byPriority<T>(items: T[], priority: (item: T) => number): T[] {
+  return items.map((item, i) => ({ item, i, p: priority(item) }))
+    .sort((a, b) => b.p - a.p || a.i - b.i).map(({ item }) => item);
+}
+
+// The [count] of [items] with the highest [priority], in their order.
+function keepFirst<T>(
+  items: T[],
+  count: number,
+  priority: (item: T) => number,
+): T[] {
+  const kept = new Set(byPriority(items, priority).slice(0, count));
+  return items.filter((item) => kept.has(item));
+}
+
 function packingOf(tripData: TripData): GoldenVowsContent["packing"] {
   const checklist = tripData.checklist ?? [];
   const checked = checklist.filter((i) => i.is_checked && i.title.trim());
@@ -976,9 +993,8 @@ export function buildGoldenVowsContent(
     tripData.notes.filter((n) => n.id).map((n) => [n.id!, n.content]),
   );
   const used = new Set<string>();
-  const heroes = plan.heroes.map((hero) => {
+  const allHeroes = plan.heroes.map((hero) => {
     const photo = byId.get(hero.photo_id)!;
-    used.add(photo.id);
     const caption = photo.caption?.trim();
     const note = caption ||
       (hero.note_id && hero.note_excerpt && notes.has(hero.note_id)
@@ -991,8 +1007,31 @@ export function buildGoldenVowsContent(
       note: note || null,
     };
   });
-  fillHeroLines(tripData, heroes);
-  const chapters = plan.chapters.map((chapter, i) => {
+  fillHeroLines(tripData, allHeroes);
+
+  // The film's length (#434) decides which pages the album keeps: photo
+  // pages first, then chapters, the packing card, the carousel last. A
+  // page left out leaves its photos to the heart; Always pages go first.
+  const packing = packingOf(tripData);
+  const always = (id: string) => byId.get(id)?.use_in_wrap_up === true;
+  const shape = gvShapeFor(filmSecondsOf(tripData), {
+    heroSeconds: byPriority(allHeroes, (h) => always(h.photo_id) ? 1 : 0)
+      .map((h) => gvHeroSeconds(h.note)),
+    chapters: plan.chapters.length,
+    packingCard: packing !== null,
+    carousel: plan.carousel !== null,
+  });
+  const heroes = keepFirst(
+    allHeroes,
+    shape.heroes,
+    (h) => always(h.photo_id) ? 1 : 0,
+  );
+  for (const hero of heroes) used.add(hero.photo_id);
+  const chapters = keepFirst(
+    plan.chapters,
+    shape.chapters,
+    (c) => c.photo_ids.filter(always).length,
+  ).map((chapter, i) => {
     for (const id of chapter.photo_ids) used.add(id);
     return {
       title: chapter.title,
@@ -1001,7 +1040,9 @@ export function buildGoldenVowsContent(
       layout: chapterLayout(chapter.photo_ids, orientations, i),
     };
   });
-  const carouselIds = plan.carousel ? carouselPhotos(photos, used) : [];
+  const carouselIds = plan.carousel && shape.carousel
+    ? carouselPhotos(photos, used)
+    : [];
   const carouselOn = plan.carousel !== null &&
     carouselIds.length >= MIN_GV_CAROUSEL;
   if (carouselOn) { for (const id of carouselIds) used.add(id); }
@@ -1015,15 +1056,16 @@ export function buildGoldenVowsContent(
     end_date,
     day_count: inclusiveDayCount(start_date, end_date) ?? 1,
     place: tripData.trip.destination?.trim() || null,
-    packing: packingOf(tripData),
+    packing: shape.packingCard ? packing : null,
     heroes,
     chapters,
     carousel: plan.carousel && carouselOn
       ? { ...plan.carousel, photo_ids: carouselIds }
       : null,
-    // The heart is decoration: Always picks already have their moment, so
-    // it's made from the other photos (#378).
-    heart_photo_ids: decorativePhotos(tripData.photos, used, MAX_GV_HEART)
+    // Every photo of the film forms the heart, shown ones too (#434): at
+    // that size a repeat isn't noticed, and a short album leaves most of
+    // its photos to it.
+    heart_photo_ids: decorativePhotos(tripData.photos, new Set(), MAX_GV_HEART)
       .map((p) => p.id),
     moment_count: photos.length,
     end_line: plan.end_line,

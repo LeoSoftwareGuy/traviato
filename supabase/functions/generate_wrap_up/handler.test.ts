@@ -19,6 +19,10 @@ import {
   neonNightPlan,
   skyStoryPlan,
 } from "./director_fixtures.ts";
+import { useFilmLengthRuleForTests } from "./film_length.ts";
+
+// These tests are about other rules: every film at its longest (#434).
+useFilmLengthRuleForTests(false);
 
 const TRIP_ID = "trip-1";
 const OWNER_ID = "user-1";

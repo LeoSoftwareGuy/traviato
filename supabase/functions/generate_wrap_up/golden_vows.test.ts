@@ -18,6 +18,10 @@ import {
   goldenVowsPlan,
 } from "./director_fixtures.ts";
 import type { TripData } from "./gather.ts";
+import { useFilmLengthRuleForTests } from "./film_length.ts";
+
+// These tests are about other rules: every film at its longest (#434).
+useFilmLengthRuleForTests(false);
 
 function problemsOf(
   edit: (plan: GoldenVowsPlan) => void,
@@ -309,23 +313,20 @@ Deno.test("an Always pick whose analysis failed isn't required", () => {
   );
 });
 
-Deno.test("the heart leaves out Always picks that have their moment", () => {
+Deno.test("the heart holds every film photo, shown ones too (#434)", () => {
   const data = directorTripData();
   data.photos = Array.from({ length: 40 }, (_, i) => ({
     ...data.photos[i % 12],
     id: `h${String(i).padStart(2, "0")}`,
     taken_at: `2026-09-01T10:${String(i).padStart(2, "0")}:00Z`,
     day_date: "2026-09-01",
-    use_in_wrap_up: i < 3 ? true : null,
+    use_in_wrap_up: i < 3 ? true : i === 39 ? false : null,
   }));
-  // Heroes h01 + h09, chapters from h00–h10: h00–h02 (Always) all used.
   const content = buildGoldenVowsContent(
     data,
     goldenVowsPlan(data.photos.map((p) => p.id)),
   );
-  assertEquals(
-    content.heart_photo_ids.filter((id) => ["h00", "h01", "h02"].includes(id)),
-    [],
-  );
-  assertEquals(content.heart_photo_ids.length, 37);
+  assertEquals(content.heart_photo_ids.length, 39);
+  assertEquals(content.heart_photo_ids.includes("h00"), true);
+  assertEquals(content.heart_photo_ids.includes("h39"), false);
 });
