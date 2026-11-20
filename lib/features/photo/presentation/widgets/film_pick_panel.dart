@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -5,19 +6,26 @@ import 'package:flutter/material.dart';
 import '../../../../core/l10n/context_l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../wrap_up/domain/wrap_up_limits.dart';
 import '../../domain/entities/film_pick.dart';
 
 const _segmentDuration = Duration(milliseconds: 150);
 
 /// "▸ IN THE FILM" panel under the photo viewer's photo (#294,
 /// docs/design/WRAP_UP_PHOTO_PICK_SPEC.md Phase 2): a hint for the current
-/// photo and an Auto · Always · Leave out segmented control. Stateless —
-/// the viewer passes the current pick and saves the change.
-class FilmPickPanel extends StatelessWidget {
+/// photo and an Auto · Always · Leave out segmented control. The viewer
+/// passes the current pick and saves the change.
+///
+/// Always photos are the film's photos (#432): the panel counts them
+/// ("23 / 60") and, once [maxAlways] are picked, Always only explains the
+/// cap instead of picking.
+class FilmPickPanel extends StatefulWidget {
   const FilmPickPanel({
     required this.pick,
     required this.isAutoPicked,
     required this.onChanged,
+    this.alwaysCount = 0,
+    this.maxAlways = WrapUpLimits.maxFilmPhotos,
     super.key,
   });
 
@@ -27,10 +35,61 @@ class FilmPickPanel extends StatelessWidget {
   final bool isAutoPicked;
   final ValueChanged<FilmPick> onChanged;
 
+  /// The memory's Always picks, this photo's included.
+  final int alwaysCount;
+  final int maxAlways;
+
+  /// How long the "Up to 60 Always photos" hint stays.
+  static const fullHintFor = Duration(seconds: 2);
+
+  @override
+  State<FilmPickPanel> createState() => _FilmPickPanelState();
+}
+
+class _FilmPickPanelState extends State<FilmPickPanel> {
+  Timer? _fullHintTimer;
+  bool _showsFullHint = false;
+
+  bool get _isAlwaysFull =>
+      widget.pick != FilmPick.always && widget.alwaysCount >= widget.maxAlways;
+
+  @override
+  void didUpdateWidget(FilmPickPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.pick != widget.pick) _hideFullHint();
+  }
+
+  @override
+  void dispose() {
+    _fullHintTimer?.cancel();
+    super.dispose();
+  }
+
+  void _hideFullHint() {
+    _fullHintTimer?.cancel();
+    _showsFullHint = false;
+  }
+
+  void _onChanged(FilmPick option) {
+    if (option == FilmPick.always && _isAlwaysFull) {
+      _fullHintTimer?.cancel();
+      setState(() => _showsFullHint = true);
+      _fullHintTimer = Timer(FilmPickPanel.fullHintFor, () {
+        if (mounted) setState(() => _showsFullHint = false);
+      });
+      return;
+    }
+    widget.onChanged(option);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final (hint, hintColor) = _hint(l10n);
+    final eyebrow = widget.alwaysCount > 0
+        ? '▸ ${l10n.film_inTheFilm} · '
+              '${l10n.film_alwaysCount(widget.alwaysCount, widget.maxAlways)}'
+        : '▸ ${l10n.film_inTheFilm}';
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: BackdropFilter(
@@ -59,7 +118,8 @@ class FilmPickPanel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '▸ ${l10n.film_inTheFilm}'.toUpperCase(),
+                        eyebrow.toUpperCase(),
+                        key: const Key('film-pick-eyebrow'),
                         style: AppTypography.mono.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -81,7 +141,11 @@ class FilmPickPanel extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                _Segments(pick: pick, onChanged: onChanged),
+                _Segments(
+                  pick: widget.pick,
+                  isAlwaysFull: _isAlwaysFull,
+                  onChanged: _onChanged,
+                ),
               ],
             ),
           ),
@@ -90,8 +154,12 @@ class FilmPickPanel extends StatelessWidget {
     );
   }
 
-  (String, Color) _hint(AppLocalizations l10n) => switch (pick) {
-    FilmPick.auto when isAutoPicked => (
+  (String, Color) _hint(AppLocalizations l10n) => switch (widget.pick) {
+    _ when _showsFullHint => (
+      l10n.film_hintAlwaysFull(widget.maxAlways),
+      AppColors.primary,
+    ),
+    FilmPick.auto when widget.isAutoPicked => (
       l10n.film_hintAutoPicked,
       AppColors.primaryLight,
     ),
@@ -102,9 +170,14 @@ class FilmPickPanel extends StatelessWidget {
 }
 
 class _Segments extends StatelessWidget {
-  const _Segments({required this.pick, required this.onChanged});
+  const _Segments({
+    required this.pick,
+    required this.isAlwaysFull,
+    required this.onChanged,
+  });
 
   final FilmPick pick;
+  final bool isAlwaysFull;
   final ValueChanged<FilmPick> onChanged;
 
   @override
@@ -129,6 +202,7 @@ class _Segments extends StatelessWidget {
                 },
                 option: option,
                 isSelected: option == pick,
+                isDimmed: option == FilmPick.always && isAlwaysFull,
                 onTap: () {
                   if (option != pick) onChanged(option);
                 },
@@ -147,12 +221,16 @@ class _Segment extends StatelessWidget {
     required this.option,
     required this.isSelected,
     required this.onTap,
+    this.isDimmed = false,
   });
 
   final String label;
   final FilmPick option;
   final bool isSelected;
   final VoidCallback onTap;
+
+  /// Always once the film is full (#432): still tappable, to explain why.
+  final bool isDimmed;
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +240,9 @@ class _Segment extends StatelessWidget {
         : isLeaveOut
         ? AppColors.tint(AppColors.textSecondary, .22)
         : AppColors.primary;
-    final foreground = !isSelected
+    final foreground = isDimmed
+        ? AppColors.textTertiary
+        : !isSelected
         ? AppColors.textSecondary
         : isLeaveOut
         ? AppColors.textPrimary
