@@ -1,0 +1,9 @@
+{
+  "priority": [
+    { "template": "golden_vows", "vibes": ["Romantic"] },
+    { "template": "neon_night", "vibes": ["Nightlife"] },
+    { "template": "field_notes", "vibes": ["Adventure", "Road trip", "Wildlife"] }
+  ],
+  "default": "sky_story",
+  "playsAs": { "field_notes": "sky_story" }
+}
