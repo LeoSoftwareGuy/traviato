@@ -271,6 +271,16 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   Kept films keep their film. The notes below describe each film; where
   they say "the director reads the memory as …", the vibes decide since
   #433.
+- **Film length follows the photos (#434):** about 30 s at 15 photos,
+  growing evenly to 75 s at 40 or more. Sky Story plays 1 page at 30 s up
+  to 5 at 75 s (busy days get extra pages); Neon Night merges chapters
+  and, in short films, leaves out a chapter's second moment, then the
+  Plan and Note scenes, then extra lines; Golden Vows keeps photo pages
+  first, then chapters, the packing card and the carousel last — and its
+  heart holds every photo, shown ones too. The app then fits the pages'
+  time (Neon Night by whole bars). Words keep their reading time, so a
+  film with long notes can run a little over. Kept films keep their
+  pacing until "Rebuild film".
 - **Sky Story is the default film (#345):** a balloon over a dusk-to-night sky,
   one page per day or group of days (up to 5) — headline, a polaroid fan,
   taped grid or fly-out, the day's note or a short line on the sky — then the

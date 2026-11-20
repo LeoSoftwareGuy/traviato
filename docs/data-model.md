@@ -179,6 +179,17 @@ Post-MVP: `video_path`, `video_status`.
   `romance` occasion. `filmPhotoIds` keeps the film to 60 photos (15+
   Always picks are exactly the film's). `DIRECTOR_VERSION` 3: older
   records re-run once, within the cap.
+- **Film length** (#434, no schema change): `content.film_seconds` —
+  `filmSeconds(photos)` from `wrap_up_limits.json` (30 s at
+  `shortestFilmPhotos` 15 → 75 s at `longestFilmPhotos` 40, shared with
+  `WrapUpLimits`) over the film's photos. The content is built to fit it
+  (`film_length.ts`: Sky pages capped by length and told to the director
+  as `sky_max_pages`; Neon Night chapters, moments, Plan/Note scenes and
+  lines; Golden Vows pages by priority, every photo in the heart) and the
+  app fits its timelines to it. Written for drafts and rebuilt kept
+  films; a kept film without it plays its old pacing.
+  `film_lengths.json` holds a 15/25/40-photo memory of each film for the
+  app's length test (`write_film_lengths.ts` regenerates it).
 - `content.golden_vows` (#346, no schema change): the Golden Vows wedding
   album, only when the director read the memory as a wedding, engagement,
   anniversary or date night and its `golden_vows` section (in `director`,
