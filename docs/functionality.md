@@ -64,6 +64,8 @@ set. Mockup copy showing other numbers is adjusted at implementation.
 - One screen: name, where, start/end dates, **vibe chips** (canonical 10:
   Romantic, Adventure, Cultural, Chill, Foodie, Road trip, Wellness, Wildlife,
   Nightlife, Photography), reward-nudge card, Create CTA.
+  At most **3 vibes** (#432) — a 4th tap shows "Pick up to 3"; memories made
+  before keep theirs.
 - **NEW — cover picker**: 8 bundled cover options as thumbnails; explicit choice,
   or **auto-suggestion from the first selected vibe** (mapping in handoff);
   empty-state slot shows "Choose a cover / or we'll pick one that suits the vibe".
@@ -125,10 +127,15 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   its preview and Delete photo → "Delete this photo?" confirm, then it folds
   away like a note (#424). The photo viewer has close top-left, delete
   top-right, and asks the same confirm before deleting (#424); "▸ N IN THE FILM" + per-thumb film badges, #294);
-  "To Do · N left" → Plan; **"View wrap-up ▸"** gradient button;
+  "To Do · N left" → Plan; **"View wrap-up ▸"** gradient button — it
+  unlocks at **15 photos and 1 note** for the whole memory (#432, no
+  per-day rules; the guide line says what's missing; kept films are never
+  locked);
   achievement-nudge card with progress ring.
 - **In the film** (#294, `docs/design/photo-pick/`): the day's photo viewer
-  has an Auto · Always · Leave out control per photo, saved at once. Always
+  has an Auto · Always · Leave out control per photo, saved at once.
+  A film shows at most **60 photos**, so Always stops at 60 and the panel
+  counts the picks ("23 / 60", #432). Always
   photos get a main moment first; Leave out photos appear nowhere in the
   film. Never an AI call. **Always means you see it (#378):** in every film
   an Always photo gets a real moment — a Sky Story page (a busy day spreads
