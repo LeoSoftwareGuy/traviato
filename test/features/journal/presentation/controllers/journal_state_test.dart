@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/journal/presentation/controllers/journal_state.dart';
 import 'package:traviato/features/journal/presentation/widgets/wrap_up_ask_line.dart';
+import 'package:traviato/features/wrap_up/domain/wrap_up_limits.dart';
 import 'package:traviato/l10n/app_localizations.dart';
 
 import '../../../photo/fakes/fake_photo_repository.dart';
@@ -52,7 +53,7 @@ void main() {
       final state = _stateWith(
         startDate: _today,
         endDate: _today.add(const Duration(days: 1)),
-        photoCount: 5,
+        photoCount: 15,
         noteCount: 5,
       );
       expect(state.wrapUpAvailability, WrapUpAvailability.hidden);
@@ -65,39 +66,39 @@ void main() {
 
     // docs/design/M6_MONETIZATION_SPEC.md §8 test matrix, implemented
     // literally (#140).
-    test('3 photos, 1 note → locked (photos unmet, notes met)', () {
+    test('12 photos, 1 note → locked (photos unmet, notes met)', () {
       final state = _stateWith(
         startDate: _today,
         endDate: _today,
-        photoCount: 3,
+        photoCount: 12,
         noteCount: 1,
       );
       expect(state.wrapUpAvailability, WrapUpAvailability.locked);
       expect(state.wrapUpPhotosMet, isFalse);
       expect(state.wrapUpNotesMet, isTrue);
-      expect(state.wrapUpPhotosHave, 3);
+      expect(state.wrapUpPhotosHave, 12);
       expect(state.wrapUpNotesHave, 1);
-      expect(wrapUpAskLine(_en, state), 'Add 2 more photos to unlock it.');
+      expect(wrapUpAskLine(_en, state), 'Add 3 more photos to unlock it.');
     });
 
     test(
-      '6 photos, 0 notes → locked, ask = "Write one note to unlock it."',
+      '15 photos, 0 notes → locked, ask = "Write one note to unlock it."',
       () {
         final state = _stateWith(
           startDate: _today,
           endDate: _today,
-          photoCount: 6,
+          photoCount: 15,
         );
         expect(state.wrapUpAvailability, WrapUpAvailability.locked);
         expect(wrapUpAskLine(_en, state), 'Write one note to unlock it.');
       },
     );
 
-    test('6 photos, 1 note → unlocked, no explainer (ask line is null)', () {
+    test('15 photos, 1 note → unlocked, no explainer (ask line is null)', () {
       final state = _stateWith(
         startDate: _today,
         endDate: _today,
-        photoCount: 6,
+        photoCount: 15,
         noteCount: 1,
       );
       expect(state.wrapUpAvailability, WrapUpAvailability.unlocked);
@@ -108,7 +109,7 @@ void main() {
       final state = _stateWith(
         startDate: _today.subtract(const Duration(days: 5)),
         endDate: _today.subtract(const Duration(days: 1)),
-        photoCount: 5,
+        photoCount: 15,
         noteCount: 1,
       );
       expect(state.wrapUpAvailability, WrapUpAvailability.unlocked);
@@ -123,7 +124,7 @@ void main() {
         final state = _stateWith(
           startDate: start,
           endDate: end,
-          photoCount: 5,
+          photoCount: 15,
           noteCount: 1,
           currentDayDate: start, // first day, not the last
         );
@@ -143,7 +144,7 @@ void main() {
       final unlocked = _stateWith(
         startDate: _today,
         endDate: _today,
-        photoCount: 5,
+        photoCount: 15,
         noteCount: 1,
       );
       expect(wrapUpAskLine(_en, unlocked), isNull);
@@ -153,7 +154,7 @@ void main() {
       final state = _stateWith(startDate: _today, endDate: _today);
       expect(
         wrapUpAskLine(_en, state),
-        'Add 5 more photos and one note to unlock it.',
+        'Add 15 more photos and one note to unlock it.',
       );
     });
 
@@ -161,7 +162,7 @@ void main() {
       final state = _stateWith(
         startDate: _today,
         endDate: _today,
-        photoCount: 4,
+        photoCount: 14,
       );
       expect(
         wrapUpAskLine(_en, state),
@@ -173,10 +174,47 @@ void main() {
       final state = _stateWith(
         startDate: _today,
         endDate: _today,
-        photoCount: 4,
+        photoCount: 14,
         noteCount: 1,
       );
       expect(wrapUpAskLine(_en, state), 'Add 1 more photo to unlock it.');
+    });
+  });
+
+  group('the #432 minimum: 15 photos and 1 note for the whole memory', () {
+    test('14 photos are locked, 15 unlock', () {
+      final locked = _stateWith(
+        startDate: _today,
+        endDate: _today,
+        photoCount: 14,
+        noteCount: 1,
+      );
+      expect(locked.wrapUpAvailability, WrapUpAvailability.locked);
+      expect(locked.wrapUpMissing?.missingPhotos, 1);
+
+      final unlocked = _stateWith(
+        startDate: _today,
+        endDate: _today,
+        photoCount: 15,
+        noteCount: 1,
+      );
+      expect(unlocked.wrapUpAvailability, WrapUpAvailability.unlocked);
+    });
+
+    test('0 notes are locked however many photos', () {
+      final state = _stateWith(
+        startDate: _today,
+        endDate: _today,
+        photoCount: 60,
+      );
+      expect(state.wrapUpAvailability, WrapUpAvailability.locked);
+      expect(state.wrapUpMissing?.needsNote, isTrue);
+      expect(state.wrapUpMissing?.missingPhotos, 0);
+    });
+
+    test('reads the shared WrapUpLimits', () {
+      expect(JournalState.wrapUpMinPhotos, WrapUpLimits.minPhotos);
+      expect(JournalState.wrapUpMinNotes, WrapUpLimits.minNotes);
     });
   });
 
@@ -185,9 +223,9 @@ void main() {
       final state = _stateWith(
         startDate: _today,
         endDate: _today,
-        photoCount: 50, // way over the 5 needed; still locked on notes
+        photoCount: 50, // way over the 15 needed; still locked on notes
       );
-      expect(state.wrapUpPhotosHave, 5);
+      expect(state.wrapUpPhotosHave, 15);
       expect(state.wrapUpPhotosMet, isTrue);
     });
   });

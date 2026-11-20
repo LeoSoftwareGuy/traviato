@@ -263,6 +263,12 @@ Post-MVP: `video_path`, `video_status`.
   the chapter goes. Lines whose note no longer says those words are
   dropped. Only a section that still breaks the rules falls back.
 
+- **Limits** (#432, no schema change): `generate_wrap_up/wrap_up_limits.json`
+  (minPhotos 15, maxFilmPhotos 60, minNotes 1, maxNoteLines 12, maxVibes 3)
+  is shared with the app's `WrapUpLimits` (a Dart test checks they agree).
+  An unkept draft below the minimum gets `422 not_eligible` before any AI
+  call; kept films are returned as stored.
+
 ### `photo_analysis` (#328)
 `photo_id PK/FK photos cascade, trip_id FK cascade, storage_path (the file
 analysed — a new path means re-analyse), summary (≤12 words, visible only),

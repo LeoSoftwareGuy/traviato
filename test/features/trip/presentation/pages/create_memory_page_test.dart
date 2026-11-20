@@ -136,6 +136,38 @@ void main() {
     expect(find.text('0 chosen'), findsOneWidget);
   });
 
+  testWidgets('allows at most 3 vibes; a 4th tap shows "Pick up to 3" (#432)', (
+    tester,
+  ) async {
+    await _pump(tester);
+
+    for (final vibe in ['Romantic', 'Adventure', 'Cultural']) {
+      final chip = find.text(vibe);
+      await tester.ensureVisible(chip);
+      await tester.tap(chip);
+      await tester.pump();
+    }
+    expect(find.text('3 chosen'), findsOneWidget);
+
+    final fourth = find.text('Foodie');
+    await tester.ensureVisible(fourth);
+    await tester.tap(fourth);
+    await tester.pump();
+    expect(find.text('Pick up to 3'), findsOneWidget);
+
+    // The hint fades back to the count; the 4th vibe was never picked.
+    await tester.pump(const Duration(seconds: 3));
+    expect(find.text('3 chosen'), findsOneWidget);
+
+    // Deselecting one frees a slot.
+    await tester.tap(find.text('Cultural'));
+    await tester.pump();
+    await tester.tap(fourth);
+    await tester.pump();
+    expect(find.text('3 chosen'), findsOneWidget);
+    expect(find.text('Pick up to 3'), findsNothing);
+  });
+
   group('cover picker', () {
     testWidgets('shows the empty state with no suggestion until a vibe is '
         'picked', (tester) async {

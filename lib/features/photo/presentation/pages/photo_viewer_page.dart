@@ -266,6 +266,10 @@ class _PhotoViewerPageState extends ConsumerState<PhotoViewerPage>
     }
   }
 
+  /// The memory's Always picks (#432) — the panel counts them up to the cap.
+  int get _alwaysCount =>
+      _filmPicks.values.where((p) => p == FilmPick.always).length;
+
   FilmPick _filmPickOf(PhotoEntity photo) =>
       _filmPicks[photo.id] ?? photo.filmPick;
 
@@ -389,6 +393,7 @@ class _PhotoViewerPageState extends ConsumerState<PhotoViewerPage>
                             _photos[_currentIndex].id,
                           ),
                           onChanged: _setFilmPick,
+                          alwaysCount: _alwaysCount,
                         ),
                       ),
                     if (widget.filmTripId != null &&

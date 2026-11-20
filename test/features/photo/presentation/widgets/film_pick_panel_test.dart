@@ -10,6 +10,7 @@ Future<void> _pump(
   bool isAutoPicked = false,
   ValueChanged<FilmPick>? onChanged,
   Locale locale = const Locale('en'),
+  int alwaysCount = 0,
 }) {
   return tester.pumpWidget(
     MaterialApp(
@@ -24,6 +25,7 @@ Future<void> _pump(
               pick: pick,
               isAutoPicked: isAutoPicked,
               onChanged: onChanged ?? (_) {},
+              alwaysCount: alwaysCount,
             ),
           ),
         ),
@@ -90,6 +92,55 @@ void main() {
       await _pump(tester, pick: FilmPick.always, locale: const Locale('ru'));
       expect(tester.takeException(), isNull);
       expect(find.text('Не брать'), findsOneWidget);
+    });
+  });
+
+  group('Always cap (#432)', () {
+    testWidgets('counts Always picks against the 60-photo film', (
+      tester,
+    ) async {
+      await _pump(tester, pick: FilmPick.always, alwaysCount: 23);
+      expect(find.text('▸ IN THE FILM · 23 / 60'), findsOneWidget);
+    });
+
+    testWidgets('no count while nothing is on Always', (tester) async {
+      await _pump(tester, pick: FilmPick.auto);
+      expect(find.text('▸ IN THE FILM'), findsOneWidget);
+    });
+
+    testWidgets('at 60, Always explains the cap instead of picking', (
+      tester,
+    ) async {
+      final changes = <FilmPick>[];
+      await _pump(
+        tester,
+        pick: FilmPick.auto,
+        alwaysCount: 60,
+        onChanged: changes.add,
+      );
+      await tester.tap(find.byKey(const Key('film-pick-always')));
+      await tester.pump();
+      expect(changes, isEmpty);
+      expect(_hint(tester), 'Up to 60 Always photos');
+
+      // Leave out still works.
+      await tester.tap(find.byKey(const Key('film-pick-never')));
+      expect(changes, [FilmPick.never]);
+      await tester.pump(const Duration(seconds: 3));
+    });
+
+    testWidgets('a photo already on Always can still be moved off it at 60', (
+      tester,
+    ) async {
+      final changes = <FilmPick>[];
+      await _pump(
+        tester,
+        pick: FilmPick.always,
+        alwaysCount: 60,
+        onChanged: changes.add,
+      );
+      await tester.tap(find.byKey(const Key('film-pick-auto')));
+      expect(changes, [FilmPick.auto]);
     });
   });
 }

@@ -45,7 +45,7 @@ class WrapUpExplainerCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           _ChecklistRow(
-            label: l10n.journal_wrapUpReqPhotos,
+            label: l10n.journal_wrapUpReqPhotos(JournalState.wrapUpMinPhotos),
             have: state.wrapUpPhotosHave,
             need: JournalState.wrapUpMinPhotos,
             met: state.wrapUpPhotosMet,

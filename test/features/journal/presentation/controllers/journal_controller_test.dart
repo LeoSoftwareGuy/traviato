@@ -108,8 +108,8 @@ void main() {
     () async {
       final today = DateTime.now();
       final todayDate = DateTime(today.year, today.month, today.day);
-      // Trip has already ended, with enough photos (>= the 5-photo
-      // wrapReady minimum, #140) but zero notes yet — starts locked on the
+      // Trip has already ended, with enough photos (>= the 15-photo
+      // wrapReady minimum, #432) but zero notes yet — starts locked on the
       // notes requirement alone.
       final tripRepo = FakeTripRepository()
         ..tripCardResult = Right(
@@ -121,7 +121,7 @@ void main() {
         );
       final photoRepo = FakePhotoRepository()
         ..photosResult = Right([
-          for (var i = 0; i < 5; i++) buildPhotoEntity(id: 'p$i'),
+          for (var i = 0; i < 15; i++) buildPhotoEntity(id: 'p$i'),
         ]);
       final noteRepo = FakeJournalNoteRepository();
       final container = _buildContainer(

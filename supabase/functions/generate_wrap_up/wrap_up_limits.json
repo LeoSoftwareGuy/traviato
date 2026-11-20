@@ -1,0 +1,7 @@
+{
+  "minPhotos": 15,
+  "maxFilmPhotos": 60,
+  "minNotes": 1,
+  "maxNoteLines": 12,
+  "maxVibes": 3
+}

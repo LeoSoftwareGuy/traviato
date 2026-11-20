@@ -533,6 +533,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get trip_vibeLabel => 'Настроение';
 
   @override
+  String trip_vibesLimit(int count) {
+    return 'Выберите до $count';
+  }
+
+  @override
   String trip_vibesChosen(int count) {
     return 'выбрано: $count';
   }
@@ -826,7 +831,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'Напишите одну заметку, чтобы открыть фильм.';
 
   @override
-  String get journal_wrapUpReqPhotos => 'Пять фото в этом событии';
+  String journal_wrapUpReqPhotos(int count) {
+    return '$count фото в этом событии';
+  }
 
   @override
   String get journal_wrapUpReqNote => 'Хотя бы одна заметка';
@@ -2502,6 +2509,16 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get film_hintNever => 'Не появится нигде';
+
+  @override
+  String film_alwaysCount(int count, int max) {
+    return '$count / $max';
+  }
+
+  @override
+  String film_hintAlwaysFull(int max) {
+    return 'Не больше $max фото «Всегда»';
+  }
 
   @override
   String get film_leftOutPill => 'Не войдёт в фильм';

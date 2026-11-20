@@ -33,6 +33,10 @@ function request(body: unknown, authHeader: string | null = "Bearer token") {
   });
 }
 
+// The film-building tests use small memories; the minimum has tests of
+// its own (#432).
+const NO_MINIMUMS = { photos: 0, notes: 0 };
+
 function baseDeps(overrides: Partial<Deps> = {}): Deps {
   return {
     serviceClient: fakeSupabaseClient({
@@ -51,6 +55,7 @@ function baseDeps(overrides: Partial<Deps> = {}): Deps {
       user_achievements: [],
     }),
     authClient: fakeAuthClient({ id: OWNER_ID }),
+    minimums: NO_MINIMUMS,
     generateAiFields: () => Promise.resolve(validAiFields),
     ...overrides,
   };
@@ -150,6 +155,7 @@ Deno.test("a published wrap-up is frozen: returned as stored, nothing read or ge
   );
   const deps = baseDeps({
     serviceClient: client,
+    minimums: NO_MINIMUMS,
     generateAiFields: () => {
       generateCalled = true;
       return Promise.resolve(validAiFields);
@@ -219,6 +225,7 @@ Deno.test("rebuild on a kept wrap-up re-assembles the film with its stored AI li
   const client = keptClient();
   const deps = baseDeps({
     serviceClient: client,
+    minimums: NO_MINIMUMS,
     generateAiFields: () => {
       generateCalled = true;
       return Promise.resolve(validAiFields);
@@ -279,6 +286,7 @@ Deno.test("handleRequest generates, assembles, saves and returns new content", a
 
 Deno.test("handleRequest returns 502 when generation fails", async () => {
   const deps = baseDeps({
+    minimums: NO_MINIMUMS,
     generateAiFields: () => Promise.reject(new Error("model refused")),
     log: () => {},
   });
@@ -291,6 +299,7 @@ Deno.test("handleRequest returns 502 when generation fails", async () => {
 Deno.test("handleRequest's 502 carries the generation error's code and detail, and logs it", async () => {
   const lines: string[] = [];
   const deps = baseDeps({
+    minimums: NO_MINIMUMS,
     generateAiFields: () =>
       Promise.reject(
         new WrapUpGenerationError(
@@ -377,6 +386,7 @@ function countingDeps(
   const calls = { n: 0 };
   const deps = baseDeps({
     serviceClient: client,
+    minimums: NO_MINIMUMS,
     generateAiFields: () => {
       calls.n++;
       return result();
@@ -440,6 +450,7 @@ Deno.test("the requested language reaches the AI and its hash (#250)", async () 
   const languages: string[] = [];
   const deps = baseDeps({
     serviceClient: client,
+    minimums: NO_MINIMUMS,
     generateAiFields: (_tripData, language) => {
       languages.push(language);
       return Promise.resolve(validAiFields);
@@ -1314,4 +1325,84 @@ Deno.test("a film kept as a Sky Story never gains Neon Night", async () => {
   )).json();
   assertEquals(json.content.sky.source, "director");
   assertEquals("neon_night" in json.content, false);
+});
+
+// #432: a draft needs WRAP_UP_LIMITS' photos and notes; a kept film never.
+function eligibilityClient(photoCount: number, noteCount: number) {
+  return fakeSupabaseClient({
+    trips: [{
+      id: TRIP_ID,
+      user_id: OWNER_ID,
+      name: "Lisbon",
+      start_date: "2026-06-01",
+      end_date: "2026-06-03",
+      cover_image_path: null,
+      vibes: [],
+    }],
+    wrap_ups: [],
+    journal_notes: Array.from({ length: noteCount }, (_, i) => ({
+      id: `n${i}`,
+      day_date: "2026-06-01",
+      content: `Note ${i}.`,
+    })),
+    photos: Array.from({ length: photoCount }, (_, i) => ({
+      id: `p${i}`,
+      day_date: "2026-06-01",
+      taken_at: null,
+      created_at: `2026-06-01T10:${String(i).padStart(2, "0")}:00Z`,
+      storage_path: `u/t/p${i}.jpg`,
+      caption: null,
+      use_in_wrap_up: null,
+    })),
+    bonus_task_assignments: [],
+    points_ledger: [],
+    user_achievements: [],
+  });
+}
+
+Deno.test("a draft below the minimum gets 422 not_eligible and no AI call (#432)", async () => {
+  for (
+    const [photos, notes, missing] of [
+      [14, 1, { photos: 1, notes: 0 }],
+      [15, 0, { photos: 0, notes: 1 }],
+      [3, 0, { photos: 12, notes: 1 }],
+    ] as const
+  ) {
+    let generateCalled = false;
+    const client = eligibilityClient(photos, notes);
+    const res = await handleRequest(
+      request({ trip_id: TRIP_ID }),
+      baseDeps({
+        serviceClient: client,
+        minimums: undefined,
+        generateAiFields: () => {
+          generateCalled = true;
+          return Promise.resolve(validAiFields);
+        },
+      }),
+    );
+    const body = await res.json();
+    assertEquals(res.status, 422);
+    assertEquals(body.code, "not_eligible");
+    assertEquals(body.missing, missing);
+    assertEquals(generateCalled, false);
+    assertEquals(client.writes, []);
+  }
+});
+
+Deno.test("15 photos and 1 note make a draft (#432)", async () => {
+  const res = await handleRequest(
+    request({ trip_id: TRIP_ID }),
+    baseDeps({ serviceClient: eligibilityClient(15, 1), minimums: undefined }),
+  );
+  assertEquals(res.status, 200);
+});
+
+Deno.test("a kept film under the minimum is still returned as stored (#432)", async () => {
+  const res = await handleRequest(
+    request({ trip_id: TRIP_ID }),
+    baseDeps({ serviceClient: keptClient(), minimums: undefined }),
+  );
+  assertEquals(res.status, 200);
+  assertEquals((await res.json()).content, validWrapUpContent);
 });
