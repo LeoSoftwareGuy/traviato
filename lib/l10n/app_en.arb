@@ -619,6 +619,27 @@
     }
   },
   "journal_wrapUpAskNote": "Write one note to unlock it.",
+  "journal_filmStyle": "Film style: {style}",
+  "@journal_filmStyle": {
+    "description": "Under View wrap-up (#433): the film the memory's vibes chose. style is one of film_style*.",
+    "placeholders": {
+      "style": {
+        "type": "String"
+      }
+    }
+  },
+  "film_styleNeonNight": "Neon Night",
+  "@film_styleNeonNight": {
+    "description": "The party film's name (#363, #433)."
+  },
+  "film_styleGoldenVows": "Golden Vows",
+  "@film_styleGoldenVows": {
+    "description": "The romantic album film's name (#346, #433)."
+  },
+  "film_styleSkyStory": "Sky Story",
+  "@film_styleSkyStory": {
+    "description": "The balloon film's name (#345, #433)."
+  },
   "journal_wrapUpReqPhotos": "{count} photos in this memory",
   "@journal_wrapUpReqPhotos": {
     "placeholders": {

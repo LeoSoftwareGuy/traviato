@@ -1334,6 +1334,30 @@ abstract class AppLocalizations {
   /// **'Write one note to unlock it.'**
   String get journal_wrapUpAskNote;
 
+  /// Under View wrap-up (#433): the film the memory's vibes chose. style is one of film_style*.
+  ///
+  /// In en, this message translates to:
+  /// **'Film style: {style}'**
+  String journal_filmStyle(String style);
+
+  /// The party film's name (#363, #433).
+  ///
+  /// In en, this message translates to:
+  /// **'Neon Night'**
+  String get film_styleNeonNight;
+
+  /// The romantic album film's name (#346, #433).
+  ///
+  /// In en, this message translates to:
+  /// **'Golden Vows'**
+  String get film_styleGoldenVows;
+
+  /// The balloon film's name (#345, #433).
+  ///
+  /// In en, this message translates to:
+  /// **'Sky Story'**
+  String get film_styleSkyStory;
+
   /// No description provided for @journal_wrapUpReqPhotos.
   ///
   /// In en, this message translates to:

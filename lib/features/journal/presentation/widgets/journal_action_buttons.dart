@@ -7,6 +7,7 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_snackbar.dart';
+import '../../../wrap_up/domain/film_template.dart';
 import '../controllers/journal_state.dart';
 import 'wrap_up_ask_line.dart';
 import 'wrap_up_explainer_card.dart';
@@ -55,13 +56,45 @@ class JournalActionButtons extends StatelessWidget {
         if (availability == WrapUpAvailability.unlocked) ...[
           if (showsToDo) const SizedBox(height: AppSpacing.sm),
           _WrapUpCta(onTap: onViewWrapUpTap),
+          if (!state.trip.isKeptForever)
+            _FilmStyleLine(vibes: state.trip.vibes),
         ] else if (availability == WrapUpAvailability.locked) ...[
           if (showsToDo) const SizedBox(height: AppSpacing.sm),
           _WrapUpCtaLocked(askLine: wrapUpAskLine(context.l10n, state)),
+          _FilmStyleLine(vibes: state.trip.vibes),
           const SizedBox(height: 11),
           WrapUpExplainerCard(state: state),
         ],
       ],
+    );
+  }
+}
+
+/// "Film style: Neon Night" (#433): the film the memory's vibes chose —
+/// the edge function picks the same one, and the director can't change
+/// it. Not shown for a kept film, which keeps whatever it was kept as.
+class _FilmStyleLine extends StatelessWidget {
+  const _FilmStyleLine({required this.vibes});
+
+  final List<String> vibes;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final style = switch (FilmTemplate.playedFor(vibes)) {
+      FilmTemplate.goldenVows => l10n.film_styleGoldenVows,
+      FilmTemplate.neonNight => l10n.film_styleNeonNight,
+      FilmTemplate.fieldNotes ||
+      FilmTemplate.skyStory => l10n.film_styleSkyStory,
+    };
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Text(
+        l10n.journal_filmStyle(style),
+        key: const Key('journal-film-style'),
+        textAlign: TextAlign.center,
+        style: AppTypography.caption.copyWith(color: AppColors.textTertiary),
+      ),
     );
   }
 }

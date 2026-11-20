@@ -217,8 +217,14 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // A Golden Vows or Neon Night memory makes no classic plan (#433): its
+    // own film always plays.
+    final ownFilm =
+        report.template == 'golden_vows' || report.template == 'neon_night';
     final status = report.isPlanned
         ? 'planned · ${report.recipe} · ${report.occasion}'
+        : ownFilm
+        ? '${report.template} · plan by ${report.filmSource ?? '—'}'
         : 'fallback — the template film plays';
     return _Card(
       title: 'Director',
@@ -227,7 +233,9 @@ class _SummaryCard extends StatelessWidget {
           status,
           key: const Key('film-plan-status'),
           style: AppTypography.headlineSerif.copyWith(
-            color: report.isPlanned ? AppColors.success : AppColors.accentCoral,
+            color: report.isPlanned || ownFilm
+                ? AppColors.success
+                : AppColors.accentCoral,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -240,6 +248,14 @@ class _SummaryCard extends StatelessWidget {
                 '${report.chapters.length} chapters',
           ),
         ],
+        // The film from the vibes (#433), and what its plan needed.
+        if (report.template != null)
+          _Line(
+            'Film',
+            '${report.template} (from the vibes)'
+                '${report.filmSource == null ? '' : ' · plan by ${report.filmSource}'}',
+          ),
+        for (final repair in report.filmRepairs) _ProblemLine(repair),
         _Line(
           'Photos',
           '${report.plannablePhotos} plannable · ${report.analysedNow} '
@@ -447,11 +463,10 @@ class _GoldenVowsCard extends ConsumerWidget {
             return [
               Text(
                 problems.isEmpty
-                    ? 'No Golden Vows: the director read this memory as '
-                          'another occasion (or the section no longer fits '
-                          'it). Sky Story plays.'
+                    ? "No Golden Vows: the memory's vibes chose another "
+                          'film (#433).'
                     : "No Golden Vows: the director's section stayed "
-                          'invalid. Sky Story plays.',
+                          'invalid (a run from before #433).',
                 key: const Key('film-plan-golden-vows-none'),
               ),
               for (final problem in problems) _ProblemLine(problem),
@@ -525,7 +540,8 @@ class _NeonNightCard extends ConsumerWidget {
           if (story == null) {
             return [
               const Text(
-                "No Neon Night: the director's section stayed invalid.",
+                "No Neon Night: the director's section stayed invalid "
+                '(a run from before #433).',
                 key: Key('film-plan-neon-night-none'),
               ),
               for (final problem in problems) _ProblemLine(problem),
