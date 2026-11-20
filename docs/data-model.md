@@ -164,6 +164,21 @@ Post-MVP: `video_path`, `video_status`.
   it's there. A film kept as a Sky Story keeps it, and "Rebuild film"
   rebuilds its pages too (no AI call); a film kept before Sky Story never
   gains it.
+- **Film from the vibes** (#433, no schema change): `film_templates.json`
+  (shared with the app's `FilmTemplate`) maps vibes to the played film;
+  `content.film_style` names it and `content.film_report`
+  (`{source: director|code, repairs[]}`) says how its section was made.
+  `director.template`, `<film>_source` and `<film>_repairs` record the
+  same for the run; `special_film` is gone from the plan tool (older
+  records keep it). One call per memory after the analysis: Sky Story
+  memories the plan call, Golden Vows / Neon Night memories their section
+  call. A Golden Vows or Neon Night memory always gets its section —
+  stored, healed, repaired, else built by code (`codeGoldenVows`,
+  `codeNeonNight`) — also with the director off; Sky pages are still built
+  for every memory as the app's safety net. Golden Vows gains the
+  `romance` occasion. `filmPhotoIds` keeps the film to 60 photos (15+
+  Always picks are exactly the film's). `DIRECTOR_VERSION` 3: older
+  records re-run once, within the cap.
 - `content.golden_vows` (#346, no schema change): the Golden Vows wedding
   album, only when the director read the memory as a wedding, engagement,
   anniversary or date night and its `golden_vows` section (in `director`,
