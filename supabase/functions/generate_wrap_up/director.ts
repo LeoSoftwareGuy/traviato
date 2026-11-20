@@ -8,10 +8,13 @@
 // `plan_version: 2` + `plan`, next to everything the current player reads,
 // so the current film keeps playing until the plan-driven player lands.
 //
-// The plan is two strict calls (#380): emit_film_plan (classic plan, Sky
-// Story and which occasion film fits), then — only for a wedding or a
-// party — that film's section on its own. One strict tool carrying every
-// film's section compiled to a grammar Anthropic refuses as too large.
+// The film's template comes from the memory's vibes, in code, before the
+// director runs (#433) — the director only fills that template's plan and
+// can never change it. One call after the photo analysis: a Sky Story
+// memory's emit_film_plan (classic plan + Sky Story), or a Golden Vows /
+// Neon Night memory's section on its own (one retry with the problems fed
+// back). A section is repaired in code, and when that isn't enough code
+// builds the same film's plan — the chosen film always plays.
 //
 // Model: claude-sonnet-5 for every call, same as the 4 AI lines (#93).
 
@@ -24,6 +27,7 @@ import {
   type ToolDefinition,
 } from "./anthropic_tool.ts";
 import type { WrapUpLanguage } from "./language.ts";
+import { WRAP_UP_LIMITS } from "./wrap_up_limits.ts";
 import {
   BANNED_PHRASES,
   describeFilmPlanProblems,
@@ -51,15 +55,17 @@ import {
 } from "./sky_story.ts";
 import {
   describeGoldenVowsProblems,
+  ensureGoldenVows,
   GOLDEN_VOWS_PROMPT_RULES,
   type GoldenVowsPlan,
   goldenVowsToolProperty,
   gvCheckContext,
   healGoldenVows,
-  repairGoldenVows,
 } from "./golden_vows.ts";
 import {
   describeNeonNightProblems,
+  type EnsuredSection,
+  ensureNeonNight,
   healNeonNight,
   NEON_NIGHT_PROMPT_RULES,
   type NeonNightPlan,
@@ -67,8 +73,9 @@ import {
   nnChapterStarts,
   nnCheckContext,
   nnLogicalDays,
-  repairNeonNight,
 } from "./neon_night.ts";
+import { type PlayedTemplate, playedTemplate } from "./film_template.ts";
+import { withFilmPhotos } from "./film_photos.ts";
 import {
   analysePhotos,
   type ImageUrlSigner,
@@ -94,19 +101,17 @@ export const MIN_PLANNABLE_PHOTOS = 6;
 // (#345), at most this many runs per memory in all. A manual rerun from
 // the Plan inspector is never capped.
 export const MAX_DIRECTOR_RUNS = 4;
-// The director's rules (#398: logical days, excerpts, chronology). A
-// record made under older rules runs again once, within MAX_DIRECTOR_RUNS.
-export const DIRECTOR_VERSION = 2;
+// The director's rules (#398: logical days, excerpts, chronology; #433:
+// the template from vibes). A record made under older rules runs again
+// once, within MAX_DIRECTOR_RUNS.
+export const DIRECTOR_VERSION = 3;
 
-// The occasion films with a section of their own (#346, #363), planned in
-// a second call; "none" = Sky Story is the memory's film.
-export const SPECIAL_FILMS = ["golden_vows", "neon_night", "none"] as const;
-export type SpecialFilm = typeof SPECIAL_FILMS[number];
-type SectionFilm = Exclude<SpecialFilm, "none">;
+// The films with a section of their own (#346, #363).
+type SectionFilm = Exclude<PlayedTemplate, "sky_story">;
 
-// emit_film_plan with the Sky Story section (#345) and the occasion film
-// to plan next (#380). Composed here so the films' modules don't import
-// each other.
+// emit_film_plan with the Sky Story section (#345). Composed here so the
+// films' modules don't import each other. No occasion choice since #433:
+// the template comes from the vibes.
 export const directorToolSchema = {
   ...filmPlanToolSchema,
   input_schema: {
@@ -114,17 +119,10 @@ export const directorToolSchema = {
     properties: {
       ...filmPlanToolSchema.input_schema.properties,
       sky_story: skyStoryToolProperty,
-      special_film: {
-        type: "string",
-        enum: [...SPECIAL_FILMS],
-        description:
-          "The occasion film this memory gets, planned in a second step: golden_vows (a wedding, engagement, anniversary or date night), neon_night (a party, rave, club night, festival, concert or night out), or none.",
-      },
     },
     required: [
       ...filmPlanToolSchema.input_schema.required,
       "sky_story",
-      "special_film",
     ],
   },
 };
@@ -151,13 +149,13 @@ function sectionTool(
 export const sectionToolSchemas: Record<SectionFilm, ToolDefinition> = {
   golden_vows: sectionTool(
     "emit_golden_vows",
-    "Emit this memory's Golden Vows wedding album, or null if it isn't a wedding, engagement, anniversary or date night.",
+    "Emit this memory's Golden Vows album. The film is fixed: always emit it.",
     "golden_vows",
     goldenVowsToolProperty,
   ),
   neon_night: sectionTool(
     "emit_neon_night",
-    "Emit this memory's Neon Night party film, or null if it isn't a party, rave, club night, festival, concert or night out.",
+    "Emit this memory's Neon Night film. The film is fixed: always emit it.",
     "neon_night",
     neonNightToolProperty,
   ),
@@ -203,10 +201,19 @@ export interface DirectorRecord {
   // why) — then the next film plays.
   neon_night?: NeonNightPlan | null;
   neon_night_problems?: string[];
-  // Which occasion film the plan call chose (#380); null when no plan
-  // answer arrived. The section call's attempts, when one ran.
-  special_film?: SpecialFilm | null;
+  // Before #433: which occasion film the plan call chose. Kept so older
+  // records still read.
+  special_film?: string | null;
+  // The film this memory plays, from its vibes (#433).
+  template?: PlayedTemplate;
+  // The section call's attempts, when one ran.
   section_attempts?: number;
+  // Where the played section came from (#433): the director's, repaired,
+  // or built by code — and every repair with its reason (Plan inspector).
+  golden_vows_source?: "director" | "code";
+  golden_vows_repairs?: string[];
+  neon_night_source?: "director" | "code";
+  neon_night_repairs?: string[];
   // id → orientation of every analysed photo: Golden Vows' chapter
   // layouts.
   orientations?: Record<string, string>;
@@ -389,19 +396,8 @@ export function buildPlanSystemPrompt(language: WrapUpLanguage): string {
     "- reasoning: 2–3 sentences on why this occasion, recipe and shape.\n",
     `- ${languageRule(language)}`,
     SKY_STORY_PROMPT_RULES,
-    SPECIAL_FILM_PROMPT_RULES,
   ].join("");
 }
-
-const SPECIAL_FILM_PROMPT_RULES = [
-  "\n\nspecial_film — whether this memory also gets a film made for its ",
-  "occasion, planned in a second step (from its name, vibes, notes and ",
-  "photos):\n",
-  "- golden_vows: a wedding, an engagement, an anniversary or a date night.\n",
-  "- neon_night: a party, a rave, a club night, a festival, a concert or ",
-  "another night out.\n",
-  "- none: anything else. When unsure, none.",
-].join("");
 
 // The second call's system prompt (#380): the shared rules and just that
 // film's.
@@ -410,12 +406,13 @@ export function buildSectionSystemPrompt(
   language: WrapUpLanguage,
 ): string {
   const name = film === "golden_vows"
-    ? "Golden Vows, an elegant wedding album"
+    ? "Golden Vows, an elegant ivory-and-gold album"
     : "Neon Night, a loud neon party film";
   return [
     "You are the director of a short film made from one person's memory. ",
     `It will be told as ${name}. Emit it with the `,
-    `${sectionToolSchemas[film].name} tool.\n\n`,
+    `${sectionToolSchemas[film].name} tool. The film is chosen: always `,
+    "emit it, never null.\n\n",
     "Rules:\n",
     "- Use only photo_ids and note_ids from the input. Never invent people, ",
     "places or events.\n",
@@ -425,20 +422,32 @@ export function buildSectionSystemPrompt(
     "- Lines are specific — real details from notes, places and photos — ",
     "never generic.\n",
     `- Never use: ${BANNED_PHRASES.map((p) => `"${p}"`).join(", ")}.\n`,
+    NOTE_LINE_RULES,
+    film === "golden_vows" ? GOLDEN_VOWS_OCCASION_RULES : "",
     `- ${sectionLanguageRule(language)}`,
     film === "golden_vows" ? GOLDEN_VOWS_PROMPT_RULES : NEON_NIGHT_PROMPT_RULES,
   ].join("");
 }
 
-// The plan answer's occasion film; anything else counts as none.
-function specialFilmOf(input: unknown): SpecialFilm {
-  const value = typeof input === "object" && input !== null
-    ? (input as Record<string, unknown>).special_film
-    : undefined;
-  return SPECIAL_FILMS.includes(value as SpecialFilm)
-    ? value as SpecialFilm
-    : "none";
-}
+// Which of the user's lines the film plays (#433), in priority order.
+const NOTE_LINE_RULES = [
+  `- At most ${WRAP_UP_LIMITS.maxNoteLines} of the user's lines in the `,
+  "whole film, 2–3 per chapter. Choose them in this order: (1) emotions ",
+  "and feelings; (2) lines that match the vibe (Nightlife: the music, the ",
+  "crowd, the night; Romantic: the two of them, special moments; outdoors: ",
+  "nature, the route, the effort); (3) specific details (numbers, names, ",
+  'places, food); (4) generic summaries ("it was fun", "было весело", ',
+  '"все устали") last. Exact words only.\n',
+].join("");
+
+// Golden Vows is chosen for every Romantic memory (#433), not only
+// weddings.
+const GOLDEN_VOWS_OCCASION_RULES = [
+  "- occasion: wedding, engagement or anniversary only when the photos or ",
+  "notes show one; date_night for a night out of two; otherwise romance. ",
+  "Vows, wedding or marriage words only for a wedding. For romance, write ",
+  'neutral romantic lines in the same style ("Just us", "Our Paris").\n',
+].join("");
 
 export function buildPlanUserPrompt(
   input: ReturnType<typeof buildPlanInput>,
@@ -575,8 +584,11 @@ export async function runDirector(
 ): Promise<DirectorRecord> {
   const log = deps.log ?? console.error;
   const calls: DirectorCall[] = [];
+  // Decided in code, before anything runs (#433); never changed below.
+  const template = playedTemplate(tripData.trip.vibes);
   const record: DirectorRecord = {
     director_version: DIRECTOR_VERSION,
+    template,
     status: "fallback",
     plan: null,
     problems: [],
@@ -592,7 +604,6 @@ export async function runDirector(
     golden_vows_problems: [],
     neon_night: null,
     neon_night_problems: [],
-    special_film: null,
     orientations: {},
     hero_scores: {},
     photo_days: photoDaysOf(tripData),
@@ -637,8 +648,18 @@ export async function runDirector(
     }
     for (const a of run.analysed) analyses.set(a.photo_id, a);
 
+    // Every analysed photo's score: they pick the film's photos, here and
+    // again when the content is built (code-built Sky pages use them too).
+    record.hero_scores = Object.fromEntries(
+      [...analyses].map(([id, a]) => [id, a.hero_score]),
+    );
+    // Only the film's photos (#433): Always picks, else the best up to 60.
+    const film = withFilmPhotos(tripData, record.hero_scores);
+    const inFilm = new Set(
+      film.photos.filter((p) => p.use_in_wrap_up !== false).map((p) => p.id),
+    );
     const usable = sortPhotosChronologically(
-      candidates.filter((p) => analyses.has(p.id)),
+      candidates.filter((p) => analyses.has(p.id) && inFilm.has(p.id)),
     );
     record.failed_ids = run.failedIds;
     record.photos = {
@@ -650,52 +671,99 @@ export async function runDirector(
     record.photo_paths = Object.fromEntries(
       usable.map((p) => [p.id, p.storage_path]),
     );
-    record.hero_scores = Object.fromEntries(
-      usable.map((p) => [p.id, analyses.get(p.id)!.hero_score]),
-    );
     record.orientations = Object.fromEntries(
       usable.map((p) => [p.id, analyses.get(p.id)!.orientation]),
     );
 
+    // The sections may use only analysed photos, so the director never
+    // picks one it hasn't seen (unanalysed Always picks aren't required).
+    const seen = {
+      ...film,
+      photos: film.photos.filter((p) =>
+        analyses.has(p.id) || p.use_in_wrap_up === false
+      ),
+    };
     if (usable.length < MIN_PLANNABLE_PHOTOS) {
       record.problems = [
         `only ${usable.length} analysed photos, a plan needs at least ${MIN_PLANNABLE_PHOTOS}`,
       ];
       record.sky_problems = record.problems;
-      record.golden_vows_problems = record.problems;
-      record.neon_night_problems = record.problems;
+      if (template === "golden_vows") {
+        record.golden_vows_source = "code";
+        record.golden_vows_repairs = [
+          ...record.problems,
+          "the film plays code's plan",
+        ];
+      } else if (template === "neon_night") {
+        record.neon_night_source = "code";
+        record.neon_night_repairs = [
+          ...record.problems,
+          "the film plays code's plan",
+        ];
+      }
       return record;
     }
 
-    const context = planContextFor(tripData, usable, language);
-    // Sky Story pages may use only analysed photos, so the director never
-    // picks one it hasn't seen (unanalysed Always picks aren't required).
-    const skyContext = skyCheckContext({
-      ...tripData,
-      photos: tripData.photos.filter((p) =>
-        analyses.has(p.id) || p.use_in_wrap_up === false
-      ),
-    });
-    // Golden Vows, too, may use only analysed photos.
-    const gvContext = gvCheckContext({
-      ...tripData,
-      photos: tripData.photos.filter((p) =>
-        analyses.has(p.id) || p.use_in_wrap_up === false
-      ),
-    });
-    // Neon Night, too, may use only analysed photos.
-    const nnContext = nnCheckContext({
-      ...tripData,
-      photos: tripData.photos.filter((p) =>
-        analyses.has(p.id) || p.use_in_wrap_up === false
-      ),
-    });
-    const input = buildPlanInput(tripData, usable, analyses, language);
+    const input = buildPlanInput(film, usable, analyses, language);
+
+    if (template === "golden_vows" || template === "neon_night") {
+      // One call: the chosen film's section (#433).
+      const ensure = template === "golden_vows"
+        ? (raw: unknown) =>
+          ensureGoldenVows(raw, gvCheckContext(seen), language)
+        : (raw: unknown) =>
+          ensureNeonNight(raw, nnCheckContext(seen), language);
+      const outcome = await planSection(
+        deps,
+        calls,
+        tripId,
+        template,
+        input,
+        language,
+        (raw) => {
+          const ensured = ensure(raw);
+          return {
+            value: ensured,
+            problems: ensured.source === "director"
+              ? []
+              : ensured.repairs.filter((r) => r.startsWith("couldn't")),
+          };
+        },
+      );
+      record.section_attempts = outcome.attempts;
+      const ensured = (outcome.value ?? ensure(null)) as ReturnType<
+        typeof ensure
+      >;
+      const repairs = outcome.problems.length > 0
+        ? [
+          ...outcome.problems.map((p) =>
+            `after ${outcome.attempts} tries: ${p}`
+          ),
+          "code built the plan",
+        ]
+        : ensured.repairs;
+      if (template === "golden_vows") {
+        record.golden_vows = ensured.plan as GoldenVowsPlan;
+        record.golden_vows_source = ensured.source;
+        record.golden_vows_repairs = repairs;
+      } else {
+        record.neon_night = ensured.plan as NeonNightPlan;
+        record.neon_night_source = ensured.source;
+        record.neon_night_repairs = repairs;
+      }
+      // The classic plan and Sky Story pages are code's (no call): the
+      // app's safety net if the chosen film fails while it plays.
+      record.problems = [`${template} memory: no classic plan call`];
+      record.sky_problems = [`${template} memory: code-built pages`];
+      return record;
+    }
+
+    // A Sky Story memory: one call, the classic plan and Sky Story.
+    const context = planContextFor(film, usable, language);
+    const skyContext = skyCheckContext(seen);
     const system = buildPlanSystemPrompt(language);
     let problems: string[] = [];
     let skyProblems: string[] = [];
-    // The occasion film from the first answer that arrived.
-    let special: SpecialFilm | null = null;
     for (let attempt = 1; attempt <= PLAN_ATTEMPTS; attempt++) {
       record.attempts = attempt;
       let toolInput: unknown;
@@ -720,7 +788,6 @@ export async function runDirector(
         if (!record.sky_story) skyProblems = [failed];
         continue;
       }
-      special ??= specialFilmOf(toolInput);
       toolInput = repairFilmPlan(toolInput, context);
       const sky = repairSkyStory(
         typeof toolInput === "object" && toolInput !== null
@@ -752,46 +819,6 @@ export async function runDirector(
     }
     record.problems = problems;
     record.sky_problems = skyProblems;
-    record.special_film = special;
-
-    // No answer at all: the occasion films share the plan call's failure.
-    // "none" (or the other film) is an answer — no problems.
-    const unanswered = special === null ? problems : [];
-    record.golden_vows_problems = unanswered;
-    record.neon_night_problems = unanswered;
-    if (special === "golden_vows" || special === "neon_night") {
-      const outcome = await planSection(
-        deps,
-        calls,
-        tripId,
-        special,
-        input,
-        language,
-        special === "golden_vows"
-          ? (raw) => {
-            const gv = repairGoldenVows(raw, gvContext);
-            return {
-              value: gv,
-              problems: describeGoldenVowsProblems(gv, gvContext),
-            };
-          }
-          : (raw) => {
-            const nn = repairNeonNight(raw, nnContext);
-            return {
-              value: nn,
-              problems: describeNeonNightProblems(nn, nnContext),
-            };
-          },
-      );
-      record.section_attempts = outcome.attempts;
-      if (special === "golden_vows") {
-        record.golden_vows = outcome.value as GoldenVowsPlan | null;
-        record.golden_vows_problems = outcome.problems;
-      } else {
-        record.neon_night = outcome.value as NeonNightPlan | null;
-        record.neon_night_problems = outcome.problems;
-      }
-    }
   } catch (err) {
     record.problems = [`director failed: ${(err as Error).message}`];
     record.sky_problems = record.problems;
@@ -878,42 +905,64 @@ export function currentSkyStory(
     : null;
 }
 
-// The director's Golden Vows section fitted to the memory as it is now:
-// as stored while it fits, else healed in code — photos deleted or left
-// out since, notes reworded (#393). Null when even the healed section
-// breaks the rules, and Sky Story plays (#346).
+// The Golden Vows a Golden Vows memory plays now (#433): the director's
+// section as stored while it fits, else healed to the memory as it is now
+// (photos deleted or left out since, notes reworded — #393) and repaired,
+// else code's plan for the same film. Never null.
 export function currentGoldenVows(
   record: unknown,
   tripData: TripData,
-): GoldenVowsPlan | null {
-  if (!isDirectorRecord(record) || !record.golden_vows) return null;
-  const context = gvCheckContext(tripData, new Set(record.failed_ids ?? []));
-  if (describeGoldenVowsProblems(record.golden_vows, context).length === 0) {
-    return record.golden_vows;
+  language: WrapUpLanguage = "en",
+): EnsuredSection<GoldenVowsPlan> {
+  const stored = isDirectorRecord(record) ? record.golden_vows ?? null : null;
+  const context = gvCheckContext(
+    tripData,
+    new Set(isDirectorRecord(record) ? record.failed_ids ?? [] : []),
+  );
+  if (stored && describeGoldenVowsProblems(stored, context).length === 0) {
+    return {
+      plan: stored,
+      source: (record as DirectorRecord).golden_vows_source ?? "director",
+      repairs: (record as DirectorRecord).golden_vows_repairs ?? [],
+    };
   }
-  const healed = healGoldenVows(record.golden_vows, context);
-  return describeGoldenVowsProblems(healed, context).length === 0
-    ? healed as GoldenVowsPlan
-    : null;
+  const ensured = ensureGoldenVows(
+    stored ? healGoldenVows(stored, context) : null,
+    context,
+    language,
+  );
+  return stored
+    ? { ...ensured, repairs: ["healed to the memory now", ...ensured.repairs] }
+    : ensured;
 }
 
-// The director's Neon Night section fitted to the memory as it is now:
-// as stored while it fits, else healed in code — photos deleted or left
-// out since, notes reworded (#393). Null when even the healed section
-// breaks the rules, and the next film plays (#363).
+// The Neon Night a Neon Night memory plays now (#433): as stored while it
+// fits, else healed (#393) and repaired, else code's plan. Never null.
 export function currentNeonNight(
   record: unknown,
   tripData: TripData,
-): NeonNightPlan | null {
-  if (!isDirectorRecord(record) || !record.neon_night) return null;
-  const context = nnCheckContext(tripData, new Set(record.failed_ids ?? []));
-  if (describeNeonNightProblems(record.neon_night, context).length === 0) {
-    return record.neon_night;
+  language: WrapUpLanguage = "en",
+): EnsuredSection<NeonNightPlan> {
+  const stored = isDirectorRecord(record) ? record.neon_night ?? null : null;
+  const context = nnCheckContext(
+    tripData,
+    new Set(isDirectorRecord(record) ? record.failed_ids ?? [] : []),
+  );
+  if (stored && describeNeonNightProblems(stored, context).length === 0) {
+    return {
+      plan: stored,
+      source: (record as DirectorRecord).neon_night_source ?? "director",
+      repairs: (record as DirectorRecord).neon_night_repairs ?? [],
+    };
   }
-  const healed = healNeonNight(record.neon_night, context);
-  return describeNeonNightProblems(healed, context).length === 0
-    ? healed as NeonNightPlan
-    : null;
+  const ensured = ensureNeonNight(
+    stored ? healNeonNight(stored, context) : null,
+    context,
+    language,
+  );
+  return stored
+    ? { ...ensured, repairs: ["healed to the memory now", ...ensured.repairs] }
+    : ensured;
 }
 
 // [iso] as 'HH:MM' on the app's clock (TripData.utc_offset_minutes, #363),

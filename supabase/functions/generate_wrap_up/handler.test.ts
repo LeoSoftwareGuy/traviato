@@ -11,7 +11,7 @@ import { gatherTripData } from "./gather.ts";
 import { computeAiInputHash } from "./ai_input_hash.ts";
 import type { AiGeneratedFields } from "./ai_fields.ts";
 import { validAiFields, validWrapUpContent } from "./test_fixtures.ts";
-import type { DirectorRecord } from "./director.ts";
+import { DIRECTOR_VERSION, type DirectorRecord } from "./director.ts";
 import {
   directorTripData,
   goldenVowsPlan,
@@ -611,7 +611,7 @@ Deno.test("moment_slots: 16 builds the 16-moment film; without it the 8-moment o
 
 function plannedRecord(): DirectorRecord {
   return {
-    director_version: 2,
+    director_version: DIRECTOR_VERSION,
     status: "planned",
     plan: keepsakePlan(),
     problems: [],
@@ -626,10 +626,13 @@ function plannedRecord(): DirectorRecord {
 }
 
 // A draft memory whose photos and notes fit keepsakePlan().
-function directorClient(wrapUps: Record<string, unknown>[] = []) {
+function directorClient(
+  wrapUps: Record<string, unknown>[] = [],
+  vibes = directorTripData().trip.vibes,
+) {
   const data = directorTripData();
   return fakeSupabaseClient({
-    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip, vibes }],
     wrap_ups: wrapUps,
     journal_notes: data.notes,
     photos: data.photos,
@@ -1013,7 +1016,7 @@ function keptGoldenVowsClient(photos = directorTripData().photos) {
 }
 
 Deno.test("a draft gets content.golden_vows from the director's section", async () => {
-  const client = directorClient();
+  const client = directorClient([], ["Romantic"]);
   const { deps } = directorDeps(client, { record: goldenVowsRecord() });
 
   const json = await (await handleRequest(request({ trip_id: TRIP_ID }), deps))
@@ -1027,30 +1030,41 @@ Deno.test("a draft gets content.golden_vows from the director's section", async 
     null,
   ]);
   assertEquals(gv.heart_photo_ids.length, 12);
-  // Sky Story is there too: the app falls back to it.
-  assertEquals(json.content.sky.source, "director");
+  assertEquals(json.content.film_style, "golden_vows");
+  assertEquals(json.content.film_report.source, "director");
+  // Code-built Sky pages are there too: the app's safety net.
+  assertEquals(json.content.sky.source, "code");
   assertEquals(client.writes[0].values.content.golden_vows, gv);
 });
 
-Deno.test("no section, the director off, or a section that no longer fits: no Golden Vows", async () => {
+Deno.test("a Romantic memory always plays Golden Vows: no section, director off, unhealable (#433)", async () => {
+  const romantic = (wrapUps: Record<string, unknown>[] = []) =>
+    directorClient(wrapUps, ["Romantic"]);
   const none = await (await handleRequest(
     request({ trip_id: TRIP_ID }),
-    directorDeps(directorClient()).deps,
+    directorDeps(romantic()).deps,
   )).json();
-  assertEquals("golden_vows" in none.content, false);
+  assertEquals(none.content.golden_vows.occasion, "romance");
+  assertEquals(none.content.film_report.source, "code");
 
   const off = await (await handleRequest(
     request({ trip_id: TRIP_ID }),
-    directorDeps(directorClient(), {
+    directorDeps(romantic(), {
       enabled: false,
       record: goldenVowsRecord(),
     }).deps,
   )).json();
-  assertEquals("golden_vows" in off.content, false);
+  assertEquals(off.content.film_style, "golden_vows");
+  assertEquals(off.content.golden_vows.heroes.length >= 2, true);
 
   const data = directorTripData();
   const deleted = fakeSupabaseClient({
-    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+    trips: [{
+      id: TRIP_ID,
+      user_id: OWNER_ID,
+      ...data.trip,
+      vibes: ["Romantic"],
+    }],
     wrap_ups: [],
     journal_notes: data.notes,
     // Both heroes' photos: too few heroes left to heal (#393).
@@ -1063,14 +1077,36 @@ Deno.test("no section, the director off, or a section that no longer fits: no Go
     request({ trip_id: TRIP_ID }),
     directorDeps(deleted, { record: goldenVowsRecord() }).deps,
   )).json();
-  assertEquals("golden_vows" in gone.content, false);
-  assertEquals(gone.content.sky.pages.length, 3);
+  assertEquals(gone.content.golden_vows.occasion, "romance");
+  assertEquals(gone.content.film_report.source, "code");
+  assertEquals(
+    JSON.stringify(gone.content.golden_vows).includes('"p01"'),
+    false,
+  );
+});
+
+Deno.test("a Sky Story memory never gets Golden Vows or Neon Night (#433)", async () => {
+  for (const record of [goldenVowsRecord(), neonNightRecord()]) {
+    const json = await (await handleRequest(
+      request({ trip_id: TRIP_ID }),
+      directorDeps(directorClient(), { record }).deps,
+    )).json();
+    assertEquals(json.content.film_style, "sky_story");
+    assertEquals("golden_vows" in json.content, false);
+    assertEquals("neon_night" in json.content, false);
+    assertEquals(json.content.sky.source, "director");
+  }
 });
 
 Deno.test("a deleted photo heals Golden Vows instead of dropping it (#393)", async () => {
   const data = directorTripData();
   const client = fakeSupabaseClient({
-    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+    trips: [{
+      id: TRIP_ID,
+      user_id: OWNER_ID,
+      ...data.trip,
+      vibes: ["Romantic"],
+    }],
     wrap_ups: [],
     journal_notes: data.notes,
     photos: data.photos.filter((p) => p.id !== "p05"),
@@ -1086,7 +1122,7 @@ Deno.test("a deleted photo heals Golden Vows instead of dropping it (#393)", asy
   assertEquals(JSON.stringify(json.content).includes('"p05"'), false);
 });
 
-Deno.test("rebuilding a film kept as Golden Vows rebuilds it while it fits, else Sky Story", async () => {
+Deno.test("rebuilding a film kept as Golden Vows keeps Golden Vows (#433)", async () => {
   const client = keptGoldenVowsClient();
   const { runs, deps } = directorDeps(client);
   const kept = await (await handleRequest(
@@ -1118,8 +1154,10 @@ Deno.test("rebuilding a film kept as Golden Vows rebuilds it while it fits, else
       ),
     ).deps,
   )).json();
-  assertEquals("golden_vows" in unhealable.content, false);
-  assertEquals(unhealable.content.sky.pages.length, 3);
+  // Too little left of the director's: code builds the album — the kept
+  // film stays Golden Vows.
+  assertEquals(unhealable.content.golden_vows.occasion, "romance");
+  assertEquals(unhealable.content.film_report.source, "code");
 });
 
 Deno.test("a film kept as a Sky Story never gains Golden Vows", async () => {
@@ -1184,7 +1222,7 @@ function keptNeonClient(
 }
 
 Deno.test("a draft gets content.neon_night from the director's section", async () => {
-  const client = directorClient();
+  const client = directorClient([], ["Nightlife"]);
   const { deps } = directorDeps(client, { record: neonNightRecord() });
 
   const json = await (await handleRequest(request({ trip_id: TRIP_ID }), deps))
@@ -1197,30 +1235,38 @@ Deno.test("a draft gets content.neon_night from the director's section", async (
   assertEquals(nn.chapters.length, 3);
   assertEquals(nn.chapters[0].note, "Bikes everywhere");
   assertEquals(nn.note.text, "Rain, then stroopwafels.");
-  // Sky Story is there too: the app falls back to it.
-  assertEquals(json.content.sky.source, "director");
+  assertEquals(json.content.film_style, "neon_night");
+  // Code-built Sky pages are there too: the app's safety net.
+  assertEquals(json.content.sky.source, "code");
   assertEquals(client.writes[0].values.content.neon_night, nn);
 });
 
-Deno.test("no section, the director off, or a section that no longer fits: no Neon Night", async () => {
+Deno.test("a Nightlife memory always plays Neon Night: no section, director off, healed (#433)", async () => {
   const none = await (await handleRequest(
     request({ trip_id: TRIP_ID }),
-    directorDeps(directorClient()).deps,
+    directorDeps(directorClient([], ["Nightlife"])).deps,
   )).json();
-  assertEquals("neon_night" in none.content, false);
+  assertEquals(none.content.film_style, "neon_night");
+  assertEquals(none.content.neon_night.chapters.length, 3);
+  assertEquals(none.content.film_report.source, "code");
 
   const off = await (await handleRequest(
     request({ trip_id: TRIP_ID }),
-    directorDeps(directorClient(), {
+    directorDeps(directorClient([], ["Nightlife"]), {
       enabled: false,
       record: neonNightRecord(),
     }).deps,
   )).json();
-  assertEquals("neon_night" in off.content, false);
+  assertEquals(off.content.neon_night.chapters.length > 0, true);
 
   const data = directorTripData();
   const deleted = fakeSupabaseClient({
-    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+    trips: [{
+      id: TRIP_ID,
+      user_id: OWNER_ID,
+      ...data.trip,
+      vibes: ["Nightlife"],
+    }],
     wrap_ups: [],
     journal_notes: data.notes,
     photos: data.photos.filter((p) => p.id !== "p09"),
@@ -1235,23 +1281,6 @@ Deno.test("no section, the director off, or a section that no longer fits: no Ne
   // A deleted photo heals the section instead of dropping it (#393).
   assertEquals(healed.content.neon_night.chapters.length > 0, true);
   assertEquals(JSON.stringify(healed.content).includes('"p09"'), false);
-
-  // One photo left: no moment to make, so Sky Story plays.
-  const lone = fakeSupabaseClient({
-    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
-    wrap_ups: [],
-    journal_notes: data.notes,
-    photos: data.photos.slice(0, 1),
-    bonus_task_assignments: [],
-    points_ledger: [],
-    user_achievements: [],
-  });
-  const gone = await (await handleRequest(
-    request({ trip_id: TRIP_ID }),
-    directorDeps(lone, { record: neonNightRecord() }).deps,
-  )).json();
-  assertEquals("neon_night" in gone.content, false);
-  assertEquals("sky" in gone.content, true);
 });
 
 Deno.test("the app's UTC offset reaches the director", async () => {
@@ -1283,7 +1312,7 @@ Deno.test("parseUtcOffset: whole minutes within ±14 h, else none", () => {
   assertEquals(parseUtcOffset(undefined), undefined);
 });
 
-Deno.test("rebuilding a film kept as Neon Night rebuilds it while it fits, else Sky Story", async () => {
+Deno.test("rebuilding a film kept as Neon Night keeps Neon Night (#433)", async () => {
   const content = {
     sky: { sky_version: 1, pages: [] },
     neon_night: { nn_version: 1 },
@@ -1312,10 +1341,11 @@ Deno.test("rebuilding a film kept as Neon Night rebuilds it while it fits, else 
   const unhealable = await (await handleRequest(
     request({ trip_id: TRIP_ID, rebuild: true }),
     directorDeps(
-      keptNeonClient(content, directorTripData().photos.slice(0, 1)),
+      keptNeonClient(content, directorTripData().photos.slice(0, 3)),
     ).deps,
   )).json();
-  assertEquals("neon_night" in unhealable.content, false);
+  // Never another film for a kept one.
+  assertEquals(unhealable.content.neon_night.nn_version, 1);
 });
 
 Deno.test("a film kept as a Sky Story never gains Neon Night", async () => {
