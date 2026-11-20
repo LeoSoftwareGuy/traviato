@@ -53,6 +53,7 @@ SkyStory? skyStoryFromWrapUp(
         for (final id in sky.mosaicPhotoIds)
           if (photos.containsKey(id)) id,
       ],
+      targetSeconds: sky.filmSeconds,
     ),
   );
 }

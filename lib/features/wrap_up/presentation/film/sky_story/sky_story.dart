@@ -13,7 +13,12 @@ class SkyStory extends Equatable {
     this.names,
     this.momentCount = 0,
     this.mosaicPhotoIds = const [],
+    this.targetSeconds,
   });
+
+  /// How long the film should play (#434, from its photos); the timeline
+  /// fits its scenes to it. Null = the reference pacing.
+  final double? targetSeconds;
 
   /// The memory's name, the opening's big title.
   final String title;
@@ -60,6 +65,7 @@ class SkyStory extends Equatable {
     pages,
     momentCount,
     mosaicPhotoIds,
+    targetSeconds,
   ];
 }
 

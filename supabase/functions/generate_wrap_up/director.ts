@@ -49,6 +49,7 @@ import {
   repairSkyStory,
   SKY_STORY_PROMPT_RULES,
   skyCheckContext,
+  skyMaxPages,
   skyPhotos,
   type SkyStoryPlan,
   skyStoryToolProperty,
@@ -292,6 +293,8 @@ export function buildPlanInput(
       day_count: inclusiveDayCount(trip.start_date, trip.end_date),
       vibes: trip.vibes,
     },
+    // The film's length decides how many Sky Story pages it holds (#434).
+    sky_max_pages: skyMaxPages(tripData),
     achievement: tripData.latestAchievement?.title ?? null,
     notes: tripData.notes
       .filter((n) => n.id)

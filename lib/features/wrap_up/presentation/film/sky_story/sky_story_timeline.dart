@@ -51,21 +51,63 @@ abstract final class SkyStoryTimeline {
       for (final (i, page) in story.pages.indexed)
         readingDur(page, layouts[i], isLast: i == count - 1),
     ];
+    final durs = fittedChapterDurs(count, mins, story.targetSeconds);
     final paces = [
       for (final (i, page) in story.pages.indexed)
-        paceFor(
-          page,
-          layouts[i],
-          chapterDurFor(i, count, mins[i]),
-          isLast: i == count - 1,
-        ),
+        paceFor(page, layouts[i], durs[i], isLast: i == count - 1),
     ];
     return forChapters(
       count,
       layouts: layouts,
-      minChapterDurs: mins,
+      minChapterDurs: durs,
       paces: paces,
     );
+  }
+
+  /// The most a page stretches or shrinks to fit the film's length (#434).
+  static const minFit = 0.75;
+  static const maxFit = 1.6;
+
+  /// A page never plays shorter than this: the taped page's note and
+  /// signature are written by ~5.7 s.
+  static const minChapterDur = 7.0;
+
+  /// The pages' lengths for a film of [count] pages: the reference's, or
+  /// with [target] (`content.film_seconds`, #434) scaled together so the
+  /// film lasts about [target] — within [minFit]–[maxFit] of the
+  /// reference, never under a page's reading time ([mins]).
+  static List<double> fittedChapterDurs(
+    int count,
+    List<double> mins,
+    double? target,
+  ) {
+    List<double> scaled(double f) => [
+      for (var i = 0; i < count; i++)
+        f == 1
+            ? chapterDurFor(i, count, mins[i])
+            : math.max(
+                math.max(chapterDurFor(i, count, 0) * f, minChapterDur),
+                mins[i],
+              ),
+    ];
+    if (target == null) return scaled(1);
+    final fixed =
+        forChapters(count).total -
+        [
+          for (var i = 0; i < count; i++) chapterDurFor(i, count, 0),
+        ].fold(0.0, (a, b) => a + b);
+    var lo = minFit;
+    var hi = maxFit;
+    for (var k = 0; k < 40; k++) {
+      final mid = (lo + hi) / 2;
+      final total = fixed + scaled(mid).fold(0.0, (a, b) => a + b);
+      if (total < target) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    return scaled((lo + hi) / 2);
   }
 
   /// The slowest a page deals its photos (#422), s between two.

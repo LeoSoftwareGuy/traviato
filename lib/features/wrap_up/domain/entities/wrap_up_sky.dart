@@ -11,7 +11,12 @@ class WrapUpSky extends Equatable {
     this.firstName,
     this.momentCount = 0,
     this.mosaicPhotoIds = const [],
+    this.filmSeconds,
   });
+
+  /// How long the film plays (#434, `content.film_seconds`); null = its
+  /// own pacing.
+  final double? filmSeconds;
 
   /// The director chose the pages (else code-built).
   final bool isFromDirector;
@@ -37,6 +42,7 @@ class WrapUpSky extends Equatable {
     momentCount,
     mosaicPhotoIds,
     pages,
+    filmSeconds,
   ];
 }
 

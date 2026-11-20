@@ -21,6 +21,11 @@ import { wholeWords } from "./text_fit.ts";
 import { bestLines, lineThemeFor } from "./excerpts.ts";
 import { chosenTemplate } from "./film_template.ts";
 import { WRAP_UP_LIMITS } from "./wrap_up_limits.ts";
+import {
+  filmSecondsOf,
+  isFilmLengthRuleOn,
+  skyPagesFor,
+} from "./film_length.ts";
 import { onLogicalDays } from "./logical_day.ts";
 
 export const SKY_VERSION = 1;
@@ -153,16 +158,19 @@ export const skyStoryToolProperty = {
 export const SKY_STORY_PROMPT_RULES = [
   "\n\nsky_story — a second film made from the same memory, one page per ",
   "chapter:\n",
-  `- 1–${MAX_SKY_PAGES} pages, in day order, their days never overlapping. `,
-  `Up to ${MAX_SKY_PAGES} days with photos: one page per day. More: group `,
+  "- 1 to sky_max_pages pages (the film's length, from its photos), in ",
+  "day order, their days never overlapping. Up to sky_max_pages days with ",
+  "photos: one page per day. More: group ",
   "neighbouring days into pages (days [4, 7]) or pick the best days.\n",
   "- Every must_include photo is shown (hero or extras) on a page of its ",
   "day. A page shows 5 photos; when a day (or a run of days) has more ",
   "must_include photos than its page shows, add a continuation page with ",
   "exactly the same days right after it (days [1, 1], then [1, 1] again) ",
-  `while there are fewer than ${MAX_SKY_PAGES} pages, and split them `,
+  "while there are fewer than sky_max_pages pages, and split them ",
   "between the pages in time order. A continuation page has its own ",
-  "headline and usually no note.\n",
+  "headline and usually no note. With fewer days than sky_max_pages, ",
+  "the busiest days also get continuation pages (more than 5 photos a ",
+  "page), up to sky_max_pages in all.\n",
   "- hero_photo_id: the page's best photo — sharp, hero_score ≥ 3, from the ",
   "page's days.\n",
   `- extra_photo_ids: up to ${MAX_SKY_EXTRAS} more photos from the page's `,
@@ -184,6 +192,8 @@ export interface SkyCheckContext {
   mustIncludeIds: ReadonlySet<string>;
   // Day number of every note.
   noteDays: ReadonlyMap<string, number>;
+  // The most pages the film's length holds (#434), ≤ MAX_SKY_PAGES.
+  maxPages: number;
 }
 
 // Day number of [date] in a memory starting [start] (1 = first day).
@@ -251,7 +261,17 @@ export function skyCheckContext(
         dayNumberOf(start, n.day_date),
       ]),
     ),
+    maxPages: skyMaxPages(tripData),
   };
+}
+
+// The most pages [tripData]'s film holds (#434): its length follows its
+// photos.
+export function skyMaxPages(tripData: TripData): number {
+  return Math.min(
+    MAX_SKY_PAGES,
+    skyPagesFor(filmSecondsOf(tripData)),
+  );
 }
 
 function isString(v: unknown): v is string {
@@ -292,9 +312,9 @@ export function describeSkyStoryProblems(
     return ["sky_story.pages: expected at least one page"];
   }
   const problems: string[] = [];
-  if (pages.length > MAX_SKY_PAGES) {
+  if (pages.length > context.maxPages) {
     problems.push(
-      `sky_story.pages: ${pages.length}, at most ${MAX_SKY_PAGES}`,
+      `sky_story.pages: ${pages.length}, at most ${context.maxPages}`,
     );
   }
   const used = new Set<string>();
@@ -432,7 +452,7 @@ export function describeSkyStoryProblems(
     const missing = always.filter((id) => !shown.includes(id));
     if (missing.length === 0) continue;
     const full = always.length - missing.length >= count * SKY_PAGE_SLOTS;
-    if (full && pages.length >= MAX_SKY_PAGES) continue;
+    if (full && pages.length >= context.maxPages) continue;
     const days = first === last ? `day ${first}` : `days ${first}–${last}`;
     problems.push(
       full
@@ -544,7 +564,7 @@ function placeAlwaysPhotos(raw: unknown[], context: SkyCheckContext): void {
   const covers = (day: number) =>
     pages.some((p) => day >= p.days[0] && day <= p.days[1]);
   for (const day of [...new Set(always.map(dayOf))]) {
-    if (covers(day) || pages.length >= MAX_SKY_PAGES) continue;
+    if (covers(day) || pages.length >= context.maxPages) continue;
     const ids = always.filter((id) => dayOf(id) === day);
     const index = pages.findIndex((p) => p.days[0] > day);
     pages.splice(
@@ -584,7 +604,7 @@ function placeAlwaysPhotos(raw: unknown[], context: SkyCheckContext): void {
       }
     }
     // 2. Continuation pages.
-    while (missing.length > 0 && pages.length < MAX_SKY_PAGES) {
+    while (missing.length > 0 && pages.length < context.maxPages) {
       const ids = missing.splice(0, SKY_PAGE_SLOTS);
       pages.splice(end, 0, continuationOf([first, last], ids));
       end++;
@@ -727,6 +747,18 @@ export function pagesPerRange(
 export function splitAtAlways(photos: Photo[], parts: number): Photo[][] {
   if (parts <= 1) return [photos];
   const always = photos.flatMap((p, i) => p.use_in_wrap_up === true ? [i] : []);
+  // Pages for a busy range rather than its Always picks (#434): even runs
+  // of its photos, in time order.
+  if (always.length <= (parts - 1) * SKY_PAGE_SLOTS) {
+    return Array.from(
+      { length: parts },
+      (_, k) =>
+        photos.slice(
+          Math.round((k * photos.length) / parts),
+          Math.round(((k + 1) * photos.length) / parts),
+        ),
+    ).filter((part) => part.length > 0);
+  }
   const starts = [0];
   let taken = 0;
   for (let k = 1; k < parts; k++) {
@@ -792,6 +824,32 @@ function groupsOf(
   }));
 }
 
+// While a film's length holds more pages than its ranges have (#434), the
+// range with the most photos a page gets one more — never past one page
+// per SKY_PAGE_SLOTS photos.
+export function morePagesForBusyRanges(
+  pages: number[],
+  photoCounts: number[],
+  maxPages = MAX_SKY_PAGES,
+): number[] {
+  const result = [...pages];
+  if (!isFilmLengthRuleOn()) return result;
+  let total = result.reduce((a, b) => a + b, 0);
+  while (total < maxPages) {
+    let best = -1;
+    photoCounts.forEach((count, i) => {
+      if (count <= result[i] * SKY_PAGE_SLOTS) return;
+      if (best < 0 || count / result[i] > photoCounts[best] / result[best]) {
+        best = i;
+      }
+    });
+    if (best < 0) break;
+    result[best]++;
+    total++;
+  }
+  return result;
+}
+
 // Code-built pages: one per day with photos, or five groups of neighbouring
 // days on a longer memory; a range with more Always picks than one page
 // shows gets continuation pages while there's room (#378).
@@ -799,6 +857,8 @@ export function codeSkyPages(
   tripData: TripData,
   heroScores: Readonly<Record<string, number>> = {},
 ): SkyPageContent[] {
+  // As many pages as the film's length holds (#434).
+  const maxPages = skyMaxPages(tripData);
   // Logical days, as the director sees them (#422).
   tripData = onLogicalDays(tripData);
   const start = tripData.trip.start_date;
@@ -811,9 +871,16 @@ export function codeSkyPages(
   }
   const days = [...counts.entries()].sort((a, b) => a[0] - b[0])
     .map(([day, count]) => ({ day, count }));
-  const groups = groupsOf(photos, start, groupDays(days, MAX_SKY_PAGES));
-  const pageCounts = pagesPerRange(
-    groups.map((g) => g.photos.filter((p) => p.use_in_wrap_up === true).length),
+  const groups = groupsOf(photos, start, groupDays(days, maxPages));
+  const pageCounts = morePagesForBusyRanges(
+    pagesPerRange(
+      groups.map((g) =>
+        g.photos.filter((p) => p.use_in_wrap_up === true).length
+      ),
+      maxPages,
+    ),
+    groups.map((g) => g.photos.length),
+    maxPages,
   );
   return groups.flatMap((group, i) =>
     splitAtAlways(group.photos, pageCounts[i]).map((part, k) => {

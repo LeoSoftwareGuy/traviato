@@ -21,6 +21,10 @@ import {
 } from "./sky_story.ts";
 import type { TripData } from "./gather.ts";
 import { directorTripData, skyStoryPlan } from "./director_fixtures.ts";
+import { useFilmLengthRuleForTests } from "./film_length.ts";
+
+// These tests are about other rules: every film at its longest (#434).
+useFilmLengthRuleForTests(false);
 
 type Photo = TripData["photos"][number];
 

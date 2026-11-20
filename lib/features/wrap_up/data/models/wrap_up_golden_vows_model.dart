@@ -1,3 +1,4 @@
+import 'film_seconds_model.dart';
 import '../../domain/entities/wrap_up_golden_vows.dart';
 
 /// The `content.golden_vows` version this app reads.
@@ -32,6 +33,7 @@ WrapUpGoldenVows? parseWrapUpGoldenVows(Map<String, dynamic> content) {
     heartPhotoIds: _ids(gv['heart_photo_ids']),
     momentCount: momentCount is int && momentCount > 0 ? momentCount : 0,
     endLine: _string(gv['end_line']),
+    filmSeconds: parseFilmSeconds(content),
   );
 }
 

@@ -19,6 +19,18 @@ void main() {
       'minNotes': WrapUpLimits.minNotes,
       'maxNoteLines': WrapUpLimits.maxNoteLines,
       'maxVibes': WrapUpLimits.maxVibes,
+      'shortestFilmSeconds': WrapUpLimits.shortestFilmSeconds,
+      'longestFilmSeconds': WrapUpLimits.longestFilmSeconds,
+      'shortestFilmPhotos': WrapUpLimits.shortestFilmPhotos,
+      'longestFilmPhotos': WrapUpLimits.longestFilmPhotos,
     });
+  });
+
+  test('filmSeconds: 30 s at 15 photos, 75 s at 40 or more (#434)', () {
+    expect(WrapUpLimits.filmSeconds(10), 30);
+    expect(WrapUpLimits.filmSeconds(15), 30);
+    expect(WrapUpLimits.filmSeconds(25), 48);
+    expect(WrapUpLimits.filmSeconds(40), 75);
+    expect(WrapUpLimits.filmSeconds(60), 75);
   });
 }

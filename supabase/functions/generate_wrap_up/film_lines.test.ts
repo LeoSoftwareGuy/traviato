@@ -102,6 +102,10 @@ Deno.test("Golden Vows: a note on the photo first; a caption always wins", () =>
 // --- #422 -------------------------------------------------------------------
 
 import { skyCheckContext } from "./sky_story.ts";
+import { useFilmLengthRuleForTests } from "./film_length.ts";
+
+// These tests are about other rules: every film at its longest (#434).
+useFilmLengthRuleForTests(false);
 
 // One day with a morning and a night out past midnight (UTC = the clock).
 function longDay(): TripData {

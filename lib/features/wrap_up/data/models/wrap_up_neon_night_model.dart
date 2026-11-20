@@ -1,3 +1,4 @@
+import 'film_seconds_model.dart';
 import '../../domain/entities/wrap_up_neon_night.dart';
 
 /// The `content.neon_night` version this app reads.
@@ -27,6 +28,7 @@ WrapUpNeonNight? parseWrapUpNeonNight(Map<String, dynamic> content) {
     firstName: _string(nn['first_name']),
     totals: _totals(nn['totals']),
     heartPhotoIds: _ids(nn['heart_photo_ids']),
+    filmSeconds: parseFilmSeconds(content),
   );
 }
 

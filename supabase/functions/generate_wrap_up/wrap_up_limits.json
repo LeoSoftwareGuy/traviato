@@ -3,5 +3,9 @@
   "maxFilmPhotos": 60,
   "minNotes": 1,
   "maxNoteLines": 12,
-  "maxVibes": 3
+  "maxVibes": 3,
+  "shortestFilmSeconds": 30,
+  "longestFilmSeconds": 75,
+  "shortestFilmPhotos": 15,
+  "longestFilmPhotos": 40
 }

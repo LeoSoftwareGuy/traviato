@@ -102,6 +102,7 @@ SkyStory flowSkyNotes(
     pages: pages,
     momentCount: story.momentCount,
     mosaicPhotoIds: story.mosaicPhotoIds,
+    targetSeconds: story.targetSeconds,
   );
 }
 
