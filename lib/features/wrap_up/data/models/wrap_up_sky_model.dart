@@ -1,3 +1,4 @@
+import 'film_seconds_model.dart';
 import '../../domain/entities/wrap_up_sky.dart';
 
 /// The `content.sky` version this app reads.
@@ -32,6 +33,7 @@ WrapUpSky? parseWrapUpSky(Map<String, dynamic> content) {
     momentCount: momentCount is int && momentCount > 0 ? momentCount : 0,
     mosaicPhotoIds: _ids(sky['mosaic_photo_ids']),
     pages: pages,
+    filmSeconds: parseFilmSeconds(content),
   );
 }
 

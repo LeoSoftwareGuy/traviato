@@ -19,7 +19,12 @@ class WrapUpGoldenVows extends Equatable {
     this.heartPhotoIds = const [],
     this.momentCount = 0,
     this.endLine,
+    this.filmSeconds,
   });
+
+  /// How long the film plays (#434, `content.film_seconds`); null = its
+  /// own pacing.
+  final double? filmSeconds;
 
   /// `wedding`, `engagement`, `anniversary` or `date_night`.
   final String? occasion;
@@ -55,6 +60,7 @@ class WrapUpGoldenVows extends Equatable {
     heartPhotoIds,
     momentCount,
     endLine,
+    filmSeconds,
   ];
 }
 

@@ -57,7 +57,12 @@ class GoldenVowsStory extends Equatable {
     this.endLine,
     this.dayCount = 1,
     this.moments,
+    this.targetSeconds,
   });
+
+  /// How long the film should play (#434, from its photos); the timeline
+  /// fits its scenes to it. Null = the reference pacing.
+  final double? targetSeconds;
 
   /// The occasion in the UI language ("Our Wedding Day"); none → the
   /// line is left out.
@@ -150,6 +155,7 @@ class GoldenVowsStory extends Equatable {
     endLine,
     dayCount,
     moments,
+    targetSeconds,
   ];
 }
 

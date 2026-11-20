@@ -65,6 +65,7 @@ GoldenVowsStory? goldenVowsFromWrapUp(
     moments: gv.momentCount > 0 ? gv.momentCount : null,
     endLine: gv.endLine,
     dayCount: _dayCount(startDate, endDate) ?? gv.dayCount,
+    targetSeconds: gv.filmSeconds,
   );
 }
 

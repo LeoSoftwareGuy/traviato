@@ -20,36 +20,75 @@ class GoldenVowsTimeline {
     this.chapters = 3,
     this.hasCarousel = true,
     List<double> heroDwells = const [],
+    this.dwellScale = 1,
   }) : assert(heroes >= 0 && chapters >= 0, 'pages: $heroes, $chapters'),
-       film = _build(hasPackingCard, heroes, chapters, hasCarousel, heroDwells);
+       film = _build(
+         hasPackingCard,
+         heroes,
+         chapters,
+         hasCarousel,
+         heroDwells,
+         dwellScale,
+       );
 
   /// A memory's film: no packed items, no packing card; no carousel
   /// photos, no carousel page.
-  factory GoldenVowsTimeline.forStory(GoldenVowsStory story) =>
-      GoldenVowsTimeline(
-        hasPackingCard: story.hasPackingCard,
-        heroes: story.heroes.length,
-        chapters: story.chapters.length,
-        hasCarousel: story.hasCarousel,
-        heroDwells: [for (final hero in story.heroes) heroDwellFor(hero.note)],
-      );
+  ///
+  /// With a target length (`content.film_seconds`, #434) every page lies
+  /// open longer or shorter, by the same [dwellScale], so the film lasts
+  /// about that long — a photo page never shorter than its note needs.
+  factory GoldenVowsTimeline.forStory(GoldenVowsStory story) {
+    GoldenVowsTimeline at(double scale) => GoldenVowsTimeline(
+      hasPackingCard: story.hasPackingCard,
+      heroes: story.heroes.length,
+      chapters: story.chapters.length,
+      hasCarousel: story.hasCarousel,
+      heroDwells: [
+        for (final hero in story.heroes)
+          scale == 1
+              ? heroDwellFor(hero.note)
+              : math.max(heroDwell * scale, heroDwellFor(hero.note, floor: 0)),
+      ],
+      dwellScale: scale,
+    );
+    final target = story.targetSeconds;
+    if (target == null) return at(1);
+    var lo = minDwellScale;
+    var hi = maxDwellScale;
+    for (var k = 0; k < 40; k++) {
+      final mid = (lo + hi) / 2;
+      if (at(mid).total < target) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    return at((lo + hi) / 2);
+  }
 
   /// The reference wedding (spec §5).
   factory GoldenVowsTimeline.reference() => GoldenVowsTimeline();
+
+  /// How far the pages' dwell stretches or shrinks to fit (#434).
+  static const minDwellScale = 0.7;
+  static const maxDwellScale = 1.8;
 
   final bool hasPackingCard;
   final int heroes;
   final int chapters;
   final bool hasCarousel;
+
+  /// Every page's dwell × this (#434); 1 = the spec's.
+  final double dwellScale;
   final FilmTimeline<GoldenVowsSceneSpec> film;
 
   /// How long a photo-with-note page lies open (#399 T1): the spec's 3 s,
   /// or long enough to read its note — seen from the turn that uncovers it
   /// to its own turn.
-  static double heroDwellFor(String? note) {
+  static double heroDwellFor(String? note, {double floor = heroDwell}) {
     final text = note?.trim();
-    if (text == null || text.isEmpty) return heroDwell;
-    return math.max(heroDwell, FilmTextRules.readingTime(text) - turnDur);
+    if (text == null || text.isEmpty) return floor;
+    return math.max(floor, FilmTextRules.readingTime(text) - turnDur);
   }
 
   static const invitationDur = 5.4;
@@ -79,6 +118,7 @@ class GoldenVowsTimeline {
     int chapters,
     bool hasCarousel,
     List<double> heroDwells,
+    double dwellScale,
   ) {
     var number = 0;
     GvPageSpec page(GvPageKind kind, int index) =>
@@ -93,8 +133,9 @@ class GoldenVowsTimeline {
           page(GvPageKind.hero, i),
         ),
       for (var i = 0; i < chapters; i++)
-        (chapterDwell + turnDur, page(GvPageKind.chapter, i)),
-      if (hasCarousel) (carouselDwell + turnDur, page(GvPageKind.carousel, 0)),
+        (chapterDwell * dwellScale + turnDur, page(GvPageKind.chapter, i)),
+      if (hasCarousel)
+        (carouselDwell * dwellScale + turnDur, page(GvPageKind.carousel, 0)),
       (heartToClose, page(GvPageKind.heart, 0)),
       (closeDur, const GvAlbumCloseSpec()),
       (endingDur, const GvEndingSpec()),

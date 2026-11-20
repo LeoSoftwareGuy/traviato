@@ -17,7 +17,12 @@ class WrapUpNeonNight extends Equatable {
     this.firstName,
     this.totals,
     this.heartPhotoIds = const [],
+    this.filmSeconds,
   });
+
+  /// How long the film plays (#434, `content.film_seconds`); null = its
+  /// own pacing.
+  final double? filmSeconds;
 
   /// The memory's name.
   final String title;
@@ -51,6 +56,7 @@ class WrapUpNeonNight extends Equatable {
     firstName,
     totals,
     heartPhotoIds,
+    filmSeconds,
   ];
 }
 

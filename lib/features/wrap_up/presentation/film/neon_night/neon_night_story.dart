@@ -229,10 +229,15 @@ class NeonNightStory extends Equatable {
     this.headline,
     this.totals,
     this.heartPhotoIds = const [],
+    this.targetSeconds,
   }) : assert(
          chapters.isNotEmpty && chapters.length <= 5,
          '1–5 chapters',
        );
+
+  /// How long the film should play (#434, from its photos); the timeline
+  /// fits its scenes to it. Null = the reference pacing.
+  final double? targetSeconds;
 
   /// The memory's title, e.g. "Night out" (shown in capitals).
   final String title;
@@ -317,6 +322,7 @@ class NeonNightStory extends Equatable {
     headline,
     totals,
     heartPhotoIds,
+    targetSeconds,
   ];
 }
 

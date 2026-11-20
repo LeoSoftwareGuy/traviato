@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -50,16 +52,62 @@ class NeonNightCanvas extends StatefulWidget {
   /// follows its photos) with their moments, each long enough to read the
   /// user's words (#399). The Plan and Note scenes play only when the
   /// memory has a plan and a note that fits.
+  ///
+  /// With a target length (`content.film_seconds`, #434) the moments hold
+  /// longer, a whole bar at a time and in turn, until the film lasts about
+  /// that long; the edge function already left out what wouldn't fit.
   static NeonNightTimeline timelineFor(
     NeonNightStory story, {
     NeonBeat beat = const NeonBeat(),
-  }) => NeonNightTimeline(
-    chapters: NnReadingTime.chaptersFor(story, beat),
-    hasPlan: story.hasPlan,
-    hasNote: story.hasNote,
-    noteMinBeats: NnReadingTime.noteBeats(story, beat),
-    beat: beat,
-  );
+  }) {
+    NeonNightTimeline build(List<NnChapterShape> chapters) => NeonNightTimeline(
+      chapters: chapters,
+      hasPlan: story.hasPlan,
+      hasNote: story.hasNote,
+      noteMinBeats: NnReadingTime.noteBeats(story, beat),
+      beat: beat,
+    );
+    final chapters = NnReadingTime.chaptersFor(story, beat);
+    final base = build(chapters);
+    final target = story.targetSeconds;
+    if (target == null) return base;
+    final bars = ((beat.secToBeat(target) - base.totalBeats + 2) / 4).floor();
+    final moments = chapters.fold(0, (n, c) => n + c.moments.length);
+    if (bars <= 0 || moments == 0) return base;
+    final extra = [
+      for (final c in chapters) List.filled(c.moments.length, 0),
+    ];
+    var left = math.min(bars, moments * maxExtraMomentBars);
+    while (left > 0) {
+      for (var i = 0; i < chapters.length && left > 0; i++) {
+        for (var j = 0; j < chapters[i].moments.length && left > 0; j++) {
+          if (extra[i][j] >= maxExtraMomentBars) continue;
+          extra[i][j]++;
+          left--;
+        }
+      }
+    }
+    return build([
+      for (final (i, c) in chapters.indexed)
+        NnChapterShape(
+          moments: c.moments,
+          photos: c.photos,
+          zoomHolds: c.zoomHolds,
+          cardMinBeats: c.cardMinBeats,
+          momentMinBeats: [
+            for (final (j, type) in c.moments.indexed)
+              math.max(
+                    type.beats,
+                    j < c.momentMinBeats.length ? c.momentMinBeats[j] : 0,
+                  ) +
+                  4 * extra[i][j],
+          ],
+        ),
+    ]);
+  }
+
+  /// The most bars a moment holds longer to fit the film's length (#434).
+  static const maxExtraMomentBars = 3;
 
   /// The §6 version: softer flicker, flares and laser punch, same timings.
   final bool reducedFlashing;
