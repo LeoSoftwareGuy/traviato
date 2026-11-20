@@ -253,6 +253,24 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   journal" / "Keep forever".
 - Generation pipeline unchanged: edge function → Anthropic → screenplay JSONB in
   `wrap_ups.content`; app renders live; MP4 export post-MVP.
+- **The film comes from the vibes (#433):** Romantic → Golden Vows,
+  Nightlife → Neon Night, Adventure / Road trip / Wildlife → Field Notes
+  (Sky Story until it ships), everything else → Sky Story; with several
+  vibes Romantic > Nightlife > outdoors > the rest. Code decides it before
+  the director runs, and the director only fills that film's plan — never
+  another film. Under View wrap-up: "Film style: Neon Night". The chosen
+  film always plays: what the director gets wrong is repaired (banned
+  phrases out of AI lines, lines cut at a word, a day with one photo joins
+  the next, Always photos without a moment go to the heart), and when
+  nothing of it can be kept code builds the same film's plan. Golden Vows
+  writes wedding words only when photos or notes show a wedding, else
+  neutral romantic lines. A film shows up to 60 photos (15+ Always photos
+  are exactly the film's), and at most 12 of the user's lines — feelings
+  first, then lines matching the vibe, then details, generic ones last.
+  The Plan inspector shows the film, who planned it and every repair.
+  Kept films keep their film. The notes below describe each film; where
+  they say "the director reads the memory as …", the vibes decide since
+  #433.
 - **Sky Story is the default film (#345):** a balloon over a dusk-to-night sky,
   one page per day or group of days (up to 5) — headline, a polaroid fan,
   taped grid or fly-out, the day's note or a short line on the sky — then the

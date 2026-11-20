@@ -22,6 +22,9 @@ class FilmDirectorReport extends Equatable {
     this.goldenVowsProblems = const [],
     this.hasNeonNight = false,
     this.neonNightProblems = const [],
+    this.template,
+    this.filmSource,
+    this.filmRepairs = const [],
     this.runCount = 0,
     this.attempts = 0,
     this.model = '',
@@ -68,6 +71,17 @@ class FilmDirectorReport extends Equatable {
   /// or when the director left it out on purpose.
   final List<String> neonNightProblems;
 
+  /// The film the memory's vibes chose (#433): `golden_vows`,
+  /// `neon_night` or `sky_story`; null for a run from before.
+  final String? template;
+
+  /// Where that film's section came from: `director` (repaired where it
+  /// had to be) or `code`; null for Sky Story or an older run.
+  final String? filmSource;
+
+  /// Every repair the section needed, with its reason (#433).
+  final List<String> filmRepairs;
+
   /// Runs for this memory so far (automatic re-runs are capped).
   final int runCount;
   final int attempts;
@@ -101,6 +115,9 @@ class FilmDirectorReport extends Equatable {
     goldenVowsProblems,
     hasNeonNight,
     neonNightProblems,
+    template,
+    filmSource,
+    filmRepairs,
     runCount,
     attempts,
     model,

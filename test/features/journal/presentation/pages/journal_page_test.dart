@@ -808,6 +808,38 @@ void main() {
   );
 
   testWidgets(
+    'shows the film style the vibes chose under View wrap-up (#433)',
+    (tester) async {
+      final tripRepo = FakeTripRepository()
+        ..tripCardResult = Right(
+          buildTripCard(
+            id: 't1',
+            startDate: _today,
+            endDate: _today,
+            vibes: const ['Foodie', 'Nightlife'],
+          ),
+        );
+      final photoRepo = FakePhotoRepository()
+        ..photosResult = Right([buildPhotoEntity(id: 'p1', dayDate: _today)]);
+      final noteRepo = FakeJournalNoteRepository();
+      await _pump(
+        tester,
+        tripRepo: tripRepo,
+        photoRepo: photoRepo,
+        noteRepo: noteRepo,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.dragUntilVisible(
+        find.byKey(const Key('journal-film-style')),
+        find.byKey(const Key('journal-content-list')),
+        const Offset(0, -200),
+      );
+      expect(find.text('Film style: Neon Night'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     "the header's stars badge shows the account's real total, not 0 (#105)",
     (tester) async {
       final tripRepo = FakeTripRepository()

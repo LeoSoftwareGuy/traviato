@@ -831,6 +831,20 @@ class AppLocalizationsRu extends AppLocalizations {
       'Напишите одну заметку, чтобы открыть фильм.';
 
   @override
+  String journal_filmStyle(String style) {
+    return 'Стиль фильма: $style';
+  }
+
+  @override
+  String get film_styleNeonNight => 'Neon Night';
+
+  @override
+  String get film_styleGoldenVows => 'Golden Vows';
+
+  @override
+  String get film_styleSkyStory => 'Sky Story';
+
+  @override
   String journal_wrapUpReqPhotos(int count) {
     return '$count фото в этом событии';
   }

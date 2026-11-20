@@ -73,12 +73,50 @@ const FOOD =
   /ribs|beer|burger|pizza|pasta|coffee|breakfast|brunch|dinner|lunch|wine|cocktail|fries|waffle|steak|ребр|рёбр|пив|бургер|пицц|кофе|завтрак|обед|ужин|вин[оа]|коктейл|вафл|стейк|картош/iu;
 const FIRSTS =
   /\b(first|never|finally)\b|впервые|перв(ый|ая|ое|ые|ый раз)|никогда|наконец/iu;
+// Emotions and feelings (#433): what the film plays first.
 const FEELINGS =
-  /\b(best|loved|incredible|craziest|unreal)\b|самый|самая|самое|лучш|обожа|невероят|охренен|безумн/iu;
+  /\b(best|lov(e|ed|ing)|incredible|craziest|unreal|felt|feel(ing)?|happ(y|iest)|cried|tears|laugh(ed|ing)?|heart|goosebumps|scared|nervous|proud|excited|missed|miss|wish|alive)\b|самый|самая|самое|лучш|обожа|невероят|охренен|безумн|счастлив|плакал|слёз|слез|смеял|смех|люблю|любим|сердц|мурашк|страшно|волнов|горд|восторг|кайф|чувств|скуча/iu;
 
-// How specific [excerpt] is (#398 R3): + numbers, names and places, food,
-// firsts, strong feelings, a good length; − generic summaries, a fragment.
-export function excerptScore(excerpt: string): number {
+// What a film's vibe is about (#433): the lines that match it come right
+// after the feelings.
+export type LineTheme = "night" | "romance" | "outdoors";
+const THEMES: Record<LineTheme, RegExp> = {
+  night:
+    /\b(music|dj|bass|crowd|danc(e|ed|ing)|track|song|lights?|dawn|sunrise|night|club|stage|beat|rave|party|sang)\b|музык|диджей|бас|толп|танц|трек|песн|рассвет|ноч|клуб|сцен|вечеринк|пели/iu,
+  romance:
+    /\b(us|we|together|kiss(ed)?|hands?|our|two of us|date|wedding|ring|proposed)\b|вместе|поцел|рук|вдвоём|вдвоем|наш|мы с|свидани|свадьб|кольц/iu,
+  outdoors:
+    /\b(trail|hike|hiked|summit|peak|forest|river|lake|sea|route|km|climb(ed)?|wind|mountains?|valley|camp|road|miles)\b|троп|поход|верш|лес|рек|озер|мор[еяю]|маршрут|км|подъ[её]м|ветер|гор[аыу]|долин|лагер|дорог/iu,
+};
+
+// The line theme of a played film: Neon Night is about the night, Golden
+// Vows about the two of you, Field Notes about the outdoors; else none.
+export function lineThemeFor(film: string): LineTheme | null {
+  switch (film) {
+    case "neon_night":
+      return "night";
+    case "golden_vows":
+      return "romance";
+    case "field_notes":
+      return "outdoors";
+    default:
+      return null;
+  }
+}
+
+// The tiers of a line's score (#433): feelings > the vibe > details >
+// generic summaries. Details add up to at most 7, so a feeling or a vibe
+// line always outranks one that only has details.
+const FEELING_SCORE = 8;
+const THEME_SCORE = 5;
+
+// How good a line [excerpt] is for the film (#398 R3, #433): feelings
+// first, then lines about [theme], then details — numbers, names and
+// places, food, firsts, a good length; − generic summaries, a fragment.
+export function excerptScore(
+  excerpt: string,
+  theme: LineTheme | null = null,
+): number {
   const text = collapse(excerpt);
   const length = [...text].length;
   let score = 0;
@@ -90,10 +128,13 @@ export function excerptScore(excerpt: string): number {
   score += Math.min(names, 2);
   if (FOOD.test(text)) score += 1;
   if (FIRSTS.test(text)) score += 1;
-  if (FEELINGS.test(text) || text.includes("!")) score += 1;
+  if (FEELINGS.test(text)) score += FEELING_SCORE;
+  else if (text.includes("!")) score += 1;
+  if (theme && THEMES[theme].test(text)) score += THEME_SCORE;
   if (length >= 30 && length <= MAX_EXCERPT_CHARS) score += 1;
   if (length < 15) score -= 1;
-  if (GENERIC.some((g) => g.test(text))) score -= 3;
+  // Generic summaries go last, whatever else they have.
+  if (GENERIC.some((g) => g.test(text))) score -= FEELING_SCORE + THEME_SCORE;
   return score;
 }
 
@@ -134,6 +175,7 @@ export function bestLines(
   notes: readonly { id: string; content: string }[],
   max: number,
   maxChars = MAX_EXCERPT_CHARS,
+  theme: LineTheme | null = null,
 ): PickedLine[] {
   const seen = new Set<string>();
   const candidates: (PickedLine & { at: number })[] = [];
@@ -141,7 +183,7 @@ export function bestLines(
     for (const text of excerptCandidates(note.content)) {
       if (seen.has(text) || isSensitive(text)) continue;
       if ([...text].length > maxChars) continue;
-      const score = excerptScore(text);
+      const score = excerptScore(text, theme);
       if (score < SPECIFIC_SCORE) continue;
       seen.add(text);
       candidates.push({ note_id: note.id, text, score, at: candidates.length });

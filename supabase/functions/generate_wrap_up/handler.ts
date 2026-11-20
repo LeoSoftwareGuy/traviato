@@ -38,6 +38,8 @@
 
 import { gatherTripData, type TripData } from "./gather.ts";
 import { wrapUpMissing } from "./wrap_up_limits.ts";
+import { type PlayedTemplate, playedTemplate } from "./film_template.ts";
+import { withFilmPhotos } from "./film_photos.ts";
 import {
   assembleWrapUpContent,
   type MomentSlots,
@@ -194,6 +196,7 @@ export async function handleRequest(
         existing.ai_fields,
         slots,
         existing,
+        language,
       );
     }
     return json({
@@ -301,17 +304,29 @@ export async function handleRequest(
   }
 
   const template = assembleWrapUpContent(tripData, aiFields, slots);
+  // The film this memory plays, from its vibes (#433) — never changed by
+  // the director — and the film's photos (at most 60).
+  const played = playedTemplate(tripData.trip.vibes);
+  const heroScores = isDirectorRecord(director)
+    ? director.hero_scores ?? {}
+    : {};
+  const film = withFilmPhotos(tripData, heroScores);
+  const isSkyMemory = played === "sky_story";
   // Next to everything the current player reads, so it keeps playing.
-  const plan = directorOn ? currentPlan(director, tripData, language) : null;
+  const plan = directorOn && isSkyMemory
+    ? currentPlan(director, film, language)
+    : null;
+  // Every memory with photos gets Sky Story pages: a Sky Story memory's
+  // film, and the app's safety net if another film fails while it plays.
   const sky = buildSkyContent(
-    tripData,
-    directorOn ? currentSkyStory(director, tripData) : null,
-    isDirectorRecord(director) ? director.hero_scores ?? {} : {},
+    film,
+    directorOn && isSkyMemory ? currentSkyStory(director, film) : null,
+    heroScores,
   );
   if (sky) {
     // More Always picks than Sky Story's pages hold: they're in the
     // mosaic instead (#378's known limit).
-    const withoutPage = alwaysWithoutPage(tripData, sky);
+    const withoutPage = alwaysWithoutPage(film, sky);
     if (withoutPage.length > 0) {
       logEvent(deps.log ?? console.error, "sky_always_without_page", {
         trip_id: tripId,
@@ -319,16 +334,21 @@ export async function handleRequest(
       });
     }
   }
-  const goldenVows = directorOn
-    ? goldenVowsContentFor(director, tripData)
-    : null;
-  const neonNight = directorOn ? neonNightContentFor(director, tripData) : null;
+  // The chosen film always plays (#433): the director's section, repaired,
+  // else code's plan for the same film — also with the director off.
+  const section = sectionContentFor(
+    played,
+    directorOn ? director : null,
+    film,
+    language,
+  );
   const content = {
     ...template,
+    film_style: played,
     ...(plan ? { plan_version: 2 as const, plan } : {}),
     ...(sky ? { sky } : {}),
-    ...(goldenVows ? { golden_vows: goldenVows } : {}),
-    ...(neonNight ? { neon_night: neonNight } : {}),
+    ...section.content,
+    ...(section.report ? { film_report: section.report } : {}),
   };
   const generatedAt = new Date().toISOString();
   const row = {
@@ -425,6 +445,7 @@ async function rebuildKept(
   aiFields: AiGeneratedFields,
   slots: MomentSlots,
   existing: { content: unknown; director?: unknown },
+  language: WrapUpLanguage,
 ): Promise<Response> {
   let tripData: TripData;
   try {
@@ -435,32 +456,40 @@ async function rebuildKept(
     }, 500);
   }
   const template = assembleWrapUpContent(tripData, aiFields, slots);
-  const keptAsSky = typeof existing.content === "object" &&
-    existing.content !== null && "sky" in existing.content;
+  const heroScores = isDirectorRecord(existing.director)
+    ? existing.director.hero_scores ?? {}
+    : {};
+  const film = withFilmPhotos(tripData, heroScores);
+  const kept = typeof existing.content === "object" && existing.content !== null
+    ? existing.content as Record<string, unknown>
+    : {};
+  const keptAsSky = "sky" in kept;
   const sky = keptAsSky
     ? buildSkyContent(
-      tripData,
-      currentSkyStory(existing.director, tripData),
-      isDirectorRecord(existing.director)
-        ? existing.director.hero_scores ?? {}
-        : {},
+      film,
+      currentSkyStory(existing.director, film),
+      heroScores,
     )
     : null;
-  const keptAsGoldenVows = keptAsSky &&
-    "golden_vows" in (existing.content as Record<string, unknown>);
-  const goldenVows = keptAsGoldenVows
-    ? goldenVowsContentFor(existing.director, tripData)
+  // A kept film keeps its film (#433: never another one — a section that
+  // no longer fits is healed, else code builds the same film). No kept
+  // film gains Golden Vows or Neon Night.
+  const keptAs: PlayedTemplate | null = !keptAsSky
+    ? null
+    : "golden_vows" in kept
+    ? "golden_vows"
+    : "neon_night" in kept
+    ? "neon_night"
     : null;
-  const keptAsNeonNight = keptAsSky &&
-    "neon_night" in (existing.content as Record<string, unknown>);
-  const neonNight = keptAsNeonNight
-    ? neonNightContentFor(existing.director, tripData)
-    : null;
+  const section = keptAs
+    ? sectionContentFor(keptAs, existing.director, film, language)
+    : { content: {}, report: null };
   const content = {
     ...template,
+    ...("film_style" in kept ? { film_style: kept.film_style } : {}),
     ...(sky ? { sky } : {}),
-    ...(goldenVows ? { golden_vows: goldenVows } : {}),
-    ...(neonNight ? { neon_night: neonNight } : {}),
+    ...section.content,
+    ...(section.report ? { film_report: section.report } : {}),
   };
   const generatedAt = new Date().toISOString();
   const { error } = await deps.serviceClient
@@ -474,17 +503,40 @@ async function rebuildKept(
   return json({ content, generated_at: generatedAt }, 200);
 }
 
-// content.golden_vows from the director's section, while it still fits.
-function goldenVowsContentFor(director: unknown, tripData: TripData) {
-  const plan = currentGoldenVows(director, tripData);
-  if (!plan || !isDirectorRecord(director)) return null;
-  return buildGoldenVowsContent(tripData, plan, director.orientations ?? {});
-}
-
-// content.neon_night from the director's section, while it still fits.
-function neonNightContentFor(director: unknown, tripData: TripData) {
-  const plan = currentNeonNight(director, tripData);
-  return plan ? buildNeonNightContent(tripData, plan) : null;
+// The chosen film's section content (#433): Golden Vows or Neon Night,
+// from the director's section (as stored, healed or repaired) or code's
+// plan — never missing. A Sky Story memory has none (its pages are
+// content.sky). The report says where it came from, for the inspector.
+function sectionContentFor(
+  played: PlayedTemplate,
+  director: unknown,
+  film: TripData,
+  language: WrapUpLanguage,
+): {
+  content: Record<string, unknown>;
+  report: { source: "director" | "code"; repairs: string[] } | null;
+} {
+  if (played === "golden_vows") {
+    const ensured = currentGoldenVows(director, film, language);
+    return {
+      content: {
+        golden_vows: buildGoldenVowsContent(
+          film,
+          ensured.plan,
+          isDirectorRecord(director) ? director.orientations ?? {} : {},
+        ),
+      },
+      report: { source: ensured.source, repairs: ensured.repairs },
+    };
+  }
+  if (played === "neon_night") {
+    const ensured = currentNeonNight(director, film, language);
+    return {
+      content: { neon_night: buildNeonNightContent(film, ensured.plan) },
+      report: { source: ensured.source, repairs: ensured.repairs },
+    };
+  }
+  return { content: {}, report: null };
 }
 
 // The app's offset from UTC in minutes, when it is a whole number within

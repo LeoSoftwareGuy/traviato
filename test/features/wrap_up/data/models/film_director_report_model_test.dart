@@ -134,6 +134,31 @@ void main() {
       expect(invalid.neonNightProblems, ['neon_night.chapters: 0']);
     });
 
+    test("reads the vibes' film, its plan's source and repairs (#433)", () {
+      final report = FilmDirectorReportModel.fromJson({
+        'status': 'fallback',
+        'plan': null,
+        'problems': <String>[],
+        'template': 'neon_night',
+        'neon_night_source': 'director',
+        'neon_night_repairs': ['repaired: neon_night.headline: 20 characters'],
+        'golden_vows_source': 'code',
+      })!;
+      expect(report.template, 'neon_night');
+      expect(report.filmSource, 'director');
+      expect(report.filmRepairs, [
+        'repaired: neon_night.headline: 20 characters',
+      ]);
+
+      final older = FilmDirectorReportModel.fromJson({
+        'status': 'fallback',
+        'problems': <String>[],
+      })!;
+      expect(older.template, isNull);
+      expect(older.filmSource, isNull);
+      expect(older.filmRepairs, isEmpty);
+    });
+
     test('is null when the director never ran', () {
       expect(FilmDirectorReportModel.fromJson(null), isNull);
       expect(FilmDirectorReportModel.fromJson({'status': 'odd'}), isNull);

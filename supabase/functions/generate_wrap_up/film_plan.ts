@@ -551,6 +551,30 @@ function quoteCount(line: string): number {
 
 // [line] trimmed, without a quote pair wrapping all of it and without an
 // unmatched quote at either end. Quotes inside the line stay.
+// An AI-written [line] without its banned phrases (#433): each removed as
+// whole words, with the spacing and punctuation left dangling around it.
+// Never used on the user's own captions or notes.
+export function withoutBannedPhrases(line: string): string {
+  let out = line;
+  for (const phrase of BANNED_PHRASES) {
+    const pattern = new RegExp(
+      `(^|[^\\p{L}])${phrase.replace(/ /g, "\\s+")}(?=$|[^\\p{L}])`,
+      "giu",
+    );
+    out = out.replace(pattern, "$1");
+  }
+  if (out === line) return line;
+  return out.replace(/\s{2,}/gu, " ")
+    .replace(/\s+([,.!?;:])/gu, "$1")
+    .replace(/^[\s,;:—–·.!-]+|[\s,;:—–·-]+$/gu, "")
+    .trim();
+}
+
+// An AI-written line made fit (#433): cleaned, banned phrases removed.
+export function cleanAiLine(line: string): string {
+  return withoutBannedPhrases(cleanLine(line));
+}
+
 export function cleanLine(line: string): string {
   let out = line.trim();
   for (;;) {
@@ -572,7 +596,8 @@ export function cleanLine(line: string): string {
 }
 
 function cleanLines(plan: Record<string, unknown>): void {
-  const clean = (v: unknown) => (typeof v === "string" ? cleanLine(v) : v);
+  // AI lines (#433): banned phrases are removed, not a reason to refuse.
+  const clean = (v: unknown) => (typeof v === "string" ? cleanAiLine(v) : v);
   plan.closing_line = clean(plan.closing_line);
   const footnote = plan.footnote;
   if (typeof footnote === "object" && footnote !== null) {

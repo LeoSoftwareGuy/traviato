@@ -806,6 +806,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journal_wrapUpAskNote => 'Write one note to unlock it.';
 
   @override
+  String journal_filmStyle(String style) {
+    return 'Film style: $style';
+  }
+
+  @override
+  String get film_styleNeonNight => 'Neon Night';
+
+  @override
+  String get film_styleGoldenVows => 'Golden Vows';
+
+  @override
+  String get film_styleSkyStory => 'Sky Story';
+
+  @override
   String journal_wrapUpReqPhotos(int count) {
     return '$count photos in this memory';
   }

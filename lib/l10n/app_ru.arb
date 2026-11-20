@@ -824,6 +824,22 @@
   "@journal_wrapUpAskNote": {
     "x-review": "pending"
   },
+  "journal_filmStyle": "Стиль фильма: {style}",
+  "@journal_filmStyle": {
+    "x-review": "pending"
+  },
+  "film_styleNeonNight": "Neon Night",
+  "@film_styleNeonNight": {
+    "x-review": "pending"
+  },
+  "film_styleGoldenVows": "Golden Vows",
+  "@film_styleGoldenVows": {
+    "x-review": "pending"
+  },
+  "film_styleSkyStory": "Sky Story",
+  "@film_styleSkyStory": {
+    "x-review": "pending"
+  },
   "journal_wrapUpReqPhotos": "{count} фото в этом событии",
   "@journal_wrapUpReqPhotos": {
     "x-review": "pending"
