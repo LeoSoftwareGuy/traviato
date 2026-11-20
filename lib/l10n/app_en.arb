@@ -354,6 +354,15 @@
   "trip_datesRequired": "Add a start and end date.",
   "trip_datesHint": "Not sure yet? Pick your best guess you can change it later.",
   "trip_vibeLabel": "The vibe",
+  "trip_vibesLimit": "Pick up to {count}",
+  "@trip_vibesLimit": {
+    "description": "Shown for a moment when a vibe is tapped past the limit (#432).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "trip_vibesChosen": "{count} chosen",
   "@trip_vibesChosen": {
     "placeholders": {
@@ -610,7 +619,14 @@
     }
   },
   "journal_wrapUpAskNote": "Write one note to unlock it.",
-  "journal_wrapUpReqPhotos": "Five photos in this memory",
+  "journal_wrapUpReqPhotos": "{count} photos in this memory",
+  "@journal_wrapUpReqPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "journal_wrapUpReqNote": "At least one note written",
   "journal_wrapUpFree": "Nothing to buy — this one's the same on every plan.",
   "journal_wordCount": "{count, plural, =1{1 word} other{{count} words}}",
@@ -2245,6 +2261,27 @@
   "film_hintNever": "Won't appear anywhere",
   "@film_hintNever": {
     "description": "Film-pick hint for Leave out (#294)."
+  },
+  "film_alwaysCount": "{count} / {max}",
+  "@film_alwaysCount": {
+    "description": "Always picks so far / the most a film shows, next to IN THE FILM (#432).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "film_hintAlwaysFull": "Up to {max} Always photos",
+  "@film_hintAlwaysFull": {
+    "description": "Film-pick hint when Always is tapped with the film already full (#432).",
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
   },
   "film_leftOutPill": "Left out of the film",
   "@film_leftOutPill": {

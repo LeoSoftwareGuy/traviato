@@ -548,6 +548,10 @@
   "@trip_vibeLabel": {
     "x-review": "pending"
   },
+  "trip_vibesLimit": "Выберите до {count}",
+  "@trip_vibesLimit": {
+    "x-review": "pending"
+  },
   "trip_vibesChosen": "выбрано: {count}",
   "@trip_vibesChosen": {
     "x-review": "pending"
@@ -820,7 +824,7 @@
   "@journal_wrapUpAskNote": {
     "x-review": "pending"
   },
-  "journal_wrapUpReqPhotos": "Пять фото в этом событии",
+  "journal_wrapUpReqPhotos": "{count} фото в этом событии",
   "@journal_wrapUpReqPhotos": {
     "x-review": "pending"
   },
@@ -2454,6 +2458,14 @@
   },
   "film_hintNever": "Не появится нигде",
   "@film_hintNever": {
+    "x-review": "pending"
+  },
+  "film_alwaysCount": "{count} / {max}",
+  "@film_alwaysCount": {
+    "x-review": "pending"
+  },
+  "film_hintAlwaysFull": "Не больше {max} фото «Всегда»",
+  "@film_hintAlwaysFull": {
     "x-review": "pending"
   },
   "film_leftOutPill": "Не войдёт в фильм",

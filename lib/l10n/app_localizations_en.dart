@@ -515,6 +515,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trip_vibeLabel => 'The vibe';
 
   @override
+  String trip_vibesLimit(int count) {
+    return 'Pick up to $count';
+  }
+
+  @override
   String trip_vibesChosen(int count) {
     return '$count chosen';
   }
@@ -801,7 +806,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journal_wrapUpAskNote => 'Write one note to unlock it.';
 
   @override
-  String get journal_wrapUpReqPhotos => 'Five photos in this memory';
+  String journal_wrapUpReqPhotos(int count) {
+    return '$count photos in this memory';
+  }
 
   @override
   String get journal_wrapUpReqNote => 'At least one note written';
@@ -2457,6 +2464,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get film_hintNever => 'Won\'t appear anywhere';
+
+  @override
+  String film_alwaysCount(int count, int max) {
+    return '$count / $max';
+  }
+
+  @override
+  String film_hintAlwaysFull(int max) {
+    return 'Up to $max Always photos';
+  }
 
   @override
   String get film_leftOutPill => 'Left out of the film';

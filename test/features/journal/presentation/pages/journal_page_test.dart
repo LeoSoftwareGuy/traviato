@@ -691,7 +691,7 @@ void main() {
   testWidgets(
     'the View wrap-up button navigates to Wrap-up once unlocked (#94, #103)',
     (tester) async {
-      // Trip has ended and meets the wrap-up content minimum (>=5 photos,
+      // Trip has ended and meets the wrap-up content minimum (>=15 photos,
       // >=1 note, docs/design/M6_MONETIZATION_SPEC.md §3) — see
       // JournalState.wrapUpAvailability.
       final tripRepo = FakeTripRepository()
@@ -700,7 +700,7 @@ void main() {
         );
       final photoRepo = FakePhotoRepository()
         ..photosResult = Right([
-          for (var i = 0; i < 5; i++)
+          for (var i = 0; i < 15; i++)
             buildPhotoEntity(id: 'p$i', dayDate: _today),
         ]);
       final noteRepo = FakeJournalNoteRepository()
@@ -799,7 +799,7 @@ void main() {
       );
       expect(
         find.text(
-          'Your film needs a little more to work with. Add 4 more '
+          'Your film needs a little more to work with. Add 14 more '
           'photos to unlock it.',
         ),
         findsOneWidget,

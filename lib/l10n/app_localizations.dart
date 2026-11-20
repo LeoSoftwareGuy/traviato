@@ -920,6 +920,12 @@ abstract class AppLocalizations {
   /// **'The vibe'**
   String get trip_vibeLabel;
 
+  /// Shown for a moment when a vibe is tapped past the limit (#432).
+  ///
+  /// In en, this message translates to:
+  /// **'Pick up to {count}'**
+  String trip_vibesLimit(int count);
+
   /// No description provided for @trip_vibesChosen.
   ///
   /// In en, this message translates to:
@@ -1331,8 +1337,8 @@ abstract class AppLocalizations {
   /// No description provided for @journal_wrapUpReqPhotos.
   ///
   /// In en, this message translates to:
-  /// **'Five photos in this memory'**
-  String get journal_wrapUpReqPhotos;
+  /// **'{count} photos in this memory'**
+  String journal_wrapUpReqPhotos(int count);
 
   /// No description provided for @journal_wrapUpReqNote.
   ///
@@ -3798,6 +3804,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Won\'t appear anywhere'**
   String get film_hintNever;
+
+  /// Always picks so far / the most a film shows, next to IN THE FILM (#432).
+  ///
+  /// In en, this message translates to:
+  /// **'{count} / {max}'**
+  String film_alwaysCount(int count, int max);
+
+  /// Film-pick hint when Always is tapped with the film already full (#432).
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {max} Always photos'**
+  String film_hintAlwaysFull(int max);
 
   /// Pill over a left-out photo in the photo viewer (#294).
   ///

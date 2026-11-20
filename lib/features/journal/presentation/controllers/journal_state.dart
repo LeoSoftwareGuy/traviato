@@ -4,6 +4,7 @@ import '../../../photo/domain/entities/photo_entity.dart';
 import '../../../photo/domain/photo_order.dart';
 import '../../../quest/domain/entities/quest_entity.dart';
 import '../../../trip/domain/entities/trip_card_entity.dart';
+import '../../../wrap_up/domain/wrap_up_limits.dart';
 import '../../domain/entities/journal_note_entity.dart';
 
 /// Gate on the Journal's "View wrap-up ▸" CTA (#103): wrap-up only makes
@@ -31,10 +32,10 @@ class JournalState extends Equatable {
   });
 
   /// Minimum content required before wrap-up generation is offered — see
-  /// [wrapReady]/[wrapUpAvailability].
-  /// docs/design/M6_MONETIZATION_SPEC.md §3's `wrapReady` formula (#140).
-  static const wrapUpMinPhotos = 5;
-  static const wrapUpMinNotes = 1;
+  /// [wrapReady]/[wrapUpAvailability]. The shared [WrapUpLimits] (#432):
+  /// photos and notes for the whole memory, no per-day rules.
+  static const wrapUpMinPhotos = WrapUpLimits.minPhotos;
+  static const wrapUpMinNotes = WrapUpLimits.minNotes;
 
   final TripCardEntity trip;
   final DateTime? currentDayDate;
