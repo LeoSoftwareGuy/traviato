@@ -276,41 +276,25 @@ Deno.test("the heart: every photo shown, spread to 200; left-out ones never", ()
 
 // --- Always picks get their own moment (#378) -----------------------------
 
-Deno.test("an Always pick must be a hero, a chapter photo or on the carousel", () => {
+Deno.test("Always picks without a slot are no problem: the heart shows them (#433)", () => {
   // p11 is used nowhere, and only 1 photo is left: no carousel page.
   const data = directorTripData();
   data.photos[11].use_in_wrap_up = true;
-  assertEquals(problemsOf(() => {}, data), [
-    `golden_vows: photo "p11" is marked Always but is no hero or chapter photo, and there's no carousel to show it`,
-  ]);
+  assertEquals(problemsOf(() => {}, data), []);
+  const content = buildGoldenVowsContent(data, goldenVowsPlan());
+  assertEquals(content.heart_photo_ids.includes("p11"), true);
 
-  // A hero or a chapter photo is enough.
-  const hero = directorTripData();
-  hero.photos[1].use_in_wrap_up = true;
-  hero.photos[4].use_in_wrap_up = true;
-  assertEquals(problemsOf(() => {}, hero), []);
-
-  // With 7 photos left over, the carousel shows it.
-  assertEquals(
-    problemsOf((p) => p.chapters = p.chapters.slice(0, 1), data),
-    [],
-  );
-});
-
-Deno.test("Always picks past the carousel's 12 need a hero or chapter slot", () => {
-  const data = directorTripData();
-  data.photos = Array.from({ length: 40 }, (_, i) => ({
-    ...data.photos[i % 12],
+  // Past the carousel's 12, too.
+  const many = directorTripData();
+  many.photos = Array.from({ length: 40 }, (_, i) => ({
+    ...many.photos[i % 12],
     id: `a${String(i).padStart(2, "0")}`,
     taken_at: `2026-09-01T10:${String(i).padStart(2, "0")}:00Z`,
     day_date: "2026-09-01",
     use_in_wrap_up: i >= 12 && i < 26 ? true : null, // 14 Always, unused
   }));
-  const plan = goldenVowsPlan(data.photos.map((p) => p.id));
-  const problems = describeGoldenVowsProblems(plan, gvCheckContext(data));
-  assertEquals(problems, [
-    `golden_vows: photo "a24" is marked Always but is no hero or chapter photo, and the carousel is full`,
-  ]);
+  const plan = goldenVowsPlan(many.photos.map((p) => p.id));
+  assertEquals(describeGoldenVowsProblems(plan, gvCheckContext(many)), []);
 });
 
 Deno.test("an Always pick whose analysis failed isn't required", () => {

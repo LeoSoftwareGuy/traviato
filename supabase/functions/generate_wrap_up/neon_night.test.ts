@@ -282,12 +282,10 @@ Deno.test("over 200 photos: an even spread that keeps the named ones", () => {
 
 // --- Always picks get their own moment (#378) -----------------------------
 
-Deno.test("an Always pick must be in a moment (or the Note scene's photo)", () => {
+Deno.test("an Always pick in no moment is no problem: the heart shows it (#433)", () => {
   const data = directorTripData();
   data.photos[11].use_in_wrap_up = true; // in no moment
-  assertEquals(problemsOf(() => {}, data), [
-    `neon_night: photo "p11" is marked Always but is in no moment — put it in a moment of its chapter`,
-  ]);
+  assertEquals(problemsOf(() => {}, data), []);
 
   // As the Note scene's background it's shown.
   assertEquals(

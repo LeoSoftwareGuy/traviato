@@ -16,8 +16,11 @@
 import type { TripData } from "./gather.ts";
 import { sortPhotosChronologically, spreadEvenly } from "./assemble.ts";
 import { decorativePhotos } from "./decorative.ts";
-import { bannedPhraseIn, cleanLine } from "./film_plan.ts";
-import { bestLines } from "./excerpts.ts";
+import { bannedPhraseIn, cleanAiLine } from "./film_plan.ts";
+import { wholeWords } from "./text_fit.ts";
+import { bestLines, lineThemeFor } from "./excerpts.ts";
+import { chosenTemplate } from "./film_template.ts";
+import { WRAP_UP_LIMITS } from "./wrap_up_limits.ts";
 import { onLogicalDays } from "./logical_day.ts";
 
 export const SKY_VERSION = 1;
@@ -468,9 +471,19 @@ export function repairSkyStory(
   for (const raw of sky.pages) {
     if (typeof raw !== "object" || raw === null) continue;
     const page = raw as Record<string, unknown>;
-    if (isString(page.headline)) page.headline = cleanLine(page.headline);
+    // AI lines (#433): banned phrases out, too long → whole words off the
+    // end, else none (the app shows the place or "Day N").
+    if (isString(page.headline)) {
+      page.headline = wholeWords(
+        cleanAiLine(page.headline),
+        MAX_SKY_HEADLINE_CHARS,
+      );
+    }
     if (isString(page.sky_line)) {
-      page.sky_line = cleanLine(page.sky_line) || null;
+      page.sky_line = wholeWords(
+        cleanAiLine(page.sky_line),
+        MAX_SKY_LINE_CHARS,
+      );
     }
     if (Array.isArray(page.extra_photo_ids)) {
       page.extra_photo_ids = page.extra_photo_ids
@@ -868,6 +881,7 @@ export function buildSkyContent(
     if (!page.note) page.note_id = null;
   }
   addSkyExcerpts(tripData, pages);
+  capSkyLines(pages);
   // The balloon is decoration: Always picks already have their page, so
   // it's made from the other photos (#378).
   const mosaic = decorativePhotos(
@@ -897,6 +911,8 @@ export const SKY_LINES_PER_PAGE = 2;
 // none keeps its fallback. Runs without a note page (the director wrote on
 // the sky instead) get none.
 function addSkyExcerpts(tripData: TripData, pages: SkyPageContent[]): void {
+  // Lines that match the memory's vibe come right after feelings (#433).
+  const theme = lineThemeFor(chosenTemplate(tripData.trip.vibes));
   const start = tripData.trip.start_date;
   const ms = (iso: string | null | undefined) => iso ? Date.parse(iso) : NaN;
   const noteTime = (n: TripData["notes"][number]) =>
@@ -953,10 +969,29 @@ function addSkyExcerpts(tripData: TripData, pages: SkyPageContent[]): void {
       page.excerpts = bestLines(
         byPage[k].map((n) => ({ id: n.id!, content: n.content })),
         SKY_LINES_PER_PAGE,
+        undefined,
+        theme,
       ).filter((l) => !shown.has(l.text))
         .map(({ note_id, text }) => ({ note_id, text }));
       for (const l of page.excerpts) shown.add(l.text);
     });
+  }
+}
+
+// At most WRAP_UP_LIMITS.maxNoteLines lines over all pages (#433): the
+// last pages give theirs up first.
+function capSkyLines(pages: SkyPageContent[]): void {
+  let total = pages.reduce((n, p) => n + (p.excerpts?.length ?? 0), 0);
+  for (
+    let k = pages.length - 1;
+    k >= 0 && total > WRAP_UP_LIMITS.maxNoteLines;
+    k--
+  ) {
+    const page = pages[k];
+    while (page.excerpts?.length && total > WRAP_UP_LIMITS.maxNoteLines) {
+      page.excerpts.pop();
+      total--;
+    }
   }
 }
 

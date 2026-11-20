@@ -1,12 +1,11 @@
 // Neon Night (#363, phase 9): the beat-synced party film, stored as
 // wrap_ups.content.neon_night next to everything the other films read.
 //
-// Only the director makes one: its `neon_night` section, emitted for a
-// party, a rave, a club night, a festival, a concert or any night out,
-// validated here against the memory as it is now. There is no code-built
-// Neon Night — no section (another occasion, the director off or failed, a
-// section still invalid after its retry, one that no longer fits) means
-// the next film plays instead.
+// A memory whose vibes choose Neon Night (#433) always plays it: the
+// director's `neon_night` section, repaired here against the memory as it
+// is now — and when nothing of it can be kept (no section, the director
+// off or failed, a section still broken after repair), a plan code builds
+// for the same film ([codeNeonNight]). Never another template.
 //
 // The director picks: where each chapter starts (its first photo — every
 // photo of the night falls into a chapter, so new photos join one on their
@@ -19,7 +18,11 @@
 import type { TripData } from "./gather.ts";
 import { sortPhotosChronologically, spreadEvenly } from "./assemble.ts";
 import { decorativePhotos } from "./decorative.ts";
-import { bannedPhraseIn, cleanLine } from "./film_plan.ts";
+import { bannedPhraseIn, cleanAiLine, cleanLine } from "./film_plan.ts";
+import type { WrapUpLanguage } from "./language.ts";
+import { WRAP_UP_LIMITS } from "./wrap_up_limits.ts";
+import { wholeWords } from "./text_fit.ts";
+export { wholeWords };
 import { isExcerptOf } from "./golden_vows.ts";
 import { firstNameOf } from "./sky_story.ts";
 import { tripLogicalDays } from "./logical_day.ts";
@@ -95,7 +98,7 @@ export interface NeonNightExcerptPlan {
 
 // Excerpts a chapter carries (#398 R3).
 export const MIN_NN_EXCERPTS = 2;
-export const MAX_NN_EXCERPTS = 4;
+export const MAX_NN_EXCERPTS = 3;
 
 export interface NeonNightPlan {
   chapters: NeonNightChapterPlan[];
@@ -190,7 +193,7 @@ const excerptDescription = (max: number) =>
 export const neonNightToolProperty = {
   type: ["object", "null"],
   description:
-    "The Neon Night film: a loud, beat-synced neon party film. Only for a party, a rave, a club night, a festival, a concert or another night out; null for every other memory.",
+    "The Neon Night film: a loud, beat-synced neon party film for this memory's night.",
   properties: {
     chapters: {
       type: "array",
@@ -279,11 +282,8 @@ export const neonNightToolProperty = {
 } as const;
 
 export const NEON_NIGHT_PROMPT_RULES = [
-  "\n\nneon_night — a fourth film, a loud neon party film. Fill it only ",
-  "when the memory is a party, a rave, a club night, a festival, a concert ",
-  "or another night out (from its name, vibes, notes and photos); ",
-  "otherwise null. When unsure, null. Never fill both golden_vows and ",
-  "neon_night.\n",
+  "\n\nneon_night — a loud neon party film, chosen for this memory from ",
+  "its vibes (#433). Always fill it.\n",
   "- Strict chronology: everything plays in time order. Photos are listed ",
   "in time order; a moment's photos and a chapter's moments follow it, and ",
   "no scene shows a photo older than the scene before.\n",
@@ -369,11 +369,42 @@ function dayStarts(
   return starts;
 }
 
+// A day needs this many photos for a chapter of its own (#433): fewer
+// can't make a moment, so the day joins its neighbour instead of the film
+// failing.
+export const MIN_NN_DAY_PHOTOS = 2;
+
+// [days] with each day of fewer than MIN_NN_DAY_PHOTOS photos joined to
+// the day before (the first one to the day after). [total] is the photo
+// count, where the last day ends.
+function mergeSmallDays(
+  days: { day: string; start: number }[],
+  total: number,
+): { day: string; start: number }[] {
+  const out = [...days];
+  for (let k = 0; k < out.length && out.length > 1;) {
+    const end = out[k + 1]?.start ?? total;
+    if (end - out[k].start >= MIN_NN_DAY_PHOTOS) {
+      k++;
+      continue;
+    }
+    if (k === 0) {
+      out.splice(1, 1);
+    } else {
+      out.splice(k, 1);
+    }
+  }
+  return out;
+}
+
 // Where the chapters of a several-day memory must start (#398 R1): each
 // day's first photo, neighbouring days grouped evenly when there are more
 // than MAX_NN_CHAPTERS. Empty for a single day: the director splits it.
 export function dayChapterStarts(context: NnCheckContext): number[] {
-  const days = dayStarts(context.photoOrder, context.photoDays);
+  const days = mergeSmallDays(
+    dayStarts(context.photoOrder, context.photoDays),
+    context.photoOrder.size,
+  );
   if (days.length <= 1) return [];
   if (days.length <= MAX_NN_CHAPTERS) return days.map((d) => d.start);
   const starts: number[] = [];
@@ -472,27 +503,6 @@ export function nnCheckContext(
       ]),
     ),
   };
-}
-
-// The photos a section gives a moment of their own: every moment's, and
-// the Note scene's background.
-function momentPhotoIds(nn: Record<string, unknown>): Set<string> {
-  const ids = new Set<string>();
-  if (Array.isArray(nn.chapters)) {
-    for (const chapter of nn.chapters) {
-      const moments = (chapter as Record<string, unknown> | null)?.moments;
-      if (!Array.isArray(moments)) continue;
-      for (const moment of moments) {
-        const photos = (moment as Record<string, unknown> | null)?.photo_ids;
-        if (Array.isArray(photos)) {
-          for (const id of photos) if (isString(id)) ids.add(id);
-        }
-      }
-    }
-  }
-  const note = nn.note_moment as Record<string, unknown> | null | undefined;
-  if (note && isString(note.photo_id)) ids.add(note.photo_id);
-  return ids;
 }
 
 function checkLine(
@@ -792,21 +802,8 @@ export function describeNeonNightProblems(
     }
   }
 
-  // Every Always pick in a moment (#378), unless the moments are full of
-  // them.
-  const inMoments = momentPhotoIds(nn);
-  const always = [...context.mustIncludeIds];
-  const missing = always.filter((id) => !inMoments.has(id));
-  if (
-    missing.length > 0 &&
-    always.length - missing.length < MAX_NN_MOMENT_SLOTS
-  ) {
-    problems.push(
-      `neon_night: photo "${
-        missing[0]
-      }" is marked Always but is in no moment — put it in a moment of its chapter`,
-    );
-  }
+  // Always picks without a moment aren't a problem (#433): the Finale's
+  // heart shows every one that found none.
   return problems;
 }
 
@@ -907,7 +904,7 @@ export function repairNeonNight(
   if (nn.note_moment === undefined) nn.note_moment = null;
 
   if (isString(nn.headline)) {
-    nn.headline = cleanLine(nn.headline) || null;
+    nn.headline = cleanAiLine(nn.headline) || null;
     if (isString(nn.headline) && isSensitive(nn.headline)) nn.headline = null;
     // Too long: whole words off its end, else none — the headline is
     // optional, never a reason to lose the film (#428).
@@ -997,7 +994,7 @@ function splitByDays(
     usedTitles.add(title);
     const moments = old.flatMap((c) =>
       Array.isArray(c.moments) ? c.moments as Record<string, unknown>[] : []
-    ).map((m) => ({
+    ).filter((m) => typeof m === "object" && m !== null).map((m) => ({
       ...m,
       photo_ids: (Array.isArray(m.photo_ids) ? m.photo_ids : []).filter((
         id,
@@ -1007,10 +1004,13 @@ function splitByDays(
       }),
     })).filter((m) => (m.photo_ids as unknown[]).length > 0);
     const excerpts = old.flatMap((c) =>
-      (c.excerpts as NeonNightExcerptPlan[] ?? []).filter((e) => {
-        const at = e.photo_id ? context.photoOrder.get(e.photo_id) : undefined;
-        return at !== undefined ? groupOf(at) === g : c === base;
-      })
+      (Array.isArray(c.excerpts) ? c.excerpts as NeonNightExcerptPlan[] : [])
+        .filter((e) => {
+          const at = e.photo_id
+            ? context.photoOrder.get(e.photo_id)
+            : undefined;
+          return at !== undefined ? groupOf(at) === g : c === base;
+        })
     );
     return {
       ...base,
@@ -1024,18 +1024,6 @@ function splitByDays(
   });
 }
 
-// [text] within [max] characters (#428): as it is, else with whole words
-// dropped from its end (and any dangling punctuation), keeping at least
-// two words; else null. Never cut inside a word.
-export function wholeWords(text: string, max: number): string | null {
-  const trimmed = text.trim();
-  if ([...trimmed].length <= max) return trimmed || null;
-  const words = trimmed.split(/\s+/u);
-  while (words.length > 2 && [...words.join(" ")].length > max) words.pop();
-  const out = words.join(" ").replace(/[\s,;:—–·.-]+$/u, "");
-  return words.length >= 2 && [...out].length <= max ? out : null;
-}
-
 // Every chapter keeps a title that fits (#426): one over
 // MAX_NN_TITLE_CHARS loses whole words from its end (never cut inside a
 // word) — rather than the whole film falling back for one character; a
@@ -1047,7 +1035,7 @@ function fitTitles(chapters: unknown[], context: NnCheckContext): void {
   for (const raw of chapters) {
     if (typeof raw !== "object" || raw === null) continue;
     const chapter = raw as Record<string, unknown>;
-    let title = isString(chapter.title) ? chapter.title.trim() : "";
+    let title = isString(chapter.title) ? cleanAiLine(chapter.title) : "";
     title = wholeWords(title, MAX_NN_TITLE_CHARS) ?? "";
     if (title && isSensitive(title)) title = "";
     if (!title && isString(chapter.first_photo_id)) {
@@ -1295,6 +1283,189 @@ function repairMoments(
     }
     chapter.moments = moments;
   });
+}
+
+// --- The chosen film always plays (#433) --------------------------------
+
+// A single night's chapters, when code plans it: parts split at the
+// longest breaks of NN_PART_GAP_MS or more, each keeping at least this
+// many photos, up to this many chapters.
+const CODE_NN_PART_PHOTOS = 8; // MIN_NN_CHAPTER_PHOTOS
+const CODE_NN_MAX_PARTS = 3;
+
+// A chapter of at least this many photos gets two moments: a burst, then
+// a timeline.
+const CODE_NN_TWO_MOMENTS = 10;
+
+const CODE_NN_TITLES: Record<WrapUpLanguage, { day: string; part: string }> = {
+  en: { day: "Day", part: "Part" },
+  ru: { day: "День", part: "Часть" },
+};
+
+// Where a single night's chapters start when code plans it.
+function singleNightStarts(context: NnCheckContext, ordered: string[]) {
+  const times = context.photoTimes;
+  const gaps: { at: number; gap: number }[] = [];
+  for (let k = 1; k < ordered.length && times; k++) {
+    const a = times.get(ordered[k - 1]);
+    const b = times.get(ordered[k]);
+    if (a !== undefined && b !== undefined && b - a >= NN_PART_GAP_MS) {
+      gaps.push({ at: k, gap: b - a });
+    }
+  }
+  gaps.sort((x, y) => y.gap - x.gap || x.at - y.at);
+  const starts = [0];
+  for (const { at } of gaps) {
+    if (starts.length >= CODE_NN_MAX_PARTS) break;
+    const sorted = [...starts].sort((x, y) => x - y);
+    const from = [...sorted].reverse().find((x) => x < at)!;
+    const to = sorted.find((x) => x > at) ?? ordered.length;
+    if (at - from >= CODE_NN_PART_PHOTOS && to - at >= CODE_NN_PART_PHOTOS) {
+      starts.push(at);
+    }
+  }
+  return starts.sort((x, y) => x - y);
+}
+
+// The memory's best line of all for the Note scene: specific, nothing
+// sensitive, short enough to write out in neon. Null when none fits.
+function codeNoteMoment(
+  context: NnCheckContext,
+): NeonNightPlan["note_moment"] {
+  let best: { note_id: string; excerpt: string; score: number } | null = null;
+  for (const [noteId, content] of context.notes) {
+    for (const text of excerptCandidates(content)) {
+      if (
+        [...text].length > MAX_NN_NOTE_CHARS || isSensitive(text) ||
+        !isExcerptOf(text, content)
+      ) continue;
+      const score = excerptScore(text, "night");
+      if (score < SPECIFIC_SCORE) continue;
+      if (!best || score > best.score) {
+        best = { note_id: noteId, excerpt: text, score };
+      }
+    }
+  }
+  return best
+    ? { note_id: best.note_id, excerpt: best.excerpt, photo_id: null }
+    : null;
+}
+
+// A Neon Night plan built by code alone (#433), for when the director's
+// can't be used: one chapter per part of the memory (each logical day or
+// stretch of the night), titled by its place, else its first photo's
+// time, else "Day N"; a burst and a timeline from its photos (one
+// timeline for a small chapter); the note scene from the best line of the
+// notes; no headline. The content picks the chapters' lines as it always
+// does. Valid by construction for any memory with 2 or more photos.
+export function codeNeonNight(
+  context: NnCheckContext,
+  language: WrapUpLanguage,
+): NeonNightPlan {
+  const ordered = [...context.photoOrder.entries()].sort((a, b) => a[1] - b[1])
+    .map(([id]) => id).filter((id) => !context.excludedIds.has(id));
+  const required = nnChapterStarts(context);
+  const starts = required.length > 0
+    ? required
+    : singleNightStarts(context, ordered);
+  const words = CODE_NN_TITLES[language];
+  const usedTitles = new Set<string>();
+  const chapters: NeonNightChapterPlan[] = starts.map((start, g) => {
+    const end = starts[g + 1] ?? ordered.length;
+    const photos = ordered.slice(start, end);
+    let title = placeOf(photos, context) ?? clockTitle(photos[0], context) ??
+      `${required.length > 0 ? words.day : words.part} ${g + 1}`;
+    if (usedTitles.has(title) || isSensitive(title)) {
+      title = wholeWords(`${title} ${g + 1}`, MAX_NN_TITLE_CHARS) ??
+        `${words.part} ${g + 1}`;
+    }
+    usedTitles.add(title);
+    const moments: NeonNightChapterPlan["moments"] = [];
+    if (photos.length >= CODE_NN_TWO_MOMENTS) {
+      const half = Math.floor(photos.length / 2);
+      moments.push({
+        type: "burst",
+        photo_ids: spreadEvenly(
+          photos.slice(0, half),
+          NN_MOMENT_PHOTOS.burst[1],
+        ),
+      });
+      moments.push({
+        type: "timeline",
+        photo_ids: spreadEvenly(
+          photos.slice(half),
+          NN_MOMENT_PHOTOS.timeline[1],
+        ),
+      });
+    } else if (photos.length >= NN_MOMENT_PHOTOS.timeline[0]) {
+      moments.push({
+        type: "timeline",
+        photo_ids: spreadEvenly(photos, NN_MOMENT_PHOTOS.timeline[1]),
+      });
+    }
+    return {
+      title,
+      first_photo_id: ordered[start],
+      note_id: null,
+      note_excerpt: null,
+      moments,
+      excerpts: [],
+    };
+  });
+  return { chapters, note_moment: codeNoteMoment(context), headline: null };
+}
+
+export interface EnsuredSection<T> {
+  plan: T;
+  // director: the director's section, repaired; code: built by code.
+  source: "director" | "code";
+  // What was wrong and put right, for the Plan inspector.
+  repairs: string[];
+}
+
+// The Neon Night this memory plays (#433): the director's section with
+// everything code can fix fixed — and when it still breaks a rule (or
+// there's none), the code-built plan. Never null, never another film.
+export function ensureNeonNight(
+  raw: unknown,
+  context: NnCheckContext,
+  language: WrapUpLanguage,
+): EnsuredSection<NeonNightPlan> {
+  if (typeof raw === "object" && raw !== null && !Array.isArray(raw)) {
+    let before: string[];
+    let repaired: unknown;
+    let after: string[];
+    try {
+      before = describeNeonNightProblems(raw, context);
+      repaired = repairNeonNight(raw, context);
+      after = describeNeonNightProblems(repaired, context);
+    } catch (err) {
+      // Repair never throws by design; if it ever does, the film still
+      // plays — code's plan.
+      before = [];
+      after = [`repair failed: ${(err as Error).message}`];
+    }
+    if (after.length === 0) {
+      return {
+        plan: repaired as NeonNightPlan,
+        source: "director",
+        repairs: before.map((p) => `repaired: ${p}`),
+      };
+    }
+    return {
+      plan: codeNeonNight(context, language),
+      source: "code",
+      repairs: [
+        ...after.map((p) => `couldn't repair: ${p}`),
+        "code built the plan",
+      ],
+    };
+  }
+  return {
+    plan: codeNeonNight(context, language),
+    source: "code",
+    repairs: ["no director section: code built the plan"],
+  };
 }
 
 // --- Building content.neon_night -----------------------------------------
@@ -1606,7 +1777,7 @@ export function pickExcerpts(
   }
   const used = new Set<string>();
 
-  return chapters.map((chapter, i) => {
+  const picked = chapters.map((chapter, i) => {
     const own = notes.filter((n) => owner.get(n.id!) === i);
     const nearest = (n: TripData["notes"][number]): string | null => {
       if (chapter.photos.some((p) => p.id === n.photo_id)) return n.photo_id!;
@@ -1626,7 +1797,7 @@ export function pickExcerpts(
         note: n,
         text,
         k,
-        score: excerptScore(text),
+        score: excerptScore(text, "night"),
       }))
     ).filter((c) => !isSensitive(c.text) && !used.has(c.text));
     const specificLeft = () =>
@@ -1647,7 +1818,7 @@ export function pickExcerpts(
         note_id: note.id!,
         photo_id: photoOk ? photo : nearest(note),
         source,
-        score: excerptScore(text),
+        score: excerptScore(text, "night"),
         at: noteTime(note),
         k,
       });
@@ -1681,6 +1852,26 @@ export function pickExcerpts(
       rejected,
     };
   });
+  capLines(picked);
+  return picked;
+}
+
+// At most WRAP_UP_LIMITS.maxNoteLines lines in the whole film (#433): the
+// lowest-scoring go first, from the chapter with the most lines, so each
+// chapter keeps its best.
+function capLines(picked: PickedLines[]): void {
+  const total = () => picked.reduce((n, p) => n + p.excerpts.length, 0);
+  while (total() > WRAP_UP_LIMITS.maxNoteLines) {
+    const most = picked.reduce((a, b) =>
+      b.excerpts.length > a.excerpts.length ? b : a
+    );
+    let worst = 0;
+    most.excerpts.forEach((e, k) => {
+      if (e.score < most.excerpts[worst].score) worst = k;
+    });
+    const [gone] = most.excerpts.splice(worst, 1);
+    most.rejected.unshift({ text: gone.text, score: gone.score });
+  }
 }
 
 // content.neon_night from a valid, current [plan].

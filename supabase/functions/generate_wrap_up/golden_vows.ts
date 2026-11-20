@@ -1,12 +1,12 @@
 // Golden Vows (#346, phase 7): the wedding-album film, stored as
 // wrap_ups.content.golden_vows next to everything the other films read.
 //
-// Only the director makes one: its `golden_vows` section, emitted for a
-// wedding, an engagement, an anniversary or a date night, validated here
-// against the memory as it is now. There is no code-built Golden Vows —
-// no section (another occasion, the director off or failed, a section
-// still invalid after its retry, one that no longer fits) means Sky Story
-// plays instead.
+// A memory whose vibes choose Golden Vows (#433) always plays it: the
+// director's `golden_vows` section, repaired here against the memory as
+// it is now — and when nothing of it can be kept, a plan code builds for
+// the same film ([codeGoldenVows]). Wedding words only when the photos or
+// notes show a wedding; otherwise the `romance` occasion and neutral
+// romantic lines. Never another template.
 //
 // What code fills in, never the AI: the packing card (the user's own
 // checked checklist items, else their planned quests), every note (the
@@ -22,7 +22,9 @@ import {
   spreadEvenly,
 } from "./assemble.ts";
 import { decorativePhotos } from "./decorative.ts";
-import { bannedPhraseIn, cleanLine } from "./film_plan.ts";
+import { bannedPhraseIn, cleanAiLine, cleanLine } from "./film_plan.ts";
+import type { WrapUpLanguage } from "./language.ts";
+import { wholeWords } from "./text_fit.ts";
 
 export const GV_VERSION = 1;
 
@@ -31,6 +33,9 @@ export const GV_OCCASIONS = [
   "engagement",
   "anniversary",
   "date_night",
+  // A romantic memory that isn't a wedding (#433): no vows, no wedding
+  // words.
+  "romance",
 ] as const;
 export type GvOccasion = typeof GV_OCCASIONS[number];
 
@@ -140,7 +145,7 @@ const lineProperty = (description: string) => ({
 export const goldenVowsToolProperty = {
   type: ["object", "null"],
   description:
-    "The Golden Vows film: an ivory-and-gold wedding album. Only for a wedding, an engagement, an anniversary or a date night; null for every other memory.",
+    "The Golden Vows film: an ivory-and-gold album for a romantic memory — a wedding only when the photos or notes show one.",
   properties: {
     occasion: { type: "string", enum: [...GV_OCCASIONS] },
     occasion_line: lineProperty(
@@ -218,10 +223,8 @@ export const goldenVowsToolProperty = {
 } as const;
 
 export const GOLDEN_VOWS_PROMPT_RULES = [
-  "\n\ngolden_vows — a third film, an elegant wedding album. Fill it only ",
-  "when the memory is a wedding, an engagement, an anniversary or a date ",
-  "night (from its name, vibes, notes and photos); otherwise null. When ",
-  "unsure, null.\n",
+  "\n\ngolden_vows — an elegant ivory-and-gold album, chosen for this ",
+  "memory from its vibes (#433). Always fill it.\n",
   `- heroes: ${MIN_GV_HEROES}–${MAX_GV_HEROES} of the most moving, sharp `,
   "photos (hero_score ≥ 3), in the order they best tell the day. label ",
   'names the moment ("The vows", "First dance").\n',
@@ -480,33 +483,8 @@ export function describeGoldenVowsProblems(
     }
   }
 
-  // Every Always pick a hero, a chapter photo or in the carousel (#378).
-  // The carousel takes leftover Always picks first, up to MAX_GV_CAROUSEL,
-  // and only plays with MIN_GV_CAROUSEL or more photos left over. Only
-  // once every slot holds an Always pick may the rest go without one.
-  const always = [...context.mustIncludeIds];
-  const leftoverAlways = always.filter((id) => !used.has(id));
-  if (leftoverAlways.length > 0) {
-    const leftover = [...context.photoOrder.keys()].filter((id) =>
-      !used.has(id)
-    );
-    const carouselOn = carousel !== null && carousel !== undefined &&
-      leftover.length >= MIN_GV_CAROUSEL;
-    const inCarousel = carouselOn
-      ? Math.min(leftoverAlways.length, MAX_GV_CAROUSEL)
-      : 0;
-    const shown = always.length - leftoverAlways.length + inCarousel;
-    const slots = MAX_GV_HEROES + MAX_GV_CHAPTERS * GV_CHAPTER_PHOTOS +
-      MAX_GV_CAROUSEL;
-    if (inCarousel < leftoverAlways.length && shown < slots) {
-      const id = leftoverAlways[inCarousel];
-      problems.push(
-        carouselOn
-          ? `golden_vows: photo "${id}" is marked Always but is no hero or chapter photo, and the carousel is full`
-          : `golden_vows: photo "${id}" is marked Always but is no hero or chapter photo, and there's no carousel to show it`,
-      );
-    }
-  }
+  // Always picks without a hero, chapter or carousel slot aren't a
+  // problem (#433): the heart shows every one of them.
   return problems;
 }
 
@@ -530,14 +508,14 @@ export function repairGoldenVows(
   }
   const gv = structuredClone(data) as Record<string, unknown>;
   for (const key of ["occasion_line", "end_line"]) {
-    if (isString(gv[key])) gv[key] = cleanLine(gv[key] as string);
+    if (isString(gv[key])) gv[key] = cleanAiLine(gv[key] as string);
   }
   if (Array.isArray(gv.heroes)) {
     gv.heroes = gv.heroes.slice(0, MAX_GV_HEROES);
     for (const raw of gv.heroes as unknown[]) {
       if (typeof raw !== "object" || raw === null) continue;
       const hero = raw as Record<string, unknown>;
-      if (isString(hero.label)) hero.label = cleanLine(hero.label);
+      if (isString(hero.label)) hero.label = cleanAiLine(hero.label);
       hero.note_id = hero.note_id ?? null;
       hero.note_excerpt = hero.note_excerpt ?? null;
       const note = isString(hero.note_id)
@@ -677,6 +655,205 @@ export function healGoldenVows(
   return repairGoldenVows(gv, context);
 }
 
+// --- The chosen film always plays (#433) --------------------------------
+
+// The lines code writes when it plans the album, or when the director's
+// line can't be made to fit: warm, neutral, no wedding words.
+const GV_CODE_LINES: Record<WrapUpLanguage, {
+  occasion: string;
+  labels: string[];
+  titles: string[];
+  lines: string[];
+  carousel: { title: string; line: string };
+  end: string;
+}> = {
+  en: {
+    occasion: "Just us",
+    labels: ["Just us", "Together", "Our moment", "Close", "Smiles", "Us"],
+    titles: ["The beginning", "Together", "The best part", "The last light"],
+    lines: ["Chapter one", "Chapter two", "Chapter three", "Chapter four"],
+    carousel: { title: "More of us", line: "Every little moment" },
+    end: "Ours, always",
+  },
+  ru: {
+    occasion: "Только мы",
+    labels: ["Только мы", "Вместе", "Наш момент", "Рядом", "Улыбки", "Мы"],
+    titles: ["Начало", "Вместе", "Самое лучшее", "Последний свет"],
+    lines: ["Глава первая", "Глава вторая", "Глава третья", "Глава четвёртая"],
+    carousel: { title: "Ещё о нас", line: "Каждый маленький момент" },
+    end: "Наше, навсегда",
+  },
+};
+
+// [line] as an AI line that fits [max] (banned phrases out, whole words
+// off its end), else [fallback].
+function fitLine(line: unknown, max: number, fallback: string): string {
+  if (!isString(line)) return fallback;
+  const fitted = wholeWords(cleanAiLine(line), max);
+  return fitted && !bannedPhraseIn(fitted) ? fitted : fallback;
+}
+
+// Every AI-written line of [gv] made to fit (#433): too long → whole words
+// off its end; missing, empty or still too long → code's line. Never
+// touches the user's words (hero excerpts are checked against the notes).
+function fitGoldenVowsLines(
+  gv: Record<string, unknown>,
+  language: WrapUpLanguage,
+): void {
+  const words = GV_CODE_LINES[language];
+  if (!GV_OCCASIONS.includes(gv.occasion as GvOccasion)) {
+    gv.occasion = "romance";
+  }
+  gv.occasion_line = fitLine(
+    gv.occasion_line,
+    MAX_GV_OCCASION_CHARS,
+    words.occasion,
+  );
+  gv.end_line = fitLine(gv.end_line, MAX_GV_END_CHARS, words.end);
+  if (Array.isArray(gv.heroes)) {
+    (gv.heroes as unknown[]).forEach((raw, i) => {
+      if (typeof raw !== "object" || raw === null) return;
+      const hero = raw as Record<string, unknown>;
+      hero.label = fitLine(
+        hero.label,
+        MAX_GV_LABEL_CHARS,
+        words.labels[i % words.labels.length],
+      );
+    });
+  }
+  if (Array.isArray(gv.chapters)) {
+    (gv.chapters as unknown[]).forEach((raw, i) => {
+      if (typeof raw !== "object" || raw === null) return;
+      const chapter = raw as Record<string, unknown>;
+      chapter.title = fitLine(
+        chapter.title,
+        MAX_GV_TITLE_CHARS,
+        words.titles[i % words.titles.length],
+      );
+      chapter.line = fitLine(
+        chapter.line,
+        MAX_GV_LINE_CHARS,
+        words.lines[i % words.lines.length],
+      );
+    });
+  }
+  if (typeof gv.carousel === "object" && gv.carousel !== null) {
+    const c = gv.carousel as Record<string, unknown>;
+    c.title = fitLine(c.title, MAX_GV_TITLE_CHARS, words.carousel.title);
+    c.line = fitLine(c.line, MAX_GV_LINE_CHARS, words.carousel.line);
+  }
+}
+
+// A Golden Vows plan built by code alone (#433): the `romance` occasion
+// and code's neutral lines; heroes spread over the memory (2–4, Always
+// picks first); chapters of 3 photos in time order from the rest (1–4);
+// a carousel when 6 or more photos are left. The content adds the notes
+// (captions, else the day's best line) as it always does. Valid by
+// construction for any memory with 5 or more photos.
+export function codeGoldenVows(
+  context: GvCheckContext,
+  language: WrapUpLanguage,
+): GoldenVowsPlan {
+  const words = GV_CODE_LINES[language];
+  const ordered = [...context.photoOrder.entries()].sort((a, b) => a[1] - b[1])
+    .map(([id]) => id).filter((id) => !context.excludedIds.has(id));
+  const heroCount = Math.max(
+    MIN_GV_HEROES,
+    Math.min(4, Math.floor(ordered.length / 8)),
+  );
+  const always = ordered.filter((id) => context.mustIncludeIds.has(id));
+  const heroIds = [
+    ...spreadEvenly(always, heroCount),
+    ...spreadEvenly(
+      ordered.filter((id) => !context.mustIncludeIds.has(id)),
+      heroCount,
+    ),
+  ].slice(0, heroCount);
+  const rest = ordered.filter((id) => !heroIds.includes(id));
+  const chapterCount = Math.max(
+    MIN_GV_CHAPTERS,
+    Math.min(MAX_GV_CHAPTERS, Math.floor(rest.length / 6)),
+  );
+  const chapters: GoldenVowsChapterPlan[] = [];
+  for (let c = 0; c < chapterCount; c++) {
+    const from = Math.floor(c * rest.length / chapterCount);
+    const to = Math.floor((c + 1) * rest.length / chapterCount);
+    const ids = spreadEvenly(rest.slice(from, to), GV_CHAPTER_PHOTOS);
+    if (ids.length < GV_CHAPTER_PHOTOS) break;
+    chapters.push({
+      title: words.titles[c],
+      line: words.lines[c],
+      photo_ids: ids,
+    });
+  }
+  const left = rest.length - chapters.length * GV_CHAPTER_PHOTOS;
+  return {
+    occasion: "romance",
+    occasion_line: words.occasion,
+    heroes: heroIds.map((id, i) => ({
+      photo_id: id,
+      label: words.labels[i % words.labels.length],
+      note_id: null,
+      note_excerpt: null,
+    })),
+    chapters,
+    carousel: left >= MIN_GV_CAROUSEL ? { ...words.carousel } : null,
+    end_line: words.end,
+  };
+}
+
+export interface EnsuredGoldenVows {
+  plan: GoldenVowsPlan;
+  source: "director" | "code";
+  repairs: string[];
+}
+
+// The Golden Vows this memory plays (#433): the director's section with
+// everything code can fix fixed, else the code-built plan. Never null,
+// never another film.
+export function ensureGoldenVows(
+  raw: unknown,
+  context: GvCheckContext,
+  language: WrapUpLanguage,
+): EnsuredGoldenVows {
+  if (typeof raw === "object" && raw !== null && !Array.isArray(raw)) {
+    let before: string[];
+    let repaired: Record<string, unknown> = {};
+    let after: string[];
+    try {
+      before = describeGoldenVowsProblems(raw, context);
+      repaired = repairGoldenVows(raw, context) as Record<string, unknown>;
+      fitGoldenVowsLines(repaired, language);
+      after = describeGoldenVowsProblems(repaired, context);
+    } catch (err) {
+      // Repair never throws by design; if it ever does, the film still
+      // plays — code's plan.
+      before = [];
+      after = [`repair failed: ${(err as Error).message}`];
+    }
+    if (after.length === 0) {
+      return {
+        plan: repaired as unknown as GoldenVowsPlan,
+        source: "director",
+        repairs: before.map((p) => `repaired: ${p}`),
+      };
+    }
+    return {
+      plan: codeGoldenVows(context, language),
+      source: "code",
+      repairs: [
+        ...after.map((p) => `couldn't repair: ${p}`),
+        "code built the plan",
+      ],
+    };
+  }
+  return {
+    plan: codeGoldenVows(context, language),
+    source: "code",
+    repairs: ["no director section: code built the plan"],
+  };
+}
+
 // --- Building content.golden_vows ----------------------------------------
 
 // The chapter's layout from its photos' orientations: a landscape first →
@@ -775,6 +952,7 @@ function fillHeroLines(
         source.map((n) => ({ id: n.id!, content: n.content })),
         8,
         MAX_GV_HERO_LINE_CHARS,
+        "romance",
       ).filter((l) => !shown.has(collapse(l.text)))
         .sort((a, b) => b.score - a.score)[0];
       if (line) {
