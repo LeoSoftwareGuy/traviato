@@ -359,8 +359,8 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   ~4 s, and a longer caption is never zoomed: its photo plays in a
   moment, which holds it for its reading time. The time shows only for
   a photo without a caption. When a moment can't hold all its photos (a timeline
-  shows 8), the lowest-rated go to the heart — Always picks and the
-  best hero scores stay, wherever they fall in time (#446). A card's
+  shows 8), the lowest-rated go to the heart — Always picks, then captioned
+  photos, then the best hero scores stay, wherever they fall in time (#446). A card's
   time range is its own photos'. Director lines that differ only in
   case, spacing, punctuation or ё/е take the note's exact words; a line
   plays over its own photo (brought into a moment); the Note scene

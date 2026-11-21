@@ -306,6 +306,17 @@ Deno.test("a full moment keeps its best photos: the heart gets the lowest-rated 
     "p9",
     "p10",
   ]);
+  // A caption ranks above a better shot: the user's own words stay.
+  const captioned = photos.map((p) =>
+    p.id === "p1" ? { ...p, caption: "Lost Anna at the bar" } : p
+  );
+  const withCaption = momentFor(captioned, scores).photo_ids;
+  assert(withCaption.includes("p1"), "the captioned photo stays");
+  assert(withCaption.includes("p10"), "the laser shot stays");
+  assert(
+    !withCaption.includes("p4") && !withCaption.includes("p7"),
+    "the lowest-rated uncaptioned ones go",
+  );
   // Without scores: an even spread, as before.
   assertEquals(momentFor(photos).photo_ids.length, 8);
 });

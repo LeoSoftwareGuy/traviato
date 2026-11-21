@@ -1576,9 +1576,10 @@ function timeOf(p: Photo): number {
 }
 
 // The moment [photos] (time order, 3 or more) play as (#444). Past a
-// timeline's 8, the best photos stay (#446) — Always picks, then the
-// highest [heroScores], then captioned ones, an even spread breaking ties
-// — so the heart gets the lowest-rated, never just the last in time.
+// timeline's 8, the best photos stay (#446) — Always picks, then captioned
+// ones (the user's own words, as the zooms rank them), then the highest
+// [heroScores], an even spread breaking ties — so the heart gets the
+// lowest-rated, never just the last in time.
 export function momentFor(
   photos: Photo[],
   heroScores: Readonly<Record<string, number>> = {},
@@ -1588,8 +1589,8 @@ export function momentFor(
     const spread = new Set(spreadEvenly(photos, room).map((p) => p.id));
     const rank = (p: Photo) =>
       (p.use_in_wrap_up === true ? 1000 : 0) +
+      (p.caption?.trim() ? 100 : 0) +
       (heroScores[p.id] ?? 0) * 10 +
-      (p.caption?.trim() ? 2 : 0) +
       (spread.has(p.id) ? 1 : 0);
     const kept = new Set(
       [...photos].sort((a, b) => rank(b) - rank(a)).slice(0, room).map((p) =>
