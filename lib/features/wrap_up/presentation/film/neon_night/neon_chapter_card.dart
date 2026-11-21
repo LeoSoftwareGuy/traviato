@@ -100,6 +100,9 @@ class NnCardTiming {
     required this.zooms,
     required this.tiles,
     List<int> zoomHolds = const [],
+    // The tiles to zoom, best first (#446: NnChapterTexts.zoomTilesFor);
+    // null = the seeded picks.
+    List<int>? zoomTiles,
     this.beat = const NeonBeat(),
   }) : zoomHolds = [
          for (var i = 0; i < zooms; i++)
@@ -107,10 +110,13 @@ class NnCardTiming {
        ],
        zoomTiles = zooms == 0
            ? const []
-           : NeonZoomPicks.pick(
-               chapterNumber: chapterNumber,
-               tiles: tiles,
-             ).take(zooms).toList(),
+           : (zoomTiles ??
+                     NeonZoomPicks.pick(
+                       chapterNumber: chapterNumber,
+                       tiles: tiles,
+                     ))
+                 .take(zooms)
+                 .toList(),
        highlights = _highlights(
          chapterNumber,
          tiles,

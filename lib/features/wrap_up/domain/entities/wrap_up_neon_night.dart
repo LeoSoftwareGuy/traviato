@@ -81,6 +81,7 @@ class WrapUpNeonPhoto extends Equatable {
     required this.id,
     required this.takenAt,
     this.caption,
+    this.heroScore,
   });
 
   final String id;
@@ -89,8 +90,12 @@ class WrapUpNeonPhoto extends Equatable {
   /// The user's own caption from Photo detail (#387), exact; null = none.
   final String? caption;
 
+  /// How good a shot it is, 1–5, from the director's analysis (#446);
+  /// null = not analysed.
+  final int? heroScore;
+
   @override
-  List<Object?> get props => [id, takenAt, caption];
+  List<Object?> get props => [id, takenAt, caption, heroScore];
 }
 
 class WrapUpNeonChapter extends Equatable {

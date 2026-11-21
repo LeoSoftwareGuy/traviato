@@ -174,6 +174,16 @@ export const NN_MOMENT_BEATS = { split: 8, burst: 8, timeline: 12, peak: 8 };
 // What a film may run over its length before a scene is left out: a bar.
 const NN_SLACK_BEATS = 4;
 
+// A card zoom shows its caption for at most its 1½ beats plus this many
+// (#446: about 4 s on screen; NeonZoomPicks.maxHoldBeats).
+export const NN_MAX_ZOOM_HOLD_BEATS = 6;
+
+// Whether [caption] can be read within one card zoom (#446), as the app
+// decides it (NnChapterTexts.zoomCaptionOf).
+export function nnFitsZoom(caption: string): boolean {
+  return nnBeatsFor(readingSeconds(caption)) <= 1.5 + NN_MAX_ZOOM_HOLD_BEATS;
+}
+
 export function nnBeatsFor(seconds: number): number {
   return seconds / (60 / NN_BPM);
 }

@@ -48,6 +48,7 @@ class NnChapterCardPainter {
          tiles: NnContactSheet.forPhotos(
            chapter.cardPhotos.length,
          ).tiles.length,
+         zoomTiles: NnChapterTexts.zoomTilesFor(chapter, spec.chapter + 1),
          beat: beat,
        );
 

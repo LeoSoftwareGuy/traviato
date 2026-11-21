@@ -12,7 +12,12 @@ class NnChapterShape {
     this.zoomHolds = const [],
     this.cardMinBeats = 0,
     this.momentMinBeats = const [],
+    this.zooms,
   }) : assert(photos >= 1, 'a chapter has photos');
+
+  /// How many zooms its card plays (#446: never a photo whose caption is
+  /// too long for one); null = one per photo, up to the cycles.
+  final int? zooms;
 
   final List<NnMomentType> moments;
   final int photos;
@@ -63,7 +68,8 @@ class NeonNightTimeline {
           chapter: i,
           chapters: count,
           // Every card zooms (#444; was only the first and the last).
-          zooms: NeonZoomPicks.countFor(chapters[i].photos),
+          zooms:
+              chapters[i].zooms ?? NeonZoomPicks.countFor(chapters[i].photos),
           zoomHolds: chapters[i].zoomHolds,
           minBeats: chapters[i].cardMinBeats,
         ),

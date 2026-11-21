@@ -9,6 +9,7 @@ import 'neon_chapter_card_painter.dart';
 import 'neon_heart.dart';
 import 'neon_night_scene_spec.dart';
 import 'neon_night_story.dart';
+import 'neon_night_texts.dart';
 import 'neon_night_timeline.dart';
 
 /// The film's photos, decoded at two sizes (#363): every contact-sheet
@@ -82,6 +83,7 @@ class NeonPhotoImages implements NeonPhotoSource {
           beats: spec.beats,
           zooms: spec.zooms,
           tiles: sheet.tiles.length,
+          zoomTiles: NnChapterTexts.zoomTilesFor(chapter, spec.chapter + 1),
           beat: timeline.beat,
         );
         large.addAll([

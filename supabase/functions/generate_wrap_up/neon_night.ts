@@ -21,7 +21,12 @@ import { decorativePhotos } from "./decorative.ts";
 import { bannedPhraseIn, cleanAiLine, cleanLine } from "./film_plan.ts";
 import type { WrapUpLanguage } from "./language.ts";
 import { WRAP_UP_LIMITS } from "./wrap_up_limits.ts";
-import { filmSecondsOf, nnFilmBeats, nnFits } from "./film_length.ts";
+import {
+  filmSecondsOf,
+  nnFilmBeats,
+  nnFits,
+  nnFitsZoom,
+} from "./film_length.ts";
 import { wholeWords } from "./text_fit.ts";
 export { wholeWords };
 import { isExcerptOf } from "./golden_vows.ts";
@@ -137,7 +142,12 @@ export interface NeonNightContent {
     title: string;
     // Chronological; taken_at is an ISO instant the app shows in local
     // time.
-    photos: { id: string; taken_at: string; caption: string | null }[];
+    photos: {
+      id: string;
+      taken_at: string;
+      caption: string | null;
+      hero_score?: number | null;
+    }[];
     // The card's own photos (#390): its grid and zooms, never a moment's.
     // Older content has none — the app then uses every chapter photo.
     card_photo_ids: string[];
@@ -1627,6 +1637,18 @@ export function dealChapter(
   // Up to 6 photos: one full card of them all and no moment (#444 — "the
   // whole day has just 4, 4 is the best choice"), never a half-empty one.
   if (n < MIN_NN_CARD_PHOTOS + NN_SCENE_PHOTOS[0]) {
+    // Unless a caption is too long for a zoom (#446): then a moment plays
+    // from that photo on (3 at least), which holds it for its reading time,
+    // and the card keeps the earlier ones — still in time order.
+    const long = pool.findIndex((p) =>
+      p.caption?.trim() && !nnFitsZoom(p.caption.trim())
+    );
+    if (long >= 0 && n > NN_SCENE_PHOTOS[0]) {
+      const from = Math.max(1, Math.min(long, n - NN_SCENE_PHOTOS[0]));
+      chapter.card = pool.slice(0, from).map((p) => p.id);
+      chapter.moments = [momentFor(pool.slice(from))];
+      return;
+    }
     chapter.card = pool.slice(0, 6).map((p) => p.id);
     chapter.moments = [];
     return;
@@ -1716,6 +1738,21 @@ function shapeChapters(
   const notePhoto = plan.note_moment?.photo_id ?? null;
   for (const chapter of chapters) dealChapter(chapter, notePhoto);
   return chapters;
+}
+
+// [chapter]'s card photos whose caption can't be read in a zoom (#446),
+// as lines to bring into a moment.
+function longCaptionLines(chapter: ShapedChapter): NeonNightContentExcerpt[] {
+  return chapter.photos.filter((p) =>
+    chapter.card.includes(p.id) && p.caption?.trim() &&
+    !nnFitsZoom(p.caption.trim())
+  ).map((p) => ({
+    text: p.caption!.trim(),
+    note_id: "",
+    photo_id: p.id,
+    source: "code" as const,
+    score: 0,
+  }));
 }
 
 // Brings each of [excerpts]' photos into a moment of [chapter] (#444):
@@ -1959,6 +1996,8 @@ function capLines(picked: PickedLines[]): void {
 export function buildNeonNightContent(
   tripData: TripData,
   plan: NeonNightPlan,
+  // The director's analysis (#446): the card zooms its best photos.
+  heroScores: Readonly<Record<string, number>> = {},
 ): NeonNightContent {
   const all = nnPhotos(tripData);
   const order = new Map(all.map((p, i) => [p.id, i]));
@@ -2075,8 +2114,13 @@ export function buildNeonNightContent(
     }
   }
   // Lines play over their own photos (#444): a line whose photo is on the
-  // card or in no scene brings it into the moment nearest it in time.
-  shaped.forEach((c, i) => bringLinePhotos(c, picked[i].excerpts));
+  // card or in no scene brings it into the moment nearest it in time. So
+  // does a caption too long for a card zoom (#446): a moment holds it for
+  // its reading time.
+  shaped.forEach((c, i) => {
+    bringLinePhotos(c, picked[i].excerpts);
+    bringLinePhotos(c, longCaptionLines(c));
+  });
   // The Note scene is never empty while a usable line is left (#444):
   // the director's pick was blocked, so code picks the best unused one.
   if (noteMoment === null) {
@@ -2095,6 +2139,9 @@ export function buildNeonNightContent(
         // The user's own words on the photo (#387): the zoom and timeline
         // labels show it instead of the time.
         caption: p.caption?.trim() || null,
+        // How good a shot it is (#446, 1–5; null = not analysed): the
+        // card zooms its best photos.
+        hero_score: heroScores[p.id] ?? null,
       })),
       card_photo_ids: chapter.card,
       // The card's typed line: the director's, else the first line short

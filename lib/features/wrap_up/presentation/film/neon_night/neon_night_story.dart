@@ -26,6 +26,7 @@ class NnPhoto extends Equatable {
     required this.takenAt,
     this.caption,
     this.line,
+    this.heroScore,
   });
 
   final String id;
@@ -40,15 +41,24 @@ class NnPhoto extends Equatable {
   /// shows under the photo instead of the caption. Null = none.
   final String? line;
 
+  /// How good a shot it is, 1–5 (#446); null = unknown. The card zooms
+  /// its best photos.
+  final int? heroScore;
+
   /// What labels the photo: its caption, else its time (#387).
   String get label => caption ?? takenAt;
 
   /// This photo carrying [line].
-  NnPhoto withLine(String line) =>
-      NnPhoto(id: id, takenAt: takenAt, caption: caption, line: line);
+  NnPhoto withLine(String line) => NnPhoto(
+    id: id,
+    takenAt: takenAt,
+    caption: caption,
+    line: line,
+    heroScore: heroScore,
+  );
 
   @override
-  List<Object?> get props => [id, takenAt, caption, line];
+  List<Object?> get props => [id, takenAt, caption, line, heroScore];
 }
 
 /// A block that shows a few of a chapter's photos after its card

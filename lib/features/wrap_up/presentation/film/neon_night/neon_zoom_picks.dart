@@ -16,10 +16,47 @@ abstract final class NeonZoomPicks {
   /// 6 s; was 3).
   static const int cycles = 2;
 
-  /// The most beats a zoom holds its photo for its caption (#444): a
-  /// zoom is on screen at most about 2.4 s (2 beats + the hold). A caption that needs longer shows the
-  /// photo's time instead (`NnChapterTexts.zoomLabelFor`).
-  static const int maxHoldBeats = 3;
+  /// The most beats a zoom holds its photo for its caption (#446): a
+  /// zoom is on screen at most about 4 s (2 beats + the hold). A caption
+  /// that needs longer isn't zoomed: its photo plays in a moment, which
+  /// holds it for its reading time (the edge function moves it there).
+  static const int maxHoldBeats = 6;
+
+  /// The card tiles chapter [chapterNumber] zooms (#446), best first: the
+  /// photos whose caption a zoom can show ([fitsZoom]), then the highest
+  /// hero score, then the seeded order. Never a photo whose caption is
+  /// too long for a zoom. At most [countFor] of [photos].
+  static List<int> best({
+    required int chapterNumber,
+    required List<({String? caption, int? heroScore})> photos,
+    required bool Function(String caption) fitsZoom,
+  }) {
+    if (photos.isEmpty) return const [];
+    final seeded = pick(chapterNumber: chapterNumber, tiles: photos.length);
+    final order = [
+      ...seeded,
+      for (var k = 0; k < photos.length; k++)
+        if (!seeded.contains(k)) k,
+    ];
+    int rank(int k) {
+      final caption = photos[k].caption?.trim();
+      final captioned = caption != null && caption.isNotEmpty;
+      if (captioned && !fitsZoom(caption)) return -1;
+      return (captioned ? 10 : 0) + (photos[k].heroScore ?? 0);
+    }
+
+    final ranked = [
+      for (final k in order)
+        if (rank(k) >= 0) k,
+    ];
+    // Stable: equal ranks keep the seeded order.
+    final position = {for (final (i, k) in order.indexed) k: i};
+    ranked.sort((a, b) {
+      final byRank = rank(b) - rank(a);
+      return byRank != 0 ? byRank : position[a]! - position[b]!;
+    });
+    return List.unmodifiable(ranked.take(countFor(photos.length)));
+  }
 
   /// Cycle starts on a long card, in local beats: the i-th pick zooms at
   /// `cycleStarts[i]`.

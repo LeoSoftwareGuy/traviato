@@ -261,3 +261,25 @@ Deno.test("a line plays over its own photo: it's brought into a moment", () => {
     `${line.photo_id} in a moment`,
   );
 });
+
+Deno.test("a caption too long for a zoom plays in a moment; hero scores in content (#446)", () => {
+  const data = threeDays();
+  const long =
+    "UFC at the bar with the whole crew, three rounds and everybody screaming at the screen";
+  data.photos.find((p) => p.id === "d2a1")!.caption = long;
+  const content = buildNeonNightContent(
+    data,
+    codeNeonNight(nnCheckContext(data), "en"),
+    { d2a0: 5 },
+  );
+  const chapter = content.chapters.find((c) =>
+    c.photos.some((p) => p.id === "d2a1")
+  )!;
+  assert(!chapter.card_photo_ids.includes("d2a1"), "not on the card");
+  assert(
+    chapter.moments.some((m) => m.photo_ids.includes("d2a1")),
+    "in a moment",
+  );
+  assertEquals(chapter.photos.find((p) => p.id === "d2a0")!.hero_score, 5);
+  assertEquals(chapter.photos.find((p) => p.id === "d2a1")!.hero_score, null);
+});
