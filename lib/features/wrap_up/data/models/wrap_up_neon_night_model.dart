@@ -79,6 +79,16 @@ WrapUpNeonChapter? _chapter(dynamic json) {
         type: type,
         photoIds: _ids(moment['photo_ids']),
         place: _string(moment['place']),
+        words: switch (moment['words']) {
+          final List<dynamic> words => {
+            for (final w in words)
+              if (w is Map &&
+                  _string(w['photo_id']) != null &&
+                  _string(w['text']) != null)
+                _string(w['photo_id'])!: _string(w['text'])!,
+          },
+          _ => null,
+        },
       ),
     );
   }
@@ -88,6 +98,10 @@ WrapUpNeonChapter? _chapter(dynamic json) {
     note: _string(json['note']),
     moments: moments,
     cardPhotoIds: _ids(json['card_photo_ids']),
+    cardZooms: switch (json['card_zooms']) {
+      final num n => n.round().clamp(0, 2),
+      _ => null,
+    },
     excerpts: _list(json['excerpts']).map(_excerpt).nonNulls.toList(),
     days: _list(json['days']).map(_date).nonNulls.toList(),
     rejectedExcerpts: _list(

@@ -148,6 +148,16 @@ class NnCardTiming {
   static const highlightFrom = 4;
   static const zoomStart = 6;
   static const typeFrom = 4.0;
+
+  /// A card that zooms nothing types from lb 2, with its sheet (#448: a
+  /// film that runs long drops the zooms; its line needs less time).
+  static const typeFromWithoutZooms = 2.0;
+
+  /// When this card starts typing its line.
+  double get typeAt => typeFromFor(zooms);
+
+  static double typeFromFor(int zooms) =>
+      zooms == 0 ? typeFromWithoutZooms : typeFrom;
   static const barFrom = 3.0;
 
   /// The highlight jumps every beat from lb 4: tile `rng(n×1000+j)`,

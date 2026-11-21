@@ -70,6 +70,7 @@ NeonNightStory? neonNightFromWrapUp(
             _photo(photo),
         ],
         note: entry.chapter.note,
+        zooms: entry.chapter.cardZooms ?? 2,
         moments: _withLines(
           // No moment: the card alone (#444) when it has its own photos;
           // content from before falls back to a timeline of the chapter.
@@ -149,6 +150,29 @@ List<NnMoment> _withLines(
   WrapUpNeonChapter chapter,
   List<NnPhoto> photos,
 ) {
+  // The server chose each moment's words (#448): those photos show them
+  // (a caption as itself, else as the line); the rest none.
+  final chosen = {
+    for (final m in chapter.moments) ...?m.words,
+  };
+  if (chapter.moments.any((m) => m.words != null)) {
+    return [
+      for (final moment in moments)
+        _rebuilt(moment, [
+          for (final photo in moment.photos)
+            switch (chosen[photo.id]) {
+              null => photo.quiet,
+              final text when text == photo.caption?.trim() => NnPhoto(
+                id: photo.id,
+                takenAt: photo.takenAt,
+                caption: photo.caption,
+                heroScore: photo.heroScore,
+              ),
+              final text => photo.quiet.withLine(text),
+            },
+        ]),
+    ];
+  }
   final order = {for (final (i, p) in photos.indexed) p.id: i};
   final card = _same(chapter.note);
   final lines = <(int, int), String>{};

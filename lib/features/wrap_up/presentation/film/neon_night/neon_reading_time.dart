@@ -27,7 +27,11 @@ abstract final class NnReadingTime {
           photos: chapter.cardPhotos.length,
           zoomHolds: zoomHolds(chapter, i + 1, beat),
           zooms: NnChapterTexts.zoomTilesFor(chapter, i + 1).length,
-          cardMinBeats: cardBeats(chapter, beat),
+          cardMinBeats: cardBeats(
+            chapter,
+            beat,
+            zooms: NnChapterTexts.zoomTilesFor(chapter, i + 1).length,
+          ),
           momentMinBeats: [
             for (final moment in chapter.moments) momentBeats(moment, beat),
           ],
@@ -71,15 +75,18 @@ abstract final class NnReadingTime {
     ];
   }
 
-  /// The card's fewest beats for its typed line: typed from lb 4 one
+  /// The card's fewest beats for its typed line: typed from lb 4 (2
+  /// without zooms) one
   /// character a frame, then on screen for at least its reading time,
   /// before the 0.18 s fade. 0 without a line.
-  static int cardBeats(NnChapter chapter, NeonBeat beat) {
+  static int cardBeats(NnChapter chapter, NeonBeat beat, {int zooms = 2}) {
     final typed = NnChapterTexts.typedTextFor(chapter.note);
     if (typed == null) return 0;
     final typing = ('> $typed'.runes.length) / NeonBeat.fps;
     final shown = math.max(typing + 0.8, FilmTextRules.readingTime(typed));
-    return _bars(NnCardTiming.typeFrom + beat.secToBeat(shown + 0.18));
+    return _bars(
+      NnCardTiming.typeFromFor(zooms) + beat.secToBeat(shown + 0.18),
+    );
   }
 
   /// A moment's fewest beats for its captions; 0 when it shows none.

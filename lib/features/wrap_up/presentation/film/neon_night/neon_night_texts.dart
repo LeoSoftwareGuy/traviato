@@ -352,7 +352,7 @@ class NnChapterTexts {
     final tiles = NnContactSheet.forPhotos(
       chapter.cardPhotos.length,
     ).tiles.length;
-    return NeonZoomPicks.best(
+    final best = NeonZoomPicks.best(
       chapterNumber: chapterNumber,
       photos: [
         for (final p in chapter.cardPhotos.take(tiles))
@@ -365,6 +365,7 @@ class NnChapterTexts {
           ) !=
           null,
     );
+    return best.take(chapter.zooms).toList();
   }
 
   static String? zoomCaptionOf(NnPhoto photo, NeonBeat beat) {
