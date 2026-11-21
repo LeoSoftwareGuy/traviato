@@ -157,15 +157,28 @@ export function isGeneric(excerpt: string): boolean {
 // Drug references and profanity (#398 R6): never chosen for a headline,
 // the note scene, the finale or a code-picked excerpt. The user's own
 // captions and notes elsewhere stay as written.
-const SENSITIVE = [
+// Drug references alone (#450): never a line code picks from a note —
+// a card line or a moment's line — nor anything [SENSITIVE] keeps out.
+const DRUGS = [
   /\b(mdma|molly|ecstasy|cocaine|ketamine|lsd|weed|stoned|drugs?)\b/iu,
-  /\b(fuck\w*|shit(s|ty|ting|ted)?|bitch\w*|cunt)\b/iu,
+  /\b(spliff|high af)\b/iu,
   // Word starts only: \b knows no Cyrillic, and "бля" hides in "корабля".
   /(^|[^а-яё])(мдма|экстази|кокаин|кетамин|наркот|упорот|обдолб)/iu,
+  // Cannabis slang (#450: "косячок"); "накосячили" (messed up) is not.
+  /(^|[^а-яё])(косяч(ок|ка|ку|ком|ки|ков)|косяк[аиу]?(?![а-яё])|марихуан|гашиш|ганджубас|дуднул|пыхнул|накурил)/iu,
+];
+
+const SENSITIVE = [
+  ...DRUGS,
+  /\b(fuck\w*|shit(s|ty|ting|ted)?|bitch\w*|cunt)\b/iu,
   /(^|[^а-яё])(бля|хуй|хуё|хуе|пизд|ёб|еба[тлн]|ебу|сука|нахуй|залуп|мудак)/iu,
   // With a prefix (#448: "охуенный").
   /(^|[^а-яё])(о|от|на|по|за|при|до)ху[йеёя]/iu,
 ];
+
+export function isDrugReference(text: string): boolean {
+  return DRUGS.some((s) => s.test(text));
+}
 
 export function isSensitive(text: string): boolean {
   return SENSITIVE.some((s) => s.test(text));
