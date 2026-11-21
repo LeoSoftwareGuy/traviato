@@ -37,6 +37,7 @@ import { tripLogicalDays } from "./logical_day.ts";
 import {
   excerptCandidates,
   excerptScore,
+  isDrugReference,
   isGeneric,
   isSensitive,
   MAX_EXCERPT_CHARS,
@@ -704,6 +705,21 @@ export function describeNeonNightProblems(
       checkLine(problems, `${where}.title`, chapter.title, MAX_NN_TITLE_CHARS);
       if (isString(chapter.title) && isSensitive(chapter.title)) {
         problems.push(`${where}.title: no drug references or profanity`);
+      }
+      // The title rules (#450), so a section stored by older code — with
+      // "Tallinn airport" or the headline as a title — is repaired on
+      // open, not played as it was.
+      if (isString(chapter.title) && chapter.title.trim()) {
+        const title = chapter.title.trim();
+        const place = [...(context.photoPlaces?.values() ?? [])].some((p) =>
+          p.trim() === title
+        );
+        if (!place && titleInOtherLanguage(title, context)) {
+          problems.push(`${where}.title: in the notes' language`);
+        }
+        if (isString(nn.headline) && sameLine(title, nn.headline)) {
+          problems.push(`${where}.title: repeats the headline`);
+        }
       }
       const start = photoAt(chapter.first_photo_id, `${where}.first_photo_id`);
       if (start !== null) {
@@ -2137,7 +2153,7 @@ export function momentWords(
       const line = excerpts.find((e) =>
         e.photo_id === id &&
         !taken.some((t) => overlaps(t, e.text)) &&
-        !repeatsTitle(e.text, title) &&
+        !repeatsTitle(e.text, title) && !isDrugReference(e.text) &&
         [...e.text].length <= maxChars
       );
       const photo = byId.get(id);
@@ -2469,6 +2485,7 @@ export function buildNeonNightContent(
       ...clauses,
     ].filter((e) =>
       [...e.text].length <= cardChars && !isGeneric(e.text) &&
+      !isDrugReference(e.text) &&
       !(reserved && sameLine(e.text, reserved)) &&
       !repeatsTitle(e.text, shaped[i].title) && nearChapter(i, e.text)
     ).sort((a, b) =>
@@ -2485,7 +2502,8 @@ export function buildNeonNightContent(
     const own = shaped[i].note &&
         !(reserved && sameLine(shaped[i].note!, reserved)) &&
         !repeatsTitle(shaped[i].note!, shaped[i].title) &&
-        !isGeneric(shaped[i].note!) && nearChapter(i, shaped[i].note!)
+        !isGeneric(shaped[i].note!) && !isDrugReference(shaped[i].note!) &&
+        nearChapter(i, shaped[i].note!)
       ? shaped[i].note
       : null;
     const ownFits = own !== null && [...own].length <= cardChars;

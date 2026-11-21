@@ -17,6 +17,7 @@ import {
   sameLine,
 } from "./neon_night.ts";
 import { withFilmPhotos } from "./film_photos.ts";
+import { currentNeonNight } from "./director.ts";
 import { nnBeatsFor, nnMomentBeats } from "./film_length.ts";
 
 function ade() {
@@ -189,4 +190,51 @@ Deno.test("ADE: Brussels types its specific line, never the morning's (#450)", (
   ]);
   assert(!all.some((t) => t.startsWith("Проснулись")), "no generic line");
   assert(!all.some((t) => /[,;:]$/.test(t)), "no trailing comma");
+});
+
+// What the phone played after #451 (#450): the section the director run
+// stored before it, repaired by older code — its titles baked in — and a
+// Note line with a drug reference. Opening the draft must replay it
+// through today's rules, not as it was stored.
+Deno.test("ADE: a section stored by older code is repaired on open (#450)", () => {
+  const memory = withFilmPhotos(adeMemory(), {});
+  const n4 = memory.notes.find((n) => n.id === "n4")!;
+  n4.content += " Перед входом косячок на двоих.";
+  const stored = repairNeonNight(
+    adeDirectorPlan(),
+    nnCheckContext(memory),
+  ) as NeonNightPlan;
+  const old = [
+    "Tallinn airport",
+    "4.5kg ribs then Куко",
+    "Самый крутой сет",
+    "Куко Unreal, home at",
+    "some sweets for Anna",
+  ];
+  stored.chapters.forEach((c, i) => c.title = old[i] ?? c.title);
+  stored.headline = "Самый крутой сет";
+  stored.note_moment = {
+    note_id: "n4",
+    excerpt: "Перед входом косячок на двоих.",
+    photo_id: null,
+  };
+  const record = {
+    status: "planned",
+    problems: [],
+    neon_night: stored,
+    neon_night_source: "director",
+  };
+  const played = currentNeonNight(record, memory, "ru");
+  const content = buildNeonNightContent(memory, played.plan);
+  const titles = content.chapters.map((c) => c.title);
+  for (const t of old) assert(!titles.includes(t), `${t}: still played`);
+  assertEquals(titles[4], "Брюссель");
+  const words = [
+    content.note?.text ?? "",
+    ...content.chapters.flatMap((c) => [
+      c.note ?? "",
+      ...c.moments.flatMap((m) => (m.words ?? []).map((w) => w.text)),
+    ]),
+  ];
+  assert(!words.some((t) => /косяч/iu.test(t)), "no drug line");
 });
