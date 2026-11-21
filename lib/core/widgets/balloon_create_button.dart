@@ -127,7 +127,7 @@ class _BalloonPainter extends CustomPainter {
 
     // "+" in the envelope's middle, in the old plus's dark ink.
     const centre = Offset(24, 19);
-    const arm = 7.0;
+    const arm = 6.5;
     canvas.drawPath(
       Path()
         ..moveTo(centre.dx - arm, centre.dy)
@@ -137,7 +137,7 @@ class _BalloonPainter extends CustomPainter {
       Paint()
         ..color = AppColors.background
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 3
+        ..strokeWidth = 2.2
         ..strokeCap = StrokeCap.round,
     );
   }

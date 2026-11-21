@@ -649,7 +649,6 @@
     }
   },
   "journal_wrapUpReqNote": "At least one note written",
-  "journal_wrapUpFree": "Nothing to buy — this one's the same on every plan.",
   "journal_wordCount": "{count, plural, =1{1 word} other{{count} words}}",
   "@journal_wordCount": {
     "placeholders": {
@@ -2533,9 +2532,7 @@
   "@timeline_noteSavedNoStar": {"description": "Toast after a new note once the day's 3 note-stars are earned (#401)."},
   "timeline_emptyTitle": "Nothing written for {weekday} yet",
   "@timeline_emptyTitle": {"description": "Journal empty day (#401); {weekday} is e.g. 'Saturday', capitalised.", "placeholders": {"weekday": {"type": "String"}}},
-  "timeline_emptyBody": "Write a line whenever something happens. Each time you tap Done it's kept as its own note, with the time.",
-  "@timeline_emptyBody": {"description": "Journal empty day (#401)."},
-  "timeline_emptyWrite": "✎ Write the first note ✦1",
+  "timeline_emptyWrite": "✎ Write the first note",
   "@timeline_emptyWrite": {"description": "Journal empty day (#401): primary button."},
   "timeline_emptyOrPhoto": "or add a photo",
   "@timeline_emptyOrPhoto": {"description": "Journal empty day (#401): secondary link."},
@@ -2549,8 +2546,6 @@
   "@photoNote_add": {"description": "Photo viewer (#402): opens the note page for a note on this photo."},
   "photoNote_listLabel": "Notes on this photo · {count}",
   "@photoNote_listLabel": {"description": "Photo viewer (#402): label over the notes written on this photo, uppercased in code.", "placeholders": {"count": {"type": "int"}}},
-  "photoNote_none": "No notes on this photo yet.",
-  "@photoNote_none": {"description": "Photo viewer (#402): when the photo has no notes."},
   "note_stampPhoto": "Photo note · {time}",
   "@note_stampPhoto": {"description": "Note page stamp for a note on a photo (#402), uppercased in code.", "placeholders": {"time": {"type": "String"}}},
   "note_onThisPhoto": "On this photo · {time}",

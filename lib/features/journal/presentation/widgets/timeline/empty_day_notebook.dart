@@ -15,7 +15,7 @@ const _ruleGap = 30.0;
 
 /// A day with nothing yet (#401, docs/design/journal-notes/ §4 "Empty
 /// day"): a small tilted notebook page, "Nothing written for Saturday yet",
-/// one line on how notes work, "✎ Write the first note ✦1" and "or add a
+/// "✎ Write the first note" and "or add a
 /// photo".
 class EmptyDayNotebook extends StatelessWidget {
   const EmptyDayNotebook({
@@ -84,19 +84,6 @@ class EmptyDayNotebook extends StatelessWidget {
           l10n.timeline_emptyTitle(weekday),
           textAlign: TextAlign.center,
           style: AppTypography.displaySerif.copyWith(fontSize: 21),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
-          child: Text(
-            l10n.timeline_emptyBody,
-            textAlign: TextAlign.center,
-            style: AppTypography.timelineMeta.copyWith(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w400,
-              height: 1.45,
-            ),
-          ),
         ),
         const SizedBox(height: AppSpacing.lg),
         DecoratedBox(

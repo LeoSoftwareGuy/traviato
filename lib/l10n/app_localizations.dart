@@ -1370,12 +1370,6 @@ abstract class AppLocalizations {
   /// **'At least one note written'**
   String get journal_wrapUpReqNote;
 
-  /// No description provided for @journal_wrapUpFree.
-  ///
-  /// In en, this message translates to:
-  /// **'Nothing to buy — this one\'s the same on every plan.'**
-  String get journal_wrapUpFree;
-
   /// No description provided for @journal_wordCount.
   ///
   /// In en, this message translates to:
@@ -4171,16 +4165,10 @@ abstract class AppLocalizations {
   /// **'Nothing written for {weekday} yet'**
   String timeline_emptyTitle(String weekday);
 
-  /// Journal empty day (#401).
-  ///
-  /// In en, this message translates to:
-  /// **'Write a line whenever something happens. Each time you tap Done it\'s kept as its own note, with the time.'**
-  String get timeline_emptyBody;
-
   /// Journal empty day (#401): primary button.
   ///
   /// In en, this message translates to:
-  /// **'✎ Write the first note ✦1'**
+  /// **'✎ Write the first note'**
   String get timeline_emptyWrite;
 
   /// Journal empty day (#401): secondary link.
@@ -4218,12 +4206,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notes on this photo · {count}'**
   String photoNote_listLabel(int count);
-
-  /// Photo viewer (#402): when the photo has no notes.
-  ///
-  /// In en, this message translates to:
-  /// **'No notes on this photo yet.'**
-  String get photoNote_none;
 
   /// Note page stamp for a note on a photo (#402), uppercased in code.
   ///

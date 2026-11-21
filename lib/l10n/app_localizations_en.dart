@@ -828,10 +828,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journal_wrapUpReqNote => 'At least one note written';
 
   @override
-  String get journal_wrapUpFree =>
-      'Nothing to buy — this one\'s the same on every plan.';
-
-  @override
   String journal_wordCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -2779,11 +2775,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get timeline_emptyBody =>
-      'Write a line whenever something happens. Each time you tap Done it\'s kept as its own note, with the time.';
-
-  @override
-  String get timeline_emptyWrite => '✎ Write the first note ✦1';
+  String get timeline_emptyWrite => '✎ Write the first note';
 
   @override
   String get timeline_emptyOrPhoto => 'or add a photo';
@@ -2808,9 +2800,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String photoNote_listLabel(int count) {
     return 'Notes on this photo · $count';
   }
-
-  @override
-  String get photoNote_none => 'No notes on this photo yet.';
 
   @override
   String note_stampPhoto(String time) {

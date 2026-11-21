@@ -10,7 +10,7 @@ import 'timeline/fresh_note_in.dart';
 
 /// Under a photo in the viewer (#402, docs/design/journal-notes/ §6):
 /// "✎ Add a note to this photo", then NOTES ON THIS PHOTO · N with each
-/// note in full (time + mic), or "No notes on this photo yet."
+/// note in full (time + mic), or nothing when it has none (#438).
 /// [freshNoteId] slides in and wears JUST NOW.
 class PhotoNotesPanel extends StatelessWidget {
   const PhotoNotesPanel({
@@ -56,18 +56,9 @@ class PhotoNotesPanel extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 14),
-        if (notes.isEmpty)
-          Text(
-            l10n.photoNote_none,
-            textAlign: TextAlign.center,
-            style: AppTypography.serif(
-              fontSize: 13,
-              fontStyle: FontStyle.italic,
-              color: AppColors.textTertiary,
-            ),
-          )
-        else ...[
+        // No notes yet: nothing under the add button (#438).
+        if (notes.isNotEmpty) ...[
+          const SizedBox(height: 14),
           Text(
             l10n.photoNote_listLabel(notes.length).toUpperCase(),
             style: AppTypography.mono.copyWith(color: AppColors.textTertiary),

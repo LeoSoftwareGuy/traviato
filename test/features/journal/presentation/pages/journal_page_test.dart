@@ -481,11 +481,14 @@ void main() {
       return noteRepo;
     }
 
-    testWidgets('a photo without notes says so', (tester) async {
+    testWidgets('a photo without notes shows only the add button (#438)', (
+      tester,
+    ) async {
       await openPhoto(tester);
 
       expect(find.byKey(const Key('photo-notes-panel')), findsOneWidget);
-      expect(find.text('No notes on this photo yet.'), findsOneWidget);
+      expect(find.byKey(const Key('photo-notes-add')), findsOneWidget);
+      expect(find.text('No notes on this photo yet.'), findsNothing);
     });
 
     testWidgets("the viewer lists the photo's notes", (tester) async {
@@ -917,10 +920,7 @@ void main() {
         findsNothing,
       );
       expect(find.byKey(const Key('wrap-up-explainer-card')), findsOneWidget);
-      expect(
-        find.textContaining("Nothing to buy"),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Nothing to buy'), findsNothing);
     },
   );
 
