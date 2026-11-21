@@ -10,16 +10,18 @@ void main() {
     const expected = <(double, int, NeonNightSceneSpec)>[
       (0.000, 0, NnIgnitionSpec()),
       (3.810, 8, NnPlanSpec()),
-      (9.524, 20, NnChapterCardSpec(chapter: 0, chapters: 3, zooms: 3)),
-      (17.143, 36, NnMomentSpec(chapter: 0, type: NnMomentType.split)),
-      (20.952, 44, NnMomentSpec(chapter: 0, type: NnMomentType.burst)),
-      (24.762, 52, NnChapterCardSpec(chapter: 1, chapters: 3, zooms: 0)),
+      // Every card zooms twice, 12 beats (#444; was 3 zooms on the first
+      // and last, none between).
+      (9.524, 20, NnChapterCardSpec(chapter: 0, chapters: 3, zooms: 2)),
+      (15.238, 32, NnMomentSpec(chapter: 0, type: NnMomentType.split)),
+      (19.048, 40, NnMomentSpec(chapter: 0, type: NnMomentType.burst)),
+      (22.857, 48, NnChapterCardSpec(chapter: 1, chapters: 3, zooms: 2)),
       (28.571, 60, NnMomentSpec(chapter: 1, type: NnMomentType.timeline)),
-      (34.286, 72, NnChapterCardSpec(chapter: 2, chapters: 3, zooms: 3)),
-      (41.905, 88, NnMomentSpec(chapter: 2, type: NnMomentType.peak)),
-      (45.714, 96, NnNoteSpec()),
-      (51.429, 108, NnFinaleSpec()),
-      (59.048, 124, NnEndingSpec()),
+      (34.286, 72, NnChapterCardSpec(chapter: 2, chapters: 3, zooms: 2)),
+      (40.000, 84, NnMomentSpec(chapter: 2, type: NnMomentType.peak)),
+      (43.810, 92, NnNoteSpec()),
+      (49.524, 104, NnFinaleSpec()),
+      (57.143, 120, NnEndingSpec()),
     ];
     expect(reference.scenes, hasLength(expected.length));
     for (var i = 0; i < expected.length; i++) {
@@ -29,11 +31,11 @@ void main() {
       expect(scene.start, closeTo(seconds, 5e-4), reason: '$spec');
       expect(reference.startBeats[i], beat, reason: '$spec');
     }
-    expect(reference.totalBeats, 136);
-    expect(reference.total, closeTo(64.762, 5e-4));
-    expect(reference.finaleBeat, 108);
-    expect(reference.finaleCue, closeTo(51.429, 5e-4));
-    expect(reference.endingCue, closeTo(59.048, 5e-4));
+    expect(reference.totalBeats, 132);
+    expect(reference.total, closeTo(62.857, 5e-4));
+    expect(reference.finaleBeat, 104);
+    expect(reference.finaleCue, closeTo(49.524, 5e-4));
+    expect(reference.endingCue, closeTo(57.143, 5e-4));
   });
 
   test('scenes run end to end, every cue on a downbeat', () {
@@ -59,20 +61,18 @@ void main() {
   });
 
   test('length by chapter count (§9), summed from the scene rules', () {
-    // 3–5 match the spec's table; 1 and 2 follow its zoom rule (the last
-    // chapter gets the long card), not the table's 24 / 29 bars (#363
-    // plan, open question 1).
-    const bars = {1: 23, 2: 30, 3: 34, 4: 38, 5: 42};
+    // Every card is 3 bars since #444 (2 zooms each).
+    const bars = {1: 22, 2: 28, 3: 33, 4: 38, 5: 43};
     for (final MapEntry(key: chapters, value: expected) in bars.entries) {
       final t = NeonNightTimeline.standard(chapters);
       expect(t.totalBeats, expected * 4, reason: '$chapters chapters');
       expect(t.chapterCount, chapters);
     }
     expect(NeonNightTimeline.standard(4).total, closeTo(72.381, 5e-4));
-    expect(NeonNightTimeline.standard(5).total, closeTo(80.0, 5e-4));
+    expect(NeonNightTimeline.standard(5).total, closeTo(81.905, 5e-4));
   });
 
-  test('the zoom rule: the first and the last chapter get the zoom card', () {
+  test('the zoom rule: every chapter card zooms (#444)', () {
     List<bool> zoomCards(int chapters) => [
       for (var i = 0; i < chapters; i++)
         (NeonNightTimeline.standard(chapters).chapterCard(i).spec
@@ -81,8 +81,8 @@ void main() {
     ];
     expect(zoomCards(1), [true]);
     expect(zoomCards(2), [true, true]);
-    expect(zoomCards(3), [true, false, true]);
-    expect(zoomCards(5), [true, false, false, false, true]);
+    expect(zoomCards(3), [true, true, true]);
+    expect(zoomCards(5), [true, true, true, true, true]);
   });
 
   test('a zoom card zooms each photo once and fits its zooms', () {
@@ -98,28 +98,16 @@ void main() {
     NnChapterCardSpec card(NeonNightTimeline t, int i) =>
         t.chapterCard(i).spec as NnChapterCardSpec;
 
-    // 3+ photos: 3 zooms, 16 beats; 1–2 photos: 1–2 zooms, 12 beats.
-    for (final (photos, zooms, beats) in [
-      (200, 3, 16),
-      (3, 3, 16),
-      (2, 2, 12),
-      (1, 1, 12),
-    ]) {
+    // 2+ photos: 2 zooms; 1 photo: 1 — always 12 beats (#444).
+    for (final (photos, zooms) in [(200, 2), (3, 2), (2, 2), (1, 1)]) {
       final t = film([photos, 20, photos]);
-      for (final i in [0, 2]) {
-        expect(card(t, i).zooms, zooms, reason: '$photos photos');
-        expect(card(t, i).beats, beats, reason: '$photos photos');
+      for (final i in [0, 1, 2]) {
+        expect(card(t, i).zooms, i == 1 ? 2 : zooms, reason: '$photos');
+        expect(card(t, i).beats, 12, reason: '$photos photos');
       }
-      // A middle chapter never zooms, whatever its photos.
-      expect(card(t, 1).zooms, 0);
     }
-    expect(card(film([20, 1, 20]), 1).beats, 8);
-
-    // One bar shorter per small first/last chapter; the drop stays on a
-    // downbeat.
     final small = film([2, 20, 1]);
-    expect(small.totalBeats, reference.totalBeats - 8);
-    expect(small.total, closeTo(reference.total - 2 * 1.905, 1e-3));
+    expect(small.totalBeats, reference.totalBeats);
     expect(small.finaleBeat % 4, 0);
   });
 
@@ -166,8 +154,8 @@ void main() {
   test('another bpm rescales every cue', () {
     final slower = NeonNightTimeline.standard(3, beat: const NeonBeat(120));
     expect(slower.startBeats, reference.startBeats);
-    expect(slower.finaleCue, closeTo(54, 1e-9));
-    expect(slower.total, closeTo(68, 1e-9));
+    expect(slower.finaleCue, closeTo(52, 1e-9));
+    expect(slower.total, closeTo(66, 1e-9));
   });
 
   test('sceneAt: hard cuts on every cue, local beats from the cue', () {
@@ -200,8 +188,8 @@ void main() {
     expect(fromIgn, closeTo(3.333, 5e-4));
     expect(toCorner, closeTo(3.810, 5e-4));
     final (fromCorner, toEnd) = reference.cornerToEnd;
-    expect(fromCorner, closeTo(59.048 + 0.476, 1e-3));
-    expect(toEnd, closeTo(59.048 + 1.190, 1e-3));
+    expect(fromCorner, closeTo(57.143 + 0.476, 1e-3));
+    expect(toEnd, closeTo(57.143 + 1.190, 1e-3));
   });
 
   test('the same input gives the same timeline', () {

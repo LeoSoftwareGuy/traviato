@@ -12,8 +12,14 @@ import 'neon_random.dart';
 ///
 /// A card with 1–2 zooms is 12 beats instead of 16 (`NnChapterCardSpec`).
 abstract final class NeonZoomPicks {
-  /// The most zoom cycles a long card plays.
-  static const int cycles = 3;
+  /// The most zoom cycles a card plays (#444: 2, so a card stays about
+  /// 6 s; was 3).
+  static const int cycles = 2;
+
+  /// The most beats a zoom holds its photo for its caption (#444): a
+  /// zoom is on screen at most about 2.4 s (2 beats + the hold). A caption that needs longer shows the
+  /// photo's time instead (`NnChapterTexts.zoomLabelFor`).
+  static const int maxHoldBeats = 3;
 
   /// Cycle starts on a long card, in local beats: the i-th pick zooms at
   /// `cycleStarts[i]`.

@@ -10,6 +10,7 @@ import 'neon_beat.dart';
 import 'neon_chapter_card.dart';
 import 'neon_moments.dart';
 import 'neon_night_story.dart';
+import 'neon_zoom_picks.dart';
 import 'neon_text_fx.dart';
 import 'neon_tokens.dart';
 import 'neon_type.dart';
@@ -331,13 +332,31 @@ class NnChapterTexts {
     textDirection: TextDirection.ltr,
   )..layout(maxWidth: typedWidth);
 
-  /// A zoom's label: [photo]'s caption when it fits, else its time.
+  /// A zoom's label: [photo]'s caption when it fits and can be read
+  /// within a zoom (#444), else its time.
   static NeonLabelBox zoomLabelFor(NnPhoto photo) {
-    final caption = photo.caption?.trim();
-    final box = caption == null || caption.isEmpty
+    final caption = zoomCaptionOf(photo, const NeonBeat());
+    final box = caption == null
         ? null
         : NeonLabelBox.caption(caption, maxWidth: NnCardTiming.zoomRect.width);
     return box ?? NeonLabelBox(photo.takenAt);
+  }
+
+  /// The caption a card zoom shows under [photo]: one that fits the zoom
+  /// and can be read in its 1½ beats plus [NeonZoomPicks.maxHoldBeats]
+  /// (#444 — a zoom never holds 9 s for a long caption). Null = none.
+  static String? zoomCaptionOf(NnPhoto photo, NeonBeat beat) {
+    final caption = photo.caption?.trim();
+    if (caption == null || caption.isEmpty) return null;
+    final read = beat.secToBeat(FilmTextRules.readingTime(caption));
+    if (read > 1.5 + NeonZoomPicks.maxHoldBeats) return null;
+    final box = NeonLabelBox.caption(
+      caption,
+      maxWidth: NnCardTiming.zoomRect.width,
+    );
+    if (box == null) return null;
+    box.dispose();
+    return caption;
   }
 
   final Color accent;

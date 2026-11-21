@@ -27,6 +27,7 @@ void main() {
 
     expect(table, startsWith('# Night out · Neon Night\n'));
     expect(table, contains('Length ${timeline.total.toStringAsFixed(1)} s'));
+    expect(table, contains('photos shown in scenes'));
     final rows = _rows(table);
     expect(rows, hasLength(timeline.scenes.length));
     expect(rows.first, contains('Ignition'));

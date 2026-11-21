@@ -124,10 +124,25 @@ void main() {
       expect(NnReadingTime.momentBeats(split, beat), 0);
     });
 
-    test('a zoom holds on a captioned photo', () {
-      final photos = [
-        photo('a', '06:40', 'fast check-in at the airport, half asleep'),
-      ];
+    test('a zoom holds on a short caption; a long one shows the time and '
+        'never stretches the zoom (#444)', () {
+      final long = NnChapter(
+        title: 'Airport',
+        from: '06:40',
+        to: '07:00',
+        photos: [
+          photo('a', '06:40', 'fast check-in at the airport, half asleep'),
+        ],
+        moments: [
+          NnTimeline([photo('a', '06:40'), photo('b', '06:50')]),
+        ],
+      );
+      expect(NnReadingTime.zoomHolds(long, 1, beat).single, 0);
+      expect(
+        NnChapterTexts.zoomLabelFor(long.photos.first).text,
+        '06:40',
+      );
+      final photos = [photo('a', '06:40', 'Gate B12, coffee')];
       final chapter = NnChapter(
         title: 'Airport',
         from: '06:40',

@@ -21,7 +21,7 @@ void main() {
       expect(balloon.poseAt(3.810), NeonBalloon.corner);
       // In the corner through the heart finale.
       expect(balloon.poseAt(30), NeonBalloon.corner);
-      expect(balloon.poseAt(58), NeonBalloon.corner);
+      expect(balloon.poseAt(56), NeonBalloon.corner);
     });
 
     test('to the end pose over Ending lb 1 → 2.5', () {

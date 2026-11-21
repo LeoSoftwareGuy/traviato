@@ -20,19 +20,34 @@ abstract final class NnMomentLayout {
   static const kbPeak = 0.10;
 }
 
-/// Split (§5.4a): 2–3 strips side by side.
+/// Split (§5.4a): 2–3 strips side by side; 4 photos as a 2 × 2 grid
+/// (#444).
 abstract final class NnSplitLayout {
   static const top = 440.0;
   static const height = 1000.0;
   static const gap = 26.0;
   static const radius = 22.0;
   static const border = 6.0;
-  static const colors = [NeonColors.pink, NeonColors.cyan, NeonColors.green];
+  static const colors = [
+    NeonColors.pink,
+    NeonColors.cyan,
+    NeonColors.green,
+    NeonColors.violet,
+  ];
 
   /// `sw = (1000 − 26(n − 1)) / n`: 316 for 3, 487 for 2.
   static double stripWidth(int n) => (1000 - gap * (n - 1)) / n;
 
   static Rect strip(int i, int n) {
+    if (n == 4) {
+      const side = (1000 - gap) / 2;
+      return Rect.fromLTWH(
+        40 + (i % 2) * (side + gap),
+        top + (i ~/ 2) * (side + gap),
+        side,
+        side,
+      );
+    }
     final sw = stripWidth(n);
     return Rect.fromLTWH(40 + i * (sw + gap), top, sw, height);
   }

@@ -20,15 +20,12 @@ abstract final class NnReadingTime {
     NeonNightStory story,
     NeonBeat beat,
   ) {
-    final count = story.chapters.length;
     return [
       for (final (i, chapter) in story.chapters.indexed)
         NnChapterShape(
           moments: [for (final moment in chapter.moments) moment.type],
           photos: chapter.cardPhotos.length,
-          zoomHolds: i == 0 || i == count - 1
-              ? zoomHolds(chapter, i + 1, beat)
-              : const [],
+          zoomHolds: zoomHolds(chapter, i + 1, beat),
           cardMinBeats: cardBeats(chapter, beat),
           momentMinBeats: [
             for (final moment in chapter.moments) momentBeats(moment, beat),
@@ -61,17 +58,11 @@ abstract final class NnReadingTime {
     ).take(zooms);
     return [
       for (final k in picks)
-        switch (nnCaptionBox(
-          chapter.cardPhotos[k],
-          maxWidth: NnCardTiming.zoomRect.width,
-        )) {
-          final box? => () {
-            final hold = _ceil(
-              beat.secToBeat(FilmTextRules.readingTime(box.text)) - 1.5,
-            );
-            box.dispose();
-            return math.max(0, hold);
-          }(),
+        switch (NnChapterTexts.zoomCaptionOf(chapter.cardPhotos[k], beat)) {
+          final caption? => math.max(
+            0,
+            _ceil(beat.secToBeat(FilmTextRules.readingTime(caption)) - 1.5),
+          ),
           null => 0,
         },
     ];

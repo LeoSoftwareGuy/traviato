@@ -77,9 +77,10 @@ void main() {
       NnPlanRow(time: '22:00', item: 'Pre-drinks', done: true),
       NnPlanRow(time: '03:00', item: 'Afterparty'),
     ]);
+    // Each card's range is its own photos' (#444), not up to the next.
     expect(story.chapters.map((c) => (c.title, c.from, c.to)), [
-      ('Doors open', '22:10', '23:40'),
-      ('After midnight', '23:40', '01:10'),
+      ('Doors open', '22:10', '22:40'),
+      ('After midnight', '23:40', '23:51'),
       ('Peak time', '01:10', '03:10'),
     ]);
     final first = story.chapters.first;

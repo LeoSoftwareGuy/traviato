@@ -4,7 +4,7 @@ import 'neon_night_story.dart';
 
 /// How many photos each moment plays with (as the server checks them).
 const neonMomentPhotos = {
-  NnMomentType.split: (min: 2, max: 3),
+  NnMomentType.split: (min: 2, max: 4),
   NnMomentType.burst: (min: 2, max: 4),
   NnMomentType.timeline: (min: 2, max: 8),
   NnMomentType.peak: (min: 3, max: 5),
@@ -44,7 +44,7 @@ NeonNightStory? neonNightFromWrapUp(
         if (photoIds.contains(photo.id)) photo.id: photo,
   };
   final chapters = <NnChapter>[];
-  for (final (index, entry) in kept.indexed) {
+  for (final entry in kept) {
     final photos = [for (final photo in entry.photos) _photo(photo)];
     final ids = {for (final photo in entry.photos) photo.id};
     final moments = [
@@ -57,10 +57,10 @@ NeonNightStory? neonNightFromWrapUp(
     chapters.add(
       NnChapter(
         title: entry.chapter.title,
+        // The chapter's own photos (#444): never up to the next chapter's
+        // first, which read 09:40–18:42 over two morning photos.
         from: photos.first.takenAt,
-        to: index + 1 < kept.length
-            ? _clock(kept[index + 1].photos.first.takenAt)
-            : photos.last.takenAt,
+        to: photos.last.takenAt,
         photos: photos,
         cardPhotos: [
           for (final photo in [
@@ -71,7 +71,11 @@ NeonNightStory? neonNightFromWrapUp(
         ],
         note: entry.chapter.note,
         moments: _withLines(
-          moments.isNotEmpty ? moments : [NnTimeline(_spread(photos))],
+          // No moment: the card alone (#444) when it has its own photos;
+          // content from before falls back to a timeline of the chapter.
+          moments.isNotEmpty || entry.chapter.cardPhotoIds.isNotEmpty
+              ? moments
+              : [NnTimeline(_spread(photos))],
           entry.chapter,
           photos,
         ),

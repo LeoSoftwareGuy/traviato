@@ -24,10 +24,39 @@ class NnContactSheet {
       span * pitch - gap,
       span * pitch - gap,
     );
+    // A rect [cols] wide and [rows] high from column [col] (fractional
+    // columns for 3 equal tiles).
+    Rect box(double col, double cols, int rows) => Rect.fromLTWH(
+      left + col * pitch,
+      top,
+      cols * pitch - gap,
+      rows * pitch - gap,
+    );
+    // Up to 9 photos (#444): the 8 × 2 grid is always full, never a band
+    // of empty space — 1–3 side by side, 4 squares, 5 and 6 a mosaic of
+    // squares and tall tiles. 7–9 (older content) show the first 6.
     if (photos < 10) {
-      return NnContactSheet._(2, [
-        for (var i = 0; i < photos && i < 4; i++) cell(2 * i, 0, 2),
-      ]);
+      return NnContactSheet._(2, switch (photos) {
+        1 || 2 || 3 => [
+          for (var i = 0; i < photos; i++) box(i * 8 / photos, 8 / photos, 2),
+        ],
+        4 => [for (var i = 0; i < 4; i++) cell(2 * i, 0, 2)],
+        5 => [
+          cell(0, 0, 2),
+          cell(2, 0, 2),
+          cell(4, 0, 2),
+          box(6, 1, 2),
+          box(7, 1, 2),
+        ],
+        _ => [
+          cell(0, 0, 2),
+          box(2, 1, 2),
+          box(3, 1, 2),
+          cell(4, 0, 2),
+          box(6, 1, 2),
+          box(7, 1, 2),
+        ],
+      });
     }
     final rows = (2 + (photos - 10) ~/ 8).clamp(2, 5);
     return NnContactSheet._(rows, [
