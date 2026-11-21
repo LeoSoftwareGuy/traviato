@@ -195,3 +195,50 @@ export function bestLines(
     .sort((a, b) => a.at - b.at)
     .map(({ at: _at, ...line }) => line);
 }
+
+// A director line snapped to the note's own words (#444): the passage of
+// [note] that reads the same ignoring case, spaces, punctuation and ё/е,
+// in the note's exact words. Null when no passage matches.
+export function snapToNote(line: string, note: string): string | null {
+  const norm = (c: string) => {
+    const l = c.toLowerCase();
+    return l === "ё" ? "е" : l;
+  };
+  const isWord = (c: string) => /[\p{L}\p{N}]/u.test(c);
+  const chars = [...note];
+  let n = "";
+  const at: number[] = [];
+  let space = true;
+  for (let i = 0; i < chars.length; i++) {
+    if (isWord(chars[i])) {
+      n += norm(chars[i]);
+      at.push(i);
+      space = false;
+    } else if (!space) {
+      n += " ";
+      at.push(i);
+      space = true;
+    }
+  }
+  const want = [...line].map((c) => isWord(c) ? norm(c) : " ").join("")
+    .replace(/\s+/g, " ").trim();
+  if (want.length === 0) return null;
+  // n is built per character, so its indices line up with [at].
+  const nChars = [...n];
+  const wChars = [...want];
+  for (let s = 0; s + wChars.length <= nChars.length; s++) {
+    if (s > 0 && nChars[s - 1] !== " ") continue;
+    let ok = true;
+    for (let k = 0; k < wChars.length && ok; k++) {
+      ok = nChars[s + k] === wChars[k];
+    }
+    if (!ok) continue;
+    const end = s + wChars.length;
+    if (end < nChars.length && nChars[end] !== " ") continue;
+    let to = at[end - 1] + 1;
+    // Keep the sentence's own closing punctuation.
+    while (to < chars.length && /[.!?…)»"]/u.test(chars[to])) to++;
+    return chars.slice(at[s], to).join("").trim();
+  }
+  return null;
+}

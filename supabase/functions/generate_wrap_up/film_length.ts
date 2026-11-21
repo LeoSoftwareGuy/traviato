@@ -183,8 +183,10 @@ export function nnCardBeats(
   count: number,
   photos: number,
 ): number {
-  const zooms = index === 0 || index === count - 1 ? Math.min(photos, 3) : 0;
-  return zooms === 0 ? 8 : zooms < 3 ? 12 : 16;
+  // Every card zooms up to 2 of its photos (#444: NeonZoomPicks), 12
+  // beats; zoom holds are capped at 2 beats each and covered by the slack.
+  void index, count;
+  return Math.min(photos, 2) === 0 ? 8 : 12;
 }
 
 export interface NnShapeMoment {

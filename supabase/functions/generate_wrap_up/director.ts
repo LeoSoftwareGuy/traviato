@@ -105,7 +105,7 @@ export const MAX_DIRECTOR_RUNS = 4;
 // The director's rules (#398: logical days, excerpts, chronology; #433:
 // the template from vibes). A record made under older rules runs again
 // once, within MAX_DIRECTOR_RUNS.
-export const DIRECTOR_VERSION = 3;
+export const DIRECTOR_VERSION = 4;
 
 // The films with a section of their own (#346, #363).
 type SectionFilm = Exclude<PlayedTemplate, "sky_story">;
@@ -888,6 +888,19 @@ export function directorIsStale(record: unknown, tripData: TripData): boolean {
   if (!isDirectorRecord(record)) return false;
   if ((record.run_count ?? 1) >= MAX_DIRECTOR_RUNS) return false;
   if ((record.director_version ?? 1) < DIRECTOR_VERSION) return true;
+  // A film photo the director never saw (#444: it planned 21 of 27):
+  // it runs again, unless the film was capped at its photo limit.
+  const seen = record.photo_paths;
+  if (seen) {
+    const failed = new Set(record.failed_ids ?? []);
+    const known = Object.keys(seen).length;
+    const unseen = tripData.photos.some((p) =>
+      p.use_in_wrap_up !== false && !(p.id in seen) && !failed.has(p.id)
+    );
+    if (unseen && known > 0 && known < WRAP_UP_LIMITS.maxFilmPhotos) {
+      return true;
+    }
+  }
   const before = record.photo_days;
   if (!before) return false;
   const now = photoDaysOf(tripData);

@@ -580,6 +580,25 @@ Deno.test("directorIsStale when photo days change, until the run cap", () => {
     ),
     false,
   );
+  // A film photo the director never saw (#444): it runs again.
+  const seenAll = Object.fromEntries(data.photos.map((p) => [p.id, "x"]));
+  assertEquals(
+    directorIsStale(skyRecord({ photo_paths: seenAll }), data),
+    false,
+  );
+  const missed = { ...seenAll };
+  delete missed[data.photos[0].id];
+  assertEquals(
+    directorIsStale(skyRecord({ photo_paths: missed }), data),
+    true,
+  );
+  assertEquals(
+    directorIsStale(
+      skyRecord({ photo_paths: missed, failed_ids: [data.photos[0].id] }),
+      data,
+    ),
+    false,
+  );
   // Records from before #345 have no photo days: never stale.
   assertEquals(
     directorIsStale(skyRecord({ photo_days: undefined }), fewer),

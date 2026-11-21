@@ -1216,7 +1216,34 @@
         "id": "p04",
         "taken_at": "2026-09-01T11:28:00Z",
         "caption": null
-       },
+       }
+      ],
+      "card_photo_ids": [
+       "p00",
+       "p01",
+       "p02",
+       "p03",
+       "p04"
+      ],
+      "note": "Tram 28 up to the castle, the whole city below us.",
+      "excerpts": [
+       {
+        "text": "Tram 28 up to the castle, the whole city below us.",
+        "note_id": "n0",
+        "photo_id": "p04",
+        "source": "code",
+        "score": 3
+       }
+      ],
+      "days": [
+       "2026-09-01"
+      ],
+      "rejected_excerpts": [],
+      "moments": []
+     },
+     {
+      "title": "09:00 2",
+      "photos": [
        {
         "id": "p05",
         "taken_at": "2026-09-02T09:00:00Z",
@@ -1241,7 +1268,34 @@
         "id": "p09",
         "taken_at": "2026-09-02T11:28:00Z",
         "caption": null
-       },
+       }
+      ],
+      "card_photo_ids": [
+       "p05",
+       "p06",
+       "p07",
+       "p08",
+       "p09"
+      ],
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "excerpts": [
+       {
+        "text": "Pastéis de nata at Manteigaria, still warm, three each.",
+        "note_id": "n1",
+        "photo_id": "p09",
+        "source": "code",
+        "score": 2
+       }
+      ],
+      "days": [
+       "2026-09-02"
+      ],
+      "rejected_excerpts": [],
+      "moments": []
+     },
+     {
+      "title": "09:00 3",
+      "photos": [
        {
         "id": "p10",
         "taken_at": "2026-09-03T09:00:00Z",
@@ -1269,53 +1323,35 @@
        }
       ],
       "card_photo_ids": [
-       "p00",
-       "p01"
+       "p10",
+       "p11",
+       "p12",
+       "p13",
+       "p14"
       ],
-      "note": "Tram 28 up to the castle, the whole city below us.",
+      "note": "Our last sunset at Miradouro da Senhora do Monte.",
       "excerpts": [
        {
-        "text": "Tram 28 up to the castle, the whole city below us.",
-        "note_id": "n0",
-        "photo_id": "p04",
+        "text": "Our last sunset at Miradouro da Senhora do Monte.",
+        "note_id": "n2",
+        "photo_id": "p14",
         "source": "code",
         "score": 3
        }
       ],
       "days": [
-       "2026-09-01",
-       "2026-09-02",
        "2026-09-03"
       ],
-      "rejected_excerpts": [
-       {
-        "text": "Our last sunset at Miradouro da Senhora do Monte.",
-        "score": 3
-       },
-       {
-        "text": "Pastéis de nata at Manteigaria, still warm, three each.",
-        "score": 2
-       }
-      ],
-      "moments": [
-       {
-        "type": "timeline",
-        "photo_ids": [
-         "p07",
-         "p08",
-         "p09",
-         "p10",
-         "p11",
-         "p12",
-         "p13",
-         "p14"
-        ],
-        "place": null
-       }
-      ]
+      "rejected_excerpts": [],
+      "moments": []
      }
     ],
-    "note": null,
+    "note": {
+     "text": "Tram 28 up to the castle, the whole city below us.",
+     "number": 1,
+     "written_at": "2026-09-01T20:00:00Z",
+     "photo_id": null
+    },
     "headline": null,
     "first_name": null,
     "totals": {
@@ -1525,7 +1561,9 @@
       ],
       "card_photo_ids": [
        "p00",
-       "p01"
+       "p01",
+       "p02",
+       "p03"
       ],
       "note": "Tram 28 up to the castle, the whole city below us.",
       "excerpts": [
@@ -1545,8 +1583,6 @@
        {
         "type": "timeline",
         "photo_ids": [
-         "p02",
-         "p03",
          "p04",
          "p05",
          "p06",
@@ -1599,7 +1635,44 @@
         "id": "p16",
         "taken_at": "2026-09-02T13:19:00Z",
         "caption": null
-       },
+       }
+      ],
+      "card_photo_ids": [
+       "p09",
+       "p10",
+       "p11",
+       "p12"
+      ],
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "excerpts": [
+       {
+        "text": "Pastéis de nata at Manteigaria, still warm, three each.",
+        "note_id": "n1",
+        "photo_id": "p16",
+        "source": "code",
+        "score": 2
+       }
+      ],
+      "days": [
+       "2026-09-02"
+      ],
+      "rejected_excerpts": [],
+      "moments": [
+       {
+        "type": "split",
+        "photo_ids": [
+         "p13",
+         "p14",
+         "p15",
+         "p16"
+        ],
+        "place": null
+       }
+      ]
+     },
+     {
+      "title": "09:00 3",
+      "photos": [
        {
         "id": "p18",
         "taken_at": "2026-09-03T09:00:00Z",
@@ -1642,8 +1715,10 @@
        }
       ],
       "card_photo_ids": [
-       "p09",
-       "p10"
+       "p18",
+       "p19",
+       "p20",
+       "p21"
       ],
       "note": "Our last sunset at Miradouro da Senhora do Monte.",
       "excerpts": [
@@ -1656,23 +1731,13 @@
        }
       ],
       "days": [
-       "2026-09-02",
        "2026-09-03"
       ],
-      "rejected_excerpts": [
-       {
-        "text": "Pastéis de nata at Manteigaria, still warm, three each.",
-        "score": 2
-       }
-      ],
+      "rejected_excerpts": [],
       "moments": [
        {
-        "type": "timeline",
+        "type": "split",
         "photo_ids": [
-         "p18",
-         "p19",
-         "p20",
-         "p21",
          "p22",
          "p23",
          "p24",
@@ -1683,7 +1748,12 @@
       ]
      }
     ],
-    "note": null,
+    "note": {
+     "text": "Tram 28 up to the castle, the whole city below us.",
+     "number": 1,
+     "written_at": "2026-09-01T20:00:00Z",
+     "photo_id": null
+    },
     "headline": null,
     "first_name": null,
     "totals": {
@@ -2038,7 +2108,10 @@
       "card_photo_ids": [
        "p00",
        "p01",
-       "p02"
+       "p02",
+       "p03",
+       "p04",
+       "p05"
       ],
       "note": "Tram 28 up to the castle, the whole city below us.",
       "excerpts": [
@@ -2056,20 +2129,17 @@
       "rejected_excerpts": [],
       "moments": [
        {
-        "type": "burst",
+        "type": "split",
         "photo_ids": [
-         "p03",
-         "p04",
-         "p05",
-         "p06"
+         "p06",
+         "p07",
+         "p08"
         ],
         "place": null
        },
        {
         "type": "timeline",
         "photo_ids": [
-         "p07",
-         "p08",
          "p09",
          "p10",
          "p11",
@@ -2151,7 +2221,10 @@
       ],
       "card_photo_ids": [
        "p14",
-       "p15"
+       "p15",
+       "p16",
+       "p17",
+       "p18"
       ],
       "note": "Pastéis de nata at Manteigaria, still warm, three each.",
       "excerpts": [
@@ -2169,18 +2242,9 @@
       "rejected_excerpts": [],
       "moments": [
        {
-        "type": "burst",
-        "photo_ids": [
-         "p16",
-         "p17",
-         "p18",
-         "p19"
-        ],
-        "place": null
-       },
-       {
         "type": "timeline",
         "photo_ids": [
+         "p19",
          "p20",
          "p21",
          "p22",
@@ -2264,7 +2328,10 @@
       ],
       "card_photo_ids": [
        "p28",
-       "p29"
+       "p29",
+       "p30",
+       "p31",
+       "p32"
       ],
       "note": "Our last sunset at Miradouro da Senhora do Monte.",
       "excerpts": [
@@ -2282,12 +2349,16 @@
       "rejected_excerpts": [],
       "moments": [
        {
-        "type": "burst",
+        "type": "timeline",
         "photo_ids": [
-         "p30",
-         "p31",
-         "p32",
-         "p33"
+         "p33",
+         "p34",
+         "p35",
+         "p36",
+         "p37",
+         "p38",
+         "p39",
+         "p27"
         ],
         "place": null
        }
