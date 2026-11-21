@@ -26,6 +26,7 @@ abstract final class NnReadingTime {
           moments: [for (final moment in chapter.moments) moment.type],
           photos: chapter.cardPhotos.length,
           zoomHolds: zoomHolds(chapter, i + 1, beat),
+          zooms: NnChapterTexts.zoomTilesFor(chapter, i + 1).length,
           cardMinBeats: cardBeats(chapter, beat),
           momentMinBeats: [
             for (final moment in chapter.moments) momentBeats(moment, beat),
@@ -49,20 +50,22 @@ abstract final class NnReadingTime {
     int chapterNumber,
     NeonBeat beat,
   ) {
-    final tiles = NnContactSheet.forPhotos(chapter.cardPhotos.length).tiles;
-    final zooms = NeonZoomPicks.countFor(chapter.cardPhotos.length);
-    if (zooms == 0) return const [];
-    final picks = NeonZoomPicks.pick(
-      chapterNumber: chapterNumber,
-      tiles: tiles.length,
-    ).take(zooms);
+    final picks = NnChapterTexts.zoomTilesFor(chapter, chapterNumber);
     return [
       for (final k in picks)
-        switch (NnChapterTexts.zoomCaptionOf(chapter.cardPhotos[k], beat)) {
-          final caption? => math.max(
-            0,
-            _ceil(beat.secToBeat(FilmTextRules.readingTime(caption)) - 1.5),
-          ),
+        switch (NnChapterTexts.zoomCaptionOf(
+          chapter.cardPhotos[k],
+          const NeonBeat(),
+        )) {
+          final caption? =>
+            math
+                .max(
+                  0,
+                  _ceil(
+                    beat.secToBeat(FilmTextRules.readingTime(caption)) - 1.5,
+                  ),
+                )
+                .clamp(0, NeonZoomPicks.maxHoldBeats),
           null => 0,
         },
     ];

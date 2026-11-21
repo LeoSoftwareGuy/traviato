@@ -21,7 +21,12 @@ import { decorativePhotos } from "./decorative.ts";
 import { bannedPhraseIn, cleanAiLine, cleanLine } from "./film_plan.ts";
 import type { WrapUpLanguage } from "./language.ts";
 import { WRAP_UP_LIMITS } from "./wrap_up_limits.ts";
-import { filmSecondsOf, nnFilmBeats, nnFits } from "./film_length.ts";
+import {
+  filmSecondsOf,
+  nnFilmBeats,
+  nnFits,
+  nnFitsZoom,
+} from "./film_length.ts";
 import { wholeWords } from "./text_fit.ts";
 export { wholeWords };
 import { isExcerptOf } from "./golden_vows.ts";
@@ -137,7 +142,12 @@ export interface NeonNightContent {
     title: string;
     // Chronological; taken_at is an ISO instant the app shows in local
     // time.
-    photos: { id: string; taken_at: string; caption: string | null }[];
+    photos: {
+      id: string;
+      taken_at: string;
+      caption: string | null;
+      hero_score?: number | null;
+    }[];
     // The card's own photos (#390): its grid and zooms, never a moment's.
     // Older content has none — the app then uses every chapter photo.
     card_photo_ids: string[];
@@ -1565,14 +1575,31 @@ function timeOf(p: Photo): number {
   return Date.parse(p.taken_at ?? p.created_at ?? "") || 0;
 }
 
-// The moment [photos] (time order, 3 or more) play as (#444).
-export function momentFor(photos: Photo[]): ContentMoment {
+// The moment [photos] (time order, 3 or more) play as (#444). Past a
+// timeline's 8, the best photos stay (#446) — Always picks, then captioned
+// ones (the user's own words, as the zooms rank them), then the highest
+// [heroScores], an even spread breaking ties — so the heart gets the
+// lowest-rated, never just the last in time.
+export function momentFor(
+  photos: Photo[],
+  heroScores: Readonly<Record<string, number>> = {},
+): ContentMoment {
+  const room = NN_MOMENT_PHOTOS.timeline[1];
   if (photos.length > NN_SCENE_PHOTOS[1]) {
-    return {
-      type: "timeline",
-      photo_ids: spreadEvenly(photos, NN_MOMENT_PHOTOS.timeline[1]).map((p) =>
+    const spread = new Set(spreadEvenly(photos, room).map((p) => p.id));
+    const rank = (p: Photo) =>
+      (p.use_in_wrap_up === true ? 1000 : 0) +
+      (p.caption?.trim() ? 100 : 0) +
+      (heroScores[p.id] ?? 0) * 10 +
+      (spread.has(p.id) ? 1 : 0);
+    const kept = new Set(
+      [...photos].sort((a, b) => rank(b) - rank(a)).slice(0, room).map((p) =>
         p.id
       ),
+    );
+    return {
+      type: "timeline",
+      photo_ids: photos.filter((p) => kept.has(p.id)).map((p) => p.id),
     };
   }
   const spread = timeOf(photos[photos.length - 1]) - timeOf(photos[0]);
@@ -1613,6 +1640,7 @@ function splitAtGap(photos: Photo[]): number {
 export function dealChapter(
   chapter: ShapedChapter,
   notePhoto: string | null,
+  heroScores: Readonly<Record<string, number>> = {},
 ): void {
   const photos = chapter.photos.filter((p) => p.id !== notePhoto);
   const pool = photos.length >= NN_SCENE_PHOTOS[0] ? photos : chapter.photos;
@@ -1627,6 +1655,18 @@ export function dealChapter(
   // Up to 6 photos: one full card of them all and no moment (#444 — "the
   // whole day has just 4, 4 is the best choice"), never a half-empty one.
   if (n < MIN_NN_CARD_PHOTOS + NN_SCENE_PHOTOS[0]) {
+    // Unless a caption is too long for a zoom (#446): then a moment plays
+    // from that photo on (3 at least), which holds it for its reading time,
+    // and the card keeps the earlier ones — still in time order.
+    const long = pool.findIndex((p) =>
+      p.caption?.trim() && !nnFitsZoom(p.caption.trim())
+    );
+    if (long >= 0 && n > NN_SCENE_PHOTOS[0]) {
+      const from = Math.max(1, Math.min(long, n - NN_SCENE_PHOTOS[0]));
+      chapter.card = pool.slice(0, from).map((p) => p.id);
+      chapter.moments = [momentFor(pool.slice(from), heroScores)];
+      return;
+    }
     chapter.card = pool.slice(0, 6).map((p) => p.id);
     chapter.moments = [];
     return;
@@ -1635,9 +1675,12 @@ export function dealChapter(
   const rest = pool.slice(cardSize);
   if (rest.length >= NN_TWO_MOMENTS_FROM) {
     const at = splitAtGap(rest);
-    chapter.moments = [momentFor(rest.slice(0, at)), momentFor(rest.slice(at))];
+    chapter.moments = [
+      momentFor(rest.slice(0, at), heroScores),
+      momentFor(rest.slice(at), heroScores),
+    ];
   } else {
-    chapter.moments = [momentFor(rest)];
+    chapter.moments = [momentFor(rest, heroScores)];
   }
 }
 
@@ -1658,6 +1701,8 @@ function shapeChapters(
   byDays = false,
   // The most chapters the film's length holds (#434).
   maxChapters = MAX_NN_CHAPTERS,
+  // Which photos a full moment keeps (#446).
+  heroScores: Readonly<Record<string, number>> = {},
 ): ShapedChapter[] {
   const chapters: ShapedChapter[] = plan.chapters.map((chapter, i) => ({
     title: chapter.title,
@@ -1714,8 +1759,23 @@ function shapeChapters(
   }
 
   const notePhoto = plan.note_moment?.photo_id ?? null;
-  for (const chapter of chapters) dealChapter(chapter, notePhoto);
+  for (const chapter of chapters) dealChapter(chapter, notePhoto, heroScores);
   return chapters;
+}
+
+// [chapter]'s card photos whose caption can't be read in a zoom (#446),
+// as lines to bring into a moment.
+function longCaptionLines(chapter: ShapedChapter): NeonNightContentExcerpt[] {
+  return chapter.photos.filter((p) =>
+    chapter.card.includes(p.id) && p.caption?.trim() &&
+    !nnFitsZoom(p.caption.trim())
+  ).map((p) => ({
+    text: p.caption!.trim(),
+    note_id: "",
+    photo_id: p.id,
+    source: "code" as const,
+    score: 0,
+  }));
 }
 
 // Brings each of [excerpts]' photos into a moment of [chapter] (#444):
@@ -1724,6 +1784,7 @@ function shapeChapters(
 function bringLinePhotos(
   chapter: ShapedChapter,
   excerpts: NeonNightContentExcerpt[],
+  heroScores: Readonly<Record<string, number>> = {},
 ): void {
   const at = new Map(chapter.photos.map((p, k) => [p.id, k]));
   const t = (id: string) =>
@@ -1760,6 +1821,7 @@ function bringLinePhotos(
       const ids = [...moved, ...first.photo_ids];
       chapter.moments[0] = momentFor(
         chapter.photos.filter((p) => ids.includes(p.id)),
+        heroScores,
       );
       continue;
     }
@@ -1959,6 +2021,8 @@ function capLines(picked: PickedLines[]): void {
 export function buildNeonNightContent(
   tripData: TripData,
   plan: NeonNightPlan,
+  // The director's analysis (#446): the card zooms its best photos.
+  heroScores: Readonly<Record<string, number>> = {},
 ): NeonNightContent {
   const all = nnPhotos(tripData);
   const order = new Map(all.map((p, i) => [p.id, i]));
@@ -1999,7 +2063,13 @@ export function buildNeonNightContent(
   // the film runs over, a chapter's second moment goes (the longest
   // first, from the last chapter), then the Plan scene, then the Note.
   const seconds = filmSecondsOf(tripData);
-  const shaped = shapeChapters(chapterPhotos, plan, byDays)
+  const shaped = shapeChapters(
+    chapterPhotos,
+    plan,
+    byDays,
+    MAX_NN_CHAPTERS,
+    heroScores,
+  )
     // A chapter plays while it has photos to show (#444: a small one is
     // its card alone).
     .filter((c) => c.card.length > 0 || c.moments.length > 0);
@@ -2053,7 +2123,7 @@ export function buildNeonNightContent(
     if (two) {
       const ids = new Set(two.c.moments.flatMap((m) => m.photo_ids));
       two.c.moments = [
-        momentFor(two.c.photos.filter((p) => ids.has(p.id))),
+        momentFor(two.c.photos.filter((p) => ids.has(p.id)), heroScores),
       ];
       picked = pickExcerpts(tripData, shaped, days);
     } else if (showsPlan) showsPlan = false;
@@ -2075,8 +2145,13 @@ export function buildNeonNightContent(
     }
   }
   // Lines play over their own photos (#444): a line whose photo is on the
-  // card or in no scene brings it into the moment nearest it in time.
-  shaped.forEach((c, i) => bringLinePhotos(c, picked[i].excerpts));
+  // card or in no scene brings it into the moment nearest it in time. So
+  // does a caption too long for a card zoom (#446): a moment holds it for
+  // its reading time.
+  shaped.forEach((c, i) => {
+    bringLinePhotos(c, picked[i].excerpts, heroScores);
+    bringLinePhotos(c, longCaptionLines(c), heroScores);
+  });
   // The Note scene is never empty while a usable line is left (#444):
   // the director's pick was blocked, so code picks the best unused one.
   if (noteMoment === null) {
@@ -2095,6 +2170,9 @@ export function buildNeonNightContent(
         // The user's own words on the photo (#387): the zoom and timeline
         // labels show it instead of the time.
         caption: p.caption?.trim() || null,
+        // How good a shot it is (#446, 1–5; null = not analysed): the
+        // card zooms its best photos.
+        hero_score: heroScores[p.id] ?? null,
       })),
       card_photo_ids: chapter.card,
       // The card's typed line: the director's, else the first line short

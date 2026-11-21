@@ -23,6 +23,7 @@ Map<String, dynamic> _content() => {
             'id': 'p2',
             'taken_at': '2026-11-14T20:20:00Z',
             'caption': 'Lost the keys',
+            'hero_score': 4,
           },
           {'id': 'broken'},
         ],
@@ -73,6 +74,9 @@ void main() {
     // The user's caption (#387); none → null.
     expect(chapter.photos.first.caption, isNull);
     expect(chapter.photos[1].caption, 'Lost the keys');
+    // Its hero score (#446); none → null.
+    expect(chapter.photos[1].heroScore, 4);
+    expect(chapter.photos.first.heroScore, isNull);
     expect(chapter.note, 'Queue was worth it.');
     expect(chapter.moments, const [
       WrapUpNeonMoment(

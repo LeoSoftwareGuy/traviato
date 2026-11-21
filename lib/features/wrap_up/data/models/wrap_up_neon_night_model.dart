@@ -61,6 +61,10 @@ WrapUpNeonChapter? _chapter(dynamic json) {
         id: id,
         takenAt: takenAt,
         caption: _string(photo['caption']),
+        heroScore: switch (photo['hero_score']) {
+          final num score => score.round(),
+          _ => null,
+        },
       ),
     );
   }

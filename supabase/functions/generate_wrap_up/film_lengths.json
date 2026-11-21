@@ -1195,27 +1195,32 @@
        {
         "id": "p00",
         "taken_at": "2026-09-01T09:00:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p01",
         "taken_at": "2026-09-01T09:37:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p02",
         "taken_at": "2026-09-01T10:14:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p03",
         "taken_at": "2026-09-01T10:51:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p04",
         "taken_at": "2026-09-01T11:28:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        }
       ],
       "card_photo_ids": [
@@ -1247,27 +1252,32 @@
        {
         "id": "p05",
         "taken_at": "2026-09-02T09:00:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p06",
         "taken_at": "2026-09-02T09:37:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p07",
         "taken_at": "2026-09-02T10:14:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p08",
         "taken_at": "2026-09-02T10:51:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p09",
         "taken_at": "2026-09-02T11:28:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        }
       ],
       "card_photo_ids": [
@@ -1299,27 +1309,32 @@
        {
         "id": "p10",
         "taken_at": "2026-09-03T09:00:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p11",
         "taken_at": "2026-09-03T09:37:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p12",
         "taken_at": "2026-09-03T10:14:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p13",
         "taken_at": "2026-09-03T10:51:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p14",
         "taken_at": "2026-09-03T11:28:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        }
       ],
       "card_photo_ids": [
@@ -1516,47 +1531,56 @@
        {
         "id": "p00",
         "taken_at": "2026-09-01T09:00:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p01",
         "taken_at": "2026-09-01T09:37:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p02",
         "taken_at": "2026-09-01T10:14:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p03",
         "taken_at": "2026-09-01T10:51:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p04",
         "taken_at": "2026-09-01T11:28:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p05",
         "taken_at": "2026-09-01T12:05:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p06",
         "taken_at": "2026-09-01T12:42:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p07",
         "taken_at": "2026-09-01T13:19:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p08",
         "taken_at": "2026-09-01T13:56:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        }
       ],
       "card_photo_ids": [
@@ -1599,42 +1623,50 @@
        {
         "id": "p09",
         "taken_at": "2026-09-02T09:00:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p10",
         "taken_at": "2026-09-02T09:37:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p11",
         "taken_at": "2026-09-02T10:14:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p12",
         "taken_at": "2026-09-02T10:51:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p13",
         "taken_at": "2026-09-02T11:28:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p14",
         "taken_at": "2026-09-02T12:05:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p15",
         "taken_at": "2026-09-02T12:42:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p16",
         "taken_at": "2026-09-02T13:19:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        }
       ],
       "card_photo_ids": [
@@ -1676,42 +1708,50 @@
        {
         "id": "p18",
         "taken_at": "2026-09-03T09:00:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p19",
         "taken_at": "2026-09-03T09:37:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p20",
         "taken_at": "2026-09-03T10:14:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p21",
         "taken_at": "2026-09-03T10:51:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p22",
         "taken_at": "2026-09-03T11:28:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p23",
         "taken_at": "2026-09-03T12:05:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p24",
         "taken_at": "2026-09-03T12:42:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p17",
         "taken_at": "2026-09-03T13:56:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        }
       ],
       "card_photo_ids": [
@@ -2037,72 +2077,86 @@
        {
         "id": "p00",
         "taken_at": "2026-09-01T09:00:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p01",
         "taken_at": "2026-09-01T09:37:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p02",
         "taken_at": "2026-09-01T10:14:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p03",
         "taken_at": "2026-09-01T10:51:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p04",
         "taken_at": "2026-09-01T11:28:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p05",
         "taken_at": "2026-09-01T12:05:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p06",
         "taken_at": "2026-09-01T12:42:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p07",
         "taken_at": "2026-09-01T13:19:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p08",
         "taken_at": "2026-09-01T13:56:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p09",
         "taken_at": "2026-09-01T14:33:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p10",
         "taken_at": "2026-09-01T15:10:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p11",
         "taken_at": "2026-09-01T15:47:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p12",
         "taken_at": "2026-09-01T16:24:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p13",
         "taken_at": "2026-09-01T17:01:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        }
       ],
       "card_photo_ids": [
@@ -2156,67 +2210,80 @@
        {
         "id": "p14",
         "taken_at": "2026-09-02T09:00:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p15",
         "taken_at": "2026-09-02T09:37:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p16",
         "taken_at": "2026-09-02T10:14:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p17",
         "taken_at": "2026-09-02T10:51:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p18",
         "taken_at": "2026-09-02T11:28:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p19",
         "taken_at": "2026-09-02T12:05:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p20",
         "taken_at": "2026-09-02T12:42:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p21",
         "taken_at": "2026-09-02T13:19:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p22",
         "taken_at": "2026-09-02T13:56:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p23",
         "taken_at": "2026-09-02T14:33:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p24",
         "taken_at": "2026-09-02T15:10:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p25",
         "taken_at": "2026-09-02T15:47:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p26",
         "taken_at": "2026-09-02T16:24:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        }
       ],
       "card_photo_ids": [
@@ -2263,67 +2330,80 @@
        {
         "id": "p28",
         "taken_at": "2026-09-03T09:00:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p29",
         "taken_at": "2026-09-03T09:37:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p30",
         "taken_at": "2026-09-03T10:14:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p31",
         "taken_at": "2026-09-03T10:51:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p32",
         "taken_at": "2026-09-03T11:28:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p33",
         "taken_at": "2026-09-03T12:05:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p34",
         "taken_at": "2026-09-03T12:42:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p35",
         "taken_at": "2026-09-03T13:19:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p36",
         "taken_at": "2026-09-03T13:56:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p37",
         "taken_at": "2026-09-03T14:33:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p38",
         "taken_at": "2026-09-03T15:10:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p39",
         "taken_at": "2026-09-03T15:47:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        },
        {
         "id": "p27",
         "taken_at": "2026-09-03T17:01:00Z",
-        "caption": null
+        "caption": null,
+        "hero_score": null
        }
       ],
       "card_photo_ids": [

@@ -9,6 +9,7 @@ import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_nigh
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_texts.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_reading_time.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_track.dart';
+import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_zoom_picks.dart';
 import 'package:traviato/l10n/app_localizations.dart';
 
 import 'neon_test_fonts.dart';
@@ -124,36 +125,64 @@ void main() {
       expect(NnReadingTime.momentBeats(split, beat), 0);
     });
 
-    test('a zoom holds on a short caption; a long one shows the time and '
-        'never stretches the zoom (#444)', () {
-      final long = NnChapter(
-        title: 'Airport',
-        from: '06:40',
-        to: '07:00',
-        photos: [
-          photo('a', '06:40', 'fast check-in at the airport, half asleep'),
-        ],
-        moments: [
-          NnTimeline([photo('a', '06:40'), photo('b', '06:50')]),
-        ],
-      );
-      expect(NnReadingTime.zoomHolds(long, 1, beat).single, 0);
-      expect(
-        NnChapterTexts.zoomLabelFor(long.photos.first).text,
-        '06:40',
-      );
-      final photos = [photo('a', '06:40', 'Gate B12, coffee')];
-      final chapter = NnChapter(
+    test('a zoom holds its caption up to ~4 s; a longer one is never zoomed '
+        'and never replaced by the time (#446)', () {
+      NnChapter card(List<NnPhoto> photos) => NnChapter(
         title: 'Airport',
         from: '06:40',
         to: '07:00',
         photos: photos,
         moments: [
-          NnTimeline([photos.first, photo('b', '06:50')]),
+          NnTimeline([photo('x', '06:55'), photo('y', '06:56')]),
         ],
       );
-      final holds = NnReadingTime.zoomHolds(chapter, 1, beat);
-      expect(holds.single, greaterThan(0));
+      // 0.8 s + 1 s per 12 characters is past a zoom's ~4 s.
+      final long = card([
+        photo(
+          'a',
+          '06:40',
+          'fast check-in at the airport, half asleep, the queue was endless',
+        ),
+      ]);
+      expect(NnChapterTexts.zoomTilesFor(long, 1), isEmpty);
+      expect(NnReadingTime.zoomHolds(long, 1, beat), isEmpty);
+      // About 3.5 s to read: zoomed, held, and its words shown.
+      final medium = card([
+        photo('a', '06:40', 'Gate B12, coffee and a croissant'),
+      ]);
+      final hold = NnReadingTime.zoomHolds(medium, 1, beat).single;
+      expect(hold, greaterThan(2));
+      expect(hold, lessThanOrEqualTo(NeonZoomPicks.maxHoldBeats));
+      expect(
+        NnChapterTexts.zoomLabelFor(medium.photos.first).text,
+        'Gate B12, coffee and a croissant',
+      );
+      // The time only for a photo without a caption.
+      expect(NnChapterTexts.zoomLabelFor(photo('b', '06:50')).text, '06:50');
+    });
+
+    test('zooms pick captioned photos, then the best hero score (#446)', () {
+      final photos = [
+        const NnPhoto(id: 'a', takenAt: '22:00', heroScore: 2),
+        const NnPhoto(id: 'b', takenAt: '22:05', heroScore: 5),
+        const NnPhoto(id: 'c', takenAt: '22:10', heroScore: 3),
+        const NnPhoto(
+          id: 'd',
+          takenAt: '22:15',
+          caption: 'Queue',
+          heroScore: 1,
+        ),
+      ];
+      final chapter = NnChapter(
+        title: 'Club',
+        from: '22:00',
+        to: '22:15',
+        photos: photos,
+        moments: [
+          NnTimeline([photo('x', '23:00'), photo('y', '23:01')]),
+        ],
+      );
+      expect(NnChapterTexts.zoomTilesFor(chapter, 1), [3, 1]);
     });
 
     test('the film stays on the track: every scene whole bars, the Finale '

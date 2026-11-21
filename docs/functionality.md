@@ -354,8 +354,13 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   mosaic); the rest make one moment, two from 6 left (split at the
   longest gap) — 3–4 photos within 2 min a burst, else a split (4 as a
   2 × 2 grid), 5+ a timeline of up to 8. A day of up to 6 photos is
-  its card alone. Every card zooms up to 2 photos; a zoom holds at most
-  3 beats, and a caption that needs longer shows the time. A card's
+  its card alone. Every card zooms up to 2 photos — captioned ones
+  first, then the best hero score (#446); a zoom holds a caption up to
+  ~4 s, and a longer caption is never zoomed: its photo plays in a
+  moment, which holds it for its reading time. The time shows only for
+  a photo without a caption. When a moment can't hold all its photos (a timeline
+  shows 8), the lowest-rated go to the heart — Always picks, then captioned
+  photos, then the best hero scores stay, wherever they fall in time (#446). A card's
   time range is its own photos'. Director lines that differ only in
   case, spacing, punctuation or ё/е take the note's exact words; a line
   plays over its own photo (brought into a moment); the Note scene

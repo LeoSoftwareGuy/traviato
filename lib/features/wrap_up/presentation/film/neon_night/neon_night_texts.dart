@@ -247,8 +247,9 @@ class NnChapterTexts {
     final timing = NnCardTiming(
       chapterNumber: index + 1,
       beats: 16,
-      zooms: 3,
+      zooms: NeonZoomPicks.cycles,
       tiles: tiles,
+      zoomTiles: zoomTilesFor(chapter, index + 1),
     );
     return NnChapterTexts._(
       accent: accent,
@@ -275,8 +276,8 @@ class NnChapterTexts {
       ],
       tileLabels: {
         for (final k in timing.zoomTiles)
-          // The caption (up to 3 lines, never cut) or the time, under the
-          // zoom (#387, #399).
+          // The caption (up to 3 lines, never cut), else — a photo without
+          // one — the time, under the zoom (#387, #399, #446).
           k: zoomLabelFor(chapter.cardPhotos[k]),
       },
     );
@@ -345,6 +346,27 @@ class NnChapterTexts {
   /// The caption a card zoom shows under [photo]: one that fits the zoom
   /// and can be read in its 1½ beats plus [NeonZoomPicks.maxHoldBeats]
   /// (#444 — a zoom never holds 9 s for a long caption). Null = none.
+  /// The card tiles [chapter] zooms, best first (#446,
+  /// [NeonZoomPicks.best]): captions a zoom can show, then hero score.
+  static List<int> zoomTilesFor(NnChapter chapter, int chapterNumber) {
+    final tiles = NnContactSheet.forPhotos(
+      chapter.cardPhotos.length,
+    ).tiles.length;
+    return NeonZoomPicks.best(
+      chapterNumber: chapterNumber,
+      photos: [
+        for (final p in chapter.cardPhotos.take(tiles))
+          (caption: p.caption, heroScore: p.heroScore),
+      ],
+      fitsZoom: (caption) =>
+          zoomCaptionOf(
+            NnPhoto(id: '', takenAt: '', caption: caption),
+            const NeonBeat(),
+          ) !=
+          null,
+    );
+  }
+
   static String? zoomCaptionOf(NnPhoto photo, NeonBeat beat) {
     final caption = photo.caption?.trim();
     if (caption == null || caption.isEmpty) return null;

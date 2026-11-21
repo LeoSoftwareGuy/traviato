@@ -537,7 +537,13 @@ function sectionContentFor(
   if (played === "neon_night") {
     const ensured = currentNeonNight(director, film, language);
     return {
-      content: { neon_night: buildNeonNightContent(film, ensured.plan) },
+      content: {
+        neon_night: buildNeonNightContent(
+          film,
+          ensured.plan,
+          isDirectorRecord(director) ? director.hero_scores ?? {} : {},
+        ),
+      },
       report: { source: ensured.source, repairs: ensured.repairs },
     };
   }

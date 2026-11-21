@@ -249,6 +249,7 @@ NnPhoto _photo(WrapUpNeonPhoto photo) => NnPhoto(
   id: photo.id,
   takenAt: _clock(photo.takenAt),
   caption: photo.caption,
+  heroScore: photo.heroScore,
 );
 
 /// 'HH:MM' on the phone's clock.
