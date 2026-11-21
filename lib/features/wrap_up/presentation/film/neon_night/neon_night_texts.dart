@@ -278,7 +278,7 @@ class NnChapterTexts {
         for (final k in timing.zoomTiles)
           // The caption (up to 3 lines, never cut), else — a photo without
           // one — the time, under the zoom (#387, #399, #446).
-          k: zoomLabelFor(chapter.cardPhotos[k]),
+          k: ?zoomLabelFor(chapter.cardPhotos[k]),
       },
     );
   }
@@ -335,11 +335,15 @@ class NnChapterTexts {
 
   /// A zoom's label: [photo]'s caption when it fits and can be read
   /// within a zoom (#444), else its time.
-  static NeonLabelBox zoomLabelFor(NnPhoto photo) {
+  static NeonLabelBox? zoomLabelFor(NnPhoto photo) {
     final caption = zoomCaptionOf(photo, const NeonBeat());
     final box = caption == null
         ? null
         : NeonLabelBox.caption(caption, maxWidth: NnCardTiming.zoomRect.width);
+    // A caption too long to read here: no label, never the time (#450).
+    if (box == null && (photo.caption?.trim().isNotEmpty ?? false)) {
+      return null;
+    }
     return box ?? NeonLabelBox(photo.takenAt);
   }
 
@@ -364,6 +368,7 @@ class NnChapterTexts {
             const NeonBeat(),
           ) !=
           null,
+      quickest: chapter.quickZooms,
     );
     return best.take(chapter.zooms).toList();
   }

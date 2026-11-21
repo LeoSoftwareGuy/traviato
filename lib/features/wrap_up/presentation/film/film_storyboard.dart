@@ -1,3 +1,4 @@
+import '../../domain/wrap_up_limits.dart';
 import 'golden_vows/golden_vows_scene_spec.dart';
 import 'golden_vows/golden_vows_story.dart';
 import 'golden_vows/golden_vows_timeline.dart';
@@ -91,9 +92,13 @@ abstract final class FilmStoryboard {
       memory: memory,
       film: 'Neon Night',
       total: timeline.total,
-      target: story.targetSeconds,
+      // Neon Night may run to the longest film (#448, #450): its limit,
+      // not its photo target.
+      target: null,
       rows: rows,
-      extra: '${shown.length} / ${inFilm.length} photos shown in scenes',
+      extra:
+          'max ${WrapUpLimits.longestFilmSeconds} s · '
+          '${shown.length} / ${inFilm.length} photos shown in scenes',
     );
   }
 

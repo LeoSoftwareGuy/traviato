@@ -139,6 +139,7 @@ class NnChapter extends Equatable {
     this.note,
     List<NnPhoto>? cardPhotos,
     this.zooms = 2,
+    this.quickZooms = false,
   }) : cardPhotos = cardPhotos == null || cardPhotos.isEmpty
            ? photos
            : cardPhotos,
@@ -164,6 +165,10 @@ class NnChapter extends Equatable {
   /// How many photos the card zooms, 0–2 (#448: fewer in a film that
   /// runs long).
   final int zooms;
+
+  /// Whether its zooms pick the quickest photos to show (#450: a film
+  /// over the longest): no caption, else the shortest.
+  final bool quickZooms;
 
   /// The user's own words, typed out on the card; none → no typed line.
   final String? note;

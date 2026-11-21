@@ -1,4 +1,3 @@
-import '../../../domain/wrap_up_limits.dart';
 import 'dart:math' as math;
 
 import 'dart:async';
@@ -7,6 +6,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../../../../../core/l10n/context_l10n.dart';
+import '../../../domain/wrap_up_limits.dart';
 import '../film_music.dart';
 import '../sky_story/guarded_painter.dart';
 import 'neon_ambient.dart';

@@ -1,5 +1,6 @@
 import '../../../domain/entities/wrap_up_neon_night.dart';
 import 'neon_night_scene_spec.dart';
+import 'neon_night_fit.dart';
 import 'neon_night_story.dart';
 
 /// How many photos each moment plays with (as the server checks them).
@@ -101,38 +102,41 @@ NeonNightStory? neonNightFromWrapUp(
       ? null
       : nn.note;
   final notePhoto = note?.photoId == null ? null : byId[note!.photoId];
-  return NeonNightStory(
-    title: nn.title,
-    date: date,
-    plan: [
-      for (final row in nn.plan)
-        NnPlanRow(time: row.time, item: row.title, done: row.done),
-    ],
-    chapters: chapters,
-    note: note == null
-        ? null
-        : NnNoteMoment(
-            text: note.text,
-            number: note.number,
-            time: note.writtenAt == null ? null : _clock(note.writtenAt!),
-            photo: notePhoto == null ? null : _photo(notePhoto),
-          ),
-    firstName: nn.firstName,
-    headline: nn.headline,
-    totals: switch (nn.totals) {
-      final t? => NnTotals(
-        photos: t.photos,
-        notes: t.notes,
-        ticks: t.ticks,
-        moments: t.moments,
-      ),
-      null => null,
-    },
-    heartPhotoIds: [
-      for (final id in nn.heartPhotoIds)
-        if (photoIds.contains(id)) id,
-    ],
-    targetSeconds: nn.filmSeconds,
+  // Never past the longest film as the player plays it (#450).
+  return NnFit.toLongest(
+    NeonNightStory(
+      title: nn.title,
+      date: date,
+      plan: [
+        for (final row in nn.plan)
+          NnPlanRow(time: row.time, item: row.title, done: row.done),
+      ],
+      chapters: chapters,
+      note: note == null
+          ? null
+          : NnNoteMoment(
+              text: note.text,
+              number: note.number,
+              time: note.writtenAt == null ? null : _clock(note.writtenAt!),
+              photo: notePhoto == null ? null : _photo(notePhoto),
+            ),
+      firstName: nn.firstName,
+      headline: nn.headline,
+      totals: switch (nn.totals) {
+        final t? => NnTotals(
+          photos: t.photos,
+          notes: t.notes,
+          ticks: t.ticks,
+          moments: t.moments,
+        ),
+        null => null,
+      },
+      heartPhotoIds: [
+        for (final id in nn.heartPhotoIds)
+          if (photoIds.contains(id)) id,
+      ],
+      targetSeconds: nn.filmSeconds,
+    ),
   );
 }
 
