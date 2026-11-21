@@ -245,12 +245,13 @@ class NnChapterCardPainter {
     }
   }
 
-  /// `> NOTE`, one character per frame from lb 4, and a cursor blinking
+  /// `> NOTE`, one character per frame from lb 4 (2 without zooms), and a
+  /// cursor blinking
   /// on half beats.
   void _typed(Canvas canvas, double t, double cue, double lb, double alpha) {
     final typed = texts.typed;
-    if (typed == null || lb < NnCardTiming.typeFrom) return;
-    final from = _at(cue, NnCardTiming.typeFrom);
+    if (typed == null || lb < timing.typeAt) return;
+    final from = _at(cue, timing.typeAt);
     final chars = ((t - from) * NeonBeat.fps + 1e-9).floor() + 1;
     final shown = chars.clamp(0, texts.typedLength);
     final at = Offset(72, sheet.bottom + 50);

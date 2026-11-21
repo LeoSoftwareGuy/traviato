@@ -48,6 +48,9 @@ class NnPhoto extends Equatable {
   /// What labels the photo: its caption, else its time (#387).
   String get label => caption ?? takenAt;
 
+  /// This photo with no words (#448: a moment shows at most 3).
+  NnPhoto get quiet => NnPhoto(id: id, takenAt: takenAt, heroScore: heroScore);
+
   /// This photo carrying [line].
   NnPhoto withLine(String line) => NnPhoto(
     id: id,
@@ -135,6 +138,7 @@ class NnChapter extends Equatable {
     required this.moments,
     this.note,
     List<NnPhoto>? cardPhotos,
+    this.zooms = 2,
   }) : cardPhotos = cardPhotos == null || cardPhotos.isEmpty
            ? photos
            : cardPhotos,
@@ -156,6 +160,10 @@ class NnChapter extends Equatable {
   /// What the card's contact sheet and zooms show, in order (the first
   /// 34): its own photos (#390), else all of [photos].
   final List<NnPhoto> cardPhotos;
+
+  /// How many photos the card zooms, 0–2 (#448: fewer in a film that
+  /// runs long).
+  final int zooms;
 
   /// The user's own words, typed out on the card; none → no typed line.
   final String? note;

@@ -160,8 +160,9 @@ void main() {
     );
     expect(
       NeonNightCanvas.timelineFor(NeonNightFixtures.reference).totalBeats,
-      // The spec's 136, plus a bar to read the note (#399).
-      140,
+      // The spec's 136, plus a bar to read the note (#399), plus a bar
+      // on each two-zoom card for the ~2.4 s zooms (#448).
+      148,
     );
   });
 

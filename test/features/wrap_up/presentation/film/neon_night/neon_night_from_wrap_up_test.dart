@@ -274,4 +274,57 @@ void main() {
     expect(photos.first.label, 'Lost the keys');
     expect(photos.last.label, '22:20');
   });
+
+  test('a moment shows only the words the server chose (#448)', () {
+    final photos = [
+      WrapUpNeonPhoto(
+        id: 'x1',
+        takenAt: DateTime(2026, 11, 14, 22),
+        caption: 'Queue for an hour',
+      ),
+      WrapUpNeonPhoto(
+        id: 'x2',
+        takenAt: DateTime(2026, 11, 14, 22, 10),
+        caption: 'Second caption',
+      ),
+      WrapUpNeonPhoto(id: 'x3', takenAt: DateTime(2026, 11, 14, 22, 20)),
+      WrapUpNeonPhoto(id: 'x4', takenAt: DateTime(2026, 11, 14, 22, 30)),
+    ];
+    final nn = WrapUpNeonNight(
+      title: 'Night out',
+      chapters: [
+        WrapUpNeonChapter(
+          title: 'Kuko',
+          photos: photos,
+          cardPhotoIds: const ['x1'],
+          cardZooms: 0,
+          moments: const [
+            WrapUpNeonMoment(
+              type: 'split',
+              photoIds: ['x2', 'x3', 'x4'],
+              words: {'x3': 'Home at 8 am'},
+            ),
+          ],
+          excerpts: const [
+            WrapUpNeonExcerpt(text: 'Ignored line', noteId: 'n', photoId: 'x2'),
+          ],
+        ),
+      ],
+    );
+    final story = neonNightFromWrapUp(
+      nn,
+      photoIds: {for (final p in photos) p.id},
+    )!;
+    final chapter = story.chapters.single;
+    expect(chapter.zooms, 0);
+    final shown = chapter.moments.single.photos;
+    // x2's caption and its excerpt aren't chosen: no words at all.
+    expect(shown[0].caption, isNull);
+    expect(shown[0].line, isNull);
+    expect(shown[1].line, 'Home at 8 am');
+    expect(shown[2].caption, isNull);
+    expect(shown[2].line, isNull);
+    // The card's own photos keep their captions.
+    expect(chapter.cardPhotos.single.caption, 'Queue for an hour');
+  });
 }

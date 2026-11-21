@@ -445,7 +445,7 @@ Deno.test("a timeline is filled with what the card leaves, in time order", () =>
   assert(ids.every((id) => chapter.photos.some((p) => p.id === id)));
 });
 
-Deno.test("a big chapter: a 6-photo card, two moments, every photo shown", () => {
+Deno.test("a big chapter: a 6-photo card, two full moments, the Always picks shown", () => {
   const data = fullNight();
   // 10 more photos on day 2, the last two marked Always.
   for (let k = 0; k < 10; k++) {
@@ -468,7 +468,9 @@ Deno.test("a big chapter: a 6-photo card, two moments, every photo shown", () =>
     ...chapter.card_photo_ids,
     ...chapter.moments.flatMap((m) => m.photo_ids),
   ];
-  assertEquals(new Set(shown).size, chapter.photos.length);
+  // 19 photos: a card of 6 and two moments of up to 6 (#448); the one
+  // left over goes to the heart, never an Always pick.
+  assertEquals(new Set(shown).size, chapter.photos.length - 1);
   assert(shown.includes("x8") && shown.includes("x9"));
   assertStrictlyAfterCard(chapter);
 });

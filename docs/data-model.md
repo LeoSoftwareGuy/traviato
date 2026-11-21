@@ -299,6 +299,13 @@ Post-MVP: `video_path`, `video_status`.
   `DIRECTOR_VERSION` 4, and `directorIsStale` also when `photo_paths`
   misses a film photo (below the film's photo cap).
 
+- **Neon Night pacing** (#448, no schema change): each moment carries
+  `words: [{photo_id, text}]` (at most 3 — the only words it shows; older
+  content without it shows every caption) and each chapter `card_zooms`
+  (0–2; absent = 2). `note` is the chapter's best line. Timelines hold 6
+  (`NN_TIMELINE_ROOM`). `film_lengths.json` gains an ADE-shaped case
+  (`ade_fixture.ts`, `case: "ade"`).
+
 - **Limits** (#432, no schema change): `generate_wrap_up/wrap_up_limits.json`
   (minPhotos 15, maxFilmPhotos 60, minNotes 1, maxNoteLines 12, maxVibes 3)
   is shared with the app's `WrapUpLimits` (a Dart test checks they agree).

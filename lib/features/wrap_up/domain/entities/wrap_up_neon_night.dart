@@ -105,6 +105,7 @@ class WrapUpNeonChapter extends Equatable {
     required this.moments,
     this.note,
     this.cardPhotoIds = const [],
+    this.cardZooms,
     this.excerpts = const [],
     this.days = const [],
     this.rejectedExcerpts = const [],
@@ -118,6 +119,9 @@ class WrapUpNeonChapter extends Equatable {
   /// The card's own photos (#390), ids of [photos]: its grid and zooms,
   /// never a moment's. Empty in older content: the card shows [photos].
   final List<String> cardPhotoIds;
+
+  /// How many photos the card zooms (#448); null in older content = 2.
+  final int? cardZooms;
 
   /// The user's own words for the card, or null for no typed line.
   final String? note;
@@ -140,6 +144,7 @@ class WrapUpNeonChapter extends Equatable {
     note,
     moments,
     cardPhotoIds,
+    cardZooms,
     excerpts,
     days,
     rejectedExcerpts,
@@ -188,16 +193,22 @@ class WrapUpNeonMoment extends Equatable {
     required this.type,
     required this.photoIds,
     this.place,
+    this.words,
   });
 
   final String type;
   final List<String> photoIds;
 
+  /// The words it shows (#448), photo id → its note line or caption; at
+  /// most 3. The other photos play with no label. Null in older content:
+  /// every photo shows its words.
+  final Map<String, String>? words;
+
   /// A split's label.
   final String? place;
 
   @override
-  List<Object?> get props => [type, photoIds, place];
+  List<Object?> get props => [type, photoIds, place, words];
 }
 
 class WrapUpNeonNote extends Equatable {

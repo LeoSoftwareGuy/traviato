@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/wrap_up/data/models/wrap_up_golden_vows_model.dart';
@@ -11,8 +10,7 @@ import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_v
 import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_timeline.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_from_wrap_up.dart';
-import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_timeline.dart';
-import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_reading_time.dart';
+import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_texts.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_track.dart';
 import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story.dart';
 import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story_from_wrap_up.dart';
@@ -33,27 +31,6 @@ void main() {
   /// How far a film may land from its target: a bar of Neon Night, a page
   /// that needs time to be read.
   const tolerance = 3.0;
-
-  /// Neon Night's shortest film for [fixture]: every chapter's card and
-  /// moments, held for their words. A short film never loses
-  /// a chapter or its Note scene (#444), so this is its floor.
-  double neonFloorOf(Map<String, dynamic> fixture) {
-    final content = (fixture['content'] as Map).cast<String, dynamic>();
-    final story = neonNightFromWrapUp(
-      parseWrapUpNeonNight(content)!,
-      photoIds: (fixture['photo_ids'] as List<dynamic>).cast<String>().toSet(),
-      startDate: DateTime.parse(fixture['start_date'] as String),
-    )!;
-    // Each chapter's card and moments with their lines' reading time
-    // (#399 T1 — never shorter), the Note, no Plan (it can go).
-    return NeonNightTimeline(
-      chapters: NnReadingTime.chaptersFor(story, NeonTrack.beat),
-      hasPlan: false,
-      hasNote: story.note != null,
-      noteMinBeats: NnReadingTime.noteBeats(story, NeonTrack.beat),
-      beat: NeonTrack.beat,
-    ).total;
-  }
 
   double lengthOf(Map<String, dynamic> fixture) {
     final content = (fixture['content'] as Map).cast<String, dynamic>();
@@ -90,6 +67,7 @@ void main() {
 
   for (final raw in fixtures) {
     final fixture = (raw as Map).cast<String, dynamic>();
+    if (fixture['case'] != null) continue;
     final photos = fixture['photos'] as int;
     test('${fixture['film']} at $photos photos lasts about '
         '${WrapUpLimits.filmSeconds(photos)} s (#434)', () {
@@ -102,22 +80,44 @@ void main() {
       final length = lengthOf(fixture);
       printOnFailure('${fixture['film']} $photos: $length s');
       if (fixture['film'] == 'neon_night') {
-        // About its target, or its chapters' floor when that is longer.
-        final floor = neonFloorOf(fixture);
-        printOnFailure('floor $floor s');
+        // Neon Night may use the room up to the longest film (#448), and
+        // never plays shorter than its target.
         expect(length, greaterThan(target - tolerance));
-        expect(
-          length,
-          lessThanOrEqualTo(math.max(target, floor) + tolerance),
-        );
+        expect(length, lessThanOrEqualTo(WrapUpLimits.longestFilmSeconds));
       } else {
         expect(length, closeTo(target, tolerance));
       }
     });
   }
 
+  test('ADE-Amsterdam: at most 75 s, every card zooms (#448)', () {
+    final fixture = fixtures
+        .cast<Map<dynamic, dynamic>>()
+        .firstWhere((f) => f['case'] == 'ade')
+        .cast<String, dynamic>();
+    final length = lengthOf(fixture);
+    printOnFailure('ADE: $length s');
+    expect(length, lessThanOrEqualTo(WrapUpLimits.longestFilmSeconds));
+    final story = neonNightFromWrapUp(
+      parseWrapUpNeonNight(
+        (fixture['content'] as Map).cast<String, dynamic>(),
+      )!,
+      photoIds: (fixture['photo_ids'] as List<dynamic>).cast<String>().toSet(),
+    )!;
+    for (final (i, chapter) in story.chapters.indexed) {
+      expect(
+        NnChapterTexts.zoomTilesFor(chapter, i + 1),
+        isNotEmpty,
+        reason: chapter.title,
+      );
+    }
+  });
+
   test('without film_seconds a film keeps its reference pacing', () {
-    final fixture = (fixtures.last as Map).cast<String, dynamic>();
+    // The 40-photo Neon Night (the last of the generated set).
+    final fixture =
+        (fixtures.lastWhere((f) => (f as Map)['case'] == null) as Map)
+            .cast<String, dynamic>();
     final content = {
       ...(fixture['content'] as Map).cast<String, dynamic>(),
     }..remove('film_seconds');

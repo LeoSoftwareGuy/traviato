@@ -154,6 +154,8 @@ const SENSITIVE = [
   // Word starts only: \b knows no Cyrillic, and "бля" hides in "корабля".
   /(^|[^а-яё])(мдма|экстази|кокаин|кетамин|наркот|упорот|обдолб)/iu,
   /(^|[^а-яё])(бля|хуй|хуё|хуе|пизд|ёб|еба[тлн]|ебу|сука|нахуй|залуп|мудак)/iu,
+  // With a prefix (#448: "охуенный").
+  /(^|[^а-яё])(о|от|на|по|за|при|до)ху[йеёя]/iu,
 ];
 
 export function isSensitive(text: string): boolean {

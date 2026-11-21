@@ -23,9 +23,11 @@ import type { WrapUpLanguage } from "./language.ts";
 import { WRAP_UP_LIMITS } from "./wrap_up_limits.ts";
 import {
   filmSecondsOf,
+  nnBeatsFor,
   nnFilmBeats,
-  nnFits,
-  nnFitsZoom,
+  nnFitsWithin,
+  nnMomentBeats,
+  type NnShapeMoment,
 } from "./film_length.ts";
 import { wholeWords } from "./text_fit.ts";
 export { wholeWords };
@@ -151,8 +153,10 @@ export interface NeonNightContent {
     // The card's own photos (#390): its grid and zooms, never a moment's.
     // Older content has none — the app then uses every chapter photo.
     card_photo_ids: string[];
-    // The user's own words, or null for no typed line: the first excerpt.
+    // The card's typed line (#448: the chapter's best excerpt), or null.
     note: string | null;
+    // How many photos the card zooms (#448); absent in older content = 2.
+    card_zooms?: number;
     // The chapter's lines (#398), in time order, each over its photo:
     // the card types the first, the note moments play them (#416).
     // Older content has none.
@@ -166,6 +170,9 @@ export interface NeonNightContent {
       photo_ids: string[];
       // A split's label: the first photo's place, when tagged.
       place: string | null;
+      // The words it shows, on their photos (#448); absent = every
+      // photo's caption or line.
+      words?: { photo_id: string; text: string }[];
     }[];
   }[];
   note: {
@@ -357,6 +364,12 @@ export interface NnCheckContext {
   // Each timed photo's local wall-clock time as UTC millis (#426): where
   // a long day breaks into parts. Untimed photos are absent.
   photoTimes?: ReadonlyMap<string, number>;
+  // note id → its logical day (#448: titles from a part's notes).
+  noteDays?: ReadonlyMap<string, string>;
+  // note id → when it was written, on the phone's clock (ms).
+  noteTimes?: ReadonlyMap<string, number>;
+  // Each photo's caption (#448: a part's title from the user's words).
+  photoCaptions?: ReadonlyMap<string, string>;
 }
 
 // Every photo's and note's logical day (#398 R1); notes as `note:<id>`.
@@ -512,6 +525,29 @@ export function nnCheckContext(
       photos.filter((p) => p.taken_at).map((p) => [
         p.id,
         Date.parse(p.taken_at!) + (tripData.utc_offset_minutes ?? 0) * 60_000,
+      ]),
+    ),
+    noteDays: (() => {
+      const days = nnLogicalDays(tripData);
+      const map = new Map<string, string>();
+      for (const n of tripData.notes) {
+        const day = n.id ? days.get(`note:${n.id}`) ?? n.day_date : null;
+        if (n.id && day) map.set(n.id, day);
+      }
+      return map;
+    })(),
+    photoCaptions: new Map(
+      photos.filter((p) => p.caption?.trim()).map((p) => [
+        p.id,
+        p.caption!.trim(),
+      ]),
+    ),
+    noteTimes: new Map(
+      tripData.notes.filter((n) => n.id && !n.legacy && n.taken_at).map((
+        n,
+      ) => [
+        n.id!,
+        Date.parse(n.taken_at!) + (tripData.utc_offset_minutes ?? 0) * 60_000,
       ]),
     ),
   };
@@ -1019,9 +1055,7 @@ function splitByDays(
       const fold = covering.title as string | null;
       title = fold && !usedTitles.has(fold) ? fold : null;
     }
-    title ??= placeOf(ordered.slice(start, end), context) ??
-      clockTitle(ordered[start], context) ??
-      (covering.title as string | null) ?? "";
+    title ??= partTitle(ordered.slice(start, end), context, usedTitles);
     usedTitles.add(title);
     const moments = old.flatMap((c) =>
       Array.isArray(c.moments) ? c.moments as Record<string, unknown>[] : []
@@ -1063,10 +1097,19 @@ function splitByDays(
 function fitTitles(chapters: unknown[], context: NnCheckContext): void {
   const ordered = [...context.photoOrder.entries()].sort((a, b) => a[1] - b[1])
     .map(([id]) => id);
+  const taken = new Set<string>();
   for (const raw of chapters) {
     if (typeof raw !== "object" || raw === null) continue;
     const chapter = raw as Record<string, unknown>;
     let title = isString(chapter.title) ? cleanAiLine(chapter.title) : "";
+    // In the notes' language (#448), unless it's a place's own name.
+    const whole = title;
+    if (
+      title && titleInOtherLanguage(title, context) &&
+      ![...(context.photoPlaces?.values() ?? [])].some((p) =>
+        p.trim() === whole
+      )
+    ) title = "";
     title = wholeWords(title, MAX_NN_TITLE_CHARS) ?? "";
     if (title && isSensitive(title)) title = "";
     if (!title && isString(chapter.first_photo_id)) {
@@ -1080,20 +1123,142 @@ function fitTitles(chapters: unknown[], context: NnCheckContext): void {
         )
         .sort((a, b) => a - b)[0] ?? ordered.length;
       if (start !== undefined) {
-        title = placeOf(ordered.slice(start, next), context) ??
-          clockTitle(chapter.first_photo_id, context) ?? "";
+        title = partTitle(ordered.slice(start, next), context, taken);
       }
     }
-    if (title) chapter.title = title;
+    if (title) {
+      chapter.title = title;
+      taken.add(title);
+    }
   }
 }
 
-// A part's title when nothing better is known (#426): its first photo's
-// time, like a flyer's "22:00".
-function clockTitle(id: string, context: NnCheckContext): string | null {
-  const ms = context.photoTimes?.get(id);
-  if (ms === undefined) return null;
-  return new Date(ms).toISOString().slice(11, 16);
+// The language the user writes in (#448): Russian when the notes' (else
+// the captions') letters are ≥ 80 % Cyrillic, English when ≥ 80 % Latin;
+// null when mixed or too few words to tell.
+function notesLanguage(context: NnCheckContext): "ru" | "en" | null {
+  for (
+    const texts of [
+      [...context.notes.values()],
+      [...(context.photoCaptions?.values() ?? [])],
+    ]
+  ) {
+    const text = texts.join(" ");
+    const cyr = (text.match(/[\u0400-\u04FF]/g) ?? []).length;
+    const lat = (text.match(/[A-Za-z]/g) ?? []).length;
+    if (cyr + lat < 20) continue;
+    // Mixed notes (neither ≥ 80 %) say nothing about the language.
+    if (cyr >= 0.8 * (cyr + lat)) return "ru";
+    if (lat >= 0.8 * (cyr + lat)) return "en";
+    return null;
+  }
+  return null;
+}
+
+// Whether [title] is written in another script than the notes (#448:
+// "15m to boarding" over Russian notes).
+function titleInOtherLanguage(title: string, context: NnCheckContext): boolean {
+  const cyr = /[\u0400-\u04FF]/.test(title);
+  const lat = /[A-Za-z]/.test(title);
+  const language = notesLanguage(context);
+  if (language === null) return false;
+  return language === "ru" ? lat && !cyr : cyr && !lat;
+}
+
+// A short line from the notes of [ids] (#448): those written during the
+// part (up to 3 h after its last photo), else on its days; a whole
+// sentence or clause that fits a title, the best-scoring. Null if none.
+function notesTitle(
+  ids: string[],
+  context: NnCheckContext,
+  duringOnly = false,
+  taken: ReadonlySet<string> = new Set(),
+): string | null {
+  const times = ids.map((id) => context.photoTimes?.get(id))
+    .filter((t): t is number => t !== undefined);
+  const from = Math.min(...times);
+  const to = Math.max(...times) + 3 * 60 * 60 * 1000;
+  const days = new Set(ids.map((id) => context.photoDays?.get(id)));
+  const during = [...context.notes.keys()].filter((id) => {
+    const t = context.noteTimes?.get(id);
+    return t !== undefined && t >= from && t <= to;
+  });
+  if (duringOnly && during.length === 0) return null;
+  const own = duringOnly
+    ? during
+    : [...context.notes.keys()].filter((id) =>
+      days.has(context.noteDays?.get(id))
+    );
+  let best: { text: string; score: number } | null = null;
+  for (const id of own) {
+    for (const sentence of excerptCandidates(context.notes.get(id)!)) {
+      for (
+        const clause of [sentence, ...sentence.split(/[,;:]\s|\s[—–-]\s/u)]
+      ) {
+        const text = clause.trim().replace(/[.!?…]+$/u, "");
+        if ([...text].length > MAX_NN_TITLE_CHARS || !text.includes(" ")) {
+          continue;
+        }
+        if (isSensitive(text) || isGeneric(text) || taken.has(text)) continue;
+        if (bannedPhraseIn(text)) continue;
+        const score = excerptScore(text, "night");
+        if (best === null || score > best.score) best = { text, score };
+      }
+    }
+  }
+  return best?.text ?? null;
+}
+
+// "Day N" / "День N" in the notes' language (#448), N the day's place
+// among the memory's photo days.
+function dayTitle(
+  ids: string[],
+  context: NnCheckContext,
+  taken: ReadonlySet<string> = new Set(),
+): string {
+  const all = [...new Set(context.photoDays?.values() ?? [])].sort();
+  const n = Math.max(0, all.indexOf(context.photoDays?.get(ids[0]) ?? "")) +
+    1;
+  const day = notesLanguage(context) === "ru" ? `День ${n}` : `Day ${n}`;
+  // A day in parts: "Day 1", "Day 1 · 2", …
+  for (let k = 1;; k++) {
+    const title = k === 1 ? day : `${day} · ${k}`;
+    if (!taken.has(title)) return title;
+  }
+}
+
+// The first caption of [ids] short enough for a title (#448): how the
+// part opens.
+function captionTitle(
+  ids: string[],
+  context: NnCheckContext,
+  taken: ReadonlySet<string>,
+): string | null {
+  for (const id of ids) {
+    const text = context.photoCaptions?.get(id)?.replace(/[.!?…]+$/u, "");
+    if (!text || [...text].length > MAX_NN_TITLE_CHARS) continue;
+    if (taken.has(text) || isSensitive(text) || isGeneric(text)) continue;
+    if (bannedPhraseIn(text)) continue;
+    return text;
+  }
+  return null;
+}
+
+// A part's title when the director gave none (#448, never a clock time):
+// the place, else one of its captions, else a line of the notes written
+// during it, else a line of its days' notes, else its day. Never one
+// [taken] already has.
+function partTitle(
+  ids: string[],
+  context: NnCheckContext,
+  taken: ReadonlySet<string> = new Set(),
+): string {
+  const free = (t: string | null) => t && !taken.has(t) ? t : null;
+  return free(placeOf(ids, context)) ??
+    captionTitle(ids, context, taken) ??
+    free(notesTitle(ids, context, true, taken)) ??
+    free(notesTitle(ids, context, false, taken)) ??
+    dayTitle(ids, context, taken);
 }
 
 // The place most of [ids] share, short enough for a title; else null.
@@ -1404,8 +1569,7 @@ export function codeNeonNight(
   const chapters: NeonNightChapterPlan[] = starts.map((start, g) => {
     const end = starts[g + 1] ?? ordered.length;
     const photos = ordered.slice(start, end);
-    let title = placeOf(photos, context) ?? clockTitle(photos[0], context) ??
-      `${required.length > 0 ? words.day : words.part} ${g + 1}`;
+    let title = partTitle(photos, context, usedTitles);
     if (usedTitles.has(title) || isSensitive(title)) {
       title = wholeWords(`${title} ${g + 1}`, MAX_NN_TITLE_CHARS) ??
         `${words.part} ${g + 1}`;
@@ -1570,6 +1734,9 @@ export const NN_SPLIT_SPREAD_MS = 10 * 60 * 1000;
 // A chapter gets a second moment when this many photos are left after
 // its card.
 export const NN_TWO_MOMENTS_FROM = 6;
+// A dealt timeline shows at most this many photos (#448: a scene stays
+// under ~12 s); more go to the chapter's other moment or the heart.
+export const NN_TIMELINE_ROOM = 6;
 
 function timeOf(p: Photo): number {
   return Date.parse(p.taken_at ?? p.created_at ?? "") || 0;
@@ -1584,7 +1751,7 @@ export function momentFor(
   photos: Photo[],
   heroScores: Readonly<Record<string, number>> = {},
 ): ContentMoment {
-  const room = NN_MOMENT_PHOTOS.timeline[1];
+  const room = NN_TIMELINE_ROOM;
   if (photos.length > NN_SCENE_PHOTOS[1]) {
     const spread = new Set(spreadEvenly(photos, room).map((p) => p.id));
     const rank = (p: Photo) =>
@@ -1616,12 +1783,14 @@ export function momentFor(
 // no side past a timeline's room, so none is left out.
 function splitAtGap(photos: Photo[]): number {
   const min = NN_SCENE_PHOTOS[0];
-  const room = NN_MOMENT_PHOTOS.timeline[1];
+  const room = NN_TIMELINE_ROOM;
   const fits = photos.length <= 2 * room;
   let at = Math.floor(photos.length / 2);
   let best = -1;
   for (let k = min; k <= photos.length - min; k++) {
     if (fits && (k > room || photos.length - k > room)) continue;
+    // More than both hold: each side fills its moment (#448).
+    if (!fits && (k < room || photos.length - k < room)) continue;
     const gap = timeOf(photos[k]) - timeOf(photos[k - 1]);
     if (gap > best) {
       best = gap;
@@ -1652,23 +1821,18 @@ export function dealChapter(
     : n >= MIN_NN_CARD_PHOTOS + NN_SCENE_PHOTOS[0]
     ? MIN_NN_CARD_PHOTOS
     : Math.min(n, 6);
-  // Up to 6 photos: one full card of them all and no moment (#444 — "the
-  // whole day has just 4, 4 is the best choice"), never a half-empty one.
-  if (n < MIN_NN_CARD_PHOTOS + NN_SCENE_PHOTOS[0]) {
-    // Unless a caption is too long for a zoom (#446): then a moment plays
-    // from that photo on (3 at least), which holds it for its reading time,
-    // and the card keeps the earlier ones — still in time order.
-    const long = pool.findIndex((p) =>
-      p.caption?.trim() && !nnFitsZoom(p.caption.trim())
-    );
-    if (long >= 0 && n > NN_SCENE_PHOTOS[0]) {
-      const from = Math.max(1, Math.min(long, n - NN_SCENE_PHOTOS[0]));
-      chapter.card = pool.slice(0, from).map((p) => p.id);
-      chapter.moments = [momentFor(pool.slice(from), heroScores)];
-      return;
-    }
-    chapter.card = pool.slice(0, 6).map((p) => p.id);
+  // Up to 4 photos: one full card of them all, no moment. 5–6 (#448 — not
+  // a slideshow of cards): a card of 3 and a moment of the rest. A
+  // captioned photo sits on a card unzoomed when its caption is too long;
+  // it never pulls photos off the card (#448).
+  if (n <= MIN_NN_CARD_PHOTOS) {
+    chapter.card = pool.map((p) => p.id);
     chapter.moments = [];
+    return;
+  }
+  if (n < MIN_NN_CARD_PHOTOS + NN_SCENE_PHOTOS[0]) {
+    chapter.card = pool.slice(0, 3).map((p) => p.id);
+    chapter.moments = [momentFor(pool.slice(3), heroScores)];
     return;
   }
   chapter.card = pool.slice(0, cardSize).map((p) => p.id);
@@ -1763,21 +1927,6 @@ function shapeChapters(
   return chapters;
 }
 
-// [chapter]'s card photos whose caption can't be read in a zoom (#446),
-// as lines to bring into a moment.
-function longCaptionLines(chapter: ShapedChapter): NeonNightContentExcerpt[] {
-  return chapter.photos.filter((p) =>
-    chapter.card.includes(p.id) && p.caption?.trim() &&
-    !nnFitsZoom(p.caption.trim())
-  ).map((p) => ({
-    text: p.caption!.trim(),
-    note_id: "",
-    photo_id: p.id,
-    source: "code" as const,
-    score: 0,
-  }));
-}
-
 // Brings each of [excerpts]' photos into a moment of [chapter] (#444):
 // one on the card trades places with the moment photo nearest it in time;
 // one in no scene takes that photo's place. Scenes stay in time order.
@@ -1814,8 +1963,8 @@ function bringLinePhotos(
       // card's first photo, or past a timeline's room.
       const moved = chapter.card.slice(c);
       if (
-        c === 0 || !first ||
-        first.photo_ids.length + moved.length > NN_MOMENT_PHOTOS.timeline[1]
+        c < MIN_NN_CARD_PHOTOS || !first ||
+        first.photo_ids.length + moved.length > NN_TIMELINE_ROOM
       ) continue;
       chapter.card = chapter.card.slice(0, c);
       const ids = [...moved, ...first.photo_ids];
@@ -1837,18 +1986,20 @@ function bringLinePhotos(
 // The Note scene code picks when the director's is blocked (#444): the
 // best-scoring specific line of any note that no chapter plays, short
 // enough for the scene and nothing sensitive. Null when there is none.
+// A line no other scene shows (#448: [isShown]); a specific one first,
+// else any that isn't generic.
 function fallbackNoteMoment(
   tripData: TripData,
-  used: ReadonlySet<string>,
+  isShown: (text: string) => boolean,
+  maxChars = MAX_NN_NOTE_CHARS,
 ): NeonNightPlan["note_moment"] {
   let best: { note_id: string; excerpt: string; score: number } | null = null;
   for (const n of tripData.notes) {
     if (!n.id || !n.content.trim()) continue;
     for (const text of excerptCandidates(n.content)) {
-      if (used.has(text) || isSensitive(text)) continue;
-      if ([...text].length > MAX_NN_NOTE_CHARS) continue;
+      if (isShown(text) || isSensitive(text) || isGeneric(text)) continue;
+      if ([...text].length > maxChars) continue;
       const score = excerptScore(text, "night");
-      if (score < SPECIFIC_SCORE) continue;
       if (best === null || score > best.score) {
         best = { note_id: n.id, excerpt: text, score };
       }
@@ -1863,6 +2014,117 @@ function fallbackNoteMoment(
     ? note.photo_id
     : null;
   return { note_id: best.note_id, excerpt: best.excerpt, photo_id: shown };
+}
+
+// At most this many photos of a moment show words (#448): lines and
+// captions; the others play with no label.
+export const MAX_NN_MOMENT_WORDS = 3;
+// A moment's words fit this long a scene (#448).
+export const MAX_NN_SCENE_SECONDS = 12;
+// A film that runs long types only lines this short on its cards (#448),
+// when the chapter has one.
+export const MIN_NN_SHORT_CARD_CHARS = 30;
+
+// Whether two lines are the same words (#448: no line twice), ignoring
+// case, spacing and punctuation; or one is most of the other.
+export function sameLine(a: string, b: string): boolean {
+  const norm = (t: string) =>
+    t.toLowerCase().replace(/ё/g, "е").replace(/[^\p{L}\p{N}]+/gu, " ")
+      .trim();
+  const x = norm(a);
+  const y = norm(b);
+  if (x.length === 0 || y.length === 0) return false;
+  // One inside the other and most of it: a title of a few words inside a
+  // long line is its own (#448: "Брюссель" over "Брюссель не меняется…").
+  const [short, long] = x.length <= y.length ? [x, y] : [y, x];
+  return long.includes(short) && short.length >= 0.6 * long.length;
+}
+
+// Whether [a] and [b] show the same words (#448): [sameLine], or the
+// shorter (3 words at least) is inside the longer — a card's clause of a
+// line a moment plays whole.
+export function overlaps(a: string, b: string): boolean {
+  const norm = (t: string) =>
+    t.toLowerCase().replace(/ё/g, "е").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  const [short, long] = norm(a).length <= norm(b).length
+    ? [norm(a), norm(b)]
+    : [norm(b), norm(a)];
+  return sameLine(a, b) ||
+    (short.split(" ").length >= 3 && ` ${long} `.includes(` ${short} `));
+}
+
+// Whether [text] repeats [title] (#448): the same words, or it opens
+// with them ("Домой пришли в 8 утра, ноги…" under "Домой пришли в 8 утра").
+export function repeatsTitle(text: string, title: string | null): boolean {
+  if (!title) return false;
+  const norm = (t: string) =>
+    t.toLowerCase().replace(/ё/g, "е").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  // A title of a word or two (a place: "Брюссель") may open a line.
+  return sameLine(text, title) ||
+    (norm(title).split(" ").length >= 3 && norm(text).startsWith(norm(title)));
+}
+
+// The words each of [chapter]'s moments shows (#448): per photo its line
+// (an excerpt placed on it, never the card's), else its caption; at most
+// [maxWords] a moment, within MAX_NN_SCENE_SECONDS — lines first, then
+// Always picks, captioned photos, the highest hero score; the rest play
+// with no label.
+export function momentWords(
+  chapter: ShapedChapter,
+  excerpts: readonly NeonNightContentExcerpt[],
+  cardLine: string | null,
+  byId: ReadonlyMap<string, Photo>,
+  heroScores: Readonly<Record<string, number>>,
+  maxWords = MAX_NN_MOMENT_WORDS,
+  // The chapter's title: no line repeats it (#448).
+  title: string | null = null,
+  maxChars = Infinity,
+  // The Note scene's line: never in a moment.
+  reserved: string | null = null,
+): { photo_id: string; text: string }[][] {
+  const taken: string[] = [cardLine, title, reserved].filter((t): t is string =>
+    !!t
+  );
+  return chapter.moments.map((m) => {
+    const options = m.photo_ids.flatMap((id) => {
+      // A line nothing else shows (#448: not the card's, nor one it types
+      // a clause of); else the photo's caption.
+      const line = excerpts.find((e) =>
+        e.photo_id === id &&
+        !taken.some((t) => overlaps(t, e.text)) &&
+        !repeatsTitle(e.text, title) &&
+        [...e.text].length <= maxChars
+      );
+      const photo = byId.get(id);
+      const raw = photo?.caption?.trim();
+      const caption = raw && [...raw].length <= maxChars ? raw : undefined;
+      const text = line?.text ?? caption;
+      if (!text) return [];
+      // A line, Always, captioned, hero score; then the more specific words.
+      const rank = (line ? 1000 + line.score : 0) +
+        (photo?.use_in_wrap_up === true ? 100 : 0) +
+        (caption ? 10 : 0) + (heroScores[id] ?? 0) +
+        Math.max(0, excerptScore(text, "night")) / 100 + [...text].length / 1e4;
+      return [{ photo_id: id, text, rank }];
+    }).sort((a, b) => b.rank - a.rank);
+    const chosen: { photo_id: string; text: string }[] = [];
+    for (const o of options) {
+      if (chosen.length >= maxWords) break;
+      if (taken.some((t) => overlaps(t, o.text))) continue;
+      if (repeatsTitle(o.text, title)) continue;
+      const lines = [...chosen.map((c) => c.text), o.text];
+      const beats = nnMomentBeats({
+        type: m.type as NnShapeMoment["type"],
+        photos: m.photo_ids.length,
+        lines,
+      });
+      if (beats > nnBeatsFor(MAX_NN_SCENE_SECONDS)) continue;
+      chosen.push({ photo_id: o.photo_id, text: o.text });
+      taken.push(o.text);
+    }
+    const at = new Map(m.photo_ids.map((id, k) => [id, k]));
+    return chosen.sort((a, b) => at.get(a.photo_id)! - at.get(b.photo_id)!);
+  });
 }
 
 interface PickedLines {
@@ -1913,9 +2175,17 @@ export function pickExcerpts(
     }
     const day = days.get(`note:${n.id}`) ?? n.day_date;
     const t = noteTime(n);
-    const i = multiDay || Number.isNaN(t)
-      ? chapterDays.findIndex((d) => d.includes(day))
+    const byDay = chapterDays.findIndex((d) => d.includes(day));
+    // Within its day, the part it was written in (#448: a day in parts
+    // gave every note to its first part, so later parts had no line).
+    const bySpan = Number.isNaN(t)
+      ? -1
       : spans.findIndex((s) => t >= s.start && t < s.end);
+    const i = !multiDay
+      ? (Number.isNaN(t) ? byDay : bySpan)
+      : bySpan >= 0 && chapterDays[bySpan].includes(day)
+      ? bySpan
+      : byDay;
     if (i >= 0) owner.set(n.id!, i);
   }
   const used = new Set<string>();
@@ -1942,7 +2212,9 @@ export function pickExcerpts(
         k,
         score: excerptScore(text, "night"),
       }))
-    ).filter((c) => !isSensitive(c.text) && !used.has(c.text));
+      // The user's own words show as written (#448): the sensitive-words
+      // rule is for AI-written lines and the Note scene only.
+    ).filter((c) => !used.has(c.text));
     const specificLeft = () =>
       candidates.filter((c) => !used.has(c.text) && c.score >= SPECIFIC_SCORE);
 
@@ -1969,7 +2241,7 @@ export function pickExcerpts(
     for (const e of chapter.excerpts) {
       const note = own.find((n) => n.id === e.note_id) ??
         notes.find((n) => n.id === e.note_id);
-      if (!note || used.has(e.text) || isSensitive(e.text)) continue;
+      if (!note || used.has(e.text)) continue;
       if (isGeneric(e.text) && specificLeft().length > 0) continue;
       take(note, e.text, e.photo_id, "director", note.content.indexOf(e.text));
     }
@@ -2075,93 +2347,156 @@ export function buildNeonNightContent(
     .filter((c) => c.card.length > 0 || c.moments.length > 0);
   const plan_ = planRows(tripData);
   let showsPlan = plan_.length > 0;
-  let noteMoment = plan.note_moment;
+  let noteMoment: NeonNightPlan["note_moment"] = null;
   let picked = pickExcerpts(tripData, shaped, days);
-  // What the app plays (#426): the card types its line; the other lines
-  // go on their own photo's moment, else the first; captions on theirs.
-  const cardLineOf = (i: number) =>
-    shaped[i].note ?? picked[i].excerpts.find((e) =>
-      [...e.text].length <= MAX_NN_CARD_NOTE_CHARS
-    )?.text ?? null;
+  const place = () =>
+    shaped.forEach((c, i) =>
+      bringLinePhotos(c, picked[i].excerpts, heroScores)
+    );
+  place();
+  // How much each scene may show (#448): words per moment (lines and
+  // captions), and the zooms per card.
+  let maxWords = MAX_NN_MOMENT_WORDS;
+  let cardZooms = 2;
+  // The longest card line (#448: shorter when the film runs long).
+  let cardChars = MAX_NN_CARD_NOTE_CHARS;
+  // The Note scene (#448: no line twice): the director's pick, else code's
+  // best line no card, moment or title shows.
+  const noteFor = (): NeonNightPlan["note_moment"] => {
+    const shownWords = shaped.flatMap((c, i) => [
+      c.title,
+      ...(cardLineOf(i) ? [cardLineOf(i)!] : []),
+      ...wordsOf(i).flat().map((w) => w.text),
+    ]);
+    // A line that opens with a chapter's title repeats it too (#448).
+    const isShown = (text: string) =>
+      shownWords.some((w) => overlaps(w, text)) ||
+      shaped.some((c) => repeatsTitle(text, c.title));
+    if (plan.note_moment && !isShown(plan.note_moment.excerpt)) {
+      return plan.note_moment;
+    }
+    return fallbackNoteMoment(tripData, isShown);
+  };
+  // The director's Note line is the Note's (#448): no card or moment
+  // takes it.
+  const reserved = plan.note_moment?.excerpt ?? null;
+  const onCard = (i: number, e: object) => {
+    const id = (e as { photo_id?: string | null }).photo_id;
+    return !!id && shaped[i].card.includes(id);
+  };
+  // The card types its chapter's best line (#448: the highest score that
+  // fits a card; the director's when it scores as well).
+  const cardLineOf = (i: number): string | null => {
+    // Its lines, else one left out (#448: every chapter with notes shows
+    // one — a line too long to show leaves the next best).
+    // A line too long for a card offers its clauses too (#448: the
+    // user's exact words, "нокаут во втором раунде и весь бар орал").
+    const clauses = [...picked[i].excerpts, ...picked[i].rejected].flatMap(
+      (e) =>
+        [...e.text].length <= cardChars ? [] : e.text.split(/(?<=[,;:])\s+/u)
+          .map((c) => c.replace(/[,;:]$/u, "").trim())
+          .filter((c) => c.split(/\s+/u).length >= 3)
+          .map((text) => ({ text, score: excerptScore(text, "night") - 1 })),
+    );
+    const fits = [
+      ...picked[i].excerpts,
+      ...picked[i].rejected,
+      ...clauses,
+    ].filter((e) =>
+      [...e.text].length <= cardChars && !isGeneric(e.text) &&
+      !(reserved && sameLine(e.text, reserved)) &&
+      !repeatsTitle(e.text, shaped[i].title)
+    ).sort((a, b) =>
+      Number(!picked[i].excerpts.includes(a as never)) -
+        Number(!picked[i].excerpts.includes(b as never)) ||
+      // A line whose photo is on the card plays there (#444: over its
+      // own photo).
+      Number(onCard(i, b)) - Number(onCard(i, a)) ||
+      b.score - a.score
+    );
+    const own = shaped[i].note &&
+        !(reserved && sameLine(shaped[i].note!, reserved)) &&
+        !repeatsTitle(shaped[i].note!, shaped[i].title)
+      ? shaped[i].note
+      : null;
+    const ownFits = own !== null && [...own].length <= cardChars;
+    if (ownFits && (!fits[0] || excerptScore(own!, "night") >= fits[0].score)) {
+      return own;
+    }
+    if (fits[0]) return fits[0].text;
+    // Nothing short enough: the line as it was (never no line for length).
+    if (cardChars < MAX_NN_CARD_NOTE_CHARS) {
+      const full = cardChars;
+      cardChars = MAX_NN_CARD_NOTE_CHARS;
+      const line = cardLineOf(i);
+      cardChars = full;
+      return line;
+    }
+    return own;
+  };
+  const wordsOf = (i: number) =>
+    momentWords(
+      shaped[i],
+      picked[i].excerpts,
+      cardLineOf(i),
+      byId,
+      heroScores,
+      maxWords,
+      shaped[i].title,
+      Infinity,
+      reserved,
+    );
   const beats = () =>
     nnFilmBeats(
       shaped.map((c, i) => {
-        const card = cardLineOf(i);
-        const lines = c.moments.map((m) =>
-          m.photo_ids.map((id) => byId.get(id)?.caption?.trim() ?? "")
-            .filter((t) => t)
-        );
-        for (const e of picked[i].excerpts) {
-          if (e.text === card) continue;
-          const at = c.moments.findIndex((m) =>
-            e.photo_id !== null && m.photo_ids.includes(e.photo_id)
-          );
-          // A card-only chapter plays its card line alone.
-          lines[Math.max(0, at)]?.push(e.text);
-        }
+        const words = wordsOf(i);
         return {
           // The card zooms its own photos (NnReadingTime: cardPhotos).
           photos: c.card.length || c.photos.length,
-          cardLine: card,
+          zooms: cardZooms,
+          cardCaptions: (c.card.length ? c.card : c.photos.map((p) => p.id))
+            .map((id) => byId.get(id)?.caption?.trim() || null),
+          cardHeroScores: (c.card.length ? c.card : c.photos.map((p) => p.id))
+            .map((id) => heroScores[id] ?? null),
+          cardLine: cardLineOf(i),
           moments: c.moments.map((m, j) => ({
             type: m.type,
             photos: m.photo_ids.length,
-            lines: lines[j],
+            lines: words[j].map((w) => w.text),
           })),
         };
       }),
       showsPlan,
-      noteMoment !== null,
+      noteFor()?.excerpt ?? true,
     );
-  // Over the film's length (#444): a chapter's two moments become one
-  // (its photos kept, up to a timeline's 8), the last chapter first; then
-  // the Plan scene; then extra lines. Never a chapter, never the Note.
-  while (!nnFits(beats(), seconds)) {
+  // A Neon film may run up to the longest film (#448: 75 s, a hard max)
+  // whatever its target; only past that it trims, in order: words per
+  // moment (3 → 2), a chapter's two moments into one (the last chapter
+  // first), the Plan scene, long card lines, then card zooms (2 → 1, never
+  // none). Never a chapter, the Note scene or a chapter's line.
+  const limit = Math.max(seconds, WRAP_UP_LIMITS.longestFilmSeconds);
+  while (!nnFitsWithin(beats(), limit)) {
     const two = shaped.map((c, i) => ({ c, i })).filter(({ c }) =>
       c.moments.length > 1
     ).pop();
-    if (two) {
+    if (maxWords > 2) maxWords--;
+    else if (two) {
       const ids = new Set(two.c.moments.flatMap((m) => m.photo_ids));
       two.c.moments = [
         momentFor(two.c.photos.filter((p) => ids.has(p.id)), heroScores),
       ];
       picked = pickExcerpts(tripData, shaped, days);
+      place();
     } else if (showsPlan) showsPlan = false;
-    else {
-      // Then a chapter's lines beyond its first, the lowest score first,
-      // from the chapter with the most.
-      const most = picked.map((l, i) => ({ l, i }))
-        .filter(({ l }) => l.excerpts.length > 1)
-        .sort((x, y) =>
-          y.l.excerpts.length - x.l.excerpts.length || y.i - x.i
-        )[0];
-      if (!most) break;
-      const lowest = most.l.excerpts.reduce(
-        (low, e, k) => e.score < most.l.excerpts[low].score ? k : low,
-        most.l.excerpts.length - 1,
-      );
-      const [gone] = most.l.excerpts.splice(lowest, 1);
-      most.l.rejected.unshift({ text: gone.text, score: gone.score });
-    }
+    else if (cardChars > MIN_NN_SHORT_CARD_CHARS) {
+      cardChars = MIN_NN_SHORT_CARD_CHARS;
+    } else if (cardZooms > 1) cardZooms--;
+    else break;
   }
-  // Lines play over their own photos (#444): a line whose photo is on the
-  // card or in no scene brings it into the moment nearest it in time. So
-  // does a caption too long for a card zoom (#446): a moment holds it for
-  // its reading time.
-  shaped.forEach((c, i) => {
-    bringLinePhotos(c, picked[i].excerpts, heroScores);
-    bringLinePhotos(c, longCaptionLines(c), heroScores);
-  });
-  // The Note scene is never empty while a usable line is left (#444):
-  // the director's pick was blocked, so code picks the best unused one.
-  if (noteMoment === null) {
-    noteMoment = fallbackNoteMoment(
-      tripData,
-      new Set(picked.flatMap((l) => l.excerpts.map((e) => e.text))),
-    );
-  }
+  noteMoment = noteFor();
   const chapters = shaped.map((chapter, i) => {
     const lines = picked[i];
+    const words = wordsOf(i);
     return {
       title: chapter.title,
       photos: chapter.photos.map((p) => ({
@@ -2177,16 +2512,20 @@ export function buildNeonNightContent(
       card_photo_ids: chapter.card,
       // The card's typed line: the director's, else the first line short
       // enough for a card (#398).
-      note: chapter.note ??
-        lines.excerpts.find((e) => [...e.text].length <= MAX_NN_CARD_NOTE_CHARS)
-          ?.text ??
-        null,
+      note: cardLineOf(i),
+      // How many photos the card zooms (#448): fewer when the film runs
+      // long; absent in older content = 2.
+      card_zooms: cardZooms,
       excerpts: lines.excerpts,
       days: lines.days,
       rejected_excerpts: lines.rejected,
-      moments: chapter.moments.map((m) => ({
+      moments: chapter.moments.map((m, j) => ({
         type: m.type,
         photo_ids: m.photo_ids,
+        // The words it shows (#448): at most MAX_NN_MOMENT_WORDS, each on
+        // its photo — a line, Always, captioned, then hero score first.
+        // The others play with no label. Absent in older content.
+        words: words[j],
         place: m.type === "split"
           ? m.photo_ids.map((id) => byId.get(id)?.place_text?.trim())
             .find((place) => place) || null

@@ -22,6 +22,10 @@ abstract final class NeonZoomPicks {
   /// holds it for its reading time (the edge function moves it there).
   static const int maxHoldBeats = 6;
 
+  /// The fewest beats a zoom holds its photo (#448): 3 + 2 beats, about
+  /// 2.4 s a zoom — Neon's signature, never a flash.
+  static const int minHoldBeats = 2;
+
   /// The card tiles chapter [chapterNumber] zooms (#446), best first: the
   /// photos whose caption a zoom can show ([fitsZoom]), then the highest
   /// hero score, then the seeded order. Never a photo whose caption is

@@ -1187,10 +1187,31 @@
     "title": "Lisbon",
     "start_date": "2026-09-01",
     "place": "Netherlands",
-    "plan": [],
+    "plan": [
+     {
+      "time": "10:00",
+      "title": "Castle",
+      "done": false
+     },
+     {
+      "time": "13:30",
+      "title": "Lunch in Alfama",
+      "done": false
+     },
+     {
+      "time": "18:00",
+      "title": "Sunset",
+      "done": false
+     },
+     {
+      "time": "21:00",
+      "title": "Fado",
+      "done": false
+     }
+    ],
     "chapters": [
      {
-      "title": "09:00",
+      "title": "Day 1",
       "photos": [
        {
         "id": "p00",
@@ -1226,11 +1247,10 @@
       "card_photo_ids": [
        "p00",
        "p01",
-       "p02",
-       "p03",
-       "p04"
+       "p02"
       ],
-      "note": "Tram 28 up to the castle, the whole city below us.",
+      "note": null,
+      "card_zooms": 2,
       "excerpts": [
        {
         "text": "Tram 28 up to the castle, the whole city below us.",
@@ -1244,10 +1264,20 @@
        "2026-09-01"
       ],
       "rejected_excerpts": [],
-      "moments": []
+      "moments": [
+       {
+        "type": "split",
+        "photo_ids": [
+         "p03",
+         "p04"
+        ],
+        "words": [],
+        "place": null
+       }
+      ]
      },
      {
-      "title": "09:00 2",
+      "title": "still warm",
       "photos": [
        {
         "id": "p05",
@@ -1283,11 +1313,10 @@
       "card_photo_ids": [
        "p05",
        "p06",
-       "p07",
-       "p08",
-       "p09"
+       "p07"
       ],
       "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "card_zooms": 2,
       "excerpts": [
        {
         "text": "Pastéis de nata at Manteigaria, still warm, three each.",
@@ -1301,10 +1330,20 @@
        "2026-09-02"
       ],
       "rejected_excerpts": [],
-      "moments": []
+      "moments": [
+       {
+        "type": "split",
+        "photo_ids": [
+         "p08",
+         "p09"
+        ],
+        "words": [],
+        "place": null
+       }
+      ]
      },
      {
-      "title": "09:00 3",
+      "title": "Day 3",
       "photos": [
        {
         "id": "p10",
@@ -1340,11 +1379,10 @@
       "card_photo_ids": [
        "p10",
        "p11",
-       "p12",
-       "p13",
-       "p14"
+       "p12"
       ],
       "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "card_zooms": 2,
       "excerpts": [
        {
         "text": "Our last sunset at Miradouro da Senhora do Monte.",
@@ -1358,7 +1396,17 @@
        "2026-09-03"
       ],
       "rejected_excerpts": [],
-      "moments": []
+      "moments": [
+       {
+        "type": "split",
+        "photo_ids": [
+         "p13",
+         "p14"
+        ],
+        "words": [],
+        "place": null
+       }
+      ]
      }
     ],
     "note": {
@@ -1523,10 +1571,31 @@
     "title": "Lisbon",
     "start_date": "2026-09-01",
     "place": "Netherlands",
-    "plan": [],
+    "plan": [
+     {
+      "time": "10:00",
+      "title": "Castle",
+      "done": false
+     },
+     {
+      "time": "13:30",
+      "title": "Lunch in Alfama",
+      "done": false
+     },
+     {
+      "time": "18:00",
+      "title": "Sunset",
+      "done": false
+     },
+     {
+      "time": "21:00",
+      "title": "Fado",
+      "done": false
+     }
+    ],
     "chapters": [
      {
-      "title": "09:00",
+      "title": "Day 1",
       "photos": [
        {
         "id": "p00",
@@ -1589,7 +1658,8 @@
        "p02",
        "p03"
       ],
-      "note": "Tram 28 up to the castle, the whole city below us.",
+      "note": null,
+      "card_zooms": 2,
       "excerpts": [
        {
         "text": "Tram 28 up to the castle, the whole city below us.",
@@ -1613,12 +1683,13 @@
          "p07",
          "p08"
         ],
+        "words": [],
         "place": null
        }
       ]
      },
      {
-      "title": "09:00 2",
+      "title": "still warm",
       "photos": [
        {
         "id": "p09",
@@ -1676,6 +1747,7 @@
        "p12"
       ],
       "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "card_zooms": 2,
       "excerpts": [
        {
         "text": "Pastéis de nata at Manteigaria, still warm, three each.",
@@ -1698,12 +1770,13 @@
          "p15",
          "p16"
         ],
+        "words": [],
         "place": null
        }
       ]
      },
      {
-      "title": "09:00 3",
+      "title": "Day 3",
       "photos": [
        {
         "id": "p18",
@@ -1761,6 +1834,7 @@
        "p21"
       ],
       "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "card_zooms": 2,
       "excerpts": [
        {
         "text": "Our last sunset at Miradouro da Senhora do Monte.",
@@ -1783,6 +1857,7 @@
          "p24",
          "p17"
         ],
+        "words": [],
         "place": null
        }
       ]
@@ -2072,7 +2147,7 @@
     ],
     "chapters": [
      {
-      "title": "09:00",
+      "title": "Day 1",
       "photos": [
        {
         "id": "p00",
@@ -2167,7 +2242,8 @@
        "p04",
        "p05"
       ],
-      "note": "Tram 28 up to the castle, the whole city below us.",
+      "note": null,
+      "card_zooms": 2,
       "excerpts": [
        {
         "text": "Tram 28 up to the castle, the whole city below us.",
@@ -2189,6 +2265,7 @@
          "p07",
          "p08"
         ],
+        "words": [],
         "place": null
        },
        {
@@ -2200,12 +2277,13 @@
          "p12",
          "p13"
         ],
+        "words": [],
         "place": null
        }
       ]
      },
      {
-      "title": "09:00 2",
+      "title": "still warm",
       "photos": [
        {
         "id": "p14",
@@ -2294,6 +2372,7 @@
        "p18"
       ],
       "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "card_zooms": 2,
       "excerpts": [
        {
         "text": "Pastéis de nata at Manteigaria, still warm, three each.",
@@ -2312,20 +2391,19 @@
         "type": "timeline",
         "photo_ids": [
          "p19",
-         "p20",
          "p21",
          "p22",
          "p23",
-         "p24",
          "p25",
          "p26"
         ],
+        "words": [],
         "place": null
        }
       ]
      },
      {
-      "title": "09:00 3",
+      "title": "Day 3",
       "photos": [
        {
         "id": "p28",
@@ -2414,6 +2492,7 @@
        "p32"
       ],
       "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "card_zooms": 2,
       "excerpts": [
        {
         "text": "Our last sunset at Miradouro da Senhora do Monte.",
@@ -2432,14 +2511,13 @@
         "type": "timeline",
         "photo_ids": [
          "p33",
-         "p34",
          "p35",
          "p36",
          "p37",
-         "p38",
          "p39",
          "p27"
         ],
+        "words": [],
         "place": null
        }
       ]
@@ -2503,5 +2581,561 @@
     ]
    }
   }
+ },
+ {
+  "film": "neon_night",
+  "photos": 27,
+  "photo_ids": [
+   "a1",
+   "a2",
+   "a3",
+   "a4",
+   "r1",
+   "r2",
+   "r3",
+   "r4",
+   "r5",
+   "k1",
+   "k2",
+   "k3",
+   "k4",
+   "k5",
+   "k6",
+   "u1",
+   "u2",
+   "u3",
+   "u4",
+   "m1",
+   "m2",
+   "m3",
+   "4b0281",
+   "b1",
+   "b2",
+   "b3",
+   "b4"
+  ],
+  "start_date": "2026-10-22",
+  "end_date": "2026-10-24",
+  "content": {
+   "film_style": "neon_night",
+   "film_seconds": 51.599999999999994,
+   "sky": {
+    "sky_version": 1,
+    "source": "code",
+    "title": "ADE-Amsterdam 2026",
+    "first_name": null,
+    "moment_count": 27,
+    "mosaic_photo_ids": [
+     "a1",
+     "a2",
+     "a3",
+     "a4",
+     "r1",
+     "r2",
+     "r3",
+     "r4",
+     "r5",
+     "k1",
+     "k2",
+     "k3",
+     "k4",
+     "k5",
+     "k6",
+     "u1",
+     "u2",
+     "u3",
+     "u4",
+     "m1",
+     "m2",
+     "m3",
+     "4b0281",
+     "b1",
+     "b2",
+     "b3",
+     "b4"
+    ],
+    "pages": [
+     {
+      "first_day": 1,
+      "last_day": null,
+      "date": "2026-10-22",
+      "end_date": null,
+      "photo_count": 15,
+      "note": "Взяли 4,5 кг рёбер и пиво на четверых. Было супер весело и получили много позитивных эмоций.",
+      "excerpts": [
+       {
+        "note_id": "n1",
+        "text": "Взяли 4,5 кг рёбер и пиво на четверых."
+       },
+       {
+        "note_id": "n2",
+        "text": "Kuko Unreal всю ночь до утра."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "a1",
+      "extra_photo_ids": [
+       "a3",
+       "r3",
+       "k1",
+       "k5"
+      ],
+      "note_id": "n1",
+      "sky_line": null
+     },
+     {
+      "first_day": 2,
+      "last_day": null,
+      "date": "2026-10-23",
+      "end_date": null,
+      "photo_count": 8,
+      "note": "Смотрели UFC в баре, нокаут во втором раунде и весь бар орал.",
+      "excerpts": [
+       {
+        "note_id": "n4",
+        "text": "Откисаем до AMF, а потом лазеры над всем залом и самый мощный дроп за неделю."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "u1",
+      "extra_photo_ids": [
+       "u2",
+       "u4",
+       "m2",
+       "4b0281"
+      ],
+      "note_id": "n3",
+      "sky_line": null
+     },
+     {
+      "first_day": 3,
+      "last_day": null,
+      "date": "2026-10-24",
+      "end_date": null,
+      "photo_count": 4,
+      "note": "Брюссель не меняется отличное пиво и вкусная еда.",
+      "excerpts": [
+       {
+        "note_id": "n5",
+        "text": "Брюссель не меняется отличное пиво и вкусная еда."
+       }
+      ],
+      "headline": null,
+      "hero_photo_id": "b1",
+      "extra_photo_ids": [
+       "b2",
+       "b3",
+       "b4"
+      ],
+      "note_id": "n5",
+      "sky_line": null
+     }
+    ]
+   },
+   "neon_night": {
+    "nn_version": 1,
+    "title": "ADE-Amsterdam 2026",
+    "start_date": "2026-10-22",
+    "place": "Amsterdam",
+    "plan": [],
+    "chapters": [
+     {
+      "title": "15 минут до посадки",
+      "photos": [
+       {
+        "id": "a1",
+        "taken_at": "2026-10-22T09:40:00Z",
+        "caption": "15 минут до посадки",
+        "hero_score": null
+       },
+       {
+        "id": "a2",
+        "taken_at": "2026-10-22T09:41:00Z",
+        "caption": null,
+        "hero_score": null
+       },
+       {
+        "id": "a3",
+        "taken_at": "2026-10-22T10:05:00Z",
+        "caption": "Боча уже спит в очереди",
+        "hero_score": null
+       },
+       {
+        "id": "a4",
+        "taken_at": "2026-10-22T10:30:00Z",
+        "caption": null,
+        "hero_score": null
+       }
+      ],
+      "card_photo_ids": [
+       "a1",
+       "a2",
+       "a3",
+       "a4"
+      ],
+      "note": null,
+      "card_zooms": 1,
+      "excerpts": [],
+      "days": [
+       "2026-10-22"
+      ],
+      "rejected_excerpts": [],
+      "moments": []
+     },
+     {
+      "title": "пиво и ещё раз пиво",
+      "photos": [
+       {
+        "id": "r1",
+        "taken_at": "2026-10-22T18:42:00Z",
+        "caption": "Рёбра на четверых, 4,5 кг",
+        "hero_score": null
+       },
+       {
+        "id": "r2",
+        "taken_at": "2026-10-22T18:50:00Z",
+        "caption": null,
+        "hero_score": null
+       },
+       {
+        "id": "r3",
+        "taken_at": "2026-10-22T19:05:00Z",
+        "caption": "пиво и ещё раз пиво",
+        "hero_score": null
+       },
+       {
+        "id": "r4",
+        "taken_at": "2026-10-22T19:30:00Z",
+        "caption": null,
+        "hero_score": null
+       },
+       {
+        "id": "r5",
+        "taken_at": "2026-10-22T20:10:00Z",
+        "caption": null,
+        "hero_score": null
+       }
+      ],
+      "card_photo_ids": [
+       "r1",
+       "r2",
+       "r3"
+      ],
+      "note": "Взяли 4,5 кг рёбер и пиво на четверых.",
+      "card_zooms": 1,
+      "excerpts": [
+       {
+        "text": "Взяли 4,5 кг рёбер и пиво на четверых.",
+        "note_id": "n1",
+        "photo_id": "r5",
+        "source": "code",
+        "score": 4
+       }
+      ],
+      "days": [
+       "2026-10-22"
+      ],
+      "rejected_excerpts": [
+       {
+        "text": "Было супер весело и получили много позитивных эмоций.",
+        "score": -12
+       }
+      ],
+      "moments": [
+       {
+        "type": "split",
+        "photo_ids": [
+         "r4",
+         "r5"
+        ],
+        "words": [],
+        "place": null
+       }
+      ]
+     },
+     {
+      "title": "Домой пришли в 8 утра",
+      "photos": [
+       {
+        "id": "k1",
+        "taken_at": "2026-10-22T23:30:00Z",
+        "caption": "Очередь в Kuko на час, но оно того стоило",
+        "hero_score": null
+       },
+       {
+        "id": "k2",
+        "taken_at": "2026-10-23T00:15:00Z",
+        "caption": null,
+        "hero_score": null
+       },
+       {
+        "id": "k3",
+        "taken_at": "2026-10-23T01:02:00Z",
+        "caption": "Unreal, всю ночь до утра без остановки",
+        "hero_score": null
+       },
+       {
+        "id": "k4",
+        "taken_at": "2026-10-23T01:40:00Z",
+        "caption": "охуенный сет",
+        "hero_score": null
+       },
+       {
+        "id": "k5",
+        "taken_at": "2026-10-23T02:30:00Z",
+        "caption": null,
+        "hero_score": null
+       },
+       {
+        "id": "k6",
+        "taken_at": "2026-10-23T03:10:00Z",
+        "caption": null,
+        "hero_score": null
+       }
+      ],
+      "card_photo_ids": [
+       "k1",
+       "k2",
+       "k3"
+      ],
+      "note": null,
+      "card_zooms": 1,
+      "excerpts": [
+       {
+        "text": "Kuko Unreal всю ночь до утра.",
+        "note_id": "n2",
+        "photo_id": "k6",
+        "source": "code",
+        "score": 14
+       },
+       {
+        "text": "Домой пришли в 8 утра, ноги отваливаются.",
+        "note_id": "n2",
+        "photo_id": "k6",
+        "source": "code",
+        "score": 3
+       }
+      ],
+      "days": [
+       "2026-10-22"
+      ],
+      "rejected_excerpts": [],
+      "moments": [
+       {
+        "type": "split",
+        "photo_ids": [
+         "k4",
+         "k5",
+         "k6"
+        ],
+        "words": [
+         {
+          "photo_id": "k4",
+          "text": "охуенный сет"
+         }
+        ],
+        "place": null
+       }
+      ]
+     },
+     {
+      "title": "UFC в баре",
+      "photos": [
+       {
+        "id": "u1",
+        "taken_at": "2026-10-23T20:00:00Z",
+        "caption": "UFC в баре",
+        "hero_score": null
+       },
+       {
+        "id": "u2",
+        "taken_at": "2026-10-23T20:40:00Z",
+        "caption": null,
+        "hero_score": null
+       },
+       {
+        "id": "u3",
+        "taken_at": "2026-10-23T21:15:00Z",
+        "caption": "Нокаут во втором раунде, бар взорвался",
+        "hero_score": null
+       },
+       {
+        "id": "u4",
+        "taken_at": "2026-10-23T22:00:00Z",
+        "caption": null,
+        "hero_score": null
+       },
+       {
+        "id": "m1",
+        "taken_at": "2026-10-24T00:30:00Z",
+        "caption": "AMF",
+        "hero_score": null
+       },
+       {
+        "id": "m2",
+        "taken_at": "2026-10-24T01:20:00Z",
+        "caption": null,
+        "hero_score": null
+       },
+       {
+        "id": "m3",
+        "taken_at": "2026-10-24T03:00:00Z",
+        "caption": null,
+        "hero_score": null
+       },
+       {
+        "id": "4b0281",
+        "taken_at": "2026-10-24T04:43:00Z",
+        "caption": "Лазеры над всем залом",
+        "hero_score": null
+       }
+      ],
+      "card_photo_ids": [
+       "u1",
+       "u2",
+       "u3",
+       "u4"
+      ],
+      "note": "Откисаем до AMF",
+      "card_zooms": 1,
+      "excerpts": [
+       {
+        "text": "Откисаем до AMF, а потом лазеры над всем залом и самый мощный дроп за неделю.",
+        "note_id": "n4",
+        "photo_id": "4b0281",
+        "source": "code",
+        "score": 9
+       }
+      ],
+      "days": [
+       "2026-10-23"
+      ],
+      "rejected_excerpts": [
+       {
+        "text": "Смотрели UFC в баре, нокаут во втором раунде и весь бар орал.",
+        "score": 1
+       }
+      ],
+      "moments": [
+       {
+        "type": "split",
+        "photo_ids": [
+         "m1",
+         "m2",
+         "m3",
+         "4b0281"
+        ],
+        "words": [
+         {
+          "photo_id": "m1",
+          "text": "AMF"
+         },
+         {
+          "photo_id": "4b0281",
+          "text": "Лазеры над всем залом"
+         }
+        ],
+        "place": null
+       }
+      ]
+     },
+     {
+      "title": "Брюссель",
+      "photos": [
+       {
+        "id": "b1",
+        "taken_at": "2026-10-24T14:00:00Z",
+        "caption": "Брюссель",
+        "hero_score": null
+       },
+       {
+        "id": "b2",
+        "taken_at": "2026-10-24T15:10:00Z",
+        "caption": null,
+        "hero_score": null
+       },
+       {
+        "id": "b3",
+        "taken_at": "2026-10-24T16:40:00Z",
+        "caption": "Вафли на Гран-Плас",
+        "hero_score": null
+       },
+       {
+        "id": "b4",
+        "taken_at": "2026-10-24T18:19:00Z",
+        "caption": null,
+        "hero_score": null
+       }
+      ],
+      "card_photo_ids": [
+       "b1",
+       "b2",
+       "b3",
+       "b4"
+      ],
+      "note": "Брюссель не меняется отличное пиво и вкусная еда.",
+      "card_zooms": 1,
+      "excerpts": [
+       {
+        "text": "Брюссель не меняется отличное пиво и вкусная еда.",
+        "note_id": "n5",
+        "photo_id": "b4",
+        "source": "code",
+        "score": 2
+       }
+      ],
+      "days": [
+       "2026-10-24"
+      ],
+      "rejected_excerpts": [],
+      "moments": []
+     }
+    ],
+    "note": {
+     "text": "Kuko Unreal всю ночь до утра.",
+     "number": 2,
+     "written_at": "2026-10-23T03:30:00Z",
+     "photo_id": null
+    },
+    "headline": null,
+    "first_name": null,
+    "totals": {
+     "photos": 27,
+     "notes": 5,
+     "ticks": 0,
+     "moments": 27
+    },
+    "heart_photo_ids": [
+     "a1",
+     "a2",
+     "a3",
+     "a4",
+     "r1",
+     "r2",
+     "r3",
+     "r4",
+     "r5",
+     "k1",
+     "k2",
+     "k3",
+     "k4",
+     "k5",
+     "k6",
+     "u1",
+     "u2",
+     "u3",
+     "u4",
+     "m1",
+     "m2",
+     "m3",
+     "4b0281",
+     "b1",
+     "b2",
+     "b3",
+     "b4"
+    ]
+   }
+  },
+  "case": "ade"
  }
 ]

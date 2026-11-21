@@ -14,6 +14,7 @@ import { withFilmPhotos } from "./film_photos.ts";
 import { filmSecondsOf } from "./film_length.ts";
 import type { PlayedTemplate } from "./film_template.ts";
 import type { TripData } from "./gather.ts";
+import { adeMemory } from "./ade_fixture.ts";
 
 export const FIXTURE_PHOTO_COUNTS = [15, 25, 40];
 export const FIXTURE_FILMS: PlayedTemplate[] = [
@@ -115,6 +116,30 @@ export function lengthContent(
   return content;
 }
 
+// The ADE-shaped Neon Night memory's content (#448), director off.
+export function adeContent(): Record<string, unknown> {
+  const memory = withFilmPhotos(adeMemory(), {});
+  return {
+    film_style: "neon_night",
+    film_seconds: filmSecondsOf(memory),
+    sky: buildSkyContent(memory, null, {}),
+    neon_night: buildNeonNightContent(
+      memory,
+      currentNeonNight(null, memory, "ru").plan,
+    ),
+  };
+}
+
+type LengthFixture = {
+  film: PlayedTemplate;
+  photos: number;
+  photo_ids: string[];
+  start_date: string;
+  end_date: string;
+  content: Record<string, unknown>;
+  case?: string;
+};
+
 // Every fixture, as film_lengths.json holds them.
 export function filmLengthFixtures(): {
   film: PlayedTemplate;
@@ -123,9 +148,10 @@ export function filmLengthFixtures(): {
   start_date: string;
   end_date: string;
   content: Record<string, unknown>;
+  case?: string;
 }[] {
   return FIXTURE_FILMS.flatMap((film) =>
-    FIXTURE_PHOTO_COUNTS.map((photos) => ({
+    FIXTURE_PHOTO_COUNTS.map((photos): LengthFixture => ({
       film,
       photos,
       photo_ids: lengthMemory(film, photos).photos.map((p) => p.id),
@@ -133,5 +159,14 @@ export function filmLengthFixtures(): {
       end_date: DAYS[2],
       content: lengthContent(film, photos),
     }))
-  );
+  ).concat([{
+    film: "neon_night",
+    photos: adeMemory().photos.length,
+    photo_ids: adeMemory().photos.map((p) => p.id),
+    start_date: "2026-10-22",
+    end_date: "2026-10-24",
+    content: adeContent(),
+    // The ADE-Amsterdam-shaped memory (#448).
+    case: "ade",
+  }]);
 }
