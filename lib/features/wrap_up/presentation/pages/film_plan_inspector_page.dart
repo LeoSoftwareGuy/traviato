@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +19,8 @@ import '../../domain/entities/film_plan_chapter.dart';
 import '../../domain/entities/film_plan_inspection.dart';
 import '../../domain/entities/film_plan_scene.dart';
 import '../controllers/wrap_up_controller.dart';
+import '../controllers/wrap_up_state.dart';
+import '../film/film_storyboard.dart';
 import '../film/golden_vows/golden_vows_timeline.dart';
 import '../../domain/entities/wrap_up_neon_night.dart';
 import '../film/neon_night/neon_night_canvas.dart';
@@ -57,6 +60,12 @@ class FilmPlanInspectorPage extends ConsumerWidget {
         backgroundColor: AppColors.background,
         title: Text('Plan inspector', style: AppTypography.screenTitle),
         actions: [
+          IconButton(
+            key: const Key('film-plan-storyboard'),
+            tooltip: 'Copy storyboard',
+            onPressed: () => _copyStoryboard(context, ref, tripId),
+            icon: const Icon(Icons.view_list_outlined),
+          ),
           IconButton(
             key: const Key('film-plan-sky-story'),
             tooltip: 'Preview Sky Story',
@@ -101,6 +110,48 @@ class FilmPlanInspectorPage extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Copies the film as it plays as a Markdown storyboard (#442).
+Future<void> _copyStoryboard(
+  BuildContext context,
+  WidgetRef ref,
+  String tripId,
+) async {
+  final state = ref.read(wrapUpControllerProvider(tripId)).value;
+  final text = state == null ? null : filmStoryboardFor(state);
+  final messenger = ScaffoldMessenger.of(context);
+  if (text == null) {
+    messenger.showSnackBar(
+      const SnackBar(content: Text('No film to copy yet')),
+    );
+    return;
+  }
+  await Clipboard.setData(ClipboardData(text: text));
+  messenger.showSnackBar(const SnackBar(content: Text('Storyboard copied')));
+}
+
+/// The storyboard of the film [state] plays — Golden Vows, else Neon
+/// Night, else Sky Story — then Sky Story's when it's only the safety net.
+/// Null without any of them.
+String? filmStoryboardFor(WrapUpState state) {
+  final sky = state.skyStory;
+  final played = switch ((state.goldenVows, state.neonNight)) {
+    (final gv?, _) => FilmStoryboard.goldenVows(
+      gv,
+      memory: gv.names,
+      takenAt: state.photoTakenAtById,
+    ),
+    (_, final nn?) => FilmStoryboard.neonNight(nn, memory: nn.title),
+    _ => null,
+  };
+  final skyTable = sky == null
+      ? null
+      : FilmStoryboard.skyStory(sky, memory: sky.title);
+  if (played == null) return skyTable;
+  return skyTable == null
+      ? played
+      : '$played\n## Safety net (plays if the film fails)\n\n$skyTable';
 }
 
 class _InspectionBody extends ConsumerWidget {
