@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../film_debug_flags.dart';
 import '../../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../../features/auth/presentation/controllers/auth_state.dart';
 import '../../../features/auth/presentation/pages/auth_page.dart';
@@ -171,8 +172,9 @@ GoRouter router(Ref ref) {
               RouteQuery.fromMemory,
         ),
       ),
-      // The director's Plan inspector (#328) — never routed in release.
-      if (kDebugMode)
+      // The director's Plan inspector (#328) — never routed in a normal
+      // release (#440: a PLAN_INSPECTOR build has it).
+      if (hasPlanInspector)
         GoRoute(
           path: RoutePaths.tripFilmPlan,
           name: RouteNames.tripFilmPlan,
