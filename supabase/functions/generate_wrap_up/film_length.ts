@@ -192,11 +192,13 @@ export function nnCardBeats(
   index: number,
   count: number,
   photos: number,
+  // The zooms it may play (#448: fewer when the film runs long).
+  zooms = 2,
 ): number {
-  // Every card zooms up to 2 of its photos (#444: NeonZoomPicks), 12
-  // beats; zoom holds are capped at 2 beats each and covered by the slack.
+  // Every card zooms up to 2 of its photos (#444: NeonZoomPicks): 12
+  // beats, 8 without a zoom; zoom holds are covered by the slack.
   void index, count;
-  return Math.min(photos, 2) === 0 ? 8 : 12;
+  return Math.min(photos, zooms) === 0 ? 8 : 12;
 }
 
 export interface NnShapeMoment {
@@ -212,6 +214,8 @@ export interface NnShapeChapter {
   moments: NnShapeMoment[];
   // The card's typed line, if any.
   cardLine?: string | null;
+  // The zooms its card may play; absent = 2.
+  zooms?: number;
 }
 
 // [beats] up to whole bars.
@@ -251,21 +255,34 @@ export function nnChapterCardBeats(
   count: number,
   chapter: NnShapeChapter,
 ): number {
-  const own = nnCardBeats(index, count, chapter.photos);
+  const own = nnCardBeats(index, count, chapter.photos, chapter.zooms);
   const line = chapter.cardLine?.trim();
   if (!line) return own;
   const typing = ([...line].length + 2) / 30;
   const shown = Math.max(typing + 0.8, readingSeconds(line));
-  return Math.max(own, bars(4 + nnBeatsFor(shown + 0.18)));
+  // Typed from lb 4, or lb 2 on a card without zooms (#448).
+  const from = (chapter.zooms ?? 2) === 0 ? 2 : 4;
+  return Math.max(own, bars(from + nnBeatsFor(shown + 0.18)));
+}
+
+// The Note scene's beats for [text] (NnNoteTexts.beatsFor, #448): 12 at
+// least, longer to read its line.
+export function nnNoteBeats(text: string | null): number {
+  if (!text?.trim()) return NN_NOTE_BEATS;
+  return Math.max(
+    NN_NOTE_BEATS,
+    bars(1 + nnBeatsFor(readingSeconds(text)) + nnBeatsFor(0.25)),
+  );
 }
 
 export function nnFilmBeats(
   chapters: NnShapeChapter[],
   hasPlan: boolean,
-  hasNote: boolean,
+  // The Note scene: whether there is one, or its line.
+  note: boolean | string,
 ): number {
   return NN_FIXED_BEATS + (hasPlan ? NN_PLAN_BEATS : 0) +
-    (hasNote ? NN_NOTE_BEATS : 0) +
+    (note === false ? 0 : nnNoteBeats(typeof note === "string" ? note : null)) +
     chapters.reduce(
       (sum, c, i) =>
         sum + nnChapterCardBeats(i, chapters.length, c) +
