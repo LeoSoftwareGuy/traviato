@@ -853,10 +853,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get journal_wrapUpReqNote => 'Хотя бы одна заметка';
 
   @override
-  String get journal_wrapUpFree =>
-      'Ничего покупать не нужно — на любом тарифе всё одинаково.';
-
-  @override
   String journal_wordCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -2837,17 +2833,13 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get timeline_emptyBody =>
-      'Пишите строчку, когда что-то происходит. Каждое нажатие «Готово» сохраняет отдельную заметку со временем.';
-
-  @override
-  String get timeline_emptyWrite => '✎ Первая заметка ✦1';
+  String get timeline_emptyWrite => '✎ Первая заметка';
 
   @override
   String get timeline_emptyOrPhoto => 'или добавьте фото';
 
   @override
-  String get timeline_emptyLine => 'Первая строчка будет здесь…';
+  String get timeline_emptyLine => 'Первая заметка появится тут…';
 
   @override
   String note_stampNew(String time) {
@@ -2866,9 +2858,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String photoNote_listLabel(int count) {
     return 'Заметки к фото · $count';
   }
-
-  @override
-  String get photoNote_none => 'К этому фото пока нет заметок.';
 
   @override
   String note_stampPhoto(String time) {

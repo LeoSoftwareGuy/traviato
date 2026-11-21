@@ -848,10 +848,6 @@
   "@journal_wrapUpReqNote": {
     "x-review": "pending"
   },
-  "journal_wrapUpFree": "Ничего покупать не нужно — на любом тарифе всё одинаково.",
-  "@journal_wrapUpFree": {
-    "x-review": "pending"
-  },
   "journal_wordCount": "{count, plural, one{{count} слово} few{{count} слова} many{{count} слов} other{{count} слова}}",
   "@journal_wordCount": {
     "x-review": "pending"
@@ -2711,11 +2707,7 @@
   "@timeline_emptyTitle": {
     "x-review": "pending"
   },
-  "timeline_emptyBody": "Пишите строчку, когда что-то происходит. Каждое нажатие «Готово» сохраняет отдельную заметку со временем.",
-  "@timeline_emptyBody": {
-    "x-review": "pending"
-  },
-  "timeline_emptyWrite": "✎ Первая заметка ✦1",
+  "timeline_emptyWrite": "✎ Первая заметка",
   "@timeline_emptyWrite": {
     "x-review": "pending"
   },
@@ -2723,7 +2715,7 @@
   "@timeline_emptyOrPhoto": {
     "x-review": "pending"
   },
-  "timeline_emptyLine": "Первая строчка будет здесь…",
+  "timeline_emptyLine": "Первая заметка появится тут…",
   "@timeline_emptyLine": {
     "x-review": "pending"
   },
@@ -2739,8 +2731,6 @@
   "@photoNote_add": {"x-review": "pending"},
   "photoNote_listLabel": "Заметки к фото · {count}",
   "@photoNote_listLabel": {"x-review": "pending"},
-  "photoNote_none": "К этому фото пока нет заметок.",
-  "@photoNote_none": {"x-review": "pending"},
   "note_stampPhoto": "Заметка к фото · {time}",
   "@note_stampPhoto": {"x-review": "pending"},
   "note_onThisPhoto": "К этому фото · {time}",

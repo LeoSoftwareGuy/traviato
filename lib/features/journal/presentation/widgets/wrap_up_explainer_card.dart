@@ -57,17 +57,6 @@ class WrapUpExplainerCard extends StatelessWidget {
             need: JournalState.wrapUpMinNotes,
             met: state.wrapUpNotesMet,
           ),
-          const SizedBox(height: AppSpacing.md),
-          const Divider(height: 1, color: AppColors.surfaceBorder),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            l10n.journal_wrapUpFree,
-            style: AppTypography.caption.copyWith(
-              fontSize: 10.5,
-              height: 1.5,
-              color: AppColors.textTertiary,
-            ),
-          ),
         ],
       ),
     );
