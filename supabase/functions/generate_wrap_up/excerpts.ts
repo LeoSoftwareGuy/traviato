@@ -27,7 +27,9 @@ function clausesOf(sentence: string): string[] {
   const pieces = sentence.split(/(?<=[,;:])\s+|\s+(?=[—–-]\s)/u).map(collapse)
     .filter((p) => p.length > 0);
   const clauses: string[] = [];
-  for (const piece of pieces) {
+  // A clause never ends on its comma (#450: "…позавтракали,").
+  for (const raw of pieces) {
+    const piece = raw.replace(/\s*[,;:]$/u, "");
     const last = clauses[clauses.length - 1];
     if (last !== undefined && [...last].length < MIN_CLAUSE_CHARS) {
       clauses[clauses.length - 1] = `${last} ${piece}`;
@@ -67,6 +69,13 @@ const GENERIC = [
   /(^|\s)сидели(\s|$|[.,!])/iu,
   /(хороший|отличный) (день|вечер)/iu,
   /отлично провели/iu,
+  // A morning's routine (#450: "Проснулись собрались с силами и
+  // позавтракали" over Brussels' "отличное пиво и вкусная еда").
+  /(^|[^а-яё])проснулись/iu,
+  /собрались с силами/iu,
+  /(^|[^а-яё])(по)?завтракали/iu,
+  /\bwoke up\b/iu,
+  /\b(had|ate) breakfast\b/iu,
 ];
 
 const FOOD =

@@ -1315,7 +1315,7 @@
        "p06",
        "p07"
       ],
-      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "note": null,
       "card_zooms": 2,
       "excerpts": [
        {
@@ -1381,7 +1381,7 @@
        "p11",
        "p12"
       ],
-      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "note": null,
       "card_zooms": 2,
       "excerpts": [
        {
@@ -1746,7 +1746,7 @@
        "p11",
        "p12"
       ],
-      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "note": null,
       "card_zooms": 2,
       "excerpts": [
        {
@@ -1833,7 +1833,7 @@
        "p20",
        "p21"
       ],
-      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "note": null,
       "card_zooms": 2,
       "excerpts": [
        {
@@ -2371,7 +2371,7 @@
        "p17",
        "p18"
       ],
-      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "note": null,
       "card_zooms": 2,
       "excerpts": [
        {
@@ -2491,7 +2491,7 @@
        "p31",
        "p32"
       ],
-      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "note": null,
       "card_zooms": 2,
       "excerpts": [
        {
@@ -2661,7 +2661,7 @@
       "date": "2026-10-22",
       "end_date": null,
       "photo_count": 15,
-      "note": "Взяли 4,5 кг рёбер и пиво на четверых. Было супер весело и получили много позитивных эмоций.",
+      "note": "Приземлились в Амстердаме и сразу поехали в отель.",
       "excerpts": [
        {
         "note_id": "n1",
@@ -2680,7 +2680,7 @@
        "k1",
        "k5"
       ],
-      "note_id": "n1",
+      "note_id": "n0",
       "sky_line": null
      },
      {
@@ -2713,7 +2713,7 @@
       "date": "2026-10-24",
       "end_date": null,
       "photo_count": 4,
-      "note": "Брюссель не меняется отличное пиво и вкусная еда.",
+      "note": "Проснулись собрались с силами и позавтракали, потом поехали в Брюссель. Брюссель не меняется отличное пиво и вкусная еда.",
       "excerpts": [
        {
         "note_id": "n5",
@@ -2757,13 +2757,13 @@
        {
         "id": "a3",
         "taken_at": "2026-10-22T10:05:00Z",
-        "caption": "Боча уже спит в очереди",
+        "caption": "Боча уже спит в очереди на посадку",
         "hero_score": null
        },
        {
         "id": "a4",
         "taken_at": "2026-10-22T10:30:00Z",
-        "caption": null,
+        "caption": "Последний кофе в Таллине перед вылетом",
         "hero_score": null
        }
       ],
@@ -2775,7 +2775,15 @@
       ],
       "note": null,
       "card_zooms": 1,
-      "excerpts": [],
+      "excerpts": [
+       {
+        "text": "Приземлились в Амстердаме и сразу поехали в отель.",
+        "note_id": "n0",
+        "photo_id": "a4",
+        "source": "code",
+        "score": 2
+       }
+      ],
       "days": [
        "2026-10-22"
       ],
@@ -2794,7 +2802,7 @@
        {
         "id": "r2",
         "taken_at": "2026-10-22T18:50:00Z",
-        "caption": null,
+        "caption": "Официант принёс поднос размером с колесо",
         "hero_score": null
        },
        {
@@ -2865,7 +2873,7 @@
        {
         "id": "k2",
         "taken_at": "2026-10-23T00:15:00Z",
-        "caption": null,
+        "caption": "Первый трек и весь зал уже прыгает вместе",
         "hero_score": null
        },
        {
@@ -2883,7 +2891,7 @@
        {
         "id": "k5",
         "taken_at": "2026-10-23T02:30:00Z",
-        "caption": null,
+        "caption": "Свет погас и все заорали в один голос",
         "hero_score": null
        },
        {
@@ -2898,7 +2906,7 @@
        "k2",
        "k3"
       ],
-      "note": null,
+      "note": "Kuko Unreal всю ночь до утра.",
       "card_zooms": 1,
       "excerpts": [
        {
@@ -2932,6 +2940,10 @@
          {
           "photo_id": "k4",
           "text": "охуенный сет"
+         },
+         {
+          "photo_id": "k5",
+          "text": "Свет погас и все заорали в один голос"
          }
         ],
         "place": null
@@ -2939,7 +2951,7 @@
       ]
      },
      {
-      "title": "UFC в баре",
+      "title": "Смотрели UFC в баре",
       "photos": [
        {
         "id": "u1",
@@ -2950,7 +2962,7 @@
        {
         "id": "u2",
         "taken_at": "2026-10-23T20:40:00Z",
-        "caption": null,
+        "caption": "Заняли последний столик прямо у экрана",
         "hero_score": null
        },
        {
@@ -2974,7 +2986,7 @@
        {
         "id": "m2",
         "taken_at": "2026-10-24T01:20:00Z",
-        "caption": null,
+        "caption": "Очередь на вход растянулась на весь квартал",
         "hero_score": null
        },
        {
@@ -2996,7 +3008,7 @@
        "u3",
        "u4"
       ],
-      "note": "Откисаем до AMF",
+      "note": "а потом лазеры над всем залом и самый мощный дроп за неделю.",
       "card_zooms": 1,
       "excerpts": [
        {
@@ -3031,8 +3043,8 @@
           "text": "AMF"
          },
          {
-          "photo_id": "4b0281",
-          "text": "Лазеры над всем залом"
+          "photo_id": "m2",
+          "text": "Очередь на вход растянулась на весь квартал"
          }
         ],
         "place": null
@@ -3057,7 +3069,7 @@
        {
         "id": "b3",
         "taken_at": "2026-10-24T16:40:00Z",
-        "caption": "Вафли на Гран-Плас",
+        "caption": "some sweets for Anna",
         "hero_score": null
        },
        {
@@ -3087,21 +3099,26 @@
       "days": [
        "2026-10-24"
       ],
-      "rejected_excerpts": [],
+      "rejected_excerpts": [
+       {
+        "text": "Проснулись собрались с силами и позавтракали, потом поехали в Брюссель.",
+        "score": -10
+       }
+      ],
       "moments": []
      }
     ],
     "note": {
-     "text": "Kuko Unreal всю ночь до утра.",
-     "number": 2,
-     "written_at": "2026-10-23T03:30:00Z",
+     "text": "Приземлились в Амстердаме и сразу поехали в отель.",
+     "number": 1,
+     "written_at": "2026-10-22T13:10:00Z",
      "photo_id": null
     },
-    "headline": null,
+    "headline": "Самый крутой сет",
     "first_name": null,
     "totals": {
      "photos": 27,
-     "notes": 5,
+     "notes": 6,
      "ticks": 0,
      "moments": 27
     },

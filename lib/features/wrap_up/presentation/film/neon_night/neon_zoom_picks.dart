@@ -28,12 +28,16 @@ abstract final class NeonZoomPicks {
 
   /// The card tiles chapter [chapterNumber] zooms (#446), best first: the
   /// photos whose caption a zoom can show ([fitsZoom]), then the highest
-  /// hero score, then the seeded order. Never a photo whose caption is
-  /// too long for a zoom. At most [countFor] of [photos].
+  /// hero score, then the seeded order; a photo whose caption is too long
+  /// for a zoom last (it zooms with no label, #450). At most [countFor] of
+  /// [photos].
   static List<int> best({
     required int chapterNumber,
     required List<({String? caption, int? heroScore})> photos,
     required bool Function(String caption) fitsZoom,
+    // A film over the longest (#450): the quickest photos instead — no
+    // caption first, then the shortest, then hero score.
+    bool quickest = false,
   }) {
     if (photos.isEmpty) return const [];
     final seeded = pick(chapterNumber: chapterNumber, tiles: photos.length);
@@ -45,14 +49,20 @@ abstract final class NeonZoomPicks {
     int rank(int k) {
       final caption = photos[k].caption?.trim();
       final captioned = caption != null && caption.isNotEmpty;
-      if (captioned && !fitsZoom(caption)) return -1;
+      // A caption too long to read in a zoom: the photo still zooms (#450:
+      // every card zooms), with no label, after every other photo.
+      if (captioned && !fitsZoom(caption)) {
+        return -1000 + (photos[k].heroScore ?? 0);
+      }
+      if (quickest) {
+        return 1000 -
+            (captioned ? caption.runes.length * 10 : 0) +
+            (photos[k].heroScore ?? 0);
+      }
       return (captioned ? 10 : 0) + (photos[k].heroScore ?? 0);
     }
 
-    final ranked = [
-      for (final k in order)
-        if (rank(k) >= 0) k,
-    ];
+    final ranked = [...order];
     // Stable: equal ranks keep the seeded order.
     final position = {for (final (i, k) in order.indexed) k: i};
     ranked.sort((a, b) {

@@ -380,7 +380,22 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   moment (3 → 2), two moments for one, the Plan scene, long card lines,
   then zooms (2 → 1, never none) — never a chapter, the Note scene or a
   chapter's line. A card without zooms (older content) types its line
-  from beat 2. Every chapter with notes shows its best line (a clause of it
+  from beat 2.
+- **75 s as played (#450, after ADE ran 85 s on the phone):** the app
+  measures the film on the player's own timeline and holds it to 75 s,
+  trimming in the same order (the last chapter first). Past those five
+  steps it has two more, so the limit holds: a card's zoom takes its
+  quickest photo (no caption first), then a moment's words 2 → 1. Every
+  card zooms; a photo whose caption is too long to read zooms with no
+  label, never the time. The storyboard shows "max 75 s". A director
+  title stays only on the chapter it was written for (most of its photos
+  shared), whole — too long means a fallback — in the notes' language
+  (≥ 70 % one script) and never the headline; else the place, a line of
+  the part's notes, then a caption. Card lines: the most specific first,
+  never a generic one while a specific is left ("woke up", "had
+  breakfast" are generic), no trailing comma, and only from a note on
+  the chapter's photos or written from 30 min before them to 90 min
+  after (no landing note over the departure photos). Every chapter with notes shows its best line (a clause of it
   when the line is too long for the card), the Note scene plays a line
   nothing else shows, and no line plays twice. Titles: the director's,
   else the place, a caption, the part's notes, else "Day N" — never a

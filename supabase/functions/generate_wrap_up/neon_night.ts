@@ -941,7 +941,11 @@ export function repairNeonNight(
       first.first_photo_id = firstId;
     }
     nn.chapters = splitByDays(chapters, context);
-    fitTitles(nn.chapters as unknown[], context);
+    fitTitles(
+      nn.chapters as unknown[],
+      context,
+      isString(nn.headline) ? cleanAiLine(nn.headline) : null,
+    );
     repairMoments(nn, context);
     fitExcerptPhotos(nn, context);
   }
@@ -1050,10 +1054,28 @@ function splitByDays(
     const covering = [...old].reverse().find((c) => startOf(c) <= start) ??
       old[0];
     const base = inside[0] ?? covering;
-    let title = (inside[0]?.title ?? null) as string | null;
-    if (!title) {
-      const fold = covering.title as string | null;
-      title = fold && !usedTitles.has(fold) ? fold : null;
+    // The director's title only for its own chapter (#450: a title moved
+    // onto another day read "Куко Unreal" over AMF): the director chapter
+    // most of this part's photos are in, with most of its own photos here.
+    const sorted = [...old].sort((a, b) => startOf(a) - startOf(b));
+    const spanOf = (c: Record<string, unknown>) => {
+      const k = sorted.indexOf(c);
+      return [
+        startOf(c),
+        k + 1 < sorted.length ? startOf(sorted[k + 1]) : ordered.length,
+      ];
+    };
+    let title: string | null = null;
+    for (const c of sorted) {
+      const [from, to] = spanOf(c);
+      const shared = Math.max(0, Math.min(to, end) - Math.max(from, start));
+      if (
+        shared * 2 >= end - start && shared * 2 >= to - from &&
+        isString(c.title) && c.title.trim() && !usedTitles.has(c.title)
+      ) {
+        title = c.title;
+        break;
+      }
     }
     title ??= partTitle(ordered.slice(start, end), context, usedTitles);
     usedTitles.add(title);
@@ -1094,10 +1116,15 @@ function splitByDays(
 // word) — rather than the whole film falling back for one character; a
 // missing one, or one that can't be shortened to at least 2 words' worth,
 // takes its place, else its first photo's time.
-function fitTitles(chapters: unknown[], context: NnCheckContext): void {
+function fitTitles(
+  chapters: unknown[],
+  context: NnCheckContext,
+  // The Finale's headline: no title repeats it (#450).
+  headline: string | null = null,
+): void {
   const ordered = [...context.photoOrder.entries()].sort((a, b) => a[1] - b[1])
     .map(([id]) => id);
-  const taken = new Set<string>();
+  const taken = new Set<string>(headline ? [headline] : []);
   for (const raw of chapters) {
     if (typeof raw !== "object" || raw === null) continue;
     const chapter = raw as Record<string, unknown>;
@@ -1110,8 +1137,11 @@ function fitTitles(chapters: unknown[], context: NnCheckContext): void {
         p.trim() === whole
       )
     ) title = "";
-    title = wholeWords(title, MAX_NN_TITLE_CHARS) ?? "";
+    // Too long: the part's own title — never cut mid-phrase (#450:
+    // "Куко Unreal, home at").
+    if ([...title].length > MAX_NN_TITLE_CHARS) title = "";
     if (title && isSensitive(title)) title = "";
+    if (title && [...taken].some((t) => sameLine(t, title))) title = "";
     if (!title && isString(chapter.first_photo_id)) {
       const start = context.photoOrder.get(chapter.first_photo_id);
       const next = chapters
@@ -1147,22 +1177,24 @@ function notesLanguage(context: NnCheckContext): "ru" | "en" | null {
     const cyr = (text.match(/[\u0400-\u04FF]/g) ?? []).length;
     const lat = (text.match(/[A-Za-z]/g) ?? []).length;
     if (cyr + lat < 20) continue;
-    // Mixed notes (neither ≥ 80 %) say nothing about the language.
-    if (cyr >= 0.8 * (cyr + lat)) return "ru";
-    if (lat >= 0.8 * (cyr + lat)) return "en";
+    // Mixed notes (neither ≥ 70 %: names like "Kuko", "AMF" don't make
+    // Russian notes mixed) say nothing about the language.
+    if (cyr >= 0.7 * (cyr + lat)) return "ru";
+    if (lat >= 0.7 * (cyr + lat)) return "en";
     return null;
   }
   return null;
 }
 
-// Whether [title] is written in another script than the notes (#448:
-// "15m to boarding" over Russian notes).
+// Whether [title] is mostly written in another script than the notes
+// (#448, #450: "Tallinn airport", "4.5kg ribs then Куко" over Russian
+// notes; a name inside a Russian title is fine).
 function titleInOtherLanguage(title: string, context: NnCheckContext): boolean {
-  const cyr = /[\u0400-\u04FF]/.test(title);
-  const lat = /[A-Za-z]/.test(title);
+  const cyr = (title.match(/[\u0400-\u04FF]/g) ?? []).length;
+  const lat = (title.match(/[A-Za-z]/g) ?? []).length;
   const language = notesLanguage(context);
   if (language === null) return false;
-  return language === "ru" ? lat && !cyr : cyr && !lat;
+  return language === "ru" ? lat > cyr : cyr > lat;
 }
 
 // A short line from the notes of [ids] (#448): those written during the
@@ -1245,18 +1277,25 @@ function captionTitle(
 }
 
 // A part's title when the director gave none (#448, never a clock time):
-// the place, else one of its captions, else a line of the notes written
-// during it, else a line of its days' notes, else its day. Never one
+// the place, else a line of the notes written during it, else one of its
+// captions, else a line of its days' notes, else its day (#450: the
+// chapter's own words before a caption like "some sweets for …"). Each
+// in the notes' language. Never one
 // [taken] already has.
 function partTitle(
   ids: string[],
   context: NnCheckContext,
   taken: ReadonlySet<string> = new Set(),
 ): string {
-  const free = (t: string | null) => t && !taken.has(t) ? t : null;
+  // In the notes' language, never a repeat (#450).
+  const free = (t: string | null) =>
+    t && ![...taken].some((u) => sameLine(u, t)) &&
+      !titleInOtherLanguage(t, context)
+      ? t
+      : null;
   return free(placeOf(ids, context)) ??
-    captionTitle(ids, context, taken) ??
     free(notesTitle(ids, context, true, taken)) ??
+    free(captionTitle(ids, context, taken)) ??
     free(notesTitle(ids, context, false, taken)) ??
     dayTitle(ids, context, taken);
 }
@@ -2025,6 +2064,12 @@ export const MAX_NN_SCENE_SECONDS = 12;
 // when the chapter has one.
 export const MIN_NN_SHORT_CARD_CHARS = 30;
 
+// [text] without a trailing comma, semicolon, colon or dash (#450:
+// "…позавтракали,"); a line still ends as the user wrote it otherwise.
+export function tidyEnd(text: string | null): string | null {
+  return text === null ? null : text.replace(/[\s,;:—–-]+$/u, "");
+}
+
 // Whether two lines are the same words (#448: no line twice), ignoring
 // case, spacing and punctuation; or one is most of the other.
 export function sameLine(a: string, b: string): boolean {
@@ -2380,6 +2425,26 @@ export function buildNeonNightContent(
   // The director's Note line is the Note's (#448): no card or moment
   // takes it.
   const reserved = plan.note_moment?.excerpt ?? null;
+  // Whether a line belongs with chapter [i]'s photos (#450: "Приземлились
+  // в Амстердаме" over the Tallinn departure): its note is on one of them,
+  // or was written from 30 min before its first photo to 90 min after its
+  // last. A note without a time belongs where code put it.
+  const noteOf = (text: string) =>
+    tripData.notes.find((n) => n.content.includes(text)) ??
+      tripData.notes.find((n) => sameLine(n.content, text));
+  const nearChapter = (i: number, text: string): boolean => {
+    const note = noteOf(text);
+    if (!note) return true;
+    const ids = new Set(shaped[i].photos.map((p) => p.id));
+    if (note.photo_id && ids.has(note.photo_id)) return true;
+    const at = Date.parse(note.taken_at ?? note.created_at ?? "");
+    const times = shaped[i].photos.map((p) =>
+      Date.parse(p.taken_at ?? p.created_at)
+    ).filter((t) => !Number.isNaN(t));
+    if (Number.isNaN(at) || times.length === 0) return true;
+    return at >= Math.min(...times) - 30 * 60_000 &&
+      at <= Math.max(...times) + 90 * 60_000;
+  };
   const onCard = (i: number, e: object) => {
     const id = (e as { photo_id?: string | null }).photo_id;
     return !!id && shaped[i].card.includes(id);
@@ -2405,39 +2470,48 @@ export function buildNeonNightContent(
     ].filter((e) =>
       [...e.text].length <= cardChars && !isGeneric(e.text) &&
       !(reserved && sameLine(e.text, reserved)) &&
-      !repeatsTitle(e.text, shaped[i].title)
+      !repeatsTitle(e.text, shaped[i].title) && nearChapter(i, e.text)
     ).sort((a, b) =>
-      Number(!picked[i].excerpts.includes(a as never)) -
-        Number(!picked[i].excerpts.includes(b as never)) ||
+      // A specific line before any other (#450: never "Проснулись…" while
+      // "Брюссель не меняется…" is unused), then the higher score.
+      Number(b.score >= SPECIFIC_SCORE) - Number(a.score >= SPECIFIC_SCORE) ||
+      b.score - a.score ||
       // A line whose photo is on the card plays there (#444: over its
       // own photo).
       Number(onCard(i, b)) - Number(onCard(i, a)) ||
-      b.score - a.score
+      Number(!picked[i].excerpts.includes(a as never)) -
+        Number(!picked[i].excerpts.includes(b as never))
     );
     const own = shaped[i].note &&
         !(reserved && sameLine(shaped[i].note!, reserved)) &&
-        !repeatsTitle(shaped[i].note!, shaped[i].title)
+        !repeatsTitle(shaped[i].note!, shaped[i].title) &&
+        !isGeneric(shaped[i].note!) && nearChapter(i, shaped[i].note!)
       ? shaped[i].note
       : null;
     const ownFits = own !== null && [...own].length <= cardChars;
     if (ownFits && (!fits[0] || excerptScore(own!, "night") >= fits[0].score)) {
       return own;
     }
-    if (fits[0]) return fits[0].text;
-    // Nothing short enough: the line as it was (never no line for length).
+    // Shortened for length: only a line as good as the full one (#450:
+    // never "потом поехали в Брюссель" for "Брюссель не меняется…");
+    // else the line as it was — never no line for length.
     if (cardChars < MAX_NN_CARD_NOTE_CHARS) {
-      const full = cardChars;
+      const short = cardChars;
       cardChars = MAX_NN_CARD_NOTE_CHARS;
-      const line = cardLineOf(i);
-      cardChars = full;
-      return line;
+      const full = cardLineOf(i);
+      cardChars = short;
+      const score = (t: string | null) =>
+        t === null ? -Infinity : excerptScore(t, "night");
+      if (!fits[0] || score(fits[0].text) < score(full)) return full;
+      return fits[0].text;
     }
+    if (fits[0]) return fits[0].text;
     return own;
   };
   const wordsOf = (i: number) =>
     momentWords(
       shaped[i],
-      picked[i].excerpts,
+      picked[i].excerpts.filter((e) => nearChapter(i, e.text)),
       cardLineOf(i),
       byId,
       heroScores,
@@ -2512,7 +2586,7 @@ export function buildNeonNightContent(
       card_photo_ids: chapter.card,
       // The card's typed line: the director's, else the first line short
       // enough for a card (#398).
-      note: cardLineOf(i),
+      note: tidyEnd(cardLineOf(i)),
       // How many photos the card zooms (#448): fewer when the film runs
       // long; absent in older content = 2.
       card_zooms: cardZooms,
@@ -2525,7 +2599,7 @@ export function buildNeonNightContent(
         // The words it shows (#448): at most MAX_NN_MOMENT_WORDS, each on
         // its photo — a line, Always, captioned, then hero score first.
         // The others play with no label. Absent in older content.
-        words: words[j],
+        words: words[j].map((w) => ({ ...w, text: tidyEnd(w.text)! })),
         place: m.type === "split"
           ? m.photo_ids.map((id) => byId.get(id)?.place_text?.trim())
             .find((place) => place) || null
@@ -2547,7 +2621,7 @@ export function buildNeonNightContent(
     chapters,
     note: noteMoment && noteIndex >= 0
       ? {
-        text: noteMoment.excerpt,
+        text: tidyEnd(noteMoment.excerpt)!,
         number: noteIndex + 1,
         written_at: notes[noteIndex].created_at ?? null,
         photo_id: noteMoment.photo_id,

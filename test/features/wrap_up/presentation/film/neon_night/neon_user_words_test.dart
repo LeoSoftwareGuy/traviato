@@ -145,8 +145,8 @@ void main() {
       expect(NnReadingTime.momentBeats(split, beat), 0);
     });
 
-    test('a zoom holds its caption up to ~4 s; a longer one is never zoomed '
-        'and never replaced by the time (#446)', () {
+    test('a zoom holds its caption up to ~4 s; a longer one zooms unlabelled, '
+        'never with the time (#446, #450)', () {
       NnChapter card(List<NnPhoto> photos) => NnChapter(
         title: 'Airport',
         from: '06:40',
@@ -164,8 +164,13 @@ void main() {
           'fast check-in at the airport, half asleep, the queue was endless',
         ),
       ]);
-      expect(NnChapterTexts.zoomTilesFor(long, 1), isEmpty);
-      expect(NnReadingTime.zoomHolds(long, 1, beat), isEmpty);
+      // Every card zooms (#450): the photo zooms for the shortest hold,
+      // with no label — never the time instead of its caption.
+      expect(NnChapterTexts.zoomTilesFor(long, 1), [0]);
+      expect(NnReadingTime.zoomHolds(long, 1, beat), [
+        NeonZoomPicks.minHoldBeats,
+      ]);
+      expect(NnChapterTexts.zoomLabelFor(long.photos.first), isNull);
       // About 3.5 s to read: zoomed, held, and its words shown.
       final medium = card([
         photo('a', '06:40', 'Gate B12, coffee and a croissant'),
@@ -174,11 +179,11 @@ void main() {
       expect(hold, greaterThan(2));
       expect(hold, lessThanOrEqualTo(NeonZoomPicks.maxHoldBeats));
       expect(
-        NnChapterTexts.zoomLabelFor(medium.photos.first).text,
+        NnChapterTexts.zoomLabelFor(medium.photos.first)!.text,
         'Gate B12, coffee and a croissant',
       );
       // The time only for a photo without a caption.
-      expect(NnChapterTexts.zoomLabelFor(photo('b', '06:50')).text, '06:50');
+      expect(NnChapterTexts.zoomLabelFor(photo('b', '06:50'))!.text, '06:50');
     });
 
     test('zooms pick captioned photos, then the best hero score (#446)', () {
