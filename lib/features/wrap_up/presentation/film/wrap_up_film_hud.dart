@@ -1,9 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/config/film_debug_flags.dart';
 import '../../../../core/config/router/route_constants.dart';
 import '../../../../core/errors/failure_message.dart';
 import '../../../../core/l10n/context_l10n.dart';
@@ -119,8 +119,9 @@ class WrapUpFilmHud extends ConsumerWidget {
                     ),
                   ),
                 ],
-                // Debug builds only: the director's Plan inspector (#328).
-                if (kDebugMode) ...[
+                // The director's Plan inspector (#328): debug builds, and
+                // PLAN_INSPECTOR builds (#440).
+                if (hasPlanInspector) ...[
                   const SizedBox(width: AppSpacing.sm),
                   _HudScrim(
                     child: IconButton(
