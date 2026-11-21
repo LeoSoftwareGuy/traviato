@@ -289,7 +289,7 @@ Deno.test("a full moment keeps its best photos: the heart gets the lowest-rated 
   // three lowest-rated go to the heart, wherever they are in time.
   const photos = run("p", "2026-10-25T01:00:00Z", 11, 10);
   const scores: Record<string, number> = {};
-  photos.forEach((p, k) => scores[p.id] = 3);
+  photos.forEach((p) => scores[p.id] = 3);
   scores.p10 = 5; // the AMF laser shot, last in time
   scores.p1 = 1;
   scores.p4 = 1;
