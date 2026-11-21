@@ -345,6 +345,23 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   days too (the night is the evening's), and a page with time to spare
   deals its photos slower — up to 1.2 s apart, over about half the page —
   instead of all at once and a long hold; the note's timing is unchanged.
+- **Neon Night deals its own scenes (#444):** one chapter per logical
+  day (parts at 2 h breaks while ≤ 5), never fewer for a short film —
+  a short film shortens scenes instead (a chapter's two moments become
+  one; then the Plan scene goes; the Note scene stays). Code deals each
+  chapter in time order, whatever the director said: the card shows the
+  first 4–6 photos in a full grid (1–3 side by side, 4 squares, 5–6 a
+  mosaic); the rest make one moment, two from 6 left (split at the
+  longest gap) — 3–4 photos within 2 min a burst, else a split (4 as a
+  2 × 2 grid), 5+ a timeline of up to 8. A day of up to 6 photos is
+  its card alone. Every card zooms up to 2 photos; a zoom holds at most
+  3 beats, and a caption that needs longer shows the time. A card's
+  time range is its own photos'. Director lines that differ only in
+  case, spacing, punctuation or ё/е take the note's exact words; a line
+  plays over its own photo (brought into a moment); the Note scene
+  falls back to code's best unused line; a headline too long is
+  dropped, never cut. The director re-runs when it hasn't seen every
+  film photo. The storyboard shows "N / M photos shown in scenes".
 - **The user's words (#399, display only; which words are chosen is #398,
   multi-excerpt note moments #416):** captions and notes are never cut
   with "…". A text that doesn't fit gets smaller type or more lines, then
