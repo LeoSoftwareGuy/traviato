@@ -8,13 +8,18 @@
 import { directorTripData } from "./director_fixtures.ts";
 import { currentGoldenVows, currentNeonNight } from "./director.ts";
 import { buildGoldenVowsContent } from "./golden_vows.ts";
-import { buildNeonNightContent } from "./neon_night.ts";
+import {
+  buildNeonNightContent,
+  type NeonNightPlan,
+  nnCheckContext,
+  repairNeonNight,
+} from "./neon_night.ts";
 import { buildSkyContent } from "./sky_story.ts";
 import { withFilmPhotos } from "./film_photos.ts";
 import { filmSecondsOf } from "./film_length.ts";
 import type { PlayedTemplate } from "./film_template.ts";
 import type { TripData } from "./gather.ts";
-import { adeMemory } from "./ade_fixture.ts";
+import { adeDirectorPlan, adeMemory } from "./ade_fixture.ts";
 
 export const FIXTURE_PHOTO_COUNTS = [15, 25, 40];
 export const FIXTURE_FILMS: PlayedTemplate[] = [
@@ -123,9 +128,13 @@ export function adeContent(): Record<string, unknown> {
     film_style: "neon_night",
     film_seconds: filmSecondsOf(memory),
     sky: buildSkyContent(memory, null, {}),
+    // The director's plan as it came back, repaired (#450).
     neon_night: buildNeonNightContent(
       memory,
-      currentNeonNight(null, memory, "ru").plan,
+      repairNeonNight(
+        adeDirectorPlan(),
+        nnCheckContext(memory),
+      ) as NeonNightPlan,
     ),
   };
 }

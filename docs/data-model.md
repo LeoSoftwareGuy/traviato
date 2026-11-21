@@ -304,7 +304,10 @@ Post-MVP: `video_path`, `video_status`.
   content without it shows every caption) and each chapter `card_zooms`
   (0–2; absent = 2). `note` is the chapter's best line. Timelines hold 6
   (`NN_TIMELINE_ROOM`). `film_lengths.json` gains an ADE-shaped case
-  (`ade_fixture.ts`, `case: "ade"`).
+  (`ade_fixture.ts`, `case: "ade"`). Since #450 that case plays the
+  director's plan as it came back (`adeDirectorPlan`), and the app holds
+  every Neon film to 75 s on its own timeline (`NnFit`) whatever the
+  content says.
 
 - **Limits** (#432, no schema change): `generate_wrap_up/wrap_up_limits.json`
   (minPhotos 15, maxFilmPhotos 60, minNotes 1, maxNoteLines 12, maxVibes 3)

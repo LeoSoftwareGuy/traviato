@@ -6,12 +6,14 @@ import {
   assert,
   assertEquals,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { ADE_LASER, adeMemory } from "./ade_fixture.ts";
-import { currentNeonNight } from "./director.ts";
+import { ADE_LASER, adeDirectorPlan, adeMemory } from "./ade_fixture.ts";
 import {
   buildNeonNightContent,
   MAX_NN_MOMENT_WORDS,
+  type NeonNightPlan,
+  nnCheckContext,
   overlaps,
+  repairNeonNight,
   sameLine,
 } from "./neon_night.ts";
 import { withFilmPhotos } from "./film_photos.ts";
@@ -21,9 +23,13 @@ function ade() {
   const memory = withFilmPhotos(adeMemory(), {});
   return {
     memory,
+    // The director's plan as it came back, repaired (#450).
     content: buildNeonNightContent(
       memory,
-      currentNeonNight(null, memory, "ru").plan,
+      repairNeonNight(
+        adeDirectorPlan(),
+        nnCheckContext(memory),
+      ) as NeonNightPlan,
     ),
   };
 }
@@ -79,6 +85,12 @@ Deno.test("ADE: every chapter with notes shows a line; the Note scene is there",
       ...c.excerpts.map((e) => e.text),
       ...(c.rejected_excerpts ?? []).map((e) => e.text),
     ];
+    // The airport's only note was written after landing in Amsterdam: it
+    // never plays over the Tallinn photos (#450).
+    if (i === 0) {
+      assert(!(c.note ?? "").startsWith("Приземлились"), "not over Tallinn");
+      return;
+    }
     if (own.length === 0) return;
     const lines = played[i].filter((t) => !captions.has(t));
     assert(
@@ -148,4 +160,33 @@ Deno.test("ADE: the user's own profane caption shows as written", () => {
       content.chapters.some((c) => c.card_photo_ids.includes("k4")),
     "shown on its photo",
   );
+});
+
+Deno.test("ADE: director titles fit their own chapter, whole, in Russian, not the headline (#450)", () => {
+  const { content } = ade();
+  const titles = content.chapters.map((c) => c.title);
+  for (const bad of ["Tallinn airport", "4.5kg ribs then Куко"]) {
+    assert(!titles.includes(bad), `${bad}: in English`);
+  }
+  for (const t of titles) {
+    assert(!t.startsWith("Куко Unreal"), `${t}: cut or on the wrong day`);
+    assert(!sameLine(t, content.headline ?? "-"), `${t}: the headline`);
+  }
+  assert(!titles.some((t) => t.startsWith("some sweets")), "Brussels");
+  assertEquals(titles[4], "Брюссель");
+});
+
+Deno.test("ADE: Brussels types its specific line, never the morning's (#450)", () => {
+  const { content } = ade();
+  const brussels = content.chapters[4];
+  assertEquals(
+    brussels.note,
+    "Брюссель не меняется отличное пиво и вкусная еда.",
+  );
+  const all = content.chapters.flatMap((c) => [
+    c.note ?? "",
+    ...c.moments.flatMap((m) => (m.words ?? []).map((w) => w.text)),
+  ]);
+  assert(!all.some((t) => t.startsWith("Проснулись")), "no generic line");
+  assert(!all.some((t) => /[,;:]$/.test(t)), "no trailing comma");
 });

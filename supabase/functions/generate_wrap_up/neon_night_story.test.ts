@@ -408,14 +408,16 @@ Deno.test("repair gives each part a chapter, titled by the director or its day (
   }
 });
 
-Deno.test("an overlong title loses whole words, not the film (#426)", () => {
+Deno.test("an overlong title is replaced, never cut mid-phrase (#426, #450)", () => {
   const context = nnCheckContext(amsterdam());
   const plan = foldedPlan();
   plan.headline = null;
   plan.chapters[0].title = "Брюссель, ребра и Shelter"; // 25 characters
   const repaired = repairNeonNight(plan, context) as NeonNightPlan;
   assertEquals(describeNeonNightProblems(repaired, context), []);
-  assertEquals(repaired.chapters[0].title, "Брюссель, ребра и");
+  // Not "Брюссель, ребра и": the part's own title instead.
+  assert(!"Брюссель, ребра и Shelter".startsWith(repaired.chapters[0].title));
+  assert(repaired.chapters[0].title.length > 0);
   // One long word can't be shortened: the part's own words instead, never
   // a clock time (#448).
   plan.chapters[0].title = "Супердлинноеназваниеглавы";
