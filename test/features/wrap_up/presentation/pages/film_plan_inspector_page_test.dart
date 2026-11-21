@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
@@ -306,6 +307,42 @@ void main() {
         find.textContaining('split · Queue was worth it.', findRichText: true),
         findsOneWidget,
       );
+    });
+
+    testWidgets('Copy storyboard copies the film as a table (#442)', (
+      tester,
+    ) async {
+      String? copied;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            copied = (call.arguments as Map)['text'] as String?;
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      final repo = FakeFilmDirectorRepository()
+        ..inspectionResult = const Right(
+          FilmPlanInspection(
+            report: FilmDirectorReport(isPlanned: true, hasNeonNight: true),
+          ),
+        );
+      await _pump(tester, repo, neonNight: neonNight);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('film-plan-storyboard')));
+      await tester.pumpAndSettle();
+
+      expect(copied, contains('· Neon Night'));
+      expect(copied, contains('Ch 1 card · Doors open'));
+      expect(find.text('Storyboard copied'), findsOneWidget);
     });
 
     testWidgets('says why there is none', (tester) async {

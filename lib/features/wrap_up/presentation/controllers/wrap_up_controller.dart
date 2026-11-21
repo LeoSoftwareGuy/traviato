@@ -88,6 +88,10 @@ class WrapUpController extends _$WrapUpController {
         photoUrlById.keys.toSet(),
       ),
       photoUrlById: photoUrlById,
+      photoTakenAtById: {
+        for (final photo in photos)
+          if (photo.takenAt case final at?) photo.id: at.toLocal(),
+      },
       // Checked before pruning: a deleted photo the film shows is exactly
       // what makes it stale.
       isOutOfDate: isKeptFilmOutOfDate(wrapUp, photos),

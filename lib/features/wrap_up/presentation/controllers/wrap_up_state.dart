@@ -9,6 +9,7 @@ class WrapUpState extends Equatable {
   const WrapUpState({
     required this.wrapUp,
     this.photoUrlById = const {},
+    this.photoTakenAtById = const {},
     this.isOutOfDate = false,
     this.skyStory,
     this.goldenVows,
@@ -24,6 +25,10 @@ class WrapUpState extends Equatable {
   /// `photos.id -> signed imageUrl`, resolved once for the whole screen —
   /// every moment/flurry photo references a trip photo only by id.
   final Map<String, String> photoUrlById;
+
+  /// When each photo was taken, on the phone's clock: the Plan inspector's
+  /// storyboard lists photos by time (#442).
+  final Map<String, DateTime> photoTakenAtById;
 
   /// The Sky Story film for this wrap-up (#345), from `content.sky` and
   /// the memory's photos; null plays the classic film.
@@ -43,6 +48,7 @@ class WrapUpState extends Equatable {
   WrapUpState copyWith({WrapUpEntity? wrapUp}) => WrapUpState(
     wrapUp: wrapUp ?? this.wrapUp,
     photoUrlById: photoUrlById,
+    photoTakenAtById: photoTakenAtById,
     isOutOfDate: isOutOfDate,
     skyStory: skyStory,
     goldenVows: goldenVows,
@@ -53,6 +59,7 @@ class WrapUpState extends Equatable {
   List<Object?> get props => [
     wrapUp,
     photoUrlById,
+    photoTakenAtById,
     isOutOfDate,
     skyStory,
     goldenVows,
