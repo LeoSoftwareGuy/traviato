@@ -283,3 +283,29 @@ Deno.test("a caption too long for a zoom plays in a moment; hero scores in conte
   assertEquals(chapter.photos.find((p) => p.id === "d2a0")!.hero_score, 5);
   assertEquals(chapter.photos.find((p) => p.id === "d2a1")!.hero_score, null);
 });
+
+Deno.test("a full moment keeps its best photos: the heart gets the lowest-rated (#446)", () => {
+  // 11 photos for one timeline of 8: the late laser shot (5) stays; the
+  // three lowest-rated go to the heart, wherever they are in time.
+  const photos = run("p", "2026-10-25T01:00:00Z", 11, 10);
+  const scores: Record<string, number> = {};
+  photos.forEach((p, k) => scores[p.id] = 3);
+  scores.p10 = 5; // the AMF laser shot, last in time
+  scores.p1 = 1;
+  scores.p4 = 1;
+  scores.p7 = 2;
+  const moment = momentFor(photos, scores);
+  assertEquals(moment.type, "timeline");
+  assertEquals(moment.photo_ids, [
+    "p0",
+    "p2",
+    "p3",
+    "p5",
+    "p6",
+    "p8",
+    "p9",
+    "p10",
+  ]);
+  // Without scores: an even spread, as before.
+  assertEquals(momentFor(photos).photo_ids.length, 8);
+});
