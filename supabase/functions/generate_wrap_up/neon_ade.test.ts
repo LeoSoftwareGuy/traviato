@@ -11,6 +11,7 @@ import { currentNeonNight } from "./director.ts";
 import {
   buildNeonNightContent,
   MAX_NN_MOMENT_WORDS,
+  overlaps,
   sameLine,
 } from "./neon_night.ts";
 import { withFilmPhotos } from "./film_photos.ts";
@@ -99,6 +100,13 @@ function memoryCaptions(): string[] {
   return adeMemory().photos.map((p) => p.caption ?? "").filter((c) => c);
 }
 
+Deno.test("ADE: every card zooms; ≤ 75 s leaves at least one zoom (#448)", () => {
+  const { content } = ade();
+  for (const c of content.chapters) {
+    assert((c.card_zooms ?? 2) >= 1, `${c.title}: a zoom`);
+  }
+});
+
 Deno.test("ADE: no clock titles, titles in the notes' language", () => {
   const { content } = ade();
   for (const c of content.chapters) {
@@ -123,7 +131,7 @@ Deno.test("ADE: no line appears twice in one film", () => {
   ];
   for (let i = 0; i < all.length; i++) {
     for (let j = i + 1; j < all.length; j++) {
-      assert(!sameLine(all[i], all[j]), `"${all[i]}" twice`);
+      assert(!overlaps(all[i], all[j]), `"${all[i]}" twice`);
     }
   }
 });

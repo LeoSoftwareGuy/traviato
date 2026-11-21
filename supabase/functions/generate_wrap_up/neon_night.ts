@@ -25,7 +25,7 @@ import {
   filmSecondsOf,
   nnBeatsFor,
   nnFilmBeats,
-  nnFits,
+  nnFitsWithin,
   nnMomentBeats,
   type NnShapeMoment,
 } from "./film_length.ts";
@@ -1992,8 +1992,6 @@ function fallbackNoteMoment(
   tripData: TripData,
   isShown: (text: string) => boolean,
   maxChars = MAX_NN_NOTE_CHARS,
-  // The shortest line instead of the best-scoring.
-  shortest = false,
 ): NeonNightPlan["note_moment"] {
   let best: { note_id: string; excerpt: string; score: number } | null = null;
   for (const n of tripData.notes) {
@@ -2001,7 +1999,7 @@ function fallbackNoteMoment(
     for (const text of excerptCandidates(n.content)) {
       if (isShown(text) || isSensitive(text) || isGeneric(text)) continue;
       if ([...text].length > maxChars) continue;
-      const score = shortest ? -[...text].length : excerptScore(text, "night");
+      const score = excerptScore(text, "night");
       if (best === null || score > best.score) {
         best = { note_id: n.id, excerpt: text, score };
       }
@@ -2026,8 +2024,6 @@ export const MAX_NN_SCENE_SECONDS = 12;
 // A film that runs long types only lines this short on its cards (#448),
 // when the chapter has one.
 export const MIN_NN_SHORT_CARD_CHARS = 30;
-// …and shows only words this short in its moments.
-export const MAX_NN_SHORT_WORD_CHARS = 40;
 
 // Whether two lines are the same words (#448: no line twice), ignoring
 // case, spacing and punctuation; or one is most of the other.
@@ -2042,6 +2038,19 @@ export function sameLine(a: string, b: string): boolean {
   // long line is its own (#448: "Брюссель" over "Брюссель не меняется…").
   const [short, long] = x.length <= y.length ? [x, y] : [y, x];
   return long.includes(short) && short.length >= 0.6 * long.length;
+}
+
+// Whether [a] and [b] show the same words (#448): [sameLine], or the
+// shorter (3 words at least) is inside the longer — a card's clause of a
+// line a moment plays whole.
+export function overlaps(a: string, b: string): boolean {
+  const norm = (t: string) =>
+    t.toLowerCase().replace(/ё/g, "е").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  const [short, long] = norm(a).length <= norm(b).length
+    ? [norm(a), norm(b)]
+    : [norm(b), norm(a)];
+  return sameLine(a, b) ||
+    (short.split(" ").length >= 3 && ` ${long} `.includes(` ${short} `));
 }
 
 // Whether [text] repeats [title] (#448): the same words, or it opens
@@ -2078,8 +2087,12 @@ export function momentWords(
   );
   return chapter.moments.map((m) => {
     const options = m.photo_ids.flatMap((id) => {
+      // A line nothing else shows (#448: not the card's, nor one it types
+      // a clause of); else the photo's caption.
       const line = excerpts.find((e) =>
-        e.photo_id === id && !(cardLine && sameLine(e.text, cardLine)) &&
+        e.photo_id === id &&
+        !taken.some((t) => overlaps(t, e.text)) &&
+        !repeatsTitle(e.text, title) &&
         [...e.text].length <= maxChars
       );
       const photo = byId.get(id);
@@ -2097,7 +2110,7 @@ export function momentWords(
     const chosen: { photo_id: string; text: string }[] = [];
     for (const o of options) {
       if (chosen.length >= maxWords) break;
-      if (taken.some((t) => sameLine(t, o.text))) continue;
+      if (taken.some((t) => overlaps(t, o.text))) continue;
       if (repeatsTitle(o.text, title)) continue;
       const lines = [...chosen.map((c) => c.text), o.text];
       const beats = nnMomentBeats({
@@ -2347,10 +2360,6 @@ export function buildNeonNightContent(
   let cardZooms = 2;
   // The longest card line (#448: shorter when the film runs long).
   let cardChars = MAX_NN_CARD_NOTE_CHARS;
-  // The longest words a moment shows (#448: shorter when it runs long).
-  let wordChars = Infinity;
-  // The longest Note line code picks (#448: shorter when it runs long).
-  let noteChars = MAX_NN_NOTE_CHARS;
   // The Note scene (#448: no line twice): the director's pick, else code's
   // best line no card, moment or title shows.
   const noteFor = (): NeonNightPlan["note_moment"] => {
@@ -2361,20 +2370,12 @@ export function buildNeonNightContent(
     ]);
     // A line that opens with a chapter's title repeats it too (#448).
     const isShown = (text: string) =>
-      shownWords.some((w) => sameLine(w, text)) ||
+      shownWords.some((w) => overlaps(w, text)) ||
       shaped.some((c) => repeatsTitle(text, c.title));
     if (plan.note_moment && !isShown(plan.note_moment.excerpt)) {
       return plan.note_moment;
     }
-    // A shorter line when the film runs long — the shortest when none is
-    // that short; never none for length.
-    return fallbackNoteMoment(tripData, isShown, noteChars) ??
-      fallbackNoteMoment(
-        tripData,
-        isShown,
-        MAX_NN_NOTE_CHARS,
-        noteChars < MAX_NN_NOTE_CHARS,
-      );
+    return fallbackNoteMoment(tripData, isShown);
   };
   // The director's Note line is the Note's (#448): no card or moment
   // takes it.
@@ -2442,7 +2443,7 @@ export function buildNeonNightContent(
       heroScores,
       maxWords,
       shaped[i].title,
-      wordChars,
+      Infinity,
       reserved,
     );
   const beats = () =>
@@ -2453,6 +2454,10 @@ export function buildNeonNightContent(
           // The card zooms its own photos (NnReadingTime: cardPhotos).
           photos: c.card.length || c.photos.length,
           zooms: cardZooms,
+          cardCaptions: (c.card.length ? c.card : c.photos.map((p) => p.id))
+            .map((id) => byId.get(id)?.caption?.trim() || null),
+          cardHeroScores: (c.card.length ? c.card : c.photos.map((p) => p.id))
+            .map((id) => heroScores[id] ?? null),
           cardLine: cardLineOf(i),
           moments: c.moments.map((m, j) => ({
             type: m.type,
@@ -2464,24 +2469,18 @@ export function buildNeonNightContent(
       showsPlan,
       noteFor()?.excerpt ?? true,
     );
-  // The film's beats with [change] tried, then undone.
-  const beatsWith = (change: () => void): number => {
-    const saved = { cardZooms, maxWords };
-    change();
-    const b = beats();
-    ({ cardZooms, maxWords } = saved);
-    return b;
-  };
-  // Over the film's length (#444, #448): a chapter's two moments become
-  // one (its photos kept, up to a timeline's room), the last chapter
-  // first; then the Plan scene; then fewer words per moment (3 → 1); then
-  // fewer card zooms (2 → 0). Never a chapter, never the Note, never a
-  // chapter's card line.
-  while (!nnFits(beats(), seconds)) {
+  // A Neon film may run up to the longest film (#448: 75 s, a hard max)
+  // whatever its target; only past that it trims, in order: words per
+  // moment (3 → 2), a chapter's two moments into one (the last chapter
+  // first), the Plan scene, long card lines, then card zooms (2 → 1, never
+  // none). Never a chapter, the Note scene or a chapter's line.
+  const limit = Math.max(seconds, WRAP_UP_LIMITS.longestFilmSeconds);
+  while (!nnFitsWithin(beats(), limit)) {
     const two = shaped.map((c, i) => ({ c, i })).filter(({ c }) =>
       c.moments.length > 1
     ).pop();
-    if (two) {
+    if (maxWords > 2) maxWords--;
+    else if (two) {
       const ids = new Set(two.c.moments.flatMap((m) => m.photo_ids));
       two.c.moments = [
         momentFor(two.c.photos.filter((p) => ids.has(p.id)), heroScores),
@@ -2489,28 +2488,11 @@ export function buildNeonNightContent(
       picked = pickExcerpts(tripData, shaped, days);
       place();
     } else if (showsPlan) showsPlan = false;
-    else if (maxWords > 1) maxWords--;
-    else if (cardZooms > 0) cardZooms--;
     else if (cardChars > MIN_NN_SHORT_CARD_CHARS) {
       cardChars = MIN_NN_SHORT_CARD_CHARS;
-    } else if (wordChars > MAX_NN_SHORT_WORD_CHARS) {
-      wordChars = MAX_NN_SHORT_WORD_CHARS;
-    } else if (noteChars > MAX_NN_SHORT_WORD_CHARS) {
-      noteChars = MAX_NN_SHORT_WORD_CHARS;
-    } else break;
+    } else if (cardZooms > 1) cardZooms--;
+    else break;
   }
-  // What the later steps saved may give back zooms, then words (#448):
-  // as many as still fit.
-  while (cardZooms < 2 && nnFits(beatsWith(() => cardZooms++), seconds)) {
-    cardZooms++;
-  }
-  while (
-    maxWords < MAX_NN_MOMENT_WORDS &&
-    nnFits(beatsWith(() => maxWords++), seconds)
-  ) maxWords++;
-  // What the film shows (#448: no line twice): the card lines and the
-  // moments' words. The Note scene plays a line none of them shows — the
-  // director's pick, else code's best unused one.
   noteMoment = noteFor();
   const chapters = shaped.map((chapter, i) => {
     const lines = picked[i];

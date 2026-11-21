@@ -265,6 +265,12 @@ Deno.test("a line plays over its own photo: it's brought into a moment", () => {
   )!;
   const line = chapter.excerpts.find((e) => e.note_id === "nx")!;
   if (line.text === chapter.note) return; // the card types it
+  // …or a clause of it, when a film over 75 s shortens card lines (#448):
+  // still over its own photo, on the card.
+  if (chapter.note && line.text.includes(chapter.note)) {
+    assert(chapter.card_photo_ids.includes(line.photo_id!));
+    return;
+  }
   // The Note scene plays it (#448: then no other scene does).
   if (content.note?.text === line.text) {
     assert(

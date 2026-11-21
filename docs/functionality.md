@@ -374,11 +374,13 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   and never pulls photos off it. A timeline holds at most 6 photos. A
   moment shows at most 3 captions or lines (a line, Always, captioned,
   then hero score) within ~12 s; its other photos play with no label.
-  A film over its length gives up, in turn: two moments for one, the
-  Plan scene, words per moment (3 → 1), card zooms (2 → 0, then the
-  card types its line from beat 2), long card lines, long moment words,
-  a long Note line — never a chapter, the Note scene or a chapter's
-  line. Every chapter with notes shows its best line (a clause of it
+  Every card zooms up to 2 photos (captioned first, else the best hero
+  score), each about 2.4 s. A Neon film may run up to 75 s, a hard max,
+  whatever its target; only past that it gives up, in turn: words per
+  moment (3 → 2), two moments for one, the Plan scene, long card lines,
+  then zooms (2 → 1, never none) — never a chapter, the Note scene or a
+  chapter's line. A card without zooms (older content) types its line
+  from beat 2. Every chapter with notes shows its best line (a clause of it
   when the line is too long for the card), the Note scene plays a line
   nothing else shows, and no line plays twice. Titles: the director's,
   else the place, a caption, the part's notes, else "Day N" — never a

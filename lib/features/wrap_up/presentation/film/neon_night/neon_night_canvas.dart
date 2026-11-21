@@ -1,3 +1,4 @@
+import '../../../domain/wrap_up_limits.dart';
 import 'dart:math' as math;
 
 import 'dart:async';
@@ -71,7 +72,15 @@ class NeonNightCanvas extends StatefulWidget {
     final base = build(chapters);
     final target = story.targetSeconds;
     if (target == null) return base;
-    final bars = ((beat.secToBeat(target) - base.totalBeats + 2) / 4).floor();
+    // To the nearest bar of the target, never past the longest film (#448:
+    // 75 s is a hard max).
+    final bars = math.min(
+      ((beat.secToBeat(target) - base.totalBeats + 2) / 4).floor(),
+      ((beat.secToBeat(WrapUpLimits.longestFilmSeconds.toDouble()) -
+                  base.totalBeats) /
+              4)
+          .floor(),
+    );
     final moments = chapters.fold(0, (n, c) => n + c.moments.length);
     if (bars <= 0 || moments == 0) return base;
     final extra = [
@@ -93,6 +102,8 @@ class NeonNightCanvas extends StatefulWidget {
           moments: c.moments,
           photos: c.photos,
           zoomHolds: c.zoomHolds,
+          // The card's own zoom count (#448), not the default for its photos.
+          zooms: c.zooms,
           cardMinBeats: c.cardMinBeats,
           momentMinBeats: [
             for (final (j, type) in c.moments.indexed)

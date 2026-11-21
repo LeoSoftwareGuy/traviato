@@ -69,8 +69,8 @@ abstract final class NnReadingTime {
                     beat.secToBeat(FilmTextRules.readingTime(caption)) - 1.5,
                   ),
                 )
-                .clamp(0, NeonZoomPicks.maxHoldBeats),
-          null => 0,
+                .clamp(NeonZoomPicks.minHoldBeats, NeonZoomPicks.maxHoldBeats),
+          null => NeonZoomPicks.minHoldBeats,
         },
     ];
   }

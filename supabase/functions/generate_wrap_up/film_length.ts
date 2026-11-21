@@ -177,6 +177,8 @@ const NN_SLACK_BEATS = 4;
 // A card zoom shows its caption for at most its 1½ beats plus this many
 // (#446: about 4 s on screen; NeonZoomPicks.maxHoldBeats).
 export const NN_MAX_ZOOM_HOLD_BEATS = 6;
+// The fewest beats a zoom holds (#448: NeonZoomPicks.minHoldBeats).
+export const NN_MIN_ZOOM_HOLD_BEATS = 2;
 
 // Whether [caption] can be read within one card zoom (#446), as the app
 // decides it (NnChapterTexts.zoomCaptionOf).
@@ -188,6 +190,38 @@ export function nnBeatsFor(seconds: number): number {
   return seconds / (60 / NN_BPM);
 }
 
+// The zooms' extra beats for [caption] (NnReadingTime.zoomHolds): its
+// reading time past the zoom's 1½ beats, from 2 to 6.
+export function nnZoomHold(caption: string | null): number {
+  const text = caption?.trim();
+  if (!text || !nnFitsZoom(text)) return NN_MIN_ZOOM_HOLD_BEATS;
+  const read = Math.ceil(nnBeatsFor(readingSeconds(text)) - 1.5 - 1e-9);
+  return Math.min(
+    NN_MAX_ZOOM_HOLD_BEATS,
+    Math.max(NN_MIN_ZOOM_HOLD_BEATS, read),
+  );
+}
+
+// A card's beats with its zooms as the app picks them (NeonZoomPicks.best,
+// NnChapterCardSpec): captions a zoom can show first, then hero score —
+// ties go to the longer hold, so the estimate never runs short. 8 without
+// a zoom; else the last zoom's end in bars, 12 at least.
+export function nnZoomCardBeats(chapter: NnShapeChapter): number {
+  const captions = chapter.cardCaptions ?? [];
+  const tiles = Math.min(captions.length, 6);
+  const zooms = Math.min(tiles, chapter.zooms ?? 2);
+  if (zooms === 0) return 8;
+  const ranked = captions.slice(0, tiles).map((c, k) => ({
+    fits: !!c?.trim() && nnFitsZoom(c.trim()),
+    hero: chapter.cardHeroScores?.[k] ?? 0,
+    hold: nnZoomHold(c),
+  })).sort((a, b) =>
+    Number(b.fits) - Number(a.fits) || b.hero - a.hero || b.hold - a.hold
+  );
+  const end = 6 + ranked.slice(0, zooms).reduce((s, r) => s + 3 + r.hold, 0);
+  return Math.max(12, bars(end));
+}
+
 export function nnCardBeats(
   index: number,
   count: number,
@@ -195,10 +229,12 @@ export function nnCardBeats(
   // The zooms it may play (#448: fewer when the film runs long).
   zooms = 2,
 ): number {
-  // Every card zooms up to 2 of its photos (#444: NeonZoomPicks): 12
-  // beats, 8 without a zoom; zoom holds are covered by the slack.
+  // Every card zooms up to 2 of its photos (#444: NeonZoomPicks), each
+  // about 2.4 s (#448: 3 + NN_MIN_ZOOM_HOLD_BEATS): 16 beats with 2, 12
+  // with 1, 8 without; longer caption holds are covered by the slack.
   void index, count;
-  return Math.min(photos, zooms) === 0 ? 8 : 12;
+  const n = Math.min(photos, zooms);
+  return n === 0 ? 8 : n === 1 ? 12 : 16;
 }
 
 export interface NnShapeMoment {
@@ -216,6 +252,10 @@ export interface NnShapeChapter {
   cardLine?: string | null;
   // The zooms its card may play; absent = 2.
   zooms?: number;
+  // The captions of the card's photos (null = none), and their hero
+  // scores: which ones it zooms, and how long each holds (#448).
+  cardCaptions?: (string | null)[];
+  cardHeroScores?: (number | null)[];
 }
 
 // [beats] up to whole bars.
@@ -255,7 +295,9 @@ export function nnChapterCardBeats(
   count: number,
   chapter: NnShapeChapter,
 ): number {
-  const own = nnCardBeats(index, count, chapter.photos, chapter.zooms);
+  const own = chapter.cardCaptions
+    ? nnZoomCardBeats(chapter)
+    : nnCardBeats(index, count, chapter.photos, chapter.zooms);
   const line = chapter.cardLine?.trim();
   if (!line) return own;
   const typing = ([...line].length + 2) / 30;
@@ -301,6 +343,11 @@ export function nnChaptersFor(seconds: number): number {
     if (cards + 10 * n <= budget) chapters = n;
   }
   return chapters;
+}
+
+// Whether a film of [beats] fits within [seconds] exactly (a hard max).
+export function nnFitsWithin(beats: number, seconds: number): boolean {
+  return beats <= nnBeatsFor(seconds) + 1e-9;
 }
 
 // Whether a film of [beats] fits [seconds] (with a bar to spare).
