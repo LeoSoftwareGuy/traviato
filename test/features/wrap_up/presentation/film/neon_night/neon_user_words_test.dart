@@ -7,6 +7,7 @@ import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_nigh
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_scene_spec.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_story.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_texts.dart';
+import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_chapter_card.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_reading_time.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_track.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_zoom_picks.dart';
@@ -84,6 +85,25 @@ void main() {
       );
       // Typed from lb 4, read for 0.8 + 66/12 s ≈ 6.3 s (13.2 beats).
       expect(beats, 20);
+      // A card without zooms types from lb 2 (#448): a bar less.
+      final quick = NnReadingTime.cardBeats(
+        NnChapter(
+          title: 'AMF',
+          from: '01:04',
+          to: '05:00',
+          photos: [photo('a', '01:04')],
+          moments: [
+            NnTimeline([photo('a', '01:04'), photo('b', '01:10')]),
+          ],
+          note: note,
+          zooms: 0,
+        ),
+        beat,
+        zooms: 0,
+      );
+      expect(quick, 16);
+      expect(NnCardTiming.typeFromFor(0), 2);
+      expect(NnCardTiming.typeFromFor(2), NnCardTiming.typeFrom);
       expect(beats % 4, 0);
     });
   });

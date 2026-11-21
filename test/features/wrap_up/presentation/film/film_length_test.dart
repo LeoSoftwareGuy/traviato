@@ -90,6 +90,7 @@ void main() {
 
   for (final raw in fixtures) {
     final fixture = (raw as Map).cast<String, dynamic>();
+    if (fixture['case'] != null) continue;
     final photos = fixture['photos'] as int;
     test('${fixture['film']} at $photos photos lasts about '
         '${WrapUpLimits.filmSeconds(photos)} s (#434)', () {
@@ -116,8 +117,24 @@ void main() {
     });
   }
 
+  test('ADE-Amsterdam: within 10 % of its target, or at most 60 s until '
+      'the shortest film is 45 s (#448)', () {
+    final fixture = fixtures
+        .cast<Map<dynamic, dynamic>>()
+        .firstWhere((f) => f['case'] == 'ade')
+        .cast<String, dynamic>();
+    final target = WrapUpLimits.filmSeconds(fixture['photos'] as int);
+    final length = lengthOf(fixture);
+    printOnFailure('ADE: $length s, target $target s');
+    expect(length, lessThanOrEqualTo(math.max(target * 1.1, 60)));
+    expect(length, greaterThan(target * 0.9));
+  });
+
   test('without film_seconds a film keeps its reference pacing', () {
-    final fixture = (fixtures.last as Map).cast<String, dynamic>();
+    // The 40-photo Neon Night (the last of the generated set).
+    final fixture =
+        (fixtures.lastWhere((f) => (f as Map)['case'] == null) as Map)
+            .cast<String, dynamic>();
     final content = {
       ...(fixture['content'] as Map).cast<String, dynamic>(),
     }..remove('film_seconds');

@@ -367,6 +367,24 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   falls back to code's best unused line; a headline too long is
   dropped, never cut. The director re-runs when it hasn't seen every
   film photo. The storyboard shows "N / M photos shown in scenes".
+- **Neon Night pacing (#448, after the ADE storyboard):** a chapter of
+  up to 4 photos is its card alone; 5–6 photos are a card of 3 and a
+  moment, so the film never plays five cards in a row; bigger
+  chapters keep cards of 4–6. A long caption sits on its card unzoomed
+  and never pulls photos off it. A timeline holds at most 6 photos. A
+  moment shows at most 3 captions or lines (a line, Always, captioned,
+  then hero score) within ~12 s; its other photos play with no label.
+  A film over its length gives up, in turn: two moments for one, the
+  Plan scene, words per moment (3 → 1), card zooms (2 → 0, then the
+  card types its line from beat 2), long card lines, long moment words,
+  a long Note line — never a chapter, the Note scene or a chapter's
+  line. Every chapter with notes shows its best line (a clause of it
+  when the line is too long for the card), the Note scene plays a line
+  nothing else shows, and no line plays twice. Titles: the director's,
+  else the place, a caption, the part's notes, else "Day N" — never a
+  clock time, never in another language than the notes. The user's own
+  captions and lines show as written, profanity too; the filter stays
+  for titles, the headline and the Note scene.
 - **The user's words (#399, display only; which words are chosen is #398,
   multi-excerpt note moments #416):** captions and notes are never cut
   with "…". A text that doesn't fit gets smaller type or more lines, then

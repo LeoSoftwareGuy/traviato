@@ -29,11 +29,16 @@ Map<String, dynamic> _content() => {
         ],
         'note': 'Queue was worth it.',
         'card_photo_ids': ['p2', 3],
+        'card_zooms': 1,
         'moments': [
           {
             'type': 'split',
             'photo_ids': ['p1', 'p2'],
             'place': 'Main stage',
+            'words': [
+              {'photo_id': 'p2', 'text': 'Lost the keys'},
+              {'photo_id': 'p1'},
+            ],
           },
           {
             'type': 'slideshow',
@@ -83,6 +88,8 @@ void main() {
         type: 'split',
         photoIds: ['p1', 'p2'],
         place: 'Main stage',
+        // The words it shows (#448); one without text is dropped.
+        words: {'p2': 'Lost the keys'},
       ),
     ]);
     expect(nn.note!.number, 4);
@@ -97,6 +104,20 @@ void main() {
     expect(nn.heartPhotoIds, ['p1', 'p2']);
     // The card's own photos (#390), malformed ids dropped.
     expect(chapter.cardPhotoIds, ['p2']);
+    expect(chapter.cardZooms, 1);
+  });
+
+  test('older content: no card_zooms, no moment words (#448)', () {
+    final content = _content();
+    final chapter =
+        ((content['neon_night'] as Map)['chapters'] as List).first as Map;
+    chapter.remove('card_zooms');
+    for (final m in chapter['moments'] as List) {
+      (m as Map).remove('words');
+    }
+    final nn = parseWrapUpNeonNight(content)!;
+    expect(nn.chapters.first.cardZooms, isNull);
+    expect(nn.chapters.first.moments.first.words, isNull);
   });
 
   test('older content without heart_photo_ids: an empty list (#378)', () {

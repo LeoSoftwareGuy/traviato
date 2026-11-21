@@ -342,7 +342,7 @@ Deno.test("a long day breaks into parts at its long breaks (#426)", () => {
   assertEquals(nnChapterStarts(nnCheckContext(oneDay)), []);
 });
 
-Deno.test("repair gives each part a chapter, titled by the director or its time", () => {
+Deno.test("repair gives each part a chapter, titled by the director or its day (#448)", () => {
   const data = longDays();
   const context = nnCheckContext(data);
   const plan: NeonNightPlan = {
@@ -379,10 +379,12 @@ Deno.test("repair gives each part a chapter, titled by the director or its time"
   };
   const repaired = repairNeonNight(plan, context) as NeonNightPlan;
   assertEquals(describeNeonNightProblems(repaired, context), []);
+  // No words to title the evening and the rave by (no place, caption or
+  // note): the day and its part, never a clock time (#448).
   assertEquals(repaired.chapters.map((c) => c.title), [
     "Прилет",
-    "20:25",
-    "03:04",
+    "Day 1",
+    "Day 1 · 2",
     "AMF",
     "Брюссель",
   ]);
@@ -414,9 +416,11 @@ Deno.test("an overlong title loses whole words, not the film (#426)", () => {
   const repaired = repairNeonNight(plan, context) as NeonNightPlan;
   assertEquals(describeNeonNightProblems(repaired, context), []);
   assertEquals(repaired.chapters[0].title, "Брюссель, ребра и");
-  // One long word can't be shortened: the part's time instead.
+  // One long word can't be shortened: the part's own words instead, never
+  // a clock time (#448).
   plan.chapters[0].title = "Супердлинноеназваниеглавы";
   const timed = repairNeonNight(plan, context) as NeonNightPlan;
   assertEquals(describeNeonNightProblems(timed, context), []);
-  assertEquals(timed.chapters[0].title, "20:00");
+  assert(!/^\d{1,2}:\d{2}$/.test(timed.chapters[0].title));
+  assert(timed.chapters[0].title.length > 0);
 });

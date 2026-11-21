@@ -66,24 +66,28 @@ Deno.test("momentFor: the type follows the photos' time spread", () => {
   // Hours apart but only 3: side by side, never a half-empty timeline.
   assertEquals(types(run("a", "2026-10-24T10:00:00Z", 3, 120)), "split");
   assertEquals(types(run("a", "2026-10-24T22:00:00Z", 5, 1)), "timeline");
-  // A timeline holds 8: more are spread evenly.
+  // A timeline holds 6 (#448: a scene stays under ~12 s): the rest go to
+  // the heart.
   assertEquals(
     momentFor(run("a", "2026-10-24T22:00:00Z", 11, 5)).photo_ids.length,
-    8,
+    6,
   );
 });
 
-Deno.test("dealChapter: a full card of 4–6, then 1–2 moments, in time order", () => {
+Deno.test("dealChapter: a card of 3–6, then 1–2 moments, in time order (#448)", () => {
   for (
     const [n, card, moments] of [
+      [3, 3, []],
       [4, 4, []],
-      [6, 6, []],
+      // 5–6 photos: a card and a moment, never five cards in a row.
+      [5, 3, [2]],
+      [6, 3, [3]],
       [7, 4, [3]],
       [9, 4, [5]],
       [10, 4, [3, 3]],
       [12, 5, [3, 4]],
       [14, 6, [3, 5]],
-      [22, 6, [8, 8]],
+      [22, 6, [6, 6]],
     ] as [number, number, number[]][]
   ) {
     const c = chapterOf(run("p", "2026-10-24T20:00:00Z", n, 10));
@@ -178,7 +182,9 @@ Deno.test("the Note scene falls back to code's best unused line", () => {
   assert(
     !content.chapters.some((c) =>
       c.note === content.note!.text ||
-      c.excerpts.some((e) => e.text === content.note!.text)
+      c.moments.some((m) =>
+        (m.words ?? []).some((w) => w.text === content.note!.text)
+      )
     ),
     "a line no chapter plays",
   );
@@ -226,11 +232,14 @@ Deno.test("three days: a chapter each, never merged for length; ≥ 70 % shown",
     `${shown.size} / ${data.photos.length} shown`,
   );
   for (const c of content.chapters) {
-    assert(c.card_photo_ids.length >= 4 || c.photos.length < 4);
+    // 4–6 on a card; 3 when a chapter of 5–6 also has a moment (#448).
+    if (c.photos.length >= 7) assert(c.card_photo_ids.length >= 4);
+    if (c.photos.length >= 5) {
+      assert(c.moments.length >= 1, `${c.title}: a card and a moment`);
+    } else assertEquals(c.moments.length, 0);
     for (const m of c.moments) {
-      if (m.type !== "timeline") {
-        assert(m.photo_ids.length >= 3 && m.photo_ids.length <= 4);
-      }
+      if (m.type === "timeline") assert(m.photo_ids.length <= 6);
+      else assert(m.photo_ids.length >= 2 && m.photo_ids.length <= 4);
     }
   }
 });
@@ -256,13 +265,22 @@ Deno.test("a line plays over its own photo: it's brought into a moment", () => {
   )!;
   const line = chapter.excerpts.find((e) => e.note_id === "nx")!;
   if (line.text === chapter.note) return; // the card types it
+  // The Note scene plays it (#448: then no other scene does).
+  if (content.note?.text === line.text) {
+    assert(
+      !chapter.moments.some((m) =>
+        (m.words ?? []).some((w) => w.text === line.text)
+      ),
+    );
+    return;
+  }
   assert(
     chapter.moments.some((m) => m.photo_ids.includes(line.photo_id!)),
     `${line.photo_id} in a moment`,
   );
 });
 
-Deno.test("a caption too long for a zoom plays in a moment; hero scores in content (#446)", () => {
+Deno.test("a long caption stays on its card, unzoomed; hero scores in content (#446, #448)", () => {
   const data = threeDays();
   const long =
     "UFC at the bar with the whole crew, three rounds and everybody screaming at the screen";
@@ -275,18 +293,16 @@ Deno.test("a caption too long for a zoom plays in a moment; hero scores in conte
   const chapter = content.chapters.find((c) =>
     c.photos.some((p) => p.id === "d2a1")
   )!;
-  assert(!chapter.card_photo_ids.includes("d2a1"), "not on the card");
-  assert(
-    chapter.moments.some((m) => m.photo_ids.includes("d2a1")),
-    "in a moment",
-  );
+  // It never pulls photos off the card (the app doesn't zoom it).
+  assert(chapter.card_photo_ids.includes("d2a1"), "on the card");
+  assert(chapter.card_photo_ids.length >= 4, "a full card");
   assertEquals(chapter.photos.find((p) => p.id === "d2a0")!.hero_score, 5);
   assertEquals(chapter.photos.find((p) => p.id === "d2a1")!.hero_score, null);
 });
 
 Deno.test("a full moment keeps its best photos: the heart gets the lowest-rated (#446)", () => {
-  // 11 photos for one timeline of 8: the late laser shot (5) stays; the
-  // three lowest-rated go to the heart, wherever they are in time.
+  // 11 photos for one timeline of 6 (#448): the late laser shot (5)
+  // stays; the lowest-rated go to the heart, wherever they are in time.
   const photos = run("p", "2026-10-25T01:00:00Z", 11, 10);
   const scores: Record<string, number> = {};
   photos.forEach((p) => scores[p.id] = 3);
@@ -296,16 +312,18 @@ Deno.test("a full moment keeps its best photos: the heart gets the lowest-rated 
   scores.p7 = 2;
   const moment = momentFor(photos, scores);
   assertEquals(moment.type, "timeline");
-  assertEquals(moment.photo_ids, [
-    "p0",
-    "p2",
-    "p3",
-    "p5",
-    "p6",
-    "p8",
-    "p9",
-    "p10",
-  ]);
+  assertEquals(moment.photo_ids.length, 6);
+  assert(moment.photo_ids.includes("p10"), "the laser shot stays");
+  for (const low of ["p1", "p4", "p7"]) {
+    assert(!moment.photo_ids.includes(low), `${low} goes to the heart`);
+  }
+  assertEquals(
+    moment.photo_ids,
+    [...moment.photo_ids].sort((a, b) =>
+      Number(a.slice(1)) - Number(b.slice(1))
+    ),
+    "in time order",
+  );
   // A caption ranks above a better shot: the user's own words stay.
   const captioned = photos.map((p) =>
     p.id === "p1" ? { ...p, caption: "Lost Anna at the bar" } : p
@@ -318,5 +336,5 @@ Deno.test("a full moment keeps its best photos: the heart gets the lowest-rated 
     "the lowest-rated uncaptioned ones go",
   );
   // Without scores: an even spread, as before.
-  assertEquals(momentFor(photos).photo_ids.length, 8);
+  assertEquals(momentFor(photos).photo_ids.length, 6);
 });
