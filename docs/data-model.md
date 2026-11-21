@@ -289,6 +289,16 @@ Post-MVP: `video_path`, `video_status`.
   the chapter goes. Lines whose note no longer says those words are
   dropped. Only a section that still breaks the rules falls back.
 
+- **Neon Night dealt by code** (#444, no schema change): `dealChapter`
+  fills `card_photo_ids` (4–6, or every photo of a chapter of ≤ 6 with
+  `moments: []` — the app plays the card alone) and 1–2 moments typed by
+  time spread (`momentFor`); `nnChaptersFor` is gone (length never
+  merges chapters). `snapToNote` (excerpts.ts) snaps director lines to the
+  note's words; `bringLinePhotos` puts each line's photo in a moment;
+  `fallbackNoteMoment` fills the Note scene; a long headline is null.
+  `DIRECTOR_VERSION` 4, and `directorIsStale` also when `photo_paths`
+  misses a film photo (below the film's photo cap).
+
 - **Limits** (#432, no schema change): `generate_wrap_up/wrap_up_limits.json`
   (minPhotos 15, maxFilmPhotos 60, minNotes 1, maxNoteLines 12, maxVibes 3)
   is shared with the app's `WrapUpLimits` (a Dart test checks they agree).

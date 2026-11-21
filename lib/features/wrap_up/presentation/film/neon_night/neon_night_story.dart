@@ -67,11 +67,12 @@ sealed class NnMoment extends Equatable {
   List<Object?> get props => [type, photos];
 }
 
-/// 2–3 photos side by side, taken close together (§5.4a). Labelled with
+/// 2–4 photos side by side (4 as a grid, #444), taken close together
+/// (§5.4a). Labelled with
 /// the first one's time and, when known, the place.
 class NnSplit extends NnMoment {
   NnSplit(super.photos, {this.place})
-    : assert(photos.length >= 2 && photos.length <= 3, 'split: 2–3 photos');
+    : assert(photos.length >= 2 && photos.length <= 4, 'split: 2–4 photos');
 
   final String? place;
 
@@ -128,10 +129,9 @@ class NnChapter extends Equatable {
            ? photos
            : cardPhotos,
        assert(photos.isNotEmpty, 'a chapter has photos'),
-       assert(
-         moments.isNotEmpty && moments.length <= 2,
-         'a chapter has 1–2 moments',
-       );
+       // 0 = the card alone: a small chapter shows all its photos there
+       // (#444).
+       assert(moments.length <= 2, 'a chapter has 0–2 moments');
 
   /// The director's title in the UI language, e.g. "Doors open".
   final String title;

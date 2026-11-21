@@ -54,10 +54,6 @@ class NeonNightTimeline {
       chapters.isNotEmpty && chapters.length <= maxChapters,
       'chapters: ${chapters.length}',
     );
-    assert(
-      chapters.every((c) => c.moments.isNotEmpty),
-      'every chapter needs a moment',
-    );
     final count = chapters.length;
     final specs = <NeonNightSceneSpec>[
       const NnIgnitionSpec(),
@@ -66,12 +62,9 @@ class NeonNightTimeline {
         NnChapterCardSpec(
           chapter: i,
           chapters: count,
-          zooms: i == 0 || i == count - 1
-              ? NeonZoomPicks.countFor(chapters[i].photos)
-              : 0,
-          zoomHolds: i == 0 || i == count - 1
-              ? chapters[i].zoomHolds
-              : const [],
+          // Every card zooms (#444; was only the first and the last).
+          zooms: NeonZoomPicks.countFor(chapters[i].photos),
+          zoomHolds: chapters[i].zoomHolds,
           minBeats: chapters[i].cardMinBeats,
         ),
         for (final (j, type) in chapters[i].moments.indexed)

@@ -73,12 +73,27 @@ abstract final class FilmStoryboard {
           NnEndingSpec() => _Row(scene.start, scene.duration, 'Ending'),
         },
     ];
+    // How many of the film's photos a scene shows (#444); the heart
+    // shows the rest.
+    final inFilm = {
+      for (final c in story.chapters)
+        for (final p in c.photos) p.id,
+    };
+    final shown = {
+      for (final c in story.chapters) ...[
+        for (final p in c.cardPhotos) p.id,
+        for (final m in c.moments)
+          for (final p in m.photos) p.id,
+      ],
+      ?story.note?.photo?.id,
+    };
     return _table(
       memory: memory,
       film: 'Neon Night',
       total: timeline.total,
       target: story.targetSeconds,
       rows: rows,
+      extra: '${shown.length} / ${inFilm.length} photos shown in scenes',
     );
   }
 
@@ -243,13 +258,15 @@ abstract final class FilmStoryboard {
     required double total,
     required double? target,
     required List<_Row> rows,
+    String? extra,
   }) {
     final buffer = StringBuffer()
       ..writeln('# $memory · $film')
       ..writeln(
         'Length ${total.toStringAsFixed(1)} s'
         '${target == null ? '' : ' · target ${target.toStringAsFixed(1)} s'}'
-        ' · ${rows.length} scenes',
+        ' · ${rows.length} scenes'
+        '${extra == null ? '' : ' · $extra'}',
       )
       ..writeln()
       ..writeln('| # | at | length | scene | photos | words |')

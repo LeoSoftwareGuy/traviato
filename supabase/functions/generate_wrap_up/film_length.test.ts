@@ -67,7 +67,9 @@ Deno.test("content: Sky pages, chapters and album pages grow with photos", () =>
     (lengthContent("neon_night", n).neon_night as { chapters: unknown[] })
       .chapters.length
   );
-  assert(nn[0] === 1 && nn[0] <= nn[1] && nn[1] <= nn[2], `${nn}`);
+  // The film's length never takes a chapter away (#444): the days and
+  // parts are the story; a short film shortens their scenes instead.
+  assert(nn.every((n) => n === nn[0]), `${nn}`);
   const gv = FIXTURE_PHOTO_COUNTS.map((n) => {
     const c = lengthContent("golden_vows", n).golden_vows as {
       heroes: unknown[];

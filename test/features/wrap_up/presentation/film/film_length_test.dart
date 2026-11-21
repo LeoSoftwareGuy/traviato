@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/wrap_up/data/models/wrap_up_golden_vows_model.dart';
@@ -10,6 +11,8 @@ import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_v
 import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_timeline.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_canvas.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_from_wrap_up.dart';
+import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_timeline.dart';
+import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_reading_time.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_track.dart';
 import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story.dart';
 import 'package:traviato/features/wrap_up/presentation/film/sky_story/sky_story_from_wrap_up.dart';
@@ -30,6 +33,27 @@ void main() {
   /// How far a film may land from its target: a bar of Neon Night, a page
   /// that needs time to be read.
   const tolerance = 3.0;
+
+  /// Neon Night's shortest film for [fixture]: every chapter's card and
+  /// moments, held for their words. A short film never loses
+  /// a chapter or its Note scene (#444), so this is its floor.
+  double neonFloorOf(Map<String, dynamic> fixture) {
+    final content = (fixture['content'] as Map).cast<String, dynamic>();
+    final story = neonNightFromWrapUp(
+      parseWrapUpNeonNight(content)!,
+      photoIds: (fixture['photo_ids'] as List<dynamic>).cast<String>().toSet(),
+      startDate: DateTime.parse(fixture['start_date'] as String),
+    )!;
+    // Each chapter's card and moments with their lines' reading time
+    // (#399 T1 — never shorter), the Note, no Plan (it can go).
+    return NeonNightTimeline(
+      chapters: NnReadingTime.chaptersFor(story, NeonTrack.beat),
+      hasPlan: false,
+      hasNote: story.note != null,
+      noteMinBeats: NnReadingTime.noteBeats(story, NeonTrack.beat),
+      beat: NeonTrack.beat,
+    ).total;
+  }
 
   double lengthOf(Map<String, dynamic> fixture) {
     final content = (fixture['content'] as Map).cast<String, dynamic>();
@@ -77,7 +101,18 @@ void main() {
       );
       final length = lengthOf(fixture);
       printOnFailure('${fixture['film']} $photos: $length s');
-      expect(length, closeTo(target, tolerance));
+      if (fixture['film'] == 'neon_night') {
+        // About its target, or its chapters' floor when that is longer.
+        final floor = neonFloorOf(fixture);
+        printOnFailure('floor $floor s');
+        expect(length, greaterThan(target - tolerance));
+        expect(
+          length,
+          lessThanOrEqualTo(math.max(target, floor) + tolerance),
+        );
+      } else {
+        expect(length, closeTo(target, tolerance));
+      }
     });
   }
 

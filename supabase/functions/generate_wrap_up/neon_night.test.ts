@@ -224,17 +224,19 @@ Deno.test("content.neon_night: chapters by range, the user's own words, totals",
   assertEquals(content.chapters[0].photos[0].taken_at, "2026-09-01T10:00:00Z");
   assertEquals(content.chapters[0].note, "Bikes everywhere");
   assertEquals(content.chapters[1].note, null);
-  // A split's place is the first one its photos carry (#426: its photos
-  // are dealt in time order after the card).
-  const split = content.chapters[0].moments[0];
-  assertEquals(split.type, "split");
-  assertEquals(
-    split.place,
-    split.photo_ids.map((id) => data.photos.find((p) => p.id === id)!)
-      .find((p) => p.place_text)?.place_text ?? null,
-  );
+  // Code deals the scenes (#444): 9 photos make a 4-photo card and one
+  // timeline of the other 5 — every photo shown, in time order. Chapter 3
+  // leaves the Note scene's photo out: 4 + a full split of 4.
+  for (const [i, chapter] of content.chapters.entries()) {
+    assertEquals(chapter.card_photo_ids.length, 4);
+    assertEquals(
+      chapter.moments.map((m) => [m.type, m.photo_ids.length]),
+      [i < 2 ? ["timeline", 5] : ["split", 4]],
+    );
+    assertStrictlyAfterCard(chapter);
+  }
   // Only a split is labelled with a place.
-  assertEquals(content.chapters[0].moments[1].place, null);
+  assertEquals(content.chapters[0].moments[0].place, null);
   assertEquals(content.note, {
     text: "Rain, then stroopwafels.",
     number: 2,
@@ -402,8 +404,9 @@ Deno.test("a full moment grows into a timeline to take an Always pick", () => {
   data.photos[3].use_in_wrap_up = true;
   const { fixed, problems } = repaired(plan, data);
   assertEquals(problems, []);
+  // A split holds 4 since #444.
   assertEquals(fixed.chapters[0].moments, [{
-    type: "timeline",
+    type: "split",
     photo_ids: ["p00", "p01", "p02", "p03"],
   }]);
 });
@@ -416,13 +419,12 @@ Deno.test("the director can't plan a peak any more", () => {
   assert(json.includes('"timeline"'));
 });
 
-Deno.test("a peak in a plan made before plays as photos side by side", () => {
-  // neonNightPlan()'s chapter 3 is a 3-photo peak.
+Deno.test("a peak in a plan made before plays as code's moments", () => {
+  // neonNightPlan()'s chapter 3 is a 3-photo peak; code deals the scenes.
   const content = buildNeonNightContent(fullNight(), neonNightPlan());
-  const moment = content.chapters[2].moments[0];
   assertEquals(content.chapters[2].moments.length, 1);
-  assertEquals(moment.type, "split");
-  assertEquals(moment.photo_ids.length, 3);
+  // 9 photos minus the Note scene's: a 4-photo card and a full split.
+  assertEquals(content.chapters[2].moments[0].photo_ids.length, 4);
   assert(
     content.chapters.every((c) => c.moments.every((m) => m.type !== "peak")),
   );
@@ -443,7 +445,7 @@ Deno.test("a timeline is filled with what the card leaves, in time order", () =>
   assert(ids.every((id) => chapter.photos.some((p) => p.id === id)));
 });
 
-Deno.test("the fill takes Always picks first and stops at 6", () => {
+Deno.test("a big chapter: a 6-photo card, two moments, every photo shown", () => {
   const data = fullNight();
   // 10 more photos on day 2, the last two marked Always.
   for (let k = 0; k < 10; k++) {
@@ -460,9 +462,14 @@ Deno.test("the fill takes Always picks first and stops at 6", () => {
   const plan = neonNightPlan();
   plan.chapters[1].moments = [{ type: "timeline", photo_ids: ["p04", "p05"] }];
   const chapter = buildNeonNightContent(data, plan).chapters[1];
-  const ids = chapter.moments[0].photo_ids;
-  assertEquals(ids.length, 6);
-  assert(ids.includes("x8") && ids.includes("x9"));
+  assertEquals(chapter.card_photo_ids.length, 6);
+  assertEquals(chapter.moments.length, 2);
+  const shown = [
+    ...chapter.card_photo_ids,
+    ...chapter.moments.flatMap((m) => m.photo_ids),
+  ];
+  assertEquals(new Set(shown).size, chapter.photos.length);
+  assert(shown.includes("x8") && shown.includes("x9"));
   assertStrictlyAfterCard(chapter);
 });
 
@@ -585,17 +592,17 @@ Deno.test("the card opens a chapter with its earliest photos (#426)", () => {
   }
 });
 
-Deno.test("a timeline under 5 photos plays as a split or burst", () => {
+Deno.test("a chapter of up to 6 photos is one full card, no moment (#444)", () => {
   const plan = neonNightPlan();
-  // The card takes chapter 2's 5 unused photos' first 4; one is left.
   plan.chapters[1].moments = [{ type: "timeline", photo_ids: ["p04", "p05"] }];
   const data = fullNight();
-  // Leave chapter 2 nothing to fill with: its extras marked left out.
+  // Chapter 2 keeps only its 4 own photos.
   for (const p of data.photos) {
     if (p.id.startsWith("d2x")) p.use_in_wrap_up = false;
   }
   const chapter = buildNeonNightContent(data, plan).chapters[1];
-  assertEquals(chapter.moments.map((m) => m.type), ["split"]);
+  assertEquals(chapter.card_photo_ids, ["p04", "p05", "p06", "p07"]);
+  assertEquals(chapter.moments, []);
 });
 
 Deno.test("the Plan scene needs 3 rows", () => {

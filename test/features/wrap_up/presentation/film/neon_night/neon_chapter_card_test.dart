@@ -51,12 +51,22 @@ void main() {
       }
     });
 
-    test('fewer than 10 photos: one row of up to 4 heroes', () {
-      expect(NnContactSheet.forPhotos(1).tiles, hasLength(1));
-      final tiles = NnContactSheet.forPhotos(9).tiles;
-      expect(tiles, hasLength(4));
-      expect([for (final t in tiles) t.width], everyElement(225));
-      expect(tiles.last.right, closeTo(72 + 8 * 118.5 - 12, 1e-9));
+    test('fewer than 10 photos: a full two-row grid of up to 6 (#444)', () {
+      const right = 72 + 8 * 118.5 - 12;
+      const bottom = 950 + 2 * 118.5 - 12;
+      for (var n = 1; n <= 9; n++) {
+        final tiles = NnContactSheet.forPhotos(n).tiles;
+        expect(tiles, hasLength(n < 6 ? n : 6), reason: '$n photos');
+        // Full width and height: never a band of empty space.
+        expect(tiles.last.right, closeTo(right, 1e-9), reason: '$n');
+        expect(
+          tiles.map((t) => t.bottom).reduce((a, b) => a > b ? a : b),
+          closeTo(bottom, 1e-9),
+        );
+        expect(tiles.first.left, 72);
+      }
+      final four = NnContactSheet.forPhotos(4).tiles;
+      expect([for (final t in four) t.width], everyElement(225));
     });
 
     test('gridBottom = 950 + rows × 118.5 − 12', () {
@@ -118,21 +128,21 @@ void main() {
 
   group('laser zooms', () {
     test('picks distinct tiles, one per zoom', () {
-      final t = NnCardTiming(chapterNumber: 3, beats: 16, zooms: 3, tiles: 34);
-      expect(t.zoomTiles, hasLength(3));
-      expect(t.zoomTiles.toSet(), hasLength(3));
+      final t = NnCardTiming(chapterNumber: 3, beats: 12, zooms: 2, tiles: 34);
+      expect(t.zoomTiles, hasLength(2));
+      expect(t.zoomTiles.toSet(), hasLength(2));
       final two = NnCardTiming(chapterNumber: 3, beats: 12, zooms: 2, tiles: 2);
       expect(two.zoomTiles.toSet(), {0, 1});
     });
 
-    test('cycles at lb 6, 9, 12; each 3 beats', () {
-      final t = NnCardTiming(chapterNumber: 1, beats: 16, zooms: 3, tiles: 34);
+    test('cycles at lb 6 and 9; each 3 beats', () {
+      final t = NnCardTiming(chapterNumber: 1, beats: 12, zooms: 2, tiles: 34);
       expect(t.zoomAt(5.9), isNull);
       expect(t.zoomAt(6), 0);
       expect(t.zoomAt(8.99), 0);
       expect(t.zoomAt(9), 1);
-      expect(t.zoomAt(14.9), 2);
-      expect(t.zoomAt(15), isNull);
+      expect(t.zoomAt(11.9), 1);
+      expect(t.zoomAt(12), isNull);
       final one = NnCardTiming(chapterNumber: 1, beats: 12, zooms: 1, tiles: 1);
       expect(one.zoomAt(9.5), isNull);
     });
@@ -161,18 +171,16 @@ void main() {
         'on by whole bars (#399)', () {
       final t = NnCardTiming(
         chapterNumber: 1,
-        beats: 20,
-        zooms: 3,
+        beats: 16,
+        zooms: 2,
         tiles: 6,
-        zoomHolds: const [3, 0, 0],
+        zoomHolds: const [2, 0],
       );
-      expect(t.cycleStart(1), 12);
-      expect(t.cycleStart(2), 15);
-      expect(t.zoomAmount(11.4, 0), 1);
-      expect(t.zoomAmount(12, 0), 0);
-      expect(t.zoomAt(17.9), 2);
-      expect(NnCardTiming.beatsFor(3, const [3, 0, 0]), 20);
-      expect(NnCardTiming.beatsFor(3, const [0, 0, 0]), 16);
+      expect(t.cycleStart(1), 11);
+      expect(t.zoomAmount(10.4, 0), 1);
+      expect(t.zoomAmount(11, 0), 0);
+      expect(t.zoomAt(13.9), 1);
+      expect(NnCardTiming.beatsFor(2, const [2, 0]), 16);
       expect(NnCardTiming.beatsFor(2, const [0, 0]), 12);
       expect(NnCardTiming.beatsFor(1, const [0]), 12);
       expect(NnCardTiming.beatsFor(0, const []), 8);
