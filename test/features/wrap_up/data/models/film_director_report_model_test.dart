@@ -186,6 +186,57 @@ void main() {
       );
     });
 
+    test(
+      'reads Golden Vows: slots, trims, photos shown, why a wedding (#458)',
+      () {
+        final report = FilmDirectorReportModel.fromJson({
+          'status': 'fallback',
+          'problems': <String>[],
+          'golden_vows': {'picks_version': 2, 'picks': <String, Object>{}},
+          'gv_slots': [
+            {
+              'slot': 'main1.note',
+              'candidates': [
+                {'id': 'n:n1:abc', 'text': 'Утро в Париже', 'score': 103},
+              ],
+              'pick': {
+                'ids': ['main1.note/n:n1:abc'],
+                'free_title': null,
+              },
+              'chosen': [
+                {'id': 'n:n1:abc', 'text': 'Утро в Париже'},
+              ],
+              'source': 'director',
+              'reason': "director's pick",
+            },
+          ],
+          'gv_trims': ['main2.note: no note', 'no carousel'],
+          'gv_shown': {'pages': 18, 'photos': 20},
+          'gv_unlisted': [
+            {'note_id': 'n4', 'text': 'Было хорошо.', 'reason': 'generic'},
+            {'note_id': 'n5'},
+          ],
+          'gv_trigger': {'word': 'свадьба', 'source': 'note', 'id': 'n1'},
+        })!;
+        expect(report.gvSlots.single.pickedIds, ['n:n1:abc']);
+        expect(report.gvSlots.single.source, 'director');
+        expect(report.gvTrims, ['main2.note: no note', 'no carousel']);
+        expect(report.gvShownPages, 18);
+        expect(report.gvShownPhotos, 20);
+        expect(report.gvUnlisted, ['Было хорошо. — generic']);
+        expect(report.gvTrigger, '«свадьба» in note n1');
+        // A run from before #458, or romance: none of it.
+        final old = FilmDirectorReportModel.fromJson({
+          'status': 'planned',
+          'problems': <String>[],
+          'gv_trigger': null,
+        })!;
+        expect(old.gvSlots, isEmpty);
+        expect(old.gvShownPhotos, isNull);
+        expect(old.gvTrigger, isNull);
+      },
+    );
+
     test("reads the vibes' film, its plan's source and repairs (#433)", () {
       final report = FilmDirectorReportModel.fromJson({
         'status': 'fallback',

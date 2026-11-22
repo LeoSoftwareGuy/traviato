@@ -2,13 +2,7 @@ import {
   assert,
   assertEquals,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import {
-  filmSeconds,
-  GV_FIXED_SECONDS,
-  gvShapeFor,
-  nnChaptersFor,
-  skyPagesFor,
-} from "./film_length.ts";
+import { filmSeconds, nnChaptersFor, skyPagesFor } from "./film_length.ts";
 import {
   filmLengthFixtures,
   FIXTURE_FILMS,
@@ -37,27 +31,6 @@ Deno.test("Neon Night: chapters by length", () => {
   assertEquals(nnChaptersFor(75), 5);
 });
 
-Deno.test("Golden Vows: photo pages first, the carousel last", () => {
-  const all = {
-    heroSeconds: [4.25, 4.25, 4.25, 4.25, 4.25, 4.25],
-    chapters: 4,
-    packingCard: true,
-    carousel: true,
-  };
-  assertEquals(gvShapeFor(30, all), {
-    heroes: 1,
-    chapters: 0,
-    packingCard: false,
-    carousel: false,
-  });
-  const mid = gvShapeFor(48, all);
-  assert(mid.heroes >= 3 && !mid.carousel, JSON.stringify(mid));
-  const long = gvShapeFor(75, all);
-  assert(long.carousel && long.packingCard, JSON.stringify(long));
-  // Never without a photo page, however short.
-  assertEquals(gvShapeFor(GV_FIXED_SECONDS - 10, all).heroes, 1);
-});
-
 Deno.test("content: Sky pages, chapters and album pages grow with photos", () => {
   const sky = FIXTURE_PHOTO_COUNTS.map((n) =>
     (lengthContent("sky_story", n).sky as { pages: unknown[] }).pages.length
@@ -81,7 +54,12 @@ Deno.test("content: Sky pages, chapters and album pages grow with photos", () =>
       heart: c.heart_photo_ids.length,
     };
   });
-  assert(gv[0].pages < gv[1].pages && gv[1].pages < gv[2].pages);
+  // More photos, more pages (#458: chapters follow the days, main pages
+  // the photos); never fewer.
+  assert(
+    gv[0].pages <= gv[1].pages && gv[1].pages <= gv[2].pages,
+    `${gv.map((g) => g.pages)}`,
+  );
   // Every photo forms the heart, shown ones too.
   assertEquals(gv.map((g) => g.heart), FIXTURE_PHOTO_COUNTS);
 });

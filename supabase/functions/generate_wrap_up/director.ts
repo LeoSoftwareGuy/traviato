@@ -58,17 +58,16 @@ import {
   type SkyStoryPlan,
   skyStoryToolProperty,
 } from "./sky_story.ts";
+import { goldenVowsFilm, type GvSlotReport } from "./gv_film.ts";
 import {
-  describeGoldenVowsProblems,
-  ensureGoldenVows,
-  GOLDEN_VOWS_PROMPT_RULES,
-  type GoldenVowsPlan,
-  goldenVowsToolProperty,
-  gvCheckContext,
-  healGoldenVows,
-} from "./golden_vows.ts";
+  buildGvPickInput,
+  buildGvPickSystemPrompt,
+  gvLanguage,
+  pickGoldenVowsLinesTool,
+} from "./gv_slots.ts";
+import type { GvOccasionTrigger } from "./gv_skeleton.ts";
+import { parsePicks, type SlotPicks } from "./film_slots.ts";
 import {
-  type EnsuredSection,
   nnChapterStarts,
   nnCheckContext,
   nnLogicalDays,
@@ -79,7 +78,6 @@ import {
   isPicksRecord,
   type NeonNightPicksRecord,
   type NnPicks,
-  parseNeonPicks,
   pickNeonLinesTool,
 } from "./neon_slots.ts";
 import { neonNightFilm, type NnSlotReport } from "./neon_film.ts";
@@ -111,12 +109,10 @@ export const MIN_PLANNABLE_PHOTOS = 6;
 // the Plan inspector is never capped.
 export const MAX_DIRECTOR_RUNS = 4;
 // The director's rules (#398: logical days, excerpts, chronology; #433:
-// the template from vibes). A record made under older rules runs again
+// the template from vibes; #454 / #458: Neon Night and Golden Vows pick
+// from code's lists). A record made under older rules runs again
 // once, within MAX_DIRECTOR_RUNS.
-export const DIRECTOR_VERSION = 5;
-
-// The films with a section of their own (#346, #363).
-type SectionFilm = "golden_vows";
+export const DIRECTOR_VERSION = 6;
 
 // emit_film_plan with the Sky Story section (#345). Composed here so the
 // films' modules don't import each other. No occasion choice since #433:
@@ -134,34 +130,6 @@ export const directorToolSchema = {
       "sky_story",
     ],
   },
-};
-
-// The second call's tool: one film's section, or null when the memory
-// turns out not to be that occasion (#380).
-function sectionTool(
-  name: string,
-  description: string,
-  key: SectionFilm,
-  property: unknown,
-): ToolDefinition {
-  return {
-    name,
-    description,
-    input_schema: {
-      type: "object",
-      properties: { [key]: property },
-      required: [key],
-    },
-  } as ToolDefinition;
-}
-
-export const sectionToolSchemas: Record<SectionFilm, ToolDefinition> = {
-  golden_vows: sectionTool(
-    "emit_golden_vows",
-    "Emit this memory's Golden Vows album. The film is fixed: always emit it.",
-    "golden_vows",
-    goldenVowsToolProperty,
-  ),
 };
 
 export type DirectorCall = TokenUsage & {
@@ -194,11 +162,19 @@ export interface DirectorRecord {
   // classic plan fell back. null = code-built pages; sky_problems says why.
   sky_story?: SkyStoryPlan | null;
   sky_problems?: string[];
-  // The Golden Vows section (#346): null when the director chose another
-  // occasion, or its section stayed invalid (golden_vows_problems says
-  // why) — then Sky Story plays.
-  golden_vows?: GoldenVowsPlan | null;
+  // Golden Vows' words (#458): the director's picks by slot, or null
+  // (code picks every slot). Records before #458 hold a whole section
+  // here; it is no longer read (DIRECTOR_VERSION 6 re-runs them).
+  golden_vows?: { picks_version: 2; picks: SlotPicks } | unknown | null;
   golden_vows_problems?: string[];
+  // Every Golden Vows slot when it ran (#458, Plan inspector), what the
+  // album gave up for its length, its photos on pages, the notes on no
+  // page and why, and the word that made it a wedding (or null).
+  gv_slots?: GvSlotReport[];
+  gv_trims?: string[];
+  gv_shown?: { pages: number; photos: number };
+  gv_unlisted?: { note_id: string; text: string; reason: string }[];
+  gv_trigger?: GvOccasionTrigger | null;
   // Neon Night's words (#454): the director's picks by slot, or null
   // (code picks every slot). Records before #454 hold a whole plan here;
   // it is no longer read (DIRECTOR_VERSION 5 re-runs them).
@@ -358,12 +334,6 @@ function sceneLines(): string {
   ).join("\n");
 }
 
-function sectionLanguageRule(language: WrapUpLanguage): string {
-  return language === "ru"
-    ? 'Write every line in natural Russian, addressing the reader as "вы". Keep names of the memory, places and people exactly as given.'
-    : "Write every line in English.";
-}
-
 function languageRule(language: WrapUpLanguage): string {
   return language === "ru"
     ? 'Write every line in natural Russian, addressing the reader as "вы". Keep names of the memory, places and people exactly as given. Set "language" to "ru".'
@@ -406,54 +376,6 @@ export function buildPlanSystemPrompt(language: WrapUpLanguage): string {
     SKY_STORY_PROMPT_RULES,
   ].join("");
 }
-
-// The second call's system prompt (#380): the shared rules and just that
-// film's.
-export function buildSectionSystemPrompt(
-  film: SectionFilm,
-  language: WrapUpLanguage,
-): string {
-  const name = "Golden Vows, an elegant ivory-and-gold album";
-  return [
-    "You are the director of a short film made from one person's memory. ",
-    `It will be told as ${name}. Emit it with the `,
-    `${sectionToolSchemas[film].name} tool. The film is chosen: always `,
-    "emit it, never null.\n\n",
-    "Rules:\n",
-    "- Use only photo_ids and note_ids from the input. Never invent people, ",
-    "places or events.\n",
-    "- Photos are listed in order (day, then time); each at most once.\n",
-    "- Prefer sharp photos with hero_score ≥ 3. Skip blurry or dark photos, ",
-    "and all but one photo of each dup_group.\n",
-    "- Lines are specific — real details from notes, places and photos — ",
-    "never generic.\n",
-    `- Never use: ${BANNED_PHRASES.map((p) => `"${p}"`).join(", ")}.\n`,
-    NOTE_LINE_RULES,
-    GOLDEN_VOWS_OCCASION_RULES,
-    `- ${sectionLanguageRule(language)}`,
-    GOLDEN_VOWS_PROMPT_RULES,
-  ].join("");
-}
-
-// Which of the user's lines the film plays (#433), in priority order.
-const NOTE_LINE_RULES = [
-  `- At most ${WRAP_UP_LIMITS.maxNoteLines} of the user's lines in the `,
-  "whole film, 2–3 per chapter. Choose them in this order: (1) emotions ",
-  "and feelings; (2) lines that match the vibe (Nightlife: the music, the ",
-  "crowd, the night; Romantic: the two of them, special moments; outdoors: ",
-  "nature, the route, the effort); (3) specific details (numbers, names, ",
-  'places, food); (4) generic summaries ("it was fun", "было весело", ',
-  '"все устали") last. Exact words only.\n',
-].join("");
-
-// Golden Vows is chosen for every Romantic memory (#433), not only
-// weddings.
-const GOLDEN_VOWS_OCCASION_RULES = [
-  "- occasion: wedding, engagement or anniversary only when the photos or ",
-  "notes show one; date_night for a night out of two; otherwise romance. ",
-  "Vows, wedding or marriage words only for a wedding. For romance, write ",
-  'neutral romantic lines in the same style ("Just us", "Our Paris").\n',
-].join("");
 
 export function buildPlanUserPrompt(
   input: ReturnType<typeof buildPlanInput>,
@@ -522,74 +444,16 @@ function summariseUsage(calls: DirectorCall[]): DirectorRecord["usage"] {
   };
 }
 
-// The occasion film's section in a call of its own (#380): its tool, its
-// rules, one retry with the problems fed back. A null section is an
-// answer (not that occasion after all). Never throws.
-async function planSection(
+// A film's words (#454, #458): one call over code's cut film and its
+// slots; a retry only when the call itself fails. Null = no picks (code
+// picks every slot).
+async function pickLines(
   deps: DirectorDeps,
   calls: DirectorCall[],
   tripId: string,
-  film: SectionFilm,
-  input: ReturnType<typeof buildPlanInput>,
-  language: WrapUpLanguage,
-  check: (raw: unknown) => { value: unknown; problems: string[] },
-): Promise<{ value: unknown | null; problems: string[]; attempts: number }> {
-  const log = deps.log ?? console.error;
-  const system = buildSectionSystemPrompt(film, language);
-  let problems: string[] = [];
-  let attempts = 0;
-  for (let attempt = 1; attempt <= PLAN_ATTEMPTS; attempt++) {
-    attempts = attempt;
-    let toolInput: unknown;
-    try {
-      const result = await callAnthropicTool({
-        apiKey: deps.apiKey,
-        model: DIRECTOR_MODEL,
-        maxTokens: PLAN_MAX_TOKENS,
-        system,
-        content: buildPlanUserPrompt(input, problems),
-        tool: sectionToolSchemas[film],
-        label: film,
-        fetchImpl: deps.fetchImpl,
-        log,
-      });
-      calls.push({ ...result.usage, call: "section" });
-      toolInput = result.input;
-    } catch (err) {
-      problems = [`${film} call failed: ${(err as Error).message}`];
-      continue;
-    }
-    const raw = typeof toolInput === "object" && toolInput !== null
-      ? (toolInput as Record<string, unknown>)[film]
-      : undefined;
-    if (raw === null || raw === undefined) {
-      return { value: null, problems: [], attempts };
-    }
-    const checked = check(raw);
-    if (checked.problems.length === 0) {
-      return { value: checked.value, problems: [], attempts };
-    }
-    problems = checked.problems;
-    logEvent(log, "director_section_invalid", {
-      trip_id: tripId,
-      film,
-      attempt,
-      problems: problems.slice(0, 30),
-    });
-  }
-  return { value: null, problems, attempts };
-}
-
-// Neon Night's words (#454): one pick_neon_lines call over code's cut
-// film and its slots; a retry only when the call itself fails. Null =
-// no picks (code picks every slot).
-async function pickNeonLines(
-  deps: DirectorDeps,
-  calls: DirectorCall[],
-  tripId: string,
-  input: ReturnType<typeof buildNeonPickInput>,
-  language: WrapUpLanguage,
-): Promise<{ picks: NnPicks | null; problems: string[]; attempts: number }> {
+  film: "neon_night" | "golden_vows",
+  call: { system: string; input: unknown; tool: ToolDefinition },
+): Promise<{ picks: SlotPicks | null; problems: string[]; attempts: number }> {
   const log = deps.log ?? console.error;
   const problems: string[] = [];
   let attempts = 0;
@@ -600,23 +464,23 @@ async function pickNeonLines(
         apiKey: deps.apiKey,
         model: DIRECTOR_MODEL,
         maxTokens: PLAN_MAX_TOKENS,
-        system: buildNeonPickSystemPrompt(language),
-        content: `Pick the words for this film:\n${JSON.stringify(input)}`,
-        tool: pickNeonLinesTool,
-        label: "neon_night",
+        system: call.system,
+        content: `Pick the words for this film:\n${JSON.stringify(call.input)}`,
+        tool: call.tool,
+        label: film,
         fetchImpl: deps.fetchImpl,
         log,
       });
       calls.push({ ...result.usage, call: "section" });
-      const picks = parseNeonPicks(result.input);
+      const picks = parsePicks(result.input);
       if (picks) return { picks, problems: [], attempts };
-      problems.push("pick_neon_lines: not a list of picks");
+      problems.push(`${call.tool.name}: not a list of picks`);
     } catch (err) {
-      problems.push(`neon_night call failed: ${(err as Error).message}`);
+      problems.push(`${film} call failed: ${(err as Error).message}`);
     }
     logEvent(log, "director_section_invalid", {
       trip_id: tripId,
-      film: "neon_night",
+      film,
       attempt,
       problems: problems.slice(-1),
     });
@@ -626,7 +490,9 @@ async function pickNeonLines(
 
 // What the inspector lists as put right (#454): each slot where the
 // director's pick didn't hold.
-function neonRepairs(report: readonly NnSlotReport[]): string[] {
+function pickRepairs(
+  report: readonly (NnSlotReport | GvSlotReport)[],
+): string[] {
   return report.filter((r) => r.pick && r.source === "code").map((r) =>
     `${r.slot}: ${r.reason}`
   );
@@ -767,19 +633,17 @@ export async function runDirector(
     if (template === "neon_night") {
       // Code cuts the film; one call picks its words (#454).
       const cut = neonNightFilm(seen, null, record.hero_scores);
-      const outcome = await pickNeonLines(
-        deps,
-        calls,
-        tripId,
-        buildNeonPickInput(
+      const outcome = await pickLines(deps, calls, tripId, "neon_night", {
+        system: buildNeonPickSystemPrompt(language),
+        input: buildNeonPickInput(
           seen,
           cut.chapters,
           cut.slots,
           analyses,
           (iso) => localClock(iso, seen),
         ),
-        language,
-      );
+        tool: pickNeonLinesTool,
+      });
       record.section_attempts = outcome.attempts;
       const played = neonNightFilm(seen, outcome.picks, record.hero_scores);
       record.neon_night = outcome.picks
@@ -788,7 +652,7 @@ export async function runDirector(
       record.neon_slots = played.report;
       record.neon_night_source = outcome.picks ? "director" : "code";
       record.neon_night_repairs = outcome.picks
-        ? neonRepairs(played.report)
+        ? pickRepairs(played.report)
         : [...outcome.problems, "code picked every slot"];
       record.problems = [`${template} memory: no classic plan call`];
       record.sky_problems = [`${template} memory: code-built pages`];
@@ -796,41 +660,42 @@ export async function runDirector(
     }
 
     if (template === "golden_vows") {
-      // One call: the chosen film's section (#433).
-      const ensure = (raw: unknown) =>
-        ensureGoldenVows(raw, gvCheckContext(seen), language);
-      const outcome = await planSection(
-        deps,
-        calls,
-        tripId,
-        template,
-        input,
+      // Code cuts the album; one call picks its words (#458).
+      const options = {
+        heroScores: record.hero_scores,
+        orientations: record.orientations,
+        summaries: new Map([...analyses].map(([id, a]) => [id, a.summary])),
         language,
-        (raw) => {
-          const ensured = ensure(raw);
-          return {
-            value: ensured,
-            problems: ensured.source === "director"
-              ? []
-              : ensured.repairs.filter((r) => r.startsWith("couldn't")),
-          };
-        },
-      );
+      };
+      const cut = goldenVowsFilm(seen, null, options);
+      const outcome = await pickLines(deps, calls, tripId, "golden_vows", {
+        system: buildGvPickSystemPrompt(
+          gvLanguage(seen, language),
+          cut.skeleton.occasion,
+        ),
+        input: buildGvPickInput(
+          seen,
+          cut.skeleton,
+          cut.slots,
+          analyses,
+          (iso) => localClock(iso, seen),
+        ),
+        tool: pickGoldenVowsLinesTool,
+      });
       record.section_attempts = outcome.attempts;
-      const ensured = (outcome.value ?? ensure(null)) as ReturnType<
-        typeof ensure
-      >;
-      const repairs = outcome.problems.length > 0
-        ? [
-          ...outcome.problems.map((p) =>
-            `after ${outcome.attempts} tries: ${p}`
-          ),
-          "code built the plan",
-        ]
-        : ensured.repairs;
-      record.golden_vows = ensured.plan as GoldenVowsPlan;
-      record.golden_vows_source = ensured.source;
-      record.golden_vows_repairs = repairs;
+      const played = goldenVowsFilm(seen, outcome.picks, options);
+      record.golden_vows = outcome.picks
+        ? { picks_version: 2, picks: outcome.picks }
+        : null;
+      record.gv_slots = played.report;
+      record.gv_trims = played.trims;
+      record.gv_shown = played.shown;
+      record.gv_unlisted = played.unlisted;
+      record.gv_trigger = played.trigger;
+      record.golden_vows_source = outcome.picks ? "director" : "code";
+      record.golden_vows_repairs = outcome.picks
+        ? pickRepairs(played.report)
+        : [...outcome.problems, "code picked every slot"];
       // The classic plan and Sky Story pages are code's (no call): the
       // app's safety net if the chosen film fails while it plays.
       record.problems = [`${template} memory: no classic plan call`];
@@ -998,35 +863,27 @@ export function currentSkyStory(
     : null;
 }
 
-// The Golden Vows a Golden Vows memory plays now (#433): the director's
-// section as stored while it fits, else healed to the memory as it is now
-// (photos deleted or left out since, notes reworded — #393) and repaired,
-// else code's plan for the same film. Never null.
+// The Golden Vows words a Golden Vows memory plays now (#458): the
+// director's stored picks, re-applied by id to the album code cuts from
+// the memory as it is now (a gone or reworded line takes code's top
+// candidate), else none. Records before #458 held a whole section: not
+// read. The summaries carry the photo that made it a wedding when it ran
+// (a photo's summary is only known then).
 export function currentGoldenVows(
   record: unknown,
-  tripData: TripData,
-  language: WrapUpLanguage = "en",
-): EnsuredSection<GoldenVowsPlan> {
+): {
+  picks: SlotPicks | null;
+  source: "director" | "code";
+  summaries: Map<string, string>;
+} {
   const stored = isDirectorRecord(record) ? record.golden_vows ?? null : null;
-  const context = gvCheckContext(
-    tripData,
-    new Set(isDirectorRecord(record) ? record.failed_ids ?? [] : []),
+  const trigger = isDirectorRecord(record) ? record.gv_trigger : null;
+  const summaries = new Map(
+    trigger?.source === "photo" ? [[trigger.id, trigger.word]] : [],
   );
-  if (stored && describeGoldenVowsProblems(stored, context).length === 0) {
-    return {
-      plan: stored,
-      source: (record as DirectorRecord).golden_vows_source ?? "director",
-      repairs: (record as DirectorRecord).golden_vows_repairs ?? [],
-    };
-  }
-  const ensured = ensureGoldenVows(
-    stored ? healGoldenVows(stored, context) : null,
-    context,
-    language,
-  );
-  return stored
-    ? { ...ensured, repairs: ["healed to the memory now", ...ensured.repairs] }
-    : ensured;
+  return isPicksRecord(stored)
+    ? { picks: stored.picks, source: "director", summaries }
+    : { picks: null, source: "code", summaries };
 }
 
 // The Neon Night words a Neon Night memory plays now (#454): the

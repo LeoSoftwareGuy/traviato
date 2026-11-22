@@ -25,6 +25,12 @@ class FilmDirectorReportModel extends FilmDirectorReport {
     super.hasNeonNight,
     super.neonNightProblems,
     super.neonSlots,
+    super.gvSlots,
+    super.gvTrims,
+    super.gvShownPages,
+    super.gvShownPhotos,
+    super.gvUnlisted,
+    super.gvTrigger,
     super.template,
     super.filmSource,
     super.filmRepairs,
@@ -72,6 +78,23 @@ class FilmDirectorReportModel extends FilmDirectorReport {
       neonSlots: _list(
         json['neon_slots'],
       ).map(_neonSlot).whereType<FilmNeonSlot>().toList(),
+      // The same shape as Neon's (#458).
+      gvSlots: _list(
+        json['gv_slots'],
+      ).map(_neonSlot).whereType<FilmNeonSlot>().toList(),
+      gvTrims: _list(json['gv_trims']).whereType<String>().toList(),
+      gvShownPages: _map(json['gv_shown'])['pages'] is num
+          ? _int(_map(json['gv_shown'])['pages'])
+          : null,
+      gvShownPhotos: _map(json['gv_shown'])['photos'] is num
+          ? _int(_map(json['gv_shown'])['photos'])
+          : null,
+      gvUnlisted: [
+        for (final n in _list(json['gv_unlisted']).map(_map))
+          if (_string(n['text']) case final text?)
+            '$text — ${_string(n['reason']) ?? '?'}',
+      ],
+      gvTrigger: _trigger(_map(json['gv_trigger'])),
       template: _string(json['template']),
       filmSource: _string(json['${_string(json['template'])}_source']),
       filmRepairs: _list(
@@ -169,3 +192,15 @@ String? _string(dynamic json) => json is String ? json : null;
 int _int(dynamic json) => json is num ? json.toInt() : 0;
 
 double _double(dynamic json) => json is num ? json.toDouble() : 0;
+
+/// "«bride» in photo p03": the word that set the album's occasion (#458).
+String? _trigger(Map<String, dynamic> json) {
+  final word = _string(json['word']);
+  if (word == null) return null;
+  final source = switch (_string(json['source'])) {
+    'note' => 'note',
+    'caption' => "photo's caption",
+    _ => "photo's summary",
+  };
+  return '«$word» in $source ${_string(json['id']) ?? '?'}';
+}

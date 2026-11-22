@@ -6,7 +6,6 @@ import {
 import {
   buildPlanInput,
   buildPlanSystemPrompt,
-  buildSectionSystemPrompt,
   currentGoldenVows,
   currentNeonNight,
   currentPlan,
@@ -25,7 +24,7 @@ import {
   DIRECTOR_PHOTO_IDS,
   directorTripData,
   emittedPlan,
-  goldenVowsPlan,
+  gvPicksAnswer,
   keepsakePlan,
   keepsakePlanWithFixableFaults,
   neonPicks,
@@ -33,6 +32,7 @@ import {
   skyStoryPlan,
   toolResponse,
 } from "./director_fixtures.ts";
+import { buildGvPickSystemPrompt } from "./gv_slots.ts";
 import type { TripData } from "./gather.ts";
 import { useFilmLengthRuleForTests } from "./film_length.ts";
 
@@ -366,7 +366,7 @@ Deno.test("runDirector sends strict tools: closed objects, no unsupported keywor
   for (
     const [anthropic, data] of [
       [fakeAnthropic([emittedPlan()]), directorTripData()],
-      [golden(goldenVowsPlan()), romantic()],
+      [golden(gvPicksAnswer(romantic())), romantic()],
       [neon(neonPicksAnswer(nightlife())), nightlife()],
     ] as const
   ) {
@@ -382,8 +382,8 @@ Deno.test("runDirector sends strict tools: closed objects, no unsupported keywor
     [...new Set(sent.map((s) => s.tool))].sort(),
     [
       "emit_film_plan",
-      "emit_golden_vows",
       "emit_photo_analysis",
+      "pick_golden_vows_lines",
       "pick_neon_lines",
     ],
   );
@@ -619,11 +619,7 @@ const nightlife = (overrides: Partial<TripData> = {}) =>
   });
 
 function golden(...answers: unknown[]) {
-  return fakeAnthropic([], {
-    emit_golden_vows: answers.map((a) =>
-      a instanceof Error ? a : { golden_vows: a }
-    ),
-  });
+  return fakeAnthropic([], { pick_golden_vows_lines: answers });
 }
 
 function neon(...answers: unknown[]) {
@@ -635,24 +631,47 @@ const calledTools = (anthropic: ReturnType<typeof fakeAnthropic>) =>
     s.tool
   );
 
-Deno.test("a Romantic memory: one Golden Vows call, kept with the photos' shapes", async () => {
-  const anthropic = golden(goldenVowsPlan());
-  const { deps: d } = deps(anthropic.fetchImpl);
-
-  const record = await runDirector(d, TRIP_ID, romantic(), "en");
-
+Deno.test("a Romantic memory: one pick_golden_vows_lines call, its picks kept (#458)", async () => {
+  const data = romantic();
+  const answer = gvPicksAnswer(data);
+  const anthropic = golden(answer);
+  const record = await runDirector(
+    deps(anthropic.fetchImpl).deps,
+    TRIP_ID,
+    data,
+    "en",
+  );
   assertEquals(record.template, "golden_vows");
   assertEquals(record.section_attempts, 1);
-  assertEquals(record.golden_vows, goldenVowsPlan());
+  assertEquals(record.director_version, DIRECTOR_VERSION);
+  const stored = record.golden_vows as {
+    picks_version: number;
+    picks: Record<string, { ids: string[]; free_title: string | null }>;
+  };
+  assertEquals(stored.picks_version, 2);
+  assertEquals(stored.picks["ch1.title"].free_title, "Canal morning");
   assertEquals(record.golden_vows_source, "director");
   assertEquals(record.golden_vows_repairs, []);
   assertEquals(record.neon_night, null);
   assertEquals(record.orientations!.p00, "portrait");
+  // The inspector's record: every slot, what plays and why.
+  const title = record.gv_slots!.find((s) => s.slot === "ch1.title")!;
+  assertEquals(title.chosen, [{ id: "free", text: "Canal morning" }]);
+  assertEquals(title.source, "director");
+  assertEquals(record.gv_shown!.photos, 12);
+  assertEquals(record.gv_trigger, null);
   // One call after the analysis: no plan call, no Sky Story call.
-  assertEquals(calledTools(anthropic), ["emit_golden_vows"]);
-  assertEquals(
-    record.usage.calls.map((c) => c.call).filter((c) => c !== "analysis"),
-    ["section"],
+  assertEquals(calledTools(anthropic), ["pick_golden_vows_lines"]);
+  // It sees the cut album and every slot's list, scoped to its slot.
+  const sent = JSON.parse(
+    (anthropic.sent.at(-1)!.body.messages as { content: string }[])[0]
+      .content.replace("Pick the words for this film:\n", ""),
+  );
+  assertEquals(sent.memory.occasion, "romance");
+  assert(
+    sent.slots.every((s: { slot: string; candidates: { id: string }[] }) =>
+      s.candidates.every((c) => c.id.startsWith(`${s.slot}/`))
+    ),
   );
 });
 
@@ -670,9 +689,9 @@ Deno.test("a Sky Story memory makes only the plan call (#433)", async () => {
   assertEquals(record.neon_night, null);
 });
 
-Deno.test("the director can't change the film: a null section is code's plan", async () => {
-  for (const answer of [null, new Error("grammar too large")]) {
-    const anthropic = golden(answer);
+Deno.test("no picks: code picks every slot, the film stays Golden Vows", async () => {
+  for (const answer of [{ nothing: true }, new Error("overloaded")]) {
+    const anthropic = golden(answer, answer);
     const record = await runDirector(
       deps(anthropic.fetchImpl).deps,
       TRIP_ID,
@@ -680,64 +699,38 @@ Deno.test("the director can't change the film: a null section is code's plan", a
       "en",
     );
     assertEquals(record.template, "golden_vows");
+    assertEquals(record.section_attempts, 2);
+    assertEquals(record.golden_vows, null);
     assertEquals(record.golden_vows_source, "code");
-    assertEquals(record.golden_vows!.occasion, "romance");
-    assert(record.golden_vows_repairs!.length > 0);
+    assertStringIncludes(
+      record.golden_vows_repairs!.at(-1)!,
+      "code picked every slot",
+    );
+    assert(record.gv_slots!.every((s) => s.source !== "director"));
   }
 });
 
-Deno.test("an unrepairable section is retried with its problems, then code builds it", async () => {
-  const broken = goldenVowsPlan();
-  (broken as unknown as Record<string, unknown>).heroes = "none";
-  const anthropic = golden(broken, goldenVowsPlan());
-
+Deno.test("a pick from another slot's list takes code's top candidate", async () => {
+  const data = romantic();
+  const answer = gvPicksAnswer(data);
+  const label = answer.picks.find((p) => p.slot === "main1.label")!;
+  label.ids = ["ch2.title/p:000"];
   const record = await runDirector(
-    deps(anthropic.fetchImpl).deps,
+    deps(golden(answer).fetchImpl).deps,
     TRIP_ID,
-    romantic(),
+    data,
     "en",
   );
-  assertEquals(record.section_attempts, 2);
-  assertEquals(record.golden_vows, goldenVowsPlan());
-  assertEquals(record.golden_vows_source, "director");
-  const retry = anthropic.sent.at(-1)!;
-  assertEquals(retry.tool, "emit_golden_vows");
-  assertStringIncludes(
-    (retry.body.messages as { content: string }[])[0].content,
-    "golden_vows.heroes: expected an array",
+  const r = record.gv_slots!.find((s) => s.slot === "main1.label")!;
+  assertEquals(r.source, "code");
+  assert(
+    record.golden_vows_repairs!.some((x) => x.startsWith("main1.label")),
   );
-
-  const twice = await runDirector(
-    deps(golden(broken).fetchImpl).deps,
-    TRIP_ID,
-    romantic(),
-    "en",
-  );
-  assertEquals(twice.section_attempts, 2);
-  assertEquals(twice.golden_vows_source, "code");
-  assert(twice.golden_vows!.heroes.length >= 2);
-  assertStringIncludes(twice.golden_vows_repairs!.at(-1)!, "code built");
-});
-
-Deno.test("a fixable section is repaired, not retried, and the repair logged", async () => {
-  const fixable = goldenVowsPlan();
-  fixable.end_line = "An unforgettable love, forever and ever and always";
-  const anthropic = golden(fixable);
-  const record = await runDirector(
-    deps(anthropic.fetchImpl).deps,
-    TRIP_ID,
-    romantic(),
-    "en",
-  );
-  assertEquals(record.section_attempts, 1);
-  assertEquals(record.golden_vows_source, "director");
-  assertEquals(record.golden_vows!.end_line.includes("unforgettable"), false);
-  assert(record.golden_vows_repairs!.some((r) => r.includes("end_line")));
 });
 
 Deno.test("too few analysed photos: code's plan, the reason recorded", async () => {
-  const anthropic = golden(goldenVowsPlan());
   const data = romantic();
+  const anthropic = golden(gvPicksAnswer(data));
   data.photos = data.photos.slice(0, 4);
   const record = await runDirector(
     deps(anthropic.fetchImpl).deps,
@@ -750,22 +743,20 @@ Deno.test("too few analysed photos: code's plan, the reason recorded", async () 
   assertEquals(calledTools(anthropic), []);
 });
 
-Deno.test("the prompts: no occasion choice, the film fixed, lines by priority", () => {
+Deno.test("the prompts: no occasion choice; Golden Vows picks, no wedding words", () => {
   const plan = buildPlanSystemPrompt("en");
   assertEquals(plan.includes("special_film"), false);
   assertEquals(plan.includes("copy a short phrase from it exactly"), false);
-  const section = buildSectionSystemPrompt("golden_vows", "en");
-  assertStringIncludes(section, "copy a short phrase from it exactly");
-  assertStringIncludes(section, "emit_golden_vows");
-  assertStringIncludes(section, "never null");
+  const romance = buildGvPickSystemPrompt("en", "romance");
+  assertStringIncludes(romance, "pick_golden_vows_lines");
+  assertStringIncludes(romance, "never use vows, wedding");
   assertStringIncludes(
-    section,
-    "Vows, wedding or marriage words only for a wedding",
+    buildGvPickSystemPrompt("ru", "wedding"),
+    "wedding words are fine",
   );
-  assertStringIncludes(section, "At most 12 of the user's lines");
 });
 
-Deno.test("the tools: no special_film on the plan, a section on its own", async () => {
+Deno.test("the tools: no special_film on the plan, picks on their own", async () => {
   const sky = fakeAnthropic([emittedPlan()]);
   await runDirector(
     deps(sky.fetchImpl).deps,
@@ -782,92 +773,47 @@ Deno.test("the tools: no special_film on the plan, a section on its own", async 
   assertEquals(main.required.includes("special_film"), false);
   assertEquals("golden_vows" in main.properties, false);
 
-  const gv = golden(goldenVowsPlan());
+  const gv = golden(gvPicksAnswer(romantic()));
   await runDirector(deps(gv.fetchImpl).deps, TRIP_ID, romantic(), "en");
-  assertEquals(schemaOf(gv, "emit_golden_vows").required, ["golden_vows"]);
+  assertEquals(schemaOf(gv, "pick_golden_vows_lines").required, ["picks"]);
 });
 
-Deno.test("currentGoldenVows: the stored section while it fits, else code's", () => {
+Deno.test("currentGoldenVows: the stored picks, else none; older sections aren't read", () => {
+  const picks = { finale: { ids: ["e:1"], free_title: null } };
   const record = {
     status: "planned",
     plan: keepsakePlan(),
     problems: [],
     failed_ids: [],
-    golden_vows: goldenVowsPlan(),
+    golden_vows: { picks_version: 2, picks },
+    gv_trigger: { word: "bride", source: "photo", id: "p03" },
   } as unknown as DirectorRecord;
-  assertEquals(
-    currentGoldenVows(record, directorTripData()).plan,
-    goldenVowsPlan(),
-  );
-  const none = currentGoldenVows(
-    { ...record, golden_vows: null },
-    directorTripData(),
-  );
-  assertEquals(none.source, "code");
-  assertEquals(currentGoldenVows(null, directorTripData()).source, "code");
-});
-
-const without = (...gone: string[]) => {
-  const data = directorTripData();
-  data.photos = data.photos.filter((p) => !gone.includes(p.id));
-  return data;
-};
-
-Deno.test("currentGoldenVows heals a section the memory has outgrown (#393)", () => {
-  const ids = DIRECTOR_PHOTO_IDS;
-  const record = {
-    status: "planned",
-    plan: keepsakePlan(),
-    problems: [],
-    failed_ids: [],
-    golden_vows: goldenVowsPlan(),
-  } as unknown as DirectorRecord;
-
-  // A chapter photo with no unused photo in its gap: the chapter goes.
-  const dropped = currentGoldenVows(record, without(ids[5])).plan;
-  assertEquals(dropped.chapters.map((c) => c.title), [
-    "Getting ready",
-    "Just married",
-  ]);
-  // One with an unused photo in its gap is refilled, in time order.
-  const refilled = currentGoldenVows(record, without(ids[10])).plan;
-  assertEquals(refilled.chapters[2].photo_ids, [ids[7], ids[8], ids[11]]);
-  // Left out counts as gone.
-  const leftOut = directorTripData();
-  leftOut.photos[10].use_in_wrap_up = false;
-  assertEquals(
-    currentGoldenVows(record, leftOut).plan.chapters[2].photo_ids,
-    [ids[7], ids[8], ids[11]],
-  );
-  // A hero whose photo is gone goes; the album needs 2 heroes, so without
-  // a third code builds the album instead (#433) — still Golden Vows.
-  const rebuilt = currentGoldenVows(record, without(ids[9]));
-  assertEquals(rebuilt.source, "code");
-  assertEquals(rebuilt.plan.occasion, "romance");
-  const threeHeroes = {
+  const current = currentGoldenVows(record);
+  assertEquals(current.picks, picks);
+  assertEquals(current.source, "director");
+  // A photo's summary set the occasion: it is known again on open.
+  assertEquals([...current.summaries], [["p03", "bride"]]);
+  // A section from before #458.
+  const old = currentGoldenVows({
     ...record,
-    golden_vows: {
-      ...goldenVowsPlan(),
-      heroes: [
-        ...goldenVowsPlan().heroes,
-        { photo_id: ids[11], label: "Cake", note_id: null, note_excerpt: null },
-      ],
-    },
+    golden_vows: { occasion: "wedding", heroes: [] },
+  });
+  assertEquals(old.picks, null);
+  assertEquals(old.source, "code");
+  assertEquals(currentGoldenVows(null).source, "code");
+});
+
+Deno.test("an older record runs again once (#458: DIRECTOR_VERSION 6)", () => {
+  assertEquals(DIRECTOR_VERSION, 6);
+  const record = {
+    status: "fallback",
+    plan: null,
+    problems: [],
+    failed_ids: [],
+    director_version: 5,
+    run_count: 1,
   } as unknown as DirectorRecord;
-  assertEquals(
-    currentGoldenVows(threeHeroes, without(ids[9])).plan.heroes.map((h) =>
-      h.photo_id
-    ),
-    [ids[1], ids[11]],
-  );
-  // A reworded note loses its card, the album stays.
-  const reworded = directorTripData();
-  reworded.notes[0].content = "Bicycles all over the place.";
-  const healed = currentGoldenVows(record, reworded).plan;
-  assertEquals(healed.heroes[0].note_id, null);
-  assertEquals(healed.heroes[0].note_excerpt, null);
-  // The stored record itself is never changed.
-  assertEquals(record.golden_vows, goldenVowsPlan());
+  assertEquals(directorIsStale(record, romantic()), true);
 });
 
 Deno.test("a Nightlife memory: one pick_neon_lines call, its picks kept (#454)", async () => {
@@ -899,7 +845,7 @@ Deno.test("Romantic + Nightlife plays Golden Vows; vibes decide, never the direc
   const both = directorTripData({
     trip: { ...directorTripData().trip, vibes: ["Nightlife", "Romantic"] },
   });
-  const anthropic = golden(goldenVowsPlan());
+  const anthropic = golden(gvPicksAnswer(both));
   const record = await runDirector(
     deps(anthropic.fetchImpl).deps,
     TRIP_ID,
@@ -907,7 +853,7 @@ Deno.test("Romantic + Nightlife plays Golden Vows; vibes decide, never the direc
     "en",
   );
   assertEquals(record.template, "golden_vows");
-  assertEquals(calledTools(anthropic), ["emit_golden_vows"]);
+  assertEquals(calledTools(anthropic), ["pick_golden_vows_lines"]);
 });
 
 Deno.test("Neon Night: a pick off its list takes code's top candidate (#454)", async () => {

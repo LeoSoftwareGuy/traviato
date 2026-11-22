@@ -2,148 +2,12 @@ import {
   assert,
   assertEquals,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import {
-  buildGoldenVowsContent,
-  chapterLayout,
-  describeGoldenVowsProblems,
-  type GoldenVowsPlan,
-  gvCheckContext,
-  isExcerptOf,
-  MAX_GV_HEART,
-  repairGoldenVows,
-} from "./golden_vows.ts";
-import {
-  DIRECTOR_PHOTO_IDS as IDS,
-  directorTripData,
-  goldenVowsPlan,
-} from "./director_fixtures.ts";
-import type { TripData } from "./gather.ts";
-import { useFilmLengthRuleForTests } from "./film_length.ts";
-
-// These tests are about other rules: every film at its longest (#434).
-useFilmLengthRuleForTests(false);
-
-function problemsOf(
-  edit: (plan: GoldenVowsPlan) => void,
-  data: TripData = directorTripData(),
-): string[] {
-  const plan = goldenVowsPlan();
-  edit(plan);
-  return describeGoldenVowsProblems(plan, gvCheckContext(data));
-}
-
-Deno.test("a valid section has no problems", () => {
-  assertEquals(problemsOf(() => {}), []);
-  // A null carousel is fine too.
-  assertEquals(problemsOf((p) => p.carousel = null), []);
-});
-
-Deno.test("each broken rule is named", () => {
-  const cases: [string, (p: GoldenVowsPlan) => void][] = [
-    [
-      "golden_vows.occasion",
-      (p) => (p as { occasion: string }).occasion = "party",
-    ],
-    ["golden_vows.heroes: 1", (p) => p.heroes = p.heroes.slice(0, 1)],
-    [
-      'golden_vows.heroes[0].photo_id: "invented"',
-      (p) => p.heroes[0].photo_id = "invented",
-    ],
-    [
-      'golden_vows.chapters[0].photo_ids[0]: "p01" is used twice',
-      (p) => p.chapters[0].photo_ids[0] = IDS[1],
-    ],
-    [
-      "golden_vows.chapters[1].photo_ids: 2",
-      (p) => p.chapters[1].photo_ids.pop(),
-    ],
-    [
-      'golden_vows.chapters[1].photo_ids[0]: "p00" is out of chronological order',
-      (p) => [p.chapters[0], p.chapters[1]] = [p.chapters[1], p.chapters[0]],
-    ],
-    [
-      "golden_vows.heroes[1].label: 26 characters",
-      (p) => p.heroes[1].label = "The very first dance of us",
-    ],
-    [
-      'golden_vows.end_line: banned phrase "unforgettable"',
-      (p) => p.end_line = "An unforgettable day",
-    ],
-    [
-      "golden_vows.heroes[0].note_id: the note is not from the photo's day",
-      (p) => p.heroes[0].photo_id = IDS[11],
-    ],
-    [
-      "golden_vows.heroes[0].note_excerpt: must be copied exactly",
-      (p) => p.heroes[0].note_excerpt = "Bicycles everywhere",
-    ],
-    [
-      "golden_vows.heroes[1].note_excerpt: only with a note_id",
-      (p) => p.heroes[1].note_excerpt = "Bikes",
-    ],
-    [
-      "golden_vows.chapters: 5",
-      (p) => {
-        p.chapters = Array.from({ length: 5 }, () => p.chapters[0]);
-      },
-    ],
-  ];
-  for (const [expected, edit] of cases) {
-    const problems = problemsOf(edit);
-    assert(
-      problems.some((line) => line.startsWith(expected)),
-      `${expected} — got ${JSON.stringify(problems)}`,
-    );
-  }
-});
-
-Deno.test("a left-out photo can't be used", () => {
-  const data = directorTripData();
-  data.photos[1].use_in_wrap_up = false;
-  assert(
-    problemsOf(() => {}, data).some((p) =>
-      p === 'golden_vows.heroes[0].photo_id: "p01" was left out by the user'
-    ),
-  );
-});
-
-Deno.test("an excerpt is the note's words, spacing aside", () => {
-  assert(isExcerptOf("Bikes  everywhere", "Bikes everywhere."));
-  assert(isExcerptOf("everywhere.", "Bikes\neverywhere."));
-  assertEquals(isExcerptOf("bikes everywhere", "Bikes everywhere."), false);
-  assertEquals(isExcerptOf("  ", "Bikes everywhere."), false);
-});
-
-Deno.test("repair: quotes and ellipses go, order is restored, bad notes drop", () => {
-  const context = gvCheckContext(directorTripData());
-  const plan = goldenVowsPlan() as unknown as Record<string, unknown>;
-  const p = plan as unknown as GoldenVowsPlan;
-  p.occasion_line = '"Our Wedding Day"';
-  p.heroes[0].note_excerpt = "“…Bikes everywhere”";
-  p.heroes[1].note_id = "n2";
-  p.heroes[1].note_excerpt = "Rain, then waffles";
-  p.chapters[0].photo_ids = [IDS[3], IDS[0], IDS[2]];
-  p.chapters = [p.chapters[2], p.chapters[0], p.chapters[1]];
-  p.heroes = [...p.heroes, ...Array(6).fill(p.heroes[1])];
-  delete plan.carousel;
-
-  const repaired = repairGoldenVows(plan, context) as GoldenVowsPlan;
-
-  assertEquals(repaired.occasion_line, "Our Wedding Day");
-  assertEquals(repaired.heroes.length, 6);
-  assertEquals(repaired.heroes[0].note_excerpt, "Bikes everywhere");
-  assertEquals(repaired.heroes[1].note_id, null);
-  assertEquals(repaired.heroes[1].note_excerpt, null);
-  assertEquals(repaired.chapters.map((c) => c.title), [
-    "Getting ready",
-    "The ceremony",
-    "Just married",
-  ]);
-  assertEquals(repaired.chapters[0].photo_ids, [IDS[0], IDS[2], IDS[3]]);
-  assertEquals(repaired.carousel, null);
-  // The original is untouched.
-  assertEquals(p.occasion_line, '"Our Wedding Day"');
-});
+import { chapterLayout, MAX_GV_HEART, packingOf } from "./golden_vows.ts";
+import { goldenVowsFilm, gvShortestSeconds } from "./gv_film.ts";
+import { directorTripData } from "./director_fixtures.ts";
+import { gvHeroScores, gvMemory } from "./gv_fixtures.ts";
+import { scopedId } from "./film_slots.ts";
+import { WRAP_UP_LIMITS } from "./wrap_up_limits.ts";
 
 Deno.test("chapter layouts follow the photos' shapes", () => {
   const shapes = (s: string[]) =>
@@ -168,43 +32,78 @@ Deno.test("chapter layouts follow the photos' shapes", () => {
   );
 });
 
-Deno.test("content: the memory's facts, the user's words, code-picked photos", () => {
-  const data = directorTripData({
+Deno.test("content: the memory's facts, the user's words, code's album", () => {
+  const data = gvMemory();
+  const { content } = goldenVowsFilm(data, null, {
+    heroScores: gvHeroScores(),
+  });
+  assertEquals(content.gv_version, 1);
+  assertEquals(content.occasion, "romance");
+  assertEquals(content.names, "Париж вдвоём");
+  assertEquals(content.place, "Париж");
+  assertEquals(content.day_count, 2);
+  // A captioned page plays its caption and no time; the others a line of
+  // their own notes with their time.
+  assertEquals(
+    content.heroes.map((h) => [h.photo_id, h.note, h.taken_at !== null]),
+    [
+      ["g04", "Утро в Париже, кофе и круассаны у окна.", true],
+      ["g07", "Эйфелева башня", false],
+      [
+        "g16",
+        "Последний закат над Сеной, пообещали вернуться сюда через год.",
+        true,
+      ],
+    ],
+  );
+  assertEquals(content.chapters.map((c) => [c.title, c.line]), [
+    ["Наш первый круассан", "Глава первая · Утро"],
+    ["Ужин на Монмартре", "Глава вторая · Вечер"],
+    ["Последний закат", "Глава третья · Утро"],
+  ]);
+  assertEquals(content.chapters.map((c) => c.photo_ids.length), [3, 3, 3]);
+  // 20 photos: past its target even at its quickest, so no carousel.
+  assertEquals(content.carousel, null);
+  assertEquals(content.heart_photo_ids.length, 20);
+  assertEquals(content.moment_count, 20);
+  assert(content.occasion_line && content.end_line);
+});
+
+Deno.test("the director's picks play when they hold", () => {
+  const data = gvMemory();
+  const cut = goldenVowsFilm(data, null, { heroScores: gvHeroScores() });
+  const finale = cut.slots.find((s) => s.slot === "finale")!;
+  // Its last candidate: words nothing else shows.
+  const pick = finale.candidates[finale.candidates.length - 1];
+  const film = goldenVowsFilm(data, {
+    finale: { ids: [scopedId("finale", pick.id)] },
+    "ch1.title": { ids: [], free_title: "Утро у Сены" },
+    "ch2.title": { ids: ["invented"] },
+  }, { heroScores: gvHeroScores() });
+  assertEquals(film.content.end_line, pick.text);
+  assertEquals(film.content.chapters[0].title, "Утро у Сены");
+  // Not in its list: code's top candidate, and the inspector says why.
+  assertEquals(film.content.chapters[1].title, "Ужин на Монмартре");
+  const r = film.report.find((x) => x.slot === "ch2.title")!;
+  assertEquals(r.source, "code");
+  assert(r.reason.includes("not in this slot's list"), r.reason);
+});
+
+Deno.test("photos shown on pages, and the heart holds them all", () => {
+  const film = goldenVowsFilm(gvMemory(), null, { heroScores: gvHeroScores() });
+  // 3 main pages and 3 chapters of 3; no carousel for its target.
+  assertEquals(film.shown, { pages: 12, photos: 20 });
+});
+
+Deno.test("packing: checked items first, else planned quests, else none", () => {
+  const checklist = directorTripData({
     checklist: [
       { title: "Rings", suggestion_code: null, is_checked: true },
       { title: "Passport", suggestion_code: "passport", is_checked: true },
       { title: "Umbrella", suggestion_code: null, is_checked: false },
     ],
   });
-  data.photos[9].caption = "  Barefoot by the last song ";
-  const content = buildGoldenVowsContent(data, goldenVowsPlan(), {
-    p00: "landscape",
-    p02: "portrait",
-    p03: "portrait",
-  });
-
-  assertEquals(content.names, "Amsterdam");
-  assertEquals(content.place, "Netherlands");
-  assertEquals(content.day_count, 3);
-  assertEquals(content.start_date, "2026-09-01");
-  assertEquals(content.occasion_line, "Our Wedding Day");
-  assertEquals(content.heroes, [
-    {
-      photo_id: "p01",
-      label: "The vows",
-      taken_at: "2026-09-01T11:00:00Z",
-      note: "Bikes everywhere",
-    },
-    {
-      // A caption is the photo's note, whatever the director chose.
-      photo_id: "p09",
-      label: "First dance",
-      taken_at: "2026-09-03T11:00:00Z",
-      note: "Barefoot by the last song",
-    },
-  ]);
-  assertEquals(content.chapters.map((c) => c.layout), ["A", "B", "C"]);
-  assertEquals(content.packing, {
+  assertEquals(packingOf(checklist), {
     source: "checklist",
     items: [
       { text: "Rings", suggestion_code: null },
@@ -213,14 +112,6 @@ Deno.test("content: the memory's facts, the user's words, code-picked photos", (
     checked: 2,
     total: 3,
   });
-  // 3 photos left: no carousel page.
-  assertEquals(content.carousel, null);
-  assertEquals(content.heart_photo_ids, IDS);
-  assertEquals(content.moment_count, 12);
-});
-
-Deno.test("packing: checked items first, else planned quests, else none", () => {
-  const plan = goldenVowsPlan();
   const quests = directorTripData({
     checklist: [{ title: "Rings", suggestion_code: null, is_checked: false }],
     quests: Array.from({ length: 7 }, (_, i) => ({
@@ -229,7 +120,7 @@ Deno.test("packing: checked items first, else planned quests, else none", () => 
       completed_at: null,
     })),
   });
-  const fromQuests = buildGoldenVowsContent(quests, plan).packing!;
+  const fromQuests = packingOf(quests)!;
   assertEquals(fromQuests.source, "quests");
   assertEquals(fromQuests.items.map((i) => i.text), [
     "Quest 0",
@@ -238,29 +129,10 @@ Deno.test("packing: checked items first, else planned quests, else none", () => 
     "Quest 3",
     "Quest 4",
   ]);
-  assertEquals(fromQuests.checked, null);
-  assertEquals(fromQuests.total, null);
-
-  assertEquals(buildGoldenVowsContent(directorTripData(), plan).packing, null);
+  assertEquals(packingOf(directorTripData()), null);
 });
 
-Deno.test("the carousel: photos used nowhere else, Always first, 6 or more", () => {
-  const data = directorTripData();
-  data.photos[11].use_in_wrap_up = true;
-  const plan = goldenVowsPlan();
-  plan.chapters = plan.chapters.slice(0, 1);
-  const content = buildGoldenVowsContent(data, plan);
-  // 2 heroes + 3 chapter photos used: 7 left, all on the carousel.
-  assertEquals(content.carousel, {
-    title: "And the night went on",
-    line: "Chapter four",
-    photo_ids: ["p04", "p05", "p06", "p07", "p08", "p10", "p11"],
-  });
-  plan.carousel = null;
-  assertEquals(buildGoldenVowsContent(data, plan).carousel, null);
-});
-
-Deno.test("the heart: every photo shown, spread to 200; left-out ones never", () => {
+Deno.test("the heart: every photo, spread to 200; left-out ones never", () => {
   const data = directorTripData();
   data.photos = Array.from({ length: 230 }, (_, i) => ({
     ...data.photos[i % 12],
@@ -271,62 +143,114 @@ Deno.test("the heart: every photo shown, spread to 200; left-out ones never", ()
     day_date: "2026-09-01",
   }));
   data.photos[5].use_in_wrap_up = false;
-  const plan = goldenVowsPlan(data.photos.map((p) => p.id).slice(12));
-  const content = buildGoldenVowsContent(data, plan);
+  const { content } = goldenVowsFilm(data, null);
   assertEquals(content.heart_photo_ids.length, MAX_GV_HEART);
   assertEquals(content.heart_photo_ids.includes("h005"), false);
   assertEquals(content.moment_count, 229);
 });
 
-// --- Always picks get their own moment (#378) -----------------------------
-
-Deno.test("Always picks without a slot are no problem: the heart shows them (#433)", () => {
-  // p11 is used nowhere, and only 1 photo is left: no carousel page.
-  const data = directorTripData();
-  data.photos[11].use_in_wrap_up = true;
-  assertEquals(problemsOf(() => {}, data), []);
-  const content = buildGoldenVowsContent(data, goldenVowsPlan());
-  assertEquals(content.heart_photo_ids.includes("p11"), true);
-
-  // Past the carousel's 12, too.
-  const many = directorTripData();
-  many.photos = Array.from({ length: 40 }, (_, i) => ({
-    ...many.photos[i % 12],
-    id: `a${String(i).padStart(2, "0")}`,
-    taken_at: `2026-09-01T10:${String(i).padStart(2, "0")}:00Z`,
-    day_date: "2026-09-01",
-    use_in_wrap_up: i >= 12 && i < 26 ? true : null, // 14 Always, unused
+// Long notes on many pages: past the longest film even at its quickest.
+function longMemory() {
+  const data = gvMemory();
+  data.photos = Array.from({ length: 48 }, (_, i) => {
+    const day = 12 + Math.floor(i / 12);
+    const at = `2026-06-${day}T${String(8 + (i % 12)).padStart(2, "0")}:00`;
+    return {
+      ...data.photos[0],
+      id: `L${String(i).padStart(2, "0")}`,
+      day_date: at.slice(0, 10),
+      taken_at: new Date(Date.parse(`${at}:00+02:00`)).toISOString(),
+      created_at: new Date(Date.parse(`${at}:00+02:00`)).toISOString(),
+      caption: null,
+      use_in_wrap_up: null,
+    };
+  });
+  data.photos[0].caption = "Наш первый круассан у окна";
+  data.trip.end_date = "2026-06-15";
+  // Sentences of about 85 characters: each fits a page whole.
+  data.notes = data.photos.filter((_, i) => i % 6 === 3).map((p, k) => ({
+    id: `ln${k}`,
+    day_date: p.day_date!,
+    taken_at: p.taken_at,
+    created_at: p.taken_at,
+    photo_id: p.id,
+    content:
+      `Мы гуляли вдоль Сены до вечера, держались за руки и смеялись, день ${
+        k + 1
+      } был лучшим. Потом нашли маленькое кафе у моста и пили кофе с круассанами до темноты.`,
   }));
-  const plan = goldenVowsPlan(many.photos.map((p) => p.id));
-  assertEquals(describeGoldenVowsProblems(plan, gvCheckContext(many)), []);
+  data.checklist = [{
+    title: "Кольца",
+    suggestion_code: null,
+    is_checked: true,
+  }];
+  return data;
+}
+
+Deno.test("length: notes give way first, then the carousel, packing, pages", () => {
+  const data = longMemory();
+  const film = goldenVowsFilm(data, null);
+  const limit = WRAP_UP_LIMITS.longestFilmSeconds;
+  assert(gvShortestSeconds(film.content) <= limit, `${film.trims}`);
+  // The order: every note trim before the carousel, the carousel before
+  // the packing card, both before any page.
+  const at = (p: (t: string) => boolean) => film.trims.findIndex(p);
+  const lastNote = film.trims.findLastIndex((t) => t.includes("note"));
+  const carousel = at((t) => t === "no carousel");
+  const packing = at((t) => t === "no packing card");
+  const page = at((t) => t.endsWith("left out"));
+  if (carousel >= 0) assert(lastNote < carousel, `${film.trims}`);
+  if (packing >= 0) assert(carousel < packing, `${film.trims}`);
+  if (page >= 0) assert(packing < page, `${film.trims}`);
+  assert(film.trims.length > 0);
 });
 
-Deno.test("an Always pick whose analysis failed isn't required", () => {
-  const data = directorTripData();
-  data.photos[11].use_in_wrap_up = true;
-  assertEquals(
-    describeGoldenVowsProblems(
-      goldenVowsPlan(),
-      gvCheckContext(data, new Set(["p11"])),
-    ),
-    [],
-  );
+Deno.test("length: never a chapter, the title page, the heart or a caption", () => {
+  const data = longMemory();
+  const full = goldenVowsFilm(data, null);
+  assertEquals(full.content.chapters.length, full.skeleton.chapters.length);
+  assertEquals(full.content.heart_photo_ids.length, 48);
+  assert(full.content.occasion_line);
+  const captioned = full.content.heroes.find((h) => h.photo_id === "L00");
+  if (full.skeleton.mains.some((m) => m.photo_id === "L00")) {
+    assertEquals(captioned?.note, "Наш первый круассан у окна");
+  }
+  assert(full.content.heroes.length >= 2);
 });
 
-Deno.test("the heart holds every film photo, shown ones too (#434)", () => {
-  const data = directorTripData();
-  data.photos = Array.from({ length: 40 }, (_, i) => ({
-    ...data.photos[i % 12],
-    id: `h${String(i).padStart(2, "0")}`,
-    taken_at: `2026-09-01T10:${String(i).padStart(2, "0")}:00Z`,
-    day_date: "2026-09-01",
-    use_in_wrap_up: i < 3 ? true : i === 39 ? false : null,
-  }));
-  const content = buildGoldenVowsContent(
-    data,
-    goldenVowsPlan(data.photos.map((p) => p.id)),
+Deno.test("length: a shorter clause is never words already shown", () => {
+  const notes = goldenVowsFilm(longMemory(), null).content.heroes
+    .flatMap((h) => h.note ? [h.note.toLowerCase()] : []);
+  assertEquals(new Set(notes).size, notes.length);
+});
+
+Deno.test("a short album aims at its target: no carousel, then no packing (#458)", () => {
+  // 20 photos: a target of about 39 s, past it even at its quickest.
+  const data = gvMemory();
+  data.checklist = [{
+    title: "Кольца",
+    suggestion_code: null,
+    is_checked: true,
+  }];
+  const film = goldenVowsFilm(data, null, { heroScores: gvHeroScores() });
+  const { content } = film;
+  assertEquals(content.carousel, null);
+  assertEquals(content.packing, null);
+  assertEquals(film.trims, [
+    "no carousel (for the target)",
+    "no packing card (for the target)",
+  ]);
+  // Never a chapter, a note, a caption or the heart.
+  assertEquals(content.chapters.length, film.skeleton.chapters.length);
+  assertEquals(content.heroes.length, film.skeleton.mains.length);
+  assert(content.heroes.every((h) => h.note));
+  assertEquals(content.heart_photo_ids.length, 20);
+});
+
+Deno.test("a long album keeps its carousel while it fits 75 s (#458)", () => {
+  const film = goldenVowsFilm(longMemory(), null);
+  assert(
+    !film.trims.some((t) => t.includes("for the target")),
+    `${film.trims}`,
   );
-  assertEquals(content.heart_photo_ids.length, 39);
-  assertEquals(content.heart_photo_ids.includes("h00"), true);
-  assertEquals(content.heart_photo_ids.includes("h39"), false);
 });

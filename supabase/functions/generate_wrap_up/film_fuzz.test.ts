@@ -13,13 +13,10 @@ import { neonNightFilm } from "./neon_film.ts";
 import { parseNeonPicks } from "./neon_slots.ts";
 import { MAX_NN_TITLE_CHARS, sameLine } from "./neon_night.ts";
 import { isDrugReference } from "./excerpts.ts";
-import {
-  buildGoldenVowsContent,
-  codeGoldenVows,
-  describeGoldenVowsProblems,
-  ensureGoldenVows,
-  gvCheckContext,
-} from "./golden_vows.ts";
+import { MAX_GV_TITLE_CHARS, MIN_GV_HEROES } from "./golden_vows.ts";
+import { goldenVowsFilm, gvShortestSeconds } from "./gv_film.ts";
+import { parsePicks } from "./film_slots.ts";
+import { WRAP_UP_LIMITS } from "./wrap_up_limits.ts";
 import { BANNED_PHRASES } from "./film_plan.ts";
 
 // A small seeded PRNG (mulberry32), so a failure can be replayed.
@@ -265,34 +262,72 @@ Deno.test(`Neon Night: ${RUNS} random memories and broken picks all play (#454)`
   }
 });
 
-Deno.test(`Golden Vows: ${RUNS} random memories and broken plans all play (#433)`, () => {
+Deno.test(`Golden Vows: ${RUNS} random memories and broken picks all play (#458)`, () => {
   for (let seed = 1; seed <= RUNS; seed++) {
     const r = rng(seed * 7919);
     const trip = withFilmPhotos(randomTrip(r));
-    const context = gvCheckContext(trip);
-    const ids = [...context.photoOrder.keys()];
-    if (ids.length < 5) continue;
-    const base = codeGoldenVows(context, "en");
-    assertEquals(
-      describeGoldenVowsProblems(base, context),
-      [],
-      `seed ${seed}: code plan`,
-    );
-    const raw = r() < 0.15 ? junk(r) : mutate(r, base, ids);
-    const ensured = ensureGoldenVows(
-      raw,
-      context,
-      pick(r, ["en", "ru"] as const),
-    );
-    assertEquals(
-      describeGoldenVowsProblems(ensured.plan, context),
-      [],
-      `seed ${seed}: ${ensured.source}`,
-    );
+    if (trip.photos.filter((p) => p.use_in_wrap_up !== false).length < 5) {
+      continue;
+    }
+    const cut = goldenVowsFilm(trip, null);
+    const picks = parsePicks(randomPicks(r, cut.slots));
+    const { content, report, skeleton } = goldenVowsFilm(trip, picks, {
+      language: pick(r, ["en", "ru"] as const),
+    });
+    // Never a chapter lost, every chapter titled; at least 2 main pages
+    // when there are photos for them.
+    assertEquals(content.chapters.length, skeleton.chapters.length);
+    for (const c of content.chapters) {
+      assert(c.title.length > 0, `seed ${seed}: untitled`);
+      assert([...c.title].length <= MAX_GV_TITLE_CHARS, `seed ${seed}`);
+    }
     assert(
-      !ensured.repairs.some((x) => x.includes("repair failed")),
-      `seed ${seed}: ${ensured.repairs.join("; ")}`,
+      content.heroes.length >= Math.min(MIN_GV_HEROES, skeleton.mains.length),
+      `seed ${seed}: ${content.heroes.length} main pages`,
     );
-    buildGoldenVowsContent(trip, ensured.plan);
+    // A captioned main page shows its caption as written, no time.
+    const byId = new Map(trip.photos.map((p) => [p.id, p]));
+    for (const h of content.heroes) {
+      const caption = byId.get(h.photo_id)?.caption?.trim();
+      if (caption) {
+        assertEquals(h.note, caption, `seed ${seed}`);
+        assertEquals(h.taken_at, null, `seed ${seed}`);
+      }
+    }
+    // Every pick from its own list (or checked words of the director's).
+    for (const x of report) {
+      for (const c of x.chosen) {
+        if (c.id === "day" || c.id === "free") continue;
+        assert(
+          x.candidates.some((k) => k.id === c.id),
+          `seed ${seed}: ${x.slot} ${c.id}`,
+        );
+      }
+    }
+    // No words twice, nothing about drugs.
+    const shown = [
+      content.occasion_line,
+      content.end_line,
+      content.carousel?.title,
+      ...content.heroes.flatMap((h) => [h.label, h.note]),
+      ...content.chapters.map((c) => c.title),
+    ].filter((t): t is string => !!t);
+    for (let i = 0; i < shown.length; i++) {
+      assertEquals(isDrugReference(shown[i]), false, `seed ${seed}`);
+      for (let j = i + 1; j < shown.length; j++) {
+        assertEquals(
+          sameLine(shown[i], shown[j]),
+          false,
+          `seed ${seed}: ${shown[i]} / ${shown[j]}`,
+        );
+      }
+    }
+    // Within the longest film, unless every trim is spent.
+    assert(
+      gvShortestSeconds(content) <=
+          WRAP_UP_LIMITS.longestFilmSeconds ||
+        content.heroes.length <= MIN_GV_HEROES,
+      `seed ${seed}: ${gvShortestSeconds(content)}`,
+    );
   }
 });

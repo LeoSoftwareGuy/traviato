@@ -4,8 +4,8 @@ import {
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { bestLines } from "./excerpts.ts";
 import { buildSkyContent, codeSkyPages } from "./sky_story.ts";
-import { buildGoldenVowsContent } from "./golden_vows.ts";
-import { directorTripData, goldenVowsPlan } from "./director_fixtures.ts";
+import { goldenVowsFilm } from "./gv_film.ts";
+import { directorTripData } from "./director_fixtures.ts";
 import type { TripData } from "./gather.ts";
 
 // Sky Story and Golden Vows use the chosen lines (#419).
@@ -55,7 +55,7 @@ Deno.test("Sky Story: a note page carries its days' best lines", () => {
   assert(codeSkyPages(data).every((p) => p.excerpts.length === 0));
 });
 
-Deno.test("Golden Vows: a hero without words gets its day's best line", () => {
+Deno.test("Golden Vows: a main page plays its day's best line", () => {
   const data = withNotes([
     { id: "n1", day_date: "2026-09-01", content: "Bikes everywhere." },
     {
@@ -65,9 +65,10 @@ Deno.test("Golden Vows: a hero without words gets its day's best line", () => {
       content: `It was fun. ${BIKES}`,
     },
   ]);
-  const gv = buildGoldenVowsContent(data, goldenVowsPlan());
-  // The director's excerpt stays; p09 (day 3, no caption) gets the bikes.
-  assertEquals(gv.heroes.map((h) => h.note), ["Bikes everywhere", BIKES]);
+  const gv = goldenVowsFilm(data, null).content;
+  // Day 3's page: the bikes, never the generic line.
+  assertEquals(gv.heroes.map((h) => h.note).at(-1), BIKES);
+  assert(!gv.heroes.some((h) => h.note === "It was fun."));
 });
 
 Deno.test("Golden Vows: a note on the photo first; a caption always wins", () => {
@@ -75,7 +76,7 @@ Deno.test("Golden Vows: a note on the photo first; a caption always wins", () =>
     {
       id: "n2",
       day_date: "2026-09-03",
-      taken_at: "2026-09-03T12:00:00Z",
+      taken_at: "2026-09-03T10:00:00Z",
       content: BIKES,
     },
     {
@@ -86,17 +87,15 @@ Deno.test("Golden Vows: a note on the photo first; a caption always wins", () =>
       content: `We went home. ${RIBS}`,
     },
   ]);
-  assertEquals(
-    buildGoldenVowsContent(data, goldenVowsPlan()).heroes[1].note,
-    RIBS,
-  );
+  const page = (d: TripData) =>
+    goldenVowsFilm(d, null).content.heroes.find((h) => h.photo_id === "p09");
+  // The photo with a note is the day's main page, with that note's line.
+  assertEquals(page(data)?.note, RIBS);
   data.photos = data.photos.map((p) =>
     p.id === "p09" ? { ...p, caption: "Our first dance" } : p
   );
-  assertEquals(
-    buildGoldenVowsContent(data, goldenVowsPlan()).heroes[1].note,
-    "Our first dance",
-  );
+  assertEquals(page(data)?.note, "Our first dance");
+  assertEquals(page(data)?.taken_at, null);
 });
 
 // --- #422 -------------------------------------------------------------------

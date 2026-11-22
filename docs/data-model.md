@@ -351,6 +351,28 @@ Post-MVP: `video_path`, `video_status`.
   photo. `film_lengths.json` regenerated; the ADE length test loads the
   film's fonts and compares the player's loop with NnFit's measure.
 
+- **Golden Vows: code cuts, the director picks** (#458, no schema
+  change; replaces #346's `emit_golden_vows` section and the repair /
+  heal / ensure code of #382–#433): `gv_skeleton.ts` cuts the album
+  (chapters by logical day and part, never dropped; main pages; prints;
+  carousel; the occasion with the word that set it), `gv_slots.ts` lists
+  candidates per slot (`occasion`, `mainK.label`, `mainK.note` — fixed to
+  a caption —, `chN.title`, `carousel.title`, `finale`), `gv_film.ts`
+  builds `content.golden_vows` (same shape) and trims it past 75 s; a
+  short album still past its `film_seconds` at its quickest also drops
+  its carousel, then its packing card (`gv_trims`: "… (for the
+  target)").
+  Shared with Neon in `film_slots.ts`: ids, lines, names, a note's scene,
+  picks, the chooser, day titles. One `pick_golden_vows_lines` call;
+  `director.golden_vows = {picks_version: 2, picks}` (older sections
+  aren't read), plus `gv_slots`, `gv_trims`, `gv_shown`, `gv_unlisted`
+  and `gv_trigger` (the inspector). On open the picks are re-applied by id
+  to the album cut from the memory now; a photo summary that set the
+  occasion comes back from `gv_trigger`. `DIRECTOR_VERSION` 6. In the app
+  `GvFit` holds the album to 75 s on its own timeline (carousel, packing,
+  main pages, then `chapterDwellScale`). `tools/record_gv_picks.ts`
+  records a real answer for an exported memory.
+
 - **Limits** (#432, no schema change): `generate_wrap_up/wrap_up_limits.json`
   (minPhotos 15, maxFilmPhotos 60, minNotes 1, maxNoteLines 12, maxVibes 3)
   is shared with the app's `WrapUpLimits` (a Dart test checks they agree).

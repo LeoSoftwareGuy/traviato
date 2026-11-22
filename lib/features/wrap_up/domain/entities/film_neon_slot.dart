@@ -1,8 +1,9 @@
 import 'package:equatable/equatable.dart';
 
-/// One slot of a Neon Night film as the director run left it (#454,
-/// `wrap_ups.director.neon_slots`): the candidates code listed, what the
-/// director picked, what plays and why. Debug-only, for the Plan inspector.
+/// One slot of a Neon Night (#454) or Golden Vows (#458) film as the
+/// director run left it (`wrap_ups.director.neon_slots` / `gv_slots`): the
+/// candidates code listed, what the director picked, what plays and why.
+/// Debug-only, for the Plan inspector.
 class FilmNeonSlot extends Equatable {
   const FilmNeonSlot({
     required this.slot,

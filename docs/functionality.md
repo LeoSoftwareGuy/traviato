@@ -433,6 +433,31 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   length — its line is shortened, then dropped, before that caption goes.
   A moment holds longer for the film's length by at most a bar a photo
   (a line still gets its reading time).
+- **Golden Vows: code cuts, the director picks (#458, as Neon's #454):**
+  code makes the album — one chapter per day (a long day in parts at its
+  2 h breaks), at most 4, never dropped (a day too small for 3 prints
+  joins its neighbour); 2–6 main pages (Always, then captioned photos,
+  then photos with a note on them, then the best shot; one a chapter);
+  3 prints a chapter; the carousel from the photos left; the heart holds
+  every photo. The occasion is a wedding, engagement, anniversary or date
+  night only when a note, caption or photo says so (the inspector shows
+  the word), else romance — wedding words only then. The director only
+  picks each place's words from code's lists (the title page, each main
+  page's label and note, chapter and carousel titles, the finale) and may
+  write a title of its own; anything else takes code's best. A captioned
+  main page shows its caption as written, with no time; else a line of a
+  note that belongs to that page. Chapter and carousel pages stay
+  prints. No words show twice. Length: past 75 s at its quickest the
+  album gives way in this order — a note's line to a shorter clause, then
+  no note; the carousel; the packing card; main pages down to 2; then
+  shorter chapter pages (never below their title's reading time). A
+  short album still past its target at its quickest gives up its
+  carousel, then its packing card (the heart still shows every photo);
+  a long one stays within 75 s. Never a chapter, a note, the title page,
+  the heart or a caption — so a short album may still run past its
+  target (a 15-photo one about 51 s against 30 s). The Plan inspector shows every slot, the word that made it a
+  wedding, "N / M photos shown", what was trimmed and the notes on no
+  page.
 - **The user's words (#399, display only; which words are chosen is #398,
   multi-excerpt note moments #416):** captions and notes are never cut
   with "…". A text that doesn't fit gets smaller type or more lines, then

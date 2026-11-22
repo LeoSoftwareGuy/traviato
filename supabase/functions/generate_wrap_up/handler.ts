@@ -63,7 +63,7 @@ import {
   isDirectorRecord,
 } from "./director.ts";
 import { alwaysWithoutPage, buildSkyContent } from "./sky_story.ts";
-import { buildGoldenVowsContent } from "./golden_vows.ts";
+import { type GoldenVowsFilm, goldenVowsFilm } from "./gv_film.ts";
 import { neonNightFilm } from "./neon_film.ts";
 
 // deno-lint-ignore no-explicit-any
@@ -522,21 +522,42 @@ function sectionContentFor(
   report: {
     source: "director" | "code";
     repairs: string[];
-    // Neon Night (#454): every slot, its candidates and what plays.
-    slots?: ReturnType<typeof neonNightFilm>["report"];
+    // Neon Night (#454), Golden Vows (#458): every slot, its candidates
+    // and what plays.
+    slots?:
+      | ReturnType<typeof neonNightFilm>["report"]
+      | GoldenVowsFilm["report"];
+    // Golden Vows (#458): what it gave up for its length, its photos on
+    // pages, notes on no page, the word that made it a wedding.
+    trims?: string[];
+    shown?: GoldenVowsFilm["shown"];
+    unlisted?: GoldenVowsFilm["unlisted"];
+    trigger?: GoldenVowsFilm["trigger"];
   } | null;
 } {
   if (played === "golden_vows") {
-    const ensured = currentGoldenVows(director, film, language);
+    // Code cuts the album; the director's stored picks choose its words
+    // (#458).
+    const current = currentGoldenVows(director);
+    const record = isDirectorRecord(director) ? director : null;
+    const gv = goldenVowsFilm(film, current.picks, {
+      heroScores: record?.hero_scores ?? {},
+      orientations: record?.orientations ?? {},
+      summaries: current.summaries,
+      language,
+    });
     return {
-      content: {
-        golden_vows: buildGoldenVowsContent(
-          film,
-          ensured.plan,
-          isDirectorRecord(director) ? director.orientations ?? {} : {},
-        ),
+      content: { golden_vows: gv.content },
+      report: {
+        source: current.source,
+        repairs: gv.report.filter((r) => r.pick && r.source === "code")
+          .map((r) => `${r.slot}: ${r.reason}`),
+        slots: gv.report,
+        trims: gv.trims,
+        shown: gv.shown,
+        unlisted: gv.unlisted,
+        trigger: gv.trigger,
       },
-      report: { source: ensured.source, repairs: ensured.repairs },
     };
   }
   if (played === "neon_night") {
