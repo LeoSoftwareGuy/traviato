@@ -5,9 +5,10 @@
 // A Neon film may run up to the longest film (#448: 75 s, a hard max);
 // past that the skeleton gives up, in order: words per moment (3 → 2), a
 // chapter's two moments as one (the last chapter first), the Plan scene,
-// card zooms (2 → 1), words per moment (2 → 1), then short card lines
-// where a chapter has one. Never a chapter, the Note scene or a chapter's
-// line — a card line is never cut for length. The app holds the
+// card zooms (2 → 1), words per moment (2 → 1), short card and moment
+// lines where a chapter has one, then moments without their note lines,
+// the last chapter's first (#456: a moment keeps its best caption). Never a chapter, the Note scene or a chapter's line — a
+// card line is never cut for length — nor a moment's last caption. The app holds the
 // film to 75 s on its own timeline as well (NnFit).
 
 import type { TripData } from "./gather.ts";
@@ -159,6 +160,13 @@ function cut(
     moments,
     dayTitle: dayTitleFor(tripData, chapters),
     shortCards: shape.shortCards,
+    quietMoments: new Set(
+      [...moments.keys()].reverse().slice(0, shape.quietMoments),
+    ),
+    // Always picks first, then the best shot (#456).
+    captionRank: (id) =>
+      (byId.get(id)?.use_in_wrap_up === true ? 100 : 0) +
+      (heroScores[id] ?? 0),
   });
   const text = (slot: string) => resolved.get(slot)?.chosen[0]?.text ?? null;
   const beats = nnFilmBeats(
@@ -195,6 +203,10 @@ function smaller(
   if (shape.cardZooms > 1) return { ...shape, cardZooms: 1 };
   if (shape.maxWords > 1) return { ...shape, maxWords: 1 };
   if (!shape.shortCards) return { ...shape, shortCards: true };
+  const moments = chapters.reduce((n, c) => n + c.moments.length, 0);
+  if (shape.quietMoments < moments) {
+    return { ...shape, quietMoments: shape.quietMoments + 1 };
+  }
   return null;
 }
 

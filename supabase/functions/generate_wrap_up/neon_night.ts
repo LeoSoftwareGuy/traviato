@@ -47,8 +47,10 @@ export const MAX_NN_MOMENT_SLOTS = MAX_NN_CHAPTERS * MAX_NN_MOMENTS * 8;
 // Lengths the film's type fits at its sizes.
 export const MAX_NN_TITLE_CHARS = 22;
 export const MAX_NN_HEADLINE_CHARS = 18;
-// A card's typed line wraps to at most 2 lines.
-export const MAX_NN_CARD_NOTE_CHARS = 60;
+// A card's typed line wraps to at most 2 lines (mono 40 over 936 px: ~39
+// a line, "> " included). 72 since #456, so a line of the card's own
+// photos ("Сидим в баре скоро принесут полтора метра ребер…", 63) fits.
+export const MAX_NN_CARD_NOTE_CHARS = 72;
 // The note scene: up to 5 lines of about 18 characters.
 export const MAX_NN_NOTE_CHARS = 90;
 

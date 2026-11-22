@@ -84,6 +84,9 @@ export interface NnShape {
   // that line is as good as its own (#450: never "едем в аэропорт" for
   // "Брюссель не меняется…") — a card never loses its line.
   shortCards: boolean;
+  // Past that (#456): how many moments, the last chapter's first, show
+  // no note line — only their best caption, if they have one.
+  quietMoments: number;
 }
 
 export const MIN_NN_SHORT_CARD_CHARS = 30;
@@ -92,16 +95,9 @@ export const MIN_NN_SHORT_CARD_CHARS = 30;
 // a line, below the most specific ones.
 const HIGHLIGHT_SCORE = 6;
 
-// How much a card line gains from matching the card's photos (#454): its
-// note on a card photo; else by the share of the card's photos taken
-// within CARD_NEAR_MINUTES of the note (a card of the airport and the
-// landing: the airport note matches 3 of 4); else written close to the
-// card's time (less per hour away).
-const CARD_ON_PHOTO_BONUS = 40;
-const CARD_SHARE_BONUS = 30;
+// A note belongs to the scene whose photos it was written among (#456):
+// the share of the scene's photos taken within this many minutes of it.
 const CARD_NEAR_MINUTES = 90;
-const CARD_NEAR_BONUS = 10;
-const CARD_NEAR_BONUS_PER_HOUR = 2.5;
 
 export function fullShape(showsPlan: boolean): NnShape {
   return {
@@ -110,6 +106,7 @@ export function fullShape(showsPlan: boolean): NnShape {
     showsPlan,
     merged: 0,
     shortCards: false,
+    quietMoments: 0,
   };
 }
 
@@ -848,46 +845,63 @@ export function buildNeonSlots(
     // A generic line only when the chapter has nothing else.
     const other = lines.some((l) => l.tier !== "generic");
     const usable = lines.filter((l) => !other || l.tier !== "generic");
-    // Where a line plays: its note's photo, else the chapter's photo
-    // nearest the note in time.
-    const anchor = (n: Note): Photo | null =>
-      chapter.photos.find((p) => p.id === n.photo_id) ??
-        nearestPhoto(chapter.photos, noteTime(n));
-
-    // The card line: a sentence or piece short enough for a card, ranked
-    // by how well it matches the card's photos too (#454: "Прибыл в
-    // аэропорт…" over the airport photos, not "Приземлились в Амстердаме").
-    const cardPhotos = chapter.photos.filter((p) =>
-      chapter.card.includes(p.id)
-    );
-    const cardTimes = cardPhotos.map(timeOf).filter((t) => t > 0);
-    const cardMatch = (n: Note): number => {
-      if (n.photo_id && chapter.card.includes(n.photo_id)) {
-        return CARD_ON_PHOTO_BONUS;
-      }
+    // Which scene each note belongs to (#456, a hard filter): its photo's
+    // scene, else the one whose photos it was written among — the largest
+    // share of the scene's photos within CARD_NEAR_MINUTES of it, then
+    // the nearest photo; the card on a tie or without a time. A scene
+    // lists only its own notes' lines, so "Приземлились в Амстердаме…"
+    // (12:00) plays over the Amsterdam photos (12:19–14:33), never over
+    // the airport card (08:40–12:10). A scene left without one shows none.
+    const scenes = [
+      chapter.photos.filter((p) => chapter.card.includes(p.id)),
+      ...chapter.moments.map((m) =>
+        chapter.photos.filter((p) => m.photo_ids.includes(p.id))
+      ),
+    ];
+    const sceneOf = (n: Note): number => {
+      const own = scenes.findIndex((ps) => ps.some((p) => p.id === n.photo_id));
+      if (own >= 0) return own - 1;
       const t = noteTime(n);
-      if (Number.isNaN(t) || cardTimes.length === 0) return 0;
-      const near = cardTimes.filter((x) =>
-        Math.abs(x - t) <= CARD_NEAR_MINUTES * 60_000
-      ).length;
-      if (near > 0) return CARD_SHARE_BONUS * near / cardTimes.length;
-      const from = Math.min(...cardTimes);
-      const to = Math.max(...cardTimes);
-      const hours = (t < from ? from - t : t > to ? t - to : 0) / 3_600_000;
-      return Math.max(0, CARD_NEAR_BONUS - CARD_NEAR_BONUS_PER_HOUR * hours);
+      if (Number.isNaN(t)) return -1;
+      let best = 0;
+      let bestShare = -1;
+      let bestNear = Infinity;
+      scenes.forEach((ps, k) => {
+        const times = ps.map(timeOf).filter((x) => x > 0);
+        if (times.length === 0) return;
+        const share = times.filter((x) =>
+          Math.abs(x - t) <= CARD_NEAR_MINUTES * 60_000
+        ).length / times.length;
+        const near = Math.min(...times.map((x) => Math.abs(x - t)));
+        if (share > bestShare || (share === bestShare && near < bestNear)) {
+          best = k;
+          bestShare = share;
+          bestNear = near;
+        }
+      });
+      return best - 1;
     };
+    const sceneNotes = new Map(own.map((n) => [n.id!, sceneOf(n)]));
+
+    // The card line: a sentence or piece short enough for a card, of the
+    // card's own notes.
+    const cardNotes = own.filter((n) => sceneNotes.get(n.id!) === -1);
     const cardOf = (l: Line): NnCandidate => ({
       id: noteLineId(l.note.id!, l.text),
       text: l.text,
       note_id: l.note.id!,
-      photo_id: anchor(l.note)?.id ?? null,
-      score: Math.round(l.score + TIER_BONUS[l.tier] + cardMatch(l.note)),
+      photo_id: chapter.card.includes(l.note.photo_id ?? "")
+        ? l.note.photo_id!
+        : nearestPhoto(scenes[0], noteTime(l.note))?.id ?? null,
+      score: Math.round(l.score + TIER_BONUS[l.tier]),
     });
     const fitsCard = (l: Line) => [...l.text].length <= MAX_NN_CARD_NOTE_CHARS;
-    const card = usable.filter(fitsCard).map(cardOf);
-    // Every note of the chapter on its card's list (#454): its best line
-    // that fits — a generic one only when it has nothing else.
-    const kept = own.flatMap((n) => {
+    const card = usable.filter((l) =>
+      sceneNotes.get(l.note.id!) === -1 && fitsCard(l)
+    ).map(cardOf);
+    // Every note of the card on its list (#454): its best line that fits
+    // — a generic one only when it has nothing else.
+    const kept = cardNotes.flatMap((n) => {
       const fit = lines.filter((l) => l.note === n && fitsCard(l))
         .map(cardOf).sort((a, b) => b.score - a.score);
       return fit.length > 0 ? [fit[0]] : [];
@@ -901,25 +915,17 @@ export function buildNeonSlots(
       candidates: top(card, kept),
     });
 
-    // Each moment's words: the lines that play over its photos — their
-    // note's photo in it, else (the note's photo on the card or none) the
-    // moment photo nearest in time — and its photos' captions.
-    const momentPhotos = chapter.moments.map((m) =>
-      chapter.photos.filter((p) => m.photo_ids.includes(p.id))
-    );
+    // Each moment's words: its own notes' lines, each over its note's
+    // photo, else the moment photo nearest in time — and its photos'
+    // captions.
+    const momentPhotos = scenes.slice(1);
     const words: NnCandidate[][] = chapter.moments.map(() => []);
     for (const l of usable) {
-      const at = anchor(l.note);
-      if (!at) continue;
-      let j = chapter.moments.findIndex((m) => m.photo_ids.includes(at.id));
-      let photo: Photo | null = at;
-      if (j < 0) {
-        photo = nearestPhoto(momentPhotos.flat(), timeOf(at));
-        j = photo
-          ? chapter.moments.findIndex((m) => m.photo_ids.includes(photo!.id))
-          : -1;
-      }
-      if (j < 0 || !photo) continue;
+      const j = sceneNotes.get(l.note.id!) ?? -1;
+      if (j < 0) continue;
+      const photo = momentPhotos[j].find((p) => p.id === l.note.photo_id) ??
+        nearestPhoto(momentPhotos[j], noteTime(l.note));
+      if (!photo) continue;
       if ([...l.text].length > MAX_EXCERPT_CHARS) continue;
       const m = chapter.moments[j];
       const beats = nnMomentBeats({
@@ -1172,8 +1178,14 @@ export interface ResolveOptions {
   moments: ReadonlyMap<string, ContentMoment>;
   // A chapter's title when nothing fits: "Day N" in the user's language.
   dayTitle: (chapter: number) => string;
-  // A film still over its length: short card lines as good as the pick.
+  // A film still over its length: short card lines as good as the pick,
+  // and a moment's line gives way to a shorter one of its note.
   shortCards?: boolean;
+  // Still over (#456): the moments (slot names) that show no note line.
+  quietMoments?: ReadonlySet<string>;
+  // How good a photo's caption is to keep (#456): Always picks, then the
+  // hero score. Higher is better.
+  captionRank?: (photoId: string) => number;
 }
 
 // Each slot's words (#454 step 4): the director's picks that are in the
@@ -1312,6 +1324,76 @@ export function resolveNeonSlots(
         shortened = true;
       }
     }
+    // A moment with captioned photos shows one of them (#456: the best —
+    // Always, then hero score), on top of its words; its line gives way
+    // to a shorter line of its note, else goes, before the caption does.
+    let captioned = false;
+    if (moment && options.quietMoments?.has(slot.slot)) {
+      // For the film's length: no note line here (#456).
+      const kept = chosen.filter((c) => c.id.startsWith("c:"));
+      chosen.splice(0, chosen.length, ...kept);
+    }
+    if (moment) {
+      const isCaption = (c: { id: string }) => c.id.startsWith("c:");
+      const rank = (c: NnCandidate) =>
+        options.captionRank?.(c.photo_id ?? "") ?? c.score;
+      const lineOnly = chosen.filter((c) => !isCaption(c));
+      const best = chosen.some(isCaption) ? null : slot.candidates
+        .filter(isCaption)
+        .sort((a, b) => rank(b) - rank(a))
+        .find((c) =>
+          free(c.text) &&
+          !lineOnly.some((x) =>
+            x.photo_id === c.photo_id || overlaps(x.text, c.text)
+          )
+        );
+      const readable = (ws: { text: string }[]) =>
+        nnMomentBeats({
+          type: moment.type,
+          photos: moment.photo_ids.length,
+          lines: ws.map((w) => w.text),
+        }) <= nnBeatsFor(MAX_NN_SCENE_SECONDS);
+      const shorter = (line: NnChosen, cap: number) =>
+        slot.candidates.filter((c) =>
+          !isCaption(c) && c.note_id === line.note_id && c.id !== line.id &&
+          [...c.text].length < Math.min([...line.text].length, cap + 1) &&
+          (!best ||
+            (c.photo_id !== best.photo_id && !overlaps(c.text, best.text))) &&
+          !chosen.some((x) => x.id !== line.id && overlaps(x.text, c.text)) &&
+          free(c.text)
+        ).sort((a, b) => b.score - a.score)[0];
+      if (best) {
+        const words: NnChosen[] = [...chosen];
+        while (words.length > 0 && !readable([...words, best])) {
+          const last = words.pop()!;
+          const short = shorter(last, Infinity);
+          if (short && readable([...words, short, best])) {
+            words.push(take(short));
+            break;
+          }
+        }
+        chosen.splice(0, chosen.length, ...words, take(best));
+        captioned = true;
+      } else if (options.shortCards && chosen.length > 0) {
+        // No caption to keep: a long line takes a short one of its note.
+        const last = chosen[chosen.length - 1];
+        const short = !isCaption(last) &&
+            [...last.text].length > MIN_NN_SHORT_CARD_CHARS
+          ? shorter(last, MIN_NN_SHORT_CARD_CHARS)
+          : undefined;
+        if (short) chosen[chosen.length - 1] = take(short);
+      }
+      if (options.shortCards && best && chosen.length > 1) {
+        const k = chosen.length - 2;
+        const line = chosen[k];
+        const short = !isCaption(line) &&
+            [...line.text].length > MIN_NN_SHORT_CARD_CHARS
+          ? shorter(line, MIN_NN_SHORT_CARD_CHARS)
+          : undefined;
+        if (short) chosen[k] = take(short);
+      }
+      if (chosen.length > 0 && source === "none") source = "code";
+    }
     if (chosen.length === 0 && slot.kind === "title") {
       chosen.push({
         id: "day",
@@ -1333,6 +1415,8 @@ export function resolveNeonSlots(
       : "every candidate shows words the film already shows";
     const reason = shortened
       ? "a shorter line as good as the pick, for the film's length"
+      : captioned && source === "director" && problems.length === 0
+      ? "director's pick; and its best caption (#456)"
       : source === "director"
       ? problems.length > 0
         ? `director's pick; dropped ${problems.join("; ")}`

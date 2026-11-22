@@ -1255,20 +1255,7 @@
       "days": [
        "2026-09-01"
       ],
-      "rejected_excerpts": [
-       {
-        "text": "Tram 28 up to the castle, the whole city below us.",
-        "score": 103
-       },
-       {
-        "text": "Tram 28 up to the castle",
-        "score": 102
-       },
-       {
-        "text": "the whole city below us.",
-        "score": 60
-       }
-      ],
+      "rejected_excerpts": [],
       "moments": [
        {
         "type": "split",
@@ -1320,7 +1307,7 @@
        "p06",
        "p07"
       ],
-      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "note": null,
       "card_zooms": 2,
       "excerpts": [
        {
@@ -1334,16 +1321,7 @@
       "days": [
        "2026-09-02"
       ],
-      "rejected_excerpts": [
-       {
-        "text": "Pastéis de nata at Manteigaria",
-        "score": 102
-       },
-       {
-        "text": "still warm three each.",
-        "score": 60
-       }
-      ],
+      "rejected_excerpts": [],
       "moments": [
        {
         "type": "split",
@@ -1351,7 +1329,12 @@
          "p08",
          "p09"
         ],
-        "words": [],
+        "words": [
+         {
+          "photo_id": "p09",
+          "text": "Pastéis de nata at Manteigaria, still warm, three each."
+         }
+        ],
         "place": null
        }
       ]
@@ -1395,7 +1378,7 @@
        "p11",
        "p12"
       ],
-      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "note": null,
       "card_zooms": 2,
       "excerpts": [
        {
@@ -1417,7 +1400,12 @@
          "p13",
          "p14"
         ],
-        "words": [],
+        "words": [
+         {
+          "photo_id": "p14",
+          "text": "Our last sunset at Miradouro da Senhora do Monte."
+         }
+        ],
         "place": null
        }
       ]
@@ -1678,20 +1666,7 @@
       "days": [
        "2026-09-01"
       ],
-      "rejected_excerpts": [
-       {
-        "text": "Tram 28 up to the castle, the whole city below us.",
-        "score": 103
-       },
-       {
-        "text": "Tram 28 up to the castle",
-        "score": 102
-       },
-       {
-        "text": "the whole city below us.",
-        "score": 60
-       }
-      ],
+      "rejected_excerpts": [],
       "moments": [
        {
         "type": "timeline",
@@ -1765,7 +1740,7 @@
        "p11",
        "p12"
       ],
-      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "note": null,
       "card_zooms": 2,
       "excerpts": [
        {
@@ -1779,16 +1754,7 @@
       "days": [
        "2026-09-02"
       ],
-      "rejected_excerpts": [
-       {
-        "text": "Pastéis de nata at Manteigaria",
-        "score": 102
-       },
-       {
-        "text": "still warm three each.",
-        "score": 60
-       }
-      ],
+      "rejected_excerpts": [],
       "moments": [
        {
         "type": "split",
@@ -1798,7 +1764,12 @@
          "p15",
          "p16"
         ],
-        "words": [],
+        "words": [
+         {
+          "photo_id": "p16",
+          "text": "Pastéis de nata at Manteigaria, still warm, three each."
+         }
+        ],
         "place": null
        }
       ]
@@ -1861,7 +1832,7 @@
        "p20",
        "p21"
       ],
-      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "note": null,
       "card_zooms": 2,
       "excerpts": [
        {
@@ -1885,7 +1856,12 @@
          "p24",
          "p17"
         ],
-        "words": [],
+        "words": [
+         {
+          "photo_id": "p17",
+          "text": "Our last sunset at Miradouro da Senhora do Monte."
+         }
+        ],
         "place": null
        }
       ]
@@ -2151,28 +2127,7 @@
     "title": "Lisbon",
     "start_date": "2026-09-01",
     "place": "Netherlands",
-    "plan": [
-     {
-      "time": "10:00",
-      "title": "Castle",
-      "done": false
-     },
-     {
-      "time": "13:30",
-      "title": "Lunch in Alfama",
-      "done": false
-     },
-     {
-      "time": "18:00",
-      "title": "Sunset",
-      "done": false
-     },
-     {
-      "time": "21:00",
-      "title": "Fado",
-      "done": false
-     }
-    ],
+    "plan": [],
     "chapters": [
      {
       "title": "Day 1",
@@ -2276,37 +2231,15 @@
       "days": [
        "2026-09-01"
       ],
-      "rejected_excerpts": [
-       {
-        "text": "Tram 28 up to the castle, the whole city below us.",
-        "score": 103
-       },
-       {
-        "text": "Tram 28 up to the castle",
-        "score": 102
-       },
-       {
-        "text": "the whole city below us.",
-        "score": 60
-       }
-      ],
+      "rejected_excerpts": [],
       "moments": [
-       {
-        "type": "split",
-        "photo_ids": [
-         "p06",
-         "p07",
-         "p08"
-        ],
-        "words": [],
-        "place": null
-       },
        {
         "type": "timeline",
         "photo_ids": [
+         "p06",
+         "p08",
          "p09",
          "p10",
-         "p11",
          "p12",
          "p13"
         ],
@@ -2404,7 +2337,7 @@
        "p17",
        "p18"
       ],
-      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "note": null,
       "card_zooms": 2,
       "excerpts": [
        {
@@ -2418,16 +2351,7 @@
       "days": [
        "2026-09-02"
       ],
-      "rejected_excerpts": [
-       {
-        "text": "Pastéis de nata at Manteigaria",
-        "score": 102
-       },
-       {
-        "text": "still warm three each.",
-        "score": 60
-       }
-      ],
+      "rejected_excerpts": [],
       "moments": [
        {
         "type": "timeline",
@@ -2439,7 +2363,12 @@
          "p25",
          "p26"
         ],
-        "words": [],
+        "words": [
+         {
+          "photo_id": "p26",
+          "text": "Pastéis de nata at Manteigaria, still warm, three each."
+         }
+        ],
         "place": null
        }
       ]
@@ -2533,7 +2462,7 @@
        "p31",
        "p32"
       ],
-      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "note": null,
       "card_zooms": 2,
       "excerpts": [
        {
@@ -2559,7 +2488,12 @@
          "p39",
          "p27"
         ],
-        "words": [],
+        "words": [
+         {
+          "photo_id": "p27",
+          "text": "Our last sunset at Miradouro da Senhora do Monte."
+         }
+        ],
         "place": null
        }
       ]
@@ -2843,14 +2777,7 @@
         "note_id": "3224a4be-3594-48c9-887b-c53053faa01a",
         "photo_id": "cd16a50b-3981-465d-ba60-33078d7f4eef",
         "source": "director",
-        "score": 126
-       },
-       {
-        "text": "а там толпа людей- даже немного испугался что не успею на самолет.",
-        "note_id": "3224a4be-3594-48c9-887b-c53053faa01a",
-        "photo_id": "a3cc4c86-5ac2-4200-8bc8-1e303d6c594e",
-        "source": "director",
-        "score": 106
+        "score": 103
        }
       ],
       "days": [
@@ -2858,8 +2785,8 @@
       ],
       "rejected_excerpts": [
        {
-        "text": "Приземлились в Амстердаме и сразу пошли завтракать",
-        "score": 111
+        "text": "а там толпа людей- даже немного испугался что не успею на самолет.",
+        "score": 106
        }
       ],
       "moments": [
@@ -2874,7 +2801,7 @@
         "words": [
          {
           "photo_id": "a3cc4c86-5ac2-4200-8bc8-1e303d6c594e",
-          "text": "а там толпа людей- даже немного испугался что не успею на самолет."
+          "text": "coffee shop"
          }
         ],
         "place": null
@@ -2928,14 +2855,7 @@
         "note_id": "e46c0c6b-8a6e-4aa1-8745-e11bf5ac73a7",
         "photo_id": "2bd9809d-ae25-452e-b250-1c6397d7a674",
         "source": "director",
-        "score": 71
-       },
-       {
-        "text": "Сидим в баре скоро принесут полтора метра ребер это 4.5kg мяса.",
-        "note_id": "6dc91f10-5646-4d6b-9859-839838d849eb",
-        "photo_id": "10af0193-e773-4ffc-8b86-1066f3fe1530",
-        "source": "director",
-        "score": 103
+        "score": 61
        }
       ],
       "days": [
@@ -2943,20 +2863,24 @@
       ],
       "rejected_excerpts": [
        {
-        "text": "Ну и конечно же взяли пиво!",
-        "score": 122
+        "text": "успели помыться поесть и выпить пивка.",
+        "score": 107
        },
        {
-        "text": "успели помыться поесть и выпить пивка.",
-        "score": 117
+        "text": "Сидим в баре скоро принесут полтора метра ребер это 4.5kg мяса.",
+        "score": 103
        },
        {
         "text": "так что решили взять риса чтобы ждать Куко было легче.",
-        "score": 112
+        "score": 102
+       },
+       {
+        "text": "Ну и конечно же взяли пиво!",
+        "score": 102
        },
        {
         "text": "но еще ждать два часа до рейва",
-        "score": 71
+        "score": 61
        }
       ],
       "moments": [
@@ -2969,7 +2893,7 @@
         "words": [
          {
           "photo_id": "10af0193-e773-4ffc-8b86-1066f3fe1530",
-          "text": "Сидим в баре скоро принесут полтора метра ребер это 4.5kg мяса."
+          "text": "some peptides"
          }
         ],
         "place": null
@@ -3027,11 +2951,15 @@
       "rejected_excerpts": [
        {
         "text": "Это самый крутой сет который я слышал или это М?",
-        "score": 124
+        "score": 109
        },
        {
         "text": "В общем мы вчера пришли где-то в 8 утра",
         "score": 103
+       },
+       {
+        "text": "потом поехали в другую локацию так как купили билеты туда тоже заранее.",
+        "score": 61
        },
        {
         "text": "так что сегодня день начался поздно.",
@@ -3089,22 +3017,15 @@
        "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
        "48da458f-98c8-414f-9453-af81cec6f9da"
       ],
-      "note": "Мы на месте это просто огромный футбольный стадион",
+      "note": "Откисаем и смотрим ufc Петр ян против Мираба",
       "card_zooms": 1,
       "excerpts": [
        {
-        "text": "Мы на месте это просто огромный футбольный стадион",
-        "note_id": "14c07398-380e-4d0a-9382-cb480c8b64cc",
-        "photo_id": "4b028163-05eb-4808-8995-2332f0e2e7a5",
-        "source": "director",
-        "score": 61
-       },
-       {
-        "text": "Выезжаем на AMF тусовку за окном ливень но мы готовы дать еще один бой.",
-        "note_id": "78ee4611-469c-4b97-9f61-a224736d1d73",
-        "photo_id": "ad570c04-90bf-4d84-9931-7a3e90db9caa",
-        "source": "director",
-        "score": 61
+        "text": "Откисаем и смотрим ufc Петр ян против Мираба",
+        "note_id": "43f91e23-1542-490d-b835-f31dfac55106",
+        "photo_id": "48da458f-98c8-414f-9453-af81cec6f9da",
+        "source": "code",
+        "score": 103
        }
       ],
       "days": [
@@ -3112,23 +3033,15 @@
       ],
       "rejected_excerpts": [
        {
-        "text": "Откисаем и смотрим ufc Петр ян против Мираба",
-        "score": 113
-       },
-       {
         "text": "Идем завтракать в город нашли english breakfast.",
-        "score": 112
+        "score": 102
        },
        {
         "text": "Зашли в продуктовый и поехали в дом откисать.",
-        "score": 71
+        "score": 61
        },
        {
         "text": "держим кулочки за нашего слона.",
-        "score": 71
-       },
-       {
-        "text": "Выезжаем на AMF тусовку за окном ливень",
         "score": 61
        }
       ],
@@ -3140,12 +3053,7 @@
          "4b028163-05eb-4808-8995-2332f0e2e7a5",
          "ff6a1fde-b6bd-48d8-b87d-29687d647553"
         ],
-        "words": [
-         {
-          "photo_id": "ad570c04-90bf-4d84-9931-7a3e90db9caa",
-          "text": "Выезжаем на AMF тусовку за окном ливень но мы готовы дать еще один бой."
-         }
-        ],
+        "words": [],
         "place": null
        }
       ]
@@ -3192,7 +3100,7 @@
         "note_id": "9c2f7347-5352-4a47-8dcf-222090ed53a9",
         "photo_id": "9a9ccc19-f7b1-491d-a502-96217f7ca55c",
         "source": "director",
-        "score": 110
+        "score": 102
        }
       ],
       "days": [
@@ -3200,11 +3108,11 @@
       ],
       "rejected_excerpts": [
        {
-        "text": "Наелись и похмелились пора домой",
-        "score": 69
+        "text": "едем в аэропорт в Брюсель",
+        "score": 61
        },
        {
-        "text": "едем в аэропорт в Брюсель",
+        "text": "Наелись и похмелились пора домой",
         "score": 61
        }
       ],
