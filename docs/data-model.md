@@ -309,6 +309,30 @@ Post-MVP: `video_path`, `video_status`.
   every Neon film to 75 s on its own timeline (`NnFit`) whatever the
   content says.
 
+- **Neon Night: code cuts, the director picks** (#454, no schema change;
+  replaces #444's director plan and the copy/snap/repair code of
+  #382–#452): code builds the film (`neon_slots.ts`, `neon_film.ts`) —
+  chapters by logical day and part, every scene's photos, the length
+  trims — and lists candidates with stable ids for every slot (`note`,
+  `chN.card`, `chN.mK`, `chN.title`, `headline`; up to 8 each, a card
+  keeps one line of each note it owns). One `pick_neon_lines` call only
+  picks ids; each id is shown with its slot's name (`ch2.card/n:…`) and
+  holds only there. `free_title` lets the director write a title (≤ 22)
+  or the headline (≤ 18, upbeat), checked for length, language, clock
+  times, "Day N", drugs and banned words; it wins over its ids when it
+  holds. Anything else takes the slot's top candidate; a title nothing
+  fits is "День N" (a later part "День N · вечер"). No words twice in a
+  film. `director.neon_night` = `{picks_version: 2, picks}` (older plans
+  aren't read) and `director.neon_slots` = per slot its candidates, the
+  pick, what plays, `source` (director/code/none) and the reason — the
+  Plan inspector shows them. `DIRECTOR_VERSION` 5: older records re-run
+  once. `content.neon_night` keeps its shape. Real-data tests:
+  `fixtures/ade_amsterdam.json` (exported by
+  `tools/export_director_input.ts`) and the director's recorded picks
+  (`tools/record_neon_picks.ts`), which also make `film_lengths.json`'s
+  `ade` case; `ade_fixture.ts` is gone. Golden Vows follows the same
+  pattern later.
+
 - **Limits** (#432, no schema change): `generate_wrap_up/wrap_up_limits.json`
   (minPhotos 15, maxFilmPhotos 60, minNotes 1, maxNoteLines 12, maxVibes 3)
   is shared with the app's `WrapUpLimits` (a Dart test checks they agree).
