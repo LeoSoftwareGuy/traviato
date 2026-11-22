@@ -1,23 +1,13 @@
-// Neon Night's scenes dealt by code (#444): full cards and moments, day
-// chapters never merged for length, lines on their own photos, director
-// lines snapped to the note, the Note scene's fallback, the headline rule.
+// Neon Night's scenes dealt by code (#444, #454): full cards and moments,
+// day chapters never merged for length, lines on their own photos.
 import {
   assert,
   assertEquals,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import {
-  buildNeonNightContent,
-  codeNeonNight,
-  dealChapter,
-  MAX_NN_HEADLINE_CHARS,
-  momentFor,
-  nnCheckContext,
-  repairNeonNight,
-} from "./neon_night.ts";
-import { snapToNote } from "./excerpts.ts";
-import { directorTripData, neonNightPlan } from "./director_fixtures.ts";
+import { dealChapter, momentFor } from "./neon_night.ts";
+import { buildNeonNightContent } from "./neon_film.ts";
+import { directorTripData } from "./director_fixtures.ts";
 import type { TripData } from "./gather.ts";
-import type { NeonNightPlan } from "./neon_night.ts";
 
 type Photo = TripData["photos"][number];
 
@@ -47,15 +37,12 @@ function run(prefix: string, start: string, n: number, stepMin: number) {
 
 function chapterOf(photos: Photo[]) {
   return {
-    title: "x",
-    note: null,
     photos,
     card: [] as string[],
     moments: [] as {
       type: "split" | "burst" | "timeline" | "peak";
       photo_ids: string[];
     }[],
-    excerpts: [],
   };
 }
 
@@ -124,72 +111,6 @@ Deno.test("dealChapter: two moments split at the longest gap", () => {
   });
 });
 
-Deno.test("snapToNote: the note's own words, ignoring case, spacing, punctuation, ё", () => {
-  const note =
-    "Брюссель не меняется: отличное пиво и вкусная еда! Всё было 4,5 кг.";
-  assertEquals(
-    snapToNote("брюссель не меняется отличное пиво и вкусная еда", note),
-    "Брюссель не меняется: отличное пиво и вкусная еда!",
-  );
-  assertEquals(snapToNote("все было 4.5 кг", note), "Всё было 4,5 кг.");
-  // Only whole words: a part of one never matches.
-  assertEquals(snapToNote("отличное пив", note), null);
-  assertEquals(snapToNote("something else", note), null);
-});
-
-Deno.test("repair snaps a director line that isn't copied exactly", () => {
-  const data = directorTripData();
-  data.notes[0].content = "Bikes everywhere, honestly — 4,5 km of canals!";
-  const plan = neonNightPlan();
-  plan.chapters[0].note_id = data.notes[0].id!;
-  plan.chapters[0].note_excerpt = "bikes everywhere honestly 4.5 km of canals";
-  const fixed = repairNeonNight(plan, nnCheckContext(data)) as NeonNightPlan;
-  assertEquals(
-    fixed.chapters[0].note_excerpt,
-    "Bikes everywhere, honestly — 4,5 km of canals!",
-  );
-});
-
-Deno.test("a headline too long is dropped, never cut mid-phrase", () => {
-  const data = directorTripData();
-  const plan = neonNightPlan();
-  plan.headline = "Куко Unreal всю ночь до утра ".repeat(4).trim();
-  assert([...plan.headline].length > MAX_NN_HEADLINE_CHARS);
-  const fixed = repairNeonNight(plan, nnCheckContext(data)) as NeonNightPlan;
-  assertEquals(fixed.headline, null);
-});
-
-Deno.test("the Note scene falls back to code's best unused line", () => {
-  const data = directorTripData();
-  data.notes.push(
-    {
-      id: "n3",
-      day_date: "2026-09-02",
-      content: "Брюссель не меняется отличное пиво и вкусная еда.",
-    } as TripData["notes"][number],
-  );
-  data.notes.push(
-    {
-      id: "n4",
-      day_date: "2026-09-02",
-      content: "Waffles at 2 am in the Grote Markt, 3 euros each.",
-    } as TripData["notes"][number],
-  );
-  const plan = neonNightPlan();
-  plan.note_moment = null;
-  const content = buildNeonNightContent(data, plan);
-  assert(content.note !== null, "a Note scene");
-  assert(
-    !content.chapters.some((c) =>
-      c.note === content.note!.text ||
-      c.moments.some((m) =>
-        (m.words ?? []).some((w) => w.text === content.note!.text)
-      )
-    ),
-    "a line no chapter plays",
-  );
-});
-
 // ADE-Amsterdam's shape: three days, the last a short one (Brussels).
 function threeDays(): TripData {
   const data = directorTripData();
@@ -214,8 +135,7 @@ function threeDays(): TripData {
 
 Deno.test("three days: a chapter each, never merged for length; ≥ 70 % shown", () => {
   const data = threeDays();
-  const plan = codeNeonNight(nnCheckContext(data), "en");
-  const content = buildNeonNightContent(data, plan);
+  const content = buildNeonNightContent(data);
   // No chapter spans two logical days; the short last day is its own.
   assert(content.chapters.length >= 3, `${content.chapters.length}`);
   const last = content.chapters[content.chapters.length - 1];
@@ -244,7 +164,7 @@ Deno.test("three days: a chapter each, never merged for length; ≥ 70 % shown",
   }
 });
 
-Deno.test("a line plays over its own photo: it's brought into a moment", () => {
+Deno.test("a note on a photo belongs to that photo's chapter, over its photo", () => {
   const data = threeDays();
   // A note on a card photo of day 2.
   data.notes = [
@@ -256,34 +176,21 @@ Deno.test("a line plays over its own photo: it's brought into a moment", () => {
       taken_at: "2026-10-23T15:20:00Z",
     } as TripData["notes"][number],
   ];
-  const content = buildNeonNightContent(
-    data,
-    codeNeonNight(nnCheckContext(data), "en"),
-  );
+  const content = buildNeonNightContent(data);
+  // The Note scene plays it (then no other scene does), else the card of
+  // its photo's chapter types it.
+  if (content.note?.text.startsWith("UFC at the bar")) {
+    for (const c of content.chapters) {
+      assert(!c.excerpts.some((e) => e.text === content.note!.text));
+    }
+    return;
+  }
   const chapter = content.chapters.find((c) =>
-    c.excerpts.some((e) => e.note_id === "nx")
+    c.photos.some((p) => p.id === "d2a1")
   )!;
   const line = chapter.excerpts.find((e) => e.note_id === "nx")!;
-  if (line.text === chapter.note) return; // the card types it
-  // …or a clause of it, when a film over 75 s shortens card lines (#448):
-  // still over its own photo, on the card.
-  if (chapter.note && line.text.includes(chapter.note)) {
-    assert(chapter.card_photo_ids.includes(line.photo_id!));
-    return;
-  }
-  // The Note scene plays it (#448: then no other scene does).
-  if (content.note?.text === line.text) {
-    assert(
-      !chapter.moments.some((m) =>
-        (m.words ?? []).some((w) => w.text === line.text)
-      ),
-    );
-    return;
-  }
-  assert(
-    chapter.moments.some((m) => m.photo_ids.includes(line.photo_id!)),
-    `${line.photo_id} in a moment`,
-  );
+  assert(line, "the note's chapter plays it");
+  assertEquals(line.photo_id, "d2a1");
 });
 
 Deno.test("a long caption stays on its card, unzoomed; hero scores in content (#446, #448)", () => {
@@ -291,11 +198,7 @@ Deno.test("a long caption stays on its card, unzoomed; hero scores in content (#
   const long =
     "UFC at the bar with the whole crew, three rounds and everybody screaming at the screen";
   data.photos.find((p) => p.id === "d2a1")!.caption = long;
-  const content = buildNeonNightContent(
-    data,
-    codeNeonNight(nnCheckContext(data), "en"),
-    { d2a0: 5 },
-  );
+  const content = buildNeonNightContent(data, null, { d2a0: 5 });
   const chapter = content.chapters.find((c) =>
     c.photos.some((p) => p.id === "d2a1")
   )!;

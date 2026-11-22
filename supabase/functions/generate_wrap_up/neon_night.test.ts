@@ -1,35 +1,21 @@
+// Neon Night's skeleton and content (#454): code cuts the chapters and
+// deals their scenes; picks only choose words (neon_slots.test.ts).
 import {
   assert,
   assertEquals,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import {
-  buildNeonNightContent,
-  describeNeonNightProblems,
-  MAX_NN_PHOTOS,
-  type NeonNightPlan,
-  neonNightToolProperty,
-  nnCheckContext,
-  repairNeonNight,
-} from "./neon_night.ts";
+import { MAX_NN_PHOTOS } from "./neon_night.ts";
+import { buildNeonNightContent } from "./neon_film.ts";
 import {
   DIRECTOR_PHOTO_IDS as IDS,
   directorTripData,
-  neonNightPlan,
+  neonPicks,
 } from "./director_fixtures.ts";
 import type { TripData } from "./gather.ts";
 import { useFilmLengthRuleForTests } from "./film_length.ts";
 
 // These tests are about other rules: every film at its longest (#434).
 useFilmLengthRuleForTests(false);
-
-function problemsOf(
-  edit: (plan: NeonNightPlan) => void,
-  data: TripData = directorTripData(),
-): string[] {
-  const plan = neonNightPlan();
-  edit(plan);
-  return describeNeonNightProblems(plan, nnCheckContext(data));
-}
 
 // directorTripData() with 5 more photos a day (14:00–18:00, ids
 // "d<day>x<k>"): 9 per chapter, so none merges (#390).
@@ -52,162 +38,23 @@ function fullNight(overrides: Partial<TripData> = {}): TripData {
   return data;
 }
 
-Deno.test("a valid section has no problems", () => {
-  assertEquals(problemsOf(() => {}), []);
-  assertEquals(
-    problemsOf((p) => {
-      p.note_moment = null;
-      p.headline = null;
-    }),
-    [],
-  );
-});
-
-Deno.test("each broken rule is named", () => {
-  const cases: [string, (p: NeonNightPlan) => void][] = [
-    ["neon_night.chapters: 0", (p) => p.chapters = []],
-    [
-      "neon_night.chapters[0].first_photo_id: must be the first photo",
-      (p) => p.chapters[0].first_photo_id = IDS[1],
-    ],
-    [
-      "neon_night.chapters[2].first_photo_id: must come after",
-      (p) => p.chapters[2].first_photo_id = IDS[3],
-    ],
-    [
-      'neon_night.chapters[1].first_photo_id: "invented"',
-      (p) => p.chapters[1].first_photo_id = "invented",
-    ],
-    [
-      "neon_night.chapters[0].title: 23 characters",
-      (p) => p.chapters[0].title = "The doors open at eight",
-    ],
-    [
-      "neon_night.chapters[1].moments: 0",
-      (p) => p.chapters[1].moments = [],
-    ],
-    [
-      "neon_night.chapters[2].moments[0].photo_ids: 2, a peak takes 3–5",
-      (p) => p.chapters[2].moments[0].photo_ids.pop(),
-    ],
-    [
-      'neon_night.chapters[1].moments[0].photo_ids[3]: "p08" is not from this chapter',
-      (p) => p.chapters[1].moments[0].photo_ids[3] = IDS[8],
-    ],
-    [
-      'neon_night.chapters[0].moments[1].photo_ids[0]: "p01" is used twice',
-      (p) => p.chapters[0].moments[1].photo_ids[0] = IDS[1],
-    ],
-    [
-      'neon_night.chapters[1].moments[0].photo_ids[1]: "p04" is out of chronological order',
-      (p) =>
-        p.chapters[1].moments[0].photo_ids = [IDS[5], IDS[4], IDS[6], IDS[7]],
-    ],
-    [
-      "neon_night.chapters[0].moments[0].type",
-      (p) => (p.chapters[0].moments[0] as { type: string }).type = "slideshow",
-    ],
-    [
-      "neon_night.chapters[0].note_excerpt: must be copied exactly",
-      (p) => p.chapters[0].note_excerpt = "Bicycles everywhere",
-    ],
-    [
-      "neon_night.chapters[1].note_excerpt: only with a note_id",
-      (p) => p.chapters[1].note_excerpt = "Bikes",
-    ],
-    [
-      "neon_night.note_moment.excerpt.note_id: not a note id",
-      (p) => p.note_moment!.note_id = "n9",
-    ],
-    [
-      'neon_night.note_moment.photo_id: "invented"',
-      (p) => p.note_moment!.photo_id = "invented",
-    ],
-    [
-      "neon_night.headline: 25 characters",
-      (p) => p.headline = "The best night of my life",
-    ],
-    [
-      'neon_night.headline: banned phrase "epic"',
-      (p) => p.headline = "Epic night",
-    ],
-  ];
-  for (const [expected, edit] of cases) {
-    const problems = problemsOf(edit);
-    assert(
-      problems.some((p) => p.startsWith(expected)),
-      `expected "${expected}" in ${JSON.stringify(problems)}`,
-    );
-  }
-});
-
-Deno.test("a photo the user left out may not be used", () => {
-  const data = directorTripData();
-  data.photos[5].use_in_wrap_up = false;
-  const problems = problemsOf(() => {}, data);
-  assert(problems.some((p) => p.includes('"p05" was left out by the user')));
-});
-
-Deno.test("repair fixes what code can put right", () => {
-  const plan = neonNightPlan();
-  // Chapters out of order, the first starting late, quotes, a reworded
-  // card excerpt, moment photos out of order, a reworded note moment.
-  plan.chapters.reverse();
-  plan.chapters[2].first_photo_id = IDS[1];
-  plan.chapters[0].title = '"Peak time"';
-  plan.chapters[2].note_excerpt = "Bicycles everywhere";
-  plan.chapters[1].moments[0].photo_ids.reverse();
-  plan.note_moment!.excerpt = "Rain then waffles";
-  plan.headline = '"Best night ever"';
-
-  const context = nnCheckContext(directorTripData());
-  const repaired = repairNeonNight(plan, context) as NeonNightPlan;
-
-  assertEquals(describeNeonNightProblems(repaired, context), []);
-  assertEquals(repaired.chapters.map((c) => c.title), [
-    "Doors open",
-    "After midnight",
-    "Peak time",
-  ]);
-  assertEquals(repaired.chapters[0].first_photo_id, IDS[0]);
-  assertEquals(repaired.chapters[0].note_id, null);
-  assertEquals(repaired.chapters[1].moments[0].photo_ids, IDS.slice(4, 8));
-  assertEquals(repaired.note_moment, null);
-  assertEquals(repaired.headline, "Best night ever");
-});
-
-Deno.test("content.neon_night: chapters by range, the user's own words, totals", () => {
+Deno.test("content.neon_night: a chapter per day, every photo dealt in time order, totals", () => {
+  const quest = (title: string, day: string, time: string, done = false) => ({
+    title,
+    day_date: day,
+    time,
+    completed_at: done ? `${day}T22:30:00Z` : null,
+  });
   const data = fullNight({
     quests: [
-      {
-        title: "Pre-drinks",
-        day_date: "2026-09-01",
-        time: "22:00:00",
-        completed_at: "2026-09-01T22:30:00Z",
-      },
-      {
-        title: "No time",
-        day_date: "2026-09-01",
-        time: null,
-        completed_at: null,
-      },
-      {
-        title: "Afterparty",
-        day_date: "2026-09-02",
-        time: "03:00:00",
-        completed_at: null,
-      },
-      {
-        title: "Breakfast",
-        day_date: "2026-09-03",
-        time: "09:00:00",
-        completed_at: null,
-      },
+      quest("Pre-drinks", "2026-09-01", "22:00:00", true),
+      { ...quest("No time", "2026-09-01", "00:00:00"), time: null },
+      quest("Afterparty", "2026-09-02", "03:00:00"),
+      quest("Breakfast", "2026-09-03", "09:00:00"),
     ],
     username: "Leo Engineer",
   });
-  data.notes[1].created_at = "2026-09-03T23:31:00Z";
-  const content = buildNeonNightContent(data, neonNightPlan());
+  const content = buildNeonNightContent(data);
 
   assertEquals(content.nn_version, 1);
   assertEquals(content.title, "Amsterdam");
@@ -222,35 +69,89 @@ Deno.test("content.neon_night: chapters by range, the user's own words, totals",
   );
   assertEquals(content.chapters.map((c) => c.photos.length), [9, 9, 9]);
   assertEquals(content.chapters[0].photos[0].taken_at, "2026-09-01T10:00:00Z");
-  assertEquals(content.chapters[0].note, "Bikes everywhere");
-  assertEquals(content.chapters[1].note, null);
-  // Code deals the scenes (#444): 9 photos make a 4-photo card and one
-  // timeline of the other 5 — every photo shown, in time order. Chapter 3
-  // leaves the Note scene's photo out: 4 + a full split of 4.
-  for (const [i, chapter] of content.chapters.entries()) {
+  // 9 photos: a card of 4 and one timeline of 5 (#444).
+  for (const chapter of content.chapters) {
     assertEquals(chapter.card_photo_ids.length, 4);
     assertEquals(
       chapter.moments.map((m) => [m.type, m.photo_ids.length]),
-      [i < 2 ? ["timeline", 5] : ["split", 4]],
+      [["timeline", 5]],
     );
     assertStrictlyAfterCard(chapter);
+    assert(chapter.title.length > 0);
   }
-  // Only a split is labelled with a place.
   assertEquals(content.chapters[0].moments[0].place, null);
-  assertEquals(content.note, {
-    text: "Rain, then stroopwafels.",
-    number: 2,
-    written_at: "2026-09-03T23:31:00Z",
-    photo_id: IDS[10],
-  });
-  assertEquals(content.headline, "Best night ever");
   assertEquals(content.first_name, "Leo");
-  assertEquals(content.totals, {
-    photos: 27,
-    notes: 2,
-    ticks: 1,
-    moments: 27,
+  assertEquals(content.totals, { photos: 27, notes: 2, ticks: 1, moments: 27 });
+});
+
+Deno.test("the director's picks only change words, never the scenes", () => {
+  const data = fullNight();
+  const code = buildNeonNightContent(data);
+  const picked = buildNeonNightContent(data, neonPicks(data));
+  const scenes = (c: typeof code) =>
+    c.chapters.map((ch) => [
+      ch.photos.map((p) => p.id),
+      ch.card_photo_ids,
+      ch.moments.map((m) => [m.type, m.photo_ids]),
+    ]);
+  assertEquals(scenes(picked), scenes(code));
+  assertEquals(picked.chapters[0].title, "Doors open");
+});
+
+Deno.test("one night is split into parts at its long breaks, never merged", () => {
+  // 12 photos an hour apart: no break of 2 h, one chapter.
+  const content = buildNeonNightContent(oneNight());
+  assertEquals(content.chapters.length, 1);
+  assertEquals(content.chapters[0].photos.length, 12);
+  assertStrictlyAfterCard(content.chapters[0]);
+});
+
+Deno.test("the card opens a chapter with its earliest photos (#426)", () => {
+  const content = buildNeonNightContent(fullNight());
+  for (const chapter of content.chapters) {
+    const shown = new Set([
+      ...chapter.card_photo_ids,
+      ...chapter.moments.flatMap((m) => m.photo_ids),
+    ]);
+    const first = chapter.photos.find((p) => shown.has(p.id))!;
+    assertEquals(chapter.card_photo_ids[0], first.id);
+    assertStrictlyAfterCard(chapter);
+  }
+});
+
+Deno.test("the Plan scene needs 3 rows", () => {
+  const quest = (title: string, time: string) => ({
+    title,
+    day_date: "2026-09-01",
+    time,
+    completed_at: null,
   });
+  const two = buildNeonNightContent(
+    fullNight({ quests: [quest("Fly", "07:00:00"), quest("Eat", "09:00:00")] }),
+  );
+  assertEquals(two.plan, []);
+  const three = buildNeonNightContent(
+    fullNight({
+      quests: [
+        quest("Fly", "07:00:00"),
+        quest("Eat", "09:00:00"),
+        quest("Club", "23:00:00"),
+      ],
+    }),
+  );
+  assertEquals(three.plan.length, 3);
+});
+
+Deno.test("chapter photos carry the user's caption, trimmed (#387)", () => {
+  const data = fullNight();
+  data.photos.find((p) => p.id === "p01")!.caption = "  Lost the keys ";
+  data.photos.find((p) => p.id === "p02")!.caption = "   ";
+  const photos = buildNeonNightContent(data).chapters[0]
+    .photos;
+  const caption = (id: string) => photos.find((p) => p.id === id)!.caption;
+  assertEquals(caption("p01"), "Lost the keys");
+  assertEquals(caption("p02"), null);
+  assertEquals(caption("p03"), null);
 });
 
 Deno.test("a photo added later joins the chapter it falls in", () => {
@@ -260,13 +161,11 @@ Deno.test("a photo added later joins the chapter it falls in", () => {
     id: "late",
     taken_at: "2026-09-02T12:30:00Z",
   });
-  const plan = neonNightPlan();
-  assertEquals(describeNeonNightProblems(plan, nnCheckContext(data)), []);
-  const content = buildNeonNightContent(data, plan);
+  const content = buildNeonNightContent(data);
   assert(content.chapters[1].photos.some((p) => p.id === "late"));
 });
 
-Deno.test("over 200 photos: an even spread that keeps the named ones", () => {
+Deno.test("over 200 photos: never more than the cap, every day kept", () => {
   const data = directorTripData();
   data.photos.push(
     ...Array.from({ length: 300 }, (_, i) => ({
@@ -277,44 +176,12 @@ Deno.test("over 200 photos: an even spread that keeps the named ones", () => {
       }Z`,
     })),
   );
-  const content = buildNeonNightContent(data, neonNightPlan());
+  const content = buildNeonNightContent(data);
   const shown = content.chapters.flatMap((c) => c.photos.map((p) => p.id));
   assert(shown.length <= MAX_NN_PHOTOS + 6, `${shown.length}`);
-  for (const id of [IDS[0], IDS[4], IDS[8], IDS[9], IDS[10]]) {
-    assert(shown.includes(id), id);
-  }
+  // Each day keeps its chapter.
+  assertEquals(content.chapters.length >= 3, true);
   assertEquals(content.totals.photos, 312);
-});
-
-// --- Always picks get their own moment (#378) -----------------------------
-
-Deno.test("an Always pick in no moment is no problem: the heart shows it (#433)", () => {
-  const data = directorTripData();
-  data.photos[11].use_in_wrap_up = true; // in no moment
-  assertEquals(problemsOf(() => {}, data), []);
-
-  // As the Note scene's background it's shown.
-  assertEquals(
-    problemsOf((p) => p.note_moment!.photo_id = "p11", data),
-    [],
-  );
-
-  // In a moment: fine.
-  const inMoment = directorTripData();
-  inMoment.photos[3].use_in_wrap_up = true;
-  assertEquals(problemsOf(() => {}, inMoment), []);
-});
-
-Deno.test("an Always pick whose analysis failed isn't required", () => {
-  const data = directorTripData();
-  data.photos[11].use_in_wrap_up = true;
-  assertEquals(
-    describeNeonNightProblems(
-      neonNightPlan(),
-      nnCheckContext(data, new Set(["p11"])),
-    ),
-    [],
-  );
 });
 
 Deno.test("the heart leaves out Always picks that have their moment", () => {
@@ -326,10 +193,7 @@ Deno.test("the heart leaves out Always picks that have their moment", () => {
     day_date: "2026-09-01",
     use_in_wrap_up: i === 1 || i === 3 ? true : null,
   }));
-  const content = buildNeonNightContent(
-    data,
-    neonNightPlan(data.photos.map((p) => p.id)),
-  );
+  const content = buildNeonNightContent(data);
   assertEquals(
     content.heart_photo_ids.filter((id) => id === "h01" || id === "h03"),
     [],
@@ -337,112 +201,6 @@ Deno.test("the heart leaves out Always picks that have their moment", () => {
   assertEquals(content.heart_photo_ids.length, 38);
   // Every photo still plays in its chapter.
   assertEquals(content.chapters.flatMap((c) => c.photos).length, 40);
-});
-
-// --- Repairs instead of discarding (#382) ---------------------------------
-
-function repaired(plan: unknown, data: TripData = directorTripData()) {
-  const context = nnCheckContext(data);
-  const fixed = repairNeonNight(plan, context) as NeonNightPlan;
-  return { fixed, problems: describeNeonNightProblems(fixed, context) };
-}
-
-Deno.test("a moment's photos from another chapter are dropped, its type made to fit", () => {
-  // ADE-Amsterdam 2026's faults: two photos from the next chapter in a
-  // moment, and a 2-photo peak.
-  const plan = neonNightPlan();
-  plan.chapters[1].moments[0].photo_ids = ["p04", "p05", "p08", "p09"];
-  plan.chapters[2].moments[0].photo_ids = ["p08", "p09"];
-  const { fixed, problems } = repaired(plan);
-  assertEquals(problems, []);
-  assertEquals(fixed.chapters[1].moments[0].photo_ids, ["p04", "p05"]);
-  assertEquals(fixed.chapters[2].moments[0], {
-    type: "timeline",
-    photo_ids: ["p08", "p09"],
-  });
-});
-
-Deno.test("a moment left under 2 photos goes; a chapter left without one gets a timeline", () => {
-  const plan = neonNightPlan();
-  plan.chapters[2].moments = [{ type: "peak", photo_ids: ["p01", "p08"] }];
-  const { fixed, problems } = repaired(plan);
-  assertEquals(problems, []);
-  // p01 isn't chapter 3's: one photo left → dropped → a timeline of
-  // chapter 3's photos instead (p10 is the Note scene's, still usable).
-  assertEquals(fixed.chapters[2].moments.length, 1);
-  assertEquals(fixed.chapters[2].moments[0].type, "timeline");
-  assert(
-    fixed.chapters[2].moments[0].photo_ids.every((id) =>
-      ["p08", "p09", "p10", "p11"].includes(id)
-    ),
-  );
-});
-
-Deno.test("Always picks without a moment join one of their chapter", () => {
-  const data = directorTripData();
-  data.photos[11].use_in_wrap_up = true; // chapter 3, in no moment
-  const { fixed, problems } = repaired(neonNightPlan(), data);
-  assertEquals(problems, []);
-  // The 3-photo peak has room for a fourth.
-  assertEquals(fixed.chapters[2].moments[0].photo_ids, [
-    "p08",
-    "p09",
-    "p10",
-    "p11",
-  ]);
-});
-
-Deno.test("a full moment grows into a timeline to take an Always pick", () => {
-  const data = directorTripData();
-  // Chapter 1 has one full split (3 of 3); its Always pick p03 makes it a
-  // 4-photo timeline.
-  const plan = neonNightPlan();
-  plan.chapters[0].moments = [{
-    type: "split",
-    photo_ids: ["p00", "p01", "p02"],
-  }];
-  data.photos[3].use_in_wrap_up = true;
-  const { fixed, problems } = repaired(plan, data);
-  assertEquals(problems, []);
-  // A split holds 4 since #444.
-  assertEquals(fixed.chapters[0].moments, [{
-    type: "split",
-    photo_ids: ["p00", "p01", "p02", "p03"],
-  }]);
-});
-
-// --- No peak, fuller timelines (#386) --------------------------------------
-
-Deno.test("the director can't plan a peak any more", () => {
-  const json = JSON.stringify(neonNightToolProperty);
-  assert(!json.includes('"peak"'));
-  assert(json.includes('"timeline"'));
-});
-
-Deno.test("a peak in a plan made before plays as code's moments", () => {
-  // neonNightPlan()'s chapter 3 is a 3-photo peak; code deals the scenes.
-  const content = buildNeonNightContent(fullNight(), neonNightPlan());
-  assertEquals(content.chapters[2].moments.length, 1);
-  // 9 photos minus the Note scene's: a 4-photo card and a full split.
-  assertEquals(content.chapters[2].moments[0].photo_ids.length, 4);
-  assert(
-    content.chapters.every((c) => c.moments.every((m) => m.type !== "peak")),
-  );
-});
-
-Deno.test("a timeline is filled with what the card leaves, in time order", () => {
-  const plan = neonNightPlan();
-  plan.chapters[1].moments = [{ type: "timeline", photo_ids: ["p07", "p04"] }];
-  const chapter = buildNeonNightContent(fullNight(), plan).chapters[1];
-  // 9 photos: the card takes 4 unused ones, the timeline the next 3.
-  assertEquals(chapter.card_photo_ids.length, 4);
-  const ids = chapter.moments[0].photo_ids;
-  assertEquals(chapter.moments[0].type, "timeline");
-  assertEquals(ids.length, 5);
-  assertStrictlyAfterCard(chapter);
-  // Never a card photo, never another chapter's.
-  assert(ids.every((id) => !chapter.card_photo_ids.includes(id)));
-  assert(ids.every((id) => chapter.photos.some((p) => p.id === id)));
 });
 
 Deno.test("a big chapter: a 6-photo card, two full moments, the Always picks shown", () => {
@@ -459,9 +217,7 @@ Deno.test("a big chapter: a 6-photo card, two full moments, the Always picks sho
       use_in_wrap_up: k >= 8 ? true : null,
     });
   }
-  const plan = neonNightPlan();
-  plan.chapters[1].moments = [{ type: "timeline", photo_ids: ["p04", "p05"] }];
-  const chapter = buildNeonNightContent(data, plan).chapters[1];
+  const chapter = buildNeonNightContent(data).chapters[1];
   assertEquals(chapter.card_photo_ids.length, 6);
   assertEquals(chapter.moments.length, 2);
   const shown = [
@@ -473,6 +229,17 @@ Deno.test("a big chapter: a 6-photo card, two full moments, the Always picks sho
   assertEquals(new Set(shown).size, chapter.photos.length - 1);
   assert(shown.includes("x8") && shown.includes("x9"));
   assertStrictlyAfterCard(chapter);
+});
+
+Deno.test("a chapter of up to 6 photos is one full card, no moment (#444)", () => {
+  const data = fullNight();
+  // Chapter 2 keeps only its 4 own photos.
+  for (const p of data.photos) {
+    if (p.id.startsWith("d2x")) p.use_in_wrap_up = false;
+  }
+  const chapter = buildNeonNightContent(data).chapters[1];
+  assertEquals(chapter.card_photo_ids, ["p04", "p05", "p06", "p07"]);
+  assertEquals(chapter.moments, []);
 });
 
 // The card's photos come first in time, then each moment's (#426).
@@ -495,8 +262,6 @@ function assertStrictlyAfterCard(
   }
 }
 
-// --- Fewer, fuller scenes (#390) --------------------------------------------
-
 // directorTripData() as one night: the 12 photos an hour apart from 10:00.
 function oneNight(): TripData {
   const data = directorTripData();
@@ -507,139 +272,3 @@ function oneNight(): TripData {
   }));
   return data;
 }
-
-Deno.test("small chapters of one night merge into fuller ones", () => {
-  // 3 chapters of 4 photos → one of 12: the first one's title and note.
-  const content = buildNeonNightContent(oneNight(), neonNightPlan());
-  assertEquals(content.chapters.length, 1);
-  const [chapter] = content.chapters;
-  assertEquals(chapter.title, "Doors open");
-  assertEquals(chapter.note, "Bikes everywhere");
-  assertEquals(chapter.photos.length, 12);
-});
-
-Deno.test("Amsterdam's shape: 5 chapters of 3–7 photos become fuller ones", () => {
-  const data = directorTripData();
-  const sizes = [7, 5, 7, 3, 6];
-  data.photos = [];
-  let n = 0;
-  sizes.forEach((size, c) => {
-    for (let k = 0; k < size; k++, n++) {
-      data.photos.push({
-        ...directorTripData().photos[0],
-        id: `a${String(n).padStart(2, "0")}`,
-        day_date: "2026-09-01",
-        taken_at: `2026-09-01T${String(8 + c * 3).padStart(2, "0")}:${
-          String(k * 5).padStart(2, "0")
-        }:00Z`,
-        caption: k === 0 ? `Caption ${c}` : null,
-        place_text: null,
-      });
-    }
-  });
-  const ids = data.photos.map((p) => p.id);
-  let at = 0;
-  const plan: NeonNightPlan = {
-    chapters: sizes.map((size, c) => {
-      const own = ids.slice(at, at + size);
-      at += size;
-      return {
-        title: `Chapter ${c + 1}`,
-        first_photo_id: own[0],
-        note_id: null,
-        note_excerpt: null,
-        // Every photo in a moment, as Amsterdam's director did.
-        moments: size > 4
-          ? [
-            { type: "split" as const, photo_ids: own.slice(0, 3) },
-            { type: "timeline" as const, photo_ids: own.slice(3) },
-          ]
-          : [{ type: "timeline" as const, photo_ids: own }],
-      };
-    }),
-    note_moment: null,
-    headline: null,
-  };
-  assertEquals(describeNeonNightProblems(plan, nnCheckContext(data)), []);
-
-  const content = buildNeonNightContent(data, plan);
-
-  assert(content.chapters.length <= 3, `${content.chapters.length}`);
-  for (const chapter of content.chapters) {
-    assert(chapter.photos.length >= 8);
-    assert(chapter.card_photo_ids.length >= 1);
-    const inMoments = chapter.moments.flatMap((m) => m.photo_ids);
-    // No photo on the card and in a moment, none twice.
-    assert(chapter.card_photo_ids.every((id) => !inMoments.includes(id)));
-    assertEquals(new Set(inMoments).size, inMoments.length);
-    for (const m of chapter.moments) {
-      assert(m.type !== "timeline" || m.photo_ids.length >= 5, m.type);
-      assert(m.type !== "peak");
-    }
-  }
-  // Fewer scenes: at most 2 moments a chapter.
-  assert(content.chapters.every((c) => c.moments.length <= 2));
-});
-
-Deno.test("the card opens a chapter with its earliest photos (#426)", () => {
-  const content = buildNeonNightContent(fullNight(), neonNightPlan());
-  for (const chapter of content.chapters) {
-    const shown = new Set([
-      ...chapter.card_photo_ids,
-      ...chapter.moments.flatMap((m) => m.photo_ids),
-    ]);
-    const first = chapter.photos.find((p) => shown.has(p.id))!;
-    assertEquals(chapter.card_photo_ids[0], first.id);
-    assertStrictlyAfterCard(chapter);
-  }
-});
-
-Deno.test("a chapter of up to 6 photos is one full card, no moment (#444)", () => {
-  const plan = neonNightPlan();
-  plan.chapters[1].moments = [{ type: "timeline", photo_ids: ["p04", "p05"] }];
-  const data = fullNight();
-  // Chapter 2 keeps only its 4 own photos.
-  for (const p of data.photos) {
-    if (p.id.startsWith("d2x")) p.use_in_wrap_up = false;
-  }
-  const chapter = buildNeonNightContent(data, plan).chapters[1];
-  assertEquals(chapter.card_photo_ids, ["p04", "p05", "p06", "p07"]);
-  assertEquals(chapter.moments, []);
-});
-
-Deno.test("the Plan scene needs 3 rows", () => {
-  const quest = (title: string, time: string) => ({
-    title,
-    day_date: "2026-09-01",
-    time,
-    completed_at: null,
-  });
-  const two = buildNeonNightContent(
-    fullNight({ quests: [quest("Fly", "07:00:00"), quest("Eat", "09:00:00")] }),
-    neonNightPlan(),
-  );
-  assertEquals(two.plan, []);
-  const three = buildNeonNightContent(
-    fullNight({
-      quests: [
-        quest("Fly", "07:00:00"),
-        quest("Eat", "09:00:00"),
-        quest("Club", "23:00:00"),
-      ],
-    }),
-    neonNightPlan(),
-  );
-  assertEquals(three.plan.length, 3);
-});
-
-Deno.test("chapter photos carry the user's caption, trimmed (#387)", () => {
-  const data = fullNight();
-  data.photos.find((p) => p.id === "p01")!.caption = "  Lost the keys ";
-  data.photos.find((p) => p.id === "p02")!.caption = "   ";
-  const photos = buildNeonNightContent(data, neonNightPlan()).chapters[0]
-    .photos;
-  const caption = (id: string) => photos.find((p) => p.id === id)!.caption;
-  assertEquals(caption("p01"), "Lost the keys");
-  assertEquals(caption("p02"), null);
-  assertEquals(caption("p03"), null);
-});

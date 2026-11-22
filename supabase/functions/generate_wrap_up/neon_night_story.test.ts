@@ -1,16 +1,16 @@
+// The real story (#398) on code's skeleton (#454): logical days, parts of
+// a long day, the notes' best lines on their own photos, strict
+// chronology.
 import {
   assert,
   assertEquals,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
-  buildNeonNightContent,
   dayChapterStarts,
-  describeNeonNightProblems,
-  type NeonNightPlan,
   nnChapterStarts,
   nnCheckContext,
-  repairNeonNight,
 } from "./neon_night.ts";
+import { buildNeonNightContent, neonNightFilm } from "./neon_film.ts";
 import { directorTripData } from "./director_fixtures.ts";
 import type { TripData } from "./gather.ts";
 import { useFilmLengthRuleForTests } from "./film_length.ts";
@@ -85,79 +85,9 @@ function amsterdam(): TripData {
   });
 }
 
-// The director folds day 2 into day 1, picks a generic line, and a
-// profane headline.
-function foldedPlan(): NeonNightPlan {
-  return {
-    chapters: [
-      {
-        title: "Brussels to Shelter",
-        first_photo_id: "a0",
-        note_id: null,
-        note_excerpt: null,
-        moments: [
-          { type: "split", photo_ids: ["a1", "a2"] },
-          { type: "timeline", photo_ids: ["b1", "b2", "b3"] },
-        ],
-        excerpts: [{ note_id: "n1", text: "It was fun.", photo_id: null }],
-      },
-      {
-        title: "Albert Cuyp",
-        first_photo_id: "c0",
-        note_id: "n4",
-        note_excerpt: "Rain, then stroopwafels",
-        moments: [{ type: "burst", photo_ids: ["c3", "c1"] }],
-        excerpts: [{
-          note_id: "n4",
-          text: "Rain, then stroopwafels at Albert Cuyp market.",
-          photo_id: "c2",
-        }],
-      },
-    ],
-    note_moment: null,
-    headline: "Fucking legends",
-  };
-}
-
-Deno.test("several days need one chapter per logical day", () => {
-  const context = nnCheckContext(amsterdam());
-  // After midnight stays on day 1; day 2 starts at b0.
-  assertEquals(context.photoDays!.get("a6"), "2026-09-01");
-  assertEquals(context.photoDays!.get("b0"), "2026-09-02");
-  const problems = describeNeonNightProblems(foldedPlan(), context);
-  assert(
-    problems.some((p) => p.includes("chapter_start")),
-    problems.join("\n"),
-  );
-  assert(problems.some((p) => p.includes("headline")), problems.join("\n"));
-});
-
-Deno.test("repair splits a folded plan by days, keeping the director's words", () => {
-  const context = nnCheckContext(amsterdam());
-  const repaired = repairNeonNight(foldedPlan(), context) as NeonNightPlan;
-  assertEquals(describeNeonNightProblems(repaired, context), []);
-  assertEquals(repaired.chapters.map((c) => c.first_photo_id), [
-    "a0",
-    "b0",
-    "c0",
-  ]);
-  assertEquals(repaired.chapters[0].title, "Brussels to Shelter");
-  assertEquals(repaired.chapters[2].title, "Albert Cuyp");
-  // Day 2 keeps the folded timeline's photos of its own day.
-  assertEquals(repaired.chapters[1].moments[0].photo_ids, ["b1", "b2", "b3"]);
-  // Moment photos in time order.
-  assertEquals(repaired.chapters[2].moments[0].photo_ids, ["c1", "c3"]);
-  assertEquals(repaired.headline, null);
-});
-
-Deno.test("content: days, specific excerpts on their photos, strict chronology", () => {
+Deno.test("content: a chapter per logical day, specific lines on their photos, strict chronology", () => {
   const data = amsterdam();
-  const plan = repairNeonNight(
-    foldedPlan(),
-    nnCheckContext(data),
-  ) as NeonNightPlan;
-  const content = buildNeonNightContent(data, plan);
-  assertEquals(content.chapters.length, 3);
+  const content = buildNeonNightContent(data);
   assertEquals(content.chapters.map((c) => c.days), [
     ["2026-09-01"],
     ["2026-09-02"],
@@ -166,79 +96,42 @@ Deno.test("content: days, specific excerpts on their photos, strict chronology",
   // After midnight is day 1's.
   assert(content.chapters[0].photos.some((p) => p.id === "a6"));
 
-  const [one, two, three] = content.chapters;
-  // Day 1: the generic "It was fun." gives way to the ribs; the club note
-  // plays over its own photo.
-  const texts = one.excerpts.map((e) => e.text);
-  assert(!texts.includes("It was fun."), texts.join(" | "));
-  assert(texts.includes("Заказали 4,5 кг рёбер на троих в Брюсселе!"));
-  const club = one.excerpts.find((e) => e.note_id === "n2")!;
-  assertEquals(club.photo_id, "a5");
-  assertEquals(club.source, "code");
-  assert(one.rejected_excerpts.some((r) => r.text === "It was fun."));
-  // Day 2: the bikes, not "We went home."; on the photo nearest 15:00.
-  assertEquals(two.excerpts.map((e) => e.text), [
-    "Rented 3 bikes and rode 12 km to Zaandam.",
-  ]);
-  assertEquals(two.excerpts[0].photo_id, "b3");
-  // Day 3: the director's line, on the photo it chose.
-  assertEquals(three.excerpts[0].source, "director");
-  assertEquals(three.excerpts[0].photo_id, "c2");
+  const lines = content.chapters.flatMap((c) => c.excerpts.map((e) => e.text));
+  // The generic lines never play while a specific one is left.
+  for (
+    const generic of ["It was fun.", "Everyone was tired.", "We went home."]
+  ) {
+    assert(!lines.includes(generic), lines.join(" | "));
+  }
+  // The club note (after midnight, so day 1's) plays: the Note scene,
+  // over its own photo — and so in no other scene.
+  assertEquals(content.note?.photo_id, "a5");
+  assert(content.note?.text.startsWith("Danced at Shelter until 3"));
+  assert(!lines.some((l) => l.startsWith("Danced at Shelter")));
 
-  // Chronology: card photos are the chapter's earliest free ones, moments
-  // and their photos in time order.
   for (const chapter of content.chapters) {
     const at = new Map(chapter.photos.map((p, i) => [p.id, i]));
-    const firsts = chapter.moments.map((m) => at.get(m.photo_ids[0])!);
-    assertEquals(firsts, [...firsts].sort((a, b) => a - b));
-    for (const m of chapter.moments) {
-      const order = m.photo_ids.map((id) => at.get(id)!);
-      assertEquals(order, [...order].sort((a, b) => a - b));
-    }
-    const inMoments = new Set(chapter.moments.flatMap((m) => m.photo_ids));
-    const free = chapter.photos.map((p) => p.id).filter((id) =>
-      !inMoments.has(id)
-    );
-    assertEquals(
+    const blocks = [
       chapter.card_photo_ids,
-      free.slice(0, chapter.card_photo_ids.length),
-    );
+      ...chapter.moments.map((m) => m.photo_ids),
+    ].map((ids) => ids.map((id) => at.get(id)!));
+    for (const [k, block] of blocks.entries()) {
+      assertEquals(block, [...block].sort((a, b) => a - b));
+      if (k > 0) assert(Math.max(...blocks[k - 1]) < Math.min(...block));
+    }
   }
-  assertEquals(content.headline, null);
 });
 
-Deno.test("one night is still split by the director, by time", () => {
+Deno.test("a profane line is never the headline or a title", () => {
   const data = amsterdam();
-  data.photos = data.photos.filter((p) => p.id.startsWith("a"));
-  const context = nnCheckContext(data);
-  const plan: NeonNightPlan = {
-    chapters: [
-      {
-        title: "Ribs",
-        first_photo_id: "a0",
-        note_id: null,
-        note_excerpt: null,
-        moments: [{ type: "split", photo_ids: ["a0", "a1"] }],
-        excerpts: [],
-      },
-      {
-        title: "Shelter",
-        first_photo_id: "a4",
-        note_id: null,
-        note_excerpt: null,
-        moments: [{ type: "split", photo_ids: ["a5", "a6"] }],
-        excerpts: [],
-      },
-    ],
-    note_moment: null,
-    headline: null,
-  };
-  assertEquals(describeNeonNightProblems(plan, context), []);
-  const repaired = repairNeonNight(plan, context) as NeonNightPlan;
-  assertEquals(repaired.chapters.map((c) => c.first_photo_id), ["a0", "a4"]);
+  data.notes[2].content = "Fucking legends. Rented 3 bikes and rode 12 km.";
+  const { slots, content } = neonNightFilm(data, null);
+  for (const s of slots) {
+    if (s.kind !== "title" && s.kind !== "headline") continue;
+    assert(s.candidates.every((c) => !/fuck/i.test(c.text)), s.slot);
+  }
+  assert(!/fuck/i.test(content.headline ?? ""));
 });
-
-// --- #422: Amsterdam feedback ------------------------------------------------
 
 Deno.test("an untimed photo keeps its stored day: no 1-photo day chapter", () => {
   const data = amsterdam();
@@ -252,36 +145,6 @@ Deno.test("an untimed photo keeps its stored day: no 1-photo day chapter", () =>
   const context = nnCheckContext(data);
   assertEquals(context.photoDays!.get("untimed"), "2026-09-03");
   assertEquals(dayChapterStarts(context).length, 3);
-});
-
-Deno.test("a day the director split by time keeps at most 2 moments", () => {
-  const context = nnCheckContext(amsterdam());
-  const plan: NeonNightPlan = {
-    chapters: [
-      ["a0", ["a0", "a1"]],
-      ["a2", ["a2", "a3"]],
-      ["a4", ["a4", "a5"]],
-      ["b0", ["b0", "b1"]],
-      ["c0", ["c0", "c1"]],
-    ].map(([first, ids], k) => ({
-      title: `Part ${k + 1}`,
-      first_photo_id: first as string,
-      note_id: null,
-      note_excerpt: null,
-      moments: [{ type: "split" as const, photo_ids: ids as string[] }],
-      excerpts: [],
-    })),
-    note_moment: null,
-    headline: null,
-  };
-  const repaired = repairNeonNight(plan, context) as NeonNightPlan;
-  assertEquals(describeNeonNightProblems(repaired, context), []);
-  const day1 = repaired.chapters[0];
-  assertEquals(day1.moments.length, 2);
-  // The first stays; the others' photos make one timeline, in time order.
-  assertEquals(day1.moments[0].photo_ids, ["a0", "a1"]);
-  assertEquals(day1.moments[1].type, "timeline");
-  assertEquals(day1.moments[1].photo_ids, ["a2", "a3", "a4", "a5"]);
 });
 
 // --- A long day in parts (#426) --------------------------------------------
@@ -333,96 +196,11 @@ Deno.test("a long day breaks into parts at its long breaks (#426)", () => {
   // for a part; the next (2.7 h, before the bar) and the rave's are parts.
   // The 2.6 h one would leave the bus 2 photos. Days 2 and 3 stay whole.
   assertEquals(starts, ["air0", "eve2", "rave0", "d2_0", "d3_0"]);
-  // A memory over a single day keeps the director's split.
+  // A memory over a single day isn't cut by days: its night is.
   const oneDay = longDays();
   oneDay.photos = oneDay.photos.filter((p) =>
     p.id.startsWith("air") ||
     p.id.startsWith("day")
   );
   assertEquals(nnChapterStarts(nnCheckContext(oneDay)), []);
-});
-
-Deno.test("repair gives each part a chapter, titled by the director or its day (#448)", () => {
-  const data = longDays();
-  const context = nnCheckContext(data);
-  const plan: NeonNightPlan = {
-    chapters: [
-      {
-        title: "Прилет",
-        first_photo_id: "air0",
-        note_id: null,
-        note_excerpt: null,
-        moments: [
-          { type: "timeline", photo_ids: ["air1", "day2", "eve2", "rave2"] },
-        ],
-        excerpts: [],
-      },
-      {
-        title: "AMF",
-        first_photo_id: "d2_0",
-        note_id: null,
-        note_excerpt: null,
-        moments: [{ type: "split", photo_ids: ["d2_2", "d2_3"] }],
-        excerpts: [],
-      },
-      {
-        title: "Брюссель",
-        first_photo_id: "d3_0",
-        note_id: null,
-        note_excerpt: null,
-        moments: [{ type: "split", photo_ids: ["d3_0", "d3_1"] }],
-        excerpts: [],
-      },
-    ],
-    note_moment: null,
-    headline: null,
-  };
-  const repaired = repairNeonNight(plan, context) as NeonNightPlan;
-  assertEquals(describeNeonNightProblems(repaired, context), []);
-  // No words to title the evening and the rave by (no place, caption or
-  // note): the day and its part, never a clock time (#448).
-  assertEquals(repaired.chapters.map((c) => c.title), [
-    "Прилет",
-    "Day 1",
-    "Day 1 · 2",
-    "AMF",
-    "Брюссель",
-  ]);
-  // Content: every chapter in its own stretch, each scene after the last.
-  const content = buildNeonNightContent(data, repaired);
-  let last = -Infinity;
-  for (const chapter of content.chapters) {
-    const at = (id: string) =>
-      Date.parse(chapter.photos.find((p) => p.id === id)!.taken_at);
-    for (
-      const block of [
-        chapter.card_photo_ids,
-        ...chapter.moments.map((m) => m.photo_ids),
-      ]
-    ) {
-      const times = block.map(at);
-      assertEquals(times, [...times].sort((a, b) => a - b));
-      assert(times[0] > last, `${chapter.title} goes back in time`);
-      last = times[times.length - 1];
-    }
-  }
-});
-
-Deno.test("an overlong title is replaced, never cut mid-phrase (#426, #450)", () => {
-  const context = nnCheckContext(amsterdam());
-  const plan = foldedPlan();
-  plan.headline = null;
-  plan.chapters[0].title = "Брюссель, ребра и Shelter"; // 25 characters
-  const repaired = repairNeonNight(plan, context) as NeonNightPlan;
-  assertEquals(describeNeonNightProblems(repaired, context), []);
-  // Not "Брюссель, ребра и": the part's own title instead.
-  assert(!"Брюссель, ребра и Shelter".startsWith(repaired.chapters[0].title));
-  assert(repaired.chapters[0].title.length > 0);
-  // One long word can't be shortened: the part's own words instead, never
-  // a clock time (#448).
-  plan.chapters[0].title = "Супердлинноеназваниеглавы";
-  const timed = repairNeonNight(plan, context) as NeonNightPlan;
-  assertEquals(describeNeonNightProblems(timed, context), []);
-  assert(!/^\d{1,2}:\d{2}$/.test(timed.chapters[0].title));
-  assert(timed.chapters[0].title.length > 0);
 });

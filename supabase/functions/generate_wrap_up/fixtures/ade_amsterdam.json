@@ -1,0 +1,1456 @@
+{
+  "exported_at": "2026-11-22T10:54:48.802Z",
+  "trip_data": {
+    "trip": {
+      "name": "ADE-Amsterdam 2026",
+      "destination": "Amsterdam Netherlands",
+      "country_code": null,
+      "start_date": "2026-10-23",
+      "end_date": "2026-10-25",
+      "vibes": [
+        "Nightlife"
+      ],
+      "cover_image_path": "c2ee6084-a15e-4ade-8979-7af9afd05985/320116c2-f201-479b-8f13-85d8d421f30e/cover.jpg"
+    },
+    "notes": [
+      {
+        "id": "3224a4be-3594-48c9-887b-c53053faa01a",
+        "day_date": "2026-10-23",
+        "content": "Прибыл в аэропорт за 10 минут до посадки, а там толпа людей- даже немного испугался что не успею на самолет.",
+        "created_at": "2026-10-23T06:40:00+00:00",
+        "taken_at": "2026-10-23T06:40:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "587ea168-33ee-4ef5-baf9-24e6a056d270",
+        "day_date": "2026-10-23",
+        "content": "Приземлились в Амстердаме и сразу пошли завтракать/ Пока ели в MacDonalds к нам пришли друзья которые прибыли двумя днями ранее.",
+        "created_at": "2026-10-23T10:00:00+00:00",
+        "taken_at": "2026-10-23T10:00:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "b8e3a6ef-1eb4-4506-af3c-b363a9050ea9",
+        "day_date": "2026-10-23",
+        "content": "Покурили косячок и зашли в магазин за пивом также забрали М.",
+        "created_at": "2026-10-23T11:00:00+00:00",
+        "taken_at": "2026-10-23T11:00:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "ece34f11-c106-4010-8d55-ccfcc3c7159c",
+        "day_date": "2026-10-23",
+        "content": "Мы выходим из дома сидели там пару часов, успели помыться поесть и выпить пивка. Конечно же пыхнули и взяли еще косячок с собой, бомбочки сделаны и тоже взяты с собой.",
+        "created_at": "2026-10-23T16:00:00+00:00",
+        "taken_at": "2026-10-23T16:00:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "6dc91f10-5646-4d6b-9859-839838d849eb",
+        "day_date": "2026-10-23",
+        "content": "Сидим в баре скоро принесут полтора метра ребер это 4.5kg мяса. Ну и конечно же взяли пиво!",
+        "created_at": "2026-10-23T19:00:00+00:00",
+        "taken_at": "2026-10-23T19:00:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "e46c0c6b-8a6e-4aa1-8745-e11bf5ac73a7",
+        "day_date": "2026-10-23",
+        "content": "Я уже нормально так поднарылся но еще ждать два часа до рейва так что решили взять риса чтобы ждать Куко было легче.",
+        "created_at": "2026-10-23T20:00:00+00:00",
+        "taken_at": "2026-10-23T20:00:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "e2528865-8652-4b44-a65e-f698f5e30db0",
+        "day_date": "2026-10-23",
+        "content": "Это самый крутой сет который я слышал или это М?",
+        "created_at": "2026-10-24T02:00:00+00:00",
+        "taken_at": "2026-10-24T02:00:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
+        "day_date": "2026-10-24",
+        "content": "В общем мы вчера пришли где-то в 8 утра,сначало были на Куко Unreal потом поехали в другую локацию так как купили билеты туда тоже заранее. Было супер весело и получили много позитивных эмоций но супер устали так что сегодня день начался поздно.",
+        "created_at": "2026-10-24T12:00:00+00:00",
+        "taken_at": "2026-10-24T12:00:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "f33b871c-c682-4680-bc74-260c570ad1a3",
+        "day_date": "2026-10-24",
+        "content": "Идем завтракать в город нашли english breakfast. Потом зашли в coffeeshop на втором этаже есть диваны где все кушают сладости и курят косячки, очень необычно. Зашли в продуктовый и поехали в дом откисать.",
+        "created_at": "2026-10-24T13:00:00+00:00",
+        "taken_at": "2026-10-24T13:00:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "43f91e23-1542-490d-b835-f31dfac55106",
+        "day_date": "2026-10-24",
+        "content": "Откисаем и смотрим ufc  Петр ян против Мираба, держим кулочки за нашего слона.",
+        "created_at": "2026-10-24T16:00:00+00:00",
+        "taken_at": "2026-10-24T16:00:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "78ee4611-469c-4b97-9f61-a224736d1d73",
+        "day_date": "2026-10-24",
+        "content": "Выезжаем на AMF тусовку за окном ливень но мы готовы дать еще один бой.",
+        "created_at": "2026-10-24T21:00:00+00:00",
+        "taken_at": "2026-10-24T21:00:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "14c07398-380e-4d0a-9382-cb480c8b64cc",
+        "day_date": "2026-10-24",
+        "content": "Мы на месте это просто огромный футбольный стадион, очень круто но диджеи не очень.",
+        "created_at": "2026-10-24T23:00:00+00:00",
+        "taken_at": "2026-10-24T23:00:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "7b1c21ed-fe19-4c70-a6bd-d85f1c502768",
+        "day_date": "2026-10-25",
+        "content": "Проснулись собрались с силами и позавтракали, едем в аэропорт в Брюсель но подороге остановимся покушать и выпить вкусного бельгийского пиво на дорожку",
+        "created_at": "2026-10-25T11:00:00+00:00",
+        "taken_at": "2026-10-25T11:00:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "9c2f7347-5352-4a47-8dcf-222090ed53a9",
+        "day_date": "2026-10-25",
+        "content": "Наелись и похмелились пора домой, Брюссель не меняется отличное пиво и вкусная еда.",
+        "created_at": "2026-10-25T15:00:00+00:00",
+        "taken_at": "2026-10-25T15:00:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      }
+    ],
+    "photos": [
+      {
+        "id": "cd16a50b-3981-465d-ba60-33078d7f4eef",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-23T06:40:18+00:00",
+        "created_at": "2026-10-23T03:40:36.820794+00:00",
+        "storage_path": "p/cd16a50b-3981-465d-ba60-33078d7f4eef.jpg",
+        "caption": "fast check-in",
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "39fea9d3-4931-4605-8f22-94c1714fa2e8",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-23T06:42:15+00:00",
+        "created_at": "2026-10-23T03:42:50.024936+00:00",
+        "storage_path": "p/39fea9d3-4931-4605-8f22-94c1714fa2e8.jpg",
+        "caption": "Did not expect that many people in the airport, have 15m before boarding",
+        "use_in_wrap_up": true,
+        "place_text": "Tallinn airport",
+        "people_tags": []
+      },
+      {
+        "id": "ac6c43bb-a98f-4c77-9a52-d84d0abb16f9",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-23T06:50:35+00:00",
+        "created_at": "2026-10-23T05:06:37.920113+00:00",
+        "storage_path": "p/ac6c43bb-a98f-4c77-9a52-d84d0abb16f9.jpg",
+        "caption": "children are ready to get fucked",
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "7b9eee86-d27a-4263-ae02-cdb2d829e792",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-23T10:10:30+00:00",
+        "created_at": "2026-10-23T08:10:51.065092+00:00",
+        "storage_path": "p/7b9eee86-d27a-4263-ae02-cdb2d829e792.jpg",
+        "caption": "we are here",
+        "use_in_wrap_up": true,
+        "place_text": "amsterdam",
+        "people_tags": []
+      },
+      {
+        "id": "a3cc4c86-5ac2-4200-8bc8-1e303d6c594e",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-23T10:19:18+00:00",
+        "created_at": "2026-10-23T08:19:30.615652+00:00",
+        "storage_path": "p/a3cc4c86-5ac2-4200-8bc8-1e303d6c594e.jpg",
+        "caption": "coffee shop",
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "1188b05a-6581-4680-9b01-34c97a7f1b34",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-23T11:25:45+00:00",
+        "created_at": "2026-10-23T09:26:22.398823+00:00",
+        "storage_path": "p/1188b05a-6581-4680-9b01-34c97a7f1b34.jpg",
+        "caption": "getting oatmeal with almonds and bananas",
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "1325f261-7d4b-48d5-a9e7-dbc4e6cc423b",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-23T12:31:11+00:00",
+        "created_at": "2026-10-23T10:31:26.430723+00:00",
+        "storage_path": "p/1325f261-7d4b-48d5-a9e7-dbc4e6cc423b.jpg",
+        "caption": "our castle",
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "34542056-43ea-4798-b5e4-18944e0c539a",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-23T12:33:58+00:00",
+        "created_at": "2026-10-23T10:34:14.764313+00:00",
+        "storage_path": "p/34542056-43ea-4798-b5e4-18944e0c539a.jpg",
+        "caption": "got some fun",
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "b884095d-4672-48cf-9da9-493aac62c69d",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-23T15:10:17+00:00",
+        "created_at": "2026-10-23T13:10:54.946772+00:00",
+        "storage_path": "p/b884095d-4672-48cf-9da9-493aac62c69d.jpg",
+        "caption": "ждем автобус",
+        "use_in_wrap_up": null,
+        "place_text": "холодно",
+        "people_tags": []
+      },
+      {
+        "id": "6eca4520-d5b4-4e2a-aed2-7760f35a40f5",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-23T15:42:19+00:00",
+        "created_at": "2026-10-23T13:42:30.18648+00:00",
+        "storage_path": "p/6eca4520-d5b4-4e2a-aed2-7760f35a40f5.jpg",
+        "caption": "боча пролил пиво",
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "2bd9809d-ae25-452e-b250-1c6397d7a674",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-23T19:30:22+00:00",
+        "created_at": "2026-10-23T17:30:37.052986+00:00",
+        "storage_path": "p/2bd9809d-ae25-452e-b250-1c6397d7a674.jpg",
+        "caption": "back to the roots",
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "cd74fdc4-2cb8-46e8-a3fc-8d1baa910293",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-23T18:25:16+00:00",
+        "created_at": "2026-10-23T18:52:08.862106+00:00",
+        "storage_path": "p/cd74fdc4-2cb8-46e8-a3fc-8d1baa910293.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "10af0193-e773-4ffc-8b86-1066f3fe1530",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-23T22:14:30+00:00",
+        "created_at": "2026-10-23T20:14:44.268243+00:00",
+        "storage_path": "p/10af0193-e773-4ffc-8b86-1066f3fe1530.jpg",
+        "caption": "some peptides",
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "1e84d7df-ead0-4193-abd0-3592e4cecd59",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-23T22:46:46+00:00",
+        "created_at": "2026-10-23T20:47:18.390223+00:00",
+        "storage_path": "p/1e84d7df-ead0-4193-abd0-3592e4cecd59.jpg",
+        "caption": "боча застрял в толчке",
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "620303b8-4aa3-4b7c-8c11-fe813dfd62a1",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-24T01:04:37+00:00",
+        "created_at": "2026-10-24T12:20:22.215184+00:00",
+        "storage_path": "p/620303b8-4aa3-4b7c-8c11-fe813dfd62a1.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "764ecd51-0180-4683-b777-200e375078ed",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-24T01:04:38+00:00",
+        "created_at": "2026-10-24T12:20:23.452374+00:00",
+        "storage_path": "p/764ecd51-0180-4683-b777-200e375078ed.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "e5be04ce-b606-415f-9b03-70c08b0fe4a3",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-24T04:34:45+00:00",
+        "created_at": "2026-10-24T12:20:24.565685+00:00",
+        "storage_path": "p/e5be04ce-b606-415f-9b03-70c08b0fe4a3.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "02d9ee87-6b80-457f-ab8f-c4c1bd67f73a",
+        "day_date": "2026-10-23",
+        "taken_at": "2026-10-24T04:34:29+00:00",
+        "created_at": "2026-10-24T12:20:25.577775+00:00",
+        "storage_path": "p/02d9ee87-6b80-457f-ab8f-c4c1bd67f73a.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e",
+        "day_date": "2026-10-24",
+        "taken_at": "2026-10-24T11:00:00+00:00",
+        "created_at": "2026-10-24T12:22:16.450672+00:00",
+        "storage_path": "p/20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e.jpg",
+        "caption": "morning hangover",
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
+        "day_date": "2026-10-24",
+        "taken_at": "2026-10-24T12:30:00+00:00",
+        "created_at": "2026-10-24T14:58:12.562625+00:00",
+        "storage_path": "p/f3d3f0b4-d645-45fd-a946-2aa8998df1cd.jpg",
+        "caption": "on the walk with some lads",
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "48da458f-98c8-414f-9453-af81cec6f9da",
+        "day_date": "2026-10-24",
+        "taken_at": "2026-10-24T16:30:00+00:00",
+        "created_at": "2026-10-24T17:01:07.968275+00:00",
+        "storage_path": "p/48da458f-98c8-414f-9453-af81cec6f9da.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "ad570c04-90bf-4d84-9931-7a3e90db9caa",
+        "day_date": "2026-10-24",
+        "taken_at": "2026-10-24T17:30:00+00:00",
+        "created_at": "2026-10-24T20:14:42.828168+00:00",
+        "storage_path": "p/ad570c04-90bf-4d84-9931-7a3e90db9caa.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "ff6a1fde-b6bd-48d8-b87d-29687d647553",
+        "day_date": "2026-10-25",
+        "taken_at": "2026-10-25T02:43:44+00:00",
+        "created_at": "2026-10-25T09:42:49.596744+00:00",
+        "storage_path": "p/ff6a1fde-b6bd-48d8-b87d-29687d647553.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "4b028163-05eb-4808-8995-2332f0e2e7a5",
+        "day_date": "2026-10-25",
+        "taken_at": "2026-10-25T02:43:43+00:00",
+        "created_at": "2026-10-25T09:42:50.684171+00:00",
+        "storage_path": "p/4b028163-05eb-4808-8995-2332f0e2e7a5.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "b6c54800-0fd8-40e0-a2d8-fee12fcc2e55",
+        "day_date": "2026-10-25",
+        "taken_at": "2026-10-25T10:55:52+00:00",
+        "created_at": "2026-10-25T09:55:55.803402+00:00",
+        "storage_path": "p/b6c54800-0fd8-40e0-a2d8-fee12fcc2e55.jpg",
+        "caption": null,
+        "use_in_wrap_up": false,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc",
+        "day_date": "2026-10-25",
+        "taken_at": "2026-10-25T19:04:31+00:00",
+        "created_at": "2026-10-25T18:04:42.597771+00:00",
+        "storage_path": "p/a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc.jpg",
+        "caption": "some sweets for Elmas",
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "da8f273e-2961-411b-b8e5-e286047a5e72",
+        "day_date": "2026-10-25",
+        "taken_at": "2026-10-25T16:39:17+00:00",
+        "created_at": "2026-10-25T18:05:12.092177+00:00",
+        "storage_path": "p/da8f273e-2961-411b-b8e5-e286047a5e72.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "9a9ccc19-f7b1-491d-a502-96217f7ca55c",
+        "day_date": "2026-10-25",
+        "taken_at": "2026-10-25T16:19:39+00:00",
+        "created_at": "2026-10-25T18:05:13.289951+00:00",
+        "storage_path": "p/9a9ccc19-f7b1-491d-a502-96217f7ca55c.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "8513fe91-5136-43bb-8d93-d930f1cecf54",
+        "day_date": "2026-10-25",
+        "taken_at": null,
+        "created_at": "2026-10-27T20:27:48.914282+00:00",
+        "storage_path": "p/8513fe91-5136-43bb-8d93-d930f1cecf54.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      }
+    ],
+    "completedBonusTasks": [
+      {
+        "completed_at": "2026-10-23T06:40:37.099238+00:00",
+        "photo_id": "cd16a50b-3981-465d-ba60-33078d7f4eef",
+        "title": "Just check in",
+        "points": 2
+      },
+      {
+        "completed_at": "2026-10-23T06:42:50.313054+00:00",
+        "photo_id": "39fea9d3-4931-4605-8f22-94c1714fa2e8",
+        "title": "Snap anything at all",
+        "points": 1
+      },
+      {
+        "completed_at": "2026-10-23T11:26:22.76239+00:00",
+        "photo_id": "1188b05a-6581-4680-9b01-34c97a7f1b34",
+        "title": "Find something free",
+        "points": 1
+      },
+      {
+        "completed_at": "2026-10-23T20:35:05.181528+00:00",
+        "photo_id": null,
+        "title": "Snap your very first impression",
+        "points": 2
+      },
+      {
+        "completed_at": "2026-10-24T14:22:16.712992+00:00",
+        "photo_id": "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e",
+        "title": "The worst photo of the day",
+        "points": 2
+      },
+      {
+        "completed_at": "2026-10-24T19:01:08.385222+00:00",
+        "photo_id": "48da458f-98c8-414f-9453-af81cec6f9da",
+        "title": "Try a snack you can't get at home",
+        "points": 2
+      },
+      {
+        "completed_at": "2026-10-24T22:14:43.121171+00:00",
+        "photo_id": "ad570c04-90bf-4d84-9931-7a3e90db9caa",
+        "title": "Do the thing you keep talking yourself out of",
+        "points": 3
+      },
+      {
+        "completed_at": "2026-10-25T10:55:56.131941+00:00",
+        "photo_id": "b6c54800-0fd8-40e0-a2d8-fee12fcc2e55",
+        "title": "Capture your final meal here",
+        "points": 1
+      },
+      {
+        "completed_at": "2026-10-25T19:04:42.968616+00:00",
+        "photo_id": "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc",
+        "title": "Snap the meal that felt like home",
+        "points": 1
+      }
+    ],
+    "starsEarned": 84,
+    "latestAchievement": {
+      "code": "first_adventure",
+      "title": "First Adventure",
+      "description": "Log your first memory."
+    },
+    "checklist": [
+      {
+        "title": "Контактные линзы или очки",
+        "suggestion_code": "contact_lenses_or_glasses",
+        "is_checked": false
+      },
+      {
+        "title": "Зонт",
+        "suggestion_code": "umbrella",
+        "is_checked": false
+      },
+      {
+        "title": "Зарядка для телефона",
+        "suggestion_code": "phone_charger",
+        "is_checked": true
+      },
+      {
+        "title": "SIM-карта или eSIM",
+        "suggestion_code": "sim_card_or_esim",
+        "is_checked": false
+      },
+      {
+        "title": "Солнцезащитные очки",
+        "suggestion_code": "sunglasses",
+        "is_checked": false
+      },
+      {
+        "title": "Дневник путешествий",
+        "suggestion_code": "travel_journal",
+        "is_checked": false
+      },
+      {
+        "title": "Одежда для сна",
+        "suggestion_code": "sleepwear",
+        "is_checked": false
+      },
+      {
+        "title": "Кредитные / дебетовые карты",
+        "suggestion_code": "credit_debit_cards",
+        "is_checked": false
+      },
+      {
+        "title": "Фотоаппарат",
+        "suggestion_code": "camera",
+        "is_checked": false
+      },
+      {
+        "title": "Шампунь и кондиционер",
+        "suggestion_code": "shampoo_conditioner",
+        "is_checked": true
+      },
+      {
+        "title": "Купальник / плавки",
+        "suggestion_code": "swimsuit",
+        "is_checked": false
+      },
+      {
+        "title": "Наушники",
+        "suggestion_code": "headphones",
+        "is_checked": false
+      },
+      {
+        "title": "Антисептик для рук",
+        "suggestion_code": "hand_sanitizer",
+        "is_checked": true
+      },
+      {
+        "title": "Беруши и маска для сна",
+        "suggestion_code": "earplugs_eye_mask",
+        "is_checked": true
+      },
+      {
+        "title": "Дезодорант",
+        "suggestion_code": "deodorant",
+        "is_checked": false
+      },
+      {
+        "title": "Органайзеры для вещей",
+        "suggestion_code": "packing_cubes",
+        "is_checked": false
+      },
+      {
+        "title": "Пауэрбанк",
+        "suggestion_code": "portable_battery_pack",
+        "is_checked": false
+      },
+      {
+        "title": "Удостоверение личности",
+        "suggestion_code": "id_card",
+        "is_checked": true
+      },
+      {
+        "title": "Куртка",
+        "suggestion_code": "jacket",
+        "is_checked": false
+      },
+      {
+        "title": "Солнцезащитный крем",
+        "suggestion_code": "sunscreen",
+        "is_checked": true
+      },
+      {
+        "title": "Посадочные талоны / билеты",
+        "suggestion_code": "boarding_passes_tickets",
+        "is_checked": true
+      },
+      {
+        "title": "Футболки",
+        "suggestion_code": "t_shirts",
+        "is_checked": false
+      },
+      {
+        "title": "Переходник для розетки",
+        "suggestion_code": "power_adapter",
+        "is_checked": false
+      },
+      {
+        "title": "Перекусы",
+        "suggestion_code": "snacks",
+        "is_checked": true
+      },
+      {
+        "title": "Удобная обувь для прогулок",
+        "suggestion_code": "comfortable_walking_shoes",
+        "is_checked": false
+      },
+      {
+        "title": "Аптечка",
+        "suggestion_code": "first_aid_kit",
+        "is_checked": false
+      },
+      {
+        "title": "Многоразовая бутылка для воды",
+        "suggestion_code": "reusable_water_bottle",
+        "is_checked": false
+      },
+      {
+        "title": "Зарядные кабели",
+        "suggestion_code": "charging_cables",
+        "is_checked": false
+      },
+      {
+        "title": "Туристическая страховка",
+        "suggestion_code": "travel_insurance",
+        "is_checked": false
+      },
+      {
+        "title": "Телефон",
+        "suggestion_code": "phone",
+        "is_checked": false
+      },
+      {
+        "title": "Рецептурные лекарства",
+        "suggestion_code": "prescription_medications",
+        "is_checked": false
+      },
+      {
+        "title": "Подушка для путешествий",
+        "suggestion_code": "travel_pillow",
+        "is_checked": false
+      },
+      {
+        "title": "Нижнее бельё",
+        "suggestion_code": "underwear",
+        "is_checked": false
+      },
+      {
+        "title": "Паспорт",
+        "suggestion_code": "passport",
+        "is_checked": false
+      },
+      {
+        "title": "Зубная щётка и паста",
+        "suggestion_code": "toothbrush_toothpaste",
+        "is_checked": false
+      },
+      {
+        "title": "полотенце",
+        "suggestion_code": null,
+        "is_checked": false
+      },
+      {
+        "title": "наличные",
+        "suggestion_code": null,
+        "is_checked": false
+      }
+    ],
+    "quests": [
+      {
+        "title": "Вылет из Таллинна в Амстердам",
+        "day_date": "2026-10-23",
+        "time": "07:00:00",
+        "completed_at": "2026-10-23T08:06:47.74944+00:00"
+      },
+      {
+        "title": "Встретиться и обсудить дальнийший план",
+        "day_date": "2026-10-23",
+        "time": null,
+        "completed_at": "2026-10-23T11:25:19.046992+00:00"
+      },
+      {
+        "title": "Посмотреть сколько стоит бонг",
+        "day_date": "2026-10-23",
+        "time": null,
+        "completed_at": "2026-10-23T11:25:21.330115+00:00"
+      },
+      {
+        "title": "Услышать voicemail from kuko",
+        "day_date": "2026-10-23",
+        "time": null,
+        "completed_at": "2026-10-26T13:26:34.392993+00:00"
+      },
+      {
+        "title": "выспаться",
+        "day_date": "2026-10-24",
+        "time": null,
+        "completed_at": null
+      },
+      {
+        "title": "позавтракать",
+        "day_date": "2026-10-24",
+        "time": null,
+        "completed_at": "2026-10-26T13:26:43.940931+00:00"
+      }
+    ],
+    "username": null,
+    "utc_offset_minutes": 120
+  },
+  "analyses": [
+    {
+      "photo_id": "cd16a50b-3981-465d-ba60-33078d7f4eef",
+      "trip_id": "t",
+      "storage_path": "p/cd16a50b-3981-465d-ba60-33078d7f4eef.jpg",
+      "summary": "Airport check-in hall with departure board and counters",
+      "setting": "venue",
+      "people": "small_group",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 2,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "39fea9d3-4931-4605-8f22-94c1714fa2e8",
+      "trip_id": "t",
+      "storage_path": "p/39fea9d3-4931-4605-8f22-94c1714fa2e8.jpg",
+      "summary": "Travelers queue with luggage at airport bag drop",
+      "setting": "venue",
+      "people": "crowd",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 2,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "ac6c43bb-a98f-4c77-9a52-d84d0abb16f9",
+      "trip_id": "t",
+      "storage_path": "p/ac6c43bb-a98f-4c77-9a52-d84d0abb16f9.jpg",
+      "summary": "Two people seated by airport kids play slide",
+      "setting": "venue",
+      "people": "2",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 3,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "7b9eee86-d27a-4263-ae02-cdb2d829e792",
+      "trip_id": "t",
+      "storage_path": "p/7b9eee86-d27a-4263-ae02-cdb2d829e792.jpg",
+      "summary": "City street corner with historic buildings and parked cars",
+      "setting": "city",
+      "people": "0",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 3,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "a3cc4c86-5ac2-4200-8bc8-1e303d6c594e",
+      "trip_id": "t",
+      "storage_path": "p/a3cc4c86-5ac2-4200-8bc8-1e303d6c594e.jpg",
+      "summary": "Coffeeshop counter with illuminated cannabis menu board",
+      "setting": "venue",
+      "people": "small_group",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 3,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "1188b05a-6581-4680-9b01-34c97a7f1b34",
+      "trip_id": "t",
+      "storage_path": "p/1188b05a-6581-4680-9b01-34c97a7f1b34.jpg",
+      "summary": "People at ornate grocery store checkout with groceries",
+      "setting": "indoor",
+      "people": "small_group",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 2,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "1325f261-7d4b-48d5-a9e7-dbc4e6cc423b",
+      "trip_id": "t",
+      "storage_path": "p/1325f261-7d4b-48d5-a9e7-dbc4e6cc423b.jpg",
+      "summary": "Two people with backpacks outside green cottage patio",
+      "setting": "outdoor",
+      "people": "2",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 2,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "34542056-43ea-4798-b5e4-18944e0c539a",
+      "trip_id": "t",
+      "storage_path": "p/34542056-43ea-4798-b5e4-18944e0c539a.jpg",
+      "summary": "Hand holding small bag with white substance indoors",
+      "setting": "indoor",
+      "people": "1",
+      "energy": "calm",
+      "quality": "soft",
+      "orientation": "portrait",
+      "hero_score": 1,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "b884095d-4672-48cf-9da9-493aac62c69d",
+      "trip_id": "t",
+      "storage_path": "p/b884095d-4672-48cf-9da9-493aac62c69d.jpg",
+      "summary": "Empty bus stop sign beside quiet roadway under clouds",
+      "setting": "outdoor",
+      "people": "0",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 2,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "6eca4520-d5b4-4e2a-aed2-7760f35a40f5",
+      "trip_id": "t",
+      "storage_path": "p/6eca4520-d5b4-4e2a-aed2-7760f35a40f5.jpg",
+      "summary": "Hands holding drinks at bar with beer taps",
+      "setting": "night-out",
+      "people": "2",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 3,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "cd74fdc4-2cb8-46e8-a3fc-8d1baa910293",
+      "trip_id": "t",
+      "storage_path": "p/cd74fdc4-2cb8-46e8-a3fc-8d1baa910293.jpg",
+      "summary": "Large rack of ribs served at dimly lit restaurant bar",
+      "setting": "night-out",
+      "people": "1",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 4,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "2bd9809d-ae25-452e-b250-1c6397d7a674",
+      "trip_id": "t",
+      "storage_path": "p/2bd9809d-ae25-452e-b250-1c6397d7a674.jpg",
+      "summary": "Crowd outside red-lit Moulin Rouge nightclub at night",
+      "setting": "night-out",
+      "people": "crowd",
+      "energy": "high",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 4,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "10af0193-e773-4ffc-8b86-1066f3fe1530",
+      "trip_id": "t",
+      "storage_path": "p/10af0193-e773-4ffc-8b86-1066f3fe1530.jpg",
+      "summary": "Close-up of hand holding scratched phone screen at night",
+      "setting": "night-out",
+      "people": "1",
+      "energy": "calm",
+      "quality": "dark",
+      "orientation": "portrait",
+      "hero_score": 1,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "1e84d7df-ead0-4193-abd0-3592e4cecd59",
+      "trip_id": "t",
+      "storage_path": "p/1e84d7df-ead0-4193-abd0-3592e4cecd59.jpg",
+      "summary": "Person unlocking green door in hallway",
+      "setting": "indoor",
+      "people": "1",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 1,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "620303b8-4aa3-4b7c-8c11-fe813dfd62a1",
+      "trip_id": "t",
+      "storage_path": "p/620303b8-4aa3-4b7c-8c11-fe813dfd62a1.jpg",
+      "summary": "Concert crowd under red lighting with monster screen graphic",
+      "setting": "night-out",
+      "people": "crowd",
+      "energy": "high",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 4,
+      "dup_group": "mw832ae2-b0-concert",
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "764ecd51-0180-4683-b777-200e375078ed",
+      "trip_id": "t",
+      "storage_path": "p/764ecd51-0180-4683-b777-200e375078ed.jpg",
+      "summary": "Concert stage with monster screen graphic and crowd silhouettes",
+      "setting": "night-out",
+      "people": "crowd",
+      "energy": "high",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 4,
+      "dup_group": "mw832ae2-b0-concert",
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "02d9ee87-6b80-457f-ab8f-c4c1bd67f73a",
+      "trip_id": "t",
+      "storage_path": "p/02d9ee87-6b80-457f-ab8f-c4c1bd67f73a.jpg",
+      "summary": "Two men selfie at green-lit nightclub with crowd",
+      "setting": "night-out",
+      "people": "2",
+      "energy": "high",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 3,
+      "dup_group": "mw832ae2-b0-selfie",
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "e5be04ce-b606-415f-9b03-70c08b0fe4a3",
+      "trip_id": "t",
+      "storage_path": "p/e5be04ce-b606-415f-9b03-70c08b0fe4a3.jpg",
+      "summary": "Two men selfie wearing sunglasses under green club lighting",
+      "setting": "night-out",
+      "people": "2",
+      "energy": "high",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 3,
+      "dup_group": "mw832ae2-b0-selfie",
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e",
+      "trip_id": "t",
+      "storage_path": "p/20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e.jpg",
+      "summary": "Person lying on pillow taking selfie indoors",
+      "setting": "indoor",
+      "people": "1",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 2,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
+      "trip_id": "t",
+      "storage_path": "p/f3d3f0b4-d645-45fd-a946-2aa8998df1cd.jpg",
+      "summary": "Group walking down festive decorated European shopping street",
+      "setting": "city",
+      "people": "small_group",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 4,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "ad570c04-90bf-4d84-9931-7a3e90db9caa",
+      "trip_id": "t",
+      "storage_path": "p/ad570c04-90bf-4d84-9931-7a3e90db9caa.jpg",
+      "summary": "Hand holding Amstel beer can near TV showing fight",
+      "setting": "home",
+      "people": "1",
+      "energy": "calm",
+      "quality": "blurry",
+      "orientation": "portrait",
+      "hero_score": 2,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "4b028163-05eb-4808-8995-2332f0e2e7a5",
+      "trip_id": "t",
+      "storage_path": "p/4b028163-05eb-4808-8995-2332f0e2e7a5.jpg",
+      "summary": "Massive crowd under bright stage lights at indoor concert",
+      "setting": "venue",
+      "people": "crowd",
+      "energy": "high",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 5,
+      "dup_group": "mw832ae2-b1-a",
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "ff6a1fde-b6bd-48d8-b87d-29687d647553",
+      "trip_id": "t",
+      "storage_path": "p/ff6a1fde-b6bd-48d8-b87d-29687d647553.jpg",
+      "summary": "Red-lit stage lights sweeping over large concert crowd",
+      "setting": "venue",
+      "people": "crowd",
+      "energy": "high",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 5,
+      "dup_group": "mw832ae2-b1-a",
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "9a9ccc19-f7b1-491d-a502-96217f7ca55c",
+      "trip_id": "t",
+      "storage_path": "p/9a9ccc19-f7b1-491d-a502-96217f7ca55c.jpg",
+      "summary": "Gothic town hall tower with crowd in plaza below",
+      "setting": "city",
+      "people": "crowd",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 5,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "da8f273e-2961-411b-b8e5-e286047a5e72",
+      "trip_id": "t",
+      "storage_path": "p/da8f273e-2961-411b-b8e5-e286047a5e72.jpg",
+      "summary": "Man at pub table with Delirium beer glass, bread basket",
+      "setting": "venue",
+      "people": "small_group",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 3,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc",
+      "trip_id": "t",
+      "storage_path": "p/a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc.jpg",
+      "summary": "Hand holding Leonidas chocolate bag beside beer glasses",
+      "setting": "indoor",
+      "people": "1",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 2,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "8513fe91-5136-43bb-8d93-d930f1cecf54",
+      "trip_id": "t",
+      "storage_path": "p/8513fe91-5136-43bb-8d93-d930f1cecf54.jpg",
+      "summary": "Group of men posing with beer glasses at bar counter",
+      "setting": "night-out",
+      "people": "small_group",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "landscape",
+      "hero_score": 4,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "48da458f-98c8-414f-9453-af81cec6f9da",
+      "trip_id": "t",
+      "storage_path": "p/48da458f-98c8-414f-9453-af81cec6f9da.jpg",
+      "summary": "Beer bottle, yogurt pouch, water bottle on dark table",
+      "setting": "indoor",
+      "people": "0",
+      "energy": "calm",
+      "quality": "soft",
+      "orientation": "portrait",
+      "hero_score": 2,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    }
+  ],
+  "recorded_director": {
+    "plan": null,
+    "model": "claude-sonnet-5",
+    "usage": {
+      "calls": [
+        {
+          "call": "section",
+          "input_tokens": 9801,
+          "output_tokens": 2834
+        }
+      ],
+      "input_tokens": 9801,
+      "estimated_usd": 0.0479,
+      "output_tokens": 2834
+    },
+    "photos": {
+      "cached": 28,
+      "failed": 0,
+      "plannable": 27,
+      "analysed_now": 0
+    },
+    "ran_at": "2026-11-21T21:04:24.428Z",
+    "status": "fallback",
+    "attempts": 0,
+    "problems": [
+      "neon_night memory: no classic plan call"
+    ],
+    "template": "neon_night",
+    "run_count": 4,
+    "sky_story": null,
+    "failed_ids": [],
+    "neon_night": {
+      "chapters": [
+        {
+          "title": "Tallinn airport",
+          "moments": [
+            {
+              "type": "burst",
+              "photo_ids": [
+                "cd16a50b-3981-465d-ba60-33078d7f4eef",
+                "39fea9d3-4931-4605-8f22-94c1714fa2e8",
+                "ac6c43bb-a98f-4c77-9a52-d84d0abb16f9"
+              ]
+            },
+            {
+              "type": "timeline",
+              "photo_ids": [
+                "7b9eee86-d27a-4263-ae02-cdb2d829e792",
+                "a3cc4c86-5ac2-4200-8bc8-1e303d6c594e",
+                "1188b05a-6581-4680-9b01-34c97a7f1b34",
+                "1325f261-7d4b-48d5-a9e7-dbc4e6cc423b",
+                "34542056-43ea-4798-b5e4-18944e0c539a"
+              ]
+            }
+          ],
+          "note_id": null,
+          "excerpts": [
+            {
+              "text": "там толпа людей- даже немного испугался что не успею на самолет",
+              "note_id": "3224a4be-3594-48c9-887b-c53053faa01a",
+              "photo_id": "39fea9d3-4931-4605-8f22-94c1714fa2e8"
+            },
+            {
+              "text": "Приземлились в Амстердаме и сразу пошли завтракать",
+              "note_id": "587ea168-33ee-4ef5-baf9-24e6a056d270",
+              "photo_id": "7b9eee86-d27a-4263-ae02-cdb2d829e792"
+            },
+            {
+              "text": "Покурили косячок и зашли в магазин за пивом также забрали М",
+              "note_id": "b8e3a6ef-1eb4-4506-af3c-b363a9050ea9",
+              "photo_id": "a3cc4c86-5ac2-4200-8bc8-1e303d6c594e"
+            }
+          ],
+          "note_excerpt": null,
+          "first_photo_id": "cd16a50b-3981-465d-ba60-33078d7f4eef"
+        },
+        {
+          "title": "4.5kg ribs then Куко",
+          "moments": [
+            {
+              "type": "timeline",
+              "photo_ids": [
+                "6eca4520-d5b4-4e2a-aed2-7760f35a40f5",
+                "cd74fdc4-2cb8-46e8-a3fc-8d1baa910293",
+                "2bd9809d-ae25-452e-b250-1c6397d7a674",
+                "10af0193-e773-4ffc-8b86-1066f3fe1530",
+                "1e84d7df-ead0-4193-abd0-3592e4cecd59"
+              ]
+            }
+          ],
+          "note_id": "6dc91f10-5646-4d6b-9859-839838d849eb",
+          "excerpts": [
+            {
+              "text": "скоро принесут полтора метра ребер это 4.5kg мяса",
+              "note_id": "6dc91f10-5646-4d6b-9859-839838d849eb",
+              "photo_id": "cd74fdc4-2cb8-46e8-a3fc-8d1baa910293"
+            },
+            {
+              "text": "еще ждать два часа до рейва так что решили взять риса",
+              "note_id": "e46c0c6b-8a6e-4aa1-8745-e11bf5ac73a7",
+              "photo_id": "2bd9809d-ae25-452e-b250-1c6397d7a674"
+            }
+          ],
+          "note_excerpt": "скоро принесут полтора метра ребер это 4.5kg мяса",
+          "first_photo_id": "6eca4520-d5b4-4e2a-aed2-7760f35a40f5"
+        },
+        {
+          "title": "Самый крутой сет",
+          "moments": [
+            {
+              "type": "burst",
+              "photo_ids": [
+                "620303b8-4aa3-4b7c-8c11-fe813dfd62a1",
+                "764ecd51-0180-4683-b777-200e375078ed"
+              ]
+            },
+            {
+              "type": "burst",
+              "photo_ids": [
+                "02d9ee87-6b80-457f-ab8f-c4c1bd67f73a",
+                "e5be04ce-b606-415f-9b03-70c08b0fe4a3"
+              ]
+            }
+          ],
+          "note_id": null,
+          "excerpts": [
+            {
+              "text": "Это самый крутой сет который я слышал или это М?",
+              "note_id": "e2528865-8652-4b44-a65e-f698f5e30db0",
+              "photo_id": "620303b8-4aa3-4b7c-8c11-fe813dfd62a1"
+            }
+          ],
+          "note_excerpt": null,
+          "first_photo_id": "620303b8-4aa3-4b7c-8c11-fe813dfd62a1"
+        },
+        {
+          "title": "Куко Unreal, home at",
+          "moments": [
+            {
+              "type": "timeline",
+              "photo_ids": [
+                "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e",
+                "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
+                "48da458f-98c8-414f-9453-af81cec6f9da",
+                "ad570c04-90bf-4d84-9931-7a3e90db9caa",
+                "4b028163-05eb-4808-8995-2332f0e2e7a5",
+                "ff6a1fde-b6bd-48d8-b87d-29687d647553"
+              ]
+            }
+          ],
+          "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
+          "excerpts": [
+            {
+              "text": "мы вчера пришли где-то в 8 утра,сначало были на Куко Unreal потом поехали в другую локацию",
+              "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
+              "photo_id": "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e"
+            },
+            {
+              "text": "за окном ливень но мы готовы дать еще один бой",
+              "note_id": "78ee4611-469c-4b97-9f61-a224736d1d73",
+              "photo_id": "ad570c04-90bf-4d84-9931-7a3e90db9caa"
+            },
+            {
+              "text": "это просто огромный футбольный стадион, очень круто но диджеи не очень",
+              "note_id": "14c07398-380e-4d0a-9382-cb480c8b64cc",
+              "photo_id": "4b028163-05eb-4808-8995-2332f0e2e7a5"
+            }
+          ],
+          "note_excerpt": "мы вчера пришли где-то в 8 утра",
+          "first_photo_id": "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e"
+        },
+        {
+          "title": "some sweets for Elmas",
+          "moments": [
+            {
+              "type": "timeline",
+              "photo_ids": [
+                "9a9ccc19-f7b1-491d-a502-96217f7ca55c",
+                "da8f273e-2961-411b-b8e5-e286047a5e72",
+                "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc",
+                "8513fe91-5136-43bb-8d93-d930f1cecf54"
+              ]
+            }
+          ],
+          "note_id": null,
+          "excerpts": [],
+          "note_excerpt": null,
+          "first_photo_id": "9a9ccc19-f7b1-491d-a502-96217f7ca55c"
+        }
+      ],
+      "headline": "Самый крутой сет",
+      "note_moment": {
+        "excerpt": "Это самый крутой сет который я слышал или это М?",
+        "note_id": "e2528865-8652-4b44-a65e-f698f5e30db0",
+        "photo_id": "620303b8-4aa3-4b7c-8c11-fe813dfd62a1"
+      }
+    },
+    "photo_days": [
+      "2026-10-23",
+      "2026-10-24",
+      "2026-10-25"
+    ],
+    "golden_vows": null,
+    "hero_scores": {
+      "02d9ee87-6b80-457f-ab8f-c4c1bd67f73a": 3,
+      "10af0193-e773-4ffc-8b86-1066f3fe1530": 1,
+      "1188b05a-6581-4680-9b01-34c97a7f1b34": 2,
+      "1325f261-7d4b-48d5-a9e7-dbc4e6cc423b": 2,
+      "1e84d7df-ead0-4193-abd0-3592e4cecd59": 1,
+      "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e": 2,
+      "2bd9809d-ae25-452e-b250-1c6397d7a674": 4,
+      "34542056-43ea-4798-b5e4-18944e0c539a": 1,
+      "39fea9d3-4931-4605-8f22-94c1714fa2e8": 2,
+      "48da458f-98c8-414f-9453-af81cec6f9da": 2,
+      "4b028163-05eb-4808-8995-2332f0e2e7a5": 5,
+      "620303b8-4aa3-4b7c-8c11-fe813dfd62a1": 4,
+      "6eca4520-d5b4-4e2a-aed2-7760f35a40f5": 3,
+      "764ecd51-0180-4683-b777-200e375078ed": 4,
+      "7b9eee86-d27a-4263-ae02-cdb2d829e792": 3,
+      "8513fe91-5136-43bb-8d93-d930f1cecf54": 4,
+      "9a9ccc19-f7b1-491d-a502-96217f7ca55c": 5,
+      "a3cc4c86-5ac2-4200-8bc8-1e303d6c594e": 3,
+      "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc": 2,
+      "ac6c43bb-a98f-4c77-9a52-d84d0abb16f9": 3,
+      "ad570c04-90bf-4d84-9931-7a3e90db9caa": 2,
+      "b884095d-4672-48cf-9da9-493aac62c69d": 2,
+      "cd16a50b-3981-465d-ba60-33078d7f4eef": 2,
+      "cd74fdc4-2cb8-46e8-a3fc-8d1baa910293": 4,
+      "da8f273e-2961-411b-b8e5-e286047a5e72": 3,
+      "e5be04ce-b606-415f-9b03-70c08b0fe4a3": 3,
+      "f3d3f0b4-d645-45fd-a946-2aa8998df1cd": 4,
+      "ff6a1fde-b6bd-48d8-b87d-29687d647553": 5
+    },
+    "photo_paths": {
+      "02d9ee87-6b80-457f-ab8f-c4c1bd67f73a": "p/02d9ee87-6b80-457f-ab8f-c4c1bd67f73a.jpg",
+      "10af0193-e773-4ffc-8b86-1066f3fe1530": "p/10af0193-e773-4ffc-8b86-1066f3fe1530.jpg",
+      "1188b05a-6581-4680-9b01-34c97a7f1b34": "p/1188b05a-6581-4680-9b01-34c97a7f1b34.jpg",
+      "1325f261-7d4b-48d5-a9e7-dbc4e6cc423b": "p/1325f261-7d4b-48d5-a9e7-dbc4e6cc423b.jpg",
+      "1e84d7df-ead0-4193-abd0-3592e4cecd59": "p/1e84d7df-ead0-4193-abd0-3592e4cecd59.jpg",
+      "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e": "p/20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e.jpg",
+      "2bd9809d-ae25-452e-b250-1c6397d7a674": "p/2bd9809d-ae25-452e-b250-1c6397d7a674.jpg",
+      "34542056-43ea-4798-b5e4-18944e0c539a": "p/34542056-43ea-4798-b5e4-18944e0c539a.jpg",
+      "39fea9d3-4931-4605-8f22-94c1714fa2e8": "p/39fea9d3-4931-4605-8f22-94c1714fa2e8.jpg",
+      "48da458f-98c8-414f-9453-af81cec6f9da": "p/48da458f-98c8-414f-9453-af81cec6f9da.jpg",
+      "4b028163-05eb-4808-8995-2332f0e2e7a5": "p/4b028163-05eb-4808-8995-2332f0e2e7a5.jpg",
+      "620303b8-4aa3-4b7c-8c11-fe813dfd62a1": "p/620303b8-4aa3-4b7c-8c11-fe813dfd62a1.jpg",
+      "6eca4520-d5b4-4e2a-aed2-7760f35a40f5": "p/6eca4520-d5b4-4e2a-aed2-7760f35a40f5.jpg",
+      "764ecd51-0180-4683-b777-200e375078ed": "p/764ecd51-0180-4683-b777-200e375078ed.jpg",
+      "7b9eee86-d27a-4263-ae02-cdb2d829e792": "p/7b9eee86-d27a-4263-ae02-cdb2d829e792.jpg",
+      "8513fe91-5136-43bb-8d93-d930f1cecf54": "p/8513fe91-5136-43bb-8d93-d930f1cecf54.jpg",
+      "9a9ccc19-f7b1-491d-a502-96217f7ca55c": "p/9a9ccc19-f7b1-491d-a502-96217f7ca55c.jpg",
+      "a3cc4c86-5ac2-4200-8bc8-1e303d6c594e": "p/a3cc4c86-5ac2-4200-8bc8-1e303d6c594e.jpg",
+      "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc": "p/a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc.jpg",
+      "ac6c43bb-a98f-4c77-9a52-d84d0abb16f9": "p/ac6c43bb-a98f-4c77-9a52-d84d0abb16f9.jpg",
+      "ad570c04-90bf-4d84-9931-7a3e90db9caa": "p/ad570c04-90bf-4d84-9931-7a3e90db9caa.jpg",
+      "cd16a50b-3981-465d-ba60-33078d7f4eef": "p/cd16a50b-3981-465d-ba60-33078d7f4eef.jpg",
+      "cd74fdc4-2cb8-46e8-a3fc-8d1baa910293": "p/cd74fdc4-2cb8-46e8-a3fc-8d1baa910293.jpg",
+      "da8f273e-2961-411b-b8e5-e286047a5e72": "p/da8f273e-2961-411b-b8e5-e286047a5e72.jpg",
+      "e5be04ce-b606-415f-9b03-70c08b0fe4a3": "p/e5be04ce-b606-415f-9b03-70c08b0fe4a3.jpg",
+      "f3d3f0b4-d645-45fd-a946-2aa8998df1cd": "p/f3d3f0b4-d645-45fd-a946-2aa8998df1cd.jpg",
+      "ff6a1fde-b6bd-48d8-b87d-29687d647553": "p/ff6a1fde-b6bd-48d8-b87d-29687d647553.jpg"
+    },
+    "orientations": {
+      "02d9ee87-6b80-457f-ab8f-c4c1bd67f73a": "portrait",
+      "10af0193-e773-4ffc-8b86-1066f3fe1530": "portrait",
+      "1188b05a-6581-4680-9b01-34c97a7f1b34": "portrait",
+      "1325f261-7d4b-48d5-a9e7-dbc4e6cc423b": "portrait",
+      "1e84d7df-ead0-4193-abd0-3592e4cecd59": "portrait",
+      "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e": "portrait",
+      "2bd9809d-ae25-452e-b250-1c6397d7a674": "portrait",
+      "34542056-43ea-4798-b5e4-18944e0c539a": "portrait",
+      "39fea9d3-4931-4605-8f22-94c1714fa2e8": "portrait",
+      "48da458f-98c8-414f-9453-af81cec6f9da": "portrait",
+      "4b028163-05eb-4808-8995-2332f0e2e7a5": "portrait",
+      "620303b8-4aa3-4b7c-8c11-fe813dfd62a1": "portrait",
+      "6eca4520-d5b4-4e2a-aed2-7760f35a40f5": "portrait",
+      "764ecd51-0180-4683-b777-200e375078ed": "portrait",
+      "7b9eee86-d27a-4263-ae02-cdb2d829e792": "portrait",
+      "8513fe91-5136-43bb-8d93-d930f1cecf54": "landscape",
+      "9a9ccc19-f7b1-491d-a502-96217f7ca55c": "portrait",
+      "a3cc4c86-5ac2-4200-8bc8-1e303d6c594e": "portrait",
+      "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc": "portrait",
+      "ac6c43bb-a98f-4c77-9a52-d84d0abb16f9": "portrait",
+      "ad570c04-90bf-4d84-9931-7a3e90db9caa": "portrait",
+      "cd16a50b-3981-465d-ba60-33078d7f4eef": "portrait",
+      "cd74fdc4-2cb8-46e8-a3fc-8d1baa910293": "portrait",
+      "da8f273e-2961-411b-b8e5-e286047a5e72": "portrait",
+      "e5be04ce-b606-415f-9b03-70c08b0fe4a3": "portrait",
+      "f3d3f0b4-d645-45fd-a946-2aa8998df1cd": "portrait",
+      "ff6a1fde-b6bd-48d8-b87d-29687d647553": "portrait"
+    },
+    "sky_problems": [
+      "neon_night memory: code-built pages"
+    ],
+    "director_version": 4,
+    "section_attempts": 1,
+    "neon_night_source": "director",
+    "neon_night_repairs": [
+      "repaired: neon_night.chapters: 6, expected 1–5",
+      "repaired: neon_night.chapters[0].title: 23 characters, at most 22",
+      "repaired: neon_night.chapters[0].note_excerpt: 63 characters, at most 60",
+      "repaired: neon_night.chapters[4].title: 24 characters, at most 22",
+      "repaired: neon_night.chapters[5].title: 29 characters, at most 22",
+      "repaired: neon_night.chapters: the memory has 5 parts — one chapter starting at each chapter_start photo"
+    ],
+    "neon_night_problems": [],
+    "golden_vows_problems": []
+  }
+}

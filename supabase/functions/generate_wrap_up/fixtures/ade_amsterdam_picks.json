@@ -1,0 +1,98 @@
+{
+  "recorded_at": "2026-11-22T11:45:50.712Z",
+  "model": "claude-sonnet-5",
+  "picks": {
+    "note": {
+      "ids": [
+        "note/n:e2528865-8652-4b44-a65e-f698f5e30db0:xaug5h"
+      ],
+      "free_title": null
+    },
+    "ch1.card": {
+      "ids": [
+        "ch1.card/n:3224a4be-3594-48c9-887b-c53053faa01a:5cbz19"
+      ],
+      "free_title": null
+    },
+    "ch1.m1": {
+      "ids": [
+        "ch1.m1/n:3224a4be-3594-48c9-887b-c53053faa01a:1fjxfq0"
+      ],
+      "free_title": null
+    },
+    "ch1.title": {
+      "ids": [
+        "ch1.title/n:587ea168-33ee-4ef5-baf9-24e6a056d270:1wt105e"
+      ],
+      "free_title": null
+    },
+    "ch2.card": {
+      "ids": [
+        "ch2.card/n:e46c0c6b-8a6e-4aa1-8745-e11bf5ac73a7:1hx1t3d"
+      ],
+      "free_title": null
+    },
+    "ch2.m1": {
+      "ids": [
+        "ch2.m1/n:6dc91f10-5646-4d6b-9859-839838d849eb:1dbdnj0"
+      ],
+      "free_title": null
+    },
+    "ch2.title": {
+      "ids": [],
+      "free_title": "Перед рейвом"
+    },
+    "ch3.card": {
+      "ids": [
+        "ch3.card/n:695a05ea-8fc3-4e4c-b64f-0733c3f79911:1dxxcc1"
+      ],
+      "free_title": null
+    },
+    "ch3.title": {
+      "ids": [
+        "ch3.title/n:695a05ea-8fc3-4e4c-b64f-0733c3f79911:1i5548u"
+      ],
+      "free_title": null
+    },
+    "ch4.card": {
+      "ids": [
+        "ch4.card/n:14c07398-380e-4d0a-9382-cb480c8b64cc:16c6xlr"
+      ],
+      "free_title": null
+    },
+    "ch4.m1": {
+      "ids": [
+        "ch4.m1/n:78ee4611-469c-4b97-9f61-a224736d1d73:1c29suw"
+      ],
+      "free_title": null
+    },
+    "ch4.title": {
+      "ids": [
+        "ch4.title/n:43f91e23-1542-490d-b835-f31dfac55106:qlvqih"
+      ],
+      "free_title": null
+    },
+    "ch5.card": {
+      "ids": [
+        "ch5.card/n:9c2f7347-5352-4a47-8dcf-222090ed53a9:1jlnwik"
+      ],
+      "free_title": null
+    },
+    "ch5.title": {
+      "ids": [
+        "ch5.title/n:7b1c21ed-fe19-4c70-a6bd-d85f1c502768:1rpexfp"
+      ],
+      "free_title": null
+    },
+    "headline": {
+      "ids": [
+        "headline/h:hdl8n3"
+      ],
+      "free_title": null
+    }
+  },
+  "usage": {
+    "input_tokens": 12832,
+    "output_tokens": 944
+  }
+}

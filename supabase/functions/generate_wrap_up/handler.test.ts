@@ -1,4 +1,7 @@
-import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import {
+  assert,
+  assertEquals,
+} from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
   type Deps,
   handleRequest,
@@ -16,7 +19,7 @@ import {
   directorTripData,
   goldenVowsPlan,
   keepsakePlan,
-  neonNightPlan,
+  neonPicks,
   skyStoryPlan,
 } from "./director_fixtures.ts";
 import { useFilmLengthRuleForTests } from "./film_length.ts";
@@ -1197,7 +1200,7 @@ function neonNightRecord(): DirectorRecord {
   return {
     ...plannedRecord(),
     sky_story: skyStoryPlan(),
-    neon_night: neonNightPlan(),
+    neon_night: { picks_version: 2, picks: neonPicks(directorTripData()) },
   };
 }
 
@@ -1225,7 +1228,7 @@ function keptNeonClient(
   });
 }
 
-Deno.test("a draft gets content.neon_night from the director's section", async () => {
+Deno.test("a draft gets content.neon_night from the director's picks (#454)", async () => {
   const client = directorClient([], ["Nightlife"]);
   const { deps } = directorDeps(client, { record: neonNightRecord() });
 
@@ -1237,9 +1240,16 @@ Deno.test("a draft gets content.neon_night from the director's section", async (
   // The fixture's 3 days keep a chapter each (#398 R1): no merging across
   // days.
   assertEquals(nn.chapters.length, 3);
-  assertEquals(nn.chapters[0].note, "Bikes everywhere");
-  assertEquals(nn.note.text, "Rain, then stroopwafels.");
+  // The director's own title holds; every slot is in the report.
+  assertEquals(nn.chapters[0].title, "Doors open");
   assertEquals(json.content.film_style, "neon_night");
+  assertEquals(json.content.film_report.source, "director");
+  assertEquals(json.content.film_report.repairs, []);
+  assert(
+    json.content.film_report.slots.some((r: { slot: string }) =>
+      r.slot === "ch1.title"
+    ),
+  );
   // Code-built Sky pages are there too: the app's safety net.
   assertEquals(json.content.sky.source, "code");
   assertEquals(client.writes[0].values.content.neon_night, nn);
@@ -1282,7 +1292,7 @@ Deno.test("a Nightlife memory always plays Neon Night: no section, director off,
     request({ trip_id: TRIP_ID }),
     directorDeps(deleted, { record: neonNightRecord() }).deps,
   )).json();
-  // A deleted photo heals the section instead of dropping it (#393).
+  // A deleted photo: the film is cut again, the picks re-applied by id.
   assertEquals(healed.content.neon_night.chapters.length > 0, true);
   assertEquals(JSON.stringify(healed.content).includes('"p09"'), false);
 });
