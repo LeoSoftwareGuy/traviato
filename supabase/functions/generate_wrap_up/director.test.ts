@@ -28,12 +28,12 @@ import {
   goldenVowsPlan,
   keepsakePlan,
   keepsakePlanWithFixableFaults,
-  neonNightPlan,
+  neonPicks,
+  neonPicksAnswer,
   skyStoryPlan,
   toolResponse,
 } from "./director_fixtures.ts";
 import type { TripData } from "./gather.ts";
-import type { NeonNightPlan } from "./neon_night.ts";
 import { useFilmLengthRuleForTests } from "./film_length.ts";
 
 // These tests are about other rules: every film at its longest (#434).
@@ -367,7 +367,7 @@ Deno.test("runDirector sends strict tools: closed objects, no unsupported keywor
     const [anthropic, data] of [
       [fakeAnthropic([emittedPlan()]), directorTripData()],
       [golden(goldenVowsPlan()), romantic()],
-      [neon(neonNightPlan()), nightlife()],
+      [neon(neonPicksAnswer(nightlife())), nightlife()],
     ] as const
   ) {
     await runDirector(
@@ -383,8 +383,8 @@ Deno.test("runDirector sends strict tools: closed objects, no unsupported keywor
     [
       "emit_film_plan",
       "emit_golden_vows",
-      "emit_neon_night",
       "emit_photo_analysis",
+      "pick_neon_lines",
     ],
   );
   const anthropic = { sent };
@@ -627,11 +627,7 @@ function golden(...answers: unknown[]) {
 }
 
 function neon(...answers: unknown[]) {
-  return fakeAnthropic([], {
-    emit_neon_night: answers.map((a) =>
-      a instanceof Error ? a : { neon_night: a }
-    ),
-  });
+  return fakeAnthropic([], { pick_neon_lines: answers });
 }
 
 const calledTools = (anthropic: ReturnType<typeof fakeAnthropic>) =>
@@ -874,19 +870,29 @@ Deno.test("currentGoldenVows heals a section the memory has outgrown (#393)", ()
   assertEquals(record.golden_vows, goldenVowsPlan());
 });
 
-Deno.test("a Nightlife memory: one Neon Night call, kept", async () => {
-  const anthropic = neon(neonNightPlan());
+Deno.test("a Nightlife memory: one pick_neon_lines call, its picks kept (#454)", async () => {
+  const data = nightlife();
+  const anthropic = neon(neonPicksAnswer(data));
   const record = await runDirector(
     deps(anthropic.fetchImpl).deps,
     TRIP_ID,
-    nightlife(),
+    data,
     "en",
   );
   assertEquals(record.template, "neon_night");
-  assertEquals(record.neon_night, neonNightPlan());
+  assertEquals(record.neon_night, {
+    picks_version: 2,
+    picks: neonPicks(data),
+  });
   assertEquals(record.neon_night_source, "director");
+  assertEquals(record.neon_night_repairs, []);
   assertEquals(record.golden_vows, null);
-  assertEquals(calledTools(anthropic), ["emit_neon_night"]);
+  assertEquals(calledTools(anthropic), ["pick_neon_lines"]);
+  // Every slot in the inspector: its candidates, the pick, its source.
+  const title = record.neon_slots!.find((r) => r.slot === "ch1.title")!;
+  assertEquals(title.source, "director");
+  assertEquals(title.chosen.map((c) => c.text), ["Doors open"]);
+  assert(record.neon_slots!.every((r) => r.source !== "code"));
 });
 
 Deno.test("Romantic + Nightlife plays Golden Vows; vibes decide, never the director", async () => {
@@ -904,51 +910,65 @@ Deno.test("Romantic + Nightlife plays Golden Vows; vibes decide, never the direc
   assertEquals(calledTools(anthropic), ["emit_golden_vows"]);
 });
 
-Deno.test("a broken Neon Night section is retried, then code builds the night", async () => {
-  const broken = neonNightPlan();
-  (broken as unknown as Record<string, unknown>).chapters = "none";
-  const anthropic = neon(broken, neonNightPlan());
+Deno.test("Neon Night: a pick off its list takes code's top candidate (#454)", async () => {
+  const data = nightlife();
+  const answer = neonPicksAnswer(data);
+  answer.picks.find((p) => p.slot === "note")!.ids = ["n:made-up"];
   const record = await runDirector(
-    deps(anthropic.fetchImpl).deps,
+    deps(neon(answer).fetchImpl).deps,
     TRIP_ID,
-    nightlife(),
+    data,
+    "en",
+  );
+  const note = record.neon_slots!.find((r) => r.slot === "note")!;
+  assertEquals(note.source, "code");
+  assertStringIncludes(note.reason, "n:made-up: not in this slot's list");
+  assertEquals(record.neon_night_source, "director");
+  assert(record.neon_night_repairs!.some((r) => r.startsWith("note: ")));
+});
+
+Deno.test("Neon Night: a failed call is retried once, then code picks every slot", async () => {
+  const data = nightlife();
+  const retried = neon(new Error("overloaded"), neonPicksAnswer(data));
+  const record = await runDirector(
+    deps(retried.fetchImpl).deps,
+    TRIP_ID,
+    data,
     "en",
   );
   assertEquals(record.section_attempts, 2);
-  assertEquals(record.neon_night, neonNightPlan());
-  assertStringIncludes(
-    (anthropic.sent.at(-1)!.body.messages as { content: string }[])[0].content,
-    "neon_night.chapters: expected an array",
-  );
+  assertEquals(record.neon_night_source, "director");
 
   const failed = await runDirector(
-    deps(neon(broken).fetchImpl).deps,
+    deps(neon(new Error("a"), new Error("b")).fetchImpl).deps,
     TRIP_ID,
-    nightlife(),
+    data,
     "en",
   );
+  assertEquals(failed.neon_night, null);
   assertEquals(failed.neon_night_source, "code");
-  assert(failed.neon_night!.chapters.length >= 1);
+  assert(failed.neon_slots!.length > 0);
+  assert(failed.neon_slots!.every((r) => r.source !== "director"));
 });
 
-Deno.test("the section call carries Neon Night's rules and the local times", async () => {
-  const prompt = buildSectionSystemPrompt("neon_night", "en");
-  assertStringIncludes(prompt, "neon_night");
-  assertStringIncludes(prompt, "emit_neon_night");
-  const anthropic = neon(neonNightPlan());
+Deno.test("the pick call sees the cut film, its slots and the local times (#454)", async () => {
   const data = nightlife({ utc_offset_minutes: 120 });
   data.notes[0].created_at = "2026-09-01T21:59:00Z";
+  data.notes[0].taken_at = "2026-09-01T21:59:00Z";
+  const anthropic = neon(neonPicksAnswer(data));
   await runDirector(deps(anthropic.fetchImpl).deps, TRIP_ID, data, "en");
-  const section = anthropic.sent.find((s) => s.tool === "emit_neon_night")!;
-  const schema = (section.body.tools as {
-    input_schema: { required: string[]; properties: Record<string, unknown> };
-  }[])[0].input_schema;
-  assertEquals(schema.required, ["neon_night"]);
-  // Photo and note times on the app's clock.
-  const content = (section.body.messages as { content: string }[])[0].content;
+  const call = anthropic.sent.find((s) => s.tool === "pick_neon_lines")!;
+  const system = call.body.system as string;
+  assertStringIncludes(system, "Each id is used once in the whole film");
+  assertStringIncludes(system, "free_title");
+  const content = (call.body.messages as { content: string }[])[0].content;
   const input = JSON.parse(content.slice(content.indexOf("{")));
   assertEquals(input.photos[0].time, "12:00");
   assertEquals(input.notes[0].written_at, "23:59");
+  assert(input.slots.some((s: { slot: string }) => s.slot === "ch1.card"));
+  for (const slot of input.slots) {
+    assert(slot.candidates.length <= 8 + 4, slot.slot);
+  }
 });
 
 Deno.test("localClock: ISO instants as HH:MM on the app's clock", () => {
@@ -962,80 +982,23 @@ Deno.test("localClock: ISO instants as HH:MM on the app's clock", () => {
   assertEquals(localClock("not a date", utc), null);
 });
 
-Deno.test("currentNeonNight: the stored section while it fits, else code's", () => {
+Deno.test("currentNeonNight: stored picks, never a plan from before #454", () => {
+  const data = nightlife();
   const record = {
     status: "planned",
     plan: keepsakePlan(),
     problems: [],
     failed_ids: [],
-    neon_night: neonNightPlan(),
+    neon_night: { picks_version: 2, picks: neonPicks(data) },
   } as unknown as DirectorRecord;
+  assertEquals(currentNeonNight(record), {
+    picks: neonPicks(data),
+    source: "director",
+  });
+  // A whole plan stored before #454 isn't read: code picks.
   assertEquals(
-    currentNeonNight(record, directorTripData()).plan,
-    neonNightPlan(),
-  );
-  assertEquals(
-    currentNeonNight({ ...record, neon_night: null }, directorTripData())
-      .source,
+    currentNeonNight({ ...record, neon_night: { chapters: [] } }).source,
     "code",
   );
-});
-
-Deno.test("currentNeonNight heals a section the memory has outgrown (#393)", () => {
-  const ids = DIRECTOR_PHOTO_IDS;
-  const record = {
-    status: "planned",
-    plan: keepsakePlan(),
-    problems: [],
-    failed_ids: [],
-    neon_night: neonNightPlan(),
-  } as unknown as DirectorRecord;
-  const momentsOf = (ensured: { plan: NeonNightPlan }) =>
-    ensured.plan.chapters.map((c) =>
-      c.moments.map((m) => [m.type, ...m.photo_ids])
-    );
-
-  // A moment photo: the moment keeps the rest, in a type that fits.
-  assertEquals(momentsOf(currentNeonNight(record, without(ids[9])))[2], [
-    ["timeline", ids[8], ids[10]],
-  ]);
-  // A chapter's first photo: it starts at its earliest remaining one.
-  const lateStart = currentNeonNight(record, without(ids[4]));
-  assertEquals(lateStart.plan.chapters[1].first_photo_id, ids[5]);
-  assertEquals(momentsOf(lateStart)[1], [
-    ["timeline", ids[5], ids[6], ids[7]],
-  ]);
-  // The first chapter's first photo: it starts at the night's first photo.
-  const first = currentNeonNight(record, without(ids[0]));
-  assertEquals(first.plan.chapters[0].first_photo_id, ids[1]);
-  // A whole chapter: it folds into the one before.
-  const folded = currentNeonNight(
-    record,
-    without(ids[4], ids[5], ids[6], ids[7]),
-  ).plan;
-  assertEquals(folded.chapters.map((c) => c.title), [
-    "Doors open",
-    "Peak time",
-  ]);
-  // The note scene's photo: the note stays, without it.
-  const noPhoto = currentNeonNight(record, without(ids[10])).plan;
-  assertEquals(noPhoto.note_moment?.excerpt, "Rain, then stroopwafels.");
-  assertEquals(noPhoto.note_moment?.photo_id, null);
-  // Left out counts as gone.
-  const leftOut = directorTripData();
-  leftOut.photos[9].use_in_wrap_up = false;
-  assertEquals(momentsOf(currentNeonNight(record, leftOut))[2], [
-    ["timeline", ids[8], ids[10]],
-  ]);
-  // A reworded note: no Note scene, the film stays.
-  const reworded = directorTripData();
-  reworded.notes[1].content = "Sun, then pancakes.";
-  assertEquals(currentNeonNight(record, reworded).plan.note_moment, null);
-  // Nothing of it left to keep: code builds the night instead (#433).
-  assertEquals(
-    currentNeonNight(record, without(...ids.slice(0, 3))).source,
-    "director",
-  );
-  // The stored record itself is never changed.
-  assertEquals(record.neon_night, neonNightPlan());
+  assertEquals(currentNeonNight({ ...record, neon_night: null }).picks, null);
 });

@@ -8,18 +8,13 @@
 import { directorTripData } from "./director_fixtures.ts";
 import { currentGoldenVows, currentNeonNight } from "./director.ts";
 import { buildGoldenVowsContent } from "./golden_vows.ts";
-import {
-  buildNeonNightContent,
-  type NeonNightPlan,
-  nnCheckContext,
-  repairNeonNight,
-} from "./neon_night.ts";
+import { buildNeonNightContent } from "./neon_film.ts";
 import { buildSkyContent } from "./sky_story.ts";
 import { withFilmPhotos } from "./film_photos.ts";
 import { filmSecondsOf } from "./film_length.ts";
 import type { PlayedTemplate } from "./film_template.ts";
 import type { TripData } from "./gather.ts";
-import { adeDirectorPlan, adeMemory } from "./ade_fixture.ts";
+import { adeFilmMemory, adePicks } from "./ade_amsterdam.ts";
 
 export const FIXTURE_PHOTO_COUNTS = [15, 25, 40];
 export const FIXTURE_FILMS: PlayedTemplate[] = [
@@ -115,27 +110,21 @@ export function lengthContent(
   if (film === "neon_night") {
     content.neon_night = buildNeonNightContent(
       memory,
-      currentNeonNight(null, memory, "en").plan,
+      currentNeonNight(null).picks,
     );
   }
   return content;
 }
 
-// The ADE-shaped Neon Night memory's content (#448), director off.
+// ADE-Amsterdam's content from its real data (#454): the exported memory
+// with the director's recorded picks.
 export function adeContent(): Record<string, unknown> {
-  const memory = withFilmPhotos(adeMemory(), {});
+  const { memory, heroScores } = adeFilmMemory();
   return {
     film_style: "neon_night",
     film_seconds: filmSecondsOf(memory),
-    sky: buildSkyContent(memory, null, {}),
-    // The director's plan as it came back, repaired (#450).
-    neon_night: buildNeonNightContent(
-      memory,
-      repairNeonNight(
-        adeDirectorPlan(),
-        nnCheckContext(memory),
-      ) as NeonNightPlan,
-    ),
+    sky: buildSkyContent(memory, null, heroScores),
+    neon_night: buildNeonNightContent(memory, adePicks(), heroScores),
   };
 }
 
@@ -170,12 +159,12 @@ export function filmLengthFixtures(): {
     }))
   ).concat([{
     film: "neon_night",
-    photos: adeMemory().photos.length,
-    photo_ids: adeMemory().photos.map((p) => p.id),
-    start_date: "2026-10-22",
-    end_date: "2026-10-24",
+    photos: adeFilmMemory().memory.photos.length,
+    photo_ids: adeFilmMemory().memory.photos.map((p) => p.id),
+    start_date: adeFilmMemory().memory.trip.start_date!,
+    end_date: adeFilmMemory().memory.trip.end_date!,
     content: adeContent(),
-    // The ADE-Amsterdam-shaped memory (#448).
+    // ADE-Amsterdam's real data (#448, #454).
     case: "ade",
   }]);
 }

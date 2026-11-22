@@ -1,7 +1,7 @@
 // Amsterdam (#433): a Nightlife memory of 28 photos and 14 notes switched
 // to Sky Story twice — over a title 1 character too long and a headline 2
 // too long. Through the handler and the real director, it plays Neon
-// Night whatever the director sends.
+// Night whatever the director sends (#454: whatever it picks).
 
 import {
   assert,
@@ -112,32 +112,39 @@ function tables() {
 
 // What the director sent: titles a character too long, a headline two
 // too long, a banned phrase, an invented photo.
-function brokenSection(photoIds: string[]) {
+interface InputSlot {
+  slot: string;
+  max_picks: number;
+  candidates: { id: string; text: string }[];
+}
+
+// A pick_neon_lines answer with every fault the director could make: an
+// invented id, a title too long and in English, a banned phrase, a
+// headline off its list, an id used twice; the rest picked right.
+function brokenPicks(slots: InputSlot[]) {
+  const first = slots.find((s) => s.slot === "ch1.card")?.candidates[0]?.id;
   return {
-    chapters: [{
-      title: "A".repeat(MAX_NN_TITLE_CHARS - 6) + " night",
-      first_photo_id: photoIds[0],
-      note_id: null,
-      note_excerpt: null,
-      moments: [
-        { type: "burst", photo_ids: [photoIds[1], photoIds[2], "invented"] },
-        { type: "timeline", photo_ids: photoIds.slice(3, 9) },
-      ],
-      excerpts: [],
-    }, {
-      title: "Epic Sunday at the canals",
-      first_photo_id: photoIds[10],
-      note_id: null,
-      note_excerpt: null,
-      moments: [{ type: "timeline", photo_ids: photoIds.slice(11, 17) }],
-      excerpts: [],
-    }],
-    note_moment: null,
-    headline: "N".repeat(MAX_NN_HEADLINE_CHARS + 2),
+    picks: slots.map((s) => ({
+      slot: s.slot,
+      ids: s.slot === "note"
+        ? ["invented"]
+        : s.slot === "headline"
+        ? [first ?? "x"]
+        : s.slot === "ch2.card" && first
+        ? [first]
+        : s.slot === "ch1.title" || s.slot === "ch2.title"
+        ? []
+        : s.candidates.slice(0, s.max_picks).map((c) => c.id),
+      free_title: s.slot === "ch1.title"
+        ? "A".repeat(MAX_NN_TITLE_CHARS - 5) + " night"
+        : s.slot === "ch2.title"
+        ? "Epic Sunday at the canals"
+        : null,
+    })),
   };
 }
 
-function director(answer: (ids: string[]) => unknown) {
+function director(answer: (slots: InputSlot[]) => unknown) {
   const client = fakeSupabaseClient(tables());
   const fetchImpl = ((_url: string, init?: RequestInit) => {
     const body = JSON.parse(init!.body as string);
@@ -153,12 +160,11 @@ function director(answer: (ids: string[]) => unknown) {
     }
     const content = body.messages[0].content as string;
     const input = JSON.parse(content.slice(content.indexOf("{")));
-    const ids = (input.photos as { photo_id: string }[]).map((p) => p.photo_id);
-    const value = answer(ids);
+    const value = answer(input.slots as InputSlot[]);
     if (value instanceof Error) {
       return Promise.resolve(new Response("{}", { status: 500 }));
     }
-    return Promise.resolve(toolResponse(tool, { neon_night: value }));
+    return Promise.resolve(toolResponse(tool, value));
   }) as typeof fetch;
   const tools: string[] = [];
   const deps: Deps = {
@@ -190,7 +196,7 @@ function director(answer: (ids: string[]) => unknown) {
   return { client, tools, deps };
 }
 
-async function open(answer: (ids: string[]) => unknown) {
+async function open(answer: (slots: InputSlot[]) => unknown) {
   const d = director(answer);
   const res = await handleRequest(
     new Request("http://localhost", {
@@ -204,8 +210,8 @@ async function open(answer: (ids: string[]) => unknown) {
   return { json: await res.json(), tools: d.tools };
 }
 
-Deno.test("Amsterdam plays Neon Night: the director's faults are repaired (#433)", async () => {
-  const { json, tools } = await open(brokenSection);
+Deno.test("Amsterdam plays Neon Night: a bad pick takes code's candidate (#454)", async () => {
+  const { json, tools } = await open(brokenPicks);
   assertEquals(json.content.film_style, "neon_night");
   const nn = json.content.neon_night;
   assert(nn.chapters.length >= 2);
@@ -218,10 +224,34 @@ Deno.test("Amsterdam plays Neon Night: the director's faults are repaired (#433)
     nn.headline === null || [...nn.headline].length <= MAX_NN_HEADLINE_CHARS,
   );
   assertEquals(JSON.stringify(nn).includes("invented"), false);
-  // One call after the analysis: the Neon section.
+  // One call after the analysis: the Neon picks.
   assertEquals(tools.filter((t) => t !== "emit_photo_analysis"), [
-    "emit_neon_night",
+    "pick_neon_lines",
   ]);
+  const slots = json.content.film_report.slots as {
+    slot: string;
+    source: string;
+  }[];
+  // (ch2.title keeps "Sunday at the canals": the banned word goes.)
+  for (const bad of ["note", "headline", "ch1.title"]) {
+    const r = slots.find((x) => x.slot === bad);
+    if (r) assertEquals(r.source === "director", false, bad);
+  }
+  // No text twice in the film.
+  const shown = [
+    ...nn.chapters.flatMap((c: {
+      title: string;
+      note: string | null;
+      moments: { words?: { text: string }[] }[];
+    }) => [
+      c.title,
+      c.note,
+      ...c.moments.flatMap((m) => (m.words ?? []).map((w) => w.text)),
+    ]),
+    nn.note?.text,
+    nn.headline,
+  ].filter((t): t is string => !!t);
+  assertEquals(new Set(shown).size, shown.length, shown.join(" | "));
   // At most 12 lines; the feelings come first.
   const lines = nn.chapters.flatMap((c: { excerpts: { text: string }[] }) =>
     c.excerpts.map((e) => e.text)
@@ -231,7 +261,13 @@ Deno.test("Amsterdam plays Neon Night: the director's faults are repaired (#433)
 });
 
 Deno.test("Amsterdam plays Neon Night when the director fails or sends junk", async () => {
-  for (const answer of [() => new Error("down"), () => "junk", () => null]) {
+  for (
+    const answer of [
+      () => new Error("down"),
+      () => "junk",
+      () => ({ picks: "none" }),
+    ]
+  ) {
     const { json } = await open(answer);
     assertEquals(json.content.film_style, "neon_night");
     assertEquals(json.content.film_report.source, "code");

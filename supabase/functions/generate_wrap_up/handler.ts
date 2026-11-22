@@ -64,7 +64,7 @@ import {
 } from "./director.ts";
 import { alwaysWithoutPage, buildSkyContent } from "./sky_story.ts";
 import { buildGoldenVowsContent } from "./golden_vows.ts";
-import { buildNeonNightContent } from "./neon_night.ts";
+import { neonNightFilm } from "./neon_film.ts";
 
 // deno-lint-ignore no-explicit-any
 type SupabaseClient = any;
@@ -519,7 +519,12 @@ function sectionContentFor(
   language: WrapUpLanguage,
 ): {
   content: Record<string, unknown>;
-  report: { source: "director" | "code"; repairs: string[] } | null;
+  report: {
+    source: "director" | "code";
+    repairs: string[];
+    // Neon Night (#454): every slot, its candidates and what plays.
+    slots?: ReturnType<typeof neonNightFilm>["report"];
+  } | null;
 } {
   if (played === "golden_vows") {
     const ensured = currentGoldenVows(director, film, language);
@@ -535,16 +540,20 @@ function sectionContentFor(
     };
   }
   if (played === "neon_night") {
-    const ensured = currentNeonNight(director, film, language);
+    const current = currentNeonNight(director);
+    const neon = neonNightFilm(
+      film,
+      current.picks,
+      isDirectorRecord(director) ? director.hero_scores ?? {} : {},
+    );
     return {
-      content: {
-        neon_night: buildNeonNightContent(
-          film,
-          ensured.plan,
-          isDirectorRecord(director) ? director.hero_scores ?? {} : {},
-        ),
+      content: { neon_night: neon.content },
+      report: {
+        source: current.source,
+        repairs: neon.report.filter((r) => r.pick && r.source === "code")
+          .map((r) => `${r.slot}: ${r.reason}`),
+        slots: neon.report,
       },
-      report: { source: ensured.source, repairs: ensured.repairs },
     };
   }
   return { content: {}, report: null };

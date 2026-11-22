@@ -402,6 +402,22 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   clock time, never in another language than the notes. The user's own
   captions and lines show as written, profanity too; the filter stays
   for titles, the headline and the Note scene.
+- **Neon Night: code cuts, the director picks (#454):** code makes the
+  whole film — chapters by day and by part of a day, every scene's
+  photos and its length — and lists the words that could go in each
+  place (the Note scene, each card, each moment, each title, the
+  headline). The director only chooses from those lists; it may write a
+  title of its own (a place, event or key moment, ≤ 22 characters) or
+  the headline (upbeat, ≤ 18), in the notes' language. Anything it gets
+  wrong takes code's best choice instead — nothing is rewritten. A note
+  belongs to its photo's chapter, else to the part of its day nearest to
+  when it was written ("вчера…" to the day before); every note without
+  drug words can play somewhere. Card lines fit the card's photos.
+  Titles name things, never half a sentence; the headline is never a
+  complaint or a first name alone, and may name what a title names. No
+  words show twice in a film. The Plan inspector lists
+  every place's choices, what the director picked and why something
+  else plays.
 - **The user's words (#399, display only; which words are chosen is #398,
   multi-excerpt note moments #416):** captions and notes are never cut
   with "…". A text that doesn't fit gets smaller type or more lines, then

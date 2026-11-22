@@ -5,7 +5,8 @@ import type { FilmPlan, PlanContext, PlanScene } from "./film_plan.ts";
 import type { PhotoAnalysis } from "./photo_analysis.ts";
 import type { SkyStoryPlan } from "./sky_story.ts";
 import type { GoldenVowsPlan } from "./golden_vows.ts";
-import type { NeonNightPlan } from "./neon_night.ts";
+import { neonNightFilm } from "./neon_film.ts";
+import type { NnPicks } from "./neon_slots.ts";
 
 export const DIRECTOR_PHOTO_IDS = Array.from(
   { length: 12 },
@@ -247,44 +248,37 @@ export function goldenVowsPlan(ids = DIRECTOR_PHOTO_IDS): GoldenVowsPlan {
 // A valid Neon Night section over directorTripData(): 3 chapters of 4
 // photos (one per day), chapter 1 split + burst with an excerpt of day 1's
 // note, chapter 2 a timeline, chapter 3 a peak; day 3's note in neon.
-export function neonNightPlan(ids = DIRECTOR_PHOTO_IDS): NeonNightPlan {
+// A pick_neon_lines answer for [data] (#454): code's own resolved picks
+// (so none collide), chapter 1 titled "Doors open" by the director and
+// every title code would call "Day N" "Part N".
+export function neonPicksAnswer(data: TripData): {
+  picks: { slot: string; ids: string[]; free_title: string | null }[];
+} {
+  const { report } = neonNightFilm(data, null);
   return {
-    chapters: [
-      {
-        title: "Doors open",
-        first_photo_id: ids[0],
-        note_id: "n1",
-        note_excerpt: "Bikes everywhere",
-        excerpts: [],
-        moments: [
-          { type: "split", photo_ids: [ids[0], ids[1]] },
-          { type: "burst", photo_ids: [ids[2], ids[3]] },
-        ],
-      },
-      {
-        title: "After midnight",
-        first_photo_id: ids[4],
-        note_id: null,
-        note_excerpt: null,
-        excerpts: [],
-        moments: [
-          { type: "timeline", photo_ids: [ids[4], ids[5], ids[6], ids[7]] },
-        ],
-      },
-      {
-        title: "Peak time",
-        first_photo_id: ids[8],
-        note_id: null,
-        note_excerpt: null,
-        excerpts: [],
-        moments: [{ type: "peak", photo_ids: [ids[8], ids[9], ids[10]] }],
-      },
-    ],
-    note_moment: {
-      note_id: "n2",
-      excerpt: "Rain, then stroopwafels.",
-      photo_id: ids[10],
-    },
-    headline: "Best night ever",
+    picks: report.map((r) => ({
+      slot: r.slot,
+      ids: r.slot === "ch1.title"
+        ? []
+        : r.chosen.map((c) => c.id).filter((id) =>
+          id !== "day" && id !== "free"
+        ),
+      // A title no candidate fits: the director writes one.
+      free_title: r.slot === "ch1.title"
+        ? "Doors open"
+        : r.slot.endsWith(".title") && r.chosen[0]?.id === "day"
+        ? `Part ${r.slot.slice(2, r.slot.indexOf("."))}`
+        : null,
+    })),
   };
+}
+
+// [neonPicksAnswer] as the director record stores it.
+export function neonPicks(data: TripData): NnPicks {
+  return Object.fromEntries(
+    neonPicksAnswer(data).picks.map((p) => [p.slot, {
+      ids: p.ids,
+      free_title: p.free_title,
+    }]),
+  );
 }

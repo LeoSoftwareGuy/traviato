@@ -9,13 +9,10 @@ import {
 import type { TripData } from "./gather.ts";
 import { validTripData } from "./test_fixtures.ts";
 import { withFilmPhotos } from "./film_photos.ts";
-import {
-  buildNeonNightContent,
-  codeNeonNight,
-  describeNeonNightProblems,
-  ensureNeonNight,
-  nnCheckContext,
-} from "./neon_night.ts";
+import { neonNightFilm } from "./neon_film.ts";
+import { parseNeonPicks } from "./neon_slots.ts";
+import { MAX_NN_TITLE_CHARS, sameLine } from "./neon_night.ts";
+import { isDrugReference } from "./excerpts.ts";
 import {
   buildGoldenVowsContent,
   codeGoldenVows,
@@ -179,38 +176,92 @@ function mutate(r: Rand, value: unknown, ids: string[], depth = 0): unknown {
 
 const RUNS = 2500;
 
-Deno.test(`Neon Night: ${RUNS} random memories and broken plans all play (#433)`, () => {
+// A pick_neon_lines answer for [slots] broken in random ways (#454): ids
+// from other slots, invented ones, the same id twice, free titles too
+// long, banned or in another language, or junk for the whole answer.
+function randomPicks(
+  r: Rand,
+  slots: { slot: string; candidates: { id: string }[] }[],
+): unknown {
+  if (r() < 0.1) return junk(r);
+  const every = slots.flatMap((s) => s.candidates.map((c) => c.id));
+  return {
+    picks: slots.filter(() => r() > 0.1).map((s) => ({
+      slot: r() < 0.03 ? "ch99.card" : s.slot,
+      ids: Array.from({ length: int(r, 0, 4) }, () => {
+        const roll = r();
+        if (roll < 0.6 && s.candidates.length) {
+          return pick(r, s.candidates).id;
+        }
+        if (roll < 0.85 && every.length) return pick(r, every);
+        return pick(r, ["invented", "", "h:0", "c:f9999"]);
+      }),
+      free_title: r() < 0.3
+        ? pick(r, [
+          "Doors open",
+          "Брюссель",
+          "A title that is far too long for any neon sign",
+          BANNED_PHRASES[0],
+          "Day 2",
+          "23:15",
+          "",
+        ])
+        : null,
+    })),
+  };
+}
+
+Deno.test(`Neon Night: ${RUNS} random memories and broken picks all play (#454)`, () => {
   for (let seed = 1; seed <= RUNS; seed++) {
     const r = rng(seed);
     const trip = withFilmPhotos(randomTrip(r));
-    const context = nnCheckContext(trip);
-    const ids = [...context.photoOrder.keys()];
-    if (ids.length < 2) continue;
-    const base = codeNeonNight(context, "en");
-    assertEquals(
-      describeNeonNightProblems(base, context),
-      [],
-      `seed ${seed}: code plan`,
+    if (trip.photos.length < 2) continue;
+    const cut = neonNightFilm(trip, null);
+    const picks = parseNeonPicks(randomPicks(r, cut.slots));
+    const { content, report } = neonNightFilm(trip, picks);
+    if (trip.photos.length >= 15) {
+      assert(content.chapters.length > 0, `seed ${seed}`);
+    }
+    // Every slot resolved from its own list (or a checked free title).
+    for (const x of report) {
+      for (const c of x.chosen) {
+        if (c.id === "day" || c.id === "free") continue;
+        assert(
+          x.candidates.some((k) => k.id === c.id),
+          `seed ${seed}: ${x.slot} ${c.id}`,
+        );
+      }
+    }
+    const ids = report.flatMap((x) =>
+      x.chosen.map((c) => c.id).filter((id) => id !== "day" && id !== "free")
     );
-    const raw = r() < 0.15 ? junk(r) : mutate(r, base, ids);
-    const ensured = ensureNeonNight(
-      raw,
-      context,
-      pick(r, ["en", "ru"] as const),
-    );
-    assertEquals(
-      describeNeonNightProblems(ensured.plan, context),
-      [],
-      `seed ${seed}: ${ensured.source}`,
-    );
-    assert(
-      !ensured.repairs.some((x) => x.includes("repair failed")),
-      `seed ${seed}: ${ensured.repairs.join("; ")}`,
-    );
-    const content = buildNeonNightContent(trip, ensured.plan);
-    if (ids.length >= 15) assert(content.chapters.length > 0, `seed ${seed}`);
-    const lines = content.chapters.reduce((n, c) => n + c.excerpts.length, 0);
-    assert(lines <= 12, `seed ${seed}: ${lines} lines`);
+    assertEquals(new Set(ids).size, ids.length, `seed ${seed}: an id twice`);
+    for (const c of content.chapters) {
+      assert(c.title.length > 0, `seed ${seed}: untitled`);
+      assert(
+        [...c.title].length <= MAX_NN_TITLE_CHARS,
+        `seed ${seed}: ${c.title}`,
+      );
+    }
+    const shown = [
+      ...content.chapters.flatMap((c) => [
+        c.title,
+        c.note,
+        ...c.moments.flatMap((m) => (m.words ?? []).map((w) => w.text)),
+      ]),
+      content.note?.text,
+      content.headline,
+    ].filter((t): t is string => !!t);
+    for (let i = 0; i < shown.length; i++) {
+      assertEquals(isDrugReference(shown[i]), false, `seed ${seed}`);
+      for (let j = i + 1; j < shown.length; j++) {
+        assertEquals(
+          sameLine(shown[i], shown[j]),
+          false,
+          `seed ${seed}: ${shown[i]} / ${shown[j]}`,
+        );
+      }
+    }
   }
 });
 
@@ -244,25 +295,4 @@ Deno.test(`Golden Vows: ${RUNS} random memories and broken plans all play (#433)
     );
     buildGoldenVowsContent(trip, ensured.plan);
   }
-});
-
-Deno.test("no check rejects what code could repair: fixable faults stay the director's", () => {
-  const r = rng(42);
-  let kept = 0;
-  for (let seed = 1; seed <= 300; seed++) {
-    const trip = withFilmPhotos(randomTrip(r));
-    const context = nnCheckContext(trip);
-    if (context.photoOrder.size < 15) continue;
-    const plan = codeNeonNight(context, "en");
-    // Faults code knows how to fix: banned or overlong lines, a headline
-    // too long, an Always pick without a moment.
-    plan.chapters[0].title = `Epic ${
-      plan.chapters[0].title
-    } unforgettable night out`;
-    plan.headline = "The most unforgettable night of the whole year";
-    const ensured = ensureNeonNight(plan, context, "en");
-    assertEquals(ensured.source, "director", `seed ${seed}`);
-    kept++;
-  }
-  assert(kept > 100);
 });

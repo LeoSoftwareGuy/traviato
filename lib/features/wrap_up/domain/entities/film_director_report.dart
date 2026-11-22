@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import 'film_neon_slot.dart';
 import 'film_plan_chapter.dart';
 
 /// The last director run for a memory (#328, `wrap_ups.director`): the plan
@@ -22,6 +23,7 @@ class FilmDirectorReport extends Equatable {
     this.goldenVowsProblems = const [],
     this.hasNeonNight = false,
     this.neonNightProblems = const [],
+    this.neonSlots = const [],
     this.template,
     this.filmSource,
     this.filmRepairs = const [],
@@ -71,6 +73,10 @@ class FilmDirectorReport extends Equatable {
   /// or when the director left it out on purpose.
   final List<String> neonNightProblems;
 
+  /// Every Neon Night slot (#454): its candidates, the director's pick,
+  /// what plays and why. Empty for a run from before.
+  final List<FilmNeonSlot> neonSlots;
+
   /// The film the memory's vibes chose (#433): `golden_vows`,
   /// `neon_night` or `sky_story`; null for a run from before.
   final String? template;
@@ -115,6 +121,7 @@ class FilmDirectorReport extends Equatable {
     goldenVowsProblems,
     hasNeonNight,
     neonNightProblems,
+    neonSlots,
     template,
     filmSource,
     filmRepairs,

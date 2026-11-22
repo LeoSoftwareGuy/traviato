@@ -16,6 +16,10 @@
 // back). A section is repaired in code, and when that isn't enough code
 // builds the same film's plan — the chosen film always plays.
 //
+// Neon Night (#454) is cut by code — chapters, scenes, length — and its
+// one call (pick_neon_lines) only picks the words from code's candidates;
+// a pick that isn't in its slot's list takes code's top candidate.
+//
 // Model: claude-sonnet-5 for every call, same as the 4 AI lines (#93).
 
 import type { TripData } from "./gather.ts";
@@ -64,17 +68,21 @@ import {
   healGoldenVows,
 } from "./golden_vows.ts";
 import {
-  describeNeonNightProblems,
   type EnsuredSection,
-  ensureNeonNight,
-  healNeonNight,
-  NEON_NIGHT_PROMPT_RULES,
-  type NeonNightPlan,
-  neonNightToolProperty,
   nnChapterStarts,
   nnCheckContext,
   nnLogicalDays,
 } from "./neon_night.ts";
+import {
+  buildNeonPickInput,
+  buildNeonPickSystemPrompt,
+  isPicksRecord,
+  type NeonNightPicksRecord,
+  type NnPicks,
+  parseNeonPicks,
+  pickNeonLinesTool,
+} from "./neon_slots.ts";
+import { neonNightFilm, type NnSlotReport } from "./neon_film.ts";
 import { type PlayedTemplate, playedTemplate } from "./film_template.ts";
 import { withFilmPhotos } from "./film_photos.ts";
 import {
@@ -105,10 +113,10 @@ export const MAX_DIRECTOR_RUNS = 4;
 // The director's rules (#398: logical days, excerpts, chronology; #433:
 // the template from vibes). A record made under older rules runs again
 // once, within MAX_DIRECTOR_RUNS.
-export const DIRECTOR_VERSION = 4;
+export const DIRECTOR_VERSION = 5;
 
 // The films with a section of their own (#346, #363).
-type SectionFilm = Exclude<PlayedTemplate, "sky_story">;
+type SectionFilm = "golden_vows";
 
 // emit_film_plan with the Sky Story section (#345). Composed here so the
 // films' modules don't import each other. No occasion choice since #433:
@@ -154,12 +162,6 @@ export const sectionToolSchemas: Record<SectionFilm, ToolDefinition> = {
     "golden_vows",
     goldenVowsToolProperty,
   ),
-  neon_night: sectionTool(
-    "emit_neon_night",
-    "Emit this memory's Neon Night film. The film is fixed: always emit it.",
-    "neon_night",
-    neonNightToolProperty,
-  ),
 };
 
 export type DirectorCall = TokenUsage & {
@@ -197,10 +199,13 @@ export interface DirectorRecord {
   // why) — then Sky Story plays.
   golden_vows?: GoldenVowsPlan | null;
   golden_vows_problems?: string[];
-  // The Neon Night section (#363): null when the director chose another
-  // occasion, or its section stayed invalid (neon_night_problems says
-  // why) — then the next film plays.
-  neon_night?: NeonNightPlan | null;
+  // Neon Night's words (#454): the director's picks by slot, or null
+  // (code picks every slot). Records before #454 hold a whole plan here;
+  // it is no longer read (DIRECTOR_VERSION 5 re-runs them).
+  neon_night?: NeonNightPicksRecord | unknown | null;
+  // Every Neon slot when it ran (#454, Plan inspector): its candidates,
+  // the director's pick, what plays and why.
+  neon_slots?: NnSlotReport[];
   neon_night_problems?: string[];
   // Before #433: which occasion film the plan call chose. Kept so older
   // records still read.
@@ -408,9 +413,7 @@ export function buildSectionSystemPrompt(
   film: SectionFilm,
   language: WrapUpLanguage,
 ): string {
-  const name = film === "golden_vows"
-    ? "Golden Vows, an elegant ivory-and-gold album"
-    : "Neon Night, a loud neon party film";
+  const name = "Golden Vows, an elegant ivory-and-gold album";
   return [
     "You are the director of a short film made from one person's memory. ",
     `It will be told as ${name}. Emit it with the `,
@@ -426,9 +429,9 @@ export function buildSectionSystemPrompt(
     "never generic.\n",
     `- Never use: ${BANNED_PHRASES.map((p) => `"${p}"`).join(", ")}.\n`,
     NOTE_LINE_RULES,
-    film === "golden_vows" ? GOLDEN_VOWS_OCCASION_RULES : "",
+    GOLDEN_VOWS_OCCASION_RULES,
     `- ${sectionLanguageRule(language)}`,
-    film === "golden_vows" ? GOLDEN_VOWS_PROMPT_RULES : NEON_NIGHT_PROMPT_RULES,
+    GOLDEN_VOWS_PROMPT_RULES,
   ].join("");
 }
 
@@ -577,6 +580,58 @@ async function planSection(
   return { value: null, problems, attempts };
 }
 
+// Neon Night's words (#454): one pick_neon_lines call over code's cut
+// film and its slots; a retry only when the call itself fails. Null =
+// no picks (code picks every slot).
+async function pickNeonLines(
+  deps: DirectorDeps,
+  calls: DirectorCall[],
+  tripId: string,
+  input: ReturnType<typeof buildNeonPickInput>,
+  language: WrapUpLanguage,
+): Promise<{ picks: NnPicks | null; problems: string[]; attempts: number }> {
+  const log = deps.log ?? console.error;
+  const problems: string[] = [];
+  let attempts = 0;
+  for (let attempt = 1; attempt <= PLAN_ATTEMPTS; attempt++) {
+    attempts = attempt;
+    try {
+      const result = await callAnthropicTool({
+        apiKey: deps.apiKey,
+        model: DIRECTOR_MODEL,
+        maxTokens: PLAN_MAX_TOKENS,
+        system: buildNeonPickSystemPrompt(language),
+        content: `Pick the words for this film:\n${JSON.stringify(input)}`,
+        tool: pickNeonLinesTool,
+        label: "neon_night",
+        fetchImpl: deps.fetchImpl,
+        log,
+      });
+      calls.push({ ...result.usage, call: "section" });
+      const picks = parseNeonPicks(result.input);
+      if (picks) return { picks, problems: [], attempts };
+      problems.push("pick_neon_lines: not a list of picks");
+    } catch (err) {
+      problems.push(`neon_night call failed: ${(err as Error).message}`);
+    }
+    logEvent(log, "director_section_invalid", {
+      trip_id: tripId,
+      film: "neon_night",
+      attempt,
+      problems: problems.slice(-1),
+    });
+  }
+  return { picks: null, problems, attempts };
+}
+
+// What the inspector lists as put right (#454): each slot where the
+// director's pick didn't hold.
+function neonRepairs(report: readonly NnSlotReport[]): string[] {
+  return report.filter((r) => r.pick && r.source === "code").map((r) =>
+    `${r.slot}: ${r.reason}`
+  );
+}
+
 // Runs the director for one memory. Never throws: anything that goes wrong
 // becomes a fallback record, so the film always plays.
 export async function runDirector(
@@ -709,13 +764,41 @@ export async function runDirector(
 
     const input = buildPlanInput(film, usable, analyses, language);
 
-    if (template === "golden_vows" || template === "neon_night") {
+    if (template === "neon_night") {
+      // Code cuts the film; one call picks its words (#454).
+      const cut = neonNightFilm(seen, null, record.hero_scores);
+      const outcome = await pickNeonLines(
+        deps,
+        calls,
+        tripId,
+        buildNeonPickInput(
+          seen,
+          cut.chapters,
+          cut.slots,
+          analyses,
+          (iso) => localClock(iso, seen),
+        ),
+        language,
+      );
+      record.section_attempts = outcome.attempts;
+      const played = neonNightFilm(seen, outcome.picks, record.hero_scores);
+      record.neon_night = outcome.picks
+        ? { picks_version: 2, picks: outcome.picks }
+        : null;
+      record.neon_slots = played.report;
+      record.neon_night_source = outcome.picks ? "director" : "code";
+      record.neon_night_repairs = outcome.picks
+        ? neonRepairs(played.report)
+        : [...outcome.problems, "code picked every slot"];
+      record.problems = [`${template} memory: no classic plan call`];
+      record.sky_problems = [`${template} memory: code-built pages`];
+      return record;
+    }
+
+    if (template === "golden_vows") {
       // One call: the chosen film's section (#433).
-      const ensure = template === "golden_vows"
-        ? (raw: unknown) =>
-          ensureGoldenVows(raw, gvCheckContext(seen), language)
-        : (raw: unknown) =>
-          ensureNeonNight(raw, nnCheckContext(seen), language);
+      const ensure = (raw: unknown) =>
+        ensureGoldenVows(raw, gvCheckContext(seen), language);
       const outcome = await planSection(
         deps,
         calls,
@@ -745,15 +828,9 @@ export async function runDirector(
           "code built the plan",
         ]
         : ensured.repairs;
-      if (template === "golden_vows") {
-        record.golden_vows = ensured.plan as GoldenVowsPlan;
-        record.golden_vows_source = ensured.source;
-        record.golden_vows_repairs = repairs;
-      } else {
-        record.neon_night = ensured.plan as NeonNightPlan;
-        record.neon_night_source = ensured.source;
-        record.neon_night_repairs = repairs;
-      }
+      record.golden_vows = ensured.plan as GoldenVowsPlan;
+      record.golden_vows_source = ensured.source;
+      record.golden_vows_repairs = repairs;
       // The classic plan and Sky Story pages are code's (no call): the
       // app's safety net if the chosen film fails while it plays.
       record.problems = [`${template} memory: no classic plan call`];
@@ -952,33 +1029,18 @@ export function currentGoldenVows(
     : ensured;
 }
 
-// The Neon Night a Neon Night memory plays now (#433): as stored while it
-// fits, else healed (#393) and repaired, else code's plan. Never null.
+// The Neon Night words a Neon Night memory plays now (#454): the
+// director's stored picks — re-applied by id to the film code cuts from
+// the memory as it is now, so a gone or reworded line takes code's top
+// candidate — else none (code picks every slot). Records before #454
+// held a whole plan: not read.
 export function currentNeonNight(
   record: unknown,
-  tripData: TripData,
-  language: WrapUpLanguage = "en",
-): EnsuredSection<NeonNightPlan> {
+): { picks: NnPicks | null; source: "director" | "code" } {
   const stored = isDirectorRecord(record) ? record.neon_night ?? null : null;
-  const context = nnCheckContext(
-    tripData,
-    new Set(isDirectorRecord(record) ? record.failed_ids ?? [] : []),
-  );
-  if (stored && describeNeonNightProblems(stored, context).length === 0) {
-    return {
-      plan: stored,
-      source: (record as DirectorRecord).neon_night_source ?? "director",
-      repairs: (record as DirectorRecord).neon_night_repairs ?? [],
-    };
-  }
-  const ensured = ensureNeonNight(
-    stored ? healNeonNight(stored, context) : null,
-    context,
-    language,
-  );
-  return stored
-    ? { ...ensured, repairs: ["healed to the memory now", ...ensured.repairs] }
-    : ensured;
+  return isPicksRecord(stored)
+    ? { picks: stored.picks, source: "director" }
+    : { picks: null, source: "code" };
 }
 
 // [iso] as 'HH:MM' on the app's clock (TripData.utc_offset_minutes, #363),
