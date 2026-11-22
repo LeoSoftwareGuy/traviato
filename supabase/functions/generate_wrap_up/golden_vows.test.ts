@@ -2,7 +2,7 @@ import {
   assert,
   assertEquals,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { chapterLayout, MAX_GV_HEART } from "./golden_vows.ts";
+import { chapterLayout, MAX_GV_HEART, packingOf } from "./golden_vows.ts";
 import { goldenVowsFilm, gvShortestSeconds } from "./gv_film.ts";
 import { directorTripData } from "./director_fixtures.ts";
 import { gvHeroScores, gvMemory } from "./gv_fixtures.ts";
@@ -62,7 +62,8 @@ Deno.test("content: the memory's facts, the user's words, code's album", () => {
     ["Последний закат", "Глава третья · Утро"],
   ]);
   assertEquals(content.chapters.map((c) => c.photo_ids.length), [3, 3, 3]);
-  assertEquals(content.carousel?.photo_ids.length, 8);
+  // 20 photos: past its target even at its quickest, so no carousel.
+  assertEquals(content.carousel, null);
   assertEquals(content.heart_photo_ids.length, 20);
   assertEquals(content.moment_count, 20);
   assert(content.occasion_line && content.end_line);
@@ -90,7 +91,8 @@ Deno.test("the director's picks play when they hold", () => {
 
 Deno.test("photos shown on pages, and the heart holds them all", () => {
   const film = goldenVowsFilm(gvMemory(), null, { heroScores: gvHeroScores() });
-  assertEquals(film.shown, { pages: 20, photos: 20 });
+  // 3 main pages and 3 chapters of 3; no carousel for its target.
+  assertEquals(film.shown, { pages: 12, photos: 20 });
 });
 
 Deno.test("packing: checked items first, else planned quests, else none", () => {
@@ -101,7 +103,7 @@ Deno.test("packing: checked items first, else planned quests, else none", () => 
       { title: "Umbrella", suggestion_code: null, is_checked: false },
     ],
   });
-  assertEquals(goldenVowsFilm(checklist, null).content.packing, {
+  assertEquals(packingOf(checklist), {
     source: "checklist",
     items: [
       { text: "Rings", suggestion_code: null },
@@ -118,7 +120,7 @@ Deno.test("packing: checked items first, else planned quests, else none", () => 
       completed_at: null,
     })),
   });
-  const fromQuests = goldenVowsFilm(quests, null).content.packing!;
+  const fromQuests = packingOf(quests)!;
   assertEquals(fromQuests.source, "quests");
   assertEquals(fromQuests.items.map((i) => i.text), [
     "Quest 0",
@@ -127,7 +129,7 @@ Deno.test("packing: checked items first, else planned quests, else none", () => 
     "Quest 3",
     "Quest 4",
   ]);
-  assertEquals(goldenVowsFilm(directorTripData(), null).content.packing, null);
+  assertEquals(packingOf(directorTripData()), null);
 });
 
 Deno.test("the heart: every photo, spread to 200; left-out ones never", () => {
@@ -220,4 +222,35 @@ Deno.test("length: a shorter clause is never words already shown", () => {
   const notes = goldenVowsFilm(longMemory(), null).content.heroes
     .flatMap((h) => h.note ? [h.note.toLowerCase()] : []);
   assertEquals(new Set(notes).size, notes.length);
+});
+
+Deno.test("a short album aims at its target: no carousel, then no packing (#458)", () => {
+  // 20 photos: a target of about 39 s, past it even at its quickest.
+  const data = gvMemory();
+  data.checklist = [{
+    title: "Кольца",
+    suggestion_code: null,
+    is_checked: true,
+  }];
+  const film = goldenVowsFilm(data, null, { heroScores: gvHeroScores() });
+  const { content } = film;
+  assertEquals(content.carousel, null);
+  assertEquals(content.packing, null);
+  assertEquals(film.trims, [
+    "no carousel (for the target)",
+    "no packing card (for the target)",
+  ]);
+  // Never a chapter, a note, a caption or the heart.
+  assertEquals(content.chapters.length, film.skeleton.chapters.length);
+  assertEquals(content.heroes.length, film.skeleton.mains.length);
+  assert(content.heroes.every((h) => h.note));
+  assertEquals(content.heart_photo_ids.length, 20);
+});
+
+Deno.test("a long album keeps its carousel while it fits 75 s (#458)", () => {
+  const film = goldenVowsFilm(longMemory(), null);
+  assert(
+    !film.trims.some((t) => t.includes("for the target")),
+    `${film.trims}`,
+  );
 });

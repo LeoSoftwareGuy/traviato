@@ -8,8 +8,10 @@
 // order (#458): a main page's note line → a shorter clause of the same
 // note → no note; the carousel; the packing card; main pages down to 2
 // (uncaptioned, not Always, weakest first); then the app shortens the
-// chapter pages, never below their title's reading time (GvFit). Never a
-// chapter, the title page, the heart or a caption.
+// chapter pages, never below their title's reading time (GvFit). A short
+// album still past its target at its quickest also gives up the carousel,
+// then the packing card. Never a chapter, a note (for the target), the
+// title page, the heart or a caption.
 
 import type { TripData } from "./gather.ts";
 import { inclusiveDayCount } from "./assemble.ts";
@@ -53,6 +55,9 @@ const GV_CHAPTER_DWELL = 3.4;
 const GV_CAROUSEL_DWELL = 6.0;
 // How far the app shrinks the pages' dwell for a short film.
 export const GV_MIN_DWELL_SCALE = 0.7;
+// How far past its target a short album may run before it gives up its
+// carousel, then its packing card (#458).
+export const GV_TARGET_SLACK_SECONDS = 1.5;
 // How far under the longest film the estimate keeps the album (#454's
 // margin): the phone lays notes out with its own fonts.
 export const GV_ESTIMATE_MARGIN_SECONDS = 1;
@@ -319,5 +324,20 @@ function fitToLongest(
   }
   // 6. The app shortens the chapter pages (GvFit).
   if (!fits()) trims.push("chapter pages shortened in the app");
+  // A short album (#458): still past its target at its quickest, it
+  // gives up the carousel, then the packing card — the heart still shows
+  // every photo. Never a chapter, a note, a caption, the title page or
+  // the heart; a long album (target 75 s) never gets here.
+  const target = filmSecondsOf(tripData);
+  const over = () =>
+    gvShortestSeconds(content) > target + GV_TARGET_SLACK_SECONDS;
+  if (over() && content.carousel) {
+    content.carousel = null;
+    trims.push("no carousel (for the target)");
+  }
+  if (over() && content.packing) {
+    content.packing = null;
+    trims.push("no packing card (for the target)");
+  }
   return { content, trims, notes };
 }

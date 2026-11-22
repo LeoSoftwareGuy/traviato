@@ -450,10 +450,12 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   prints. No words show twice. Length: past 75 s at its quickest the
   album gives way in this order — a note's line to a shorter clause, then
   no note; the carousel; the packing card; main pages down to 2; then
-  shorter chapter pages (never below their title's reading time). Never
-  a chapter, the title page, the heart or a caption. So a short album
-  may run past its target (a 15-photo one about 58 s), as Neon Night
-  does. The Plan inspector shows every slot, the word that made it a
+  shorter chapter pages (never below their title's reading time). A
+  short album still past its target at its quickest gives up its
+  carousel, then its packing card (the heart still shows every photo);
+  a long one stays within 75 s. Never a chapter, a note, the title page,
+  the heart or a caption — so a short album may still run past its
+  target (a 15-photo one about 51 s against 30 s). The Plan inspector shows every slot, the word that made it a
   wedding, "N / M photos shown", what was trimmed and the notes on no
   page.
 - **The user's words (#399, display only; which words are chosen is #398,

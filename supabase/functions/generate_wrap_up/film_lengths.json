@@ -506,29 +506,7 @@
     "end_date": "2026-09-03",
     "day_count": 3,
     "place": "Netherlands",
-    "packing": {
-     "source": "checklist",
-     "items": [
-      {
-       "text": "Passports",
-       "suggestion_code": null
-      },
-      {
-       "text": "Sunscreen",
-       "suggestion_code": null
-      },
-      {
-       "text": "Camera",
-       "suggestion_code": null
-      },
-      {
-       "text": "Sandals",
-       "suggestion_code": null
-      }
-     ],
-     "checked": 4,
-     "total": 4
-    },
+    "packing": null,
     "heroes": [
      {
       "photo_id": "p00",
@@ -736,29 +714,7 @@
     "end_date": "2026-09-03",
     "day_count": 3,
     "place": "Netherlands",
-    "packing": {
-     "source": "checklist",
-     "items": [
-      {
-       "text": "Passports",
-       "suggestion_code": null
-      },
-      {
-       "text": "Sunscreen",
-       "suggestion_code": null
-      },
-      {
-       "text": "Camera",
-       "suggestion_code": null
-      },
-      {
-       "text": "Sandals",
-       "suggestion_code": null
-      }
-     ],
-     "checked": 4,
-     "total": 4
-    },
+    "packing": null,
     "heroes": [
      {
       "photo_id": "p00",
@@ -817,24 +773,7 @@
       "layout": "C"
      }
     ],
-    "carousel": {
-     "title": "More of us",
-     "line": "Every little moment",
-     "photo_ids": [
-      "p03",
-      "p05",
-      "p07",
-      "p08",
-      "p11",
-      "p13",
-      "p15",
-      "p16",
-      "p20",
-      "p22",
-      "p24",
-      "p17"
-     ]
-    },
+    "carousel": null,
     "heart_photo_ids": [
      "p00",
      "p01",

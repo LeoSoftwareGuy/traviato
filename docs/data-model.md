@@ -358,7 +358,10 @@ Post-MVP: `video_path`, `video_status`.
   carousel; the occasion with the word that set it), `gv_slots.ts` lists
   candidates per slot (`occasion`, `mainK.label`, `mainK.note` — fixed to
   a caption —, `chN.title`, `carousel.title`, `finale`), `gv_film.ts`
-  builds `content.golden_vows` (same shape) and trims it past 75 s.
+  builds `content.golden_vows` (same shape) and trims it past 75 s; a
+  short album still past its `film_seconds` at its quickest also drops
+  its carousel, then its packing card (`gv_trims`: "… (for the
+  target)").
   Shared with Neon in `film_slots.ts`: ids, lines, names, a note's scene,
   picks, the chooser, day titles. One `pick_golden_vows_lines` call;
   `director.golden_vows = {picks_version: 2, picks}` (older sections
