@@ -169,7 +169,7 @@ void main() {
   group('labels', () {
     setUpAll(loadNeonNightFonts);
 
-    String label(NnMomentTexts texts) => (texts as NnLabelTexts).label.text;
+    String label(NnMomentTexts texts) => (texts as NnLabelTexts).label!.text;
 
     test('split: time · place; burst: BURST · time; peak: first → last', () {
       final texts = NeonNightTexts(NeonNightFixtures.reference, en);
@@ -199,6 +199,65 @@ void main() {
       final few = NeonNightTexts(NeonNightFixtures.few, en);
       expect(label(few.chapters[0].moments.single), '23:00');
       few.dispose();
+    });
+
+    test('a captioned photo never shows its time (#456)', () {
+      const chapter = [
+        NnPhoto(id: 'a', takenAt: '13:10'),
+        NnPhoto(id: 'b', takenAt: '13:12'),
+        NnPhoto(id: 'c', takenAt: '13:14'),
+      ];
+      final quiet = [
+        const NnPhoto(id: 'd', takenAt: '13:19', caption: 'coffee shop').quiet,
+        const NnPhoto(id: 'e', takenAt: '14:25', caption: 'our castle').quiet,
+      ];
+      NnChapter withMoment(NnMoment moment) => NnChapter(
+        title: 'Амстердам',
+        from: '13:10',
+        to: '14:25',
+        photos: [...chapter, ...moment.photos],
+        cardPhotos: chapter,
+        moments: [moment],
+      );
+      final split = NnMomentTexts(
+        NnSplit(quiet),
+        withMoment(NnSplit(quiet)),
+        en,
+      );
+      expect((split as NnLabelTexts).label, isNull);
+      final placed = NnMomentTexts(
+        NnSplit(quiet, place: 'Dam'),
+        withMoment(NnSplit(quiet)),
+        en,
+      );
+      expect(label(placed), 'DAM');
+      final burst = NnMomentTexts(
+        NnBurst(quiet),
+        withMoment(NnBurst(quiet)),
+        en,
+      );
+      expect(label(burst), 'BURST');
+      final timeline = [
+        ...quiet,
+        ...chapter,
+      ]..sort((a, b) => a.takenAt.compareTo(b.takenAt));
+      final lit =
+          NnMomentTexts(
+                NnTimeline(timeline),
+                withMoment(NnTimeline(timeline)),
+                en,
+              )
+              as NnTimelineTexts;
+      for (final (i, photo) in timeline.indexed) {
+        final (plain, _) = lit.times[i];
+        expect(
+          (plain.text! as TextSpan).text,
+          photo.captioned ? '' : photo.takenAt,
+        );
+      }
+      for (final t in [split, placed, burst, lit]) {
+        t.dispose();
+      }
     });
   });
 
@@ -249,8 +308,9 @@ void main() {
       moments: [NnTimeline(photos)],
     );
 
-    test('a timeline item shows its time; the lit one its caption, large, '
-        'and holds the highlight while it is read (#399 T2)', () {
+    test('a timeline item shows its time — a captioned one its caption or '
+        'nothing (#456); the lit one its caption, large, and holds the '
+        'highlight while it is read (#399 T2)', () {
       final photos = [
         const NnPhoto(id: 'a', takenAt: '22:10', caption: 'Lost the keys'),
         const NnPhoto(id: 'b', takenAt: '22:20'),
@@ -258,7 +318,7 @@ void main() {
       ];
       final texts = NnTimelineTexts(NnTimeline(photos), chapter(photos));
       String time(int i) => (texts.times[i].$1.text! as TextSpan).text!;
-      expect([time(0), time(1), time(2)], ['22:10', '22:20', '22:30']);
+      expect([time(0), time(1), time(2)], ['', '22:20', '']);
       expect(texts.captions[0]!.text, 'Lost the keys');
       expect(texts.captions[1], isNull);
       // Too long for 3 lines: left out, never cut.

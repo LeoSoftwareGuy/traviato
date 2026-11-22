@@ -335,6 +335,22 @@ Post-MVP: `video_path`, `video_status`.
   `ade` case; `ade_fixture.ts` is gone. Golden Vows follows the same
   pattern later.
 
+- **Neon Night lines on their own photos** (#456, no schema change):
+  `buildNeonSlots` gives each note one scene of its chapter (its photo's,
+  else the largest share of a scene's photos within 90 min, then the
+  nearest photo; the card on a tie or without a time) and lists its lines
+  only there — a hard filter, not a score. `MAX_NN_CARD_NOTE_CHARS` 72.
+  A moment's words always keep its best caption (`captionRank`: Always,
+  then hero score), on top of `maxWords`; for length its line gives way
+  to a shorter line of its note, else goes. `NnShape.quietMoments` (the
+  last trim step): that many moments, the last chapter's first, show no
+  note line. In the app `NnPhoto.captionHidden` keeps a quiet photo's
+  caption known, so it never shows its time; NnFit adds steps 8–9 (a
+  moment's line to its short clause, then gone) and never drops a
+  moment's last caption; extra bars for the target stop at a bar per
+  photo. `film_lengths.json` regenerated; the ADE length test loads the
+  film's fonts and compares the player's loop with NnFit's measure.
+
 - **Limits** (#432, no schema change): `generate_wrap_up/wrap_up_limits.json`
   (minPhotos 15, maxFilmPhotos 60, minNotes 1, maxNoteLines 12, maxVibes 3)
   is shared with the app's `WrapUpLimits` (a Dart test checks they agree).

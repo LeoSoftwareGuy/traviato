@@ -15,10 +15,18 @@ import 'neon_track.dart';
 /// 3. the Plan scene goes;
 /// 4. a long card line becomes its first short clause;
 /// 5. a card's zooms 2 → 1 (never none).
-/// Should the film still run over, two more, so the limit holds:
+/// Should the film still run over, more, so the limit holds:
 /// 6. a card's zoom takes its quickest photo (no caption first);
-/// 7. a moment's words 2 → 1.
-/// Never a chapter, the Note scene, a chapter's line or its last zoom.
+/// 7. a moment's words 2 → 1;
+/// 8. a moment's long line becomes its first short clause (#456);
+/// 9. a moment's line goes (#456: on the phone ADE ran 77.4 s, every
+///    other step spent).
+/// Never a chapter, the Note scene, a chapter's line, its last zoom, nor
+/// a moment's last caption (#456): a moment's words go captions first
+/// while another caption stays, then its line is shortened, then it goes.
+///
+/// [lengthOf] lays the film out with the fonts the device has, so on the
+/// phone it measures what plays; tests load the bundled fonts to match.
 abstract final class NnFit {
   /// The longest a card line stays in step 4.
   static const int shortCardLine = 30;
@@ -50,14 +58,7 @@ abstract final class NnFit {
   static NeonNightStory? _step(NeonNightStory s) {
     final last = s.chapters.length - 1;
     // 1. Words 3 → 2.
-    for (var i = last; i >= 0; i--) {
-      final c = s.chapters[i];
-      for (final (j, m) in c.moments.indexed) {
-        if (_worded(m).length > 2) {
-          return _withChapter(s, i, _withMoment(c, j, _quietOne(m)));
-        }
-      }
-    }
+    if (_fewerWords(s, 2) case final next?) return next;
     // 2. Two moments → one.
     for (var i = last; i >= 0; i--) {
       final c = s.chapters[i];
@@ -102,13 +103,54 @@ abstract final class NnFit {
       }
     }
     // 7. a moment's words 2 → 1.
+    if (_fewerWords(s, 1) case final next?) return next;
+    // 8. a moment's long line → its first short clause;
     for (var i = last; i >= 0; i--) {
       final c = s.chapters[i];
       for (final (j, m) in c.moments.indexed) {
-        if (_worded(m).length > 1) {
-          return _withChapter(s, i, _withMoment(c, j, _quietOne(m)));
+        if (_shorterLine(m) case final shorter?) {
+          return _withChapter(s, i, _withMoment(c, j, shorter));
         }
       }
+    }
+    // 9. a moment's line goes.
+    for (var i = last; i >= 0; i--) {
+      final c = s.chapters[i];
+      for (final (j, m) in c.moments.indexed) {
+        if (m.photos.any((p) => p.line != null)) {
+          final quiet = _rebuilt(m, [
+            for (final p in m.photos) p.line != null ? p.quiet : p,
+          ]);
+          return _withChapter(s, i, _withMoment(c, j, quiet));
+        }
+      }
+    }
+    return null;
+  }
+
+  /// [s] with one moment (the last chapter's first) down from more than
+  /// [words] words by one, or null when none can be.
+  static NeonNightStory? _fewerWords(NeonNightStory s, int words) {
+    for (var i = s.chapters.length - 1; i >= 0; i--) {
+      final c = s.chapters[i];
+      for (final (j, m) in c.moments.indexed) {
+        if (_worded(m).length <= words) continue;
+        if (_quietOne(m) case final quieter?) {
+          return _withChapter(s, i, _withMoment(c, j, quieter));
+        }
+      }
+    }
+    return null;
+  }
+
+  /// [m] with its first long line as its short clause; null if none.
+  static NnMoment? _shorterLine(NnMoment m) {
+    for (final (k, p) in m.photos.indexed) {
+      final line = p.line;
+      if (line == null || line.runes.length <= shortCardLine) continue;
+      final short = shortClause(line);
+      if (short == null || short == line) continue;
+      return _rebuilt(m, [...m.photos]..[k] = p.quiet.withLine(short));
     }
     return null;
   }
@@ -129,16 +171,34 @@ abstract final class NnFit {
       if (p.line != null || p.caption != null) p,
   ];
 
-  /// [m] with one photo's words gone: a caption before a note line, the
-  /// last first.
-  static NnMoment _quietOne(NnMoment m) {
-    final worded = _worded(m);
-    final drop = worded.lastWhere(
-      (p) => p.line == null,
-      orElse: () => worded.last,
-    );
+  /// [m] with one word fewer (#456): a caption, the last first, while
+  /// another caption stays; else its line — shortened to its first short
+  /// clause while a caption stays, else gone. Null when only its last
+  /// caption is left.
+  static NnMoment? _quietOne(NnMoment m) {
+    final captions = [
+      for (final p in m.photos)
+        if (p.line == null && p.caption != null) p,
+    ];
+    final lines = [
+      for (final p in m.photos)
+        if (p.line != null) p,
+    ];
+    if (captions.length > 1) {
+      final drop = captions.last;
+      return _rebuilt(m, [
+        for (final p in m.photos) p == drop ? p.quiet : p,
+      ]);
+    }
+    if (lines.isEmpty) return null;
+    final photo = lines.last;
+    final line = photo.line!;
+    final short = line.runes.length > shortCardLine ? shortClause(line) : null;
+    final kept = captions.isNotEmpty && short != null && short != line
+        ? photo.quiet.withLine(short)
+        : photo.quiet;
     return _rebuilt(m, [
-      for (final p in m.photos) p == drop ? p.quiet : p,
+      for (final p in m.photos) p == photo ? kept : p,
     ]);
   }
 

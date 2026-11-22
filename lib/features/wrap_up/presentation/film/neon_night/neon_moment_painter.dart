@@ -110,7 +110,8 @@ class NnMomentPainter {
     final a = FilmEases.at(t, from, 0.3, FilmEases.linear) * alpha;
     final captions = texts.captions;
     if (captions.isEmpty) {
-      texts.label.paint(canvas, _labelAt(texts.label), alpha: a);
+      final label = texts.label;
+      if (label != null) label.paint(canvas, _labelAt(label), alpha: a);
       return;
     }
     var start = from;

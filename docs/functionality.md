@@ -418,6 +418,21 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   words show twice in a film. The Plan inspector lists
   every place's choices, what the director picked and why something
   else plays.
+- **Neon Night on the phone (#456, after ADE ran 77.4 s):** the film is
+  measured with its own fonts, as the phone lays it out (tests used to
+  measure in a test font, where a long line didn't fit and its reading
+  time went uncounted). Past every earlier step, a moment's line becomes
+  its first short clause, then goes. A line plays only in the scene its
+  note belongs to — the scene of its photo, else the one whose photos it
+  was written among (most of them within 90 min, then the nearest) — so
+  the airport line types on the airport card and the landing line plays
+  over the Amsterdam photos; a scene with no line of its own shows none.
+  A card's line may be up to 72 characters. A captioned photo never shows
+  its time (its caption or nothing); every moment with captioned photos
+  shows one (Always first, then the best shot), even when trimmed for
+  length — its line is shortened, then dropped, before that caption goes.
+  A moment holds longer for the film's length by at most a bar a photo
+  (a line still gets its reading time).
 - **The user's words (#399, display only; which words are chosen is #398,
   multi-excerpt note moments #416):** captions and notes are never cut
   with "…". A text that doesn't fit gets smaller type or more lines, then

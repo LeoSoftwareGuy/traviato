@@ -341,9 +341,7 @@ class NnChapterTexts {
         ? null
         : NeonLabelBox.caption(caption, maxWidth: NnCardTiming.zoomRect.width);
     // A caption too long to read here: no label, never the time (#450).
-    if (box == null && (photo.caption?.trim().isNotEmpty ?? false)) {
-      return null;
-    }
+    if (box == null && photo.captioned) return null;
     return box ?? NeonLabelBox(photo.takenAt);
   }
 
@@ -434,14 +432,17 @@ sealed class NnMomentTexts {
     NnChapter chapter,
     AppLocalizations l10n,
   ) => switch (moment) {
+    // A captioned photo never shows its time (#456): the place alone, or
+    // no label.
     NnSplit(:final photos, :final place) => NnLabelTexts(
-      place == null
-          ? photos.first.takenAt
-          : '${photos.first.takenAt} · ${place.toUpperCase()}',
+      [?photos.first.timeLabel, ?place?.toUpperCase()].join(' · '),
       photos,
     ),
     NnBurst(:final photos) => NnLabelTexts(
-      '${l10n.neonNight_burst.toUpperCase()} · ${photos.first.takenAt}',
+      [
+        l10n.neonNight_burst.toUpperCase(),
+        ?photos.first.timeLabel,
+      ].join(' · '),
       photos,
     ),
     NnTimeline() => NnTimelineTexts(moment, chapter),
@@ -477,12 +478,14 @@ NeonLabelBox? nnCaptionBox(
 /// another in photo order, each for its reading time (#399 T1).
 class NnLabelTexts implements NnMomentTexts {
   NnLabelTexts(String text, List<NnPhoto> photos)
-    : label = NeonLabelBox(text),
+    : label = text.isEmpty ? null : NeonLabelBox(text),
       captions = [
         for (final photo in photos) ?nnCaptionBox(photo, withLine: true),
       ];
 
-  final NeonLabelBox label;
+  /// The moment's time and place; null when there is nothing to say
+  /// (#456: its first photo is captioned and it has no place).
+  final NeonLabelBox? label;
 
   /// The captions that fit, in photo order.
   final List<NeonLabelBox> captions;
@@ -494,7 +497,7 @@ class NnLabelTexts implements NnMomentTexts {
 
   @override
   void dispose() {
-    label.dispose();
+    label?.dispose();
     for (final caption in captions) {
       caption.dispose();
     }
@@ -527,8 +530,9 @@ class NnTimelineTexts implements NnMomentTexts {
           ),
       ];
 
+  /// Empty for a captioned photo (#456: its caption or nothing).
   static TextPainter _time(NnPhoto photo, Color color) => neonLayout(
-    photo.takenAt,
+    photo.timeLabel ?? '',
     NeonType.mono(44, color: color, letterSpacing: 2),
   );
 
