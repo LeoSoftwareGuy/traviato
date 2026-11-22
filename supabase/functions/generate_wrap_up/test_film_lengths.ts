@@ -6,8 +6,8 @@
 //   deno run --allow-write write_film_lengths.ts
 
 import { directorTripData } from "./director_fixtures.ts";
-import { currentGoldenVows, currentNeonNight } from "./director.ts";
-import { buildGoldenVowsContent } from "./golden_vows.ts";
+import { currentNeonNight } from "./director.ts";
+import { goldenVowsFilm } from "./gv_film.ts";
 import { buildNeonNightContent } from "./neon_film.ts";
 import { buildSkyContent } from "./sky_story.ts";
 import { withFilmPhotos } from "./film_photos.ts";
@@ -102,10 +102,7 @@ export function lengthContent(
     sky: buildSkyContent(memory, null, {}),
   };
   if (film === "golden_vows") {
-    content.golden_vows = buildGoldenVowsContent(
-      memory,
-      currentGoldenVows(null, memory, "en").plan,
-    );
+    content.golden_vows = goldenVowsFilm(memory, null).content;
   }
   if (film === "neon_night") {
     content.neon_night = buildNeonNightContent(

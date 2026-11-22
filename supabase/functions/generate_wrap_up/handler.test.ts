@@ -17,7 +17,7 @@ import { validAiFields, validWrapUpContent } from "./test_fixtures.ts";
 import { DIRECTOR_VERSION, type DirectorRecord } from "./director.ts";
 import {
   directorTripData,
-  goldenVowsPlan,
+  gvPicks,
   keepsakePlan,
   neonPicks,
   skyStoryPlan,
@@ -986,13 +986,20 @@ Deno.test("rebuilding a film kept as a Sky Story rebuilds its pages (#345)", asy
   assertEquals(kept.content.sky.source, "director");
 });
 
-// --- Golden Vows (#346) ---
+// --- Golden Vows (#346; #458: code cuts it, the director picks) ---
 
 function goldenVowsRecord(): DirectorRecord {
+  const romantic = directorTripData();
+  romantic.trip = { ...romantic.trip, vibes: ["Romantic"] };
   return {
     ...plannedRecord(),
     sky_story: skyStoryPlan(),
-    golden_vows: goldenVowsPlan(),
+    golden_vows: {
+      picks_version: 2,
+      picks: gvPicks(romantic, new Map([["p03", "bride"]])),
+    },
+    // A photo's summary showed a wedding when the director ran.
+    gv_trigger: { word: "bride", source: "photo", id: "p03" },
     orientations: {},
   };
 }
@@ -1022,7 +1029,10 @@ function keptGoldenVowsClient(photos = directorTripData().photos) {
   });
 }
 
-Deno.test("a draft gets content.golden_vows from the director's section", async () => {
+const chapterTitles = (gv: { chapters: { title: string }[] }) =>
+  gv.chapters.map((c) => c.title);
+
+Deno.test("a draft gets content.golden_vows: code's album, the director's picks", async () => {
   const client = directorClient([], ["Romantic"]);
   const { deps } = directorDeps(client, { record: goldenVowsRecord() });
 
@@ -1030,23 +1040,27 @@ Deno.test("a draft gets content.golden_vows from the director's section", async 
     .json();
 
   const gv = json.content.golden_vows;
+  assertEquals(gv.gv_version, 1);
+  // The occasion the director's photo summary showed, known again.
   assertEquals(gv.occasion, "wedding");
   assertEquals(gv.names, "Amsterdam");
-  assertEquals(gv.heroes.map((h: { note: string | null }) => h.note), [
-    "Bikes everywhere",
-    null,
-  ]);
+  assertEquals(chapterTitles(gv)[0], "Canal morning");
+  assertEquals(gv.chapters.length, 3);
   assertEquals(gv.heart_photo_ids.length, 12);
   assertEquals(json.content.film_style, "golden_vows");
-  assertEquals(json.content.film_report.source, "director");
+  const report = json.content.film_report;
+  assertEquals(report.source, "director");
+  assertEquals(report.repairs, []);
+  assert(report.slots.some((s: { slot: string }) => s.slot === "finale"));
+  assertEquals(report.shown.photos, 12);
+  assertEquals(report.trigger, { word: "bride", source: "photo", id: "p03" });
   // Code-built Sky pages are there too: the app's safety net.
   assertEquals(json.content.sky.source, "code");
   assertEquals(client.writes[0].values.content.golden_vows, gv);
 });
 
-Deno.test("a Romantic memory always plays Golden Vows: no section, director off, unhealable (#433)", async () => {
-  const romantic = (wrapUps: Record<string, unknown>[] = []) =>
-    directorClient(wrapUps, ["Romantic"]);
+Deno.test("a Romantic memory always plays Golden Vows: no picks, director off (#433)", async () => {
+  const romantic = () => directorClient([], ["Romantic"]);
   const none = await (await handleRequest(
     request({ trip_id: TRIP_ID }),
     directorDeps(romantic()).deps,
@@ -1063,33 +1077,6 @@ Deno.test("a Romantic memory always plays Golden Vows: no section, director off,
   )).json();
   assertEquals(off.content.film_style, "golden_vows");
   assertEquals(off.content.golden_vows.heroes.length >= 2, true);
-
-  const data = directorTripData();
-  const deleted = fakeSupabaseClient({
-    trips: [{
-      id: TRIP_ID,
-      user_id: OWNER_ID,
-      ...data.trip,
-      vibes: ["Romantic"],
-    }],
-    wrap_ups: [],
-    journal_notes: data.notes,
-    // Both heroes' photos: too few heroes left to heal (#393).
-    photos: data.photos.filter((p) => p.id !== "p01" && p.id !== "p09"),
-    bonus_task_assignments: [],
-    points_ledger: [],
-    user_achievements: [],
-  });
-  const gone = await (await handleRequest(
-    request({ trip_id: TRIP_ID }),
-    directorDeps(deleted, { record: goldenVowsRecord() }).deps,
-  )).json();
-  assertEquals(gone.content.golden_vows.occasion, "romance");
-  assertEquals(gone.content.film_report.source, "code");
-  assertEquals(
-    JSON.stringify(gone.content.golden_vows).includes('"p01"'),
-    false,
-  );
 });
 
 Deno.test("a Sky Story memory never gets Golden Vows or Neon Night (#433)", async () => {
@@ -1105,7 +1092,7 @@ Deno.test("a Sky Story memory never gets Golden Vows or Neon Night (#433)", asyn
   }
 });
 
-Deno.test("a deleted photo heals Golden Vows instead of dropping it (#393)", async () => {
+Deno.test("deleted photos: the album is cut again, no chapter lost (#458)", async () => {
   const data = directorTripData();
   const client = fakeSupabaseClient({
     trips: [{
@@ -1116,7 +1103,7 @@ Deno.test("a deleted photo heals Golden Vows instead of dropping it (#393)", asy
     }],
     wrap_ups: [],
     journal_notes: data.notes,
-    photos: data.photos.filter((p) => p.id !== "p05"),
+    photos: data.photos.filter((p) => p.id !== "p05" && p.id !== "p01"),
     bonus_task_assignments: [],
     points_ledger: [],
     user_achievements: [],
@@ -1125,8 +1112,14 @@ Deno.test("a deleted photo heals Golden Vows instead of dropping it (#393)", asy
     request({ trip_id: TRIP_ID }),
     directorDeps(client, { record: goldenVowsRecord() }).deps,
   )).json();
-  assertEquals(json.content.golden_vows.chapters.length, 2);
+  assertEquals(json.content.golden_vows.chapters.length, 3);
   assertEquals(JSON.stringify(json.content).includes('"p05"'), false);
+  assertEquals(
+    JSON.stringify(json.content.golden_vows).includes('"p01"'),
+    false,
+  );
+  // The picks that still hold play.
+  assertEquals(chapterTitles(json.content.golden_vows)[0], "Canal morning");
 });
 
 Deno.test("rebuilding a film kept as Golden Vows keeps Golden Vows (#433)", async () => {
@@ -1149,22 +1142,8 @@ Deno.test("rebuilding a film kept as Golden Vows keeps Golden Vows (#433)", asyn
       ),
     ).deps,
   )).json();
-  assertEquals(changed.content.golden_vows.chapters.length, 2);
-
-  const unhealable = await (await handleRequest(
-    request({ trip_id: TRIP_ID, rebuild: true }),
-    directorDeps(
-      keptGoldenVowsClient(
-        directorTripData().photos.filter((p) =>
-          p.id !== "p01" && p.id !== "p09"
-        ),
-      ),
-    ).deps,
-  )).json();
-  // Too little left of the director's: code builds the album — the kept
-  // film stays Golden Vows.
-  assertEquals(unhealable.content.golden_vows.occasion, "romance");
-  assertEquals(unhealable.content.film_report.source, "code");
+  assertEquals(changed.content.golden_vows.chapters.length, 3);
+  assertEquals(JSON.stringify(changed.content).includes('"p05"'), false);
 });
 
 Deno.test("a film kept as a Sky Story never gains Golden Vows", async () => {

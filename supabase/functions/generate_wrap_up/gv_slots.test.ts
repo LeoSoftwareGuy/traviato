@@ -22,7 +22,7 @@ function album(data: TripData = gvMemory()) {
     resolveGvSlots(slots, picks, {
       language: "ru",
       names: namesOf(data),
-      dayTitle: (i) => gvDayTitle(skeleton, i, "ru"),
+      dayTitle: (i) => gvDayTitle(data, skeleton, i, "ru"),
       shown: [data.trip.name, data.trip.destination ?? ""],
     });
   return { data, skeleton, slots, resolve };
@@ -152,7 +152,7 @@ Deno.test("a title nothing fits is the day", () => {
     ["ch1.title", "ch2.title", "ch3.title"].map((s) =>
       r.get(s)!.chosen[0].text
     ),
-    ["День 1", "День 1", "День 2"],
+    ["День 1", "День 1 · вечер", "День 2"],
   );
 });
 

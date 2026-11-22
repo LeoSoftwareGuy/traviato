@@ -28,6 +28,7 @@ import type { WrapUpLanguage } from "./language.ts";
 import { excerptScore, isGeneric } from "./excerpts.ts";
 import {
   choose,
+  dayTitleFor,
   freeTextProblem,
   hash,
   hasVerb,
@@ -163,6 +164,23 @@ export function gvLanguage(
   return writtenLanguage(tripData) ?? language;
 }
 
+// The part of the day [photos] start in: 0 morning … 3 night, or null.
+function partOf(
+  photos: readonly Photo[],
+  utcOffsetMinutes: number,
+): number | null {
+  const t = photos.map(timeOf).find((x) => x > 0);
+  if (!t) return null;
+  const hour = new Date(t + utcOffsetMinutes * 60_000).getUTCHours();
+  return hour >= 5 && hour < 12
+    ? 0
+    : hour >= 12 && hour < 17
+    ? 1
+    : hour >= 17 && hour < 22
+    ? 2
+    : 3;
+}
+
 // Chapter [i]'s eyebrow: "Глава первая · Утро", by its first photo's
 // local hour.
 export function gvChapterLine(
@@ -171,30 +189,21 @@ export function gvChapterLine(
   language: "ru" | "en",
   utcOffsetMinutes: number,
 ): string {
-  const t = photos.map(timeOf).find((x) => x > 0);
   const number = NUMBERS[language][i] ?? NUMBERS[language][3];
-  if (!t) return number;
-  const hour = new Date(t + utcOffsetMinutes * 60_000).getUTCHours();
-  const part = hour >= 5 && hour < 12
-    ? 0
-    : hour >= 12 && hour < 17
-    ? 1
-    : hour >= 17 && hour < 22
-    ? 2
-    : 3;
-  return `${number} · ${PARTS[language][part]}`;
+  const part = partOf(photos, utcOffsetMinutes);
+  return part === null ? number : `${number} · ${PARTS[language][part]}`;
 }
 
-// A chapter's last-resort title: "День N" / "Day N", N its first day's
-// place among the album's days.
+// A chapter's last-resort title, as Neon Night's (#454): "День N", a
+// later part of the same day "День 1 · вечер", the same stretch again
+// "День 1 · вторая ночь" — never a clock time, never two alike.
 export function gvDayTitle(
+  tripData: TripData,
   skeleton: GvSkeleton,
   i: number,
   language: "ru" | "en",
 ): string {
-  const days = [...new Set(skeleton.chapters.flatMap((c) => c.days))].sort();
-  const n = days.indexOf(skeleton.chapters[i].days[0] ?? "") + 1 || i + 1;
-  return language === "ru" ? `День ${n}` : `Day ${n}`;
+  return dayTitleFor(tripData, skeleton.chapters, language)(i);
 }
 
 // [list] without lines that differ only in case, spacing or punctuation
@@ -315,12 +324,10 @@ export function buildGvSlots(
     const photo = byId.get(m.photo_id)!;
     const caption = photo.caption?.trim();
     const slot = `main${k + 1}`;
-    const chapterNotes = notes.filter((n) =>
-      owners.get(n.id!)?.[0] === m.chapter
-    );
-    // Its label: names of its chapter's notes, its place, a short caption
-    // of its own that names something; neutral labels last.
-    const shortCaption = caption && title(caption, MAX_GV_LABEL_CHARS);
+    // Its label, a word or two over the photo: its place, else code's
+    // neutral labels (the director may name the moment). A note's phrase
+    // is too often half a name in Russian ("На Эйфелеву"), and a caption
+    // already plays as the page's note.
     slots.push({
       slot: `${slot}.label`,
       kind: "label",
@@ -330,21 +337,7 @@ export function buildGvSlots(
       free: true,
       fixed: false,
       candidates: topDistinct([
-        ...named(
-          mainNotes[k].length ? mainNotes[k] : chapterNotes,
-          MAX_GV_LABEL_CHARS,
-          15,
-        ),
         ...placeCandidate([photo], MAX_GV_LABEL_CHARS),
-        ...(shortCaption && !hasVerb(shortCaption)
-          ? [{
-            id: `c:${photo.id}`,
-            text: shortCaption,
-            note_id: null,
-            photo_id: photo.id,
-            score: 20,
-          }]
-          : []),
         ...neutral([...weddingLabels, ...LABELS[language].other], "l"),
       ]),
     });
@@ -520,9 +513,9 @@ export function resolveGvSlots(
   const lines: string[] = [];
   const titles: string[] = options.shown.filter((t) => t.trim());
   const results = new Map<string, GvSlotResult>();
-  const ordered = [...slots].sort((a, b) =>
-    ORDER.indexOf(a.kind) - ORDER.indexOf(b.kind)
-  );
+  // Captions first: they always play, so no other slot takes their words.
+  const rank = (x: GvSlot) => ORDER.indexOf(x.kind) * 2 + (x.fixed ? 0 : 1);
+  const ordered = [...slots].sort((a, b) => rank(a) - rank(b));
   for (const slot of ordered) {
     const isLine = slot.kind === "note";
     // The finale may name what a title names; only the same whole words
@@ -546,8 +539,9 @@ export function resolveGvSlots(
             slot.kind === "finale" || slot.kind === "occasion",
           ) ?? (free(text) ? null : "repeats words the album shows")
         : null,
+      // A caption always plays, as written (#458): never trimmed.
       fits: (chosen, c) =>
-        !free(c.text)
+        !slot.fixed && !free(c.text)
           ? "shows words the album already shows"
           : chosen.some((x) => sameLine(x.text, c.text))
           ? "repeats another pick"

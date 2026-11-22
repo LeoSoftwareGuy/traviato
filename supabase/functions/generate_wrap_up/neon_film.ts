@@ -11,6 +11,7 @@
 // card line is never cut for length — nor a moment's last caption. The app holds the
 // film to 75 s on its own timeline as well (NnFit).
 
+import { dayTitleFor } from "./film_slots.ts";
 import type { TripData } from "./gather.ts";
 import { decorativePhotos } from "./decorative.ts";
 import { firstNameOf } from "./sky_story.ts";
@@ -65,75 +66,6 @@ export interface NeonNightFilm {
   slots: NnSlot[];
   report: NnSlotReport[];
   shape: NnShape;
-}
-
-// A chapter's last-resort title: "Day N" / "День N" in the user's
-// language, N its day's place among the film's days (#454: never
-// "День 1 · 3"). A later part of a day says when it is — "День 1 · вечер"
-// by its first photo's local hour, never a clock time — so no two
-// chapters share a title; the same stretch again takes an ordinal
-// ("День 1 · вторая ночь").
-type Stretch = "morning" | "afternoon" | "evening" | "night";
-const STRETCH: Record<"ru" | "en", Record<Stretch, string>> = {
-  ru: { morning: "утро", afternoon: "день", evening: "вечер", night: "ночь" },
-  en: {
-    morning: "morning",
-    afternoon: "afternoon",
-    evening: "evening",
-    night: "night",
-  },
-};
-// Second to fifth, by the Russian word's gender (утро n, день/вечер m,
-// ночь f) — short enough for a title of 22 ("День 12 · третий вечер").
-const ORDINALS: Record<"ru" | "en", Record<Stretch, string[]>> = {
-  ru: {
-    morning: ["второе", "третье", "4-е", "5-е"],
-    afternoon: ["второй", "третий", "4-й", "5-й"],
-    evening: ["второй", "третий", "4-й", "5-й"],
-    night: ["вторая", "третья", "4-я", "5-я"],
-  },
-  en: Object.fromEntries(
-    (["morning", "afternoon", "evening", "night"] as const).map((
-      k,
-    ) => [k, ["2nd", "3rd", "4th", "5th"]]),
-  ) as Record<Stretch, string[]>,
-};
-
-function stretchOf(hour: number): Stretch {
-  return hour >= 5 && hour < 12
-    ? "morning"
-    : hour >= 12 && hour < 17
-    ? "afternoon"
-    : hour >= 17 && hour < 23
-    ? "evening"
-    : "night";
-}
-
-function dayTitleFor(
-  tripData: TripData,
-  chapters: readonly NnSkeletonChapter[],
-): (chapter: number) => string {
-  const all = [...new Set(chapters.flatMap((c) => c.days))].sort();
-  const lang = writtenLanguage(tripData) === "ru" ? "ru" : "en";
-  const word = lang === "ru" ? "День" : "Day";
-  const offset = tripData.utc_offset_minutes ?? 0;
-  const count = new Map<string, number>();
-  const titles = chapters.map((c, i) => {
-    const day = `${word} ${Math.max(0, all.indexOf(c.days[0] ?? "")) + 1}`;
-    if (chapters.findIndex((x) => x.days[0] === c.days[0]) === i) return day;
-    const at = c.photos[0]?.taken_at ?? c.photos[0]?.created_at;
-    const stretch = stretchOf(
-      at ? new Date(Date.parse(at) + offset * 60_000).getUTCHours() : 20,
-    );
-    const key = `${day}|${stretch}`;
-    const n = count.get(key) ?? 0;
-    count.set(key, n + 1);
-    const name = STRETCH[lang][stretch];
-    return n === 0
-      ? `${day} · ${name}`
-      : `${day} · ${ORDINALS[lang][stretch][Math.min(n, 4) - 1]} ${name}`;
-  });
-  return (i) => titles[i];
 }
 
 // The skeleton for [shape], its slots and their words.

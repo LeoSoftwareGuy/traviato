@@ -1,10 +1,11 @@
 // Test fixtures for the director (#328).
 
 import type { TripData } from "./gather.ts";
+import { goldenVowsFilm } from "./gv_film.ts";
+import type { SlotPicks } from "./film_slots.ts";
 import type { FilmPlan, PlanContext, PlanScene } from "./film_plan.ts";
 import type { PhotoAnalysis } from "./photo_analysis.ts";
 import type { SkyStoryPlan } from "./sky_story.ts";
-import type { GoldenVowsPlan } from "./golden_vows.ts";
 import { neonNightFilm } from "./neon_film.ts";
 import type { NnPicks } from "./neon_slots.ts";
 
@@ -202,49 +203,6 @@ export function toolResponse(
   );
 }
 
-// A valid Golden Vows section over directorTripData(): 2 heroes (one with
-// an excerpt of day 1's note), 3 chapters of 3, a carousel title. 9 of 12
-// photos used, so only 3 are left — too few for the carousel page.
-export function goldenVowsPlan(ids = DIRECTOR_PHOTO_IDS): GoldenVowsPlan {
-  return {
-    occasion: "wedding",
-    occasion_line: "Our Wedding Day",
-    heroes: [
-      {
-        photo_id: ids[1],
-        label: "The vows",
-        note_id: "n1",
-        note_excerpt: "Bikes everywhere",
-      },
-      {
-        photo_id: ids[9],
-        label: "First dance",
-        note_id: null,
-        note_excerpt: null,
-      },
-    ],
-    chapters: [
-      {
-        title: "Getting ready",
-        line: "Chapter one · Morning",
-        photo_ids: [ids[0], ids[2], ids[3]],
-      },
-      {
-        title: "The ceremony",
-        line: "Chapter two · Midday",
-        photo_ids: [ids[4], ids[5], ids[6]],
-      },
-      {
-        title: "Just married",
-        line: "Chapter three · Evening",
-        photo_ids: [ids[7], ids[8], ids[10]],
-      },
-    ],
-    carousel: { title: "And the night went on", line: "Chapter four" },
-    end_line: "Forever starts here",
-  };
-}
-
 // A valid Neon Night section over directorTripData(): 3 chapters of 4
 // photos (one per day), chapter 1 split + burst with an excerpt of day 1's
 // note, chapter 2 a timeline, chapter 3 a peak; day 3's note in neon.
@@ -277,6 +235,48 @@ export function neonPicksAnswer(data: TripData): {
 export function neonPicks(data: TripData): NnPicks {
   return Object.fromEntries(
     neonPicksAnswer(data).picks.map((p) => [p.slot, {
+      ids: p.ids,
+      free_title: p.free_title,
+    }]),
+  );
+}
+
+// A pick_golden_vows_lines answer for [data] (#458): code's own choices,
+// the finale's last candidate instead, and a title of the director's own.
+export function gvPicksAnswer(
+  data: TripData,
+  summaries: ReadonlyMap<string, string> = new Map(),
+): {
+  picks: { slot: string; ids: string[]; free_title: string | null }[];
+} {
+  const { report } = goldenVowsFilm(data, null, { summaries });
+  return {
+    picks: report.map((r) => ({
+      slot: r.slot,
+      ids: r.slot === "ch1.title"
+        ? []
+        : r.slot === "finale"
+        ? [r.candidates.at(-1)!.id]
+        : r.chosen.map((c) => c.id).filter((id) =>
+          id !== "day" && id !== "free"
+        ),
+      // A title no candidate fits: the director writes one.
+      free_title: r.slot === "ch1.title"
+        ? "Canal morning"
+        : r.slot.endsWith(".title") && r.chosen[0]?.id === "day"
+        ? `Canal part ${r.slot.slice(2, r.slot.indexOf("."))}`
+        : null,
+    })),
+  };
+}
+
+// [gvPicksAnswer] as the director record stores it.
+export function gvPicks(
+  data: TripData,
+  summaries: ReadonlyMap<string, string> = new Map(),
+): SlotPicks {
+  return Object.fromEntries(
+    gvPicksAnswer(data, summaries).picks.map((p) => [p.slot, {
       ids: p.ids,
       free_title: p.free_title,
     }]),

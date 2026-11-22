@@ -506,16 +506,81 @@
     "end_date": "2026-09-03",
     "day_count": 3,
     "place": "Netherlands",
-    "packing": null,
+    "packing": {
+     "source": "checklist",
+     "items": [
+      {
+       "text": "Passports",
+       "suggestion_code": null
+      },
+      {
+       "text": "Sunscreen",
+       "suggestion_code": null
+      },
+      {
+       "text": "Camera",
+       "suggestion_code": null
+      },
+      {
+       "text": "Sandals",
+       "suggestion_code": null
+      }
+     ],
+     "checked": 4,
+     "total": 4
+    },
     "heroes": [
      {
-      "photo_id": "p03",
-      "label": "Just us",
-      "taken_at": "2026-09-01T10:51:00Z",
+      "photo_id": "p00",
+      "label": "Together",
+      "taken_at": "2026-09-01T09:00:00Z",
       "note": "Tram 28 up to the castle, the whole city below us."
+     },
+     {
+      "photo_id": "p05",
+      "label": "Our moment",
+      "taken_at": "2026-09-02T09:00:00Z",
+      "note": "Pastéis de nata at Manteigaria, still warm, three each."
+     },
+     {
+      "photo_id": "p10",
+      "label": "Close",
+      "taken_at": "2026-09-03T09:00:00Z",
+      "note": "Our last sunset at Miradouro da Senhora do Monte."
      }
     ],
-    "chapters": [],
+    "chapters": [
+     {
+      "title": "Day 1",
+      "line": "Chapter one · Morning",
+      "photo_ids": [
+       "p01",
+       "p02",
+       "p03"
+      ],
+      "layout": "A"
+     },
+     {
+      "title": "At Manteigaria",
+      "line": "Chapter two · Morning",
+      "photo_ids": [
+       "p06",
+       "p07",
+       "p08"
+      ],
+      "layout": "B"
+     },
+     {
+      "title": "At Miradouro",
+      "line": "Chapter three · Morning",
+      "photo_ids": [
+       "p11",
+       "p12",
+       "p13"
+      ],
+      "layout": "C"
+     }
+    ],
     "carousel": null,
     "heart_photo_ids": [
      "p00",
@@ -535,7 +600,7 @@
      "p14"
     ],
     "moment_count": 15,
-    "end_line": "Ours, always"
+    "end_line": "the whole city below us"
    }
   }
  },
@@ -671,40 +736,105 @@
     "end_date": "2026-09-03",
     "day_count": 3,
     "place": "Netherlands",
-    "packing": null,
+    "packing": {
+     "source": "checklist",
+     "items": [
+      {
+       "text": "Passports",
+       "suggestion_code": null
+      },
+      {
+       "text": "Sunscreen",
+       "suggestion_code": null
+      },
+      {
+       "text": "Camera",
+       "suggestion_code": null
+      },
+      {
+       "text": "Sandals",
+       "suggestion_code": null
+      }
+     ],
+     "checked": 4,
+     "total": 4
+    },
     "heroes": [
      {
-      "photo_id": "p04",
-      "label": "Just us",
-      "taken_at": "2026-09-01T11:28:00Z",
+      "photo_id": "p00",
+      "label": "Together",
+      "taken_at": "2026-09-01T09:00:00Z",
+      "note": null
+     },
+     {
+      "photo_id": "p01",
+      "label": "Our moment",
+      "taken_at": "2026-09-01T09:37:00Z",
       "note": "Tram 28 up to the castle, the whole city below us."
      },
      {
-      "photo_id": "p12",
-      "label": "Together",
-      "taken_at": "2026-09-02T10:51:00Z",
+      "photo_id": "p09",
+      "label": "Close",
+      "taken_at": "2026-09-02T09:00:00Z",
       "note": "Pastéis de nata at Manteigaria, still warm, three each."
      },
      {
-      "photo_id": "p21",
-      "label": "Our moment",
-      "taken_at": "2026-09-03T10:51:00Z",
+      "photo_id": "p18",
+      "label": "Smiles",
+      "taken_at": "2026-09-03T09:00:00Z",
       "note": "Our last sunset at Miradouro da Senhora do Monte."
      }
     ],
     "chapters": [
      {
-      "title": "The beginning",
-      "line": "Chapter one",
+      "title": "Day 1",
+      "line": "Chapter one · Morning",
       "photo_ids": [
-       "p01",
-       "p03",
+       "p02",
+       "p04",
        "p06"
       ],
       "layout": "A"
+     },
+     {
+      "title": "At Manteigaria",
+      "line": "Chapter two · Morning",
+      "photo_ids": [
+       "p10",
+       "p12",
+       "p14"
+      ],
+      "layout": "B"
+     },
+     {
+      "title": "At Miradouro",
+      "line": "Chapter three · Morning",
+      "photo_ids": [
+       "p19",
+       "p21",
+       "p23"
+      ],
+      "layout": "C"
      }
     ],
-    "carousel": null,
+    "carousel": {
+     "title": "More of us",
+     "line": "Every little moment",
+     "photo_ids": [
+      "p03",
+      "p05",
+      "p07",
+      "p08",
+      "p11",
+      "p13",
+      "p15",
+      "p16",
+      "p20",
+      "p22",
+      "p24",
+      "p17"
+     ]
+    },
     "heart_photo_ids": [
      "p00",
      "p01",
@@ -733,7 +863,7 @@
      "p17"
     ],
     "moment_count": 25,
-    "end_line": "Ours, always"
+    "end_line": "the whole city below us"
    }
   }
  },
@@ -982,58 +1112,70 @@
     },
     "heroes": [
      {
-      "photo_id": "p05",
-      "label": "Just us",
-      "taken_at": "2026-09-01T12:05:00Z",
+      "photo_id": "p00",
+      "label": "Together",
+      "taken_at": "2026-09-01T09:00:00Z",
+      "note": null
+     },
+     {
+      "photo_id": "p01",
+      "label": "Our moment",
+      "taken_at": "2026-09-01T09:37:00Z",
       "note": "Tram 28 up to the castle, the whole city below us."
      },
      {
+      "photo_id": "p14",
+      "label": "Close",
+      "taken_at": "2026-09-02T09:00:00Z",
+      "note": null
+     },
+     {
       "photo_id": "p15",
-      "label": "Together",
+      "label": "Smiles",
       "taken_at": "2026-09-02T09:37:00Z",
       "note": "Pastéis de nata at Manteigaria, still warm, three each."
      },
      {
-      "photo_id": "p25",
-      "label": "Our moment",
-      "taken_at": "2026-09-02T15:47:00Z",
+      "photo_id": "p28",
+      "label": "",
+      "taken_at": "2026-09-03T09:00:00Z",
       "note": null
      },
      {
-      "photo_id": "p36",
-      "label": "Close",
-      "taken_at": "2026-09-03T13:56:00Z",
+      "photo_id": "p29",
+      "label": "",
+      "taken_at": "2026-09-03T09:37:00Z",
       "note": "Our last sunset at Miradouro da Senhora do Monte."
      }
     ],
     "chapters": [
      {
-      "title": "The beginning",
-      "line": "Chapter one",
+      "title": "Day 1",
+      "line": "Chapter one · Morning",
       "photo_ids": [
-       "p01",
-       "p04",
-       "p08"
+       "p02",
+       "p06",
+       "p10"
       ],
       "layout": "A"
      },
      {
-      "title": "Together",
-      "line": "Chapter two",
+      "title": "At Manteigaria",
+      "line": "Chapter two · Morning",
       "photo_ids": [
-       "p11",
-       "p14",
-       "p18"
+       "p16",
+       "p19",
+       "p23"
       ],
       "layout": "B"
      },
      {
-      "title": "The best part",
-      "line": "Chapter three",
+      "title": "At Miradouro",
+      "line": "Chapter three · Morning",
       "photo_ids": [
-       "p21",
-       "p24",
-       "p29"
+       "p30",
+       "p33",
+       "p37"
       ],
       "layout": "C"
      }
@@ -1042,17 +1184,17 @@
      "title": "More of us",
      "line": "Every little moment",
      "photo_ids": [
-      "p02",
-      "p06",
+      "p04",
+      "p07",
       "p09",
       "p12",
       "p17",
       "p20",
-      "p23",
-      "p28",
-      "p32",
+      "p22",
+      "p25",
+      "p31",
       "p34",
-      "p37",
+      "p36",
       "p39"
      ]
     },
@@ -1099,7 +1241,7 @@
      "p27"
     ],
     "moment_count": 40,
-    "end_line": "Ours, always"
+    "end_line": "the whole city below us"
    }
   }
  },

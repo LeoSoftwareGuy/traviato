@@ -275,12 +275,26 @@ export function buildGvSkeleton(
     ),
   );
   const rank = (p: Photo) => gvRank(p, heroScores, withNote);
-  const ranked = groups.map((g) => [...g].sort((a, b) => rank(b) - rank(a)));
+  // A main page plays its caption: two pages never the same caption — a
+  // repeat stays a print or on the carousel.
+  const repeated = new Set<string>();
+  const captions = new Set<string>();
+  for (const p of [...photos].sort((a, b) => rank(b) - rank(a))) {
+    const c = p.caption?.trim().toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ");
+    if (!c) continue;
+    if (captions.has(c)) repeated.add(p.id);
+    captions.add(c);
+  }
+  const ranked = groups.map((g) =>
+    [...g].filter((p) => !repeated.has(p.id)).sort((a, b) => rank(b) - rank(a))
+  );
   const mains: GvSkeletonMain[] = [];
   for (let round = 0; mains.length < count; round++) {
     let added = false;
     // The chapters with the best photo still free go first in a round.
-    const order = groups.map((_, i) => i).filter((i) => round < spare[i])
+    const order = groups.map((_, i) => i).filter((i) =>
+      round < spare[i] && round < ranked[i].length
+    )
       .sort((a, b) => rank(ranked[b][round]) - rank(ranked[a][round]));
     for (const i of order) {
       if (mains.length >= count) break;
