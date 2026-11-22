@@ -27,6 +27,7 @@ class NnPhoto extends Equatable {
     this.caption,
     this.line,
     this.heroScore,
+    this.captionHidden = false,
   });
 
   final String id;
@@ -45,11 +46,27 @@ class NnPhoto extends Equatable {
   /// its best photos.
   final int? heroScore;
 
+  /// The photo has a caption it doesn't show here (#456: a moment shows
+  /// at most 3 words). A captioned photo never shows its time instead.
+  final bool captionHidden;
+
+  /// Whether the user captioned it, shown or not (#456).
+  bool get captioned => captionHidden || (caption?.trim().isNotEmpty ?? false);
+
   /// What labels the photo: its caption, else its time (#387).
   String get label => caption ?? takenAt;
 
+  /// Its time as a label, or null for a captioned photo (#456: a caption
+  /// or nothing, never the time).
+  String? get timeLabel => captioned ? null : takenAt;
+
   /// This photo with no words (#448: a moment shows at most 3).
-  NnPhoto get quiet => NnPhoto(id: id, takenAt: takenAt, heroScore: heroScore);
+  NnPhoto get quiet => NnPhoto(
+    id: id,
+    takenAt: takenAt,
+    heroScore: heroScore,
+    captionHidden: captioned,
+  );
 
   /// This photo carrying [line].
   NnPhoto withLine(String line) => NnPhoto(
@@ -58,10 +75,18 @@ class NnPhoto extends Equatable {
     caption: caption,
     line: line,
     heroScore: heroScore,
+    captionHidden: captionHidden,
   );
 
   @override
-  List<Object?> get props => [id, takenAt, caption, line, heroScore];
+  List<Object?> get props => [
+    id,
+    takenAt,
+    caption,
+    line,
+    heroScore,
+    captionHidden,
+  ];
 }
 
 /// A block that shows a few of a chapter's photos after its card

@@ -81,16 +81,34 @@ class NeonNightCanvas extends StatefulWidget {
               4)
           .floor(),
     );
-    final moments = chapters.fold(0, (n, c) => n + c.moments.length);
+    // A moment holds longer only up to a bar per photo (#456: a 2-photo
+    // split held 7.7 s); a line that needs its reading time keeps it.
+    final room = [
+      for (final (i, c) in chapters.indexed)
+        [
+          for (final (j, type) in c.moments.indexed)
+            (((math.max(type.beats, 4 * _photosIn(story, i, j)) -
+                            math.max(
+                              type.beats,
+                              j < c.momentMinBeats.length
+                                  ? c.momentMinBeats[j]
+                                  : 0,
+                            )) /
+                        4)
+                    .floor())
+                .clamp(0, maxExtraMomentBars),
+        ],
+    ];
+    final moments = room.fold(0, (n, r) => n + r.fold(0, (a, b) => a + b));
     if (bars <= 0 || moments == 0) return base;
     final extra = [
       for (final c in chapters) List.filled(c.moments.length, 0),
     ];
-    var left = math.min(bars, moments * maxExtraMomentBars);
+    var left = math.min(bars, moments);
     while (left > 0) {
       for (var i = 0; i < chapters.length && left > 0; i++) {
         for (var j = 0; j < chapters[i].moments.length && left > 0; j++) {
-          if (extra[i][j] >= maxExtraMomentBars) continue;
+          if (extra[i][j] >= room[i][j]) continue;
           extra[i][j]++;
           left--;
         }
@@ -120,6 +138,11 @@ class NeonNightCanvas extends StatefulWidget {
   /// The most bars a moment holds longer to fit the film's length (#434).
   static const maxExtraMomentBars = 3;
 
+  static int _photosIn(NeonNightStory story, int chapter, int moment) {
+    final moments = story.chapters[chapter].moments;
+    return moment < moments.length ? moments[moment].photos.length : 0;
+  }
+
   /// The §6 version: softer flicker, flares and laser punch, same timings.
   final bool reducedFlashing;
 
@@ -143,8 +166,18 @@ class NeonNightCanvas extends StatefulWidget {
   State<NeonNightCanvas> createState() => _NeonNightCanvasState();
 }
 
+/// The running film, for tests (#456): how long the player loops it.
+abstract interface class NeonNightPlayback {
+  /// The film's length as the player runs it: its clock's loop.
+  Duration get playLength;
+}
+
 class _NeonNightCanvasState extends State<NeonNightCanvas>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin
+    implements NeonNightPlayback {
+  @override
+  Duration get playLength => _controller.duration ?? Duration.zero;
+
   late final AnimationController _controller = AnimationController(
     vsync: this,
   );

@@ -82,8 +82,9 @@ Deno.test("ADE: every chapter with notes has card candidates; Brussels has its l
   }
   const brussels = slot(slots, "ch5.card").candidates.map((c) => c.text);
   assert(brussels.includes(BRUSSELS_LINE), brussels.join(" | "));
-  // The AMF night's notes are ch4's (#454: they were on no list).
-  const amf = slot(slots, "ch4.card").candidates.map((c) => c.text);
+  // The AMF night's notes are ch4's (#454: they were on no list), on its
+  // moment of the stadium night's photos (#456).
+  const amf = slot(slots, "ch4.m1").candidates.map((c) => c.text);
   assert(amf.some((t) => t.startsWith("Выезжаем на AMF тусовку")));
   assert(amf.some((t) => t.startsWith("Мы на месте")));
   // "вчера…" is the night before's: Kuko's card.
@@ -154,11 +155,16 @@ Deno.test("ADE: each list is capped at 8, plus one line of every note it owns", 
 
 Deno.test("ADE replay: the director's picks hold, Brussels types its line", () => {
   const { report, content } = played();
+  // Recorded before #456: these picks were lines of another scene's notes
+  // (the airport line over the Amsterdam split, the ribs over the 01:14
+  // split, the stadium night over the walk) — now on another list.
+  const moved = new Set(["ch1.m1", "ch2.m1", "ch4.card"]);
   for (const r of report) {
     // A director pick, or code's for the film's length only.
     assert(
       r.source === "director" ||
-        r.reason.startsWith("a shorter line as good as the pick"),
+        r.reason.startsWith("a shorter line as good as the pick") ||
+        (moved.has(r.slot) && r.reason.includes("not in this slot's list")),
       `${r.slot}: ${r.reason}`,
     );
   }
@@ -249,8 +255,12 @@ Deno.test("ADE: titles are names, the card line matches the card's photos (#454)
     ),
   );
   // Ch1's card opens at Tallinn airport: the airport note leads.
+  const { memory } = adeFilmMemory();
+  const first = slot(slots, "ch1.card").candidates[0];
   assert(
-    slot(slots, "ch1.card").candidates[0].text.startsWith("Прибыл в аэропорт"),
+    memory.notes.find((n) => n.id === first.note_id)!.content.startsWith(
+      "Прибыл в аэропорт",
+    ),
   );
 });
 
@@ -298,4 +308,103 @@ Deno.test("ADE replay: the recorded titles and headline play (#454)", () => {
   // A headline may share a name with a title, never be the same words.
   assertEquals(content.headline, "Куко Unreal");
   assertEquals(report.find((r) => r.slot === "headline")!.source, "director");
+});
+
+// ADE's photos by their local time (+02:00 that October).
+const AIRPORT_NOTE = "Прибыл в аэропорт";
+const LANDED_NOTE = "Приземлились в Амстердаме";
+const RIBS_NOTE = "Сидим в баре скоро принесут полтора метра ребер";
+const RIBS_PHOTO = "cd74fd";
+
+const notesOf = (s: NnSlot) => {
+  const { memory } = adeFilmMemory();
+  return s.candidates.filter((c) => c.note_id).map((c) =>
+    memory.notes.find((n) => n.id === c.note_id)!.content
+  );
+};
+
+Deno.test("ADE: a scene lists only its own photos' lines — airport card, Amsterdam split (#456)", () => {
+  const { slots, chapters } = cut();
+  const card = notesOf(slot(slots, "ch1.card"));
+  assert(card.length > 0);
+  for (const n of card) assert(n.startsWith(AIRPORT_NOTE), n);
+  const split = notesOf(slot(slots, "ch1.m1"));
+  assert(split.length > 0);
+  for (const n of split) assert(n.startsWith(LANDED_NOTE), n);
+  // Each line plays over a photo of its own scene.
+  for (const c of slot(slots, "ch1.m1").candidates) {
+    assert(chapters[0].moments[0].photo_ids.includes(c.photo_id!), c.text);
+  }
+  // Whatever the director picks, the card types an airport line and the
+  // split never does.
+  const { memory, heroScores } = adeFilmMemory();
+  const picks = adePicks();
+  for (const c of slot(slots, "ch1.card").candidates) {
+    picks["ch1.card"] = { ids: [`ch1.card/${c.id}`] };
+    picks["ch1.m1"] = {
+      ids: slot(slots, "ch1.card").candidates.map((x) => x.id),
+    };
+    const film = neonNightFilm(memory, picks, heroScores).content.chapters[0];
+    assert(
+      memory.notes.some((n) =>
+        n.content.startsWith(AIRPORT_NOTE) && n.content.includes(film.note!)
+      ),
+    );
+    for (const w of film.moments[0].words ?? []) {
+      assertEquals(w.text.startsWith(AIRPORT_NOTE.slice(0, 6)), false, w.text);
+    }
+  }
+});
+
+Deno.test("ADE: the ribs line plays with the 21:25 photo, on Ch2's card (#456)", () => {
+  const { slots, chapters } = cut();
+  const ribs = slot(slots, "ch2.card").candidates.find((c) =>
+    c.text.startsWith(RIBS_NOTE)
+  );
+  assert(ribs, "on the card's list");
+  // Never over the 01:14–01:46 split.
+  for (const c of slot(slots, "ch2.m1").candidates) {
+    assertEquals(c.text.includes("ребер"), false, c.text);
+  }
+  const { memory, heroScores } = adeFilmMemory();
+  const picks = adePicks();
+  picks["ch2.card"] = { ids: [`ch2.card/${ribs.id}`] };
+  const film = neonNightFilm(memory, picks, heroScores).content.chapters[1];
+  assert(film.note!.startsWith(RIBS_NOTE), film.note!);
+  assert(film.card_photo_ids.some((id) => id.startsWith(RIBS_PHOTO)));
+  assert(chapters[1].card.some((id) => id.startsWith(RIBS_PHOTO)));
+});
+
+Deno.test("ADE: the Ch1 split shows one of its captions (#456)", () => {
+  for (const film of [cut(), played()]) {
+    const ch1 = film.content.chapters[0];
+    const captions = new Map(
+      ch1.photos.filter((p) => p.caption).map((p) => [p.id, p.caption!]),
+    );
+    const split = ch1.moments[0];
+    assert(split.photo_ids.every((id) => captions.has(id)));
+    assert(
+      (split.words ?? []).some((w) => captions.get(w.photo_id) === w.text),
+      JSON.stringify(split.words),
+    );
+  }
+});
+
+Deno.test("ADE: every moment with captioned photos keeps a caption at any length (#456)", () => {
+  const { memory, heroScores } = adeFilmMemory();
+  for (const picks of [null, adePicks()]) {
+    const { content } = neonNightFilm(memory, picks, heroScores);
+    for (const c of content.chapters) {
+      const captions = new Map(
+        c.photos.filter((p) => p.caption).map((p) => [p.id, p.caption!]),
+      );
+      for (const m of c.moments) {
+        if (!m.photo_ids.some((id) => captions.has(id))) continue;
+        assert(
+          (m.words ?? []).some((w) => captions.get(w.photo_id) === w.text),
+          c.title,
+        );
+      }
+    }
+  }
 });
