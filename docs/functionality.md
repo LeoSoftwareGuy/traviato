@@ -414,7 +414,8 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   when it was written ("вчера…" to the day before); every note without
   drug words can play somewhere. Card lines fit the card's photos.
   Titles name things, never half a sentence; the headline is never a
-  complaint. No words show twice in a film. The Plan inspector lists
+  complaint or a first name alone, and may name what a title names. No
+  words show twice in a film. The Plan inspector lists
   every place's choices, what the director picked and why something
   else plays.
 - **The user's words (#399, display only; which words are chosen is #398,

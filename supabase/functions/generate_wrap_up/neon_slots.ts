@@ -527,6 +527,98 @@ export function isNegative(text: string): boolean {
   return NEGATIVE.test(text);
 }
 
+// First names, never a headline alone (#454: "Петр").
+const FIRST_NAMES = new Set([
+  "александр",
+  "саша",
+  "алексей",
+  "леша",
+  "андрей",
+  "антон",
+  "артем",
+  "борис",
+  "вадим",
+  "василий",
+  "вася",
+  "виктор",
+  "владимир",
+  "вова",
+  "дмитрий",
+  "дима",
+  "денис",
+  "евгений",
+  "женя",
+  "иван",
+  "ваня",
+  "игорь",
+  "илья",
+  "кирилл",
+  "максим",
+  "макс",
+  "михаил",
+  "миша",
+  "никита",
+  "николай",
+  "коля",
+  "олег",
+  "павел",
+  "паша",
+  "петр",
+  "петя",
+  "роман",
+  "рома",
+  "сергей",
+  "сережа",
+  "степан",
+  "юрий",
+  "юра",
+  "ярослав",
+  "анна",
+  "аня",
+  "анастасия",
+  "настя",
+  "дарья",
+  "даша",
+  "екатерина",
+  "катя",
+  "елена",
+  "лена",
+  "ирина",
+  "ира",
+  "мария",
+  "маша",
+  "наталья",
+  "наташа",
+  "ольга",
+  "оля",
+  "светлана",
+  "света",
+  "татьяна",
+  "таня",
+  "юлия",
+  "юля",
+  "alex",
+  "anna",
+  "ben",
+  "dan",
+  "david",
+  "emma",
+  "james",
+  "john",
+  "kate",
+  "leo",
+  "mark",
+  "max",
+  "mike",
+  "nick",
+  "paul",
+  "peter",
+  "sam",
+  "sara",
+  "sarah",
+  "tom",
+]);
+
 // Words a sentence often opens with that name nothing.
 const OPENERS = new Set([
   "мы",
@@ -959,7 +1051,9 @@ export function buildNeonSlots(
     const latinWord = language === "ru" &&
       /^\p{Script=Latin}+$/u.test(h ?? "");
     return h && !hasVerb(h) && !/^\d+$/u.test(h) &&
-        (!latinWord || /^\p{Lu}{2,5}$/u.test(h))
+        (!latinWord || /^\p{Lu}{2,5}$/u.test(h)) &&
+        // A first name alone is no headline ("Петр").
+        !FIRST_NAMES.has(norm(h))
       ? [{ text: h, score: HIGHLIGHT_SCORE }]
       : [];
   }).filter((x, _i, all) =>
@@ -1099,8 +1193,12 @@ export function resolveNeonSlots(
     !lines.some((l) => overlaps(l, text)) &&
     !captions.some((c) => overlaps(c, text));
   // A title never repeats a line or a caption the film shows (#454).
-  const titleFree = (text: string) =>
-    !titles.some((t) => sameLine(t, text)) &&
+  // A title never repeats another title, a line or a caption. The
+  // headline may share a name with a title ("Куко Unreal" under "На Куко
+  // Unreal"); only the same whole words twice are a repeat.
+  const sameWords = (a: string, b: string) => norm(a) === norm(b);
+  const titleFree = (text: string, headline = false) =>
+    !titles.some((t) => headline ? sameWords(t, text) : sameLine(t, text)) &&
     ![...lines, ...captions].some((l) =>
       sameLine(l, text) || repeatsTitle(l, text)
     );
@@ -1111,7 +1209,8 @@ export function resolveNeonSlots(
   );
   for (const slot of ordered) {
     const isTitle = slot.kind === "title" || slot.kind === "headline";
-    const free = (text: string) => isTitle ? titleFree(text) : lineFree(text);
+    const free = (text: string) =>
+      isTitle ? titleFree(text, slot.kind === "headline") : lineFree(text);
     const moment = options.moments.get(slot.slot);
     const fits = (chosen: NnChosen[], c: NnCandidate): string | null => {
       if (!free(c.text)) return "shows words the film already shows";

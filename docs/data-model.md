@@ -322,7 +322,9 @@ Post-MVP: `video_path`, `video_status`.
   times, "Day N", drugs and banned words; it wins over its ids when it
   holds. Anything else takes the slot's top candidate; a title nothing
   fits is "День N" (a later part "День N · вечер"). No words twice in a
-  film. `director.neon_night` = `{picks_version: 2, picks}` (older plans
+  film; the headline may share a name with a title ("Куко Unreal" under
+  "На Куко Unreal"), never its whole words, and is never a first name
+  alone. `director.neon_night` = `{picks_version: 2, picks}` (older plans
   aren't read) and `director.neon_slots` = per slot its candidates, the
   pick, what plays, `source` (director/code/none) and the reason — the
   Plan inspector shows them. `DIRECTOR_VERSION` 5: older records re-run

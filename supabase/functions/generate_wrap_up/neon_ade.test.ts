@@ -201,7 +201,6 @@ Deno.test("ADE replay: no words twice, within 75 s", () => {
       ...c.moments.flatMap((m) => (m.words ?? []).map((w) => w.text)),
     ]),
     content.note?.text,
-    content.headline,
   ].filter((t): t is string => !!t);
   for (let i = 0; i < shown.length; i++) {
     for (let j = i + 1; j < shown.length; j++) {
@@ -210,6 +209,16 @@ Deno.test("ADE replay: no words twice, within 75 s", () => {
         false,
         `${shown[i]} / ${shown[j]}`,
       );
+    }
+  }
+  // The headline may share a name with a title (#454), never a line, nor
+  // a title's whole words.
+  const headline = content.headline!;
+  const titles = content.chapters.map((c) => c.title.toLowerCase());
+  assertEquals(titles.includes(headline.toLowerCase()), false);
+  for (const line of shown) {
+    if (!titles.includes(line.toLowerCase())) {
+      assertEquals(sameLine(line, headline), false, line);
     }
   }
   const { shape } = played();
@@ -251,7 +260,9 @@ Deno.test("ADE: the headline is upbeat — names and highlights, the director's 
   for (const name of ["ADE", "AMF", "Куко Unreal"]) {
     assert(headline.includes(name), headline.join(" · "));
   }
-  for (const low of ["диджеи не очень", "Amsterdam", "Амстердаме", "Сидим"]) {
+  for (
+    const low of ["диджеи не очень", "Amsterdam", "Амстердаме", "Сидим", "Петр"]
+  ) {
     assertEquals(headline.includes(low), false, low);
   }
   const { memory, heroScores } = adeFilmMemory();
@@ -273,4 +284,18 @@ Deno.test("ADE: the headline is upbeat — names and highlights, the director's 
   ) {
     assertEquals(playing(bad).source === "director", false, bad);
   }
+});
+
+Deno.test("ADE replay: the recorded titles and headline play (#454)", () => {
+  const { content, report } = played();
+  assertEquals(content.chapters.map((c) => c.title), [
+    "Амстердам",
+    "Полтора метра ребер",
+    "На Куко Unreal",
+    "AMF под ливнем",
+    "Брюссель",
+  ]);
+  // A headline may share a name with a title, never be the same words.
+  assertEquals(content.headline, "Куко Unreal");
+  assertEquals(report.find((r) => r.slot === "headline")!.source, "director");
 });

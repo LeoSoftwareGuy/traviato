@@ -1,5 +1,5 @@
 {
-  "recorded_at": "2026-11-22T11:45:50.712Z",
+  "recorded_at": "2026-11-22T11:58:07.962Z",
   "model": "claude-sonnet-5",
   "picks": {
     "note": {
@@ -16,15 +16,14 @@
     },
     "ch1.m1": {
       "ids": [
-        "ch1.m1/n:3224a4be-3594-48c9-887b-c53053faa01a:1fjxfq0"
+        "ch1.m1/n:3224a4be-3594-48c9-887b-c53053faa01a:1fjxfq0",
+        "ch1.m1/n:587ea168-33ee-4ef5-baf9-24e6a056d270:1nbr3f"
       ],
       "free_title": null
     },
     "ch1.title": {
-      "ids": [
-        "ch1.title/n:587ea168-33ee-4ef5-baf9-24e6a056d270:1wt105e"
-      ],
-      "free_title": null
+      "ids": [],
+      "free_title": "Амстердам"
     },
     "ch2.card": {
       "ids": [
@@ -40,11 +39,11 @@
     },
     "ch2.title": {
       "ids": [],
-      "free_title": "Перед рейвом"
+      "free_title": "Полтора метра ребер"
     },
     "ch3.card": {
       "ids": [
-        "ch3.card/n:695a05ea-8fc3-4e4c-b64f-0733c3f79911:1dxxcc1"
+        "ch3.card/n:695a05ea-8fc3-4e4c-b64f-0733c3f79911:18vtje9"
       ],
       "free_title": null
     },
@@ -67,10 +66,8 @@
       "free_title": null
     },
     "ch4.title": {
-      "ids": [
-        "ch4.title/n:43f91e23-1542-490d-b835-f31dfac55106:qlvqih"
-      ],
-      "free_title": null
+      "ids": [],
+      "free_title": "AMF под ливнем"
     },
     "ch5.card": {
       "ids": [
@@ -79,20 +76,18 @@
       "free_title": null
     },
     "ch5.title": {
-      "ids": [
-        "ch5.title/n:7b1c21ed-fe19-4c70-a6bd-d85f1c502768:1rpexfp"
-      ],
-      "free_title": null
+      "ids": [],
+      "free_title": "Брюссель"
     },
     "headline": {
       "ids": [
-        "headline/h:hdl8n3"
+        "headline/h:1x7aoc5"
       ],
       "free_title": null
     }
   },
   "usage": {
-    "input_tokens": 12832,
-    "output_tokens": 944
+    "input_tokens": 13024,
+    "output_tokens": 887
   }
 }

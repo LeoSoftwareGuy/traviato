@@ -2778,7 +2778,7 @@
     "plan": [],
     "chapters": [
      {
-      "title": "В Амстердаме",
+      "title": "Амстердам",
       "photos": [
        {
         "id": "cd16a50b-3981-465d-ba60-33078d7f4eef",
@@ -2882,7 +2882,7 @@
       ]
      },
      {
-      "title": "Перед рейвом",
+      "title": "Полтора метра ребер",
       "photos": [
        {
         "id": "6eca4520-d5b4-4e2a-aed2-7760f35a40f5",
@@ -3017,7 +3017,7 @@
         "text": "сначало были на Куко Unreal",
         "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
         "photo_id": "e5be04ce-b606-415f-9b03-70c08b0fe4a3",
-        "source": "director",
+        "source": "code",
         "score": 110
        }
       ],
@@ -3045,7 +3045,7 @@
       "moments": []
      },
      {
-      "title": "Против Мираба",
+      "title": "AMF под ливнем",
       "photos": [
        {
         "id": "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e",
@@ -3151,7 +3151,7 @@
       ]
      },
      {
-      "title": "В Брюсель",
+      "title": "Брюссель",
       "photos": [
        {
         "id": "9a9ccc19-f7b1-491d-a502-96217f7ca55c",
@@ -3217,7 +3217,7 @@
      "written_at": "2026-10-24T02:00:00+00:00",
      "photo_id": null
     },
-    "headline": "ADE",
+    "headline": "Куко Unreal",
     "first_name": null,
     "totals": {
      "photos": 27,
