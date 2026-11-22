@@ -134,6 +134,58 @@ void main() {
       expect(invalid.neonNightProblems, ['neon_night.chapters: 0']);
     });
 
+    test('reads every Neon Night slot: candidates, pick, source (#454)', () {
+      final report = FilmDirectorReportModel.fromJson({
+        'status': 'planned',
+        'problems': <String>[],
+        'neon_night': {'picks_version': 2, 'picks': <String, Object>{}},
+        'neon_slots': [
+          {
+            'slot': 'ch5.title',
+            'candidates': [
+              {'id': 'n:a:1', 'text': 'В Брюсель', 'score': 25},
+              {'id': 'bad'},
+              'junk',
+            ],
+            'pick': {
+              'ids': ['ch5.title/n:a:1', 'n:b:2'],
+              'free_title': 'Брюссель',
+            },
+            'chosen': [
+              {'id': 'free', 'text': 'Брюссель'},
+            ],
+            'source': 'director',
+            'reason': "director's pick",
+          },
+          {'candidates': <Object>[]},
+          {'slot': 'headline', 'pick': null},
+        ],
+      })!;
+      expect(report.hasNeonNight, isTrue);
+      expect(report.neonSlots, hasLength(2));
+      final title = report.neonSlots.first;
+      expect(title.slot, 'ch5.title');
+      expect(title.candidates.first.text, 'В Брюсель');
+      expect(title.candidates.first.score, 25);
+      expect(title.candidates[1].text, '');
+      expect(title.pickedIds, ['n:a:1', 'n:b:2']);
+      expect(title.freeText, 'Брюссель');
+      expect(title.chosenIds, ['free']);
+      expect(title.chosen, ['Брюссель']);
+      expect(title.source, 'director');
+      final headline = report.neonSlots[1];
+      expect(headline.pickedIds, isEmpty);
+      expect(headline.source, 'none');
+      // A run from before #454 has no slots.
+      expect(
+        FilmDirectorReportModel.fromJson({
+          'status': 'planned',
+          'problems': <String>[],
+        })!.neonSlots,
+        isEmpty,
+      );
+    });
+
     test("reads the vibes' film, its plan's source and repairs (#433)", () {
       final report = FilmDirectorReportModel.fromJson({
         'status': 'fallback',

@@ -13,6 +13,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
+import '../../domain/entities/film_neon_slot.dart';
 import '../../domain/entities/film_director_report.dart';
 import '../../domain/entities/film_photo_analysis.dart';
 import '../../domain/entities/film_plan_chapter.dart';
@@ -190,6 +191,7 @@ class _InspectionBody extends ConsumerWidget {
         _SummaryCard(report: report),
         _GoldenVowsCard(tripId: tripId, report: report),
         _NeonNightCard(tripId: tripId, report: report),
+        if (report.neonSlots.isNotEmpty) _NeonSlotsCard(report.neonSlots),
         _SkyStoryCard(tripId: tripId, report: report),
         if (report.problems.isNotEmpty)
           _ProblemsCard(problems: report.problems),
@@ -680,6 +682,67 @@ class _NeonChapterLines extends StatelessWidget {
               style: AppTypography.caption.copyWith(
                 color: AppColors.textSecondary,
               ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Every Neon Night slot (#454): what plays and where it came from, why,
+/// the director's own words if it wrote any, then code's candidates —
+/// ✓ what plays, → what the director picked.
+class _NeonSlotsCard extends StatelessWidget {
+  const _NeonSlotsCard(this.slots);
+
+  final List<FilmNeonSlot> slots;
+
+  @override
+  Widget build(BuildContext context) {
+    final fromDirector = slots.where((s) => s.source == 'director').length;
+    return _Card(
+      title: 'Neon Night slots',
+      children: [
+        _Line(
+          'Picks',
+          '$fromDirector of ${slots.length} slot(s) by the director',
+        ),
+        for (final slot in slots) _NeonSlotRow(slot),
+      ],
+    );
+  }
+}
+
+class _NeonSlotRow extends StatelessWidget {
+  const _NeonSlotRow(this.slot);
+
+  final FilmNeonSlot slot;
+
+  @override
+  Widget build(BuildContext context) {
+    final picked = slot.pickedIds.toSet();
+    final plays = slot.chosenIds.toSet();
+    final secondary = AppTypography.caption.copyWith(
+      color: AppColors.textSecondary,
+    );
+    return Padding(
+      key: Key('film-plan-neon-slot-${slot.slot}'),
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _Line(
+            '${slot.slot} · ${slot.source}',
+            slot.chosen.isEmpty ? '—' : slot.chosen.join(' | '),
+          ),
+          Text(slot.reason, style: secondary),
+          if (slot.freeText != null)
+            Text('free: ${slot.freeText}', style: secondary),
+          for (final c in slot.candidates)
+            Text(
+              '${plays.contains(c.id) ? '✓' : ' '}'
+              '${picked.contains(c.id) ? '→' : ' '} ${c.score} · ${c.text}',
+              style: secondary,
             ),
         ],
       ),

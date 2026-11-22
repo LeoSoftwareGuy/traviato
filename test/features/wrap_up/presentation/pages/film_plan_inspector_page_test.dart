@@ -8,6 +8,7 @@ import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/settings/domain/app_language.dart';
 import 'package:traviato/features/settings/presentation/controllers/app_language_controller.dart';
+import 'package:traviato/features/wrap_up/domain/entities/film_neon_slot.dart';
 import 'package:traviato/features/wrap_up/domain/entities/film_director_report.dart';
 import 'package:traviato/features/wrap_up/domain/entities/film_photo_analysis.dart';
 import 'package:traviato/features/wrap_up/domain/entities/film_plan_chapter.dart';
@@ -343,6 +344,71 @@ void main() {
       expect(copied, contains('· Neon Night'));
       expect(copied, contains('Ch 1 card · Doors open'));
       expect(find.text('Storyboard copied'), findsOneWidget);
+    });
+
+    testWidgets('shows every slot: candidates, the pick, what plays (#454)', (
+      tester,
+    ) async {
+      final repo = FakeFilmDirectorRepository()
+        ..inspectionResult = const Right(
+          FilmPlanInspection(
+            report: FilmDirectorReport(
+              isPlanned: true,
+              neonSlots: [
+                FilmNeonSlot(
+                  slot: 'ch5.title',
+                  candidates: [
+                    FilmNeonCandidate(
+                      id: 'n:a:1',
+                      text: 'В Брюсель',
+                      score: 25,
+                    ),
+                  ],
+                  pickedIds: ['n:a:1'],
+                  freeText: 'Брюссель',
+                  chosenIds: ['free'],
+                  chosen: ['Брюссель'],
+                  source: 'director',
+                  reason: "director's pick",
+                ),
+                FilmNeonSlot(
+                  slot: 'ch2.card',
+                  candidates: [
+                    FilmNeonCandidate(id: 'n:b:1', text: 'Пиво!', score: 9),
+                  ],
+                  pickedIds: ['n:x:9'],
+                  chosenIds: ['n:b:1'],
+                  chosen: ['Пиво!'],
+                  source: 'code',
+                  reason: "ch1.m1/n:x:9: from ch1.m1's list, valid only there",
+                ),
+              ],
+            ),
+          ),
+        );
+      await _pump(tester, repo);
+      await tester.pumpAndSettle();
+
+      await scrollTo(
+        tester,
+        find.byKey(const Key('film-plan-neon-slot-ch2.card')),
+      );
+      expect(
+        find.textContaining(
+          '1 of 2 slot(s) by the director',
+          findRichText: true,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('ch5.title · director', findRichText: true),
+        findsOneWidget,
+      );
+      expect(find.text('free: Брюссель'), findsOneWidget);
+      // ✓ plays, → the director picked.
+      expect(find.text(' → 25 · В Брюсель'), findsOneWidget);
+      expect(find.text('✓  9 · Пиво!'), findsOneWidget);
+      expect(find.textContaining('valid only there'), findsOneWidget);
     });
 
     testWidgets('says why there is none', (tester) async {

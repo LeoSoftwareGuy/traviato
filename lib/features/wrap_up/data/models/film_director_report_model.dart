@@ -1,4 +1,5 @@
 import '../../domain/entities/film_director_report.dart';
+import '../../domain/entities/film_neon_slot.dart';
 import '../../domain/entities/film_photo_analysis.dart';
 import '../../domain/entities/film_plan_chapter.dart';
 import '../../domain/entities/film_plan_scene.dart';
@@ -23,6 +24,7 @@ class FilmDirectorReportModel extends FilmDirectorReport {
     super.goldenVowsProblems,
     super.hasNeonNight,
     super.neonNightProblems,
+    super.neonSlots,
     super.template,
     super.filmSource,
     super.filmRepairs,
@@ -67,6 +69,9 @@ class FilmDirectorReportModel extends FilmDirectorReport {
       neonNightProblems: _list(
         json['neon_night_problems'],
       ).whereType<String>().toList(),
+      neonSlots: _list(
+        json['neon_slots'],
+      ).map(_neonSlot).whereType<FilmNeonSlot>().toList(),
       template: _string(json['template']),
       filmSource: _string(json['${_string(json['template'])}_source']),
       filmRepairs: _list(
@@ -100,6 +105,37 @@ FilmPhotoAnalysis? filmPhotoAnalysisFromRow(Map<String, dynamic> row) {
     quality: _string(row['quality']) ?? '',
     heroScore: _int(row['hero_score']),
     dupGroup: _string(row['dup_group']),
+  );
+}
+
+/// A `neon_slots` entry (#454), or null without its slot name.
+FilmNeonSlot? _neonSlot(dynamic json) {
+  final map = _map(json);
+  final slot = _string(map['slot']);
+  if (slot == null) return null;
+  final pick = _map(map['pick']);
+  final chosen = _list(map['chosen']).map(_map).toList();
+  return FilmNeonSlot(
+    slot: slot,
+    candidates: [
+      for (final c in _list(map['candidates']).map(_map))
+        if (_string(c['id']) case final id?)
+          FilmNeonCandidate(
+            id: id,
+            text: _string(c['text']) ?? '',
+            score: _int(c['score']),
+          ),
+    ],
+    // The director's ids carry their slot's name ("ch2.card/n:…").
+    pickedIds: [
+      for (final id in _list(pick['ids']).whereType<String>())
+        id.startsWith('$slot/') ? id.substring(slot.length + 1) : id,
+    ],
+    freeText: _string(pick['free_title']),
+    chosenIds: [for (final c in chosen) ?_string(c['id'])],
+    chosen: [for (final c in chosen) ?_string(c['text'])],
+    source: _string(map['source']) ?? 'none',
+    reason: _string(map['reason']) ?? '',
   );
 }
 
