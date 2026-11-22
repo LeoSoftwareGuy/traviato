@@ -19,18 +19,15 @@
 
 import type { TripData } from "./gather.ts";
 import type { ToolDefinition } from "./anthropic_tool.ts";
-import { bannedPhraseIn, cleanAiLine } from "./film_plan.ts";
 import type { WrapUpLanguage } from "./language.ts";
 import { tripLogicalDays } from "./logical_day.ts";
 import {
-  clausesOf,
   excerptScore,
   isDrugReference,
   isGeneric,
   isSensitive,
   MAX_EXCERPT_CHARS,
   sentencesOf,
-  SPECIFIC_SCORE,
 } from "./excerpts.ts";
 import {
   nnBeatsFor,
@@ -56,17 +53,81 @@ import {
   repeatsTitle,
   sameLine,
   singleNightStarts,
-  timeOf,
 } from "./neon_night.ts";
+
+import {
+  CAPTION_BONUS,
+  choose,
+  FIRST_NAMES,
+  freeTextProblem,
+  hash,
+  hasVerb,
+  inOtherLanguage,
+  isNegative,
+  type Line,
+  linesOf as linesOfTheme,
+  MAX_SLOT_CANDIDATES,
+  namePhrases,
+  namesOf,
+  nearestPhoto,
+  norm,
+  noteChapters,
+  noteLineId,
+  noteScene,
+  noteTime,
+  parsePicks,
+  placeOf,
+  scopedId,
+  shortClauses as shortClausesOfTheme,
+  type SlotCandidate,
+  type SlotChosen,
+  type SlotPick,
+  type SlotPicks,
+  TIER_BONUS,
+  titleText as titleTextOfTheme,
+  top,
+  writtenLanguage,
+} from "./film_slots.ts";
+
+export { hasVerb, inOtherLanguage, isNegative, namePhrases, namesOf };
+export { noteChapters, writtenLanguage };
+export { scopedId };
 
 type Photo = TripData["photos"][number];
 type Note = TripData["notes"][number];
 
 // Candidates a slot lists at most: the top-scored.
-export const MAX_NN_CANDIDATES = 8;
+export const MAX_NN_CANDIDATES = MAX_SLOT_CANDIDATES;
 
 // The theme Neon Night's lines are scored for.
 const THEME = "night" as const;
+
+// The shared helpers in Neon's theme.
+const linesOf = (note: Note) => linesOfTheme(note, THEME);
+function titleText(
+  text: string,
+  max: number,
+  language: "ru" | "en" | null,
+  names: ReadonlySet<string>,
+  needsSpace: boolean,
+  scored = true,
+): string | null {
+  return titleTextOfTheme(
+    text,
+    max,
+    language,
+    names,
+    needsSpace,
+    scored,
+    THEME,
+  );
+}
+const shortClauses = (
+  lines: Parameters<typeof shortClausesOfTheme>[0],
+  max: number,
+  language: "ru" | "en" | null,
+  names: ReadonlySet<string>,
+) => shortClausesOfTheme(lines, max, language, names, THEME);
 
 // --- The skeleton ---------------------------------------------------------
 
@@ -94,10 +155,6 @@ export const MIN_NN_SHORT_CARD_CHARS = 30;
 // A name or highlight's score as a headline: above an ordinary piece of
 // a line, below the most specific ones.
 const HIGHLIGHT_SCORE = 6;
-
-// A note belongs to the scene whose photos it was written among (#456):
-// the share of the scene's photos taken within this many minutes of it.
-const CARD_NEAR_MINUTES = 90;
 
 export function fullShape(showsPlan: boolean): NnShape {
   return {
@@ -199,15 +256,7 @@ export function zoomedCaptions(
 
 export type NnSlotKind = "note" | "card" | "moment" | "title" | "headline";
 
-export interface NnCandidate {
-  id: string;
-  text: string;
-  note_id: string | null;
-  // The photo it plays over (a moment's word), or null.
-  photo_id: string | null;
-  // Higher is better; the list is sorted by it.
-  score: number;
-}
+export type NnCandidate = SlotCandidate;
 
 export interface NnSlot {
   // "note", "headline", "ch1.title", "ch1.card", "ch1.m1", …
@@ -219,583 +268,6 @@ export interface NnSlot {
   // How many ids the director may pick: a moment's words, else 1.
   max_picks: number;
   candidates: NnCandidate[];
-}
-
-// A short, stable id for a text (FNV-1a).
-function hash(text: string): string {
-  let h = 0x811c9dc5;
-  for (const c of text) {
-    h ^= c.codePointAt(0)!;
-    h = Math.imul(h, 0x01000193) >>> 0;
-  }
-  return h.toString(36);
-}
-
-function noteLineId(noteId: string, text: string): string {
-  return `n:${noteId}:${hash(text)}`;
-}
-
-function norm(text: string): string {
-  return text.toLowerCase().replace(/ё/g, "е").replace(/[^\p{L}\p{N}]+/gu, " ")
-    .trim();
-}
-
-// When a note was written; NaN for an old one-a-day note (its time is its
-// last edit) or none.
-function noteTime(n: Note): number {
-  if (n.legacy) return NaN;
-  return Date.parse(n.taken_at ?? n.created_at ?? "");
-}
-
-// The language the user writes in: Russian when the notes' (else the
-// captions') letters are ≥ 70 % Cyrillic, English when ≥ 70 % Latin; null
-// when mixed or too few to tell.
-export function writtenLanguage(tripData: TripData): "ru" | "en" | null {
-  for (
-    const texts of [
-      tripData.notes.map((n) => n.content),
-      tripData.photos.map((p) => p.caption ?? ""),
-    ]
-  ) {
-    const text = texts.join(" ");
-    const cyr = (text.match(/[Ѐ-ӿ]/g) ?? []).length;
-    const lat = (text.match(/[A-Za-z]/g) ?? []).length;
-    if (cyr + lat < 20) continue;
-    if (cyr >= 0.7 * (cyr + lat)) return "ru";
-    if (lat >= 0.7 * (cyr + lat)) return "en";
-    return null;
-  }
-  return null;
-}
-
-// The words of the user's notes: a Latin word inside Russian notes is a
-// name ("Kuko", "AMF", "ufc"), never another language — captions don't
-// count (#454: English captions over Russian notes are another language).
-// The memory's own name is the user's words too ("ADE-Amsterdam 2026").
-export function namesOf(tripData: TripData): Set<string> {
-  const words = new Set<string>(
-    norm(tripData.trip.name ?? "").split(" ").filter(Boolean),
-  );
-  for (const n of tripData.notes) {
-    for (const w of norm(n.content).split(" ")) if (w) words.add(w);
-  }
-  return words;
-}
-
-// Whether [text] is in another language than [language] (#454), word by
-// word: a word counts as the user's when it's in their script or one they
-// wrote in their notes (a name: "Kuko Unreal", "AMF"); the text passes
-// when at least half its words are ("Rave до утра"), fails otherwise
-// ("Tallinn airport", "coffee shop" over Russian notes).
-export function inOtherLanguage(
-  text: string,
-  language: "ru" | "en" | null,
-  names: ReadonlySet<string>,
-): boolean {
-  if (language === null) return false;
-  const words = norm(text).split(" ").filter((w) => /\p{L}/u.test(w));
-  if (words.length === 0) return false;
-  const own = words.filter((w) =>
-    names.has(w) ||
-    (language === "ru" ? /[\u0400-\u04FF]/u.test(w) : /[a-z]/u.test(w))
-  ).length;
-  return own * 2 < words.length;
-}
-
-// "Yesterday …": a note about the day before (#454).
-const YESTERDAY = /(^|[^\p{L}])(вчера|yesterday|last night)([^\p{L}]|$)/iu;
-
-// The day before [day], 'YYYY-MM-DD'.
-function dayBefore(day: string): string {
-  const d = new Date(`${day}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() - 1);
-  return d.toISOString().slice(0, 10);
-}
-
-// Which chapters a note's lines belong to (#454): the chapter with its
-// photo; else its logical day's — a note about yesterday ("вчера…") the
-// day before's last part — and within the day the part whose time range
-// is nearest to when it was written (after the day's last photo: its last
-// part). The user writes later — in the evening, the next morning — so
-// there is no window. An old one-a-day note (no time) belongs to every
-// part of its day; a note on no chapter's day to the nearest in time.
-export function noteChapters(
-  tripData: TripData,
-  chapters: readonly NnSkeletonChapter[],
-): Map<string, number[]> {
-  const days = tripLogicalDays(tripData);
-  const spans = chapters.map((c) => {
-    const times = c.photos.map(timeOf).filter((t) => t > 0);
-    return { from: Math.min(...times), to: Math.max(...times) };
-  });
-  const distance = (i: number, t: number) =>
-    t < spans[i].from
-      ? spans[i].from - t
-      : t > spans[i].to
-      ? t - spans[i].to
-      : 0;
-  const nearest = (among: number[], t: number) => {
-    let best = among[0];
-    for (const i of among) if (distance(i, t) < distance(best, t)) best = i;
-    return best;
-  };
-  const owners = new Map<string, number[]>();
-  for (const n of tripData.notes) {
-    if (!n.id || !n.content.trim()) continue;
-    const own = chapters.findIndex((c) =>
-      c.photos.some((p) => p.id === n.photo_id)
-    );
-    if (own >= 0) {
-      owners.set(n.id, [own]);
-      continue;
-    }
-    const written = days.get(`note:${n.id}`) ?? n.day_date;
-    const onDay = (day: string) =>
-      chapters.flatMap((c, i) => c.days.includes(day) ? [i] : []);
-    if (YESTERDAY.test(n.content)) {
-      const before = onDay(dayBefore(written));
-      if (before.length > 0) {
-        owners.set(n.id, [before[before.length - 1]]);
-        continue;
-      }
-    }
-    const today = onDay(written);
-    const t = noteTime(n);
-    if (Number.isNaN(t)) {
-      if (today.length > 0) owners.set(n.id, today);
-      continue;
-    }
-    if (today.length > 0) {
-      owners.set(n.id, [nearest(today, t)]);
-    } else if (chapters.length > 0) {
-      owners.set(n.id, [nearest(chapters.map((_, i) => i), t)]);
-    }
-  }
-  return owners;
-}
-
-// How good a line is (#454): specific (details, feelings — scored),
-// plain (the user's words, nothing to score: "Выезжаем на AMF тусовку…"),
-// generic (a summary: "было весело"). Plain lines are candidates too —
-// only generic ones wait until a chapter has nothing else.
-type Tier = "specific" | "plain" | "generic";
-
-interface Line {
-  note: Note;
-  text: string;
-  score: number;
-  tier: Tier;
-  // Its place in the note: lines keep the note's order on ties.
-  k: number;
-}
-
-function tierOf(text: string, score: number): Tier {
-  if (isGeneric(text)) return "generic";
-  return score >= SPECIFIC_SCORE ? "specific" : "plain";
-}
-
-// Where a clause breaks further (#454): at a slash, or before a
-// conjunction that opens a clause of its own — so a long line without
-// commas still gives a card a piece ("Выезжаем на AMF тусовку за окном
-// ливень" | "но мы готовы дать еще один бой").
-// (Never a bare "so": "I felt so happy" is one phrase.)
-const BREAKS = /\s*\/\s*|\s+(?=(?:но|а|так что|потом|зато|but|then)\s)/iu;
-
-// A sentence's pieces: its clauses, then each clause broken at BREAKS —
-// pieces of 2 words or more, the user's exact words.
-function piecesOf(sentence: string): string[] {
-  const clauses = clausesOf(sentence);
-  const out = [...clauses];
-  for (const clause of clauses) {
-    const parts = clause.split(BREAKS);
-    if (parts.length < 2) continue;
-    for (const part of parts) {
-      const t = part.trim().replace(/\s*[,;:]$/u, "");
-      if (t.split(/\s+/u).length >= 2 && !out.includes(t)) out.push(t);
-    }
-  }
-  return out;
-}
-
-// [note]'s lines: each sentence and its pieces — a long sentence only as
-// pieces — and never any of a sentence with an explicit drug word (#450,
-// #454: "…курят косячки, очень необычно" gives no "очень необычно"
-// either).
-function linesOf(note: Note): Line[] {
-  const out: Line[] = [];
-  const seen = new Set<string>();
-  for (const sentence of sentencesOf(note.content)) {
-    if (isDrugReference(sentence)) continue;
-    const pieces = [
-      ...([...sentence].length <= MAX_EXCERPT_CHARS ? [sentence] : []),
-      ...piecesOf(sentence),
-    ];
-    for (const text of pieces) {
-      if (seen.has(text) || [...text].length > MAX_EXCERPT_CHARS) continue;
-      seen.add(text);
-      const score = excerptScore(text, THEME);
-      out.push({ note, text, score, tier: tierOf(text, score), k: out.length });
-    }
-  }
-  return out;
-}
-
-function nearestPhoto(photos: readonly Photo[], t: number): Photo | null {
-  if (Number.isNaN(t) || photos.length === 0) return null;
-  let best = photos[0];
-  for (const p of photos) {
-    if (Math.abs(timeOf(p) - t) < Math.abs(timeOf(best) - t)) best = p;
-  }
-  return best;
-}
-
-// The top MAX_NN_CANDIDATES of [candidates] by score — always keeping
-// [kept] (one line of every note, #454), so the list can grow past the
-// cap only for them.
-function top(
-  candidates: NnCandidate[],
-  kept: readonly NnCandidate[] = [],
-): NnCandidate[] {
-  const seen = new Set<string>();
-  const unique = (list: readonly NnCandidate[]) =>
-    list.filter((c) => {
-      if (seen.has(c.id)) return false;
-      seen.add(c.id);
-      return true;
-    });
-  const must = unique(kept);
-  const rest = unique([...candidates].sort((a, b) => b.score - a.score))
-    .slice(0, Math.max(0, MAX_NN_CANDIDATES - must.length));
-  return [...must, ...rest].sort((a, b) => b.score - a.score);
-}
-
-// Specific lines first, then plain ones, captions, generic lines last.
-const TIER_BONUS: Record<Tier, number> = {
-  specific: 100,
-  plain: 60,
-  generic: 0,
-};
-const CAPTION_BONUS = 50;
-
-// A title or headline from the user's words: short, nothing sensitive, no
-// banned phrase, in their language.
-function titleText(
-  text: string,
-  max: number,
-  language: "ru" | "en" | null,
-  names: ReadonlySet<string>,
-  needsSpace: boolean,
-  // A name is a fact, not a line: no score needed ("AMF").
-  scored = true,
-): string | null {
-  const t = text.trim().replace(/[.!?…,;:]+$/u, "").trim();
-  if (!t || [...t].length > max) return null;
-  if (needsSpace && !t.includes(" ")) return null;
-  if (isSensitive(t) || bannedPhraseIn(t)) return null;
-  if (scored && excerptScore(t, THEME) < 0) return null;
-  if (inOtherLanguage(t, language, names)) return null;
-  return t;
-}
-
-// A word that reads as a verb (#454): titles name things, so a phrase
-// with one is a fragment of a sentence ("сразу пошли завтракать").
-// Russian by its endings (infinitive, past, reflexive, present 1st/3rd
-// plural), English by -ed/-ing and the common irregular ones.
-const RU_VERB =
-  /(ть|ться|чь|[аяеиыоуё]л|ли|ла|ло|лся|лась|лись|ем|ём|ешь|ете|ют|ят|ся|сь)$/u;
-const EN_VERB =
-  /^(?:\p{L}+(?:ed|ing)|went|got|had|was|were|is|are|ate|came|took|saw|did|go|get|have|has|made|felt|left)$/u;
-const RU_NOT_VERB = new Set(["пиво", "село", "тепло", "рубли", "шлем"]);
-
-export function hasVerb(text: string): boolean {
-  return (text.toLowerCase().match(/\p{L}+/gu) ?? []).some((w) =>
-    /\p{Script=Cyrillic}/u.test(w)
-      ? w.length >= 4 && RU_VERB.test(w) && !RU_NOT_VERB.has(w)
-      : EN_VERB.test(w)
-  );
-}
-
-// A complaint or a low (#454): never the headline, the film's peak
-// ("диджеи не очень").
-const NEGATIVE =
-  /(^|[^\p{L}])(не очень|так себе|плох|отстой|ужас|скучн|устал|разочар|жаль|грустн|бесит|надоел|не понрав|хуже|отврат|болит|похмел|not great|bad|boring|tired|awful|terrible|disappoint|sucked|meh|hangover|worst)/iu;
-
-export function isNegative(text: string): boolean {
-  return NEGATIVE.test(text);
-}
-
-// First names, never a headline alone (#454: "Петр").
-const FIRST_NAMES = new Set([
-  "александр",
-  "саша",
-  "алексей",
-  "леша",
-  "андрей",
-  "антон",
-  "артем",
-  "борис",
-  "вадим",
-  "василий",
-  "вася",
-  "виктор",
-  "владимир",
-  "вова",
-  "дмитрий",
-  "дима",
-  "денис",
-  "евгений",
-  "женя",
-  "иван",
-  "ваня",
-  "игорь",
-  "илья",
-  "кирилл",
-  "максим",
-  "макс",
-  "михаил",
-  "миша",
-  "никита",
-  "николай",
-  "коля",
-  "олег",
-  "павел",
-  "паша",
-  "петр",
-  "петя",
-  "роман",
-  "рома",
-  "сергей",
-  "сережа",
-  "степан",
-  "юрий",
-  "юра",
-  "ярослав",
-  "анна",
-  "аня",
-  "анастасия",
-  "настя",
-  "дарья",
-  "даша",
-  "екатерина",
-  "катя",
-  "елена",
-  "лена",
-  "ирина",
-  "ира",
-  "мария",
-  "маша",
-  "наталья",
-  "наташа",
-  "ольга",
-  "оля",
-  "светлана",
-  "света",
-  "татьяна",
-  "таня",
-  "юлия",
-  "юля",
-  "alex",
-  "anna",
-  "ben",
-  "dan",
-  "david",
-  "emma",
-  "james",
-  "john",
-  "kate",
-  "leo",
-  "mark",
-  "max",
-  "mike",
-  "nick",
-  "paul",
-  "peter",
-  "sam",
-  "sara",
-  "sarah",
-  "tom",
-]);
-
-// Words a sentence often opens with that name nothing.
-const OPENERS = new Set([
-  "мы",
-  "я",
-  "он",
-  "она",
-  "они",
-  "ну",
-  "это",
-  "вот",
-  "там",
-  "тут",
-  "все",
-  "всё",
-  "сегодня",
-  "вчера",
-  "завтра",
-  "потом",
-  "сначала",
-  "сначало",
-  "наконец",
-  "конечно",
-  "очень",
-  "так",
-  "уже",
-  "ещё",
-  "еще",
-  "но",
-  "а",
-  "и",
-  "пока",
-  "когда",
-  "где",
-  "здесь",
-  "теперь",
-  "we",
-  "i",
-  "it",
-  "the",
-  "a",
-  "so",
-  "then",
-  "today",
-  "yesterday",
-  "and",
-  "but",
-  "our",
-  "my",
-]);
-const PREPOSITIONS = new Set([
-  "в",
-  "во",
-  "на",
-  "из",
-  "до",
-  "у",
-  "к",
-  "от",
-  "по",
-  "под",
-  "над",
-  "за",
-  "через",
-  "против",
-  "с",
-  "со",
-  "in",
-  "at",
-  "to",
-  "from",
-  "on",
-  "vs",
-]);
-
-// The names in [text] (#454): runs of capitalised words — the opening one
-// too when it reads as a name, not a verb ("Брюссель не меняется…") — and,
-// in Cyrillic notes, Latin words ("Куко Unreal", "AMF"). After a
-// preposition the run keeps it, as the case needs it ("В Амстердаме"),
-// unless [bare] (a headline: "Куко Unreal").
-export function namePhrases(text: string, bare = false): string[] {
-  const out: string[] = [];
-  for (const sentence of sentencesOf(text)) {
-    const words = sentence.split(/\s+/u).map((w) =>
-      w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "")
-    );
-    const cyrillic = /\p{Script=Cyrillic}/u.test(sentence);
-    const isName = (w: string, k: number) => {
-      if ([...w].length < 2 || hasVerb(w)) return false;
-      if (OPENERS.has(w.toLowerCase())) return false;
-      // A diary sentence often opens on a verb in the present ("Сидим…",
-      // "Идем…"): an opening word ending like one names nothing.
-      if (k === 0 && /(им|ем|ём|ут|ют|ит|ет|ат|ят)$/u.test(w.toLowerCase())) {
-        return false;
-      }
-      // A Latin name in Cyrillic notes: capitalised or an acronym ("Unreal",
-      // "AMF"), never a lowercase word ("ufc", "english").
-      if (cyrillic && /^\p{Script=Latin}+$/u.test(w)) return /^\p{Lu}/u.test(w);
-      return /^\p{Lu}/u.test(w) &&
-        (k > 0 || !PREPOSITIONS.has(w.toLowerCase()));
-    };
-    for (let k = 0; k < words.length; k++) {
-      if (!isName(words[k], k)) continue;
-      let end = k;
-      while (end + 1 < words.length && isName(words[end + 1], end + 1)) end++;
-      const before = words[k - 1]?.toLowerCase();
-      const run = words.slice(k, end + 1).join(" ");
-      // Bare, a lone Russian word after a preposition is in its case
-      // ("Амстердаме", "Мираба"): left out. A name with a Latin part
-      // ("Куко Unreal") doesn't decline.
-      if (
-        bare && before && PREPOSITIONS.has(before) &&
-        /^\p{Script=Cyrillic}+$/u.test(run)
-      ) {
-        k = end;
-        continue;
-      }
-      out.push(
-        !bare && before && PREPOSITIONS.has(before)
-          ? `${before[0].toUpperCase()}${before.slice(1)} ${run}`
-          : run,
-      );
-      k = end;
-    }
-  }
-  return out;
-}
-
-// Where a title or headline phrase may break (#454): before these words
-// as well as at BREAKS ("Мы на месте" | "это просто огромный…").
-const PHRASE_BREAKS =
-  /\s+(?=(?:и|это|чтобы|которые|потом|а|но|так что|and|but|then)\s)/iu;
-// A phrase never opens with one of them: "но супер устали" is a fragment,
-// "супер устали" the user's words.
-const LEADING =
-  /^(?:и|это|чтобы|которые|потом|а|но|так что|ну|and|but|so|then)\s+/iu;
-
-// The short phrases of [lines] that can be a title or headline: their
-// pieces, broken further at PHRASE_BREAKS, without a leading conjunction
-// — always the user's exact words, never a generic one.
-function shortClauses(
-  lines: readonly Line[],
-  max: number,
-  language: "ru" | "en" | null,
-  names: ReadonlySet<string>,
-): NnCandidate[] {
-  const out: NnCandidate[] = [];
-  for (const l of lines) {
-    if (l.tier === "generic") continue;
-    const pieces = [l.text, ...piecesOf(l.text)];
-    const phrases = [
-      ...pieces,
-      ...pieces.flatMap((p) => p.split(PHRASE_BREAKS)),
-    ].map((p) => p.trim().replace(LEADING, ""));
-    for (const phrase of phrases) {
-      const t = titleText(phrase, max, language, names, true);
-      if (!t || isGeneric(t)) continue;
-      out.push({
-        id: noteLineId(l.note.id!, t),
-        text: t,
-        note_id: l.note.id!,
-        photo_id: null,
-        score: excerptScore(t, THEME),
-      });
-    }
-  }
-  return out;
-}
-
-// The place most of [photos] share, if any.
-function placeOf(photos: readonly Photo[]): string | null {
-  const counts = new Map<string, number>();
-  for (const p of photos) {
-    const place = p.place_text?.trim();
-    if (place) counts.set(place, (counts.get(place) ?? 0) + 1);
-  }
-  let best: string | null = null;
-  for (const [place, n] of counts) {
-    if (best === null || n > counts.get(best)!) best = place;
-  }
-  return best;
 }
 
 // Every slot of the film with its candidates (#454 step 2).
@@ -847,7 +319,7 @@ export function buildNeonSlots(
     const usable = lines.filter((l) => !other || l.tier !== "generic");
     // Which scene each note belongs to (#456, a hard filter): its photo's
     // scene, else the one whose photos it was written among — the largest
-    // share of the scene's photos within CARD_NEAR_MINUTES of it, then
+    // share of the scene's photos within SCENE_NEAR_MINUTES of it, then
     // the nearest photo; the card on a tie or without a time. A scene
     // lists only its own notes' lines, so "Приземлились в Амстердаме…"
     // (12:00) plays over the Amsterdam photos (12:19–14:33), never over
@@ -858,29 +330,7 @@ export function buildNeonSlots(
         chapter.photos.filter((p) => m.photo_ids.includes(p.id))
       ),
     ];
-    const sceneOf = (n: Note): number => {
-      const own = scenes.findIndex((ps) => ps.some((p) => p.id === n.photo_id));
-      if (own >= 0) return own - 1;
-      const t = noteTime(n);
-      if (Number.isNaN(t)) return -1;
-      let best = 0;
-      let bestShare = -1;
-      let bestNear = Infinity;
-      scenes.forEach((ps, k) => {
-        const times = ps.map(timeOf).filter((x) => x > 0);
-        if (times.length === 0) return;
-        const share = times.filter((x) =>
-          Math.abs(x - t) <= CARD_NEAR_MINUTES * 60_000
-        ).length / times.length;
-        const near = Math.min(...times.map((x) => Math.abs(x - t)));
-        if (share > bestShare || (share === bestShare && near < bestNear)) {
-          best = k;
-          bestShare = share;
-          bestNear = near;
-        }
-      });
-      return best - 1;
-    };
+    const sceneOf = (n: Note): number => noteScene(scenes, n) - 1;
     const sceneNotes = new Map(own.map((n) => [n.id!, sceneOf(n)]));
 
     // The card line: a sentence or piece short enough for a card, of the
@@ -1123,13 +573,8 @@ export function unlistedNotes(
 
 // --- The director's picks and their validation ----------------------------
 
-export interface NnPick {
-  ids: string[];
-  // A title the director wrote, when no candidate fits.
-  free_title?: string | null;
-}
-
-export type NnPicks = Record<string, NnPick>;
+export type NnPick = SlotPick;
+export type NnPicks = SlotPicks;
 
 // What the director record stores (#454): its picks by slot.
 export interface NeonNightPicksRecord {
@@ -1143,13 +588,7 @@ export function isPicksRecord(value: unknown): value is NeonNightPicksRecord {
     typeof (value as Record<string, unknown>).picks === "object";
 }
 
-export interface NnChosen {
-  id: string;
-  text: string;
-  note_id: string | null;
-  photo_id: string | null;
-  score: number;
-}
+export type NnChosen = SlotChosen;
 
 export interface NnSlotResult {
   slot: string;
@@ -1165,9 +604,6 @@ export interface NnSlotResult {
 // first, then the titles, then the headline — so a title never takes a
 // line's words, and the headline never a title's.
 const ORDER: NnSlotKind[] = ["note", "card", "moment", "title", "headline"];
-
-const CLOCK = /^\d{1,2}[:.]\d{2}$/u;
-const DAY_N = /^(day|день)\s*\d+/iu;
 
 export interface ResolveOptions {
   // Captions the film already shows (card zooms): no line repeats one.
@@ -1224,7 +660,10 @@ export function resolveNeonSlots(
     const free = (text: string) =>
       isTitle ? titleFree(text, slot.kind === "headline") : lineFree(text);
     const moment = options.moments.get(slot.slot);
-    const fits = (chosen: NnChosen[], c: NnCandidate): string | null => {
+    const fits = (
+      chosen: readonly NnChosen[],
+      c: NnCandidate,
+    ): string | null => {
       if (!free(c.text)) return "shows words the film already shows";
       if (chosen.some((x) => overlaps(x.text, c.text))) {
         return "repeats another pick";
@@ -1253,59 +692,22 @@ export function resolveNeonSlots(
     });
 
     const pick = picks?.[slot.slot];
-    const chosen: NnChosen[] = [];
-    const problems: string[] = [];
-    let source: NnSlotResult["source"] = "none";
-    if (pick) {
-      // A title: the director's own, when it wrote one that holds — it
-      // writes one whenever it names the chapter better (#454).
-      const freeTitle = isTitle && pick.free_title
-        ? cleanAiLine(pick.free_title)
-        : "";
-      if (freeTitle) {
-        const why = freeTitleProblem(
-          freeTitle,
-          options,
-          slot.kind === "headline" ? "headline" : "title",
-        ) ??
-          (titleFree(freeTitle) ? null : "repeats words the film shows");
-        if (why) problems.push(`free title "${freeTitle}": ${why}`);
-        else {
-          chosen.push({
-            id: "free",
-            text: freeTitle,
-            note_id: null,
-            photo_id: null,
-            score: 0,
-          });
-        }
-      }
-      for (const picked of (pick.ids ?? []).slice(0, slot.max_picks)) {
-        if (chosen.length >= slot.max_picks) break;
-        const scoped = unscoped(slot.slot, picked);
-        if ("problem" in scoped) {
-          problems.push(scoped.problem);
-          continue;
-        }
-        const id = scoped.id;
-        const c = slot.candidates.find((x) => x.id === id);
-        if (!c) {
-          problems.push(`${id}: not in this slot's list`);
-          continue;
-        }
-        const why = fits(chosen, c);
-        if (why) problems.push(`${id}: ${why}`);
-        else chosen.push(take(c));
-      }
-      if (chosen.length > 0) source = "director";
-    }
-    if (chosen.length === 0) {
-      for (const c of slot.candidates) {
-        if (chosen.length >= slot.max_picks) break;
-        if (fits(chosen, c) === null) chosen.push(take(c));
-      }
-      if (chosen.length > 0) source = "code";
-    }
+    // A title: the director's own, when it wrote one that holds — it
+    // writes one whenever it names the chapter better (#454).
+    const picked = choose(slot, pick, {
+      freeText: isTitle
+        ? (text) =>
+          freeTitleProblem(
+            text,
+            options,
+            slot.kind === "headline" ? "headline" : "title",
+          ) ?? (titleFree(text) ? null : "repeats words the film shows")
+        : null,
+      fits,
+    });
+    const chosen: NnChosen[] = picked.chosen;
+    const problems = picked.problems;
+    let source: NnSlotResult["source"] = picked.source;
     // Short for length (#454): only a line as good as the one picked.
     let shortened = false;
     if (
@@ -1452,36 +854,11 @@ export function freeTitleProblem(
   kind: "title" | "headline" = "title",
 ): string | null {
   const max = kind === "headline" ? MAX_NN_HEADLINE_CHARS : MAX_NN_TITLE_CHARS;
-  if ([...title].length > max) return `longer than ${max} characters`;
-  if (isSensitive(title)) return "sensitive words";
-  if (bannedPhraseIn(title)) return "a banned phrase";
-  if (CLOCK.test(title) || DAY_N.test(title)) return "a clock time or day";
-  if (kind === "headline" && isNegative(title)) return "not upbeat";
-  if (inOtherLanguage(title, options.language, options.names)) {
-    return "not in the notes' language";
-  }
-  return null;
+  return freeTextProblem(title, options, max, kind === "headline");
 }
 
 // The director's tool input as picks, or null when it isn't that shape.
-export function parseNeonPicks(raw: unknown): NnPicks | null {
-  if (typeof raw !== "object" || raw === null) return null;
-  const list = (raw as Record<string, unknown>).picks;
-  if (!Array.isArray(list)) return null;
-  const picks: NnPicks = {};
-  for (const p of list) {
-    if (typeof p !== "object" || p === null) continue;
-    const { slot, ids, free_title } = p as Record<string, unknown>;
-    if (typeof slot !== "string") continue;
-    picks[slot] = {
-      ids: Array.isArray(ids)
-        ? ids.filter((id): id is string => typeof id === "string")
-        : [],
-      free_title: typeof free_title === "string" ? free_title : null,
-    };
-  }
-  return picks;
-}
+export const parseNeonPicks = parsePicks;
 
 // --- The director's call ----------------------------------------------------
 
@@ -1563,24 +940,6 @@ export function buildNeonPickSystemPrompt(language: WrapUpLanguage): string {
       language === "ru" ? "Russian" : "English"
     } unless the notes say otherwise.`,
   ].join("");
-}
-
-// A candidate's id as the director sees it: its slot's name first, so an
-// id is only ever valid in its own slot (#454).
-export function scopedId(slot: string, id: string): string {
-  return `${slot}/${id}`;
-}
-
-// The candidate id a picked [id] names in [slot], or why it names none.
-function unscoped(slot: string, id: string): { id: string } | {
-  problem: string;
-} {
-  const at = id.indexOf("/");
-  if (at < 0) return { id };
-  const from = id.slice(0, at);
-  return from === slot
-    ? { id: id.slice(at + 1) }
-    : { problem: `${id}: from ${from}'s list, valid only there` };
 }
 
 // What the director sees (#454): the memory's facts, the cut film and
