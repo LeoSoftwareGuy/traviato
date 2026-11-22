@@ -79,9 +79,11 @@ void main() {
       );
       final length = lengthOf(fixture);
       printOnFailure('${fixture['film']} $photos: $length s');
-      if (fixture['film'] == 'neon_night') {
-        // Neon Night may use the room up to the longest film (#448), and
-        // never plays shorter than its target.
+      if (fixture['film'] == 'neon_night' || fixture['film'] == 'golden_vows') {
+        // Neon Night (#448) and Golden Vows (#458) may use the room up to
+        // the longest film — Golden Vows never drops a chapter, and only
+        // past 75 s do its notes and pages give way — and never play
+        // shorter than their target.
         expect(length, greaterThan(target - tolerance));
         expect(length, lessThanOrEqualTo(WrapUpLimits.longestFilmSeconds));
       } else {

@@ -69,8 +69,17 @@ class GoldenVowsCanvas extends StatefulWidget {
   State<GoldenVowsCanvas> createState() => _GoldenVowsCanvasState();
 }
 
+/// What the playing film lasts on its own clock (#458's length test).
+abstract interface class GoldenVowsPlayback {
+  Duration get playLength;
+}
+
 class _GoldenVowsCanvasState extends State<GoldenVowsCanvas>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin
+    implements GoldenVowsPlayback {
+  @override
+  Duration get playLength => _controller.duration ?? Duration.zero;
+
   late final AnimationController _controller = AnimationController(
     vsync: this,
   );

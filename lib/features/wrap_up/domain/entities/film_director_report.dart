@@ -24,6 +24,12 @@ class FilmDirectorReport extends Equatable {
     this.hasNeonNight = false,
     this.neonNightProblems = const [],
     this.neonSlots = const [],
+    this.gvSlots = const [],
+    this.gvTrims = const [],
+    this.gvShownPages,
+    this.gvShownPhotos,
+    this.gvUnlisted = const [],
+    this.gvTrigger,
     this.template,
     this.filmSource,
     this.filmRepairs = const [],
@@ -77,6 +83,24 @@ class FilmDirectorReport extends Equatable {
   /// what plays and why. Empty for a run from before.
   final List<FilmNeonSlot> neonSlots;
 
+  /// Every Golden Vows slot (#458), as [neonSlots]. Empty for a run from
+  /// before.
+  final List<FilmNeonSlot> gvSlots;
+
+  /// What the album gave up for its length (#458), in order.
+  final List<String> gvTrims;
+
+  /// "N / M photos shown" on the album's pages (the heart holds them all).
+  final int? gvShownPages;
+  final int? gvShownPhotos;
+
+  /// Notes on no main page, each "its text — why".
+  final List<String> gvUnlisted;
+
+  /// What made it a wedding, engagement…: "«свадьба» in note n1"; null
+  /// = romance (nothing did).
+  final String? gvTrigger;
+
   /// The film the memory's vibes chose (#433): `golden_vows`,
   /// `neon_night` or `sky_story`; null for a run from before.
   final String? template;
@@ -122,6 +146,12 @@ class FilmDirectorReport extends Equatable {
     hasNeonNight,
     neonNightProblems,
     neonSlots,
+    gvSlots,
+    gvTrims,
+    gvShownPages,
+    gvShownPhotos,
+    gvUnlisted,
+    gvTrigger,
     template,
     filmSource,
     filmRepairs,

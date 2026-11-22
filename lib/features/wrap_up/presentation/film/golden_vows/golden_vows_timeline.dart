@@ -20,6 +20,7 @@ class GoldenVowsTimeline {
     this.chapters = 3,
     this.hasCarousel = true,
     List<double> heroDwells = const [],
+    List<double> chapterDwells = const [],
     this.dwellScale = 1,
   }) : assert(heroes >= 0 && chapters >= 0, 'pages: $heroes, $chapters'),
        film = _build(
@@ -28,6 +29,7 @@ class GoldenVowsTimeline {
          chapters,
          hasCarousel,
          heroDwells,
+         chapterDwells,
          dwellScale,
        );
 
@@ -48,6 +50,13 @@ class GoldenVowsTimeline {
           scale == 1
               ? heroDwellFor(hero.note)
               : math.max(heroDwell * scale, heroDwellFor(hero.note, floor: 0)),
+      ],
+      chapterDwells: [
+        for (final chapter in story.chapters)
+          chapterDwellFor(
+            chapter.title,
+            chapterDwell * scale * story.chapterDwellScale,
+          ),
       ],
       dwellScale: scale,
     );
@@ -91,6 +100,12 @@ class GoldenVowsTimeline {
     return math.max(floor, FilmTextRules.readingTime(text) - turnDur);
   }
 
+  /// How long a chapter page lies open (#458): [dwell], never shorter than
+  /// its title takes to read — seen from the turn that uncovers it to its
+  /// own turn.
+  static double chapterDwellFor(String title, double dwell) =>
+      math.max(dwell, FilmTextRules.readingTime(title.trim()) - turnDur);
+
   static const invitationDur = 5.4;
   static const packingCardDur = 6.5;
 
@@ -118,6 +133,7 @@ class GoldenVowsTimeline {
     int chapters,
     bool hasCarousel,
     List<double> heroDwells,
+    List<double> chapterDwells,
     double dwellScale,
   ) {
     var number = 0;
@@ -133,7 +149,13 @@ class GoldenVowsTimeline {
           page(GvPageKind.hero, i),
         ),
       for (var i = 0; i < chapters; i++)
-        (chapterDwell * dwellScale + turnDur, page(GvPageKind.chapter, i)),
+        (
+          (i < chapterDwells.length
+                  ? chapterDwells[i]
+                  : chapterDwell * dwellScale) +
+              turnDur,
+          page(GvPageKind.chapter, i),
+        ),
       if (hasCarousel)
         (carouselDwell * dwellScale + turnDur, page(GvPageKind.carousel, 0)),
       (heartToClose, page(GvPageKind.heart, 0)),

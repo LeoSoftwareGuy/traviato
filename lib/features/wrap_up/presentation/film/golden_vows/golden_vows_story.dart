@@ -58,11 +58,16 @@ class GoldenVowsStory extends Equatable {
     this.dayCount = 1,
     this.moments,
     this.targetSeconds,
+    this.chapterDwellScale = 1,
   });
 
   /// How long the film should play (#434, from its photos); the timeline
   /// fits its scenes to it. Null = the reference pacing.
   final double? targetSeconds;
+
+  /// How long chapter pages lie open, × their dwell (#458: GvFit's last
+  /// step, never below a title's reading time); 1 = the timeline's.
+  final double chapterDwellScale;
 
   /// The occasion in the UI language ("Our Wedding Day"); none → the
   /// line is left out.
@@ -135,6 +140,33 @@ class GoldenVowsStory extends Equatable {
 
   List<String> get packedShown => packed.take(maxPacked).toList();
 
+  /// This story with the pages GvFit keeps (#458).
+  GoldenVowsStory fitted({
+    List<GvHero>? heroes,
+    bool dropCarousel = false,
+    bool dropPacking = false,
+    double? chapterDwellScale,
+  }) => GoldenVowsStory(
+    names: names,
+    date: date,
+    occasionLine: occasionLine,
+    place: place,
+    packed: dropPacking ? const [] : packed,
+    packedCodes: dropPacking ? const [] : packedCodes,
+    packedChecked: dropPacking ? null : packedChecked,
+    packedTotal: dropPacking ? null : packedTotal,
+    isPackedFromQuests: !dropPacking && isPackedFromQuests,
+    heroes: heroes ?? this.heroes,
+    chapters: chapters,
+    carousel: dropCarousel ? null : carousel,
+    heartPhotoIds: heartPhotoIds,
+    endLine: endLine,
+    dayCount: dayCount,
+    moments: moments,
+    targetSeconds: targetSeconds,
+    chapterDwellScale: chapterDwellScale ?? this.chapterDwellScale,
+  );
+
   bool get hasPackingCard => packed.isNotEmpty;
 
   @override
@@ -156,6 +188,7 @@ class GoldenVowsStory extends Equatable {
     dayCount,
     moments,
     targetSeconds,
+    chapterDwellScale,
   ];
 }
 

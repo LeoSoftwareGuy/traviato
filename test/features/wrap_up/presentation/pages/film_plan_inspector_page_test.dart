@@ -14,6 +14,7 @@ import 'package:traviato/features/wrap_up/domain/entities/film_photo_analysis.da
 import 'package:traviato/features/wrap_up/domain/entities/film_plan_chapter.dart';
 import 'package:traviato/features/wrap_up/domain/entities/film_plan_inspection.dart';
 import 'package:traviato/features/wrap_up/domain/entities/film_plan_scene.dart';
+import 'package:traviato/features/wrap_up/domain/entities/wrap_up_golden_vows.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_neon_night.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_sky.dart';
 import 'package:traviato/features/trip/presentation/providers/trip_providers.dart';
@@ -74,6 +75,7 @@ Future<void> _pump(
   FakeFilmDirectorRepository repo, {
   WrapUpSky? sky,
   WrapUpNeonNight? neonNight,
+  WrapUpGoldenVows? goldenVows,
 }) {
   return tester.pumpWidget(
     ProviderScope(
@@ -83,7 +85,11 @@ Future<void> _pump(
         wrapUpRepositoryProvider.overrideWithValue(
           FakeWrapUpRepository()
             ..getOrGenerateResult = Right(
-              buildWrapUpEntity(sky: sky, neonNight: neonNight),
+              buildWrapUpEntity(
+                sky: sky,
+                neonNight: neonNight,
+                goldenVows: goldenVows,
+              ),
             ),
         ),
         tripRepositoryProvider.overrideWithValue(FakeTripRepository()),
@@ -345,6 +351,83 @@ void main() {
       expect(copied, contains('Ch 1 card · Doors open'));
       expect(find.text('Storyboard copied'), findsOneWidget);
     });
+
+    testWidgets(
+      'Golden Vows: its slots, why a wedding, photos shown, trims (#458)',
+      (
+        tester,
+      ) async {
+        final repo = FakeFilmDirectorRepository()
+          ..inspectionResult = const Right(
+            FilmPlanInspection(
+              report: FilmDirectorReport(
+                isPlanned: false,
+                gvSlots: [
+                  FilmNeonSlot(
+                    slot: 'ch1.title',
+                    candidates: [
+                      FilmNeonCandidate(id: 'c:p2', text: 'Сена', score: 23),
+                    ],
+                    chosenIds: ['free'],
+                    chosen: ['Утро у Сены'],
+                    freeText: 'Утро у Сены',
+                    source: 'director',
+                    reason: "director's pick",
+                  ),
+                ],
+                gvTrims: ['main3.note: no note'],
+                gvShownPages: 2,
+                gvShownPhotos: 3,
+                gvUnlisted: ['Было хорошо. — generic'],
+                gvTrigger: '«свадьба» in note n1',
+              ),
+            ),
+          );
+        await _pump(
+          tester,
+          repo,
+          goldenVows: WrapUpGoldenVows(
+            occasion: 'wedding',
+            names: 'Анна и Марко',
+            startDate: DateTime(2026, 6, 14),
+            heroes: const [
+              WrapUpGoldenVowsHero(photoId: 'p1', label: 'Клятвы'),
+            ],
+            chapters: const [
+              WrapUpGoldenVowsChapter(
+                title: 'Утро у Сены',
+                photoIds: ['p2', 'p3'],
+              ),
+            ],
+            heartPhotoIds: const ['p1', 'p2', 'p3'],
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await scrollTo(tester, find.byKey(const Key('film-plan-gv-trims')));
+        expect(
+          find.textContaining('«свадьба» in note n1', findRichText: true),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('2 / 3 photos on pages', findRichText: true),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('main3.note: no note', findRichText: true),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('Было хорошо. — generic', findRichText: true),
+          findsOneWidget,
+        );
+        await scrollTo(
+          tester,
+          find.byKey(const Key('film-plan-gv-slot-ch1.title')),
+        );
+        expect(find.text('free: Утро у Сены'), findsOneWidget);
+      },
+    );
 
     testWidgets('shows every slot: candidates, the pick, what plays (#454)', (
       tester,

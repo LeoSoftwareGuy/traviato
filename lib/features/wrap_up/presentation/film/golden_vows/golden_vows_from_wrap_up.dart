@@ -1,4 +1,5 @@
 import '../../../domain/entities/wrap_up_golden_vows.dart';
+import 'golden_vows_fit.dart';
 import 'golden_vows_story.dart';
 
 /// The fewest photos the carousel page plays with (as the server picks).
@@ -36,36 +37,39 @@ GoldenVowsStory? goldenVowsFromWrapUp(
   ];
   if (heroes.isEmpty && chapters.isEmpty) return null;
   final packing = gv.packing;
-  return GoldenVowsStory(
-    occasionLine: gv.occasionLine,
-    names: gv.names,
-    date: date,
-    place: gv.place,
-    packed: [for (final item in packing?.items ?? const []) item.text],
-    packedCodes: [
-      for (final item in packing?.items ?? const []) item.suggestionCode,
-    ],
-    packedChecked: packing?.checked,
-    packedTotal: packing?.total,
-    isPackedFromQuests: packing?.isFromQuests ?? false,
-    heroes: heroes,
-    chapters: chapters,
-    carousel: switch (gv.carousel) {
-      final carousel? => _chapter(
-        carousel,
-        photoIds,
-        minPhotos: minGoldenVowsCarouselPhotos,
-      ),
-      null => null,
-    },
-    heartPhotoIds: [
-      for (final id in gv.heartPhotoIds)
-        if (photoIds.contains(id)) id,
-    ],
-    moments: gv.momentCount > 0 ? gv.momentCount : null,
-    endLine: gv.endLine,
-    dayCount: _dayCount(startDate, endDate) ?? gv.dayCount,
-    targetSeconds: gv.filmSeconds,
+  // Never past the longest film as the player plays it (#458).
+  return GvFit.toLongest(
+    GoldenVowsStory(
+      occasionLine: gv.occasionLine,
+      names: gv.names,
+      date: date,
+      place: gv.place,
+      packed: [for (final item in packing?.items ?? const []) item.text],
+      packedCodes: [
+        for (final item in packing?.items ?? const []) item.suggestionCode,
+      ],
+      packedChecked: packing?.checked,
+      packedTotal: packing?.total,
+      isPackedFromQuests: packing?.isFromQuests ?? false,
+      heroes: heroes,
+      chapters: chapters,
+      carousel: switch (gv.carousel) {
+        final carousel? => _chapter(
+          carousel,
+          photoIds,
+          minPhotos: minGoldenVowsCarouselPhotos,
+        ),
+        null => null,
+      },
+      heartPhotoIds: [
+        for (final id in gv.heartPhotoIds)
+          if (photoIds.contains(id)) id,
+      ],
+      moments: gv.momentCount > 0 ? gv.momentCount : null,
+      endLine: gv.endLine,
+      dayCount: _dayCount(startDate, endDate) ?? gv.dayCount,
+      targetSeconds: gv.filmSeconds,
+    ),
   );
 }
 

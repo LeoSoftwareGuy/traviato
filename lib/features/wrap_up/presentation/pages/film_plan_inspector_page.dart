@@ -191,7 +191,18 @@ class _InspectionBody extends ConsumerWidget {
         _SummaryCard(report: report),
         _GoldenVowsCard(tripId: tripId, report: report),
         _NeonNightCard(tripId: tripId, report: report),
-        if (report.neonSlots.isNotEmpty) _NeonSlotsCard(report.neonSlots),
+        if (report.gvSlots.isNotEmpty)
+          _SlotsCard(
+            title: 'Golden Vows slots',
+            keyPrefix: 'film-plan-gv-slot',
+            slots: report.gvSlots,
+          ),
+        if (report.neonSlots.isNotEmpty)
+          _SlotsCard(
+            title: 'Neon Night slots',
+            keyPrefix: 'film-plan-neon-slot',
+            slots: report.neonSlots,
+          ),
         _SkyStoryCard(tripId: tripId, report: report),
         if (report.problems.isNotEmpty)
           _ProblemsCard(problems: report.problems),
@@ -237,7 +248,7 @@ class _Card extends StatelessWidget {
 }
 
 class _Line extends StatelessWidget {
-  const _Line(this.label, this.value);
+  const _Line(this.label, this.value, {super.key});
 
   final String label;
   final String value;
@@ -558,6 +569,28 @@ class _GoldenVowsCard extends ConsumerWidget {
                 chapter.line ?? '—',
               ),
             _Line('End line', story.endLine ?? '—'),
+            // #458: what code decided, and why.
+            _Line(
+              'Occasion from',
+              report?.gvTrigger ?? '— (nothing said wedding: romance)',
+              key: const Key('film-plan-gv-trigger'),
+            ),
+            if (report?.gvShownPhotos case final total?)
+              _Line(
+                'Shown',
+                '${report!.gvShownPages} / $total photos on pages '
+                    '(the heart holds them all)',
+                key: const Key('film-plan-gv-shown'),
+              ),
+            _Line(
+              'For length',
+              report == null || report!.gvTrims.isEmpty
+                  ? '— (nothing trimmed)'
+                  : report!.gvTrims.join(' · '),
+              key: const Key('film-plan-gv-trims'),
+            ),
+            for (final note in report?.gvUnlisted ?? const <String>[])
+              _Line('Note on no page', note),
           ];
         },
       ),
@@ -689,34 +722,42 @@ class _NeonChapterLines extends StatelessWidget {
   }
 }
 
-/// Every Neon Night slot (#454): what plays and where it came from, why,
+/// Every slot of a film whose words the director picks — Neon Night
+/// (#454), Golden Vows (#458): what plays and where it came from, why,
 /// the director's own words if it wrote any, then code's candidates —
 /// ✓ what plays, → what the director picked.
-class _NeonSlotsCard extends StatelessWidget {
-  const _NeonSlotsCard(this.slots);
+class _SlotsCard extends StatelessWidget {
+  const _SlotsCard({
+    required this.title,
+    required this.keyPrefix,
+    required this.slots,
+  });
 
+  final String title;
+  final String keyPrefix;
   final List<FilmNeonSlot> slots;
 
   @override
   Widget build(BuildContext context) {
     final fromDirector = slots.where((s) => s.source == 'director').length;
     return _Card(
-      title: 'Neon Night slots',
+      title: title,
       children: [
         _Line(
           'Picks',
           '$fromDirector of ${slots.length} slot(s) by the director',
         ),
-        for (final slot in slots) _NeonSlotRow(slot),
+        for (final slot in slots) _SlotRow(slot, keyPrefix: keyPrefix),
       ],
     );
   }
 }
 
-class _NeonSlotRow extends StatelessWidget {
-  const _NeonSlotRow(this.slot);
+class _SlotRow extends StatelessWidget {
+  const _SlotRow(this.slot, {required this.keyPrefix});
 
   final FilmNeonSlot slot;
+  final String keyPrefix;
 
   @override
   Widget build(BuildContext context) {
@@ -726,7 +767,7 @@ class _NeonSlotRow extends StatelessWidget {
       color: AppColors.textSecondary,
     );
     return Padding(
-      key: Key('film-plan-neon-slot-${slot.slot}'),
+      key: Key('$keyPrefix-${slot.slot}'),
       padding: const EdgeInsets.only(top: AppSpacing.sm),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
