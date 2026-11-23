@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_golden_vows.dart';
 import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_album.dart';
 import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_from_wrap_up.dart';
+import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_scene_spec.dart';
 import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_story.dart';
 import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_texts.dart';
 import 'package:traviato/l10n/app_localizations.dart';
@@ -168,4 +169,65 @@ void main() {
       planned.dispose();
     });
   });
+
+  test(
+    'a chapter of 2 pages is two album pages, in the stored order (#460)',
+    () {
+      const gv = WrapUpGoldenVows(
+        names: 'Elmas birthday',
+        heroes: [
+          WrapUpGoldenVowsHero(photoId: 'h1', label: 'Arabica', order: 1),
+          WrapUpGoldenVowsHero(photoId: 'h2', order: 3),
+        ],
+        chapters: [
+          WrapUpGoldenVowsChapter(
+            title: 'From Tallinn',
+            line: 'Chapter one · Night',
+            photoIds: ['a1', 'a2', 'a3', 'a4', 'a5'],
+            layout: 'B',
+            pages: [
+              WrapUpGoldenVowsChapterPage(
+                photoIds: ['a1', 'a2', 'a3'],
+                order: 0,
+                layout: 'B',
+              ),
+              WrapUpGoldenVowsChapterPage(
+                photoIds: ['a4', 'a5'],
+                order: 2,
+                layout: 'B2',
+              ),
+            ],
+          ),
+        ],
+      );
+      final story = goldenVowsFromWrapUp(
+        gv,
+        photoIds: const {'h1', 'h2', 'a1', 'a2', 'a3', 'a4', 'a5'},
+        startDate: DateTime(2026, 2, 26),
+      )!;
+      expect(story.chapters.map((c) => c.photoIds), [
+        ['a1', 'a2', 'a3'],
+        ['a4', 'a5'],
+      ]);
+      expect(story.chapters.map((c) => c.title), [
+        'From Tallinn',
+        'From Tallinn',
+      ]);
+      expect(story.chapters.last.layout, GvChapterLayout.b2);
+      expect(story.chapters.map((c) => c.isSecondPage), [false, true]);
+      // A caption with no time plays alone.
+      expect(story.heroes.first.caption, 'Arabica');
+      expect(story.pageOrder, [
+        (kind: GvPageKind.chapter, index: 0),
+        (kind: GvPageKind.hero, index: 0),
+        (kind: GvPageKind.chapter, index: 1),
+        (kind: GvPageKind.hero, index: 1),
+      ]);
+      // Older content (no orders): main pages first, then chapters.
+      final older = story.fitted(
+        heroes: [for (final h in story.heroes) GvHero(photoId: h.photoId)],
+      );
+      expect(older.pageOrder.first, (kind: GvPageKind.hero, index: 0));
+    },
+  );
 }

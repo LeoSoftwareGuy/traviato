@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_album.dart';
 import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_fit.dart';
 import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_story.dart';
 import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_timeline.dart';
@@ -83,5 +84,41 @@ void main() {
       GoldenVowsTimeline.chapterDwellFor(long, 0),
       greaterThan(GoldenVowsTimeline.chapterDwellFor('Сборы', 0)),
     );
+  });
+
+  test("chapters' second pages go first, the latest first (#460)", () {
+    final paged = wedding.fitted(
+      chapters: [
+        for (final (i, c) in wedding.chapters.indexed) ...[
+          c,
+          GvChapter(
+            title: c.title,
+            line: c.line,
+            photoIds: ['more-${i + 1}-1', 'more-${i + 1}-2'],
+            layout: GvChapterLayout.b2,
+            isSecondPage: true,
+          ),
+        ],
+      ],
+    );
+    final one = GvFit.toLongest(
+      paged,
+      maxSeconds: GvFit.lengthOf(paged) - 0.01,
+    );
+    // The last chapter's second page went; the carousel and packing stay.
+    expect(one.chapters, hasLength(paged.chapters.length - 1));
+    expect(one.chapters.last, wedding.chapters.last);
+    expect(one.carousel, isNotNull);
+    expect(one.hasPackingCard, isTrue);
+    final none = GvFit.toLongest(
+      paged,
+      maxSeconds: GvFit.lengthOf(wedding) + 0.01,
+    );
+    expect(none.chapters, wedding.chapters);
+    expect(none.carousel, isNotNull);
+  });
+
+  test('a page of 2 prints has its own layout (#460)', () {
+    expect(GvChapterLayouts.forChapter(0, GvChapterLayout.b2), hasLength(2));
   });
 }

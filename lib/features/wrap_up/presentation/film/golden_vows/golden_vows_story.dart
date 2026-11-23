@@ -1,26 +1,35 @@
 import 'package:equatable/equatable.dart';
 
+import 'golden_vows_scene_spec.dart' show GvPageKind;
+
 /// One photo-with-note page (spec §5.3): the photo, the note on its taped
 /// card and the caption under it ("THE VOWS · 15:10"), each optional.
 class GvHero extends Equatable {
-  const GvHero({required this.photoId, this.note, this.caption});
+  const GvHero({required this.photoId, this.note, this.caption, this.order});
 
   final String photoId;
   final String? note;
   final String? caption;
 
+  /// Its place in the album's play order (#460); null = after the one
+  /// before it, before the chapters.
+  final int? order;
+
   @override
-  List<Object?> get props => [photoId, note, caption];
+  List<Object?> get props => [photoId, note, caption, order];
 }
 
 /// A titled album page of up to 3 prints ("Getting ready" · "CHAPTER ONE
-/// · MORNING"); the carousel page is one too, with up to 12.
+/// · MORNING"); the carousel page is one too, with up to 12. A chapter of
+/// 4–6 prints is two of these (#460), the second [isSecondPage].
 class GvChapter extends Equatable {
   const GvChapter({
     required this.title,
     required this.photoIds,
     this.line,
     this.layout,
+    this.order,
+    this.isSecondPage = false,
   });
 
   final String title;
@@ -30,13 +39,31 @@ class GvChapter extends Equatable {
   /// Where its prints go (spec §5.3); null cycles A, B, C by chapter.
   final GvChapterLayout? layout;
 
+  /// Its place in the album's play order (#460); null = after the main
+  /// pages, in turn.
+  final int? order;
+
+  /// A chapter's second page of prints (#460): GvFit's first to go.
+  final bool isSecondPage;
+
   @override
-  List<Object?> get props => [title, line, photoIds, layout];
+  List<Object?> get props => [
+    title,
+    line,
+    photoIds,
+    layout,
+    order,
+    isSecondPage,
+  ];
 }
 
 /// The chapter pages' print arrangements (`GvChapterLayouts`): A — a wide
-/// print over two; B — a tall print beside two; C — two over a wide one.
-enum GvChapterLayout { a, b, c }
+/// print over two; B — a tall print beside two; C — two over a wide one;
+/// B2 (#460) — a tall print beside one, for a page of 2.
+enum GvChapterLayout { a, b, c, b2 }
+
+/// One page of the album in play order: which hero or chapter page.
+typedef GvPageRef = ({GvPageKind kind, int index});
 
 /// What the Golden Vows film shows of one memory (#346, spec §6).
 class GoldenVowsStory extends Equatable {
@@ -101,8 +128,24 @@ class GoldenVowsStory extends Equatable {
   /// One photo-with-note page each.
   final List<GvHero> heroes;
 
-  /// One page of 3 prints each, layouts cycling A, B, C.
+  /// One page of up to 3 prints each, layouts cycling A, B, C.
   final List<GvChapter> chapters;
+
+  /// The main and chapter pages in the order they play (#460): by their
+  /// [GvHero.order] / [GvChapter.order] when every page has one, else
+  /// every main page, then every chapter page.
+  List<GvPageRef> get pageOrder {
+    final refs = <GvPageRef>[
+      for (var i = 0; i < heroes.length; i++) (kind: GvPageKind.hero, index: i),
+      for (var i = 0; i < chapters.length; i++)
+        (kind: GvPageKind.chapter, index: i),
+    ];
+    int? orderOf(GvPageRef r) => r.kind == GvPageKind.hero
+        ? heroes[r.index].order
+        : chapters[r.index].order;
+    if (refs.any((r) => orderOf(r) == null)) return refs;
+    return refs..sort((a, b) => orderOf(a)!.compareTo(orderOf(b)!));
+  }
 
   /// Two rows of prints sliding past; null or no photos → no page.
   final GvChapter? carousel;
@@ -143,6 +186,7 @@ class GoldenVowsStory extends Equatable {
   /// This story with the pages GvFit keeps (#458).
   GoldenVowsStory fitted({
     List<GvHero>? heroes,
+    List<GvChapter>? chapters,
     bool dropCarousel = false,
     bool dropPacking = false,
     double? chapterDwellScale,
@@ -157,7 +201,7 @@ class GoldenVowsStory extends Equatable {
     packedTotal: dropPacking ? null : packedTotal,
     isPackedFromQuests: !dropPacking && isPackedFromQuests,
     heroes: heroes ?? this.heroes,
-    chapters: chapters,
+    chapters: chapters ?? this.chapters,
     carousel: dropCarousel ? null : carousel,
     heartPhotoIds: heartPhotoIds,
     endLine: endLine,

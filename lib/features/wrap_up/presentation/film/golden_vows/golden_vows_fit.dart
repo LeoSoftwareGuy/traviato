@@ -5,7 +5,8 @@ import 'golden_vows_timeline.dart';
 /// Golden Vows held to the longest film on the player's own timeline
 /// (#458; Neon Night's NnFit, #450). The edge function already trims the
 /// notes (a shorter clause, then none) and pages for its estimate; on the
-/// phone the album gives way in the same order: the carousel, the packing
+/// phone the album gives way in the same order: chapters' second pages of
+/// prints (#460, the latest first), the carousel, the packing
 /// card, main pages down to 2 (those without a note first, the latest
 /// first), then shorter chapter pages — never below their title's reading
 /// time. Never a chapter, the title page, the heart or a caption.
@@ -29,6 +30,10 @@ abstract final class GvFit {
     bool fits(GoldenVowsStory s) => lengthOf(s) <= maxSeconds;
     if (fits(story)) return story;
     var s = story;
+    for (final page in s.chapters.reversed.where((c) => c.isSecondPage)) {
+      s = s.fitted(chapters: [...s.chapters]..remove(page));
+      if (fits(s)) return s;
+    }
     if (s.carousel != null) {
       s = s.fitted(dropCarousel: true);
       if (fits(s)) return s;

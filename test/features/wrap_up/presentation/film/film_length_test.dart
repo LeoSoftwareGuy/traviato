@@ -79,23 +79,10 @@ void main() {
       );
       final length = lengthOf(fixture);
       printOnFailure('${fixture['film']} $photos: $length s');
-      if (fixture['film'] == 'golden_vows') {
-        // Golden Vows (#458) aims at its target, never past 75 s: a short
-        // album past it even at its quickest gives up its carousel, then
-        // its packing card — never a chapter, a note or the heart, so it
-        // may still run longer.
-        final gv = parseWrapUpGoldenVows(
-          (fixture['content'] as Map).cast<String, dynamic>(),
-        )!;
-        expect(length, greaterThan(target - tolerance));
-        expect(length, lessThanOrEqualTo(WrapUpLimits.longestFilmSeconds));
-        if (length > target + tolerance) {
-          expect(gv.carousel, isNull, reason: 'the carousel goes first');
-          expect(gv.packing, isNull, reason: 'then the packing card');
-        }
-      } else if (fixture['film'] == 'neon_night') {
-        // Neon Night may use the room up to the longest film (#448), and
-        // never plays shorter than its target.
+      if (fixture['film'] == 'golden_vows' || fixture['film'] == 'neon_night') {
+        // Neon Night (#448) and Golden Vows (#460) may use the room up to
+        // the longest film, and never play shorter than their target:
+        // Golden Vows trims only past 75 s.
         expect(length, greaterThan(target - tolerance));
         expect(length, lessThanOrEqualTo(WrapUpLimits.longestFilmSeconds));
       } else {
