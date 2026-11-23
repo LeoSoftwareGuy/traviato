@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/utils/place_time.dart';
+
 /// One timed note of a memory's day (#397). A day holds many, each saved by
 /// its own Done, shown at [takenAt] in time order.
 class JournalNoteEntity extends Equatable {
@@ -13,6 +15,7 @@ class JournalNoteEntity extends Equatable {
     this.dictated = false,
     this.photoId,
     this.legacy = false,
+    this.utcOffsetMinutes,
   });
 
   final String id;
@@ -37,6 +40,38 @@ class JournalNoteEntity extends Equatable {
   /// last edit.
   final bool legacy;
 
+  /// The device's UTC offset where it was written (#461), or resolved
+  /// from the memory's zone ([onClockOf]); null = the phone's.
+  final int? utcOffsetMinutes;
+
+  /// [takenAt] on the clock of where it was written: for showing and for
+  /// its day, never for ordering.
+  DateTime get localTakenAt => placeTime(takenAt, utcOffsetMinutes);
+
+  /// [editedAt] on the same clock.
+  DateTime get localEditedAt => placeTime(editedAt, utcOffsetMinutes);
+
+  /// This note with an offset from [zone] (the memory's) when it has none
+  /// of its own.
+  JournalNoteEntity onClockOf(String? zone) {
+    if (utcOffsetMinutes != null) return this;
+    final offset = zoneOffsetAt(zone, takenAt);
+    return offset == null
+        ? this
+        : JournalNoteEntity(
+            id: id,
+            tripId: tripId,
+            dayDate: dayDate,
+            takenAt: takenAt,
+            editedAt: editedAt,
+            content: content,
+            dictated: dictated,
+            photoId: photoId,
+            legacy: legacy,
+            utcOffsetMinutes: offset,
+          );
+  }
+
   @override
   List<Object?> get props => [
     id,
@@ -48,5 +83,6 @@ class JournalNoteEntity extends Equatable {
     dictated,
     photoId,
     legacy,
+    utcOffsetMinutes,
   ];
 }

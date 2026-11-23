@@ -44,10 +44,16 @@ Future<KeptMemory> keptMemory(Ref ref, String tripId) async {
     return const [];
   }, (value) => value);
 
+  final trip = orThrow(await tripFuture);
+  // Times on the clock of where each one happened (#461).
   return buildKeptMemory(
-    trip: orThrow(await tripFuture),
-    photos: orThrow(await photosFuture),
-    notes: orThrow(await notesFuture),
+    trip: trip,
+    photos: [
+      for (final p in orThrow(await photosFuture)) p.onClockOf(trip.timeZone),
+    ],
+    notes: [
+      for (final n in orThrow(await notesFuture)) n.onClockOf(trip.timeZone),
+    ],
     quests: orThrow(await questsFuture),
     bonusAssignments: orEmpty(await assignmentsFuture),
     bonusTemplates: orEmpty(await templatesFuture),

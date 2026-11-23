@@ -386,7 +386,7 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
       day: note.dayDate,
       stamp:
           '${noteDayStamp(context, _state, note.dayDate)} · '
-          '${l10n.note_stampEdit(L10nDates.clock(l10n.localeName, use24h: use24h).format(note.takenAt.toLocal()))}',
+          '${l10n.note_stampEdit(L10nDates.clock(l10n.localeName, use24h: use24h).format(note.localTakenAt))}',
       existingText: note.content,
       dictated: dictated,
       onPhoto: photo == null ? null : notePhotoAttachment(context, photo),
@@ -418,7 +418,7 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
     final time = L10nDates.clock(
       context.l10n.localeName,
       use24h: MediaQuery.alwaysUse24HourFormatOf(context),
-    ).format(note.takenAt.toLocal());
+    ).format(note.localTakenAt);
     if (await DeleteNoteSheet.confirm(context, time: time) && mounted) {
       _delete(note);
     }

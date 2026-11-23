@@ -28,6 +28,7 @@ class TripCardEntity extends Equatable {
     required this.stars,
     required this.expenseTotal,
     this.wrapUpPublishedAt,
+    this.timeZone,
   });
 
   /// Synthesizes a card for a trip that was just created — no photos, stars
@@ -97,6 +98,7 @@ class TripCardEntity extends Equatable {
       stars: stars,
       expenseTotal: expenseTotal,
       wrapUpPublishedAt: wrapUpPublishedAt,
+      timeZone: timeZone,
     );
   }
 
@@ -123,6 +125,7 @@ class TripCardEntity extends Equatable {
         stars: stars,
         expenseTotal: expenseTotal,
         wrapUpPublishedAt: publishedAt,
+        timeZone: timeZone,
       );
 
   static (TripStatus, int?) _deriveStatusAndDuration(
@@ -161,6 +164,10 @@ class TripCardEntity extends Equatable {
   final int stars;
   final double expenseTotal;
   final DateTime? wrapUpPublishedAt;
+
+  /// The memory's IANA zone (#461), once the film resolved it: times of
+  /// photos and notes without their own offset read on its clock.
+  final String? timeZone;
 
   /// The trip's wrap-up has been "Kept forever" (M4-3).
   bool get isKeptForever => wrapUpPublishedAt != null;
@@ -211,5 +218,6 @@ class TripCardEntity extends Equatable {
     stars,
     expenseTotal,
     wrapUpPublishedAt,
+    timeZone,
   ];
 }

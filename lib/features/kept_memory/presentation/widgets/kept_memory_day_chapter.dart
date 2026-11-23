@@ -86,7 +86,7 @@ class KeptMemoryDayChapter extends StatelessWidget {
                   note.legacy
                       ? context.l10n.timeline_earlierNote.toUpperCase()
                       : KeptMemoryLabels.noteTime(
-                          note.takenAt,
+                          note.localTakenAt,
                           context.l10n.localeName,
                           use24h: MediaQuery.alwaysUse24HourFormatOf(context),
                         ),

@@ -24,6 +24,7 @@ class TripCardModel extends TripCardEntity {
     required super.stars,
     required super.expenseTotal,
     super.wrapUpPublishedAt,
+    super.timeZone,
   });
 
   factory TripCardModel.fromJson(Map<String, dynamic> json) => TripCardModel(
@@ -45,6 +46,7 @@ class TripCardModel extends TripCardEntity {
     stars: (json['stars'] as num).toInt(),
     expenseTotal: (json['expense_total'] as num).toDouble(),
     wrapUpPublishedAt: _parseDate(json['wrap_up_published_at']),
+    timeZone: json['time_zone'] as String?,
   );
 
   static DateTime? _parseDate(Object? value) =>

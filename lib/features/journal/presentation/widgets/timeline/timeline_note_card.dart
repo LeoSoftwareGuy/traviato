@@ -101,7 +101,7 @@ class _TimelineNoteCardState extends State<TimelineNoteCard> {
       if (widget.isLater && !note.legacy)
         _Chip.plain(
           l10n.timeline_writtenOn(
-            L10nDates.weekdayDayMonth(locale).format(note.takenAt.toLocal()),
+            L10nDates.weekdayDayMonth(locale).format(note.localTakenAt),
           ),
         ),
     ];
@@ -169,10 +169,7 @@ class _TimelineNoteCardState extends State<TimelineNoteCard> {
                 const SizedBox(height: 10),
                 _OnPhotoChip(
                   photo: widget.photo!,
-                  time: clock.format(
-                    (widget.photo!.takenAt ?? widget.photo!.createdAt)
-                        .toLocal(),
-                  ),
+                  time: clock.format(widget.photo!.localTime),
                   onTap: () => _tap(widget.onPhotoTap),
                 ),
               ],
@@ -182,9 +179,9 @@ class _TimelineNoteCardState extends State<TimelineNoteCard> {
                   l10n
                       .timeline_lastEdited(
                         (widget.isLater
-                                ? '${L10nDates.dayMonth(locale).format(note.editedAt.toLocal())} '
+                                ? '${L10nDates.dayMonth(locale).format(note.localEditedAt)} '
                                 : '') +
-                            clock.format(note.editedAt.toLocal()),
+                            clock.format(note.localEditedAt),
                         l10n.journal_wordCount(countNoteWords(note.content)),
                       )
                       .toUpperCase(),
