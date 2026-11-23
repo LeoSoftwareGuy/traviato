@@ -374,19 +374,28 @@ Post-MVP: `video_path`, `video_status`.
 
 - **Golden Vows in time order** (#460, no schema change):
   `content.golden_vows.heroes[].order` and `chapters[].pages: [{photo_ids,
-  layout, order}]` (1–2 pages, up to 6 prints in all; `photo_ids` keeps
-  every print, `layout` the first page's) give every page's place in the
-  play order, 0…N-1 after trims; older content has neither and plays main
-  pages first. Layout `B2` is a page of 2 prints. `gv_skeleton.ts` keeps
-  a day of 2+ photos its own chapter, ranks main pages by the notes
-  anchored to a photo (`noteAnchors`: its own photo counts 2, a photo
-  within 90 min 1) and builds `sequence`; `gv_slots.ts` places each note
-  on one page (`gvNoteHomes`), labels from captions or that page's note
-  phrases, and checks the director's free text against the user's words
-  (`gvWordGuard`: names as written, no first name or description-only
-  word). The "(for the target)" trims are gone; past 75 s second pages go
-  first ("…: one page of prints"). `DIRECTOR_VERSION` 7. Real-data
-  tests: `fixtures/budapest_birthday.json` (`budapest_birthday.ts`,
+  layout, order, note}]` (1–2 pages, up to 6 prints in all; `photo_ids`
+  keeps every print, `layout` the first page's; `note` the user's line in
+  place of the eyebrow, or null) give every page's place in the play
+  order, 0…N-1 after trims; older content has neither and plays main
+  pages first. Layout `B2` is a page of 2 prints. `gv_skeleton.ts`: one
+  main page per `GV_PHOTOS_PER_MAIN` (7) photos within 2–6, ranked by the
+  notes anchored to a photo (`noteAnchors`: its own photo counts 2, a
+  photo within 90 min 1); a 2-photo day is its page alone; prints spread
+  over the chapter even when it has more Always picks than room; builds
+  `sequence`. `gv_slots.ts`: `gvNoteHomes` places each note on one page,
+  `{main}` or `{chapter, page}`; slots `chN.pK.note` (kind `note`) list a
+  page of prints' own lines, a second page or a chapter's only page also
+  the chapter's other lines (`MAX_GV_PAGE_LINE_CHARS` 72); labels from
+  captions or that page's note phrases; `gvWordGuard` checks the
+  director's free text (names as written, no first name or
+  description-only word). `gv_film.ts`: `gvLimitSeconds` = min(75 s, 4 s ×
+  film photos); for it only second pages without a line, the carousel,
+  the packing card and main pages without a note go; notes are trimmed
+  and pages with words dropped only past 75 s (as `GvFit` in the app,
+  `GvFit.limitFor`). A page's estimate covers its title and line reading
+  time. `DIRECTOR_VERSION` 7. Real-data tests:
+  `fixtures/budapest_birthday.json` (`budapest_birthday.ts`,
   `gv_budapest.test.ts`).
 
 - **Limits** (#432, no schema change): `generate_wrap_up/wrap_up_limits.json`
