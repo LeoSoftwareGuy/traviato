@@ -6,11 +6,10 @@
 //   neighbouring days together past MAX_GV_CHAPTERS, a long day in parts
 //   at its 2 h breaks while each part keeps GV_MIN_PART_PHOTOS. A chapter
 //   is never dropped (#458: that's how Neon lost Brussels), and a short
-//   day stays its own (#460): 3 photos are a main page and a page of 2
-//   prints; 2 photos a page of both and a main page of one of them (the
-//   only photo an album shows twice). Only a day of 1 joins its
+//   day stays its own (#460): 2 photos are a page of 2 prints, the day's
+//   best note its line; no photo shows twice. Only a day of 1 joins its
 //   neighbour.
-// - Main pages: 2–6, at least one a chapter, each chapter's best photo
+// - Main pages: about one per 7 photos, 2–6, each chapter's best photo
 //   first — Always picks, then captioned photos, then the photos the
 //   user's notes were written on or among (#460: a note plays on its own
 //   photo), then the hero score.
@@ -58,7 +57,8 @@ export const GV_MIN_DAY_PHOTOS = 2;
 // A break this long inside a day can start a chapter.
 export const GV_PART_BREAK_MINUTES = 120;
 // About one main page per this many photos, within 2–6.
-const GV_PHOTOS_PER_MAIN = 6;
+// 15 photos → 2, 25 → 4, 40 → 6 (#460: a small album plays quick).
+export const GV_PHOTOS_PER_MAIN = 7;
 
 export interface GvSkeletonChapter {
   // Its photos, in time order.
@@ -280,23 +280,30 @@ function pageSizes(n: number): number[] {
 function printsOf(
   photos: readonly Photo[],
   count: number,
-  heroScores: Readonly<Record<string, number>>,
+  score: (p: Photo) => number,
 ): Photo[] {
-  const always = photos.filter((p) => p.use_in_wrap_up === true)
-    .slice(0, count);
-  const rest = photos.filter((p) => !always.includes(p));
-  const room = count - always.length;
-  const picked = [...always];
-  for (let k = 0; k < room && rest.length > 0; k++) {
-    const from = Math.floor(k * rest.length / room);
-    const to = Math.max(from + 1, Math.floor((k + 1) * rest.length / room));
-    const stretch = rest.slice(from, to).filter((p) => !picked.includes(p));
-    const best = [...stretch].sort((a, b) =>
-      (heroScores[b.id] ?? 0) - (heroScores[a.id] ?? 0)
-    )[0];
-    if (best) {
-      picked.push(best);
+  // The best of each stretch of [list], [room] of them.
+  const spread = (list: readonly Photo[], room: number, picked: Photo[]) => {
+    for (let k = 0; k < room && list.length > 0; k++) {
+      const from = Math.floor(k * list.length / room);
+      const to = Math.max(from + 1, Math.floor((k + 1) * list.length / room));
+      const best = list.slice(from, to).filter((p) => !picked.includes(p))
+        .sort((x, y) => score(y) - score(x))[0];
+      if (best) picked.push(best);
     }
+  };
+  const always = photos.filter((p) => p.use_in_wrap_up === true);
+  const picked: Photo[] = [];
+  // More Always picks than room (#460): spread over the chapter too, not
+  // its first ones.
+  if (always.length >= count) spread(always, count, picked);
+  else {
+    picked.push(...always);
+    spread(
+      photos.filter((p) => !always.includes(p)),
+      count - always.length,
+      picked,
+    );
   }
   return photos.filter((p) => picked.includes(p));
 }
@@ -316,9 +323,10 @@ export function buildGvSkeleton(
   const groups = chapterGroups(photos, days);
   const { occasion, trigger } = gvOccasionOf(tripData, summaries);
 
-  // Main pages: about one per GV_PHOTOS_PER_MAIN photos, or one for each
-  // photo a note belongs to (#460), within 2–6 — at least one a chapter,
-  // each chapter keeping 2 prints.
+  // Main pages: about one per GV_PHOTOS_PER_MAIN photos, within 2–6
+  // (#460: they scale with the album, not with its chapters or notes),
+  // each chapter keeping 2 prints; a note without a main page plays on
+  // its page of prints.
   // A note written on the photo counts twice: it beats one only written
   // near it.
   const anchored = new Map<string, number>();
@@ -327,18 +335,11 @@ export function buildGvSkeleton(
     const weight = ownPhoto.get(note) === id ? 2 : 1;
     anchored.set(id, (anchored.get(id) ?? 0) + weight);
   }
-  // A 2-photo day spares one: its page shows both (#460).
-  const spare = groups.map((g) =>
-    g.length === MIN_GV_PAGE_PRINTS ? 1 : g.length - MIN_GV_PAGE_PRINTS
-  );
+  // A 2-photo day is its page of 2 prints alone (#460: no photo twice).
+  const spare = groups.map((g) => g.length - MIN_GV_PAGE_PRINTS);
   const count = Math.min(
     MAX_GV_HEROES,
-    Math.max(
-      MIN_GV_HEROES,
-      groups.length,
-      Math.round(photos.length / GV_PHOTOS_PER_MAIN),
-      anchored.size,
-    ),
+    Math.max(MIN_GV_HEROES, Math.round(photos.length / GV_PHOTOS_PER_MAIN)),
     spare.reduce((s, n) => s + Math.max(0, n), 0),
   );
   const withNote = anchored;
@@ -379,13 +380,11 @@ export function buildGvSkeleton(
   mains.sort((a, b) => order.get(a.photo_id)! - order.get(b.photo_id)!);
 
   const chapters: GvSkeletonChapter[] = groups.map((g, i) => {
-    const rest = g.length === MIN_GV_PAGE_PRINTS
-      ? g
-      : g.filter((p) => !main.has(p.id));
+    const rest = g.filter((p) => !main.has(p.id));
     const prints = printsOf(
       rest,
       Math.min(MAX_GV_CHAPTER_PRINTS, rest.length),
-      heroScores,
+      rank,
     ).map((p) => p.id);
     let at = 0;
     const pages = pageSizes(prints.length).map((n, k) => {

@@ -45,7 +45,7 @@ Deno.test("a captioned main page's label is its caption, as written", () => {
     ),
   );
   // Whatever the director picks.
-  const other = slotOf(slots, "main1.note").candidates[0].id;
+  const other = slotOf(slots, "main2.note").candidates[0].id;
   const r = resolve({ [label.slot]: { ids: [scopedId(label.slot, other)] } });
   assertEquals(
     r.get(label.slot)!.chosen.map((c) => c.text),
@@ -68,9 +68,15 @@ Deno.test("a main page lists only its own notes' lines", () => {
       assert(ch.days.includes(n.day_date), `${id} on main${k + 1}`);
     }
   });
-  // The morning note on the morning page, the sunset note on the last.
-  assertEquals(notesOf(0), new Set(["n1"]));
-  assert(notesOf(skeleton.mains.length - 1).has("n5"));
+  // The morning note on the morning prints (no main page there), the
+  // sunset note on day 2's second page of prints (#460).
+  assertEquals(notesOf(0), new Set());
+  const pageNotes = (i: number, k: number) =>
+    new Set(
+      slotOf(slots, `ch${i}.p${k}.note`).candidates.map((c) => c.note_id),
+    );
+  assert(pageNotes(1, 1).has("n1"));
+  assert(pageNotes(3, 2).has("n5"));
 });
 
 Deno.test("no wedding words when it isn't a wedding", () => {
@@ -93,7 +99,7 @@ Deno.test("without picks every slot plays code's choice, no words twice", () => 
     // A page with nothing of its own shows nothing (#460).
     if (x.source === "none") {
       assertEquals(x.chosen.length, 0, slot);
-      assert(slot.startsWith("main"), slot);
+      assert(slot.startsWith("main") || slot.endsWith(".note"), slot);
       continue;
     }
     assertEquals(x.chosen.length, 1, slot);
@@ -106,18 +112,18 @@ Deno.test("without picks every slot plays code's choice, no words twice", () => 
 
 Deno.test("a pick holds only in its own slot's list", () => {
   const { slots, resolve } = album();
-  const note = slotOf(slots, "main1.note");
-  const other = slotOf(slots, "main3.note");
+  const note = slotOf(slots, "main2.note");
+  const other = slotOf(slots, "ch3.p2.note");
   const title = slotOf(slots, "ch2.title");
   // Its last candidate: one nothing else takes.
   const second = note.candidates[note.candidates.length - 1];
   const r = resolve({
-    "main1.note": { ids: [scopedId(note.slot, second.id)] },
-    // ch2.title picks main3.note's id: not in its list.
+    "main2.note": { ids: [scopedId(note.slot, second.id)] },
+    // ch2.title picks ch3.p2.note's id: not in its list.
     "ch2.title": { ids: [scopedId(other.slot, other.candidates[0].id)] },
   });
-  assertEquals(r.get("main1.note")!.source, "director");
-  assertEquals(r.get("main1.note")!.chosen[0].text, second.text);
+  assertEquals(r.get("main2.note")!.source, "director");
+  assertEquals(r.get("main2.note")!.chosen[0].text, second.text);
   const t = r.get("ch2.title")!;
   assertEquals(t.source, "code");
   // What code plays with no picks at all.
@@ -179,14 +185,8 @@ Deno.test("chapter eyebrows: number and most photos' part of the day", () => {
   );
 });
 
-Deno.test("notes on no page say why", () => {
+Deno.test("every note has a page (#460)", () => {
   const { data, skeleton, slots } = album();
-  // The Montmartre note is on g11, a print (#460: a note only on its own
-  // page).
-  assertEquals(gvUnlistedNotes(data, skeleton, slots), [{
-    note_id: "n3",
-    text: "Гуляли по ночному Монмартру до полуночи.",
-    reason:
-      "it belongs to a page of prints: its photo, or the photos it was written among",
-  }]);
+  // Every note plays somewhere (#460: on its page of prints too).
+  assertEquals(gvUnlistedNotes(data, skeleton, slots), []);
 });

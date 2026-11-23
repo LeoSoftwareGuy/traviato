@@ -10,13 +10,16 @@
 // (uncaptioned, not Always, weakest first); then the app shortens the
 // chapter pages, never below their title's reading time (GvFit). Second
 // pages of prints go first, before the user's words (#460).
-// Never a chapter, the title page, the heart or a caption; nothing is
-// trimmed for a short album's target (#460: as Neon Night).
+// Never a chapter, the title page, the heart or a caption. The album's
+// limit is 75 s, and about 4 s a film photo below (#460: a small album
+// plays quick) — for that one only pages without the user's words go
+// (second pages, the carousel, the packing card, main pages without a
+// note); notes are shortened or dropped only past 75 s.
 
 import type { TripData } from "./gather.ts";
 import { inclusiveDayCount } from "./assemble.ts";
 import { decorativePhotos } from "./decorative.ts";
-import { filmSecondsOf, readingSeconds } from "./film_length.ts";
+import { readingSeconds } from "./film_length.ts";
 import type { WrapUpLanguage } from "./language.ts";
 import { WRAP_UP_LIMITS } from "./wrap_up_limits.ts";
 import { namesOf, type SlotPicks } from "./film_slots.ts";
@@ -70,11 +73,34 @@ export function gvSecondsAt(content: GoldenVowsContent, scale: number): number {
       GV_HERO_DWELL * scale,
       note?.trim() ? readingSeconds(note) - GV_TURN : 0,
     ) + GV_TURN;
+  // A page of prints: its dwell, or as long as its title and line need
+  // (#460).
+  const page = (title: string, note: string | null | undefined) =>
+    Math.max(
+      GV_CHAPTER_DWELL * scale,
+      readingSeconds(title) - GV_TURN,
+      note?.trim() ? readingSeconds(note) - GV_TURN : 0,
+    ) + GV_TURN;
   return GV_FIXED + (content.packing?.items.length ? GV_PACKING : 0) +
     content.heroes.reduce((s, h) => s + hero(h.note), 0) +
-    content.chapters.reduce((s, c) => s + (c.pages?.length ?? 1), 0) *
-      (GV_CHAPTER_DWELL * scale + GV_TURN) +
+    content.chapters.reduce(
+      (s, c) =>
+        s +
+        (c.pages?.length
+          ? c.pages.reduce((t, pg) => t + page(c.title, pg.note), 0)
+          : page(c.title, null)),
+      0,
+    ) +
     (content.carousel ? GV_CAROUSEL_DWELL * scale + GV_TURN : 0);
+}
+
+// The album's longest (#460): 75 s, and about 4 s a film photo below.
+export const GV_SECONDS_PER_PHOTO = 4;
+export function gvLimitSeconds(photos: number): number {
+  return Math.min(
+    WRAP_UP_LIMITS.longestFilmSeconds,
+    GV_SECONDS_PER_PHOTO * photos,
+  );
 }
 
 // As short as the app can play it.
@@ -170,6 +196,7 @@ export function goldenVowsFilm(
       photo_ids: [...pg.prints],
       layout: pg.layout,
       order: orderOf.get(`ch:${i}:${k}`)!,
+      note: text(`ch${i + 1}.p${k + 1}.note`),
     })),
   }));
   const carouselTitle = text("carousel.title");
@@ -286,10 +313,12 @@ function fitToLongest(
   // main slot → the note now played (null: none), for trimmed notes.
   notes: Map<string, { id: string; text: string } | null>;
 } {
-  const limit = Math.max(
-    filmSecondsOf(tripData),
-    WRAP_UP_LIMITS.longestFilmSeconds,
-  ) - GV_ESTIMATE_MARGIN_SECONDS;
+  // Never past 75 s, nor past ~4 s a film photo (#460: a small album
+  // plays quick); only the 75 s limit takes the user's words.
+  const longest = WRAP_UP_LIMITS.longestFilmSeconds -
+    GV_ESTIMATE_MARGIN_SECONDS;
+  let limit = gvLimitSeconds(gvPhotos(tripData).length) -
+    GV_ESTIMATE_MARGIN_SECONDS;
   const content = structuredClone(start);
   const trims: string[] = [];
   const notes = new Map<string, { id: string; text: string } | null>();
@@ -304,18 +333,21 @@ function fitToLongest(
     content.heroes.filter((h) => h.note && !captioned(h.photo_id))
       .sort((a, b) => [...b.note!].length - [...a.note!].length);
 
-  // 0. Second pages of prints (#460), the latest chapter first — before
-  // the user's words: their chapter keeps its first page.
-  // Their photos go on the carousel, which shows up to 12 on one page.
+  // 0. Second pages of prints (#460), the latest chapter first — those
+  // without a line first; one with a line only past 75 s. Their chapter
+  // keeps its first page; their photos go on the carousel, which shows up
+  // to 12 on one page.
   const freed: string[] = [];
-  for (const chapter of [...content.chapters].reverse()) {
-    if (fits()) break;
-    const pages = chapter.pages ?? [];
-    if (pages.length < 2) continue;
-    chapter.pages = pages.slice(0, 1);
-    chapter.photo_ids = [...pages[0].photo_ids];
-    freed.push(...pages.slice(1).flatMap((pg) => pg.photo_ids));
-    trims.push(`${chapter.title}: one page of prints`);
+  for (const withLine of [false, true]) {
+    for (const chapter of [...content.chapters].reverse()) {
+      if (fits() || (withLine && gvShortestSeconds(content) <= longest)) break;
+      const pages = chapter.pages ?? [];
+      if (pages.length < 2 || !!pages[1].note !== withLine) continue;
+      chapter.pages = pages.slice(0, 1);
+      chapter.photo_ids = [...pages[0].photo_ids];
+      freed.push(...pages.slice(1).flatMap((pg) => pg.photo_ids));
+      trims.push(`${chapter.title}: one page of prints`);
+    }
   }
   if (freed.length > 0) {
     const at = new Map(gvPhotos(tripData).map((p, k) => [p.id, k]));
@@ -330,7 +362,9 @@ function fitToLongest(
       trims.push(`their ${freed.length} prints on the carousel`);
     }
   }
-  // 1. Note lines → a shorter clause of the same note.
+  // 1. Past 75 s only: note lines → a shorter clause of the same note.
+  const shortLimit = limit;
+  limit = longest;
   for (const hero of trimmable()) {
     if (fits()) break;
     const slot = slotOf.get(mainSlot(hero.photo_id));
@@ -365,6 +399,7 @@ function fitToLongest(
     notes.set(slot, null);
   }
   // 3. The carousel; 4. the packing card.
+  limit = shortLimit;
   if (!fits() && content.carousel) {
     content.carousel = null;
     trims.push("no carousel");
@@ -373,7 +408,8 @@ function fitToLongest(
     content.packing = null;
     trims.push("no packing card");
   }
-  // 5. Main pages down to 2: uncaptioned, not Always, weakest first.
+  // 5. Main pages down to 2: uncaptioned, not Always, weakest first —
+  // one with a note only past 75 s.
   const droppable = content.heroes.filter((h) => !captioned(h.photo_id))
     .sort((a, b) =>
       Number(byId.get(a.photo_id)?.use_in_wrap_up === true) -
@@ -382,6 +418,7 @@ function fitToLongest(
     );
   for (const hero of droppable) {
     if (fits() || content.heroes.length <= MIN_GV_HEROES) break;
+    if (hero.note && gvShortestSeconds(content) <= longest) continue;
     content.heroes = content.heroes.filter((h) => h !== hero);
     trims.push(`${mainSlot(hero.photo_id).replace(".note", "")}: left out`);
   }

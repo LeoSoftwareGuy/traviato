@@ -135,13 +135,62 @@ Deno.test("Budapest: each note line on the page it belongs to", () => {
   f.content.heroes.forEach((h, k) => {
     const noteId = noteOf(f, `main${k + 1}.note`);
     if (!h.note || !noteId) return;
-    assertEquals(homes.get(noteId), k, `main${k + 1}: ${h.note}`);
+    assertEquals(homes.get(noteId), { main: k }, `main${k + 1}: ${h.note}`);
   });
-  // The café line on the café photo, the birthday on the spa.
-  const noteOn = (text: string) =>
-    f.content.heroes.find((h) => h.note?.includes(text))?.photo_id;
-  assert(noteOn("golden coffee")?.startsWith("25661a"));
-  assert(noteOn("Elmas birthday")?.startsWith("133bbd"));
+  // A page of prints: its own note; a second page (or a chapter's only
+  // page) another line of its chapter — never the eyebrow again.
+  f.content.chapters.forEach((c, i) => {
+    const noMain = !f.skeleton.mains.some((m) => m.chapter === i);
+    c.pages!.forEach((pg, k) => {
+      const noteId = noteOf(f, `ch${i + 1}.p${k + 1}.note`);
+      if (!pg.note || !noteId) return;
+      const home = homes.get(noteId);
+      if (k > 0 || noMain) {
+        assert(typeof home === "object", pg.note);
+        const chapter = "main" in home
+          ? f.skeleton.mains[home.main].chapter
+          : home.chapter;
+        assertEquals(chapter, i, pg.note);
+      } else {
+        assertEquals(home, { chapter: i, page: k }, pg.note);
+      }
+    });
+  });
+  // The café line with the café photo, the birthday on the spa.
+  const pageOf = (text: string) => {
+    const hero = f.content.heroes.find((h) => h.note?.includes(text));
+    if (hero) return [hero.photo_id];
+    return f.content.chapters.flatMap((c) => c.pages!)
+      .find((pg) => pg.note?.includes(text))?.photo_ids ?? [];
+  };
+  assert(pageOf("golden coffee").some((id) => id.startsWith("25661a")));
+  assert(pageOf("Elmas birthday").some((id) => id.startsWith("133bbd")));
+});
+
+Deno.test("Budapest: no photo twice; a 2-photo day is its page of 2 with a line", () => {
+  const f = film();
+  const shown = [
+    ...f.content.heroes.map((h) => h.photo_id),
+    ...f.content.chapters.flatMap((c) => c.pages!.flatMap((p) => p.photo_ids)),
+    ...(f.content.carousel?.photo_ids ?? []),
+  ];
+  assertEquals(new Set(shown).size, shown.length);
+  const day1 = f.content.chapters[0];
+  assertEquals(day1.pages!.map((p) => [p.layout, p.photo_ids.length]), [
+    ["B2", 2],
+  ]);
+  assert(!f.skeleton.mains.some((m) => m.chapter === 0));
+  assertStringIncludes(day1.pages![0].note!, "Tallinn to Budapest");
+});
+
+Deno.test("Budapest: a second page never repeats the eyebrow", () => {
+  const f = film();
+  for (const c of f.content.chapters) {
+    for (const pg of c.pages!.slice(1)) {
+      assert(pg.note !== c.line);
+      if (pg.note) assert(!pg.note.startsWith("Chapter"), pg.note);
+    }
+  }
 });
 
 Deno.test("Budapest: each chapter's time of day is most of its photos'", () => {

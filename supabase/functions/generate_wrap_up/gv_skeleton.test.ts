@@ -90,24 +90,27 @@ Deno.test("never more than 4 chapters, and no photo is lost", () => {
   assertEquals(s.chapters.flatMap((c) => c.days).length, 7);
 });
 
-Deno.test("a short day stays its own chapter; one photo joins (#460)", () => {
+Deno.test("a short day stays its own chapter, no photo twice; one photo joins (#460)", () => {
   const data = daysMemory(3, 8);
-  // The middle day keeps 3 photos: a main page and a page of 2 prints.
+  // The middle day keeps 3 photos: its own chapter.
   data.photos = data.photos.filter((p) =>
     !p.id.startsWith("d1") || ["d1p0", "d1p1", "d1p2"].includes(p.id)
   );
   const three = buildGvSkeleton(data);
   assertEquals(three.chapters.length, 3);
-  assertEquals(three.chapters[1].pages.map((p) => p.layout), ["B2"]);
-  assertEquals(three.mains.filter((m) => m.chapter === 1).length, 1);
-  // 2 photos: a page of both, and a main page of one of them.
+  assertEquals(three.chapters[1].photos.length, 3);
+  // 2 photos: a page of both (B2), no main page — no photo twice.
   data.photos = data.photos.filter((p) => p.id !== "d1p2");
   const two = buildGvSkeleton(data);
   assertEquals(two.chapters.length, 3);
   assertEquals(two.chapters[1].prints, ["d1p0", "d1p1"]);
-  assert(
-    two.mains.some((m) => m.chapter === 1 && m.photo_id.startsWith("d1")),
-  );
+  assertEquals(two.chapters[1].pages.map((p) => p.layout), ["B2"]);
+  assert(!two.mains.some((m) => m.chapter === 1));
+  const shown = [
+    ...two.mains.map((m) => m.photo_id),
+    ...two.chapters.flatMap((c) => c.prints),
+  ];
+  assertEquals(new Set(shown).size, shown.length);
   // 1 photo: into its neighbour, never lost.
   data.photos = data.photos.filter((p) => p.id !== "d1p1");
   const one = buildGvSkeleton(data);

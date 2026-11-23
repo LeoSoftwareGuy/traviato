@@ -63,6 +63,7 @@ import {
   MAX_GV_HERO_LINE_CHARS,
   MAX_GV_LABEL_CHARS,
   MAX_GV_OCCASION_CHARS,
+  MAX_GV_PAGE_LINE_CHARS,
   MAX_GV_TITLE_CHARS,
 } from "./golden_vows.ts";
 import type { GvSkeleton } from "./gv_skeleton.ts";
@@ -73,6 +74,7 @@ type Note = TripData["notes"][number];
 const THEME = "romance" as const;
 
 export type GvSlotKind =
+  // A main page's note, or a page of prints' line (#460: "chN.pK.note").
   | "note"
   | "label"
   | "title"
@@ -88,6 +90,8 @@ export interface GvSlot {
   // 0-based main page or chapter; null for the album's own slots.
   main: number | null;
   chapter: number | null;
+  // A chapter's page of prints, 0-based (#460); else absent.
+  page?: number;
   max_picks: number;
   // Whether the director may write its own words here.
   free: boolean;
@@ -394,49 +398,72 @@ export function gvCaptions(tripData: TripData) {
   return { labelCaption, noteCaption };
 }
 
+// Where a note plays (#460): a main page, a chapter's page of prints, or
+// nowhere.
+export type GvNoteHome =
+  | { main: number }
+  | { chapter: number; page: number }
+  | "none";
+
 // Where each note belongs (#460, the #456 scene rule): the main page of
-// its own photo, else the page whose photos it was written among — never
-// another part of its chapter. A note written far from its chapter's
-// photos (later, about the day) goes to the chapter's last main page.
-// "prints": it belongs to a page of prints and shows nowhere; "none": its
-// chapter has no main page for a note (or it has no chapter).
+// its own photo, else the page — main or prints — whose photos it was
+// written among; never another part of its chapter. A note written far
+// from its chapter's photos (later, about the day) goes to the chapter's
+// last main page, else its last page of prints. "none": no chapter on its
+// day.
 export function gvNoteHomes(
   tripData: TripData,
   skeleton: GvSkeleton,
-): Map<string, number | "prints" | "none"> {
+): Map<string, GvNoteHome> {
   const byId = new Map(tripData.photos.map((p) => [p.id, p]));
   const owners = noteChapters(tripData, skeleton.chapters);
   const { noteCaption } = gvCaptions(tripData);
   const nearMs = SCENE_NEAR_MINUTES * 60_000;
-  const homes = new Map<string, number | "prints" | "none">();
+  const homes = new Map<string, GvNoteHome>();
   for (const n of tripData.notes) {
     if (!n.id || !n.content.trim()) continue;
     const chapter = owners.get(n.id)?.[0];
-    const hosts = chapter === undefined ? [] : skeleton.mains
-      .map((m, k) => ({ m, k }))
-      .filter(({ m }) => m.chapter === chapter && !noteCaption(m));
-    if (chapter === undefined || hosts.length === 0) {
+    if (chapter === undefined) {
       homes.set(n.id, "none");
       continue;
     }
     const c = skeleton.chapters[chapter];
+    const hosts: GvNoteHome[] = [
+      ...skeleton.mains.flatMap((m, k) =>
+        m.chapter === chapter && !noteCaption(m) ? [{ main: k }] : []
+      ),
+      ...c.pages.map((_, page) => ({ chapter, page })),
+    ];
+    const scenes = [
+      ...skeleton.mains.flatMap((m) =>
+        m.chapter === chapter && !noteCaption(m)
+          ? [[byId.get(m.photo_id)!]]
+          : []
+      ),
+      ...c.pages.map((pg) => pg.prints.map((id) => byId.get(id)!)),
+    ];
+    if (hosts.length === 0) {
+      homes.set(n.id, "none");
+      continue;
+    }
     const times = c.photos.map(timeOf).filter((x) => x > 0);
     const t = noteTime(n);
     const timed = times.length > 0 && !Number.isNaN(t) &&
       t >= Math.min(...times) - nearMs && t <= Math.max(...times) + nearMs;
     if (!timed && !c.photos.some((p) => p.id === n.photo_id)) {
-      homes.set(n.id, hosts[hosts.length - 1].k);
+      const mains = hosts.filter((h) => typeof h === "object" && "main" in h);
+      homes.set(n.id, (mains.length > 0 ? mains : hosts).at(-1)!);
       continue;
     }
-    const scenes = [
-      ...hosts.map(({ m }) => [byId.get(m.photo_id)!]),
-      ...c.pages.map((pg) => pg.prints.map((id) => byId.get(id)!)),
-    ];
-    const scene = noteScene(scenes, n);
-    homes.set(n.id, scene < hosts.length ? hosts[scene].k : "prints");
+    homes.set(n.id, hosts[noteScene(scenes, n)] ?? hosts.at(-1)!);
   }
   return homes;
 }
+
+const isMainHome = (h: GvNoteHome | undefined, k: number) =>
+  typeof h === "object" && "main" in h && h.main === k;
+const isPageHome = (h: GvNoteHome | undefined, i: number, k: number) =>
+  typeof h === "object" && "chapter" in h && h.chapter === i && h.page === k;
 
 // Every slot of the album with its candidates (#458).
 export function buildGvSlots(
@@ -510,7 +537,7 @@ export function buildGvSlots(
   const { labelCaption, noteCaption } = gvCaptions(tripData);
   const homes = gvNoteHomes(tripData, skeleton);
   const mainNotes = skeleton.mains.map((_, k) =>
-    notes.filter((n) => homes.get(n.id!) === k)
+    notes.filter((n) => isMainHome(homes.get(n.id!), k))
   );
   const logical = tripLogicalDays(tripData);
   skeleton.mains.forEach((m, k) => {
@@ -589,6 +616,49 @@ export function buildGvSlots(
       free: false,
       fixed: !!caption,
       candidates,
+    });
+  });
+
+  // A page of prints' line (#460): a line of the notes that belong to
+  // it. A second page, or the only page of a chapter without a main page
+  // (a 2-photo day), also takes the chapter's other lines — so it never
+  // repeats the chapter's eyebrow.
+  const lineCandidates = (own: readonly Note[], bonus: number) =>
+    own.flatMap((n) => linesOf(n, THEME))
+      .filter((l) => [...l.text].length <= MAX_GV_PAGE_LINE_CHARS)
+      .map((l) => ({
+        id: noteLineId(l.note.id!, l.text),
+        text: l.text,
+        note_id: l.note.id!,
+        photo_id: null,
+        score: l.score + TIER_BONUS[l.tier] + bonus,
+      }));
+  skeleton.chapters.forEach((c, i) => {
+    const owned = notes.filter((n) => owners.get(n.id!)?.[0] === i);
+    const noMain = !skeleton.mains.some((m) => m.chapter === i);
+    c.pages.forEach((_, k) => {
+      const own = notes.filter((n) => isPageHome(homes.get(n.id!), i, k));
+      const wide = k > 0 || noMain;
+      const lines = [
+        ...lineCandidates(own, 100),
+        ...(wide
+          ? lineCandidates(owned.filter((n) => !own.includes(n)), 0)
+          : []),
+      ];
+      const specific = lines.some((l) => !isGeneric(l.text));
+      slots.push({
+        slot: `ch${i + 1}.p${k + 1}.note`,
+        kind: "note",
+        main: null,
+        chapter: i,
+        page: k,
+        max_picks: 1,
+        free: false,
+        fixed: false,
+        candidates: topDistinct(
+          lines.filter((l) => !specific || !isGeneric(l.text)),
+        ),
+      });
     });
   });
 
@@ -972,14 +1042,12 @@ export function gvUnlistedNotes(
   ).map((n) => {
     const home = homes.get(n.id!);
     const reason = home === "none"
-      ? "no main page for a note in its chapter (or no chapter on its day)"
-      : home === "prints"
-      ? "it belongs to a page of prints: its photo, or the photos it was written among"
+      ? "no chapter on its day"
       : linesOf(n, THEME).length === 0
       ? "no line left after the drug filter"
       : linesOf(n, THEME).every((l) => l.tier === "generic")
       ? "only generic lines, and its page has a specific one"
-      : `no line fits a main page (≤ ${MAX_GV_HERO_LINE_CHARS} chars)`;
+      : `no line fits its page (≤ ${MAX_GV_HERO_LINE_CHARS} chars on a main page, ${MAX_GV_PAGE_LINE_CHARS} on prints)`;
     return { note_id: n.id!, text: n.content, reason };
   });
 }

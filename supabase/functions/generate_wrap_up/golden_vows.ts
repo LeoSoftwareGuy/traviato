@@ -51,6 +51,8 @@ export const MAX_GV_LABEL_CHARS = 18;
 // about this many at full size (712 px of 30 px spaced capitals).
 export const MAX_GV_CAPTION_LABEL_CHARS = 24;
 export const MAX_GV_NOTE_CHARS = 60;
+// A page of prints' line (#460): one line under its title, shrunk to fit.
+export const MAX_GV_PAGE_LINE_CHARS = 72;
 export const MAX_GV_TITLE_CHARS = 28;
 export const MAX_GV_LINE_CHARS = 36;
 export const MAX_GV_END_CHARS = 40;
@@ -99,7 +101,13 @@ export interface GoldenVowsContent {
     layout: GvLayout;
     // Its pages (#460): 1 or 2, each its prints, layout and place in the
     // play order. Absent in older content: one page of photo_ids.
-    pages?: { photo_ids: string[]; layout: GvLayout; order: number }[];
+    // note: the user's line in place of the eyebrow (#460), or null.
+    pages?: {
+      photo_ids: string[];
+      layout: GvLayout;
+      order: number;
+      note?: string | null;
+    }[];
   }[];
   carousel: { title: string; line: string; photo_ids: string[] } | null;
   heart_photo_ids: string[];
