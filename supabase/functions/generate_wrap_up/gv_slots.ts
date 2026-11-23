@@ -29,6 +29,7 @@ import { excerptScore, isGeneric } from "./excerpts.ts";
 import {
   choose,
   dayTitleFor,
+  FIRST_NAMES,
   freeTextProblem,
   hash,
   hasVerb,
@@ -37,11 +38,12 @@ import {
   MAX_SLOT_CANDIDATES,
   namePhrases,
   namesOf,
-  nearestPhoto,
   noteChapters,
   noteLineId,
+  noteScene,
   noteTime,
   placeOf,
+  SCENE_NEAR_MINUTES,
   scopedId,
   shortClauses,
   type SlotCandidate,
@@ -53,8 +55,10 @@ import {
   writtenLanguage,
 } from "./film_slots.ts";
 import { repeatsTitle, sameLine, timeOf } from "./neon_night.ts";
+import { tripLogicalDays } from "./logical_day.ts";
 import {
   type GvOccasion,
+  MAX_GV_CAPTION_LABEL_CHARS,
   MAX_GV_END_CHARS,
   MAX_GV_HERO_LINE_CHARS,
   MAX_GV_LABEL_CHARS,
@@ -111,16 +115,6 @@ const OCCASION_LINES: Record<"ru" | "en", Lines> = {
     romance: ["Только мы", "Мы вдвоём", "Вместе"],
   },
 };
-const LABELS: Record<"ru" | "en", { wedding: string[]; other: string[] }> = {
-  en: {
-    wedding: ["The vows", "First dance", "The rings"],
-    other: ["Just us", "Together", "Our moment", "Close", "Smiles"],
-  },
-  ru: {
-    wedding: ["Клятвы", "Первый танец", "Кольца"],
-    other: ["Только мы", "Вместе", "Наш момент", "Рядом", "Улыбки"],
-  },
-};
 const CAROUSEL: Record<"ru" | "en", { wedding: string[]; other: string[] }> = {
   en: {
     wedding: ["And the night went on"],
@@ -164,13 +158,8 @@ export function gvLanguage(
   return writtenLanguage(tripData) ?? language;
 }
 
-// The part of the day [photos] start in: 0 morning … 3 night, or null.
-function partOf(
-  photos: readonly Photo[],
-  utcOffsetMinutes: number,
-): number | null {
-  const t = photos.map(timeOf).find((x) => x > 0);
-  if (!t) return null;
+// The part of the day [t] is in: 0 morning … 3 night.
+export function gvPartOfTime(t: number, utcOffsetMinutes: number): number {
   const hour = new Date(t + utcOffsetMinutes * 60_000).getUTCHours();
   return hour >= 5 && hour < 12
     ? 0
@@ -181,8 +170,24 @@ function partOf(
     : 3;
 }
 
-// Chapter [i]'s eyebrow: "Глава первая · Утро", by its first photo's
-// local hour.
+// The part of the day most of [photos] are in (#460: never only the
+// first's), the earliest such part on a tie; null without times.
+export function gvPartOf(
+  photos: readonly Photo[],
+  utcOffsetMinutes: number,
+): number | null {
+  const parts = photos.map(timeOf).filter((x) => x > 0)
+    .map((t) => gvPartOfTime(t, utcOffsetMinutes));
+  if (parts.length === 0) return null;
+  const counts = [0, 0, 0, 0];
+  for (const part of parts) counts[part]++;
+  let best = parts[0];
+  for (const part of parts) if (counts[part] > counts[best]) best = part;
+  return best;
+}
+
+// Chapter [i]'s eyebrow: "Глава первая · Утро", by the part of the day
+// most of its photos are in (#460).
 export function gvChapterLine(
   photos: readonly Photo[],
   i: number,
@@ -190,7 +195,7 @@ export function gvChapterLine(
   utcOffsetMinutes: number,
 ): string {
   const number = NUMBERS[language][i] ?? NUMBERS[language][3];
-  const part = partOf(photos, utcOffsetMinutes);
+  const part = gvPartOf(photos, utcOffsetMinutes);
   return part === null ? number : `${number} · ${PARTS[language][part]}`;
 }
 
@@ -204,6 +209,149 @@ export function gvDayTitle(
   language: "ru" | "en",
 ): string {
   return dayTitleFor(tripData, skeleton.chapters, language)(i);
+}
+
+// Words that open a short phrase of a note (#460): "for a golden
+// coffee", "with famous spas", "to irish bar".
+const PHRASE_OPENERS = new Set([
+  "a",
+  "an",
+  "the",
+  "some",
+  "our",
+  "my",
+  "this",
+  "these",
+  "those",
+  "with",
+  "for",
+  "to",
+  "at",
+  "in",
+  "into",
+  "of",
+  "from",
+  "out",
+  "on",
+]);
+// Words a phrase stops before.
+const PHRASE_STOPS = new Set([
+  ...PHRASE_OPENERS,
+  "and",
+  "but",
+  "or",
+  "so",
+  "is",
+  "was",
+  "are",
+  "were",
+  "it",
+  "its",
+  "that",
+  "which",
+  "who",
+  "too",
+  "very",
+  "really",
+  "just",
+  "then",
+  "there",
+  "here",
+  "we",
+  "i",
+  "you",
+  "he",
+  "she",
+  "they",
+  "me",
+  "us",
+  "be",
+  "been",
+  "had",
+  "has",
+  "have",
+  "went",
+  "go",
+  "got",
+  "by",
+  "as",
+  "after",
+  "before",
+  "about",
+  "all",
+  "not",
+  "no",
+  "also",
+  "even",
+  "full",
+  "around",
+  "like",
+  "lots",
+  "lot",
+  "more",
+  "most",
+  "s",
+  "t",
+]);
+// A phrase never opens on a verb ("make things", "walk around").
+const PHRASE_VERBS = new Set([
+  "make",
+  "take",
+  "walk",
+  "check",
+  "see",
+  "start",
+  "explore",
+  "go",
+  "come",
+  "find",
+  "get",
+  "do",
+  "eat",
+  "drink",
+  "try",
+  "visit",
+  "keep",
+  "say",
+  "feel",
+  "look",
+  "meet",
+  "buy",
+  "sleep",
+  "stay",
+]);
+// What a birthday, a wedding, an anniversary names (#460): "Elmas
+// birthday", kept exactly as written.
+const OCCASION_NOUN = /^(birthday|wedding|anniversary|honeymoon|engagement)$/iu;
+
+// The short phrases of [text] that name something (#460): 2–3 words after
+// an article or preposition ("golden coffee", "famous spas"), and a name
+// with its occasion ("Elmas birthday") — the user's words as written,
+// English only (Russian has no articles to find them by).
+export function gvNotePhrases(text: string): string[] {
+  const out: string[] = [];
+  for (const sentence of text.split(/[.!?;,:()\n]+/u)) {
+    const words = sentence.split(/\s+/u).filter(Boolean);
+    const bare = words.map((w) => w.toLowerCase().replace(/[^\p{L}'’-]/gu, ""));
+    for (let i = 0; i < words.length; i++) {
+      // "Elmas birthday": a capitalised word before an occasion noun.
+      if (
+        i + 1 < words.length && /^\p{Lu}/u.test(words[i]) &&
+        OCCASION_NOUN.test(bare[i + 1]) && !PHRASE_STOPS.has(bare[i])
+      ) out.push(`${words[i]} ${bare[i + 1]}`);
+      if (!PHRASE_OPENERS.has(bare[i])) continue;
+      const run: string[] = [];
+      for (let k = i + 1; k < words.length && run.length < 3; k++) {
+        if (PHRASE_STOPS.has(bare[k]) || !bare[k]) break;
+        run.push(words[k].replace(/[^\p{L}\p{N}'’-]/gu, ""));
+      }
+      if (
+        run.length >= 2 && !PHRASE_VERBS.has(run[0].toLowerCase()) &&
+        !hasVerb(run.join(" "))
+      ) out.push(run.join(" "));
+    }
+  }
+  return [...new Set(out)];
 }
 
 // [list] without lines that differ only in case, spacing or punctuation
@@ -229,6 +377,66 @@ const neutral = (
     photo_id: null,
     score: NEUTRAL_SCORE - k,
   }));
+
+// A main page's caption (#460): one that fits the label line is the
+// label (never with a time); a longer one plays as the page's note, as
+// written.
+export function gvCaptions(tripData: TripData) {
+  const byId = new Map(tripData.photos.map((p) => [p.id, p]));
+  const captionOf = (m: { photo_id: string }) =>
+    byId.get(m.photo_id)?.caption?.trim() || null;
+  const labelCaption = (m: { photo_id: string }) => {
+    const c = captionOf(m);
+    return c && [...c].length <= MAX_GV_CAPTION_LABEL_CHARS ? c : null;
+  };
+  const noteCaption = (m: { photo_id: string }) =>
+    labelCaption(m) ? null : captionOf(m);
+  return { labelCaption, noteCaption };
+}
+
+// Where each note belongs (#460, the #456 scene rule): the main page of
+// its own photo, else the page whose photos it was written among — never
+// another part of its chapter. A note written far from its chapter's
+// photos (later, about the day) goes to the chapter's last main page.
+// "prints": it belongs to a page of prints and shows nowhere; "none": its
+// chapter has no main page for a note (or it has no chapter).
+export function gvNoteHomes(
+  tripData: TripData,
+  skeleton: GvSkeleton,
+): Map<string, number | "prints" | "none"> {
+  const byId = new Map(tripData.photos.map((p) => [p.id, p]));
+  const owners = noteChapters(tripData, skeleton.chapters);
+  const { noteCaption } = gvCaptions(tripData);
+  const nearMs = SCENE_NEAR_MINUTES * 60_000;
+  const homes = new Map<string, number | "prints" | "none">();
+  for (const n of tripData.notes) {
+    if (!n.id || !n.content.trim()) continue;
+    const chapter = owners.get(n.id)?.[0];
+    const hosts = chapter === undefined ? [] : skeleton.mains
+      .map((m, k) => ({ m, k }))
+      .filter(({ m }) => m.chapter === chapter && !noteCaption(m));
+    if (chapter === undefined || hosts.length === 0) {
+      homes.set(n.id, "none");
+      continue;
+    }
+    const c = skeleton.chapters[chapter];
+    const times = c.photos.map(timeOf).filter((x) => x > 0);
+    const t = noteTime(n);
+    const timed = times.length > 0 && !Number.isNaN(t) &&
+      t >= Math.min(...times) - nearMs && t <= Math.max(...times) + nearMs;
+    if (!timed && !c.photos.some((p) => p.id === n.photo_id)) {
+      homes.set(n.id, hosts[hosts.length - 1].k);
+      continue;
+    }
+    const scenes = [
+      ...hosts.map(({ m }) => [byId.get(m.photo_id)!]),
+      ...c.pages.map((pg) => pg.prints.map((id) => byId.get(id)!)),
+    ];
+    const scene = noteScene(scenes, n);
+    homes.set(n.id, scene < hosts.length ? hosts[scene].k : "prints");
+  }
+  return homes;
+}
 
 // Every slot of the album with its candidates (#458).
 export function buildGvSlots(
@@ -299,49 +507,56 @@ export function buildGvSlots(
     ]),
   });
 
-  // Main pages: which notes each shows (#458). A note belongs to its
-  // chapter; within it, to the uncaptioned main page of its own photo,
-  // else the one whose photo is nearest when it was written. A main page
-  // is a single photo, so the other photos of the chapter never compete:
-  // only main pages show words (chapter pages are prints).
-  const mainNotes = skeleton.mains.map(() => [] as Note[]);
-  for (const n of notes) {
-    const chapter = owners.get(n.id!)?.[0];
-    if (chapter === undefined) continue;
-    const pages = skeleton.mains.map((m, k) => ({ m, k })).filter(({ m }) =>
-      m.chapter === chapter && !byId.get(m.photo_id)?.caption?.trim()
-    );
-    if (pages.length === 0) continue;
-    const own = pages.find(({ m }) => m.photo_id === n.photo_id);
-    const photos = pages.map(({ m }) => byId.get(m.photo_id)!);
-    const near = own
-      ? byId.get(own.m.photo_id)!
-      : nearestPhoto(photos, noteTime(n)) ?? photos[0];
-    mainNotes[pages.find(({ m }) => m.photo_id === near.id)!.k].push(n);
-  }
-  const weddingLabels = wedding ? LABELS[language].wedding : [];
+  const { labelCaption, noteCaption } = gvCaptions(tripData);
+  const homes = gvNoteHomes(tripData, skeleton);
+  const mainNotes = skeleton.mains.map((_, k) =>
+    notes.filter((n) => homes.get(n.id!) === k)
+  );
+  const logical = tripLogicalDays(tripData);
   skeleton.mains.forEach((m, k) => {
     const photo = byId.get(m.photo_id)!;
-    const caption = photo.caption?.trim();
     const slot = `main${k + 1}`;
-    // Its label, a word or two over the photo: its place, else code's
-    // neutral labels (the director may name the moment). A note's phrase
-    // is too often half a name in Russian ("На Эйфелеву"), and a caption
-    // already plays as the page's note.
+    const label = labelCaption(m);
+    const caption = noteCaption(m);
+    // Its label (#460): the caption that fits, else the photo's place,
+    // else a phrase of a note on that page — never a generic one; with
+    // none, no label.
+    const days = skeleton.chapters[m.chapter].days;
+    const phrases = mainNotes[k].filter((n) =>
+      days.includes(logical.get(`note:${n.id}`) ?? n.day_date)
+    ).flatMap((n) =>
+      gvNotePhrases(n.content)
+        .filter((t) => [...t].length <= MAX_GV_LABEL_CHARS)
+        .map((t) => ({
+          id: noteLineId(n.id!, t),
+          text: t,
+          note_id: n.id!,
+          photo_id: photo.id,
+          score: 20 + excerptScore(t, THEME),
+        }))
+    );
     slots.push({
       slot: `${slot}.label`,
       kind: "label",
       main: k,
       chapter: m.chapter,
       max_picks: 1,
-      free: true,
-      fixed: false,
-      candidates: topDistinct([
-        ...placeCandidate([photo], MAX_GV_LABEL_CHARS),
-        ...neutral([...weddingLabels, ...LABELS[language].other], "l"),
-      ]),
+      free: false,
+      fixed: !!label,
+      candidates: label
+        ? [{
+          id: `c:${photo.id}`,
+          text: label,
+          note_id: null,
+          photo_id: photo.id,
+          score: 100,
+        }]
+        : topDistinct([
+          ...placeCandidate([photo], MAX_GV_LABEL_CHARS),
+          ...phrases,
+        ]),
     });
-    // Its note: the caption as written, else its own notes' lines.
+    // Its note: a long caption as written, else its own notes' lines.
     let candidates: SlotCandidate[];
     if (caption) {
       candidates = [{
@@ -377,9 +592,41 @@ export function buildGvSlots(
     });
   });
 
-  // Chapter titles: they name the chapter.
+  // Chapter titles: they name the chapter — from its own days' notes
+  // first (#460: a note of another day only when they name nothing).
+  const noteDay = (n: Note) => logical.get(`note:${n.id}`) ?? n.day_date;
+  const phraseTitles = (own: readonly Note[]) =>
+    own.flatMap((n) =>
+      gvNotePhrases(n.content).flatMap((phrase) => {
+        // A heading's first letter capitalised; the words as written.
+        const t = title(
+          phrase.charAt(0).toUpperCase() + phrase.slice(1),
+          MAX_GV_TITLE_CHARS,
+          false,
+        );
+        return t && !hasVerb(t)
+          ? [{
+            id: noteLineId(n.id!, t),
+            text: t,
+            note_id: n.id!,
+            photo_id: null,
+            // A name with its occasion ("Elmas birthday") names the day.
+            score: / (birthday|wedding|anniversary|honeymoon|engagement)$/iu
+                .test(t)
+              ? 25
+              : 12,
+          }]
+          : [];
+      })
+    );
   skeleton.chapters.forEach((c, i) => {
-    const own = notes.filter((n) => owners.get(n.id!)?.[0] === i);
+    const owned = notes.filter((n) => owners.get(n.id!)?.[0] === i);
+    const today = owned.filter((n) => c.days.includes(noteDay(n)));
+    const fromToday = [
+      ...named(today, MAX_GV_TITLE_CHARS, 15),
+      ...phraseTitles(today),
+    ];
+    const own = fromToday.length > 0 ? today : owned;
     slots.push({
       slot: `ch${i + 1}.title`,
       kind: "title",
@@ -393,6 +640,7 @@ export function buildGvSlots(
         // Below the captions: a phrase of a note can stop mid-name
         // ("На Эйфелеву").
         ...named(own, MAX_GV_TITLE_CHARS, 15),
+        ...phraseTitles(own),
         ...c.photos.flatMap((p) => {
           const t = p.caption && title(p.caption, MAX_GV_TITLE_CHARS);
           return t && !hasVerb(t)
@@ -409,7 +657,11 @@ export function buildGvSlots(
     });
   });
 
-  if (skeleton.carousel.length > 0) {
+  // The carousel's title: also when only a second page of prints may
+  // end up there (#460).
+  const mayCarousel = skeleton.carousel.length > 0 ||
+    skeleton.chapters.some((c) => c.pages.length > 1);
+  if (mayCarousel) {
     slots.push({
       slot: "carousel.title",
       kind: "carousel",
@@ -420,7 +672,9 @@ export function buildGvSlots(
       fixed: false,
       candidates: topDistinct([
         ...placeCandidate(
-          skeleton.carousel.map((id) => byId.get(id)!),
+          skeleton.carousel.length > 0
+            ? skeleton.carousel.map((id) => byId.get(id)!)
+            : skeleton.chapters.flatMap((c) => c.photos),
           MAX_GV_TITLE_CHARS,
         ),
         ...neutral(
@@ -475,11 +729,113 @@ export interface GvSlotResult {
 export interface GvResolveOptions {
   language: "ru" | "en";
   names: ReadonlySet<string>;
+  // What the director's own words may say (#460); none: no check.
+  guard?: GvWordGuard;
   // Chapter [i]'s title when nothing fits: "День N".
   dayTitle: (chapter: number) => string;
   // Words the album shows anyway: the memory's name and place on the
   // title page.
   shown: readonly string[];
+}
+
+// The words the director's own text is checked against (#460).
+export interface GvWordGuard {
+  // The names the user wrote, as written, lowercased: the memory's name,
+  // capitalised words inside their notes' and captions' sentences, the
+  // place.
+  names: ReadonlySet<string>;
+  // Every word of the user's (notes, captions, memory name, place) and of
+  // code's own lines, lowercased.
+  own: ReadonlySet<string>;
+  // Words only the photo descriptions say.
+  described: ReadonlySet<string>;
+}
+
+const wordsOf = (text: string) =>
+  text.split(/[^\p{L}\p{N}'’]+/u).filter(Boolean);
+// A word without its possessive: "Elmas's" → "Elmas", "Elma's" → "Elma".
+const stem = (w: string) => w.replace(/['’]s?$/u, "").toLowerCase();
+
+// The guard for [tripData] (#460).
+export function gvWordGuard(
+  tripData: TripData,
+  summaries: ReadonlyMap<string, string>,
+): GvWordGuard {
+  const texts = [
+    tripData.trip.name,
+    tripData.trip.destination ?? "",
+    ...tripData.notes.map((n) => n.content),
+    ...tripData.photos.map((p) => p.caption ?? ""),
+    ...tripData.photos.map((p) => p.place_text ?? ""),
+  ];
+  const names = new Set<string>();
+  for (const w of wordsOf(tripData.trip.name)) names.add(stem(w));
+  for (const w of wordsOf(tripData.trip.destination ?? "")) names.add(stem(w));
+  for (const t of texts.slice(2)) {
+    for (const sentence of t.split(/[.!?\n]+/u)) {
+      wordsOf(sentence).forEach((w, k) => {
+        if (k > 0 && /^\p{Lu}/u.test(w)) names.add(stem(w));
+      });
+    }
+  }
+  const code = [
+    ...Object.values(OCCASION_LINES).flatMap((l) => Object.values(l).flat()),
+    ...Object.values(CAROUSEL).flatMap((l) => [...l.wedding, ...l.other]),
+    ...Object.values(FINALE).flatMap((l) => [...l.wedding, ...l.other]),
+  ];
+  const own = new Set(
+    [...texts, ...code].flatMap((t) => wordsOf(t).map(stem)),
+  );
+  const described = new Set(
+    [...summaries.values()].flatMap((t) => wordsOf(t).map(stem))
+      .filter((w) => [...w].length >= 4 && !own.has(w)),
+  );
+  return { names, own, described };
+}
+
+// How many single-letter edits turn [a] into [b].
+function editDistance(a: string, b: string): number {
+  const row = Array.from({ length: b.length + 1 }, (_, k) => k);
+  for (let i = 1; i <= a.length; i++) {
+    let prev = row[0];
+    row[0] = i;
+    for (let k = 1; k <= b.length; k++) {
+      const next = row[k];
+      row[k] = Math.min(
+        row[k] + 1,
+        row[k - 1] + 1,
+        prev + (a[i - 1] === b[k - 1] ? 0 : 1),
+      );
+      prev = next;
+    }
+  }
+  return row[b.length];
+}
+
+// Why the director's own [text] can't play, or null (#460): it changes a
+// name the user wrote ("Elma's" for "Elmas" — the name, or the name and
+// "'s", only), names a person the user never wrote, or says what only
+// the photo descriptions say.
+export function gvWordsProblem(
+  text: string,
+  guard: GvWordGuard,
+): string | null {
+  for (const raw of wordsOf(text)) {
+    const w = stem(raw);
+    if (!w || guard.names.has(w)) continue;
+    for (const name of guard.names) {
+      if (
+        [...name].length >= 4 && w[0] === name[0] &&
+        editDistance(w, name) <= ([...name].length >= 6 ? 2 : 1)
+      ) return `«${raw}» changes the name «${name}»`;
+    }
+    if (guard.own.has(w)) continue;
+    if (FIRST_NAMES.has(w)) return `«${raw}»: a name the user never wrote`;
+    if (guard.described.has(w)) {
+      return `«${raw}»: only in the photo descriptions`;
+    }
+  }
+  return null;
 }
 
 // Picks in the order slots are resolved: the notes (the user's lines)
@@ -514,15 +870,21 @@ export function resolveGvSlots(
   const titles: string[] = options.shown.filter((t) => t.trim());
   const results = new Map<string, GvSlotResult>();
   // Captions first: they always play, so no other slot takes their words.
-  const rank = (x: GvSlot) => ORDER.indexOf(x.kind) * 2 + (x.fixed ? 0 : 1);
+  // A caption, as label or note, before every other slot (#460).
+  const rank = (x: GvSlot) => x.fixed ? -1 : ORDER.indexOf(x.kind);
   const ordered = [...slots].sort((a, b) => rank(a) - rank(b));
   for (const slot of ordered) {
     const isLine = slot.kind === "note";
     // The finale may name what a title names; only the same whole words
     // are a repeat.
+    const lower = (t: string) => t.toLowerCase().replace(/ё/g, "е");
     const free = (text: string) =>
       isLine
         ? !lines.some((l) => sameLine(l, text))
+        // A label never repeats words a note shows (#460).
+        : slot.kind === "label" &&
+            lines.some((l) => lower(l).includes(lower(text)))
+        ? false
         : !titles.some((t) =>
           slot.kind === "finale"
             ? t.toLowerCase() === text.toLowerCase()
@@ -537,7 +899,8 @@ export function resolveGvSlots(
             options,
             MAX_FREE[slot.kind],
             slot.kind === "finale" || slot.kind === "occasion",
-          ) ?? (free(text) ? null : "repeats words the album shows")
+          ) ?? (options.guard ? gvWordsProblem(text, options.guard) : null) ??
+            (free(text) ? null : "repeats words the album shows")
         : null,
       // A caption always plays, as written (#458): never trimmed.
       fits: (chosen, c) =>
@@ -559,7 +922,11 @@ export function resolveGvSlots(
       });
       source = "code";
     }
-    for (const c of chosen) (isLine ? lines : titles).push(c.text);
+    for (const c of chosen) {
+      (isLine ? lines : titles).push(c.text);
+      // A caption's words are taken for lines and titles alike.
+      if (slot.fixed) (isLine ? titles : lines).push(c.text);
+    }
     const reason = slot.fixed
       ? "the photo's caption, as written"
       : source === "director"
@@ -588,27 +955,26 @@ export function resolveGvSlots(
   return results;
 }
 
-// The notes on no main page's list, and why (#458).
+// The notes on no main page's list, and why (#458, #460).
 export function gvUnlistedNotes(
   tripData: TripData,
   skeleton: GvSkeleton,
   slots: readonly GvSlot[],
 ): { note_id: string; text: string; reason: string }[] {
   const listed = new Set(
-    slots.flatMap((s) => s.candidates.map((c) => c.note_id)),
+    slots.filter((s) => s.kind === "note").flatMap((s) =>
+      s.candidates.map((c) => c.note_id)
+    ),
   );
-  const owners = noteChapters(tripData, skeleton.chapters);
-  const byId = new Map(tripData.photos.map((p) => [p.id, p]));
+  const homes = gvNoteHomes(tripData, skeleton);
   return tripData.notes.filter((n) =>
     n.id && n.content.trim() && !listed.has(n.id)
   ).map((n) => {
-    const chapter = owners.get(n.id!)?.[0];
-    const reason = chapter === undefined
-      ? "on no chapter (no photos on its day)"
-      : !skeleton.mains.some((m) =>
-          m.chapter === chapter && !byId.get(m.photo_id)?.caption?.trim()
-        )
-      ? "its chapter's main pages all show their captions"
+    const home = homes.get(n.id!);
+    const reason = home === "none"
+      ? "no main page for a note in its chapter (or no chapter on its day)"
+      : home === "prints"
+      ? "it belongs to a page of prints: its photo, or the photos it was written among"
       : linesOf(n, THEME).length === 0
       ? "no line left after the drug filter"
       : linesOf(n, THEME).every((l) => l.tier === "generic")

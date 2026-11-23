@@ -8,10 +8,10 @@
 // order (#458): a main page's note line → a shorter clause of the same
 // note → no note; the carousel; the packing card; main pages down to 2
 // (uncaptioned, not Always, weakest first); then the app shortens the
-// chapter pages, never below their title's reading time (GvFit). A short
-// album still past its target at its quickest also gives up the carousel,
-// then the packing card. Never a chapter, a note (for the target), the
-// title page, the heart or a caption.
+// chapter pages, never below their title's reading time (GvFit). Second
+// pages of prints go first, before the user's words (#460).
+// Never a chapter, the title page, the heart or a caption; nothing is
+// trimmed for a short album's target (#460: as Neon Night).
 
 import type { TripData } from "./gather.ts";
 import { inclusiveDayCount } from "./assemble.ts";
@@ -24,7 +24,9 @@ import {
   type GoldenVowsContent,
   GV_VERSION,
   gvPhotos,
+  MAX_GV_CAROUSEL,
   MAX_GV_HEART,
+  MIN_GV_CAROUSEL,
   MIN_GV_HEROES,
   packingOf,
 } from "./golden_vows.ts";
@@ -41,6 +43,7 @@ import {
   type GvSlot,
   type GvSlotResult,
   gvUnlistedNotes,
+  gvWordGuard,
   resolveGvSlots,
 } from "./gv_slots.ts";
 import { sameLine } from "./neon_night.ts";
@@ -55,9 +58,6 @@ const GV_CHAPTER_DWELL = 3.4;
 const GV_CAROUSEL_DWELL = 6.0;
 // How far the app shrinks the pages' dwell for a short film.
 export const GV_MIN_DWELL_SCALE = 0.7;
-// How far past its target a short album may run before it gives up its
-// carousel, then its packing card (#458).
-export const GV_TARGET_SLACK_SECONDS = 1.5;
 // How far under the longest film the estimate keeps the album (#454's
 // margin): the phone lays notes out with its own fonts.
 export const GV_ESTIMATE_MARGIN_SECONDS = 1;
@@ -72,7 +72,8 @@ export function gvSecondsAt(content: GoldenVowsContent, scale: number): number {
     ) + GV_TURN;
   return GV_FIXED + (content.packing?.items.length ? GV_PACKING : 0) +
     content.heroes.reduce((s, h) => s + hero(h.note), 0) +
-    content.chapters.length * (GV_CHAPTER_DWELL * scale + GV_TURN) +
+    content.chapters.reduce((s, c) => s + (c.pages?.length ?? 1), 0) *
+      (GV_CHAPTER_DWELL * scale + GV_TURN) +
     (content.carousel ? GV_CAROUSEL_DWELL * scale + GV_TURN : 0);
 }
 
@@ -135,10 +136,18 @@ export function goldenVowsFilm(
     names: namesOf(tripData),
     dayTitle: (i) => gvDayTitle(tripData, skeleton, i, language),
     shown: [tripData.trip.name, tripData.trip.destination ?? ""],
+    guard: gvWordGuard(tripData, options.summaries ?? new Map()),
   });
   const text = (slot: string) => resolved.get(slot)?.chosen[0]?.text ?? null;
   const byId = new Map(tripData.photos.map((p) => [p.id, p]));
 
+  // Every page's place in the play order (#460).
+  const orderOf = new Map(
+    skeleton.sequence.map((p, k) => [
+      p.kind === "main" ? `main:${p.main}` : `ch:${p.chapter}:${p.page}`,
+      k,
+    ]),
+  );
   const heroes = skeleton.mains.map((m, k) => {
     const photo = byId.get(m.photo_id)!;
     const captioned = !!photo.caption?.trim();
@@ -148,6 +157,7 @@ export function goldenVowsFilm(
       // A captioned page shows its caption, never the time (#458).
       taken_at: captioned ? null : photo.taken_at,
       note: text(`main${k + 1}.note`),
+      order: orderOf.get(`main:${k}`)!,
     };
   });
   const chapters = skeleton.chapters.map((c, i) => ({
@@ -156,6 +166,11 @@ export function goldenVowsFilm(
     line: gvChapterLine(c.photos, i, language, utcOffset),
     photo_ids: [...c.prints],
     layout: c.layout,
+    pages: c.pages.map((pg, k) => ({
+      photo_ids: [...pg.prints],
+      layout: pg.layout,
+      order: orderOf.get(`ch:${i}:${k}`)!,
+    })),
   }));
   const carouselTitle = text("carousel.title");
   const { start_date, end_date } = tripData.trip;
@@ -186,8 +201,25 @@ export function goldenVowsFilm(
     end_line: text("finale") ?? "",
   };
 
-  const fitted = fitToLongest(content, skeleton, slots, tripData, heroScores);
+  // A carousel of [ids] (#460: what a second page of prints gave up).
+  const carouselOf = (ids: string[]) =>
+    carouselTitle
+      ? {
+        title: carouselTitle,
+        line: carouselLine(carouselTitle, language),
+        photo_ids: ids,
+      }
+      : null;
+  const fitted = fitToLongest(
+    content,
+    skeleton,
+    slots,
+    tripData,
+    heroScores,
+    carouselOf,
+  );
   content = fitted.content;
+  renumberPages(content);
   const shownIds = new Set([
     ...content.heroes.map((h) => h.photo_id),
     ...content.chapters.flatMap((c) => c.photo_ids),
@@ -247,6 +279,7 @@ function fitToLongest(
   slots: readonly GvSlot[],
   tripData: TripData,
   heroScores: Readonly<Record<string, number>>,
+  carouselOf: (ids: string[]) => GoldenVowsContent["carousel"],
 ): {
   content: GoldenVowsContent;
   trims: string[];
@@ -271,6 +304,32 @@ function fitToLongest(
     content.heroes.filter((h) => h.note && !captioned(h.photo_id))
       .sort((a, b) => [...b.note!].length - [...a.note!].length);
 
+  // 0. Second pages of prints (#460), the latest chapter first — before
+  // the user's words: their chapter keeps its first page.
+  // Their photos go on the carousel, which shows up to 12 on one page.
+  const freed: string[] = [];
+  for (const chapter of [...content.chapters].reverse()) {
+    if (fits()) break;
+    const pages = chapter.pages ?? [];
+    if (pages.length < 2) continue;
+    chapter.pages = pages.slice(0, 1);
+    chapter.photo_ids = [...pages[0].photo_ids];
+    freed.push(...pages.slice(1).flatMap((pg) => pg.photo_ids));
+    trims.push(`${chapter.title}: one page of prints`);
+  }
+  if (freed.length > 0) {
+    const at = new Map(gvPhotos(tripData).map((p, k) => [p.id, k]));
+    const pool = [
+      ...new Set([...(content.carousel?.photo_ids ?? []), ...freed]),
+    ]
+      .sort((a, b) => (at.get(a) ?? 0) - (at.get(b) ?? 0))
+      .slice(0, MAX_GV_CAROUSEL);
+    const carousel = pool.length >= MIN_GV_CAROUSEL ? carouselOf(pool) : null;
+    if (carousel) {
+      content.carousel = carousel;
+      trims.push(`their ${freed.length} prints on the carousel`);
+    }
+  }
   // 1. Note lines → a shorter clause of the same note.
   for (const hero of trimmable()) {
     if (fits()) break;
@@ -283,10 +342,14 @@ function fitToLongest(
       ...content.heroes.flatMap((h) => [h.label, h.note ?? ""]),
       ...content.chapters.map((c) => c.title),
     ];
+    // … nor a label's words inside it (#460).
+    const labels = content.heroes.map((h) => h.label.toLowerCase())
+      .filter(Boolean);
     const shorter = slot?.candidates.filter((c) =>
       c.note_id === now?.note_id &&
       [...c.text].length < [...hero.note!].length &&
-      !shown.some((t) => sameLine(t, c.text))
+      !shown.some((t) => sameLine(t, c.text)) &&
+      !labels.some((l) => c.text.toLowerCase().includes(l))
     ).sort((a, b) => b.score - a.score)[0];
     if (!slot || !shorter) continue;
     trims.push(`${slot.slot}: a shorter clause of its note`);
@@ -324,20 +387,15 @@ function fitToLongest(
   }
   // 6. The app shortens the chapter pages (GvFit).
   if (!fits()) trims.push("chapter pages shortened in the app");
-  // A short album (#458): still past its target at its quickest, it
-  // gives up the carousel, then the packing card — the heart still shows
-  // every photo. Never a chapter, a note, a caption, the title page or
-  // the heart; a long album (target 75 s) never gets here.
-  const target = filmSecondsOf(tripData);
-  const over = () =>
-    gvShortestSeconds(content) > target + GV_TARGET_SLACK_SECONDS;
-  if (over() && content.carousel) {
-    content.carousel = null;
-    trims.push("no carousel (for the target)");
-  }
-  if (over() && content.packing) {
-    content.packing = null;
-    trims.push("no packing card (for the target)");
-  }
   return { content, trims, notes };
+}
+
+// Pages left after the trims play 0, 1, 2, … in their order (#460).
+function renumberPages(content: GoldenVowsContent) {
+  const pages: { order?: number }[] = [
+    ...content.heroes,
+    ...content.chapters.flatMap((c) => c.pages ?? []),
+  ];
+  pages.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .forEach((p, k) => p.order = k);
 }
