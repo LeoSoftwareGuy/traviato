@@ -72,6 +72,7 @@ WrapUpGoldenVowsHero? _hero(dynamic json) {
     label: _string(json['label']),
     takenAt: takenAt == null ? null : DateTime.tryParse(takenAt),
     note: _string(json['note']),
+    order: _order(json['order']),
   );
 }
 
@@ -80,14 +81,40 @@ WrapUpGoldenVowsChapter? _chapter(dynamic json) {
   final title = _string(json['title']);
   final photoIds = _ids(json['photo_ids']);
   if (title == null || photoIds.isEmpty) return null;
-  final layout = json['layout'];
   return WrapUpGoldenVowsChapter(
     title: title,
     line: _string(json['line']),
     photoIds: photoIds,
-    layout: const {'A', 'B', 'C'}.contains(layout) ? layout as String : null,
+    layout: _layout(json['layout']),
+    pages: _pages(json['pages']),
   );
 }
+
+/// A chapter's pages (#460); none unless every one has prints and an
+/// order, so older content plays as one page.
+List<WrapUpGoldenVowsChapterPage> _pages(dynamic value) {
+  final pages = <WrapUpGoldenVowsChapterPage>[];
+  for (final page in _list(value)) {
+    if (page is! Map) return const [];
+    final photoIds = _ids(page['photo_ids']);
+    final order = _order(page['order']);
+    if (photoIds.isEmpty || order == null) return const [];
+    pages.add(
+      WrapUpGoldenVowsChapterPage(
+        photoIds: photoIds,
+        order: order,
+        layout: _layout(page['layout']),
+        note: _string(page['note']),
+      ),
+    );
+  }
+  return pages;
+}
+
+String? _layout(dynamic value) =>
+    const {'A', 'B', 'C', 'B2'}.contains(value) ? value as String : null;
+
+int? _order(dynamic value) => value is int && value >= 0 ? value : null;
 
 /// `2026-06-14` as a local calendar date.
 DateTime? _date(dynamic value) {

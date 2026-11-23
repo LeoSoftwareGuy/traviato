@@ -1,0 +1,1573 @@
+{
+  "exported_at": "2026-11-22T19:58:17.859Z",
+  "trip_data": {
+    "trip": {
+      "name": "Elmas birthday",
+      "destination": "Budapest Hungary",
+      "country_code": null,
+      "start_date": "2026-02-26",
+      "end_date": "2026-03-01",
+      "vibes": [
+        "Romantic",
+        "Adventure"
+      ],
+      "cover_image_path": "c2ee6084-a15e-4ade-8979-7af9afd05985/75380260-09fd-4b4d-a077-ce6f1ce7ded5/cover.jpg"
+    },
+    "notes": [
+      {
+        "id": "36265ad3-b2ea-49cf-bb9c-fd9d60d8573b",
+        "day_date": "2026-02-26",
+        "content": "Direct plane from Tallinn to Budapest is the best, just 2 hours and you are there.",
+        "created_at": "2026-11-22T18:06:50.647189+00:00",
+        "taken_at": "2026-02-26T23:08:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "3794a728-28b4-4f6e-a4a8-482a94f9770f",
+        "day_date": "2026-02-26",
+        "content": "Checked in to our appartment, had some snacks and went to sleep. Will explore the city in the morning",
+        "created_at": "2026-11-22T18:09:39.644955+00:00",
+        "taken_at": "2026-02-26T23:38:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "b525d33e-d7df-4763-922d-f1517785d477",
+        "day_date": "2026-02-26",
+        "content": "Mortimer is feeling lonely",
+        "created_at": "2026-11-22T18:07:58.424603+00:00",
+        "taken_at": "2026-11-22T18:07:58.325055+00:00",
+        "photo_id": "f8710fb6-e80e-4c39-86c7-535b7c874318",
+        "legacy": false
+      },
+      {
+        "id": "1cdb63f2-58e9-4504-84d1-4f678251d84c",
+        "day_date": "2026-02-26",
+        "content": "Favourite coffee Arabica",
+        "created_at": "2026-11-22T18:08:45.093508+00:00",
+        "taken_at": "2026-11-22T18:08:44.975007+00:00",
+        "photo_id": "3001aefd-4cfb-4ebb-8b51-07f1ba6a73d0",
+        "legacy": false
+      },
+      {
+        "id": "2a28c39a-d3f8-44a2-8921-d5fece183c84",
+        "day_date": "2026-02-27",
+        "content": "Woke up and went for some local cousine breakfast, absolute delight. Prices are good too",
+        "created_at": "2026-11-22T18:10:26.552888+00:00",
+        "taken_at": "2026-02-27T09:00:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "ebac3e6c-9d6c-457d-9a69-9c31ce4f2955",
+        "day_date": "2026-02-27",
+        "content": "Went to really posh looking cafe for a golden coffee",
+        "created_at": "2026-11-22T19:10:44.763512+00:00",
+        "taken_at": "2026-02-27T14:30:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "e8178b1a-6561-4781-bd65-d0444f6f2699",
+        "day_date": "2026-02-27",
+        "content": "Had a lovely meal and decided to check out famous bars. This particular is called Szimpla Kert it has 2 floors and has lots of rooms , feels like a maze full of bars and people",
+        "created_at": "2026-11-22T19:13:29.938517+00:00",
+        "taken_at": "2026-02-27T21:00:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "6c51e5b4-74d9-42d1-87cd-1e4d690c38d6",
+        "day_date": "2026-02-28",
+        "content": "Today is Elmas birthday so we decided to start our day with famous spas. It s massive building with lots of saunas and outside hot swimming pool. This was amazing, you can spend entire day there",
+        "created_at": "2026-11-22T19:17:47.286259+00:00",
+        "taken_at": "2026-02-28T11:00:00+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "f4271f40-3440-487f-a6ef-2438f54332ae",
+        "day_date": "2026-02-28",
+        "content": "Then decided to walk around castle and straight to irish bar for some guiness pie and guiness, needles to say",
+        "created_at": "2026-11-22T19:19:03.503443+00:00",
+        "taken_at": "2026-11-22T19:19:03.413316+00:00",
+        "photo_id": null,
+        "legacy": false
+      },
+      {
+        "id": "673ad7f8-a478-4ab1-9753-9a1f30358275",
+        "day_date": "2026-03-01",
+        "content": "Last day in this lovely city and to make things even worse i have just seen Travis Fimmel one of my favourite actors . I have been one hand shake away from him but hesitated and thought for a second its not him. Then verified it was him after googling and rushed after him but it was to late. Vould not find him.",
+        "created_at": "2026-11-22T19:22:14.459422+00:00",
+        "taken_at": "2026-11-22T19:22:14.367421+00:00",
+        "photo_id": null,
+        "legacy": false
+      }
+    ],
+    "photos": [
+      {
+        "id": "2a3015fb-9e76-48ac-bc8b-8d2920b65777",
+        "day_date": "2026-02-26",
+        "taken_at": "2026-02-26T23:08:20+00:00",
+        "created_at": "2026-11-22T18:07:33.554462+00:00",
+        "storage_path": "p/2a3015fb-9e76-48ac-bc8b-8d2920b65777.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "3001aefd-4cfb-4ebb-8b51-07f1ba6a73d0",
+        "day_date": "2026-02-26",
+        "taken_at": "2026-02-26T23:08:28+00:00",
+        "created_at": "2026-11-22T18:07:34.312395+00:00",
+        "storage_path": "p/3001aefd-4cfb-4ebb-8b51-07f1ba6a73d0.jpg",
+        "caption": null,
+        "use_in_wrap_up": null,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "f8710fb6-e80e-4c39-86c7-535b7c874318",
+        "day_date": "2026-02-26",
+        "taken_at": "2026-02-26T20:57:40+00:00",
+        "created_at": "2026-11-22T18:07:34.952928+00:00",
+        "storage_path": "p/f8710fb6-e80e-4c39-86c7-535b7c874318.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "5d120b72-72e5-45fa-9526-3a7f84e4375c",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T09:48:48+00:00",
+        "created_at": "2026-11-22T18:11:10.953846+00:00",
+        "storage_path": "p/5d120b72-72e5-45fa-9526-3a7f84e4375c.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "876cbe54-549e-442e-bc22-74b831752c2c",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T10:33:07+00:00",
+        "created_at": "2026-11-22T19:07:52.293724+00:00",
+        "storage_path": "p/876cbe54-549e-442e-bc22-74b831752c2c.jpg",
+        "caption": null,
+        "use_in_wrap_up": null,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "d9d0995e-43fe-4cd8-a03c-7cdd8f2591e5",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T10:42:58+00:00",
+        "created_at": "2026-11-22T19:07:53.301203+00:00",
+        "storage_path": "p/d9d0995e-43fe-4cd8-a03c-7cdd8f2591e5.jpg",
+        "caption": null,
+        "use_in_wrap_up": null,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "501ce519-e1c5-432f-81f5-314a8abd9078",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T10:44:10+00:00",
+        "created_at": "2026-11-22T19:07:53.981295+00:00",
+        "storage_path": "p/501ce519-e1c5-432f-81f5-314a8abd9078.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "b776e84f-0242-4797-90b9-470beb656236",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T11:12:57+00:00",
+        "created_at": "2026-11-22T19:07:54.766549+00:00",
+        "storage_path": "p/b776e84f-0242-4797-90b9-470beb656236.jpg",
+        "caption": null,
+        "use_in_wrap_up": null,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "44871494-97ed-40df-af3f-c0adc7ecd541",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T11:32:11+00:00",
+        "created_at": "2026-11-22T19:07:55.453217+00:00",
+        "storage_path": "p/44871494-97ed-40df-af3f-c0adc7ecd541.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "c4addcfd-e459-4050-942c-d2bb63dd9211",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T11:38:04+00:00",
+        "created_at": "2026-11-22T19:07:56.842933+00:00",
+        "storage_path": "p/c4addcfd-e459-4050-942c-d2bb63dd9211.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "bb322bba-1799-4a75-900a-87e5a4edbd79",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T11:44:36+00:00",
+        "created_at": "2026-11-22T19:07:57.579684+00:00",
+        "storage_path": "p/bb322bba-1799-4a75-900a-87e5a4edbd79.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "662f69c6-c2d2-4035-b438-db36b4ad798d",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T11:40:42+00:00",
+        "created_at": "2026-11-22T19:07:58.48119+00:00",
+        "storage_path": "p/662f69c6-c2d2-4035-b438-db36b4ad798d.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "a95bd32e-1ff4-4c1d-8656-17a276c06893",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T12:40:05+00:00",
+        "created_at": "2026-11-22T19:08:49.90498+00:00",
+        "storage_path": "p/a95bd32e-1ff4-4c1d-8656-17a276c06893.jpg",
+        "caption": "most beautiful parlament building i have seen",
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "e72d4013-7abc-47c5-9efd-bee9220c1d5a",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T15:04:13+00:00",
+        "created_at": "2026-11-22T19:09:57.992822+00:00",
+        "storage_path": "p/e72d4013-7abc-47c5-9efd-bee9220c1d5a.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "25661aa6-6ae6-482b-94f8-42d366fe911b",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T14:43:09+00:00",
+        "created_at": "2026-11-22T19:09:58.719209+00:00",
+        "storage_path": "p/25661aa6-6ae6-482b-94f8-42d366fe911b.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "1a1ff08d-0651-4d0e-913e-03c5e64a4ca9",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T21:43:38+00:00",
+        "created_at": "2026-11-22T19:13:59.910104+00:00",
+        "storage_path": "p/1a1ff08d-0651-4d0e-913e-03c5e64a4ca9.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "6137b255-2970-4f50-9c77-9fd6b2197b57",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T21:46:31+00:00",
+        "created_at": "2026-11-22T19:14:00.663858+00:00",
+        "storage_path": "p/6137b255-2970-4f50-9c77-9fd6b2197b57.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "be26b00b-4468-4aa5-bc7c-360dfdd88362",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T21:56:00+00:00",
+        "created_at": "2026-11-22T19:14:01.372267+00:00",
+        "storage_path": "p/be26b00b-4468-4aa5-bc7c-360dfdd88362.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "5b209670-5ca9-43c3-9e26-9a36a8420a93",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T21:55:56+00:00",
+        "created_at": "2026-11-22T19:14:02.258773+00:00",
+        "storage_path": "p/5b209670-5ca9-43c3-9e26-9a36a8420a93.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "6438ee46-bb02-4ab2-b918-71750538e3bd",
+        "day_date": "2026-02-27",
+        "taken_at": "2026-02-27T21:05:57+00:00",
+        "created_at": "2026-11-22T19:14:02.8394+00:00",
+        "storage_path": "p/6438ee46-bb02-4ab2-b918-71750538e3bd.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "133bbde8-1a94-4e41-8c21-ef92537b7b86",
+        "day_date": "2026-02-28",
+        "taken_at": "2026-02-28T12:11:31+00:00",
+        "created_at": "2026-11-22T19:18:08.201219+00:00",
+        "storage_path": "p/133bbde8-1a94-4e41-8c21-ef92537b7b86.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "d3863676-22e4-4005-8268-b57ec4116036",
+        "day_date": "2026-02-28",
+        "taken_at": "2026-02-28T13:19:38+00:00",
+        "created_at": "2026-11-22T19:18:08.933838+00:00",
+        "storage_path": "p/d3863676-22e4-4005-8268-b57ec4116036.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "4e22d3a0-1515-4dba-938e-b561a24b4356",
+        "day_date": "2026-02-28",
+        "taken_at": "2026-02-28T13:35:59+00:00",
+        "created_at": "2026-11-22T19:18:09.690929+00:00",
+        "storage_path": "p/4e22d3a0-1515-4dba-938e-b561a24b4356.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "cf4afcdf-5436-4bc1-8213-7e211a10a59b",
+        "day_date": "2026-02-28",
+        "taken_at": "2026-02-28T13:37:09+00:00",
+        "created_at": "2026-11-22T19:18:10.286469+00:00",
+        "storage_path": "p/cf4afcdf-5436-4bc1-8213-7e211a10a59b.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "e24977fe-a9d6-47f7-9805-fda3b3b513ab",
+        "day_date": "2026-02-28",
+        "taken_at": "2026-02-28T13:19:46+00:00",
+        "created_at": "2026-11-22T19:18:10.887334+00:00",
+        "storage_path": "p/e24977fe-a9d6-47f7-9805-fda3b3b513ab.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "a4770d99-fc53-47e6-95ba-934ee8e925ef",
+        "day_date": "2026-02-28",
+        "taken_at": "2026-02-28T14:51:03+00:00",
+        "created_at": "2026-11-22T19:20:17.610661+00:00",
+        "storage_path": "p/a4770d99-fc53-47e6-95ba-934ee8e925ef.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      },
+      {
+        "id": "be7ede64-e0e3-4778-9da3-83b72ec63bf2",
+        "day_date": "2026-02-28",
+        "taken_at": "2026-02-28T14:42:05+00:00",
+        "created_at": "2026-11-22T19:20:18.229647+00:00",
+        "storage_path": "p/be7ede64-e0e3-4778-9da3-83b72ec63bf2.jpg",
+        "caption": null,
+        "use_in_wrap_up": true,
+        "place_text": null,
+        "people_tags": []
+      }
+    ],
+    "completedBonusTasks": [],
+    "starsEarned": 63,
+    "latestAchievement": {
+      "code": "first_adventure",
+      "title": "First Adventure",
+      "description": "Log your first memory."
+    },
+    "checklist": [],
+    "quests": [],
+    "username": null,
+    "utc_offset_minutes": 120
+  },
+  "analyses": [
+    {
+      "photo_id": "f8710fb6-e80e-4c39-86c7-535b7c874318",
+      "trip_id": "t",
+      "storage_path": "p/f8710fb6-e80e-4c39-86c7-535b7c874318.jpg",
+      "summary": "Cat watching TV in cozy living room with string lights",
+      "setting": "home",
+      "people": "0",
+      "energy": "calm",
+      "quality": "dark",
+      "orientation": "portrait",
+      "hero_score": 3,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "2a3015fb-9e76-48ac-bc8b-8d2920b65777",
+      "trip_id": "t",
+      "storage_path": "p/2a3015fb-9e76-48ac-bc8b-8d2920b65777.jpg",
+      "summary": "Coffee shop counter with espresso machine and grinders full of beans",
+      "setting": "city",
+      "people": "small_group",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 2,
+      "dup_group": "mws8pnyr-b0-a",
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "3001aefd-4cfb-4ebb-8b51-07f1ba6a73d0",
+      "trip_id": "t",
+      "storage_path": "p/3001aefd-4cfb-4ebb-8b51-07f1ba6a73d0.jpg",
+      "summary": "Coffee shop with neon percent sign and espresso machine",
+      "setting": "city",
+      "people": "1",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 3,
+      "dup_group": "mws8pnyr-b0-a",
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "5d120b72-72e5-45fa-9526-3a7f84e4375c",
+      "trip_id": "t",
+      "storage_path": "p/5d120b72-72e5-45fa-9526-3a7f84e4375c.jpg",
+      "summary": "Brunch plates with eggs benedict, orange juice and salad on table",
+      "setting": "outdoor",
+      "people": "0",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 3,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "876cbe54-549e-442e-bc22-74b831752c2c",
+      "trip_id": "t",
+      "storage_path": "p/876cbe54-549e-442e-bc22-74b831752c2c.jpg",
+      "summary": "Grand domed basilica facade with twin towers under blue sky",
+      "setting": "city",
+      "people": "crowd",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 5,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "d9d0995e-43fe-4cd8-a03c-7cdd8f2591e5",
+      "trip_id": "t",
+      "storage_path": "p/d9d0995e-43fe-4cd8-a03c-7cdd8f2591e5.jpg",
+      "summary": "Yellow taxis crossing chain bridge with lion statue and castle view",
+      "setting": "city",
+      "people": "small_group",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 4,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "501ce519-e1c5-432f-81f5-314a8abd9078",
+      "trip_id": "t",
+      "storage_path": "p/501ce519-e1c5-432f-81f5-314a8abd9078.jpg",
+      "summary": "Man standing on bridge with lion statue and castle in background",
+      "setting": "city",
+      "people": "small_group",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 3,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "b776e84f-0242-4797-90b9-470beb656236",
+      "trip_id": "t",
+      "storage_path": "p/b776e84f-0242-4797-90b9-470beb656236.jpg",
+      "summary": "Ornate hunting fountain statue with hunters, dogs and stag",
+      "setting": "city",
+      "people": "1",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 4,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "44871494-97ed-40df-af3f-c0adc7ecd541",
+      "trip_id": "t",
+      "storage_path": "p/44871494-97ed-40df-af3f-c0adc7ecd541.jpg",
+      "summary": "Bronze equestrian statue of crowned king on ornate pedestal",
+      "setting": "city",
+      "people": "0",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 4,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "c4addcfd-e459-4050-942c-d2bb63dd9211",
+      "trip_id": "t",
+      "storage_path": "p/c4addcfd-e459-4050-942c-d2bb63dd9211.jpg",
+      "summary": "Two people sitting in stone archway overlooking city skyline",
+      "setting": "city",
+      "people": "2",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 5,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "662f69c6-c2d2-4035-b438-db36b4ad798d",
+      "trip_id": "t",
+      "storage_path": "p/662f69c6-c2d2-4035-b438-db36b4ad798d.jpg",
+      "summary": "Stone archway framing distant parliament building across river",
+      "setting": "city",
+      "people": "0",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 4,
+      "dup_group": "mws8pnyr-b0-b",
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "bb322bba-1799-4a75-900a-87e5a4edbd79",
+      "trip_id": "t",
+      "storage_path": "p/bb322bba-1799-4a75-900a-87e5a4edbd79.jpg",
+      "summary": "Couple kissing beneath stone archway with city view behind",
+      "setting": "city",
+      "people": "2",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 5,
+      "dup_group": "mws8pnyr-b0-b",
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "a95bd32e-1ff4-4c1d-8656-17a276c06893",
+      "trip_id": "t",
+      "storage_path": "p/a95bd32e-1ff4-4c1d-8656-17a276c06893.jpg",
+      "summary": "Gothic parliament building with spires and dome against blue sky",
+      "setting": "city",
+      "people": "0",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 5,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "25661aa6-6ae6-482b-94f8-42d366fe911b",
+      "trip_id": "t",
+      "storage_path": "p/25661aa6-6ae6-482b-94f8-42d366fe911b.jpg",
+      "summary": "Café menu page showing gold-topped coffee drink photos",
+      "setting": "indoor",
+      "people": "0",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 1,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "e72d4013-7abc-47c5-9efd-bee9220c1d5a",
+      "trip_id": "t",
+      "storage_path": "p/e72d4013-7abc-47c5-9efd-bee9220c1d5a.jpg",
+      "summary": "Man overlooking ornate gilded cafe interior from balcony",
+      "setting": "indoor",
+      "people": "1",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 4,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "6438ee46-bb02-4ab2-b918-71750538e3bd",
+      "trip_id": "t",
+      "storage_path": "p/6438ee46-bb02-4ab2-b918-71750538e3bd.jpg",
+      "summary": "DJ mixing records in colorful eclectic ruin bar booth",
+      "setting": "night-out",
+      "people": "1",
+      "energy": "high",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 4,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "1a1ff08d-0651-4d0e-913e-03c5e64a4ca9",
+      "trip_id": "t",
+      "storage_path": "p/1a1ff08d-0651-4d0e-913e-03c5e64a4ca9.jpg",
+      "summary": "Man posing on balcony in plant-filled decorated ruin bar",
+      "setting": "night-out",
+      "people": "1",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 3,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "6137b255-2970-4f50-9c77-9fd6b2197b57",
+      "trip_id": "t",
+      "storage_path": "p/6137b255-2970-4f50-9c77-9fd6b2197b57.jpg",
+      "summary": "Colorful tiled sign reading Buda Lovin Pest on graffiti wall",
+      "setting": "night-out",
+      "people": "1",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 3,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "5b209670-5ca9-43c3-9e26-9a36a8420a93",
+      "trip_id": "t",
+      "storage_path": "p/5b209670-5ca9-43c3-9e26-9a36a8420a93.jpg",
+      "summary": "Blue-lit plant-covered courtyard with neon signs at night",
+      "setting": "night-out",
+      "people": "small_group",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 4,
+      "dup_group": "mws8pnyr-b0-c",
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "be26b00b-4468-4aa5-bc7c-360dfdd88362",
+      "trip_id": "t",
+      "storage_path": "p/be26b00b-4468-4aa5-bc7c-360dfdd88362.jpg",
+      "summary": "Neon-lit greenery filled bar corridor with hanging flowers",
+      "setting": "night-out",
+      "people": "small_group",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 4,
+      "dup_group": "mws8pnyr-b0-c",
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "133bbde8-1a94-4e41-8c21-ef92537b7b86",
+      "trip_id": "t",
+      "storage_path": "p/133bbde8-1a94-4e41-8c21-ef92537b7b86.jpg",
+      "summary": "Crowded thermal bath pool before yellow bathhouse building",
+      "setting": "outdoor",
+      "people": "crowd",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 4,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "d3863676-22e4-4005-8268-b57ec4116036",
+      "trip_id": "t",
+      "storage_path": "p/d3863676-22e4-4005-8268-b57ec4116036.jpg",
+      "summary": "Couple embracing in thermal pool near statue fountain",
+      "setting": "outdoor",
+      "people": "small_group",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 5,
+      "dup_group": "mws8pnyr-b1-a",
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "e24977fe-a9d6-47f7-9805-fda3b3b513ab",
+      "trip_id": "t",
+      "storage_path": "p/e24977fe-a9d6-47f7-9805-fda3b3b513ab.jpg",
+      "summary": "Couple embracing face to face in thermal pool water",
+      "setting": "outdoor",
+      "people": "small_group",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 5,
+      "dup_group": "mws8pnyr-b1-a",
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "4e22d3a0-1515-4dba-938e-b561a24b4356",
+      "trip_id": "t",
+      "storage_path": "p/4e22d3a0-1515-4dba-938e-b561a24b4356.jpg",
+      "summary": "Crowded thermal pool with hot air balloon over rooftops",
+      "setting": "outdoor",
+      "people": "crowd",
+      "energy": "high",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 4,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "cf4afcdf-5436-4bc1-8213-7e211a10a59b",
+      "trip_id": "t",
+      "storage_path": "p/cf4afcdf-5436-4bc1-8213-7e211a10a59b.jpg",
+      "summary": "Man drinking beer poolside with hot air balloon backdrop",
+      "setting": "outdoor",
+      "people": "crowd",
+      "energy": "medium",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 4,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "be7ede64-e0e3-4778-9da3-83b72ec63bf2",
+      "trip_id": "t",
+      "storage_path": "p/be7ede64-e0e3-4778-9da3-83b72ec63bf2.jpg",
+      "summary": "Ornate baroque building rooftop with statues against blue sky",
+      "setting": "city",
+      "people": "0",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 3,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    },
+    {
+      "photo_id": "a4770d99-fc53-47e6-95ba-934ee8e925ef",
+      "trip_id": "t",
+      "storage_path": "p/a4770d99-fc53-47e6-95ba-934ee8e925ef.jpg",
+      "summary": "Historical bust statue beside bare tree and yellow bridge",
+      "setting": "city",
+      "people": "small_group",
+      "energy": "calm",
+      "quality": "sharp",
+      "orientation": "portrait",
+      "hero_score": 3,
+      "dup_group": null,
+      "model": "claude-sonnet-5"
+    }
+  ],
+  "recorded_director": {
+    "plan": null,
+    "model": "claude-sonnet-5",
+    "usage": {
+      "calls": [
+        {
+          "call": "section",
+          "input_tokens": 6307,
+          "output_tokens": 673
+        }
+      ],
+      "input_tokens": 6307,
+      "estimated_usd": 0.0193,
+      "output_tokens": 673
+    },
+    "photos": {
+      "cached": 27,
+      "failed": 0,
+      "plannable": 23,
+      "analysed_now": 0
+    },
+    "ran_at": "2026-11-22T19:47:29.222Z",
+    "status": "fallback",
+    "attempts": 0,
+    "gv_shown": {
+      "pages": 13,
+      "photos": 23
+    },
+    "gv_slots": [
+      {
+        "pick": {
+          "ids": [],
+          "free_title": "Elma's birthday in Budapest"
+        },
+        "slot": "occasion",
+        "chosen": [
+          {
+            "id": "free",
+            "text": "Elma's birthday in Budapest"
+          }
+        ],
+        "reason": "director's pick",
+        "source": "director",
+        "candidates": [
+          {
+            "id": "o:uxi1kx",
+            "text": "Just us",
+            "score": 0
+          },
+          {
+            "id": "o:2pjdp9",
+            "text": "The two of us",
+            "score": -1
+          },
+          {
+            "id": "o:irb6fj",
+            "text": "Together",
+            "score": -2
+          }
+        ]
+      },
+      {
+        "pick": {
+          "ids": [
+            "main1.label/l:s0rza3"
+          ],
+          "free_title": null
+        },
+        "slot": "main1.label",
+        "chosen": [
+          {
+            "id": "l:s0rza3",
+            "text": "Our moment"
+          }
+        ],
+        "reason": "director's pick",
+        "source": "director",
+        "candidates": [
+          {
+            "id": "l:uxi1kx",
+            "text": "Just us",
+            "score": 0
+          },
+          {
+            "id": "l:irb6fj",
+            "text": "Together",
+            "score": -1
+          },
+          {
+            "id": "l:s0rza3",
+            "text": "Our moment",
+            "score": -2
+          },
+          {
+            "id": "l:1l0xxoj",
+            "text": "Close",
+            "score": -3
+          },
+          {
+            "id": "l:7uz07o",
+            "text": "Smiles",
+            "score": -4
+          }
+        ]
+      },
+      {
+        "pick": {
+          "ids": [
+            "main1.note/n:3794a728-28b4-4f6e-a4a8-482a94f9770f:1nnjs5g"
+          ],
+          "free_title": null
+        },
+        "slot": "main1.note",
+        "chosen": [
+          {
+            "id": "n:3794a728-28b4-4f6e-a4a8-482a94f9770f:1nnjs5g",
+            "text": "Will explore the city in the morning"
+          }
+        ],
+        "reason": "director's pick",
+        "source": "director",
+        "candidates": [
+          {
+            "id": "n:36265ad3-b2ea-49cf-bb9c-fd9d60d8573b:h3dghz",
+            "text": "Direct plane from Tallinn to Budapest is the best, just 2 hours and you are there.",
+            "score": 113
+          },
+          {
+            "id": "n:b525d33e-d7df-4763-922d-f1517785d477:1sxoevp",
+            "text": "Mortimer is feeling lonely",
+            "score": 108
+          },
+          {
+            "id": "n:3794a728-28b4-4f6e-a4a8-482a94f9770f:7n046z",
+            "text": "Checked in to our appartment, had some snacks and went to sleep.",
+            "score": 106
+          },
+          {
+            "id": "n:3794a728-28b4-4f6e-a4a8-482a94f9770f:br1azg",
+            "text": "Checked in to our appartment",
+            "score": 105
+          },
+          {
+            "id": "n:36265ad3-b2ea-49cf-bb9c-fd9d60d8573b:15dh26i",
+            "text": "just 2 hours and you are there.",
+            "score": 103
+          },
+          {
+            "id": "n:ebac3e6c-9d6c-457d-9a69-9c31ce4f2955:9i4q6g",
+            "text": "Went to really posh looking cafe for a golden coffee",
+            "score": 102
+          },
+          {
+            "id": "n:3794a728-28b4-4f6e-a4a8-482a94f9770f:xg2phu",
+            "text": "had some snacks and went to sleep.",
+            "score": 61
+          },
+          {
+            "id": "n:3794a728-28b4-4f6e-a4a8-482a94f9770f:1nnjs5g",
+            "text": "Will explore the city in the morning",
+            "score": 61
+          }
+        ]
+      },
+      {
+        "pick": {
+          "ids": [
+            "main2.label/l:7uz07o"
+          ],
+          "free_title": null
+        },
+        "slot": "main2.label",
+        "chosen": [
+          {
+            "id": "l:7uz07o",
+            "text": "Smiles"
+          }
+        ],
+        "reason": "director's pick",
+        "source": "director",
+        "candidates": [
+          {
+            "id": "l:uxi1kx",
+            "text": "Just us",
+            "score": 0
+          },
+          {
+            "id": "l:irb6fj",
+            "text": "Together",
+            "score": -1
+          },
+          {
+            "id": "l:s0rza3",
+            "text": "Our moment",
+            "score": -2
+          },
+          {
+            "id": "l:1l0xxoj",
+            "text": "Close",
+            "score": -3
+          },
+          {
+            "id": "l:7uz07o",
+            "text": "Smiles",
+            "score": -4
+          }
+        ]
+      },
+      {
+        "pick": null,
+        "slot": "main2.note",
+        "chosen": [
+          {
+            "id": "c:a95bd32e-1ff4-4c1d-8656-17a276c06893",
+            "text": "most beautiful parlament building i have seen"
+          }
+        ],
+        "reason": "the photo's caption, as written",
+        "source": "code",
+        "candidates": [
+          {
+            "id": "c:a95bd32e-1ff4-4c1d-8656-17a276c06893",
+            "text": "most beautiful parlament building i have seen",
+            "score": 100
+          }
+        ]
+      },
+      {
+        "pick": {
+          "ids": [
+            "main3.label/l:irb6fj"
+          ],
+          "free_title": null
+        },
+        "slot": "main3.label",
+        "chosen": [
+          {
+            "id": "l:irb6fj",
+            "text": "Together"
+          }
+        ],
+        "reason": "director's pick",
+        "source": "director",
+        "candidates": [
+          {
+            "id": "l:uxi1kx",
+            "text": "Just us",
+            "score": 0
+          },
+          {
+            "id": "l:irb6fj",
+            "text": "Together",
+            "score": -1
+          },
+          {
+            "id": "l:s0rza3",
+            "text": "Our moment",
+            "score": -2
+          },
+          {
+            "id": "l:1l0xxoj",
+            "text": "Close",
+            "score": -3
+          },
+          {
+            "id": "l:7uz07o",
+            "text": "Smiles",
+            "score": -4
+          }
+        ]
+      },
+      {
+        "pick": {
+          "ids": [
+            "main3.note/n:e8178b1a-6561-4781-bd65-d0444f6f2699:t99xjt"
+          ],
+          "free_title": null
+        },
+        "slot": "main3.note",
+        "chosen": [
+          {
+            "id": "n:e8178b1a-6561-4781-bd65-d0444f6f2699:t99xjt",
+            "text": "feels like a maze full of bars and people"
+          }
+        ],
+        "reason": "director's pick",
+        "source": "director",
+        "candidates": [
+          {
+            "id": "n:e8178b1a-6561-4781-bd65-d0444f6f2699:kv5ajl",
+            "text": "This particular is called Szimpla Kert it has 2 floors and has lots of rooms",
+            "score": 105
+          },
+          {
+            "id": "n:e8178b1a-6561-4781-bd65-d0444f6f2699:1mmzwy0",
+            "text": "Had a lovely meal and decided to check out famous bars.",
+            "score": 61
+          },
+          {
+            "id": "n:e8178b1a-6561-4781-bd65-d0444f6f2699:t99xjt",
+            "text": "feels like a maze full of bars and people",
+            "score": 61
+          }
+        ]
+      },
+      {
+        "pick": {
+          "ids": [
+            "main4.label/l:1l0xxoj"
+          ],
+          "free_title": null
+        },
+        "slot": "main4.label",
+        "chosen": [
+          {
+            "id": "l:1l0xxoj",
+            "text": "Close"
+          }
+        ],
+        "reason": "director's pick",
+        "source": "director",
+        "candidates": [
+          {
+            "id": "l:uxi1kx",
+            "text": "Just us",
+            "score": 0
+          },
+          {
+            "id": "l:irb6fj",
+            "text": "Together",
+            "score": -1
+          },
+          {
+            "id": "l:s0rza3",
+            "text": "Our moment",
+            "score": -2
+          },
+          {
+            "id": "l:1l0xxoj",
+            "text": "Close",
+            "score": -3
+          },
+          {
+            "id": "l:7uz07o",
+            "text": "Smiles",
+            "score": -4
+          }
+        ]
+      },
+      {
+        "pick": {
+          "ids": [
+            "main4.note/n:6c51e5b4-74d9-42d1-87cd-1e4d690c38d6:twq6qk"
+          ],
+          "free_title": null
+        },
+        "slot": "main4.note",
+        "chosen": [
+          {
+            "id": "n:6c51e5b4-74d9-42d1-87cd-1e4d690c38d6:twq6qk",
+            "text": "Today is Elmas birthday so we decided to start our day with famous spas."
+          }
+        ],
+        "reason": "director's pick",
+        "source": "director",
+        "candidates": [
+          {
+            "id": "n:6c51e5b4-74d9-42d1-87cd-1e4d690c38d6:twq6qk",
+            "text": "Today is Elmas birthday so we decided to start our day with famous spas.",
+            "score": 107
+          },
+          {
+            "id": "n:673ad7f8-a478-4ab1-9753-9a1f30358275:14wbi6v",
+            "text": "I have been one hand shake away from him",
+            "score": 106
+          },
+          {
+            "id": "n:1cdb63f2-58e9-4504-84d1-4f678251d84c:1qog2fz",
+            "text": "Favourite coffee Arabica",
+            "score": 102
+          },
+          {
+            "id": "n:6c51e5b4-74d9-42d1-87cd-1e4d690c38d6:cdkyyx",
+            "text": "It s massive building with lots of saunas and outside hot swimming pool.",
+            "score": 61
+          },
+          {
+            "id": "n:673ad7f8-a478-4ab1-9753-9a1f30358275:g8d4dw",
+            "text": "but hesitated and thought for a second its not him.",
+            "score": 61
+          },
+          {
+            "id": "n:673ad7f8-a478-4ab1-9753-9a1f30358275:1uck936",
+            "text": "Then verified it was him after googling and rushed after him but it was to late.",
+            "score": 61
+          },
+          {
+            "id": "n:673ad7f8-a478-4ab1-9753-9a1f30358275:dvz9tz",
+            "text": "but it was to late.",
+            "score": 60
+          },
+          {
+            "id": "n:673ad7f8-a478-4ab1-9753-9a1f30358275:p8xi0l",
+            "text": "Vould not find him.",
+            "score": 60
+          }
+        ]
+      },
+      {
+        "pick": {
+          "ids": [
+            "ch1.title/n:36265ad3-b2ea-49cf-bb9c-fd9d60d8573b:17jcyre"
+          ],
+          "free_title": null
+        },
+        "slot": "ch1.title",
+        "chosen": [
+          {
+            "id": "n:36265ad3-b2ea-49cf-bb9c-fd9d60d8573b:17jcyre",
+            "text": "To Budapest"
+          }
+        ],
+        "reason": "director's pick",
+        "source": "director",
+        "candidates": [
+          {
+            "id": "n:36265ad3-b2ea-49cf-bb9c-fd9d60d8573b:11geb5n",
+            "text": "From Tallinn",
+            "score": 15
+          },
+          {
+            "id": "n:36265ad3-b2ea-49cf-bb9c-fd9d60d8573b:17jcyre",
+            "text": "To Budapest",
+            "score": 15
+          }
+        ]
+      },
+      {
+        "pick": {
+          "ids": [
+            "ch2.title/n:e8178b1a-6561-4781-bd65-d0444f6f2699:d2szi5"
+          ],
+          "free_title": null
+        },
+        "slot": "ch2.title",
+        "chosen": [
+          {
+            "id": "n:e8178b1a-6561-4781-bd65-d0444f6f2699:d2szi5",
+            "text": "Szimpla Kert"
+          }
+        ],
+        "reason": "director's pick",
+        "source": "director",
+        "candidates": [
+          {
+            "id": "n:e8178b1a-6561-4781-bd65-d0444f6f2699:d2szi5",
+            "text": "Szimpla Kert",
+            "score": 15
+          }
+        ]
+      },
+      {
+        "pick": {
+          "ids": [
+            "ch3.title/n:673ad7f8-a478-4ab1-9753-9a1f30358275:xab0je"
+          ],
+          "free_title": null
+        },
+        "slot": "ch3.title",
+        "chosen": [
+          {
+            "id": "n:673ad7f8-a478-4ab1-9753-9a1f30358275:xab0je",
+            "text": "Travis Fimmel"
+          }
+        ],
+        "reason": "director's pick",
+        "source": "director",
+        "candidates": [
+          {
+            "id": "n:673ad7f8-a478-4ab1-9753-9a1f30358275:xab0je",
+            "text": "Travis Fimmel",
+            "score": 15
+          }
+        ]
+      },
+      {
+        "pick": {
+          "ids": [
+            "carousel.title/k:jp8s7g"
+          ],
+          "free_title": null
+        },
+        "slot": "carousel.title",
+        "chosen": [
+          {
+            "id": "k:jp8s7g",
+            "text": "Every little moment"
+          }
+        ],
+        "reason": "director's pick",
+        "source": "director",
+        "candidates": [
+          {
+            "id": "k:xsom9f",
+            "text": "More of us",
+            "score": 0
+          },
+          {
+            "id": "k:jp8s7g",
+            "text": "Every little moment",
+            "score": -1
+          },
+          {
+            "id": "k:akkou4",
+            "text": "And the day went on",
+            "score": -2
+          }
+        ]
+      },
+      {
+        "pick": {
+          "ids": [],
+          "free_title": "Together in Budapest, always"
+        },
+        "slot": "finale",
+        "chosen": [
+          {
+            "id": "free",
+            "text": "Together in Budapest, always"
+          }
+        ],
+        "reason": "director's pick",
+        "source": "director",
+        "candidates": [
+          {
+            "id": "f:hu2cad",
+            "text": "Mortimer is feeling lonely",
+            "score": 8
+          },
+          {
+            "id": "f:vp7ohj",
+            "text": "I have been one hand shake away from him",
+            "score": 6
+          },
+          {
+            "id": "f:1gzbtfg",
+            "text": "Checked in to our appartment",
+            "score": 5
+          },
+          {
+            "id": "f:3b5crk",
+            "text": "just 2 hours and you are there",
+            "score": 3
+          },
+          {
+            "id": "f:5s43rz",
+            "text": "Favourite coffee Arabica",
+            "score": 2
+          },
+          {
+            "id": "f:1e0laba",
+            "text": "just 2 hours",
+            "score": 1
+          },
+          {
+            "id": "f:18fg4so",
+            "text": "had some snacks and went to sleep",
+            "score": 1
+          },
+          {
+            "id": "f:frmht0",
+            "text": "Will explore the city in the morning",
+            "score": 1
+          }
+        ]
+      }
+    ],
+    "gv_trims": [
+      "no carousel (for the target)"
+    ],
+    "problems": [
+      "golden_vows memory: no classic plan call"
+    ],
+    "template": "golden_vows",
+    "run_count": 3,
+    "sky_story": null,
+    "failed_ids": [],
+    "gv_trigger": null,
+    "neon_night": null,
+    "photo_days": [
+      "2026-02-26",
+      "2026-02-27",
+      "2026-02-28"
+    ],
+    "golden_vows": {
+      "picks": {
+        "finale": {
+          "ids": [],
+          "free_title": "Together in Budapest, always"
+        },
+        "occasion": {
+          "ids": [],
+          "free_title": "Elma's birthday in Budapest"
+        },
+        "ch1.title": {
+          "ids": [
+            "ch1.title/n:36265ad3-b2ea-49cf-bb9c-fd9d60d8573b:17jcyre"
+          ],
+          "free_title": null
+        },
+        "ch2.title": {
+          "ids": [
+            "ch2.title/n:e8178b1a-6561-4781-bd65-d0444f6f2699:d2szi5"
+          ],
+          "free_title": null
+        },
+        "ch3.title": {
+          "ids": [
+            "ch3.title/n:673ad7f8-a478-4ab1-9753-9a1f30358275:xab0je"
+          ],
+          "free_title": null
+        },
+        "main1.note": {
+          "ids": [
+            "main1.note/n:3794a728-28b4-4f6e-a4a8-482a94f9770f:1nnjs5g"
+          ],
+          "free_title": null
+        },
+        "main3.note": {
+          "ids": [
+            "main3.note/n:e8178b1a-6561-4781-bd65-d0444f6f2699:t99xjt"
+          ],
+          "free_title": null
+        },
+        "main4.note": {
+          "ids": [
+            "main4.note/n:6c51e5b4-74d9-42d1-87cd-1e4d690c38d6:twq6qk"
+          ],
+          "free_title": null
+        },
+        "main1.label": {
+          "ids": [
+            "main1.label/l:s0rza3"
+          ],
+          "free_title": null
+        },
+        "main2.label": {
+          "ids": [
+            "main2.label/l:7uz07o"
+          ],
+          "free_title": null
+        },
+        "main3.label": {
+          "ids": [
+            "main3.label/l:irb6fj"
+          ],
+          "free_title": null
+        },
+        "main4.label": {
+          "ids": [
+            "main4.label/l:1l0xxoj"
+          ],
+          "free_title": null
+        },
+        "carousel.title": {
+          "ids": [
+            "carousel.title/k:jp8s7g"
+          ],
+          "free_title": null
+        }
+      },
+      "picks_version": 2
+    },
+    "gv_unlisted": [
+      {
+        "text": "Woke up and went for some local cousine breakfast, absolute delight. Prices are good too",
+        "reason": "no line fits a main page (≤ 90 chars)",
+        "note_id": "2a28c39a-d3f8-44a2-8921-d5fece183c84"
+      },
+      {
+        "text": "Then decided to walk around castle and straight to irish bar for some guiness pie and guiness, needles to say",
+        "reason": "no line fits a main page (≤ 90 chars)",
+        "note_id": "f4271f40-3440-487f-a6ef-2438f54332ae"
+      }
+    ],
+    "hero_scores": {
+      "133bbde8-1a94-4e41-8c21-ef92537b7b86": 4,
+      "1a1ff08d-0651-4d0e-913e-03c5e64a4ca9": 3,
+      "25661aa6-6ae6-482b-94f8-42d366fe911b": 1,
+      "2a3015fb-9e76-48ac-bc8b-8d2920b65777": 2,
+      "3001aefd-4cfb-4ebb-8b51-07f1ba6a73d0": 3,
+      "44871494-97ed-40df-af3f-c0adc7ecd541": 4,
+      "4e22d3a0-1515-4dba-938e-b561a24b4356": 4,
+      "501ce519-e1c5-432f-81f5-314a8abd9078": 3,
+      "5b209670-5ca9-43c3-9e26-9a36a8420a93": 4,
+      "5d120b72-72e5-45fa-9526-3a7f84e4375c": 3,
+      "6137b255-2970-4f50-9c77-9fd6b2197b57": 3,
+      "6438ee46-bb02-4ab2-b918-71750538e3bd": 4,
+      "662f69c6-c2d2-4035-b438-db36b4ad798d": 4,
+      "876cbe54-549e-442e-bc22-74b831752c2c": 5,
+      "a4770d99-fc53-47e6-95ba-934ee8e925ef": 3,
+      "a95bd32e-1ff4-4c1d-8656-17a276c06893": 5,
+      "b776e84f-0242-4797-90b9-470beb656236": 4,
+      "bb322bba-1799-4a75-900a-87e5a4edbd79": 5,
+      "be26b00b-4468-4aa5-bc7c-360dfdd88362": 4,
+      "be7ede64-e0e3-4778-9da3-83b72ec63bf2": 3,
+      "c4addcfd-e459-4050-942c-d2bb63dd9211": 5,
+      "cf4afcdf-5436-4bc1-8213-7e211a10a59b": 4,
+      "d3863676-22e4-4005-8268-b57ec4116036": 5,
+      "d9d0995e-43fe-4cd8-a03c-7cdd8f2591e5": 4,
+      "e24977fe-a9d6-47f7-9805-fda3b3b513ab": 5,
+      "e72d4013-7abc-47c5-9efd-bee9220c1d5a": 4,
+      "f8710fb6-e80e-4c39-86c7-535b7c874318": 3
+    },
+    "photo_paths": {
+      "133bbde8-1a94-4e41-8c21-ef92537b7b86": "p/133bbde8-1a94-4e41-8c21-ef92537b7b86.jpg",
+      "1a1ff08d-0651-4d0e-913e-03c5e64a4ca9": "p/1a1ff08d-0651-4d0e-913e-03c5e64a4ca9.jpg",
+      "25661aa6-6ae6-482b-94f8-42d366fe911b": "p/25661aa6-6ae6-482b-94f8-42d366fe911b.jpg",
+      "2a3015fb-9e76-48ac-bc8b-8d2920b65777": "p/2a3015fb-9e76-48ac-bc8b-8d2920b65777.jpg",
+      "44871494-97ed-40df-af3f-c0adc7ecd541": "p/44871494-97ed-40df-af3f-c0adc7ecd541.jpg",
+      "4e22d3a0-1515-4dba-938e-b561a24b4356": "p/4e22d3a0-1515-4dba-938e-b561a24b4356.jpg",
+      "501ce519-e1c5-432f-81f5-314a8abd9078": "p/501ce519-e1c5-432f-81f5-314a8abd9078.jpg",
+      "5b209670-5ca9-43c3-9e26-9a36a8420a93": "p/5b209670-5ca9-43c3-9e26-9a36a8420a93.jpg",
+      "5d120b72-72e5-45fa-9526-3a7f84e4375c": "p/5d120b72-72e5-45fa-9526-3a7f84e4375c.jpg",
+      "6137b255-2970-4f50-9c77-9fd6b2197b57": "p/6137b255-2970-4f50-9c77-9fd6b2197b57.jpg",
+      "6438ee46-bb02-4ab2-b918-71750538e3bd": "p/6438ee46-bb02-4ab2-b918-71750538e3bd.jpg",
+      "662f69c6-c2d2-4035-b438-db36b4ad798d": "p/662f69c6-c2d2-4035-b438-db36b4ad798d.jpg",
+      "a4770d99-fc53-47e6-95ba-934ee8e925ef": "p/a4770d99-fc53-47e6-95ba-934ee8e925ef.jpg",
+      "a95bd32e-1ff4-4c1d-8656-17a276c06893": "p/a95bd32e-1ff4-4c1d-8656-17a276c06893.jpg",
+      "bb322bba-1799-4a75-900a-87e5a4edbd79": "p/bb322bba-1799-4a75-900a-87e5a4edbd79.jpg",
+      "be26b00b-4468-4aa5-bc7c-360dfdd88362": "p/be26b00b-4468-4aa5-bc7c-360dfdd88362.jpg",
+      "be7ede64-e0e3-4778-9da3-83b72ec63bf2": "p/be7ede64-e0e3-4778-9da3-83b72ec63bf2.jpg",
+      "c4addcfd-e459-4050-942c-d2bb63dd9211": "p/c4addcfd-e459-4050-942c-d2bb63dd9211.jpg",
+      "cf4afcdf-5436-4bc1-8213-7e211a10a59b": "p/cf4afcdf-5436-4bc1-8213-7e211a10a59b.jpg",
+      "d3863676-22e4-4005-8268-b57ec4116036": "p/d3863676-22e4-4005-8268-b57ec4116036.jpg",
+      "e24977fe-a9d6-47f7-9805-fda3b3b513ab": "p/e24977fe-a9d6-47f7-9805-fda3b3b513ab.jpg",
+      "e72d4013-7abc-47c5-9efd-bee9220c1d5a": "p/e72d4013-7abc-47c5-9efd-bee9220c1d5a.jpg",
+      "f8710fb6-e80e-4c39-86c7-535b7c874318": "p/f8710fb6-e80e-4c39-86c7-535b7c874318.jpg"
+    },
+    "orientations": {
+      "133bbde8-1a94-4e41-8c21-ef92537b7b86": "portrait",
+      "1a1ff08d-0651-4d0e-913e-03c5e64a4ca9": "portrait",
+      "25661aa6-6ae6-482b-94f8-42d366fe911b": "portrait",
+      "2a3015fb-9e76-48ac-bc8b-8d2920b65777": "portrait",
+      "44871494-97ed-40df-af3f-c0adc7ecd541": "portrait",
+      "4e22d3a0-1515-4dba-938e-b561a24b4356": "portrait",
+      "501ce519-e1c5-432f-81f5-314a8abd9078": "portrait",
+      "5b209670-5ca9-43c3-9e26-9a36a8420a93": "portrait",
+      "5d120b72-72e5-45fa-9526-3a7f84e4375c": "portrait",
+      "6137b255-2970-4f50-9c77-9fd6b2197b57": "portrait",
+      "6438ee46-bb02-4ab2-b918-71750538e3bd": "portrait",
+      "662f69c6-c2d2-4035-b438-db36b4ad798d": "portrait",
+      "a4770d99-fc53-47e6-95ba-934ee8e925ef": "portrait",
+      "a95bd32e-1ff4-4c1d-8656-17a276c06893": "portrait",
+      "bb322bba-1799-4a75-900a-87e5a4edbd79": "portrait",
+      "be26b00b-4468-4aa5-bc7c-360dfdd88362": "portrait",
+      "be7ede64-e0e3-4778-9da3-83b72ec63bf2": "portrait",
+      "c4addcfd-e459-4050-942c-d2bb63dd9211": "portrait",
+      "cf4afcdf-5436-4bc1-8213-7e211a10a59b": "portrait",
+      "d3863676-22e4-4005-8268-b57ec4116036": "portrait",
+      "e24977fe-a9d6-47f7-9805-fda3b3b513ab": "portrait",
+      "e72d4013-7abc-47c5-9efd-bee9220c1d5a": "portrait",
+      "f8710fb6-e80e-4c39-86c7-535b7c874318": "portrait"
+    },
+    "sky_problems": [
+      "golden_vows memory: code-built pages"
+    ],
+    "director_version": 6,
+    "section_attempts": 1,
+    "golden_vows_source": "director",
+    "golden_vows_repairs": [],
+    "neon_night_problems": [],
+    "golden_vows_problems": []
+  }
+}

@@ -1,7 +1,12 @@
 // A small Romantic memory for the Golden Vows unit tests (#458). Made up,
 // not real data: the real-data tests run on the exported fixture
 // (fixtures/, tools/export_director_input.ts) once it is there.
+import {
+  assert,
+  assertEquals,
+} from "https://deno.land/std@0.224.0/assert/mod.ts";
 import type { TripData } from "./gather.ts";
+import type { GoldenVowsContent } from "./golden_vows.ts";
 
 type Photo = TripData["photos"][number];
 type Note = TripData["notes"][number];
@@ -135,4 +140,46 @@ export function gvMemory(
 
 export function gvHeroScores(): Record<string, number> {
   return { ...HERO };
+}
+
+// Every page in [content] plays in time order (#460): chapter after
+// chapter, each opened by its first page of prints, then its main pages
+// ([mainChapter]) and second page by their first photo's time.
+export function assertPlayOrder(
+  data: TripData,
+  content: GoldenVowsContent,
+  mainChapter: number[],
+) {
+  const at = new Map(data.photos.map((p) => [p.id, Date.parse(p.taken_at!)]));
+  const pages = [
+    ...content.heroes.map((h, k) => ({
+      order: h.order!,
+      chapter: mainChapter[k],
+      heading: false,
+      t: at.get(h.photo_id)!,
+    })),
+    ...content.chapters.flatMap((c, i) =>
+      c.pages!.map((p, k) => ({
+        order: p.order,
+        chapter: i,
+        heading: k === 0,
+        t: at.get(p.photo_ids[0])!,
+      }))
+    ),
+  ].sort((a, b) => a.order - b.order);
+  assertEquals(pages.map((p) => p.order), pages.map((_, k) => k));
+  let chapter = -1;
+  let last = -Infinity;
+  for (const p of pages) {
+    if (p.chapter !== chapter) {
+      assertEquals(p.chapter, chapter + 1, `order ${p.order}`);
+      assert(p.heading, `chapter ${p.chapter} opens with its prints`);
+      chapter = p.chapter;
+      last = -Infinity;
+      continue;
+    }
+    assert(!p.heading);
+    assert(p.t >= last, `order ${p.order} goes back in time`);
+    last = p.t;
+  }
 }

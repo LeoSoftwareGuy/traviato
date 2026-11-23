@@ -127,4 +127,50 @@ void main() {
     expect(gv.carousel, isNull);
     expect(gv.dayCount, 1);
   });
+
+  test('chapter pages and the play order (#460)', () {
+    final gv = parseWrapUpGoldenVows(
+      _content({
+        'heroes': [
+          {'photo_id': 'h1', 'order': 1},
+        ],
+        'chapters': [
+          {
+            'title': 'Day one',
+            'photo_ids': ['a', 'b', 'c', 'd'],
+            'layout': 'B2',
+            'pages': [
+              {
+                'photo_ids': ['a', 'b'],
+                'layout': 'B2',
+                'order': 0,
+              },
+              {
+                'photo_ids': ['c', 'd'],
+                'layout': 'B2',
+                'order': 2,
+              },
+            ],
+          },
+          {
+            // A page without its order: the chapter plays as one page.
+            'title': 'Day two',
+            'photo_ids': ['e', 'f', 'g'],
+            'pages': [
+              {
+                'photo_ids': ['e', 'f', 'g'],
+              },
+            ],
+          },
+        ],
+      }),
+    )!;
+    expect(gv.heroes.single.order, 1);
+    expect(gv.chapters.first.layout, 'B2');
+    expect(gv.chapters.first.pages, const [
+      WrapUpGoldenVowsChapterPage(photoIds: ['a', 'b'], order: 0, layout: 'B2'),
+      WrapUpGoldenVowsChapterPage(photoIds: ['c', 'd'], order: 2, layout: 'B2'),
+    ]);
+    expect(gv.chapters.last.pages, isEmpty);
+  });
 }

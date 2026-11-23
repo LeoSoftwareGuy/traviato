@@ -510,21 +510,17 @@
     "heroes": [
      {
       "photo_id": "p00",
-      "label": "Together",
+      "label": "",
       "taken_at": "2026-09-01T09:00:00Z",
-      "note": "Tram 28 up to the castle, the whole city below us."
+      "note": "Tram 28 up to the castle, the whole city below us.",
+      "order": 1
      },
      {
       "photo_id": "p05",
-      "label": "Our moment",
+      "label": "",
       "taken_at": "2026-09-02T09:00:00Z",
-      "note": "Pastéis de nata at Manteigaria, still warm, three each."
-     },
-     {
-      "photo_id": "p10",
-      "label": "Close",
-      "taken_at": "2026-09-03T09:00:00Z",
-      "note": "Our last sunset at Miradouro da Senhora do Monte."
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "order": 4
      }
     ],
     "chapters": [
@@ -534,9 +530,30 @@
       "photo_ids": [
        "p01",
        "p02",
-       "p03"
+       "p03",
+       "p04"
       ],
-      "layout": "A"
+      "layout": "B2",
+      "pages": [
+       {
+        "photo_ids": [
+         "p01",
+         "p02"
+        ],
+        "layout": "B2",
+        "order": 0,
+        "note": null
+       },
+       {
+        "photo_ids": [
+         "p03",
+         "p04"
+        ],
+        "layout": "B2",
+        "order": 2,
+        "note": "the whole city below us."
+       }
+      ]
      },
      {
       "title": "At Manteigaria",
@@ -544,19 +561,52 @@
       "photo_ids": [
        "p06",
        "p07",
-       "p08"
+       "p08",
+       "p09"
       ],
-      "layout": "B"
+      "layout": "B2",
+      "pages": [
+       {
+        "photo_ids": [
+         "p06",
+         "p07"
+        ],
+        "layout": "B2",
+        "order": 3,
+        "note": null
+       },
+       {
+        "photo_ids": [
+         "p08",
+         "p09"
+        ],
+        "layout": "B2",
+        "order": 5,
+        "note": "Pastéis de nata at Manteigaria"
+       }
+      ]
      },
      {
       "title": "At Miradouro",
       "line": "Chapter three · Morning",
       "photo_ids": [
+       "p10",
        "p11",
-       "p12",
-       "p13"
+       "p12"
       ],
-      "layout": "C"
+      "layout": "C",
+      "pages": [
+       {
+        "photo_ids": [
+         "p10",
+         "p11",
+         "p12"
+        ],
+        "layout": "C",
+        "order": 6,
+        "note": "Our last sunset at Miradouro da Senhora do Monte."
+       }
+      ]
      }
     ],
     "carousel": null,
@@ -578,7 +628,7 @@
      "p14"
     ],
     "moment_count": 15,
-    "end_line": "the whole city below us"
+    "end_line": "still warm three each"
    }
   }
  },
@@ -714,31 +764,57 @@
     "end_date": "2026-09-03",
     "day_count": 3,
     "place": "Netherlands",
-    "packing": null,
+    "packing": {
+     "source": "checklist",
+     "items": [
+      {
+       "text": "Passports",
+       "suggestion_code": null
+      },
+      {
+       "text": "Sunscreen",
+       "suggestion_code": null
+      },
+      {
+       "text": "Camera",
+       "suggestion_code": null
+      },
+      {
+       "text": "Sandals",
+       "suggestion_code": null
+      }
+     ],
+     "checked": 4,
+     "total": 4
+    },
     "heroes": [
      {
       "photo_id": "p00",
-      "label": "Together",
+      "label": "",
       "taken_at": "2026-09-01T09:00:00Z",
-      "note": null
+      "note": null,
+      "order": 1
      },
      {
       "photo_id": "p01",
-      "label": "Our moment",
+      "label": "",
       "taken_at": "2026-09-01T09:37:00Z",
-      "note": "Tram 28 up to the castle, the whole city below us."
+      "note": "Tram 28 up to the castle, the whole city below us.",
+      "order": 2
      },
      {
       "photo_id": "p09",
-      "label": "Close",
+      "label": "",
       "taken_at": "2026-09-02T09:00:00Z",
-      "note": "Pastéis de nata at Manteigaria, still warm, three each."
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "order": 5
      },
      {
       "photo_id": "p18",
-      "label": "Smiles",
+      "label": "",
       "taken_at": "2026-09-03T09:00:00Z",
-      "note": "Our last sunset at Miradouro da Senhora do Monte."
+      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "order": 8
      }
     ],
     "chapters": [
@@ -747,30 +823,105 @@
       "line": "Chapter one · Morning",
       "photo_ids": [
        "p02",
+       "p03",
        "p04",
-       "p06"
+       "p05",
+       "p06",
+       "p07"
       ],
-      "layout": "A"
+      "layout": "A",
+      "pages": [
+       {
+        "photo_ids": [
+         "p02",
+         "p03",
+         "p04"
+        ],
+        "layout": "A",
+        "order": 0,
+        "note": null
+       },
+       {
+        "photo_ids": [
+         "p05",
+         "p06",
+         "p07"
+        ],
+        "layout": "B",
+        "order": 3,
+        "note": "the whole city below us."
+       }
+      ]
      },
      {
       "title": "At Manteigaria",
       "line": "Chapter two · Morning",
       "photo_ids": [
        "p10",
+       "p11",
        "p12",
-       "p14"
+       "p13",
+       "p14",
+       "p15"
       ],
-      "layout": "B"
+      "layout": "B",
+      "pages": [
+       {
+        "photo_ids": [
+         "p10",
+         "p11",
+         "p12"
+        ],
+        "layout": "B",
+        "order": 4,
+        "note": null
+       },
+       {
+        "photo_ids": [
+         "p13",
+         "p14",
+         "p15"
+        ],
+        "layout": "C",
+        "order": 6,
+        "note": "Pastéis de nata at Manteigaria"
+       }
+      ]
      },
      {
       "title": "At Miradouro",
       "line": "Chapter three · Morning",
       "photo_ids": [
        "p19",
+       "p20",
        "p21",
-       "p23"
+       "p22",
+       "p23",
+       "p24"
       ],
-      "layout": "C"
+      "layout": "C",
+      "pages": [
+       {
+        "photo_ids": [
+         "p19",
+         "p20",
+         "p21"
+        ],
+        "layout": "C",
+        "order": 7,
+        "note": null
+       },
+       {
+        "photo_ids": [
+         "p22",
+         "p23",
+         "p24"
+        ],
+        "layout": "A",
+        "order": 9,
+        "note": null
+       }
+      ]
      }
     ],
     "carousel": null,
@@ -802,7 +953,7 @@
      "p17"
     ],
     "moment_count": 25,
-    "end_line": "the whole city below us"
+    "end_line": "still warm three each"
    }
   }
  },
@@ -1052,89 +1203,131 @@
     "heroes": [
      {
       "photo_id": "p00",
-      "label": "Together",
+      "label": "",
       "taken_at": "2026-09-01T09:00:00Z",
-      "note": null
+      "note": null,
+      "order": 1
      },
      {
       "photo_id": "p01",
-      "label": "Our moment",
+      "label": "",
       "taken_at": "2026-09-01T09:37:00Z",
-      "note": "Tram 28 up to the castle, the whole city below us."
+      "note": null,
+      "order": 2
+     },
+     {
+      "photo_id": "p02",
+      "label": "",
+      "taken_at": "2026-09-01T10:14:00Z",
+      "note": null,
+      "order": 3
+     },
+     {
+      "photo_id": "p03",
+      "label": "",
+      "taken_at": "2026-09-01T10:51:00Z",
+      "note": "Tram 28 up to the castle, the whole city below us.",
+      "order": 4
      },
      {
       "photo_id": "p14",
-      "label": "Close",
+      "label": "",
       "taken_at": "2026-09-02T09:00:00Z",
-      "note": null
-     },
-     {
-      "photo_id": "p15",
-      "label": "Smiles",
-      "taken_at": "2026-09-02T09:37:00Z",
-      "note": "Pastéis de nata at Manteigaria, still warm, three each."
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "order": 6
      },
      {
       "photo_id": "p28",
       "label": "",
       "taken_at": "2026-09-03T09:00:00Z",
-      "note": null
-     },
-     {
-      "photo_id": "p29",
-      "label": "",
-      "taken_at": "2026-09-03T09:37:00Z",
-      "note": "Our last sunset at Miradouro da Senhora do Monte."
+      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "order": 8
      }
     ],
     "chapters": [
      {
       "title": "Day 1",
-      "line": "Chapter one · Morning",
+      "line": "Chapter one · Afternoon",
       "photo_ids": [
-       "p02",
-       "p06",
-       "p10"
+       "p04",
+       "p05",
+       "p07"
       ],
-      "layout": "A"
+      "layout": "A",
+      "pages": [
+       {
+        "photo_ids": [
+         "p04",
+         "p05",
+         "p07"
+        ],
+        "layout": "A",
+        "order": 0,
+        "note": null
+       }
+      ]
      },
      {
       "title": "At Manteigaria",
-      "line": "Chapter two · Morning",
+      "line": "Chapter two · Afternoon",
       "photo_ids": [
-       "p16",
-       "p19",
-       "p23"
+       "p15",
+       "p17",
+       "p19"
       ],
-      "layout": "B"
+      "layout": "B",
+      "pages": [
+       {
+        "photo_ids": [
+         "p15",
+         "p17",
+         "p19"
+        ],
+        "layout": "B",
+        "order": 5,
+        "note": null
+       }
+      ]
      },
      {
       "title": "At Miradouro",
-      "line": "Chapter three · Morning",
+      "line": "Chapter three · Afternoon",
       "photo_ids": [
-       "p30",
-       "p33",
-       "p37"
+       "p29",
+       "p31",
+       "p33"
       ],
-      "layout": "C"
+      "layout": "C",
+      "pages": [
+       {
+        "photo_ids": [
+         "p29",
+         "p31",
+         "p33"
+        ],
+        "layout": "C",
+        "order": 7,
+        "note": null
+       }
+      ]
      }
     ],
     "carousel": {
      "title": "More of us",
      "line": "Every little moment",
      "photo_ids": [
-      "p04",
-      "p07",
+      "p06",
       "p09",
+      "p10",
+      "p11",
       "p12",
-      "p17",
+      "p13",
+      "p16",
       "p20",
+      "p21",
       "p22",
-      "p25",
-      "p31",
-      "p34",
-      "p36",
-      "p39"
+      "p23",
+      "p24"
      ]
     },
     "heart_photo_ids": [
@@ -1180,7 +1373,7 @@
      "p27"
     ],
     "moment_count": 40,
-    "end_line": "the whole city below us"
+    "end_line": "still warm three each"
    }
   }
  },

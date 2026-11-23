@@ -7,8 +7,10 @@ const minGoldenVowsCarouselPhotos = 6;
 
 /// The Golden Vows film for a wrap-up's `content.golden_vows` (#346),
 /// resolved against [photoIds], the memory's photos the app can show. A
-/// hero whose photo is gone is skipped, a chapter keeps the photos left
-/// (none → skipped), a carousel under [minGoldenVowsCarouselPhotos] is
+/// hero whose photo is gone is skipped, a chapter page keeps the photos
+/// left (none → skipped; a chapter of 2 pages is two album pages, #460),
+/// pages play in the stored order, a carousel under
+/// [minGoldenVowsCarouselPhotos] is
 /// dropped; null when no hero or chapter is left, or there's no date, so
 /// Sky Story plays.
 ///
@@ -29,11 +31,30 @@ GoldenVowsStory? goldenVowsFromWrapUp(
           photoId: hero.photoId,
           note: hero.note,
           caption: _caption(hero.label, hero.takenAt),
+          order: hero.order,
         ),
   ];
   final chapters = [
     for (final chapter in gv.chapters)
-      ?_chapter(chapter, photoIds, minPhotos: 1),
+      if (chapter.pages.isEmpty)
+        ?_chapter(chapter, photoIds, minPhotos: 1)
+      else
+        for (final (k, page) in chapter.pages.indexed)
+          ?_chapter(
+            // A page's line is the user's, else the chapter's eyebrow on
+            // its first page only (#460: a second page never repeats it).
+            WrapUpGoldenVowsChapter(
+              title: chapter.title,
+              line: page.note ?? (k == 0 ? chapter.line : null),
+              photoIds: page.photoIds,
+              layout: page.layout,
+            ),
+            isNote: page.note != null,
+            photoIds,
+            minPhotos: 1,
+            order: page.order,
+            isSecondPage: k > 0,
+          ),
   ];
   if (heroes.isEmpty && chapters.isEmpty) return null;
   final packing = gv.packing;
@@ -77,6 +98,9 @@ GvChapter? _chapter(
   WrapUpGoldenVowsChapter chapter,
   Set<String> photoIds, {
   required int minPhotos,
+  int? order,
+  bool isSecondPage = false,
+  bool isNote = false,
 }) {
   final ids = [
     for (final id in chapter.photoIds)
@@ -91,8 +115,12 @@ GvChapter? _chapter(
       'A' => GvChapterLayout.a,
       'B' => GvChapterLayout.b,
       'C' => GvChapterLayout.c,
+      'B2' => GvChapterLayout.b2,
       _ => null,
     },
+    order: order,
+    isSecondPage: isSecondPage,
+    isLineANote: isNote,
   );
 }
 

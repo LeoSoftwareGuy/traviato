@@ -216,8 +216,10 @@ export function neonPicksAnswer(data: TripData): {
   return {
     picks: report.map((r) => ({
       slot: r.slot,
-      ids: r.slot === "ch1.title"
-        ? []
+      ids: r.slot === "ch1.title" ? [] : r.chosen.length === 0
+        // Nothing played without picks (its words were taken): the
+        // director still names its top candidate.
+        ? r.candidates.slice(0, 1).map((c) => c.id)
         : r.chosen.map((c) => c.id).filter((id) =>
           id !== "day" && id !== "free"
         ),
@@ -257,14 +259,18 @@ export function gvPicksAnswer(
         ? []
         : r.slot === "finale"
         ? [r.candidates.at(-1)!.id]
+        : r.chosen.length === 0
+        // Nothing played without picks (its words were taken): the
+        // director still names its top candidate.
+        ? r.candidates.slice(0, 1).map((c) => c.id)
         : r.chosen.map((c) => c.id).filter((id) =>
           id !== "day" && id !== "free"
         ),
       // A title no candidate fits: the director writes one.
       free_title: r.slot === "ch1.title"
-        ? "Canal morning"
+        ? "Slow morning"
         : r.slot.endsWith(".title") && r.chosen[0]?.id === "day"
-        ? `Canal part ${r.slot.slice(2, r.slot.indexOf("."))}`
+        ? `Slow part ${r.slot.slice(2, r.slot.indexOf("."))}`
         : null,
     })),
   };

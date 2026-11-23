@@ -450,14 +450,36 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   prints. No words show twice. Length: past 75 s at its quickest the
   album gives way in this order — a note's line to a shorter clause, then
   no note; the carousel; the packing card; main pages down to 2; then
-  shorter chapter pages (never below their title's reading time). A
-  short album still past its target at its quickest gives up its
-  carousel, then its packing card (the heart still shows every photo);
-  a long one stays within 75 s. Never a chapter, a note, the title page,
-  the heart or a caption — so a short album may still run past its
-  target (a 15-photo one about 51 s against 30 s). The Plan inspector shows every slot, the word that made it a
+  shorter chapter pages (never below their title's reading time). Never
+  a chapter, a note, the title page, the heart or a caption. (A short
+  album's "aim at the target" step was removed in #460.) The Plan inspector shows every slot, the word that made it a
   wedding, "N / M photos shown", what was trimmed and the notes on no
   page.
+- **Golden Vows in time order (#460, after the first real run):** each
+  chapter opens with its page of prints, then plays its own main pages —
+  and its second page of prints — by time; chapters follow the logical
+  days and the parts of a day. A day is never merged into another; no
+  photo shows twice. A 2-photo day is a page of 2 prints (a smaller B,
+  "B2") alone, the day's best note its line. A chapter holds up to 6
+  prints, a second page with the same layouts for 4–6. **Main pages
+  scale with the album:** about one per 7 photos (15 → 2, 25 → 4, up to
+  6), the photos a note was written on first, then those it was written
+  among. A note without a main page plays as its page of prints' line,
+  in the user's words in place of the chapter's eyebrow; a second page
+  shows another line of its chapter, or none — never the eyebrow again.
+  **Labels** are the photo's caption (up to 24 characters, never with a
+  time), else a short phrase of a note on that page, else nothing —
+  never generic, never the page's note again; a page's note is only a
+  note that belongs to it. The chapter's time-of-day word follows most of
+  its photos. Titles come from the chapter's own day first. The
+  director's own words never change a name ("Elma's" for "Elmas"), never
+  name someone the user didn't write, and never use what only the photo
+  descriptions say. **Length:** never past 75 s, and a small album about
+  4 s a film photo at most (15 photos about 55 s), playing its pages at
+  their quicker pace. For that limit only pages without the user's words
+  give way — second pages, the carousel, the packing card, main pages
+  without a note; notes and captions are shortened or dropped only past
+  75 s. Never a chapter. The "aim at the target" step of #458 is gone.
 - **The user's words (#399, display only; which words are chosen is #398,
   multi-excerpt note moments #416):** captions and notes are never cut
   with "…". A text that doesn't fit gets smaller type or more lines, then

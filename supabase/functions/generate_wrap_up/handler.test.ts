@@ -1044,7 +1044,7 @@ Deno.test("a draft gets content.golden_vows: code's album, the director's picks"
   // The occasion the director's photo summary showed, known again.
   assertEquals(gv.occasion, "wedding");
   assertEquals(gv.names, "Amsterdam");
-  assertEquals(chapterTitles(gv)[0], "Canal morning");
+  assertEquals(chapterTitles(gv)[0], "Slow morning");
   assertEquals(gv.chapters.length, 3);
   assertEquals(gv.heart_photo_ids.length, 12);
   assertEquals(json.content.film_style, "golden_vows");
@@ -1119,7 +1119,7 @@ Deno.test("deleted photos: the album is cut again, no chapter lost (#458)", asyn
     false,
   );
   // The picks that still hold play.
-  assertEquals(chapterTitles(json.content.golden_vows)[0], "Canal morning");
+  assertEquals(chapterTitles(json.content.golden_vows)[0], "Slow morning");
 });
 
 Deno.test("rebuilding a film kept as Golden Vows keeps Golden Vows (#433)", async () => {

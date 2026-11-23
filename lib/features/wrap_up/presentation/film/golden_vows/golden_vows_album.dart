@@ -243,6 +243,12 @@ abstract final class GvChapterLayouts {
     (120.0, 1020.0, 840.0, 600.0, 1.0),
   ];
 
+  /// A page of 2 prints (#460): B's tall print, and one beside it, lower.
+  static const b2 = [
+    (120.0, 470.0, 470.0, 1150.0, -1.0),
+    (620.0, 760.0, 340.0, 560.0, 1.6),
+  ];
+
   /// The chapter's [layout], else A, B, C in turn.
   static List<(double, double, double, double, double)> forChapter(
     int i, [
@@ -251,6 +257,7 @@ abstract final class GvChapterLayouts {
     GvChapterLayout.a => a,
     GvChapterLayout.b => b,
     GvChapterLayout.c => c,
+    GvChapterLayout.b2 => b2,
     null => const [a, b, c][i % 3],
   };
 }

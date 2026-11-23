@@ -6,6 +6,7 @@ import 'package:traviato/features/wrap_up/data/models/wrap_up_golden_vows_model.
 import 'package:traviato/features/wrap_up/data/models/wrap_up_neon_night_model.dart';
 import 'package:traviato/features/wrap_up/data/models/wrap_up_sky_model.dart';
 import 'package:traviato/features/wrap_up/domain/wrap_up_limits.dart';
+import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_fit.dart';
 import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_from_wrap_up.dart';
 import 'package:traviato/features/wrap_up/presentation/film/golden_vows/golden_vows_timeline.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_canvas.dart';
@@ -79,25 +80,15 @@ void main() {
       );
       final length = lengthOf(fixture);
       printOnFailure('${fixture['film']} $photos: $length s');
-      if (fixture['film'] == 'golden_vows') {
-        // Golden Vows (#458) aims at its target, never past 75 s: a short
-        // album past it even at its quickest gives up its carousel, then
-        // its packing card — never a chapter, a note or the heart, so it
-        // may still run longer.
-        final gv = parseWrapUpGoldenVows(
-          (fixture['content'] as Map).cast<String, dynamic>(),
-        )!;
+      if (fixture['film'] == 'golden_vows' || fixture['film'] == 'neon_night') {
+        // Neon Night (#448) and Golden Vows (#460) may use the room up to
+        // the longest film, and never play shorter than their target.
         expect(length, greaterThan(target - tolerance));
         expect(length, lessThanOrEqualTo(WrapUpLimits.longestFilmSeconds));
-        if (length > target + tolerance) {
-          expect(gv.carousel, isNull, reason: 'the carousel goes first');
-          expect(gv.packing, isNull, reason: 'then the packing card');
+        if (fixture['film'] == 'golden_vows') {
+          // A small album plays quick (#460): about 4 s a photo at most.
+          expect(length, lessThanOrEqualTo(GvFit.secondsPerPhoto * photos));
         }
-      } else if (fixture['film'] == 'neon_night') {
-        // Neon Night may use the room up to the longest film (#448), and
-        // never plays shorter than its target.
-        expect(length, greaterThan(target - tolerance));
-        expect(length, lessThanOrEqualTo(WrapUpLimits.longestFilmSeconds));
       } else {
         expect(length, closeTo(target, tolerance));
       }

@@ -110,9 +110,10 @@ export const MIN_PLANNABLE_PHOTOS = 6;
 export const MAX_DIRECTOR_RUNS = 4;
 // The director's rules (#398: logical days, excerpts, chronology; #433:
 // the template from vibes; #454 / #458: Neon Night and Golden Vows pick
-// from code's lists). A record made under older rules runs again
-// once, within MAX_DIRECTOR_RUNS.
-export const DIRECTOR_VERSION = 6;
+// from code's lists; #460: Golden Vows' new pages and slot lists). A
+// record made under older rules runs again once, within
+// MAX_DIRECTOR_RUNS.
+export const DIRECTOR_VERSION = 7;
 
 // emit_film_plan with the Sky Story section (#345). Composed here so the
 // films' modules don't import each other. No occasion choice since #433:

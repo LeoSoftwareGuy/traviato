@@ -32,7 +32,11 @@ export const MIN_GV_HEROES = 2;
 export const MAX_GV_HEROES = 6;
 export const MIN_GV_CHAPTERS = 1;
 export const MAX_GV_CHAPTERS = 4;
+// A chapter page holds 3 prints, a short one 2 (layout B2, #460); a
+// chapter shows up to 6 prints on two pages.
 export const GV_CHAPTER_PHOTOS = 3;
+export const MIN_GV_PAGE_PRINTS = 2;
+export const MAX_GV_CHAPTER_PRINTS = 6;
 // The carousel page shows up to 12 photos used nowhere else; below 6 it's
 // skipped.
 export const MAX_GV_CAROUSEL = 12;
@@ -43,14 +47,20 @@ export const MAX_GV_PACKED = 5;
 // Lengths the film's type fits at its sizes.
 export const MAX_GV_OCCASION_CHARS = 32;
 export const MAX_GV_LABEL_CHARS = 18;
+// A caption as the label (#460): no time beside it, so the line holds
+// about this many at full size (712 px of 30 px spaced capitals).
+export const MAX_GV_CAPTION_LABEL_CHARS = 24;
 export const MAX_GV_NOTE_CHARS = 60;
+// A page of prints' line (#460): one line under its title, shrunk to fit.
+export const MAX_GV_PAGE_LINE_CHARS = 72;
 export const MAX_GV_TITLE_CHARS = 28;
 export const MAX_GV_LINE_CHARS = 36;
 export const MAX_GV_END_CHARS = 40;
 
 type Photo = TripData["photos"][number];
 
-export type GvLayout = "A" | "B" | "C";
+// B2 (#460): a page of 2 prints, a smaller variant of B.
+export type GvLayout = "A" | "B" | "C" | "B2";
 
 export interface GoldenVowsContent {
   gv_version: typeof GV_VERSION;
@@ -79,12 +89,25 @@ export interface GoldenVowsContent {
     taken_at: string | null;
     // The user's own words, or null for no note card.
     note: string | null;
+    // Its place in the album's play order (#460): with every chapter
+    // page's, pages play by it. Absent in older content.
+    order?: number;
   }[];
   chapters: {
     title: string;
     line: string;
+    // Every print, in time order; layout is its first page's.
     photo_ids: string[];
     layout: GvLayout;
+    // Its pages (#460): 1 or 2, each its prints, layout and place in the
+    // play order. Absent in older content: one page of photo_ids.
+    // note: the user's line in place of the eyebrow (#460), or null.
+    pages?: {
+      photo_ids: string[];
+      layout: GvLayout;
+      order: number;
+      note?: string | null;
+    }[];
   }[];
   carousel: { title: string; line: string; photo_ids: string[] } | null;
   heart_photo_ids: string[];
@@ -99,14 +122,16 @@ export function gvPhotos(tripData: TripData): Photo[] {
   );
 }
 
-// The chapter's layout from its photos' orientations: a landscape first →
-// A (wide print on top), a landscape last → C (wide print below), else B
-// (a tall print beside two). Unknown orientations cycle A, B, C.
+// A page's layout from its photos' orientations: a landscape first → A
+// (wide print on top), a landscape last → C (wide print below), else B
+// (a tall print beside two). Unknown orientations cycle A, B, C. A page of
+// 2 prints is B2 (#460).
 export function chapterLayout(
   photoIds: string[],
   orientations: Readonly<Record<string, string>>,
   index: number,
 ): GvLayout {
+  if (photoIds.length < GV_CHAPTER_PHOTOS) return "B2";
   const shapes = photoIds.map((id) => orientations[id]);
   if (shapes.some((s) => s === undefined)) {
     return (["A", "B", "C"] as const)[index % 3];

@@ -71,7 +71,7 @@ Deno.test("Golden Vows: a main page plays its day's best line", () => {
   assert(!gv.heroes.some((h) => h.note === "It was fun."));
 });
 
-Deno.test("Golden Vows: a note on the photo first; a caption always wins", () => {
+Deno.test("Golden Vows: a note on the photo first; a caption is the label", () => {
   const data = withNotes([
     {
       id: "n2",
@@ -94,7 +94,10 @@ Deno.test("Golden Vows: a note on the photo first; a caption always wins", () =>
   data.photos = data.photos.map((p) =>
     p.id === "p09" ? { ...p, caption: "Our first dance" } : p
   );
-  assertEquals(page(data)?.note, "Our first dance");
+  // The caption is the label, with no time; the note stays the page's own
+  // (#460).
+  assertEquals(page(data)?.label, "Our first dance");
+  assertEquals(page(data)?.note, RIBS);
   assertEquals(page(data)?.taken_at, null);
 });
 

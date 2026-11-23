@@ -13,7 +13,11 @@ import { neonNightFilm } from "./neon_film.ts";
 import { parseNeonPicks } from "./neon_slots.ts";
 import { MAX_NN_TITLE_CHARS, sameLine } from "./neon_night.ts";
 import { isDrugReference } from "./excerpts.ts";
-import { MAX_GV_TITLE_CHARS, MIN_GV_HEROES } from "./golden_vows.ts";
+import {
+  MAX_GV_CAPTION_LABEL_CHARS,
+  MAX_GV_TITLE_CHARS,
+  MIN_GV_HEROES,
+} from "./golden_vows.ts";
 import { goldenVowsFilm, gvShortestSeconds } from "./gv_film.ts";
 import { parsePicks } from "./film_slots.ts";
 import { WRAP_UP_LIMITS } from "./wrap_up_limits.ts";
@@ -285,13 +289,64 @@ Deno.test(`Golden Vows: ${RUNS} random memories and broken picks all play (#458)
       content.heroes.length >= Math.min(MIN_GV_HEROES, skeleton.mains.length),
       `seed ${seed}: ${content.heroes.length} main pages`,
     );
-    // A captioned main page shows its caption as written, no time.
+    // A captioned main page shows its caption as written, no time: as
+    // its label when it fits there, else as its note (#460).
     const byId = new Map(trip.photos.map((p) => [p.id, p]));
     for (const h of content.heroes) {
       const caption = byId.get(h.photo_id)?.caption?.trim();
       if (caption) {
-        assertEquals(h.note, caption, `seed ${seed}`);
+        assertEquals(
+          [...caption].length <= MAX_GV_CAPTION_LABEL_CHARS ? h.label : h.note,
+          caption,
+          `seed ${seed}`,
+        );
         assertEquals(h.taken_at, null, `seed ${seed}`);
+      }
+      // A label never repeats its page's note (#460).
+      if (h.label && h.note) {
+        assert(
+          !h.note.toLowerCase().includes(h.label.toLowerCase()),
+          `seed ${seed}: ${h.label} / ${h.note}`,
+        );
+      }
+    }
+    // Every page has its place in the play order (#460): chapter after
+    // chapter, each opening on its first page of prints; 2–3 prints a
+    // page, at most 2 pages.
+    const plays = [
+      ...content.heroes.map((h) => ({
+        order: h.order!,
+        chapter: skeleton.mains.find((m) => m.photo_id === h.photo_id)!
+          .chapter,
+        heading: false,
+      })),
+      ...content.chapters.flatMap((c, i) =>
+        (c.pages ?? []).map((pg, k) => ({
+          order: pg.order,
+          chapter: i,
+          heading: k === 0,
+        }))
+      ),
+    ].sort((a, b) => a.order - b.order);
+    assertEquals(
+      new Set(plays.map((x) => x.order)).size,
+      plays.length,
+      `seed ${seed}`,
+    );
+    for (let k = 1; k < plays.length; k++) {
+      assert(plays[k].chapter >= plays[k - 1].chapter, `seed ${seed}`);
+      if (plays[k].heading) {
+        assert(plays[k].chapter > plays[k - 1].chapter, `seed ${seed}`);
+      }
+    }
+    for (const c of content.chapters) {
+      assert((c.pages ?? []).length <= 2, `seed ${seed}`);
+      for (const pg of c.pages ?? []) {
+        assert(
+          pg.photo_ids.length >= 2 && pg.photo_ids.length <= 3,
+          `seed ${seed}: ${pg.photo_ids.length} prints`,
+        );
+        assertEquals(pg.layout === "B2", pg.photo_ids.length === 2);
       }
     }
     // Every pick from its own list (or checked words of the director's).
@@ -305,15 +360,20 @@ Deno.test(`Golden Vows: ${RUNS} random memories and broken picks all play (#458)
       }
     }
     // No words twice, nothing about drugs.
+    // The finale may name what a title names (#454): only the same whole
+    // words are a repeat there.
     const shown = [
       content.occasion_line,
-      content.end_line,
       content.carousel?.title,
       ...content.heroes.flatMap((h) => [h.label, h.note]),
       ...content.chapters.map((c) => c.title),
     ].filter((t): t is string => !!t);
     for (let i = 0; i < shown.length; i++) {
       assertEquals(isDrugReference(shown[i]), false, `seed ${seed}`);
+      assert(
+        shown[i].toLowerCase() !== content.end_line.toLowerCase(),
+        `seed ${seed}: ${shown[i]}`,
+      );
       for (let j = i + 1; j < shown.length; j++) {
         assertEquals(
           sameLine(shown[i], shown[j]),

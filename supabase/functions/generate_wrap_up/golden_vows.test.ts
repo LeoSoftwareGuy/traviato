@@ -5,7 +5,7 @@ import {
 import { chapterLayout, MAX_GV_HEART, packingOf } from "./golden_vows.ts";
 import { goldenVowsFilm, gvShortestSeconds } from "./gv_film.ts";
 import { directorTripData } from "./director_fixtures.ts";
-import { gvHeroScores, gvMemory } from "./gv_fixtures.ts";
+import { assertPlayOrder, gvHeroScores, gvMemory } from "./gv_fixtures.ts";
 import { scopedId } from "./film_slots.ts";
 import { WRAP_UP_LIMITS } from "./wrap_up_limits.ts";
 
@@ -42,27 +42,51 @@ Deno.test("content: the memory's facts, the user's words, code's album", () => {
   assertEquals(content.names, "Париж вдвоём");
   assertEquals(content.place, "Париж");
   assertEquals(content.day_count, 2);
-  // A captioned page plays its caption and no time; the others a line of
-  // their own notes with their time.
+  // 20 photos: 3 main pages (#460: about one per 7). A captioned page's
+  // label is its caption, with no time; every page's note is a line of
+  // its own notes, or none.
   assertEquals(
-    content.heroes.map((h) => [h.photo_id, h.note, h.taken_at !== null]),
+    content.heroes.map((h) => [
+      h.photo_id,
+      h.label,
+      h.note,
+      h.taken_at !== null,
+    ]),
     [
-      ["g04", "Утро в Париже, кофе и круассаны у окна.", true],
-      ["g07", "Эйфелева башня", false],
+      ["g04", "", null, true],
       [
-        "g16",
-        "Последний закат над Сеной, пообещали вернуться сюда через год.",
-        true,
+        "g07",
+        "Эйфелева башня",
+        "Я держала его за руку и не хотела уходить.",
+        false,
       ],
+      ["g16", "", "Было хорошо.", true],
     ],
   );
   assertEquals(content.chapters.map((c) => [c.title, c.line]), [
     ["Наш первый круассан", "Глава первая · Утро"],
     ["Ужин на Монмартре", "Глава вторая · Вечер"],
-    ["Последний закат", "Глава третья · Утро"],
+    ["Последний закат", "Глава третья · День"],
   ]);
-  assertEquals(content.chapters.map((c) => c.photo_ids.length), [3, 3, 3]);
-  // 20 photos: past its target even at its quickest, so no carousel.
+  // Up to 6 prints on 2 pages; the notes without a main page play as
+  // their page's line (#460), a second page never the eyebrow.
+  assertEquals(
+    content.chapters.map((c) =>
+      c.pages!.map((p) => [p.photo_ids.length, p.note])
+    ),
+    [
+      [[3, "Утро в Париже, кофе и круассаны у окна."], [
+        2,
+        "Мы так долго этого ждали!",
+      ]],
+      [[3, null], [2, "Гуляли по ночному Монмартру до полуночи."]],
+      [[3, null], [
+        3,
+        "Последний закат над Сеной, пообещали вернуться сюда через год.",
+      ]],
+    ],
+  );
+  // One photo left over: too few for a carousel.
   assertEquals(content.carousel, null);
   assertEquals(content.heart_photo_ids.length, 20);
   assertEquals(content.moment_count, 20);
@@ -91,8 +115,8 @@ Deno.test("the director's picks play when they hold", () => {
 
 Deno.test("photos shown on pages, and the heart holds them all", () => {
   const film = goldenVowsFilm(gvMemory(), null, { heroScores: gvHeroScores() });
-  // 3 main pages and 3 chapters of 3; no carousel for its target.
-  assertEquals(film.shown, { pages: 12, photos: 20 });
+  // 3 main pages and 16 prints (#460: up to 6 a chapter).
+  assertEquals(film.shown, { pages: 19, photos: 20 });
 });
 
 Deno.test("packing: checked items first, else planned quests, else none", () => {
@@ -224,8 +248,8 @@ Deno.test("length: a shorter clause is never words already shown", () => {
   assertEquals(new Set(notes).size, notes.length);
 });
 
-Deno.test("a short album aims at its target: no carousel, then no packing (#458)", () => {
-  // 20 photos: a target of about 39 s, past it even at its quickest.
+Deno.test("a short album trims only past 75 s, like Neon (#460)", () => {
+  // 20 photos: a target of about 39 s; it keeps its packing card.
   const data = gvMemory();
   data.checklist = [{
     title: "Кольца",
@@ -234,17 +258,24 @@ Deno.test("a short album aims at its target: no carousel, then no packing (#458)
   }];
   const film = goldenVowsFilm(data, null, { heroScores: gvHeroScores() });
   const { content } = film;
-  assertEquals(content.carousel, null);
-  assertEquals(content.packing, null);
-  assertEquals(film.trims, [
-    "no carousel (for the target)",
-    "no packing card (for the target)",
-  ]);
-  // Never a chapter, a note, a caption or the heart.
+  assertEquals(content.packing?.items.map((i) => i.text), ["Кольца"]);
+  assert(
+    !film.trims.some((t) => t.includes("for the target")),
+    `${film.trims}`,
+  );
+  assert(gvShortestSeconds(content) <= 75);
+  // Never a chapter, a main page or the heart.
   assertEquals(content.chapters.length, film.skeleton.chapters.length);
   assertEquals(content.heroes.length, film.skeleton.mains.length);
-  assert(content.heroes.every((h) => h.note));
   assertEquals(content.heart_photo_ids.length, 20);
+});
+
+Deno.test("pages play in time order, each main page in its chapter (#460)", () => {
+  const data = gvMemory();
+  const { content, skeleton } = goldenVowsFilm(data, null, {
+    heroScores: gvHeroScores(),
+  });
+  assertPlayOrder(data, content, skeleton.mains.map((m) => m.chapter));
 });
 
 Deno.test("a long album keeps its carousel while it fits 75 s (#458)", () => {
@@ -253,4 +284,27 @@ Deno.test("a long album keeps its carousel while it fits 75 s (#458)", () => {
     !film.trims.some((t) => t.includes("for the target")),
     `${film.trims}`,
   );
+});
+
+Deno.test("a small album plays quick: about 4 s a photo, nothing of the user's lost (#460)", () => {
+  const data = gvMemory();
+  data.photos = data.photos.filter((p) =>
+    !["g02", "g05", "g10", "g14", "g19"].includes(p.id)
+  );
+  const film = goldenVowsFilm(data, null, { heroScores: gvHeroScores() });
+  assertEquals(data.photos.length, 15);
+  assert(
+    gvShortestSeconds(film.content) <= 4 * 15,
+    `${gvShortestSeconds(film.content)}`,
+  );
+  // 2 main pages, every chapter, every caption and every note line kept.
+  assertEquals(film.content.heroes.length, 2);
+  assertEquals(film.content.chapters.length, film.skeleton.chapters.length);
+  assert(!film.trims.some((t) => t.includes("note")), `${film.trims}`);
+  const shown = JSON.stringify(film.content);
+  for (const p of data.photos) {
+    if (p.caption && film.content.heroes.some((h) => h.photo_id === p.id)) {
+      assert(shown.includes(p.caption), p.caption);
+    }
+  }
 });

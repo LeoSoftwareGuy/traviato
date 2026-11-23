@@ -649,14 +649,14 @@ Deno.test("a Romantic memory: one pick_golden_vows_lines call, its picks kept (#
     picks: Record<string, { ids: string[]; free_title: string | null }>;
   };
   assertEquals(stored.picks_version, 2);
-  assertEquals(stored.picks["ch1.title"].free_title, "Canal morning");
+  assertEquals(stored.picks["ch1.title"].free_title, "Slow morning");
   assertEquals(record.golden_vows_source, "director");
   assertEquals(record.golden_vows_repairs, []);
   assertEquals(record.neon_night, null);
   assertEquals(record.orientations!.p00, "portrait");
   // The inspector's record: every slot, what plays and why.
   const title = record.gv_slots!.find((s) => s.slot === "ch1.title")!;
-  assertEquals(title.chosen, [{ id: "free", text: "Canal morning" }]);
+  assertEquals(title.chosen, [{ id: "free", text: "Slow morning" }]);
   assertEquals(title.source, "director");
   assertEquals(record.gv_shown!.photos, 12);
   assertEquals(record.gv_trigger, null);
@@ -803,14 +803,14 @@ Deno.test("currentGoldenVows: the stored picks, else none; older sections aren't
   assertEquals(currentGoldenVows(null).source, "code");
 });
 
-Deno.test("an older record runs again once (#458: DIRECTOR_VERSION 6)", () => {
-  assertEquals(DIRECTOR_VERSION, 6);
+Deno.test("an older record runs again once (#460: DIRECTOR_VERSION 7)", () => {
+  assertEquals(DIRECTOR_VERSION, 7);
   const record = {
     status: "fallback",
     plan: null,
     problems: [],
     failed_ids: [],
-    director_version: 5,
+    director_version: 6,
     run_count: 1,
   } as unknown as DirectorRecord;
   assertEquals(directorIsStale(record, romantic()), true);

@@ -86,4 +86,37 @@ void main() {
     expect(noCarousel.total, closeTo(70 - 7.25, 1e-9));
     expect(noCarousel.turnStarts, hasLength(8));
   });
+
+  test('pages play in the given order (#460)', () {
+    final timeline = GoldenVowsTimeline(
+      heroes: 2,
+      chapters: 2,
+      hasCarousel: false,
+      pageOrder: const [
+        (kind: GvPageKind.chapter, index: 0),
+        (kind: GvPageKind.hero, index: 0),
+        (kind: GvPageKind.hero, index: 1),
+        (kind: GvPageKind.chapter, index: 1),
+      ],
+    );
+    final pages = [
+      for (final scene in timeline.film.scenes)
+        if (scene.spec case final GvPageSpec page) (page.kind, page.index),
+    ];
+    expect(pages, [
+      (GvPageKind.chapter, 0),
+      (GvPageKind.hero, 0),
+      (GvPageKind.hero, 1),
+      (GvPageKind.chapter, 1),
+      (GvPageKind.heart, 0),
+    ]);
+    // The same pages, the same length, in any order.
+    expect(
+      timeline.total,
+      closeTo(
+        GoldenVowsTimeline(heroes: 2, chapters: 2, hasCarousel: false).total,
+        1e-9,
+      ),
+    );
+  });
 }
