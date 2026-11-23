@@ -29,12 +29,13 @@ abstract class KeptMemoryLabels {
   static String keptDate(DateTime date, String locale) =>
       DateFormat('d MMM y', locale).format(date.toLocal());
 
-  /// `05:48` / `5:48 AM` — a note's time on the phone's clock (#402).
+  /// `05:48` / `5:48 AM` — a note's time (#402), [time] already on the
+  /// clock of where it was written (#461: `localTakenAt`).
   static String noteTime(
     DateTime time,
     String locale, {
     required bool use24h,
-  }) => L10nDates.clock(locale, use24h: use24h).format(time.toLocal());
+  }) => L10nDates.clock(locale, use24h: use24h).format(time);
 
   /// `1:19` — the film's length.
   static String filmDuration(Duration duration) {

@@ -243,7 +243,7 @@ class _PhotoTile extends StatelessWidget {
                       top: 7,
                       left: 7,
                       child: PhotoTimePill(
-                        takenAt: photo.takenAt ?? photo.createdAt,
+                        takenAt: photo.localTime,
                         use24h: use24h,
                       ),
                     ),

@@ -53,10 +53,12 @@ class JournalController extends _$JournalController {
       (q) => q,
     );
 
+    // Times on the clock of where each one happened (#461): its own
+    // offset, else the memory's zone.
     final loaded = JournalState(
       trip: trip,
-      photos: photos,
-      notes: notes,
+      photos: [for (final p in photos) p.onClockOf(trip.timeZone)],
+      notes: [for (final n in notes) n.onClockOf(trip.timeZone)],
       quests: quests,
     );
     // After midnight, a night still going belongs to the evening before

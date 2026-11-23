@@ -217,6 +217,7 @@ class WrapUpNeonNote extends Equatable {
     required this.number,
     this.writtenAt,
     this.photoId,
+    this.noteId,
   });
 
   /// An exact excerpt of the user's note.
@@ -227,8 +228,11 @@ class WrapUpNeonNote extends Equatable {
   final DateTime? writtenAt;
   final String? photoId;
 
+  /// The note's id (#461): its place's clock; null in older content.
+  final String? noteId;
+
   @override
-  List<Object?> get props => [text, number, writtenAt, photoId];
+  List<Object?> get props => [text, number, writtenAt, photoId, noteId];
 }
 
 class WrapUpNeonTotals extends Equatable {

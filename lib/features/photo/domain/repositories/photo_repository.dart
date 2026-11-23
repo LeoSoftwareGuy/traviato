@@ -21,6 +21,8 @@ abstract interface class PhotoRepository {
     double? lat,
     double? lng,
     DateTime? takenAt,
+    int? utcOffsetMinutes,
+    String? utcOffsetSource,
   });
 
   /// Deletes the photo's row, then its storage file (#165). The photo's ✦2

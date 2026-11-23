@@ -45,7 +45,7 @@ KeptMemory buildKeptMemory({
   final photosByDay = <int, List<KeptMemoryPhoto>>{};
   for (final photo in photos) {
     final dayIndex = dayIndexOf(
-      photo.dayDate ?? (photo.takenAt ?? photo.createdAt).toLocal(),
+      photo.dayDate ?? photo.localTime,
     );
     (photosByDay[dayIndex] ??= []).add(
       KeptMemoryPhoto(
@@ -109,7 +109,7 @@ DateTime _dateOnly(DateTime d) => DateTime.utc(d.year, d.month, d.day);
 // total if one ever shows up.
 DateTime _earliest(List<PhotoEntity> photos, List<JournalNoteEntity> notes) {
   final dates = [
-    for (final p in photos) p.dayDate ?? (p.takenAt ?? p.createdAt).toLocal(),
+    for (final p in photos) p.dayDate ?? p.localTime,
     for (final n in notes) n.dayDate,
   ];
   if (dates.isEmpty) return DateTime.now();
@@ -123,7 +123,7 @@ int _spanDays(
 ) {
   var last = 1;
   for (final date in [
-    for (final p in photos) p.dayDate ?? (p.takenAt ?? p.createdAt).toLocal(),
+    for (final p in photos) p.dayDate ?? p.localTime,
     for (final n in notes) n.dayDate,
   ]) {
     final index = _dateOnly(date).difference(start).inDays + 1;

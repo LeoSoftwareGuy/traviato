@@ -164,6 +164,7 @@ export function gvLanguage(
 
 // The part of the day [t] is in: 0 morning … 3 night.
 export function gvPartOfTime(t: number, utcOffsetMinutes: number): number {
+  // [t] an instant, on the clock [utcOffsetMinutes] from UTC.
   const hour = new Date(t + utcOffsetMinutes * 60_000).getUTCHours();
   return hour >= 5 && hour < 12
     ? 0
@@ -180,8 +181,12 @@ export function gvPartOf(
   photos: readonly Photo[],
   utcOffsetMinutes: number,
 ): number | null {
-  const parts = photos.map(timeOf).filter((x) => x > 0)
-    .map((t) => gvPartOfTime(t, utcOffsetMinutes));
+  // Each photo on its own place's clock (#461); [utcOffsetMinutes] only
+  // for one without a resolved offset.
+  const parts = photos.filter((p) => timeOf(p) > 0)
+    .map((p) =>
+      gvPartOfTime(timeOf(p), p.utc_offset_minutes ?? utcOffsetMinutes)
+    );
   if (parts.length === 0) return null;
   const counts = [0, 0, 0, 0];
   for (const part of parts) counts[part]++;
@@ -1134,7 +1139,10 @@ export function buildGvPickInput(
   skeleton: GvSkeleton,
   slots: readonly GvSlot[],
   analyses: ReadonlyMap<string, { summary: string; hero_score: number }>,
-  clock: (iso: string | null) => string | null,
+  clock: (
+    iso: string | null,
+    item?: { utc_offset_minutes?: number | null },
+  ) => string | null,
 ) {
   const { trip } = tripData;
   const byId = new Map(tripData.photos.map((p) => [p.id, p]));
@@ -1150,7 +1158,10 @@ export function buildGvPickInput(
     notes_language: writtenLanguage(tripData),
     notes: tripData.notes.filter((n) => n.id && n.content.trim()).map((n) => ({
       note_id: n.id,
-      written_at: clock(n.legacy ? null : n.taken_at ?? n.created_at ?? null),
+      written_at: clock(
+        n.legacy ? null : n.taken_at ?? n.created_at ?? null,
+        n,
+      ),
       photo_id: n.photo_id ?? null,
       text: n.content,
     })),
@@ -1160,7 +1171,7 @@ export function buildGvPickInput(
         page: `main${k + 1}`,
         chapter: m.chapter + 1,
         photo_id: p.id,
-        time: clock(p.taken_at ?? p.created_at),
+        time: clock(p.taken_at ?? p.created_at, p),
         summary: analyses.get(p.id)?.summary ?? null,
         caption: p.caption?.trim() || null,
       };

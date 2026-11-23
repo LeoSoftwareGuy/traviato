@@ -4,11 +4,17 @@ import 'package:exif/exif.dart';
 /// GPS is extracted whenever the file carries it; whether it's kept is a
 /// permission decision made by the caller (see `photo_mutations.dart`).
 class PhotoExif {
-  const PhotoExif({this.takenAt, this.lat, this.lng});
+  const PhotoExif({this.takenAt, this.lat, this.lng, this.utcOffsetMinutes});
 
+  /// With [utcOffsetMinutes] (#461): the real instant, in UTC. Without it:
+  /// the wall-clock time the file holds, as a local [DateTime].
   final DateTime? takenAt;
   final double? lat;
   final double? lng;
+
+  /// The UTC offset where the photo was taken, from EXIF
+  /// `OffsetTimeOriginal` (else `OffsetTime`), when the file carries one.
+  final int? utcOffsetMinutes;
 
   bool get hasGps => lat != null && lng != null;
 }
@@ -27,8 +33,16 @@ class PhotoExifReader {
     }
     if (tags.isEmpty) return const PhotoExif();
 
+    final offset = readExifOffset(
+      tags['EXIF OffsetTimeOriginal']?.printable ??
+          tags['EXIF OffsetTime']?.printable,
+    );
+    final wallClock = _readTakenAt(tags);
     return PhotoExif(
-      takenAt: _readTakenAt(tags),
+      takenAt: wallClock == null || offset == null
+          ? wallClock
+          : instantOf(wallClock, offset),
+      utcOffsetMinutes: wallClock == null ? null : offset,
       lat: _readCoordinate(
         tags['GPS GPSLatitude'],
         tags['GPS GPSLatitudeRef']?.printable,
@@ -60,6 +74,27 @@ DateTime? _readTakenAt(Map<String, IfdTag> tags) {
     int.parse(match.group(6)!),
   );
 }
+
+/// An EXIF offset ('+01:00', '-05:30') in minutes, or null.
+int? readExifOffset(String? raw) {
+  final match = RegExp(r'^([+-])(\d{2}):(\d{2})$').firstMatch(
+    raw?.trim() ?? '',
+  );
+  if (match == null) return null;
+  final minutes = int.parse(match.group(2)!) * 60 + int.parse(match.group(3)!);
+  if (minutes > 18 * 60) return null;
+  return match.group(1) == '-' ? -minutes : minutes;
+}
+
+/// The UTC instant of [wallClock] (its fields as read) at [offsetMinutes].
+DateTime instantOf(DateTime wallClock, int offsetMinutes) => DateTime.utc(
+  wallClock.year,
+  wallClock.month,
+  wallClock.day,
+  wallClock.hour,
+  wallClock.minute,
+  wallClock.second,
+).subtract(Duration(minutes: offsetMinutes));
 
 /// GPS coordinate tags hold [degrees, minutes, seconds] as `Ratio`s; the
 /// matching `*Ref` tag ('S' or 'W') gives the sign.

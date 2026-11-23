@@ -1,3 +1,4 @@
+import '../../../domain/entities/film_clock.dart';
 import '../../../domain/entities/wrap_up_golden_vows.dart';
 import 'golden_vows_fit.dart';
 import 'golden_vows_story.dart';
@@ -21,6 +22,7 @@ GoldenVowsStory? goldenVowsFromWrapUp(
   required Set<String> photoIds,
   DateTime? startDate,
   DateTime? endDate,
+  FilmClock clock = FilmClock.phone,
 }) {
   final date = startDate ?? gv.startDate;
   if (date == null) return null;
@@ -30,7 +32,14 @@ GoldenVowsStory? goldenVowsFromWrapUp(
         GvHero(
           photoId: hero.photoId,
           note: hero.note,
-          caption: _caption(hero.label, hero.takenAt),
+          caption: _caption(
+            hero.label,
+            // On the clock of where it was taken (#461).
+            switch (hero.takenAt) {
+              final at? => clock.photo(hero.photoId, at),
+              null => null,
+            },
+          ),
           order: hero.order,
         ),
   ];
@@ -124,14 +133,10 @@ GvChapter? _chapter(
   );
 }
 
-/// "The vows · 15:10": the director's label and the photo's local time,
-/// either one alone, or null.
-String? _caption(String? label, DateTime? takenAt) {
-  final local = takenAt?.toLocal();
-  final time = local == null
-      ? null
-      : '${local.hour.toString().padLeft(2, '0')}:'
-            '${local.minute.toString().padLeft(2, '0')}';
+/// "The vows · 15:10": the director's label and the photo's local time
+/// ([wallClock], from the film's clock), either one alone, or null.
+String? _caption(String? label, DateTime? wallClock) {
+  final time = wallClock == null ? null : FilmClock.hhmm(wallClock);
   return switch ((label, time)) {
     (final l?, final t?) => '$l · $t',
     (final l?, null) => l,

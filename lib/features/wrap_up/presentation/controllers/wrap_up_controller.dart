@@ -90,7 +90,8 @@ class WrapUpController extends _$WrapUpController {
       photoUrlById: photoUrlById,
       photoTakenAtById: {
         for (final photo in photos)
-          if (photo.takenAt case final at?) photo.id: at.toLocal(),
+          if (photo.takenAt case final at?)
+            photo.id: wrapUp.clock.photo(photo.id, at),
       },
       // Checked before pruning: a deleted photo the film shows is exactly
       // what makes it stale.
@@ -106,7 +107,10 @@ class WrapUpController extends _$WrapUpController {
                 photo.id: SkyPhoto(
                   id: photo.id,
                   place: photo.placeText,
-                  takenAt: photo.takenAt?.toLocal(),
+                  takenAt: switch (photo.takenAt) {
+                    final at? => wrapUp.clock.photo(photo.id, at),
+                    null => null,
+                  },
                   caption: photo.caption,
                 ),
           },
@@ -118,6 +122,7 @@ class WrapUpController extends _$WrapUpController {
       goldenVows: switch (wrapUp.goldenVows) {
         final gv? => goldenVowsFromWrapUp(
           gv,
+          clock: wrapUp.clock,
           photoIds: photoUrlById.keys.toSet(),
           startDate: trip?.startDate,
           endDate: trip?.endDate,
@@ -127,6 +132,7 @@ class WrapUpController extends _$WrapUpController {
       neonNight: switch (wrapUp.neonNight) {
         final nn? => neonNightFromWrapUp(
           nn,
+          clock: wrapUp.clock,
           photoIds: photoUrlById.keys.toSet(),
           startDate: trip?.startDate,
         ),

@@ -11,6 +11,7 @@ import '../../../journal/presentation/controllers/journal_controller.dart';
 import '../../../subscription/presentation/controllers/entitlement_controller.dart';
 import '../../domain/entities/film_pick.dart';
 import '../../domain/entities/photo_entity.dart';
+import '../../domain/photo_capture_time.dart';
 import '../providers/photo_providers.dart';
 
 const _freeTierPhotoLimit = 40;
@@ -57,6 +58,11 @@ Future<PhotoEntity> runAddPhoto({
     }
 
     final exif = await exifReader.read(rawBytes);
+    final captured = PhotoCaptureTime.of(
+      exifTakenAt: exif.takenAt,
+      exifOffsetMinutes: exif.utcOffsetMinutes,
+      now: DateTime.now(),
+    );
     final compressed = await compressor.compress(rawBytes);
 
     final result = await repo.addPhoto(
@@ -68,7 +74,9 @@ Future<PhotoEntity> runAddPhoto({
       placeText: placeText,
       lat: locationPermissionGranted ? exif.lat : null,
       lng: locationPermissionGranted ? exif.lng : null,
-      takenAt: exif.takenAt,
+      takenAt: captured.takenAt,
+      utcOffsetMinutes: captured.utcOffsetMinutes,
+      utcOffsetSource: captured.source,
     );
     return result.fold(
       (failure) => throw PresentationFailureException(failure),

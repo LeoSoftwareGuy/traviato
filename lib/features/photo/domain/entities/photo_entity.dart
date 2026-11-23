@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/utils/place_time.dart';
 import 'film_pick.dart';
 
 /// A photo attached to a memory, optionally tagged to a day/place/people.
@@ -21,6 +22,7 @@ class PhotoEntity extends Equatable {
     this.imageUrl,
     this.filmPick = FilmPick.auto,
     this.filmPickSetAt,
+    this.utcOffsetMinutes,
   });
 
   final String id;
@@ -43,23 +45,43 @@ class PhotoEntity extends Equatable {
   /// `generated_at` means the film is out of date.
   final DateTime? filmPickSetAt;
 
-  PhotoEntity copyWith({FilmPick? filmPick, DateTime? filmPickSetAt}) =>
-      PhotoEntity(
-        id: id,
-        tripId: tripId,
-        dayDate: dayDate,
-        storagePath: storagePath,
-        caption: caption,
-        lat: lat,
-        lng: lng,
-        placeText: placeText,
-        peopleTags: peopleTags,
-        takenAt: takenAt,
-        createdAt: createdAt,
-        imageUrl: imageUrl,
-        filmPick: filmPick ?? this.filmPick,
-        filmPickSetAt: filmPickSetAt ?? this.filmPickSetAt,
-      );
+  /// The UTC offset where it was taken (#461): stored at upload, or
+  /// resolved from the memory's zone ([onClockOf]); null = the phone's.
+  final int? utcOffsetMinutes;
+
+  /// When it was taken (else added), on the clock of where it was taken:
+  /// for showing and for its day, never for ordering.
+  DateTime get localTime => placeTime(takenAt ?? createdAt, utcOffsetMinutes);
+
+  /// This photo with an offset from [zone] (the memory's) when it has
+  /// none of its own.
+  PhotoEntity onClockOf(String? zone) {
+    if (utcOffsetMinutes != null) return this;
+    final offset = zoneOffsetAt(zone, takenAt ?? createdAt);
+    return offset == null ? this : copyWith(utcOffsetMinutes: offset);
+  }
+
+  PhotoEntity copyWith({
+    FilmPick? filmPick,
+    DateTime? filmPickSetAt,
+    int? utcOffsetMinutes,
+  }) => PhotoEntity(
+    id: id,
+    tripId: tripId,
+    dayDate: dayDate,
+    storagePath: storagePath,
+    caption: caption,
+    lat: lat,
+    lng: lng,
+    placeText: placeText,
+    peopleTags: peopleTags,
+    takenAt: takenAt,
+    createdAt: createdAt,
+    imageUrl: imageUrl,
+    filmPick: filmPick ?? this.filmPick,
+    filmPickSetAt: filmPickSetAt ?? this.filmPickSetAt,
+    utcOffsetMinutes: utcOffsetMinutes ?? this.utcOffsetMinutes,
+  );
 
   @override
   List<Object?> get props => [
@@ -77,5 +99,6 @@ class PhotoEntity extends Equatable {
     imageUrl,
     filmPick,
     filmPickSetAt,
+    utcOffsetMinutes,
   ];
 }

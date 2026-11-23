@@ -42,7 +42,7 @@ abstract final class NoteActionsSheet {
       final time = L10nDates.clock(
         l10n.localeName,
         use24h: use24h,
-      ).format(note.takenAt.toLocal());
+      ).format(note.localTakenAt);
       return BottomSheetChrome(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
@@ -127,7 +127,7 @@ abstract final class PhotoActionsSheet {
       final time = L10nDates.clock(
         l10n.localeName,
         use24h: use24h,
-      ).format((photo.takenAt ?? photo.createdAt).toLocal());
+      ).format(photo.localTime);
       final caption = photo.caption?.trim();
       return BottomSheetChrome(
         child: Padding(

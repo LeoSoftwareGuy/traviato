@@ -949,7 +949,10 @@ export function buildNeonPickInput(
   chapters: readonly NnSkeletonChapter[],
   slots: readonly NnSlot[],
   analyses: ReadonlyMap<string, { summary: string; hero_score: number }>,
-  clock: (iso: string | null) => string | null,
+  clock: (
+    iso: string | null,
+    item?: { utc_offset_minutes?: number | null },
+  ) => string | null,
 ) {
   const { trip } = tripData;
   return {
@@ -963,17 +966,24 @@ export function buildNeonPickInput(
     notes_language: writtenLanguage(tripData),
     notes: tripData.notes.filter((n) => n.id && n.content.trim()).map((n) => ({
       note_id: n.id,
-      written_at: clock(n.legacy ? null : n.taken_at ?? n.created_at ?? null),
+      written_at: clock(
+        n.legacy ? null : n.taken_at ?? n.created_at ?? null,
+        n,
+      ),
       photo_id: n.photo_id ?? null,
       text: n.content,
     })),
     chapters: chapters.map((c, i) => ({
       chapter: i + 1,
       days: c.days,
-      from: clock(c.photos[0]?.taken_at ?? c.photos[0]?.created_at ?? null),
+      from: clock(
+        c.photos[0]?.taken_at ?? c.photos[0]?.created_at ?? null,
+        c.photos[0],
+      ),
       to: clock(
         c.photos[c.photos.length - 1]?.taken_at ??
           c.photos[c.photos.length - 1]?.created_at ?? null,
+        c.photos[c.photos.length - 1],
       ),
       places: [
         ...new Set(c.photos.map((p) => p.place_text?.trim()).filter(Boolean)),
@@ -989,7 +999,7 @@ export function buildNeonPickInput(
       c.photos.map((p) => ({
         photo_id: p.id,
         chapter: i + 1,
-        time: clock(p.taken_at ?? p.created_at),
+        time: clock(p.taken_at ?? p.created_at, p),
         summary: analyses.get(p.id)?.summary ?? null,
         caption: p.caption?.trim() || null,
         place: p.place_text ?? null,

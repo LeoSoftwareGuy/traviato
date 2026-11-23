@@ -480,6 +480,21 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   give way — second pages, the carousel, the packing card, main pages
   without a note; notes and captions are shortened or dropped only past
   75 s. Never a chapter. The "aim at the target" step of #458 is gone.
+- **Times where they happened (#461):** a film reads every photo and
+  note on the clock of where it was taken or written, never the phone's
+  zone now — Budapest photos play 21:57 while the phone is in Tallinn.
+  A photo's offset: its own (EXIF offset, or the phone's for a fresh
+  shot), else the zone of its GPS position, else the memory's zone; a
+  note's: the phone's when written, else a nearby photo's, else the
+  memory's. The memory's zone comes from its photos' GPS, else its
+  country, else a city or country in its destination — a country with
+  several zones (USA, Russia…) is never guessed: "unresolved", and the
+  phone's offset plays. Daylight saving time is per moment. Logical
+  days, chapters and parts, time-of-day words, card and label times and
+  the director's input all use these times. Kept films keep the phone's
+  clock until "Rebuild film". The Plan inspector shows the zone and
+  where each time came from. The Journal, photo viewer and Kept Memory
+  page show the same times.
 - **The user's words (#399, display only; which words are chosen is #398,
   multi-excerpt note moments #416):** captions and notes are never cut
   with "…". A text that doesn't fit gets smaller type or more lines, then

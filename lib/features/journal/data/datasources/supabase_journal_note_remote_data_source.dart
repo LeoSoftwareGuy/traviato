@@ -85,6 +85,9 @@ class SupabaseJournalNoteRemoteDataSource
             'day_date': _dateOnly(dayDate),
             'taken_at': takenAt.toUtc().toIso8601String(),
             'edited_at': takenAt.toUtc().toIso8601String(),
+            // Where it was written (#461): the film reads the note on
+            // that place's clock.
+            'utc_offset_minutes': takenAt.toLocal().timeZoneOffset.inMinutes,
             'content': content,
             'dictated': dictated,
             'photo_id': ?photoId,

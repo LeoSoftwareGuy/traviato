@@ -17,6 +17,8 @@ abstract interface class PhotoRemoteDataSource {
     double? lat,
     double? lng,
     DateTime? takenAt,
+    int? utcOffsetMinutes,
+    String? utcOffsetSource,
   });
 
   /// Deletes the `photos` row via the `delete_photo` RPC, which also takes

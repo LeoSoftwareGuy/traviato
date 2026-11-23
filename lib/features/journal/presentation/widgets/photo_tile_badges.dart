@@ -78,6 +78,8 @@ class FilmBadge extends StatelessWidget {
 class PhotoTimePill extends StatelessWidget {
   const PhotoTimePill({required this.takenAt, required this.use24h, super.key});
 
+  /// A wall-clock time already on the photo's place clock (#461:
+  /// `PhotoEntity.localTime`).
   final DateTime takenAt;
 
   /// `HH:mm` or `h:mm a`, following the phone.
@@ -97,7 +99,7 @@ class PhotoTimePill extends StatelessWidget {
               L10nDates.clock(
                 context.l10n.localeName,
                 use24h: use24h,
-              ).format(takenAt.toLocal()),
+              ).format(takenAt),
               key: const Key('journal-photo-time-pill'),
               maxLines: 1,
               style: AppTypography.caption.copyWith(

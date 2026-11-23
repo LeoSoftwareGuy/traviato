@@ -50,9 +50,9 @@ class TimelineLater extends TimelineEntry {
   const TimelineLater();
 }
 
-/// When a photo happened, in local time: taken, else added.
-DateTime photoTimeOf(PhotoEntity photo) =>
-    (photo.takenAt ?? photo.createdAt).toLocal();
+/// When a photo happened, on the clock of where it was taken (#461):
+/// taken, else added.
+DateTime photoTimeOf(PhotoEntity photo) => photo.localTime;
 
 /// Whether [at] (local) is past the night of [day]: a later date, or the
 /// next morning from [logicalDayCutoffHour].
@@ -78,7 +78,7 @@ List<TimelineEntry> buildDayTimeline({
     items.add(_Item(at, photo: p, isLater: isAfterDayOver(at, day)));
   }
   for (final n in notes) {
-    final at = n.takenAt.toLocal();
+    final at = n.localTakenAt;
     items.add(_Item(at, note: n, isLater: isAfterDayOver(at, day)));
   }
   items.sort((a, b) {

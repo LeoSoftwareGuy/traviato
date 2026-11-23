@@ -46,6 +46,8 @@ class FakePhotoRepository implements PhotoRepository {
     double? lat,
     double? lng,
     DateTime? takenAt,
+    int? utcOffsetMinutes,
+    String? utcOffsetSource,
   }) async {
     final callIndex = addPhotoCallCount;
     addPhotoCallCount++;

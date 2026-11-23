@@ -716,7 +716,8 @@ class _PhotoInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final caption = photo.caption?.trim();
-    final takenAt = photo.takenAt;
+    // On the clock of where it was taken (#461).
+    final takenAt = photo.takenAt == null ? null : photo.localTime;
     final smallStyle = AppTypography.caption.copyWith(
       fontSize: 11,
       letterSpacing: 0,

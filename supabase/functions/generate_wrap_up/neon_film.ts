@@ -240,6 +240,8 @@ export function neonNightFilm(
         text: tidyEnd(note.text)!,
         number: noteIndex + 1,
         written_at: notes[noteIndex].created_at ?? null,
+        // Its offset is content.local_times.notes[note_id] (#461).
+        ...(notes[noteIndex].id ? { note_id: notes[noteIndex].id } : {}),
         photo_id: note.photo_id,
       }
       : null,

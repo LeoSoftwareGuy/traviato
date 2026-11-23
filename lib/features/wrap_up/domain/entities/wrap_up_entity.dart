@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import 'film_clock.dart';
 import 'film_plan.dart';
 import 'wrap_up_cover_photo.dart';
 import 'wrap_up_dates.dart';
@@ -38,7 +39,12 @@ class WrapUpEntity extends Equatable {
     this.sky,
     this.goldenVows,
     this.neonNight,
+    this.clock = FilmClock.phone,
   });
+
+  /// Each photo's and note's place clock (#461); the phone's for a film
+  /// kept before it.
+  final FilmClock clock;
 
   /// The generator's resolved film plan (#151); `null` for a wrap-up
   /// generated before cuts existed, which plays exactly as it always did.
@@ -120,6 +126,7 @@ class WrapUpEntity extends Equatable {
     sky: sky,
     goldenVows: goldenVows,
     neonNight: neonNight,
+    clock: clock,
   );
 
   @override
@@ -141,5 +148,6 @@ class WrapUpEntity extends Equatable {
     sky,
     goldenVows,
     neonNight,
+    clock,
   ];
 }
