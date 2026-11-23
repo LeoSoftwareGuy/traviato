@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:traviato/features/wrap_up/domain/entities/film_clock.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_neon_night.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_from_wrap_up.dart';
 import 'package:traviato/features/wrap_up/presentation/film/neon_night/neon_night_scene_spec.dart';
@@ -68,6 +69,47 @@ Set<String> _all() => {
 };
 
 void main() {
+  test("times play on each photo's place clock, not the phone's (#461)", () {
+    // Every photo an hour east of the phone, the note two hours.
+    final clock = FilmClock(
+      photoOffsets: {
+        for (final chapter in _nn().chapters)
+          for (final photo in chapter.photos)
+            photo.id: photo.takenAt.timeZoneOffset.inMinutes + 60,
+      },
+      noteOffsets: {
+        'n4': DateTime(2026, 11, 15).timeZoneOffset.inMinutes + 120,
+      },
+    );
+    final nn = _nn();
+    final story = neonNightFromWrapUp(
+      WrapUpNeonNight(
+        title: nn.title,
+        startDate: nn.startDate,
+        plan: nn.plan,
+        chapters: nn.chapters,
+        note: WrapUpNeonNote(
+          text: nn.note!.text,
+          number: nn.note!.number,
+          writtenAt: nn.note!.writtenAt,
+          photoId: nn.note!.photoId,
+          noteId: 'n4',
+        ),
+        headline: nn.headline,
+        firstName: nn.firstName,
+        totals: nn.totals,
+      ),
+      photoIds: _all(),
+      clock: clock,
+    )!;
+    expect(story.chapters.map((c) => (c.from, c.to)), [
+      ('23:10', '23:40'),
+      ('00:40', '00:51'),
+      ('02:10', '04:10'),
+    ]);
+    expect(story.note!.time, '02:31');
+  });
+
   test('maps every piece, on the phone clock (#363)', () {
     final story = neonNightFromWrapUp(_nn(), photoIds: _all())!;
 

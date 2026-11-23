@@ -70,5 +70,6 @@ WrapUpEntity pruneMissingPhotos(
     sky: wrapUp.sky,
     goldenVows: wrapUp.goldenVows,
     neonNight: wrapUp.neonNight,
+    clock: wrapUp.clock,
   );
 }

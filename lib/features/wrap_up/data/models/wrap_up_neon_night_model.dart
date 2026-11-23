@@ -148,6 +148,7 @@ WrapUpNeonNote? _note(dynamic json) {
     number: number,
     writtenAt: _instant(json['written_at']),
     photoId: _string(json['photo_id']),
+    noteId: _string(json['note_id']),
   );
 }
 

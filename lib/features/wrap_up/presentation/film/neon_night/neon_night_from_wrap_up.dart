@@ -1,3 +1,4 @@
+import '../../../domain/entities/film_clock.dart';
 import '../../../domain/entities/wrap_up_neon_night.dart';
 import 'neon_night_scene_spec.dart';
 import 'neon_night_fit.dart';
@@ -26,7 +27,9 @@ NeonNightStory? neonNightFromWrapUp(
   WrapUpNeonNight nn, {
   required Set<String> photoIds,
   DateTime? startDate,
+  FilmClock clock = FilmClock.phone,
 }) {
+  NnPhoto photoOf(WrapUpNeonPhoto photo) => _photo(photo, clock);
   final kept = [
     for (final chapter in nn.chapters)
       (
@@ -46,14 +49,14 @@ NeonNightStory? neonNightFromWrapUp(
   };
   final chapters = <NnChapter>[];
   for (final entry in kept) {
-    final photos = [for (final photo in entry.photos) _photo(photo)];
+    final photos = [for (final photo in entry.photos) photoOf(photo)];
     final ids = {for (final photo in entry.photos) photo.id};
     final moments = [
       for (final moment in entry.chapter.moments)
         ?_moment(moment, [
           for (final id in moment.photoIds)
             if (ids.contains(id)) byId[id]!,
-        ]),
+        ], clock),
     ].take(2).toList();
     chapters.add(
       NnChapter(
@@ -68,7 +71,7 @@ NeonNightStory? neonNightFromWrapUp(
             for (final id in entry.chapter.cardPhotoIds)
               if (ids.contains(id)) byId[id]!,
           ]..sort((a, b) => a.takenAt.compareTo(b.takenAt)))
-            _photo(photo),
+            photoOf(photo),
         ],
         note: entry.chapter.note,
         zooms: entry.chapter.cardZooms ?? 2,
@@ -85,7 +88,8 @@ NeonNightStory? neonNightFromWrapUp(
     );
   }
 
-  final firstPhoto = kept.first.photos.first.takenAt.toLocal();
+  final first = kept.first.photos.first;
+  final firstPhoto = clock.photo(first.id, first.takenAt);
   final date =
       startDate ??
       nn.startDate ??
@@ -117,8 +121,10 @@ NeonNightStory? neonNightFromWrapUp(
           : NnNoteMoment(
               text: note.text,
               number: note.number,
-              time: note.writtenAt == null ? null : _clock(note.writtenAt!),
-              photo: notePhoto == null ? null : _photo(notePhoto),
+              time: note.writtenAt == null
+                  ? null
+                  : FilmClock.hhmm(clock.note(note.noteId, note.writtenAt!)),
+              photo: notePhoto == null ? null : photoOf(notePhoto),
             ),
       firstName: nn.firstName,
       headline: nn.headline,
@@ -236,13 +242,17 @@ NnMoment _rebuilt(NnMoment moment, List<NnPhoto> photos) => switch (moment) {
 String? _same(String? text) =>
     text?.replaceAll(RegExp(r'\s+'), ' ').trim().toLowerCase();
 
-NnMoment? _moment(WrapUpNeonMoment moment, List<WrapUpNeonPhoto> source) {
+NnMoment? _moment(
+  WrapUpNeonMoment moment,
+  List<WrapUpNeonPhoto> source,
+  FilmClock clock,
+) {
   // In the order they were taken (#399 T6), whatever the plan's order.
   final photos = [
     for (final photo in [
       ...source,
     ]..sort((a, b) => a.takenAt.compareTo(b.takenAt)))
-      _photo(photo),
+      _photo(photo, clock),
   ];
   final type = switch (moment.type) {
     'split' => NnMomentType.split,
@@ -273,16 +283,10 @@ List<NnPhoto> _spread(List<NnPhoto> photos) {
   ];
 }
 
-NnPhoto _photo(WrapUpNeonPhoto photo) => NnPhoto(
+NnPhoto _photo(WrapUpNeonPhoto photo, FilmClock clock) => NnPhoto(
   id: photo.id,
-  takenAt: _clock(photo.takenAt),
+  // On the clock of where it was taken (#461).
+  takenAt: FilmClock.hhmm(clock.photo(photo.id, photo.takenAt)),
   caption: photo.caption,
   heroScore: photo.heroScore,
 );
-
-/// 'HH:MM' on the phone's clock.
-String _clock(DateTime instant) {
-  final local = instant.toLocal();
-  String two(int v) => v.toString().padLeft(2, '0');
-  return '${two(local.hour)}:${two(local.minute)}';
-}

@@ -10,6 +10,7 @@ import '../../domain/entities/wrap_up_keepsake.dart';
 import '../../domain/entities/wrap_up_moment.dart';
 import '../../domain/entities/wrap_up_photo_ref.dart';
 import '../../domain/entities/wrap_up_unlock.dart';
+import 'film_clock_model.dart';
 import 'film_plan_model.dart';
 import 'wrap_up_golden_vows_model.dart';
 import 'wrap_up_neon_night_model.dart';
@@ -39,6 +40,7 @@ class WrapUpModel extends WrapUpEntity {
     super.sky,
     super.goldenVows,
     super.neonNight,
+    super.clock,
   });
 
   /// [row] is a `wrap_ups` row shape: `content`, `generated_at`,
@@ -68,6 +70,7 @@ class WrapUpModel extends WrapUpEntity {
       sky: parseWrapUpSky(contentMap),
       goldenVows: parseWrapUpGoldenVows(contentMap),
       neonNight: parseWrapUpNeonNight(contentMap),
+      clock: parseFilmClock(contentMap),
     );
   }
 }

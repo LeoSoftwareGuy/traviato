@@ -179,6 +179,7 @@ class _InspectionBody extends ConsumerWidget {
           _GoldenVowsCard(tripId: tripId, report: null),
           _NeonNightCard(tripId: tripId, report: null),
           _SkyStoryCard(tripId: tripId, report: null),
+          _TimeZoneCard(tripId: tripId),
         ],
       );
     }
@@ -214,6 +215,7 @@ class _InspectionBody extends ConsumerWidget {
             analyses: inspection.analyses,
           ),
         if (report.isPlanned) _LinesCard(report: report),
+        _TimeZoneCard(tripId: tripId),
       ],
     );
   }
@@ -337,6 +339,55 @@ class _SummaryCard extends StatelessWidget {
               'run ${report.runCount} · ${report.ranAt?.toLocal() ?? '—'}',
         ),
       ],
+    );
+  }
+}
+
+/// The clock the film's times play on (#461): the memory's zone and where
+/// it came from, and how each photo's and note's offset was found.
+class _TimeZoneCard extends ConsumerWidget {
+  const _TimeZoneCard({required this.tripId});
+
+  final String tripId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(wrapUpControllerProvider(tripId));
+    String sources(Map<String, int> counts) => counts.isEmpty
+        ? '—'
+        : [
+            for (final MapEntry(:key, :value) in counts.entries) '$key $value',
+          ].join(' · ');
+    return _Card(
+      title: 'Time zone',
+      children: state.when(
+        loading: () => const [LinearProgressIndicator()],
+        error: (error, _) => [Text('Could not load the wrap-up: $error')],
+        data: (data) {
+          final clock = data.wrapUp.clock;
+          if (!clock.isPlaceClock) {
+            return const [
+              Text(
+                "Kept before #461: the phone's clock until Rebuild film.",
+                key: Key('film-plan-time-zone-phone'),
+              ),
+            ];
+          }
+          return [
+            _Line(
+              'Zone',
+              clock.zoneSource == 'unresolved'
+                  ? "unresolved — ${clock.zoneDetail ?? '?'} · the phone's "
+                        'offset where nothing else is known'
+                  : '${clock.zone ?? '—'} · from ${clock.zoneSource ?? '?'}'
+                        '${clock.zoneDetail == null ? '' : ' (${clock.zoneDetail})'}',
+              key: const Key('film-plan-time-zone'),
+            ),
+            _Line('Photos', sources(clock.photoSources)),
+            _Line('Notes', sources(clock.noteSources)),
+          ];
+        },
+      ),
     );
   }
 }
