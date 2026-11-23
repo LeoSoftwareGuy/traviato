@@ -104,6 +104,7 @@ List<WrapUpGoldenVowsChapterPage> _pages(dynamic value) {
         photoIds: photoIds,
         order: order,
         layout: _layout(page['layout']),
+        note: _string(page['note']),
       ),
     );
   }

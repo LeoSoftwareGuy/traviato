@@ -30,10 +30,17 @@ class GvChapter extends Equatable {
     this.layout,
     this.order,
     this.isSecondPage = false,
+    this.isLineANote = false,
   });
 
   final String title;
+
+  /// The eyebrow ("Chapter one · Morning"), or the user's own line
+  /// ([isLineANote], #460).
   final String? line;
+
+  /// [line] is the user's words: set as a note, read in full.
+  final bool isLineANote;
   final List<String> photoIds;
 
   /// Where its prints go (spec §5.3); null cycles A, B, C by chapter.
@@ -54,6 +61,7 @@ class GvChapter extends Equatable {
     layout,
     order,
     isSecondPage,
+    isLineANote,
   ];
 }
 

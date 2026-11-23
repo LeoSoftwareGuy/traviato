@@ -283,7 +283,7 @@ TextPainter? fitGvNote(String note) {
 /// A titled page's heading (spec §5.3): the script title at y 268 and the
 /// spaced line under it at y 398.
 class GvHeadingTexts {
-  GvHeadingTexts(String title, String? line)
+  GvHeadingTexts(String title, String? line, {bool isNote = false})
     : title = _fit(
         title,
         GoldenVowsType.script(92, color: GoldenVowsColors.gold),
@@ -291,6 +291,14 @@ class GvHeadingTexts {
       ),
       line = line == null
           ? null
+          // The user's own line (#460): in their words, as a note is set,
+          // on one line — smaller, never cut.
+          : isNote
+          ? _fit(
+              line,
+              GoldenVowsType.script(46, color: GoldenVowsColors.ink),
+              maxWidth,
+            )
           : _fit(
               line.toUpperCase(),
               GoldenVowsType.serif(
@@ -357,7 +365,11 @@ class GvAlbumTexts {
       ],
       chapters = [
         for (final chapter in story.chapters)
-          GvHeadingTexts(chapter.title, chapter.line),
+          GvHeadingTexts(
+            chapter.title,
+            chapter.line,
+            isNote: chapter.isLineANote,
+          ),
       ],
       carousel = story.hasCarousel
           ? GvHeadingTexts(story.carousel!.title, story.carousel!.line)

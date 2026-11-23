@@ -41,12 +41,15 @@ GoldenVowsStory? goldenVowsFromWrapUp(
       else
         for (final (k, page) in chapter.pages.indexed)
           ?_chapter(
+            // A page's line is the user's, else the chapter's eyebrow on
+            // its first page only (#460: a second page never repeats it).
             WrapUpGoldenVowsChapter(
               title: chapter.title,
-              line: chapter.line,
+              line: page.note ?? (k == 0 ? chapter.line : null),
               photoIds: page.photoIds,
               layout: page.layout,
             ),
+            isNote: page.note != null,
             photoIds,
             minPhotos: 1,
             order: page.order,
@@ -97,6 +100,7 @@ GvChapter? _chapter(
   required int minPhotos,
   int? order,
   bool isSecondPage = false,
+  bool isNote = false,
 }) {
   final ids = [
     for (final id in chapter.photoIds)
@@ -116,6 +120,7 @@ GvChapter? _chapter(
     },
     order: order,
     isSecondPage: isSecondPage,
+    isLineANote: isNote,
   );
 }
 

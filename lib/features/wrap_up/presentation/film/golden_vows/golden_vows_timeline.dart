@@ -62,6 +62,7 @@ class GoldenVowsTimeline {
           chapterDwellFor(
             chapter.title,
             chapterDwell * scale * story.chapterDwellScale,
+            note: chapter.isLineANote ? chapter.line : null,
           ),
       ],
       dwellScale: scale,
@@ -108,10 +109,15 @@ class GoldenVowsTimeline {
   }
 
   /// How long a chapter page lies open (#458): [dwell], never shorter than
-  /// its title takes to read — seen from the turn that uncovers it to its
-  /// own turn.
-  static double chapterDwellFor(String title, double dwell) =>
-      math.max(dwell, FilmTextRules.readingTime(title.trim()) - turnDur);
+  /// its title — or the user's line on it ([note], #460) — takes to read,
+  /// seen from the turn that uncovers it to its own turn.
+  static double chapterDwellFor(String title, double dwell, {String? note}) =>
+      math.max(
+        math.max(dwell, FilmTextRules.readingTime(title.trim()) - turnDur),
+        note == null || note.trim().isEmpty
+            ? 0
+            : FilmTextRules.readingTime(note.trim()) - turnDur,
+      );
 
   static const invitationDur = 5.4;
   static const packingCardDur = 6.5;

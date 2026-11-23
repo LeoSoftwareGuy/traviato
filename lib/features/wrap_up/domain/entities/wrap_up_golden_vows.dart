@@ -156,12 +156,16 @@ class WrapUpGoldenVowsChapterPage extends Equatable {
     required this.photoIds,
     required this.order,
     this.layout,
+    this.note,
   });
 
   final List<String> photoIds;
   final int order;
   final String? layout;
 
+  /// The user's line in place of the chapter's eyebrow (#460), or null.
+  final String? note;
+
   @override
-  List<Object?> get props => [photoIds, order, layout];
+  List<Object?> get props => [photoIds, order, layout, note];
 }

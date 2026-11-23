@@ -215,6 +215,9 @@ void main() {
       ]);
       expect(story.chapters.last.layout, GvChapterLayout.b2);
       expect(story.chapters.map((c) => c.isSecondPage), [false, true]);
+      // The eyebrow on the first page only; a second page without a line of
+      // its own shows none (#460).
+      expect(story.chapters.map((c) => c.line), ['Chapter one · Night', null]);
       // A caption with no time plays alone.
       expect(story.heroes.first.caption, 'Arabica');
       expect(story.pageOrder, [
@@ -230,4 +233,35 @@ void main() {
       expect(older.pageOrder.first, (kind: GvPageKind.hero, index: 0));
     },
   );
+
+  test("a page's own line takes the eyebrow's place, set as a note (#460)", () {
+    const gv = WrapUpGoldenVows(
+      names: 'Elmas birthday',
+      heroes: [],
+      chapters: [
+        WrapUpGoldenVowsChapter(
+          title: 'From Tallinn',
+          line: 'Chapter one · Night',
+          photoIds: ['a1', 'a2'],
+          pages: [
+            WrapUpGoldenVowsChapterPage(
+              photoIds: ['a1', 'a2'],
+              order: 0,
+              layout: 'B2',
+              note: 'Direct plane from Tallinn to Budapest is the best',
+            ),
+          ],
+        ),
+      ],
+    );
+    final story = goldenVowsFromWrapUp(
+      gv,
+      photoIds: const {'a1', 'a2'},
+      startDate: DateTime(2026, 2, 26),
+    )!;
+    final page = story.chapters.single;
+    expect(page.line, 'Direct plane from Tallinn to Budapest is the best');
+    expect(page.isLineANote, isTrue);
+    expect(page.layout, GvChapterLayout.b2);
+  });
 }

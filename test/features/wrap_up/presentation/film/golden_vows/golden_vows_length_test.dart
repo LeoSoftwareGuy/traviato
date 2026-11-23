@@ -87,7 +87,7 @@ void main() {
           ),
       ],
     );
-    final fitted = GvFit.toLongest(long, maxSeconds: 60);
+    final fitted = GvFit.toLongest(long, maxSeconds: 60, longest: 60);
     expect(GvFit.lengthOf(fitted), lessThanOrEqualTo(60));
     await tester.pumpWidget(
       Localizations(
