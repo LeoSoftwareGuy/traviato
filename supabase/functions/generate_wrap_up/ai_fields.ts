@@ -1,7 +1,6 @@
-// The four genuinely-AI-generated fields of wrap_ups.content (#125). Kept
-// separate from content.ts's full WrapUpContent so the Anthropic prompt only
-// ever sees (and only ever has to produce) this small slice — everything
-// else is assembled deterministically in assemble.ts.
+// The classic film's four lines (#125), stored as wrap_ups.ai_fields. AI-
+// written until #463; since then a draft's come from the notes
+// (code_lines.ts) and a kept film keeps the ones it was kept with.
 
 export interface AiGeneratedFields {
   invitation_line2: string;
@@ -9,46 +8,6 @@ export interface AiGeneratedFields {
   unlock_reason: string | null;
   keepsake_closing_quote: string;
 }
-
-export const aiGeneratedFieldsToolSchema = {
-  name: "emit_wrap_up_copy",
-  description:
-    "Emit the four AI-written lines for this trip's wrap-up film as structured JSON.",
-  input_schema: {
-    type: "object",
-    properties: {
-      invitation_line2: {
-        type: "string",
-        description:
-          'One short line naming the trip\'s type + destination, e.g. "One long road." Fraunces italic, reads under a computed "Five days." line — keep it terse.',
-      },
-      bridges: {
-        type: "array",
-        items: { type: "string" },
-        minItems: 3,
-        maxItems: 3,
-        description:
-          "Exactly 3 short text blocks (max 2 lines each, \\n-separated), one per arc of the trip's day notes in chronological order. Never describe a photograph — these frames never show one.",
-      },
-      unlock_reason: {
-        type: ["string", "null"],
-        description:
-          "One line saying why this trip earned the given achievement. Null if no achievement was provided.",
-      },
-      keepsake_closing_quote: {
-        type: "string",
-        description:
-          "One short, warm closing line for the trip's final keepsake card.",
-      },
-    },
-    required: [
-      "invitation_line2",
-      "bridges",
-      "unlock_reason",
-      "keepsake_closing_quote",
-    ],
-  },
-} as const;
 
 function isString(v: unknown): v is string {
   return typeof v === "string";

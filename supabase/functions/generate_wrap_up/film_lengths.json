@@ -50,30 +50,74 @@
     "pages": [
      {
       "first_day": 1,
-      "last_day": 3,
+      "last_day": null,
       "date": "2026-09-01",
-      "end_date": "2026-09-03",
-      "photo_count": 15,
+      "end_date": null,
+      "photo_count": 5,
+      "headline": "Whole city below",
+      "hero_photo_id": "p00",
+      "extra_photo_ids": [
+       "p01",
+       "p02",
+       "p03",
+       "p04"
+      ],
+      "note_id": "n0",
       "note": "Tram 28 up to the castle, the whole city below us.",
       "excerpts": [
        {
         "note_id": "n0",
         "text": "Tram 28 up to the castle, the whole city below us."
-       },
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 2,
+      "last_day": null,
+      "date": "2026-09-02",
+      "end_date": null,
+      "photo_count": 5,
+      "headline": "At Manteigaria",
+      "hero_photo_id": "p05",
+      "extra_photo_ids": [
+       "p06",
+       "p07",
+       "p08",
+       "p09"
+      ],
+      "note_id": "n1",
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "excerpts": [
+       {
+        "note_id": "n1",
+        "text": "Pastéis de nata at Manteigaria, still warm, three each."
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 3,
+      "last_day": null,
+      "date": "2026-09-03",
+      "end_date": null,
+      "photo_count": 5,
+      "headline": "At Miradouro",
+      "hero_photo_id": "p10",
+      "extra_photo_ids": [
+       "p11",
+       "p12",
+       "p13",
+       "p14"
+      ],
+      "note_id": "n2",
+      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "excerpts": [
        {
         "note_id": "n2",
         "text": "Our last sunset at Miradouro da Senhora do Monte."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p07",
-      "extra_photo_ids": [
-       "p01",
-       "p05",
-       "p09",
-       "p13"
-      ],
-      "note_id": "n0",
       "sky_line": null
      }
     ]
@@ -155,6 +199,15 @@
       "date": "2026-09-01",
       "end_date": null,
       "photo_count": 9,
+      "headline": "Whole city below",
+      "hero_photo_id": "p00",
+      "extra_photo_ids": [
+       "p01",
+       "p03",
+       "p05",
+       "p07"
+      ],
+      "note_id": "n0",
       "note": "Tram 28 up to the castle, the whole city below us.",
       "excerpts": [
        {
@@ -162,43 +215,54 @@
         "text": "Tram 28 up to the castle, the whole city below us."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p04",
-      "extra_photo_ids": [
-       "p01",
-       "p03",
-       "p06",
-       "p08"
-      ],
-      "note_id": "n0",
       "sky_line": null
      },
      {
       "first_day": 2,
-      "last_day": 3,
+      "last_day": null,
       "date": "2026-09-02",
-      "end_date": "2026-09-03",
-      "photo_count": 16,
+      "end_date": null,
+      "photo_count": 8,
+      "headline": "At Manteigaria",
+      "hero_photo_id": "p09",
+      "extra_photo_ids": [
+       "p10",
+       "p11",
+       "p13",
+       "p15"
+      ],
+      "note_id": "n1",
       "note": "Pastéis de nata at Manteigaria, still warm, three each.",
       "excerpts": [
        {
         "note_id": "n1",
         "text": "Pastéis de nata at Manteigaria, still warm, three each."
-       },
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 3,
+      "last_day": null,
+      "date": "2026-09-03",
+      "end_date": null,
+      "photo_count": 8,
+      "headline": "At Miradouro",
+      "hero_photo_id": "p18",
+      "extra_photo_ids": [
+       "p19",
+       "p20",
+       "p22",
+       "p24"
+      ],
+      "note_id": "n2",
+      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "excerpts": [
        {
         "note_id": "n2",
         "text": "Our last sunset at Miradouro da Senhora do Monte."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p16",
-      "extra_photo_ids": [
-       "p10",
-       "p14",
-       "p20",
-       "p24"
-      ],
-      "note_id": "n1",
       "sky_line": null
      }
     ]
@@ -310,41 +374,22 @@
       "date": "2026-09-01",
       "end_date": null,
       "photo_count": 14,
-      "note": "Tram 28 up to the castle, the whole city below us.",
-      "excerpts": [],
-      "headline": null,
-      "hero_photo_id": "p03",
+      "headline": "Whole city below",
+      "hero_photo_id": "p00",
       "extra_photo_ids": [
-       "p00",
-       "p02",
+       "p01",
        "p04",
-       "p06"
+       "p07",
+       "p10"
       ],
       "note_id": "n0",
-      "sky_line": null
-     },
-     {
-      "first_day": 1,
-      "last_day": null,
-      "date": "2026-09-01",
-      "end_date": null,
-      "photo_count": 14,
-      "note": null,
+      "note": "Tram 28 up to the castle, the whole city below us.",
       "excerpts": [
        {
         "note_id": "n0",
         "text": "Tram 28 up to the castle, the whole city below us."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p10",
-      "extra_photo_ids": [
-       "p07",
-       "p09",
-       "p11",
-       "p13"
-      ],
-      "note_id": null,
       "sky_line": null
      },
      {
@@ -353,41 +398,22 @@
       "date": "2026-09-02",
       "end_date": null,
       "photo_count": 13,
-      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
-      "excerpts": [],
-      "headline": null,
-      "hero_photo_id": "p17",
+      "headline": "At Manteigaria",
+      "hero_photo_id": "p14",
       "extra_photo_ids": [
-       "p14",
-       "p16",
+       "p15",
        "p18",
-       "p20"
+       "p21",
+       "p24"
       ],
       "note_id": "n1",
-      "sky_line": null
-     },
-     {
-      "first_day": 2,
-      "last_day": null,
-      "date": "2026-09-02",
-      "end_date": null,
-      "photo_count": 13,
-      "note": null,
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
       "excerpts": [
        {
         "note_id": "n1",
         "text": "Pastéis de nata at Manteigaria, still warm, three each."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p23",
-      "extra_photo_ids": [
-       "p21",
-       "p22",
-       "p25",
-       "p26"
-      ],
-      "note_id": null,
       "sky_line": null
      },
      {
@@ -396,6 +422,15 @@
       "date": "2026-09-03",
       "end_date": null,
       "photo_count": 13,
+      "headline": "At Miradouro",
+      "hero_photo_id": "p28",
+      "extra_photo_ids": [
+       "p29",
+       "p32",
+       "p35",
+       "p38"
+      ],
+      "note_id": "n2",
       "note": "Our last sunset at Miradouro da Senhora do Monte.",
       "excerpts": [
        {
@@ -403,15 +438,6 @@
         "text": "Our last sunset at Miradouro da Senhora do Monte."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p34",
-      "extra_photo_ids": [
-       "p29",
-       "p32",
-       "p36",
-       "p39"
-      ],
-      "note_id": "n2",
       "sky_line": null
      }
     ]
@@ -469,30 +495,74 @@
     "pages": [
      {
       "first_day": 1,
-      "last_day": 3,
+      "last_day": null,
       "date": "2026-09-01",
-      "end_date": "2026-09-03",
-      "photo_count": 15,
+      "end_date": null,
+      "photo_count": 5,
+      "headline": "Whole city below",
+      "hero_photo_id": "p00",
+      "extra_photo_ids": [
+       "p01",
+       "p02",
+       "p03",
+       "p04"
+      ],
+      "note_id": "n0",
       "note": "Tram 28 up to the castle, the whole city below us.",
       "excerpts": [
        {
         "note_id": "n0",
         "text": "Tram 28 up to the castle, the whole city below us."
-       },
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 2,
+      "last_day": null,
+      "date": "2026-09-02",
+      "end_date": null,
+      "photo_count": 5,
+      "headline": "At Manteigaria",
+      "hero_photo_id": "p05",
+      "extra_photo_ids": [
+       "p06",
+       "p07",
+       "p08",
+       "p09"
+      ],
+      "note_id": "n1",
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "excerpts": [
+       {
+        "note_id": "n1",
+        "text": "Pastéis de nata at Manteigaria, still warm, three each."
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 3,
+      "last_day": null,
+      "date": "2026-09-03",
+      "end_date": null,
+      "photo_count": 5,
+      "headline": "At Miradouro",
+      "hero_photo_id": "p10",
+      "extra_photo_ids": [
+       "p11",
+       "p12",
+       "p13",
+       "p14"
+      ],
+      "note_id": "n2",
+      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "excerpts": [
        {
         "note_id": "n2",
         "text": "Our last sunset at Miradouro da Senhora do Monte."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p07",
-      "extra_photo_ids": [
-       "p01",
-       "p05",
-       "p09",
-       "p13"
-      ],
-      "note_id": "n0",
       "sky_line": null
      }
     ]
@@ -707,6 +777,15 @@
       "date": "2026-09-01",
       "end_date": null,
       "photo_count": 9,
+      "headline": "Whole city below",
+      "hero_photo_id": "p00",
+      "extra_photo_ids": [
+       "p01",
+       "p03",
+       "p05",
+       "p07"
+      ],
+      "note_id": "n0",
       "note": "Tram 28 up to the castle, the whole city below us.",
       "excerpts": [
        {
@@ -714,43 +793,54 @@
         "text": "Tram 28 up to the castle, the whole city below us."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p04",
-      "extra_photo_ids": [
-       "p01",
-       "p03",
-       "p06",
-       "p08"
-      ],
-      "note_id": "n0",
       "sky_line": null
      },
      {
       "first_day": 2,
-      "last_day": 3,
+      "last_day": null,
       "date": "2026-09-02",
-      "end_date": "2026-09-03",
-      "photo_count": 16,
+      "end_date": null,
+      "photo_count": 8,
+      "headline": "At Manteigaria",
+      "hero_photo_id": "p09",
+      "extra_photo_ids": [
+       "p10",
+       "p11",
+       "p13",
+       "p15"
+      ],
+      "note_id": "n1",
       "note": "Pastéis de nata at Manteigaria, still warm, three each.",
       "excerpts": [
        {
         "note_id": "n1",
         "text": "Pastéis de nata at Manteigaria, still warm, three each."
-       },
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 3,
+      "last_day": null,
+      "date": "2026-09-03",
+      "end_date": null,
+      "photo_count": 8,
+      "headline": "At Miradouro",
+      "hero_photo_id": "p18",
+      "extra_photo_ids": [
+       "p19",
+       "p20",
+       "p22",
+       "p24"
+      ],
+      "note_id": "n2",
+      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "excerpts": [
        {
         "note_id": "n2",
         "text": "Our last sunset at Miradouro da Senhora do Monte."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p16",
-      "extra_photo_ids": [
-       "p10",
-       "p14",
-       "p20",
-       "p24"
-      ],
-      "note_id": "n1",
       "sky_line": null
      }
     ]
@@ -1062,41 +1152,22 @@
       "date": "2026-09-01",
       "end_date": null,
       "photo_count": 14,
-      "note": "Tram 28 up to the castle, the whole city below us.",
-      "excerpts": [],
-      "headline": null,
-      "hero_photo_id": "p03",
+      "headline": "Whole city below",
+      "hero_photo_id": "p00",
       "extra_photo_ids": [
-       "p00",
-       "p02",
+       "p01",
        "p04",
-       "p06"
+       "p07",
+       "p10"
       ],
       "note_id": "n0",
-      "sky_line": null
-     },
-     {
-      "first_day": 1,
-      "last_day": null,
-      "date": "2026-09-01",
-      "end_date": null,
-      "photo_count": 14,
-      "note": null,
+      "note": "Tram 28 up to the castle, the whole city below us.",
       "excerpts": [
        {
         "note_id": "n0",
         "text": "Tram 28 up to the castle, the whole city below us."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p10",
-      "extra_photo_ids": [
-       "p07",
-       "p09",
-       "p11",
-       "p13"
-      ],
-      "note_id": null,
       "sky_line": null
      },
      {
@@ -1105,41 +1176,22 @@
       "date": "2026-09-02",
       "end_date": null,
       "photo_count": 13,
-      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
-      "excerpts": [],
-      "headline": null,
-      "hero_photo_id": "p17",
+      "headline": "At Manteigaria",
+      "hero_photo_id": "p14",
       "extra_photo_ids": [
-       "p14",
-       "p16",
+       "p15",
        "p18",
-       "p20"
+       "p21",
+       "p24"
       ],
       "note_id": "n1",
-      "sky_line": null
-     },
-     {
-      "first_day": 2,
-      "last_day": null,
-      "date": "2026-09-02",
-      "end_date": null,
-      "photo_count": 13,
-      "note": null,
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
       "excerpts": [
        {
         "note_id": "n1",
         "text": "Pastéis de nata at Manteigaria, still warm, three each."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p23",
-      "extra_photo_ids": [
-       "p21",
-       "p22",
-       "p25",
-       "p26"
-      ],
-      "note_id": null,
       "sky_line": null
      },
      {
@@ -1148,6 +1200,15 @@
       "date": "2026-09-03",
       "end_date": null,
       "photo_count": 13,
+      "headline": "At Miradouro",
+      "hero_photo_id": "p28",
+      "extra_photo_ids": [
+       "p29",
+       "p32",
+       "p35",
+       "p38"
+      ],
+      "note_id": "n2",
       "note": "Our last sunset at Miradouro da Senhora do Monte.",
       "excerpts": [
        {
@@ -1155,15 +1216,6 @@
         "text": "Our last sunset at Miradouro da Senhora do Monte."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p34",
-      "extra_photo_ids": [
-       "p29",
-       "p32",
-       "p36",
-       "p39"
-      ],
-      "note_id": "n2",
       "sky_line": null
      }
     ]
@@ -1428,30 +1480,74 @@
     "pages": [
      {
       "first_day": 1,
-      "last_day": 3,
+      "last_day": null,
       "date": "2026-09-01",
-      "end_date": "2026-09-03",
-      "photo_count": 15,
+      "end_date": null,
+      "photo_count": 5,
+      "headline": "Whole city below",
+      "hero_photo_id": "p00",
+      "extra_photo_ids": [
+       "p01",
+       "p02",
+       "p03",
+       "p04"
+      ],
+      "note_id": "n0",
       "note": "Tram 28 up to the castle, the whole city below us.",
       "excerpts": [
        {
         "note_id": "n0",
         "text": "Tram 28 up to the castle, the whole city below us."
-       },
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 2,
+      "last_day": null,
+      "date": "2026-09-02",
+      "end_date": null,
+      "photo_count": 5,
+      "headline": "At Manteigaria",
+      "hero_photo_id": "p05",
+      "extra_photo_ids": [
+       "p06",
+       "p07",
+       "p08",
+       "p09"
+      ],
+      "note_id": "n1",
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
+      "excerpts": [
+       {
+        "note_id": "n1",
+        "text": "Pastéis de nata at Manteigaria, still warm, three each."
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 3,
+      "last_day": null,
+      "date": "2026-09-03",
+      "end_date": null,
+      "photo_count": 5,
+      "headline": "At Miradouro",
+      "hero_photo_id": "p10",
+      "extra_photo_ids": [
+       "p11",
+       "p12",
+       "p13",
+       "p14"
+      ],
+      "note_id": "n2",
+      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "excerpts": [
        {
         "note_id": "n2",
         "text": "Our last sunset at Miradouro da Senhora do Monte."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p07",
-      "extra_photo_ids": [
-       "p01",
-       "p05",
-       "p09",
-       "p13"
-      ],
-      "note_id": "n0",
       "sky_line": null
      }
     ]
@@ -1795,6 +1891,15 @@
       "date": "2026-09-01",
       "end_date": null,
       "photo_count": 9,
+      "headline": "Whole city below",
+      "hero_photo_id": "p00",
+      "extra_photo_ids": [
+       "p01",
+       "p03",
+       "p05",
+       "p07"
+      ],
+      "note_id": "n0",
       "note": "Tram 28 up to the castle, the whole city below us.",
       "excerpts": [
        {
@@ -1802,43 +1907,54 @@
         "text": "Tram 28 up to the castle, the whole city below us."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p04",
-      "extra_photo_ids": [
-       "p01",
-       "p03",
-       "p06",
-       "p08"
-      ],
-      "note_id": "n0",
       "sky_line": null
      },
      {
       "first_day": 2,
-      "last_day": 3,
+      "last_day": null,
       "date": "2026-09-02",
-      "end_date": "2026-09-03",
-      "photo_count": 16,
+      "end_date": null,
+      "photo_count": 8,
+      "headline": "At Manteigaria",
+      "hero_photo_id": "p09",
+      "extra_photo_ids": [
+       "p10",
+       "p11",
+       "p13",
+       "p15"
+      ],
+      "note_id": "n1",
       "note": "Pastéis de nata at Manteigaria, still warm, three each.",
       "excerpts": [
        {
         "note_id": "n1",
         "text": "Pastéis de nata at Manteigaria, still warm, three each."
-       },
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 3,
+      "last_day": null,
+      "date": "2026-09-03",
+      "end_date": null,
+      "photo_count": 8,
+      "headline": "At Miradouro",
+      "hero_photo_id": "p18",
+      "extra_photo_ids": [
+       "p19",
+       "p20",
+       "p22",
+       "p24"
+      ],
+      "note_id": "n2",
+      "note": "Our last sunset at Miradouro da Senhora do Monte.",
+      "excerpts": [
        {
         "note_id": "n2",
         "text": "Our last sunset at Miradouro da Senhora do Monte."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p16",
-      "extra_photo_ids": [
-       "p10",
-       "p14",
-       "p20",
-       "p24"
-      ],
-      "note_id": "n1",
       "sky_line": null
      }
     ]
@@ -2292,41 +2408,22 @@
       "date": "2026-09-01",
       "end_date": null,
       "photo_count": 14,
-      "note": "Tram 28 up to the castle, the whole city below us.",
-      "excerpts": [],
-      "headline": null,
-      "hero_photo_id": "p03",
+      "headline": "Whole city below",
+      "hero_photo_id": "p00",
       "extra_photo_ids": [
-       "p00",
-       "p02",
+       "p01",
        "p04",
-       "p06"
+       "p07",
+       "p10"
       ],
       "note_id": "n0",
-      "sky_line": null
-     },
-     {
-      "first_day": 1,
-      "last_day": null,
-      "date": "2026-09-01",
-      "end_date": null,
-      "photo_count": 14,
-      "note": null,
+      "note": "Tram 28 up to the castle, the whole city below us.",
       "excerpts": [
        {
         "note_id": "n0",
         "text": "Tram 28 up to the castle, the whole city below us."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p10",
-      "extra_photo_ids": [
-       "p07",
-       "p09",
-       "p11",
-       "p13"
-      ],
-      "note_id": null,
       "sky_line": null
      },
      {
@@ -2335,41 +2432,22 @@
       "date": "2026-09-02",
       "end_date": null,
       "photo_count": 13,
-      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
-      "excerpts": [],
-      "headline": null,
-      "hero_photo_id": "p17",
+      "headline": "At Manteigaria",
+      "hero_photo_id": "p14",
       "extra_photo_ids": [
-       "p14",
-       "p16",
+       "p15",
        "p18",
-       "p20"
+       "p21",
+       "p24"
       ],
       "note_id": "n1",
-      "sky_line": null
-     },
-     {
-      "first_day": 2,
-      "last_day": null,
-      "date": "2026-09-02",
-      "end_date": null,
-      "photo_count": 13,
-      "note": null,
+      "note": "Pastéis de nata at Manteigaria, still warm, three each.",
       "excerpts": [
        {
         "note_id": "n1",
         "text": "Pastéis de nata at Manteigaria, still warm, three each."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p23",
-      "extra_photo_ids": [
-       "p21",
-       "p22",
-       "p25",
-       "p26"
-      ],
-      "note_id": null,
       "sky_line": null
      },
      {
@@ -2378,6 +2456,15 @@
       "date": "2026-09-03",
       "end_date": null,
       "photo_count": 13,
+      "headline": "At Miradouro",
+      "hero_photo_id": "p28",
+      "extra_photo_ids": [
+       "p29",
+       "p32",
+       "p35",
+       "p38"
+      ],
+      "note_id": "n2",
       "note": "Our last sunset at Miradouro da Senhora do Monte.",
       "excerpts": [
        {
@@ -2385,15 +2472,6 @@
         "text": "Our last sunset at Miradouro da Senhora do Monte."
        }
       ],
-      "headline": null,
-      "hero_photo_id": "p34",
-      "extra_photo_ids": [
-       "p29",
-       "p32",
-       "p36",
-       "p39"
-      ],
-      "note_id": "n2",
       "sky_line": null
      }
     ]
@@ -2881,19 +2959,18 @@
     "first_name": null,
     "moment_count": 29,
     "mosaic_photo_ids": [
+     "39fea9d3-4931-4605-8f22-94c1714fa2e8",
+     "ac6c43bb-a98f-4c77-9a52-d84d0abb16f9",
      "a3cc4c86-5ac2-4200-8bc8-1e303d6c594e",
-     "1188b05a-6581-4680-9b01-34c97a7f1b34",
      "1325f261-7d4b-48d5-a9e7-dbc4e6cc423b",
      "34542056-43ea-4798-b5e4-18944e0c539a",
-     "6eca4520-d5b4-4e2a-aed2-7760f35a40f5",
-     "cd74fdc4-2cb8-46e8-a3fc-8d1baa910293",
-     "10af0193-e773-4ffc-8b86-1066f3fe1530",
-     "1e84d7df-ead0-4193-abd0-3592e4cecd59",
+     "2bd9809d-ae25-452e-b250-1c6397d7a674",
      "620303b8-4aa3-4b7c-8c11-fe813dfd62a1",
-     "764ecd51-0180-4683-b777-200e375078ed",
      "02d9ee87-6b80-457f-ab8f-c4c1bd67f73a",
-     "e5be04ce-b606-415f-9b03-70c08b0fe4a3",
-     "ff6a1fde-b6bd-48d8-b87d-29687d647553"
+     "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
+     "4b028163-05eb-4808-8995-2332f0e2e7a5",
+     "ff6a1fde-b6bd-48d8-b87d-29687d647553",
+     "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc"
     ],
     "pages": [
      {
@@ -2901,27 +2978,70 @@
       "last_day": null,
       "date": "2026-10-23",
       "end_date": null,
-      "photo_count": 17,
+      "photo_count": 8,
+      "headline": "В Амстердаме",
+      "hero_photo_id": "7b9eee86-d27a-4263-ae02-cdb2d829e792",
+      "extra_photo_ids": [
+       "cd16a50b-3981-465d-ba60-33078d7f4eef",
+       "ac6c43bb-a98f-4c77-9a52-d84d0abb16f9",
+       "1188b05a-6581-4680-9b01-34c97a7f1b34",
+       "1325f261-7d4b-48d5-a9e7-dbc4e6cc423b"
+      ],
+      "note_id": "3224a4be-3594-48c9-887b-c53053faa01a",
       "note": "Прибыл в аэропорт за 10 минут до посадки, а там толпа людей- даже немного испугался что не успею на самолет.",
       "excerpts": [
        {
         "note_id": "3224a4be-3594-48c9-887b-c53053faa01a",
-        "text": "Прибыл в аэропорт за 10 минут до посадки, а там толпа людей- даже немного испугался что не успею на самолет."
-       },
+        "text": "а там толпа людей- даже немного испугался что не успею на самолет."
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 1,
+      "last_day": null,
+      "date": "2026-10-23",
+      "end_date": null,
+      "photo_count": 5,
+      "headline": null,
+      "hero_photo_id": "2bd9809d-ae25-452e-b250-1c6397d7a674",
+      "extra_photo_ids": [
+       "6eca4520-d5b4-4e2a-aed2-7760f35a40f5",
+       "cd74fdc4-2cb8-46e8-a3fc-8d1baa910293",
+       "10af0193-e773-4ffc-8b86-1066f3fe1530",
+       "1e84d7df-ead0-4193-abd0-3592e4cecd59"
+      ],
+      "note_id": "ece34f11-c106-4010-8d55-ccfcc3c7159c",
+      "note": "Мы выходим из дома сидели там пару часов, успели помыться поесть и выпить пивка. Конечно же пыхнули и взяли еще косячок с собой, бомбочки сделаны и тоже взяты с собой.",
+      "excerpts": [
+       {
+        "note_id": "ece34f11-c106-4010-8d55-ccfcc3c7159c",
+        "text": "успели помыться поесть и выпить пивка."
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 1,
+      "last_day": null,
+      "date": "2026-10-23",
+      "end_date": null,
+      "photo_count": 4,
+      "headline": "На Куко Unreal",
+      "hero_photo_id": "764ecd51-0180-4683-b777-200e375078ed",
+      "extra_photo_ids": [
+       "620303b8-4aa3-4b7c-8c11-fe813dfd62a1",
+       "02d9ee87-6b80-457f-ab8f-c4c1bd67f73a",
+       "e5be04ce-b606-415f-9b03-70c08b0fe4a3"
+      ],
+      "note_id": "e2528865-8652-4b44-a65e-f698f5e30db0",
+      "note": "Это самый крутой сет который я слышал или это М?",
+      "excerpts": [
        {
         "note_id": "e2528865-8652-4b44-a65e-f698f5e30db0",
         "text": "Это самый крутой сет который я слышал или это М?"
        }
       ],
-      "headline": null,
-      "hero_photo_id": "2bd9809d-ae25-452e-b250-1c6397d7a674",
-      "extra_photo_ids": [
-       "cd16a50b-3981-465d-ba60-33078d7f4eef",
-       "39fea9d3-4931-4605-8f22-94c1714fa2e8",
-       "ac6c43bb-a98f-4c77-9a52-d84d0abb16f9",
-       "7b9eee86-d27a-4263-ae02-cdb2d829e792"
-      ],
-      "note_id": "3224a4be-3594-48c9-887b-c53053faa01a",
       "sky_line": null
      },
      {
@@ -2930,26 +3050,22 @@
       "date": "2026-10-24",
       "end_date": null,
       "photo_count": 6,
-      "note": "В общем мы вчера пришли где-то в 8 утра,сначало были на Куко Unreal потом поехали в другую локацию так как купили билеты туда тоже заранее. Было супер весело и получили много позитивных эмоций но супер устали так что сегодня день начался поздно.",
-      "excerpts": [
-       {
-        "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
-        "text": "В общем мы вчера пришли где-то в 8 утра,сначало были на Куко Unreal потом поехали в другую локацию так как купили билеты туда тоже заранее."
-       },
-       {
-        "note_id": "43f91e23-1542-490d-b835-f31dfac55106",
-        "text": "Откисаем и смотрим ufc Петр ян против Мираба, держим кулочки за нашего слона."
-       }
-      ],
-      "headline": null,
-      "hero_photo_id": "4b028163-05eb-4808-8995-2332f0e2e7a5",
+      "headline": "Против Мираба",
+      "hero_photo_id": "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
       "extra_photo_ids": [
        "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e",
-       "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
        "48da458f-98c8-414f-9453-af81cec6f9da",
-       "ad570c04-90bf-4d84-9931-7a3e90db9caa"
+       "ad570c04-90bf-4d84-9931-7a3e90db9caa",
+       "4b028163-05eb-4808-8995-2332f0e2e7a5"
       ],
-      "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
+      "note_id": "f33b871c-c682-4680-bc74-260c570ad1a3",
+      "note": "Идем завтракать в город нашли english breakfast. Потом зашли в coffeeshop на втором этаже есть диваны где все кушают сладости и курят косячки, очень необычно. Зашли в продуктовый и поехали в дом откисать.",
+      "excerpts": [
+       {
+        "note_id": "f33b871c-c682-4680-bc74-260c570ad1a3",
+        "text": "Идем завтракать в город нашли english breakfast."
+       }
+      ],
       "sky_line": null
      },
      {
@@ -2958,25 +3074,21 @@
       "date": "2026-10-25",
       "end_date": null,
       "photo_count": 4,
+      "headline": "В Брюсель",
+      "hero_photo_id": "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc",
+      "extra_photo_ids": [
+       "9a9ccc19-f7b1-491d-a502-96217f7ca55c",
+       "da8f273e-2961-411b-b8e5-e286047a5e72",
+       "8513fe91-5136-43bb-8d93-d930f1cecf54"
+      ],
+      "note_id": "7b1c21ed-fe19-4c70-a6bd-d85f1c502768",
       "note": "Проснулись собрались с силами и позавтракали, едем в аэропорт в Брюсель но подороге остановимся покушать и выпить вкусного бельгийского пиво на дорожку",
       "excerpts": [
        {
         "note_id": "7b1c21ed-fe19-4c70-a6bd-d85f1c502768",
-        "text": "едем в аэропорт в Брюсель но подороге остановимся покушать и выпить вкусного бельгийского пиво на дорожку"
-       },
-       {
-        "note_id": "9c2f7347-5352-4a47-8dcf-222090ed53a9",
-        "text": "Наелись и похмелились пора домой, Брюссель не меняется отличное пиво и вкусная еда."
+        "text": "но подороге остановимся покушать и выпить вкусного бельгийского пиво на дорожку"
        }
       ],
-      "headline": null,
-      "hero_photo_id": "9a9ccc19-f7b1-491d-a502-96217f7ca55c",
-      "extra_photo_ids": [
-       "da8f273e-2961-411b-b8e5-e286047a5e72",
-       "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc",
-       "8513fe91-5136-43bb-8d93-d930f1cecf54"
-      ],
-      "note_id": "7b1c21ed-fe19-4c70-a6bd-d85f1c502768",
       "sky_line": null
      }
     ]

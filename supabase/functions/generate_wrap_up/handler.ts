@@ -3,29 +3,26 @@
 // server. Auth guard + ownership check per docs/supabase.md.
 //
 // Draft vs frozen (#187): a published wrap-up is returned untouched. A draft
-// is rebuilt from current data on every call, and Anthropic is only called
-// when the AI's inputs (ai_input_hash.ts) changed — at most
-// MAX_AI_GENERATIONS times per memory, after which the last AI text is
-// reused.
+// is rebuilt from current data on every call. The classic film's four
+// lines come from the notes (code_lines.ts, #463: no AI call); a kept
+// film keeps the lines it was kept with.
 //
 // Rebuild (#294): `rebuild: true` on a kept wrap-up re-assembles its film
-// from the current photos and picks, keeping its stored AI lines (no AI
-// call — the lines are written from notes, never photos) and its
-// published_at. It's the user's explicit "Photos changed · Rebuild film";
-// nothing else ever rewrites a kept film.
+// from the current photos and picks, keeping its stored lines (no AI
+// call) and its published_at. It's the user's explicit "Photos changed ·
+// Rebuild film"; nothing else ever rewrites a kept film.
 //
 // Director (#328): when WRAP_UP_DIRECTOR_USER_IDS enables it for the caller,
 // a draft's first build also runs the director (director.ts) and stores the
-// run in wrap_ups.director; a still-valid plan is merged into the draft's
-// content as `plan_version: 2` + `plan`. `director: "rerun"` runs it again
-// (the dev Plan inspector). On a kept film a rerun writes only
-// wrap_ups.director — a kept film's content is never touched by it.
+// run in wrap_ups.director. `director: "rerun"` runs it again (the dev
+// Plan inspector). On a kept film a rerun writes only wrap_ups.director —
+// a kept film's content is never touched by it.
 //
-// Sky Story (#345): every draft with photos gets `content.sky`, the film's
-// pages — the director's when its sky_story still fits the memory, else
-// built by code. The director is on for everyone unless switched off
-// (director_flag.ts), and runs again on its own when the memory's photo
-// days change (capped, director.ts).
+// Sky Story (#345, #463): every draft with photos gets `content.sky`, the
+// film's pages cut by code, with the director's stored picks for a Sky
+// Story memory's words. The director is on for everyone unless switched
+// off (director_flag.ts), and runs again on its own when the memory's
+// photo days change (capped, director.ts).
 //
 // Golden Vows (#346): a draft also gets `content.golden_vows` when the
 // director's section (a wedding, engagement, anniversary or date night)
@@ -51,35 +48,28 @@ import {
   type AiGeneratedFields,
   validateAiGeneratedFields,
 } from "./ai_fields.ts";
-import { computeAiInputHash } from "./ai_input_hash.ts";
+import { codeAiFields } from "./code_lines.ts";
 import { parseWrapUpLanguage, type WrapUpLanguage } from "./language.ts";
-import { logEvent, type LogLike, WrapUpGenerationError } from "./anthropic.ts";
+import { logEvent, type LogLike } from "./anthropic.ts";
 import {
   currentGoldenVows,
   currentNeonNight,
-  currentPlan,
   currentSkyStory,
   directorIsStale,
   type DirectorRecord,
   isDirectorRecord,
 } from "./director.ts";
-import { alwaysWithoutPage, buildSkyContent } from "./sky_story.ts";
+import { alwaysWithoutPage } from "./sky_story.ts";
+import { type SkyFilm, skyStoryFilm } from "./sky_film.ts";
 import { type GoldenVowsFilm, goldenVowsFilm } from "./gv_film.ts";
 import { neonNightFilm } from "./neon_film.ts";
 
 // deno-lint-ignore no-explicit-any
 type SupabaseClient = any;
 
-// 1 initial generation + 3 regenerations, same for free and Pro (#187).
-export const MAX_AI_GENERATIONS = 4;
-
 export interface Deps {
   serviceClient: SupabaseClient;
   authClient: (authHeader: string) => SupabaseClient;
-  generateAiFields: (
-    tripData: TripData,
-    language: WrapUpLanguage,
-  ) => Promise<AiGeneratedFields>;
   // Defaults to `console.error` — see anthropic.ts's `[generate_wrap_up]`
   // log lines (#166).
   log?: LogLike;
@@ -169,7 +159,7 @@ export async function handleRequest(
   const { data: existing, error: existingError } = await deps.serviceClient
     .from("wrap_ups")
     .select(
-      "content, generated_at, published_at, ai_fields, ai_input_hash, ai_generation_count, director",
+      "content, generated_at, published_at, ai_fields, director",
     )
     .eq("trip_id", tripId)
     .maybeSingle();
@@ -191,11 +181,13 @@ export async function handleRequest(
         existing,
       );
     }
-    if (rebuild && validateAiGeneratedFields(existing.ai_fields)) {
+    if (rebuild) {
       return await rebuildKept(
         deps,
         tripId,
-        existing.ai_fields,
+        validateAiGeneratedFields(existing.ai_fields)
+          ? existing.ai_fields
+          : null,
         slots,
         existing,
         language,
@@ -235,62 +227,8 @@ export async function handleRequest(
     }, 422);
   }
 
-  const inputHash = await computeAiInputHash(tripData, language);
-  const storedFields = validateAiGeneratedFields(existing?.ai_fields)
-    ? existing!.ai_fields as AiGeneratedFields
-    : null;
-  const generationCount: number = existing?.ai_generation_count ?? 0;
-  const storedHash: string | null = existing?.ai_input_hash ?? null;
-
-  let aiFields: AiGeneratedFields;
-  let newCount = generationCount;
-  // Whether [aiFields] were written from the current inputs — decides which
-  // hash is saved. A failed regeneration (or the cap) keeps the old hash so
-  // the row never claims text is fresher than it is.
-  let fieldsMatchInputs = true;
-  if (
-    storedFields &&
-    (storedHash === null || storedHash === inputHash ||
-      generationCount >= MAX_AI_GENERATIONS)
-  ) {
-    // Unchanged inputs, a backfilled row adopting its hash, or the cap
-    // reached — reuse the last AI-written text, no Anthropic call.
-    aiFields = storedFields;
-    fieldsMatchInputs = storedHash === null || storedHash === inputHash;
-  } else if (storedFields) {
-    // A regeneration. Counted whether or not it succeeds — every call costs
-    // — and a failure falls back to the last text rather than breaking.
-    newCount = generationCount + 1;
-    try {
-      aiFields = await deps.generateAiFields(tripData, language);
-    } catch (err) {
-      logGenerationFailure(deps, tripId, err, "regeneration_failed");
-      aiFields = storedFields;
-      fieldsMatchInputs = false;
-    }
-  } else {
-    // First generation: only counted on success, so a failed first attempt
-    // can't burn the cap before the user ever has a wrap-up.
-    try {
-      aiFields = await deps.generateAiFields(tripData, language);
-    } catch (err) {
-      // `error` keeps its old shape (the Dart client reads it as the
-      // message); `code` + `detail` say which of the three upstream
-      // failures this was (#166) — all 502, distinct from 401/403/404/500.
-      const { code, detail } = logGenerationFailure(
-        deps,
-        tripId,
-        err,
-        "generation_failed",
-      );
-      return json({
-        error: `wrap-up generation failed: ${detail}`,
-        code,
-        detail,
-      }, 502);
-    }
-    newCount = generationCount + 1;
-  }
+  // The classic film's lines, from the notes (#463).
+  const aiFields = codeAiFields(tripData);
 
   // The director runs once per memory on its own, again when its photo days
   // changed (capped), and on a rerun.
@@ -314,17 +252,14 @@ export async function handleRequest(
     : {};
   const film = withFilmPhotos(tripData, heroScores);
   const isSkyMemory = played === "sky_story";
-  // Next to everything the current player reads, so it keeps playing.
-  const plan = directorOn && isSkyMemory
-    ? currentPlan(director, film, language)
-    : null;
   // Every memory with photos gets Sky Story pages: a Sky Story memory's
-  // film, and the app's safety net if another film fails while it plays.
-  const sky = buildSkyContent(
-    film,
-    directorOn && isSkyMemory ? currentSkyStory(director, film) : null,
-    heroScores,
-  );
+  // film (with the director's picks), and the app's safety net if another
+  // film fails while it plays (code's words).
+  const skyPicks = directorOn && isSkyMemory
+    ? currentSkyStory(director)
+    : { picks: null, source: "code" as const };
+  const skyFilm = skyStoryFilm(film, skyPicks.picks, { heroScores, language });
+  const sky = skyFilm.content;
   if (sky) {
     // More Always picks than Sky Story's pages hold: they're in the
     // mosaic instead (#378's known limit).
@@ -338,12 +273,9 @@ export async function handleRequest(
   }
   // The chosen film always plays (#433): the director's section, repaired,
   // else code's plan for the same film — also with the director off.
-  const section = sectionContentFor(
-    played,
-    directorOn ? director : null,
-    film,
-    language,
-  );
+  const section = isSkyMemory
+    ? { content: {}, report: skyReport(skyFilm, skyPicks.source) }
+    : sectionContentFor(played, directorOn ? director : null, film, language);
   const content = {
     ...template,
     film_style: played,
@@ -351,7 +283,6 @@ export async function handleRequest(
     film_seconds: filmSecondsOf(film),
     // Each photo's and note's place clock (#461).
     local_times: localTimesOf(tripData),
-    ...(plan ? { plan_version: 2 as const, plan } : {}),
     ...(sky ? { sky } : {}),
     ...section.content,
     ...(section.report ? { film_report: section.report } : {}),
@@ -360,16 +291,12 @@ export async function handleRequest(
   const row = {
     content,
     generated_at: generatedAt,
+    // The lines a film kept from this draft keeps.
     ai_fields: aiFields,
-    // After a failed regeneration the old hash stays, so the next open
-    // retries — counted again, so still bounded by the cap.
-    ai_input_hash: fieldsMatchInputs ? inputHash : storedHash,
-    ai_generation_count: newCount,
     ...(directorRan ? { director } : {}),
   };
 
-  // Never delete-and-recreate (that would reset the counter), and never
-  // write over a wrap-up that was kept forever while this request ran.
+  // Never delete-and-recreate, and never write over a wrap-up that was kept forever while this request ran.
   const { error: saveError } = existing
     ? await deps.serviceClient
       .from("wrap_ups")
@@ -436,7 +363,8 @@ async function rerunKeptDirector(
   }, 200);
 }
 
-// Re-assembles a kept film with its stored AI lines (#294). Only ever
+// Re-assembles a kept film with its stored lines (#294; none stored: the
+// notes' lines, #463). Only ever
 // writes over a row that is still kept. A film kept as a Sky Story (#345)
 // rebuilds its pages too — the director's stored pages while they still
 // fit, else code-built; no AI call — so it stays a Sky Story. A film kept
@@ -447,7 +375,7 @@ async function rerunKeptDirector(
 async function rebuildKept(
   deps: Deps,
   tripId: string,
-  aiFields: AiGeneratedFields,
+  storedFields: AiGeneratedFields | null,
   slots: MomentSlots,
   existing: { content: unknown; director?: unknown },
   language: WrapUpLanguage,
@@ -461,6 +389,7 @@ async function rebuildKept(
       error: `failed to gather trip data: ${(err as Error).message}`,
     }, 500);
   }
+  const aiFields = storedFields ?? codeAiFields(tripData);
   const template = assembleWrapUpContent(tripData, aiFields, slots);
   const heroScores = isDirectorRecord(existing.director)
     ? existing.director.hero_scores ?? {}
@@ -470,13 +399,11 @@ async function rebuildKept(
     ? existing.content as Record<string, unknown>
     : {};
   const keptAsSky = "sky" in kept;
-  const sky = keptAsSky
-    ? buildSkyContent(
-      film,
-      currentSkyStory(existing.director, film),
-      heroScores,
-    )
+  const keptPicks = currentSkyStory(existing.director);
+  const skyFilm = keptAsSky
+    ? skyStoryFilm(film, keptPicks.picks, { heroScores, language })
     : null;
+  const sky = skyFilm?.content ?? null;
   // A kept film keeps its film (#433: never another one — a section that
   // no longer fits is healed, else code builds the same film). No kept
   // film gains Golden Vows or Neon Night.
@@ -489,6 +416,8 @@ async function rebuildKept(
     : null;
   const section = keptAs
     ? sectionContentFor(keptAs, existing.director, film, language)
+    : skyFilm
+    ? { content: {}, report: skyReport(skyFilm, keptPicks.source) }
     : { content: {}, report: null };
   const content = {
     ...template,
@@ -511,6 +440,22 @@ async function rebuildKept(
     return json({ error: `failed to save wrap-up: ${error.message}` }, 500);
   }
   return json({ content, generated_at: generatedAt }, 200);
+}
+
+// Sky Story's report for the inspector (#463): every slot, what the film
+// gave up for its length, its photos on pages and the notes on no page.
+function skyReport(sky: SkyFilm, source: "director" | "code") {
+  return {
+    source,
+    repairs: sky.report.filter((r) => r.pick && r.source === "code")
+      .map((r) => `${r.slot}: ${r.reason}`),
+    slots: sky.report,
+    trims: sky.trims,
+    shown: sky.shown,
+    unlisted: sky.unlisted,
+    seconds: sky.seconds,
+    limit_seconds: sky.limit_seconds,
+  };
 }
 
 // The chosen film's section content (#433): Golden Vows or Neon Night,
@@ -606,24 +551,6 @@ async function runCounted(
   const runs = isDirectorRecord(previous) ? previous.run_count ?? 1 : 0;
   const record = await deps.director!.run(tripId, tripData, language);
   return { ...record, run_count: runs + 1 };
-}
-
-function logGenerationFailure(
-  deps: Deps,
-  tripId: string,
-  err: unknown,
-  event: string,
-): { code: string; detail: string } {
-  const code = err instanceof WrapUpGenerationError
-    ? err.code
-    : "ai_output_invalid";
-  const detail = (err as Error).message;
-  logEvent(deps.log ?? console.error, event, {
-    trip_id: tripId,
-    code,
-    detail,
-  });
-  return { code, detail };
 }
 
 // The memory's data with every photo and note on its own place's clock

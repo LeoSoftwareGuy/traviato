@@ -21,7 +21,7 @@ import {
 import { goldenVowsFilm, gvShortestSeconds } from "./gv_film.ts";
 import { parsePicks } from "./film_slots.ts";
 import { WRAP_UP_LIMITS } from "./wrap_up_limits.ts";
-import { BANNED_PHRASES } from "./film_plan.ts";
+import { BANNED_PHRASES } from "./banned_phrases.ts";
 
 // A small seeded PRNG (mulberry32), so a failure can be replayed.
 function rng(seed: number) {

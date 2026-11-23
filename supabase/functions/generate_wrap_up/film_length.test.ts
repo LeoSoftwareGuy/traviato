@@ -35,7 +35,9 @@ Deno.test("content: Sky pages, chapters and album pages grow with photos", () =>
   const sky = FIXTURE_PHOTO_COUNTS.map((n) =>
     (lengthContent("sky_story", n).sky as { pages: unknown[] }).pages.length
   );
-  assertEquals(sky, [1, 2, 5]);
+  // A page per day (#463): the fixture's 3 days at every size — the length
+  // never takes a day away, it only groups days past what fits.
+  assertEquals(sky, [3, 3, 3]);
   const nn = FIXTURE_PHOTO_COUNTS.map((n) =>
     (lengthContent("neon_night", n).neon_night as { chapters: unknown[] })
       .chapters.length

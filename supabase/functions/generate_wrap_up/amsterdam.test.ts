@@ -13,7 +13,6 @@ import type { WrapUpLanguage } from "./language.ts";
 import { runDirector } from "./director.ts";
 import { analysisFor, toolResponse } from "./director_fixtures.ts";
 import { fakeAuthClient, fakeSupabaseClient } from "./test_fakes.ts";
-import { validAiFields } from "./test_fixtures.ts";
 import { MAX_NN_HEADLINE_CHARS, MAX_NN_TITLE_CHARS } from "./neon_night.ts";
 
 const TRIP_ID = "amsterdam";
@@ -170,7 +169,6 @@ function director(answer: (slots: InputSlot[]) => unknown) {
   const deps: Deps = {
     serviceClient: client,
     authClient: fakeAuthClient({ id: OWNER_ID }),
-    generateAiFields: () => Promise.resolve(validAiFields),
     log: () => {},
     director: {
       isEnabledFor: () => true,

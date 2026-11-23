@@ -2,25 +2,16 @@ import {
   assert,
   assertEquals,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import {
-  type Deps,
-  handleRequest,
-  MAX_AI_GENERATIONS,
-  parseUtcOffset,
-} from "./handler.ts";
-import { LOG_PREFIX, WrapUpGenerationError } from "./anthropic.ts";
+import { type Deps, handleRequest, parseUtcOffset } from "./handler.ts";
 import { fakeAuthClient, fakeSupabaseClient } from "./test_fakes.ts";
-import { gatherTripData } from "./gather.ts";
-import { computeAiInputHash } from "./ai_input_hash.ts";
 import type { AiGeneratedFields } from "./ai_fields.ts";
 import { validAiFields, validWrapUpContent } from "./test_fixtures.ts";
 import { DIRECTOR_VERSION, type DirectorRecord } from "./director.ts";
 import {
   directorTripData,
   gvPicks,
-  keepsakePlan,
   neonPicks,
-  skyStoryPlan,
+  skyPicks,
 } from "./director_fixtures.ts";
 import { useFilmLengthRuleForTests } from "./film_length.ts";
 
@@ -63,7 +54,6 @@ function baseDeps(overrides: Partial<Deps> = {}): Deps {
     }),
     authClient: fakeAuthClient({ id: OWNER_ID }),
     minimums: NO_MINIMUMS,
-    generateAiFields: () => Promise.resolve(validAiFields),
     ...overrides,
   };
 }
@@ -144,7 +134,6 @@ Deno.test("handleRequest returns 403 when the caller doesn't own the trip", asyn
 });
 
 Deno.test("a published wrap-up is frozen: returned as stored, nothing read or generated", async () => {
-  let generateCalled = false;
   const client = fakeSupabaseClient(
     {
       trips: [{ id: TRIP_ID, user_id: OWNER_ID }],
@@ -153,28 +142,18 @@ Deno.test("a published wrap-up is frozen: returned as stored, nothing read or ge
         generated_at: "2026-06-06T00:00:00Z",
         published_at: "2026-06-07T00:00:00Z",
         ai_fields: validAiFields,
-        ai_input_hash: "old",
-        ai_generation_count: 1,
       }],
     },
     // Gathering would fail loudly — proves a frozen wrap-up never reads it.
     { photos: { message: "must not be read" } },
   );
-  const deps = baseDeps({
-    serviceClient: client,
-    minimums: NO_MINIMUMS,
-    generateAiFields: () => {
-      generateCalled = true;
-      return Promise.resolve(validAiFields);
-    },
-  });
+  const deps = baseDeps({ serviceClient: client, minimums: NO_MINIMUMS });
 
   const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
   const json = await res.json();
 
   assertEquals(res.status, 200);
   assertEquals(json.content, validWrapUpContent);
-  assertEquals(generateCalled, false);
   assertEquals(client.writes, []);
 });
 
@@ -194,8 +173,6 @@ function keptClient() {
       generated_at: "2026-06-06T00:00:00Z",
       published_at: "2026-06-07T00:00:00Z",
       ai_fields: validAiFields,
-      ai_input_hash: "old",
-      ai_generation_count: 1,
     }],
     journal_notes: [{
       day_date: "2026-06-01",
@@ -227,17 +204,9 @@ function keptClient() {
   });
 }
 
-Deno.test("rebuild on a kept wrap-up re-assembles the film with its stored AI lines (#294)", async () => {
-  let generateCalled = false;
+Deno.test("rebuild on a kept wrap-up re-assembles the film with its stored lines (#294)", async () => {
   const client = keptClient();
-  const deps = baseDeps({
-    serviceClient: client,
-    minimums: NO_MINIMUMS,
-    generateAiFields: () => {
-      generateCalled = true;
-      return Promise.resolve(validAiFields);
-    },
-  });
+  const deps = baseDeps({ serviceClient: client, minimums: NO_MINIMUMS });
 
   const res = await handleRequest(
     request({ trip_id: TRIP_ID, rebuild: true }),
@@ -246,8 +215,7 @@ Deno.test("rebuild on a kept wrap-up re-assembles the film with its stored AI li
   const json = await res.json();
 
   assertEquals(res.status, 200);
-  // Notes changed since keeping, yet no AI call: kept lines are reused.
-  assertEquals(generateCalled, false);
+  // Notes changed since keeping: the kept lines are reused.
   assertEquals(json.content.bridges, validAiFields.bridges);
   assertEquals(
     json.content.moments.map((m: { photo_id: string }) => m.photo_id),
@@ -276,64 +244,21 @@ Deno.test("a kept wrap-up without rebuild stays frozen even when picks changed",
   assertEquals(client.writes, []);
 });
 
-Deno.test("handleRequest generates, assembles, saves and returns new content", async () => {
+Deno.test("handleRequest assembles, saves and returns new content", async () => {
   const res = await handleRequest(request({ trip_id: TRIP_ID }), baseDeps());
   const json = await res.json();
 
   assertEquals(res.status, 200);
-  assertEquals(json.content.invitation.line2, validAiFields.invitation_line2);
-  assertEquals(json.content.bridges, validAiFields.bridges);
-  assertEquals(
-    json.content.keepsake.closing_quote,
-    validAiFields.keepsake_closing_quote,
-  );
+  // No notes, no destination: the memory's name, no bridges, no quote —
+  // never filler (#463).
+  assertEquals(json.content.invitation.line2, "Untitled Trip");
+  assertEquals(json.content.bridges, ["", "", ""]);
+  assertEquals(json.content.keepsake.closing_quote, "");
   assertEquals(json.content.moments, []); // no photos in this fixture's trip
   assertEquals(json.content.footnote.photo_count, 0);
 });
 
-Deno.test("handleRequest returns 502 when generation fails", async () => {
-  const deps = baseDeps({
-    minimums: NO_MINIMUMS,
-    generateAiFields: () => Promise.reject(new Error("model refused")),
-    log: () => {},
-  });
-  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
-  assertEquals(res.status, 502);
-});
-
-// #166: the 502 body says which upstream failure it was, and one summary
-// line with the trip id is logged for the dashboard.
-Deno.test("handleRequest's 502 carries the generation error's code and detail, and logs it", async () => {
-  const lines: string[] = [];
-  const deps = baseDeps({
-    minimums: NO_MINIMUMS,
-    generateAiFields: () =>
-      Promise.reject(
-        new WrapUpGenerationError(
-          "ai_upstream_error",
-          "Anthropic API error: 529",
-        ),
-      ),
-    log: (line) => lines.push(line),
-  });
-  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
-  assertEquals(res.status, 502);
-  assertEquals(await res.json(), {
-    error: "wrap-up generation failed: Anthropic API error: 529",
-    code: "ai_upstream_error",
-    detail: "Anthropic API error: 529",
-  });
-  assertEquals(lines.length, 1);
-  const logged = JSON.parse(lines[0].slice(LOG_PREFIX.length + 1));
-  assertEquals(logged, {
-    event: "generation_failed",
-    trip_id: TRIP_ID,
-    code: "ai_upstream_error",
-    detail: "Anthropic API error: 529",
-  });
-});
-
-// ---- Drafts (#187) ---------------------------------------------------------
+// ---- Drafts (#187, #463: the classic film's lines from the notes) ----------
 
 const DRAFT_TABLES = {
   trips: [{
@@ -346,7 +271,10 @@ const DRAFT_TABLES = {
     cover_image_path: null,
     vibes: ["Foodie"],
   }],
-  journal_notes: [{ day_date: "2026-06-01", content: "Tram 28." }],
+  journal_notes: [{
+    day_date: "2026-06-01",
+    content: "Tram 28 up to the castle, the whole city below us.",
+  }],
   photos: [
     {
       id: "p-new",
@@ -366,13 +294,6 @@ const OLD_FIELDS: AiGeneratedFields = {
   invitation_line2: "The old line.",
 };
 
-// The hash of DRAFT_TABLES' AI inputs, as the handler will compute it.
-async function currentHash(): Promise<string> {
-  return computeAiInputHash(
-    await gatherTripData(fakeSupabaseClient(DRAFT_TABLES), TRIP_ID),
-  );
-}
-
 function draftClient(row: Record<string, unknown>) {
   return fakeSupabaseClient({
     ...DRAFT_TABLES,
@@ -385,199 +306,50 @@ function draftClient(row: Record<string, unknown>) {
   });
 }
 
-function countingDeps(
-  client: ReturnType<typeof fakeSupabaseClient>,
-  result: () => Promise<AiGeneratedFields> = () =>
-    Promise.resolve(validAiFields),
-) {
-  const calls = { n: 0 };
-  const deps = baseDeps({
-    serviceClient: client,
-    minimums: NO_MINIMUMS,
-    generateAiFields: () => {
-      calls.n++;
-      return result();
-    },
-    log: () => {},
-  });
-  return { deps, calls };
-}
-
-Deno.test("draft with unchanged AI inputs: rebuilt from current photos, no AI call", async () => {
-  const client = draftClient({
-    ai_fields: OLD_FIELDS,
-    ai_input_hash: await currentHash(),
-    ai_generation_count: 1,
-  });
-  const { deps, calls } = countingDeps(client);
-
-  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
+Deno.test("a draft is rebuilt from current photos, its lines from the notes (#463)", async () => {
+  const client = draftClient({ ai_fields: OLD_FIELDS });
+  const res = await handleRequest(
+    request({ trip_id: TRIP_ID }),
+    baseDeps({ serviceClient: client, log: () => {} }),
+  );
   const json = await res.json();
 
   assertEquals(res.status, 200);
-  assertEquals(calls.n, 0);
   assertEquals(
     json.content.moments.map((m: { photo_id: string }) => m.photo_id),
     ["p-new"],
   );
-  assertEquals(json.content.invitation.line2, "The old line.");
+  // The AI-written draft lines are gone: the notes' words play.
+  assertEquals(json.content.invitation.line2, "Lisbon");
+  assertEquals(json.content.bridges.filter(Boolean), [
+    "Tram 28 up to the castle, the whole city below us.",
+  ]);
   const [write] = client.writes;
   assertEquals(write.op, "update");
-  assertEquals(write.values.ai_generation_count, 1);
+  assertEquals(write.values.ai_fields, {
+    invitation_line2: "Lisbon",
+    bridges: json.content.bridges,
+    unlock_reason: null,
+    keepsake_closing_quote: json.content.keepsake.closing_quote,
+  });
+  // No AI hash or count any more.
+  assertEquals("ai_input_hash" in write.values, false);
+  assertEquals("ai_generation_count" in write.values, false);
   assertEquals(write.filters, [
     ["eq", "trip_id", TRIP_ID],
     ["is", "published_at", null],
   ]);
 });
 
-Deno.test("draft whose notes changed: regenerates and counts the call", async () => {
-  const client = draftClient({
-    ai_fields: OLD_FIELDS,
-    ai_input_hash: "hash-of-older-notes",
-    ai_generation_count: 2,
-  });
-  const { deps, calls } = countingDeps(client);
-
-  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
-  const json = await res.json();
-
-  assertEquals(calls.n, 1);
-  assertEquals(json.content.invitation.line2, validAiFields.invitation_line2);
-  assertEquals(client.writes[0].values.ai_generation_count, 3);
-  assertEquals(client.writes[0].values.ai_input_hash, await currentHash());
-  assertEquals(client.writes[0].values.ai_fields, validAiFields);
-});
-
-Deno.test("the requested language reaches the AI and its hash (#250)", async () => {
-  const client = draftClient({
-    ai_fields: OLD_FIELDS,
-    ai_input_hash: await currentHash(), // English, unchanged inputs
-    ai_generation_count: 1,
-  });
-  const languages: string[] = [];
-  const deps = baseDeps({
-    serviceClient: client,
-    minimums: NO_MINIMUMS,
-    generateAiFields: (_tripData, language) => {
-      languages.push(language);
-      return Promise.resolve(validAiFields);
-    },
-    log: () => {},
-  });
-
-  const res = await handleRequest(
-    request({ trip_id: TRIP_ID, language: "ru" }),
-    deps,
-  );
-
-  assertEquals(res.status, 200);
-  assertEquals(languages, ["ru"]);
-  assertEquals(client.writes[0].values.ai_generation_count, 2);
-  assertEquals(
-    client.writes[0].values.ai_input_hash,
-    await computeAiInputHash(
-      await gatherTripData(fakeSupabaseClient(DRAFT_TABLES), TRIP_ID),
-      "ru",
-    ),
-  );
-});
-
-Deno.test("no or unknown language is English: an English draft stays put", async () => {
-  for (const language of [undefined, "et"]) {
-    const client = draftClient({
-      ai_fields: OLD_FIELDS,
-      ai_input_hash: await currentHash(),
-      ai_generation_count: 1,
-    });
-    const { deps, calls } = countingDeps(client);
-
-    await handleRequest(request({ trip_id: TRIP_ID, language }), deps);
-
-    assertEquals(calls.n, 0, `language: ${language}`);
-  }
-});
-
-Deno.test("draft at the AI cap: no call, last AI text reused, film still rebuilt", async () => {
-  const client = draftClient({
-    ai_fields: OLD_FIELDS,
-    ai_input_hash: "hash-of-older-notes",
-    ai_generation_count: MAX_AI_GENERATIONS,
-  });
-  const { deps, calls } = countingDeps(client);
-
-  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
-  const json = await res.json();
-
-  assertEquals(res.status, 200);
-  assertEquals(calls.n, 0);
-  assertEquals(json.content.invitation.line2, "The old line.");
-  assertEquals(json.content.moments.length, 1);
-  assertEquals(
-    client.writes[0].values.ai_generation_count,
-    MAX_AI_GENERATIONS,
-  );
-});
-
-Deno.test("backfilled draft (NULL hash): adopts the current hash without an AI call", async () => {
-  const client = draftClient({
-    ai_fields: OLD_FIELDS,
-    ai_input_hash: null,
-    ai_generation_count: 1,
-  });
-  const { deps, calls } = countingDeps(client);
-
-  await handleRequest(request({ trip_id: TRIP_ID }), deps);
-
-  assertEquals(calls.n, 0);
-  assertEquals(client.writes[0].values.ai_input_hash, await currentHash());
-  assertEquals(client.writes[0].values.ai_generation_count, 1);
-});
-
-Deno.test("a failed regeneration reuses the last text, keeps the old hash, still counts", async () => {
-  const client = draftClient({
-    ai_fields: OLD_FIELDS,
-    ai_input_hash: "hash-of-older-notes",
-    ai_generation_count: 1,
-  });
-  const { deps, calls } = countingDeps(
-    client,
-    () => Promise.reject(new Error("overloaded")),
-  );
-
-  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
-  const json = await res.json();
-
-  assertEquals(res.status, 200);
-  assertEquals(calls.n, 1);
-  assertEquals(json.content.invitation.line2, "The old line.");
-  assertEquals(client.writes[0].values.ai_input_hash, "hash-of-older-notes");
-  assertEquals(client.writes[0].values.ai_generation_count, 2);
-});
-
-Deno.test("first generation inserts a row counting one call", async () => {
+Deno.test("a first build inserts a row", async () => {
   const client = fakeSupabaseClient({ ...DRAFT_TABLES, wrap_ups: [] });
-  const { deps } = countingDeps(client);
-
-  await handleRequest(request({ trip_id: TRIP_ID }), deps);
-
+  await handleRequest(
+    request({ trip_id: TRIP_ID }),
+    baseDeps({ serviceClient: client, log: () => {} }),
+  );
   const [write] = client.writes;
   assertEquals(write.op, "insert");
   assertEquals(write.values.trip_id, TRIP_ID);
-  assertEquals(write.values.ai_generation_count, 1);
-  assertEquals(write.values.ai_input_hash, await currentHash());
-});
-
-Deno.test("a failed first generation returns 502 and saves nothing", async () => {
-  const client = fakeSupabaseClient({ ...DRAFT_TABLES, wrap_ups: [] });
-  const { deps } = countingDeps(
-    client,
-    () => Promise.reject(new Error("overloaded")),
-  );
-
-  const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
-
-  assertEquals(res.status, 502);
-  assertEquals(client.writes, []);
 });
 
 // ---- 16 moments (#304) -------------------------------------------------
@@ -620,7 +392,7 @@ function plannedRecord(): DirectorRecord {
   return {
     director_version: DIRECTOR_VERSION,
     status: "planned",
-    plan: keepsakePlan(),
+    sky: { picks_version: 2, picks: skyPicks(directorTripData()) },
     problems: [],
     attempts: 1,
     model: "claude-sonnet-5",
@@ -632,7 +404,7 @@ function plannedRecord(): DirectorRecord {
   };
 }
 
-// A draft memory whose photos and notes fit keepsakePlan().
+// A draft memory whose photos and notes fit plannedRecord()'s picks.
 function directorClient(
   wrapUps: Record<string, unknown>[] = [],
   vibes = directorTripData().trip.vibes,
@@ -669,7 +441,7 @@ function directorDeps(
   };
 }
 
-Deno.test("director off: no run, no plan in the film, no director column written", async () => {
+Deno.test("director off: no run, code's words, no director column written", async () => {
   const client = directorClient();
   const { runs, deps } = directorDeps(client, { enabled: false });
 
@@ -679,10 +451,11 @@ Deno.test("director off: no run, no plan in the film, no director column written
   assertEquals(res.status, 200);
   assertEquals(runs, []);
   assertEquals("plan" in json.content, false);
+  assertEquals(json.content.sky.source, "code");
   assertEquals("director" in client.writes[0].values, false);
 });
 
-Deno.test("director on: the first build runs it, stores the run and merges the plan", async () => {
+Deno.test("director on: the first build runs it, stores the run and plays its picks", async () => {
   const client = directorClient();
   const { runs, deps } = directorDeps(client);
 
@@ -691,10 +464,12 @@ Deno.test("director on: the first build runs it, stores the run and merges the p
 
   assertEquals(res.status, 200);
   assertEquals(runs, [TRIP_ID]);
-  assertEquals(json.content.plan_version, 2);
-  assertEquals(json.content.plan, keepsakePlan());
-  // Everything the current player reads is still there.
-  assertEquals(json.content.bridges, validAiFields.bridges);
+  // No classic plan any more (#463).
+  assertEquals("plan" in json.content, false);
+  assertEquals(json.content.sky.source, "director");
+  assertEquals(json.content.sky.pages[0].headline, "Bikes first");
+  // Everything the classic player reads is still there.
+  assertEquals(json.content.bridges.length, 3);
   assertEquals(json.content.moments.length > 0, true);
   assertEquals(client.writes[0].values.director, {
     ...plannedRecord(),
@@ -702,14 +477,12 @@ Deno.test("director on: the first build runs it, stores the run and merges the p
   });
 });
 
-Deno.test("director on, already run: no second run, the stored plan is still merged", async () => {
+Deno.test("director on, already run: no second run, the stored picks still play", async () => {
   const client = directorClient([{
     content: validWrapUpContent,
     generated_at: "2026-11-01T00:00:00Z",
     published_at: null,
     ai_fields: validAiFields,
-    ai_input_hash: null,
-    ai_generation_count: 1,
     director: plannedRecord(),
   }]);
   const { runs, deps } = directorDeps(client);
@@ -718,21 +491,21 @@ Deno.test("director on, already run: no second run, the stored plan is still mer
   const json = await res.json();
 
   assertEquals(runs, []);
-  assertEquals(json.content.plan, keepsakePlan());
+  assertEquals(json.content.sky.pages[0].headline, "Bikes first");
   assertEquals("director" in client.writes[0].values, false);
 });
 
-Deno.test("a fallback run leaves today's template film", async () => {
+Deno.test("a fallback run: code picks every word", async () => {
   const client = directorClient();
   const { deps } = directorDeps(client, {
-    record: { ...plannedRecord(), status: "fallback", plan: null },
+    record: { ...plannedRecord(), status: "fallback", sky: null },
   });
 
   const res = await handleRequest(request({ trip_id: TRIP_ID }), deps);
   const json = await res.json();
 
   assertEquals(res.status, 200);
-  assertEquals("plan" in json.content, false);
+  assertEquals(json.content.sky.source, "code");
   assertEquals(client.writes[0].values.director.status, "fallback");
 });
 
@@ -758,9 +531,7 @@ Deno.test("rerun on a draft runs again even with a stored run", async () => {
     generated_at: "2026-11-01T00:00:00Z",
     published_at: null,
     ai_fields: validAiFields,
-    ai_input_hash: null,
-    ai_generation_count: 1,
-    director: { ...plannedRecord(), status: "fallback", plan: null },
+    director: { ...plannedRecord(), status: "fallback", sky: null },
   }]);
   const { runs, deps } = directorDeps(client);
 
@@ -772,7 +543,7 @@ Deno.test("rerun on a draft runs again even with a stored run", async () => {
 
   assertEquals(runs, [TRIP_ID]);
   assertEquals(json.director.status, "planned");
-  assertEquals(json.content.plan_version, 2);
+  assertEquals(json.content.sky.source, "director");
 });
 
 Deno.test("rerun on a kept film writes only wrap_ups.director, content untouched", async () => {
@@ -811,30 +582,33 @@ Deno.test("a kept film is never planned by an ordinary open", async () => {
 
 // --- Sky Story (#345) ---
 
-Deno.test("a draft gets content.sky from the director's pages", async () => {
+Deno.test("a draft gets content.sky: code's pages, the director's words (#463)", async () => {
   const client = directorClient();
-  const { deps } = directorDeps(client, {
-    record: { ...plannedRecord(), sky_story: skyStoryPlan() },
-  });
+  const { deps } = directorDeps(client);
 
   const json = await (await handleRequest(request({ trip_id: TRIP_ID }), deps))
     .json();
 
   assertEquals(json.content.sky.source, "director");
-  assertEquals(
-    json.content.sky.pages.map((p: { headline: string }) => p.headline),
-    skyStoryPlan().pages.map((p) => p.headline),
-  );
+  assertEquals(json.content.sky.pages.length, 3);
+  assertEquals(json.content.sky.pages[0].excerpts, [
+    { note_id: "n1", text: "Bikes everywhere." },
+  ]);
   assertEquals(json.content.sky.moment_count, 12);
   assertEquals(client.writes[0].values.content.sky, json.content.sky);
+  // The inspector's report: every slot, the photos on pages.
+  const report = json.content.film_report;
+  assertEquals(report.source, "director");
+  assertEquals(report.shown, { pages: 12, photos: 12 });
+  assert(report.slots.some((r: { slot: string }) => r.slot === "p1.headline"));
 });
 
-Deno.test("director off or without pages: code-built content.sky", async () => {
+Deno.test("director off or without picks: code's words on content.sky", async () => {
   for (const enabled of [false, true]) {
     const client = directorClient();
     const { deps } = directorDeps(client, {
       enabled,
-      record: { ...plannedRecord(), sky_story: null, hero_scores: { p02: 5 } },
+      record: { ...plannedRecord(), sky: null, hero_scores: { p02: 5 } },
     });
     const json = await (await handleRequest(
       request({ trip_id: TRIP_ID }),
@@ -842,7 +616,8 @@ Deno.test("director off or without pages: code-built content.sky", async () => {
     )).json();
     assertEquals(json.content.sky.source, "code");
     assertEquals(json.content.sky.pages.length, 3);
-    assertEquals(json.content.sky.pages[0].headline, null);
+    // Code names the page by its place (#463).
+    assertEquals(json.content.sky.pages[0].headline, "Centraal");
     if (enabled) {
       // Code-built pages still use the director's hero scores.
       assertEquals(json.content.sky.pages[0].hero_photo_id, "p02");
@@ -916,8 +691,6 @@ Deno.test("the director runs again when photo days changed, and counts the run",
     generated_at: "2026-11-01T00:00:00Z",
     published_at: null,
     ai_fields: validAiFields,
-    ai_input_hash: null,
-    ai_generation_count: 1,
     director: stale,
   }]);
   const { runs, deps } = directorDeps(client);
@@ -928,27 +701,27 @@ Deno.test("the director runs again when photo days changed, and counts the run",
   assertEquals(client.writes[0].values.director.run_count, 3);
 });
 
-Deno.test("rebuilding a film kept as a Sky Story rebuilds its pages (#345)", async () => {
+Deno.test("rebuilding a film kept as a Sky Story rebuilds its pages (#345, #463)", async () => {
   const data = directorTripData();
-  const client = fakeSupabaseClient({
-    trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
-    wrap_ups: [{
-      content: { ...validWrapUpContent, sky: { sky_version: 1, pages: [] } },
-      generated_at: "2026-09-05T00:00:00Z",
-      published_at: "2026-09-06T00:00:00Z",
-      ai_fields: validAiFields,
-      ai_input_hash: "old",
-      ai_generation_count: 1,
-      director: { ...plannedRecord(), sky_story: skyStoryPlan() },
-    }],
-    journal_notes: data.notes,
-    // A photo of day 2's page was deleted since: the director's pages no
-    // longer fit, so they're rebuilt by code.
-    photos: data.photos.filter((p) => p.id !== "p05"),
-    bonus_task_assignments: [],
-    points_ledger: [],
-    user_achievements: [],
-  });
+  const keptRow = (photos: typeof data.photos) =>
+    fakeSupabaseClient({
+      trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
+      wrap_ups: [{
+        content: { ...validWrapUpContent, sky: { sky_version: 1, pages: [] } },
+        generated_at: "2026-09-05T00:00:00Z",
+        published_at: "2026-09-06T00:00:00Z",
+        ai_fields: validAiFields,
+        director: plannedRecord(),
+      }],
+      journal_notes: data.notes,
+      photos,
+      bonus_task_assignments: [],
+      points_ledger: [],
+      user_achievements: [],
+    });
+  // A photo was deleted since: the pages are cut again, the stored picks
+  // re-applied by id.
+  const client = keptRow(data.photos.filter((p) => p.id !== "p05"));
   const { runs, deps } = directorDeps(client);
 
   const json = await (await handleRequest(
@@ -957,21 +730,28 @@ Deno.test("rebuilding a film kept as a Sky Story rebuilds its pages (#345)", asy
   )).json();
 
   assertEquals(runs, []);
-  assertEquals(json.content.sky.source, "code");
+  assertEquals(json.content.sky.source, "director");
   assertEquals(json.content.sky.pages.length, 3);
+  assertEquals(
+    json.content.sky.pages.flatMap((p: { extra_photo_ids: string[] }) =>
+      p.extra_photo_ids
+    ).includes("p05"),
+    false,
+  );
+  // Its kept lines stay.
+  assertEquals(json.content.bridges, validAiFields.bridges);
   assertEquals(client.writes[0].values.content.sky, json.content.sky);
+});
 
-  // While they still fit, the director's pages are kept.
-  const fits = fakeSupabaseClient({
+Deno.test("a kept film without stored lines rebuilds with the notes' lines (#463)", async () => {
+  const data = directorTripData();
+  const client = fakeSupabaseClient({
     trips: [{ id: TRIP_ID, user_id: OWNER_ID, ...data.trip }],
     wrap_ups: [{
-      content: { ...validWrapUpContent, sky: { sky_version: 1, pages: [] } },
+      content: validWrapUpContent,
       generated_at: "2026-09-05T00:00:00Z",
       published_at: "2026-09-06T00:00:00Z",
-      ai_fields: validAiFields,
-      ai_input_hash: "old",
-      ai_generation_count: 1,
-      director: { ...plannedRecord(), sky_story: skyStoryPlan() },
+      ai_fields: null,
     }],
     journal_notes: data.notes,
     photos: data.photos,
@@ -979,11 +759,11 @@ Deno.test("rebuilding a film kept as a Sky Story rebuilds its pages (#345)", asy
     points_ledger: [],
     user_achievements: [],
   });
-  const kept = await (await handleRequest(
+  const json = await (await handleRequest(
     request({ trip_id: TRIP_ID, rebuild: true }),
-    directorDeps(fits).deps,
+    baseDeps({ serviceClient: client }),
   )).json();
-  assertEquals(kept.content.sky.source, "director");
+  assertEquals(json.content.invitation.line2, "Netherlands");
 });
 
 // --- Golden Vows (#346; #458: code cuts it, the director picks) ---
@@ -993,7 +773,6 @@ function goldenVowsRecord(): DirectorRecord {
   romantic.trip = { ...romantic.trip, vibes: ["Romantic"] };
   return {
     ...plannedRecord(),
-    sky_story: skyStoryPlan(),
     golden_vows: {
       picks_version: 2,
       picks: gvPicks(romantic, new Map([["p03", "bride"]])),
@@ -1017,8 +796,6 @@ function keptGoldenVowsClient(photos = directorTripData().photos) {
       generated_at: "2026-09-05T00:00:00Z",
       published_at: "2026-09-06T00:00:00Z",
       ai_fields: validAiFields,
-      ai_input_hash: "old",
-      ai_generation_count: 1,
       director: goldenVowsRecord(),
     }],
     journal_notes: data.notes,
@@ -1155,8 +932,6 @@ Deno.test("a film kept as a Sky Story never gains Golden Vows", async () => {
       generated_at: "2026-09-05T00:00:00Z",
       published_at: "2026-09-06T00:00:00Z",
       ai_fields: validAiFields,
-      ai_input_hash: "old",
-      ai_generation_count: 1,
       director: goldenVowsRecord(),
     }],
     journal_notes: data.notes,
@@ -1178,7 +953,6 @@ Deno.test("a film kept as a Sky Story never gains Golden Vows", async () => {
 function neonNightRecord(): DirectorRecord {
   return {
     ...plannedRecord(),
-    sky_story: skyStoryPlan(),
     neon_night: { picks_version: 2, picks: neonPicks(directorTripData()) },
   };
 }
@@ -1195,8 +969,6 @@ function keptNeonClient(
       generated_at: "2026-09-05T00:00:00Z",
       published_at: "2026-09-06T00:00:00Z",
       ai_fields: validAiFields,
-      ai_input_hash: "old",
-      ai_generation_count: 1,
       director: neonNightRecord(),
     }],
     journal_notes: data.notes,
@@ -1391,24 +1163,15 @@ Deno.test("a draft below the minimum gets 422 not_eligible and no AI call (#432)
       [3, 0, { photos: 12, notes: 1 }],
     ] as const
   ) {
-    let generateCalled = false;
     const client = eligibilityClient(photos, notes);
     const res = await handleRequest(
       request({ trip_id: TRIP_ID }),
-      baseDeps({
-        serviceClient: client,
-        minimums: undefined,
-        generateAiFields: () => {
-          generateCalled = true;
-          return Promise.resolve(validAiFields);
-        },
-      }),
+      baseDeps({ serviceClient: client, minimums: undefined }),
     );
     const body = await res.json();
     assertEquals(res.status, 422);
     assertEquals(body.code, "not_eligible");
     assertEquals(body.missing, missing);
-    assertEquals(generateCalled, false);
     assertEquals(client.writes, []);
   }
 });

@@ -5,7 +5,6 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 import { handleRequest } from "./handler.ts";
-import { callAnthropic } from "./anthropic.ts";
 import { runDirector } from "./director.ts";
 import { DIRECTOR_FLAG_ENV, parseDirectorFlag } from "./director_flag.ts";
 
@@ -24,8 +23,6 @@ Deno.serve((req) => {
   return handleRequest(req, {
     serviceClient,
     authClient,
-    generateAiFields: (tripData, language) =>
-      callAnthropic(tripData, anthropicApiKey, fetch, console.error, language),
     director: {
       isEnabledFor: parseDirectorFlag(Deno.env.get(DIRECTOR_FLAG_ENV)),
       run: (tripId, tripData, language) =>

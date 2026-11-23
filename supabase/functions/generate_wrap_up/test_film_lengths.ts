@@ -9,7 +9,7 @@ import { directorTripData } from "./director_fixtures.ts";
 import { currentNeonNight } from "./director.ts";
 import { goldenVowsFilm } from "./gv_film.ts";
 import { buildNeonNightContent } from "./neon_film.ts";
-import { buildSkyContent } from "./sky_story.ts";
+import { skyStoryFilm } from "./sky_film.ts";
 import { withFilmPhotos } from "./film_photos.ts";
 import { filmSecondsOf } from "./film_length.ts";
 import type { PlayedTemplate } from "./film_template.ts";
@@ -99,7 +99,7 @@ export function lengthContent(
   const content: Record<string, unknown> = {
     film_style: film,
     film_seconds: filmSecondsOf(memory),
-    sky: buildSkyContent(memory, null, {}),
+    sky: skyStoryFilm(memory, null).content,
   };
   if (film === "golden_vows") {
     content.golden_vows = goldenVowsFilm(memory, null).content;
@@ -120,7 +120,7 @@ export function adeContent(): Record<string, unknown> {
   return {
     film_style: "neon_night",
     film_seconds: filmSecondsOf(memory),
-    sky: buildSkyContent(memory, null, heroScores),
+    sky: skyStoryFilm(memory, null, { heroScores }).content,
     neon_night: buildNeonNightContent(memory, adePicks(), heroScores),
   };
 }

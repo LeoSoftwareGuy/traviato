@@ -3,7 +3,8 @@ import {
   assertEquals,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { bestLines } from "./excerpts.ts";
-import { buildSkyContent, codeSkyPages } from "./sky_story.ts";
+import { skyStoryFilm } from "./sky_film.ts";
+import { buildSkySkeleton } from "./sky_skeleton.ts";
 import { goldenVowsFilm } from "./gv_film.ts";
 import { directorTripData } from "./director_fixtures.ts";
 import type { TripData } from "./gather.ts";
@@ -30,7 +31,7 @@ function withNotes(notes: TripData["notes"]): TripData {
   return directorTripData({ notes });
 }
 
-Deno.test("Sky Story: a note page carries its days' best lines", () => {
+Deno.test("Sky Story: a page carries the best lines of its own notes (#463)", () => {
   const data = withNotes([
     {
       id: "n1",
@@ -45,14 +46,13 @@ Deno.test("Sky Story: a note page carries its days' best lines", () => {
     },
     { id: "n2", day_date: "2026-09-03", content: "Rain, then stroopwafels." },
   ]);
-  const sky = buildSkyContent(data, null)!;
-  const day1 = sky.pages.find((p) => p.first_day === 1 && p.note)!;
+  const sky = skyStoryFilm(data, null).content!;
+  const day1 = sky.pages.find((p) => p.first_day === 1)!;
   assertEquals(day1.excerpts.map((e) => e.text), [RIBS, BIKES]);
-  // Only the note's page carries them; a day with nothing specific none.
-  for (const page of sky.pages) {
-    if (page !== day1) assertEquals(page.excerpts, []);
-  }
-  assert(codeSkyPages(data).every((p) => p.excerpts.length === 0));
+  assertEquals(day1.note_id, "n1");
+  // Day 2 has no note: no lines; day 3 its own.
+  assertEquals(sky.pages[1].excerpts, []);
+  assertEquals(sky.pages[2].excerpts.map((e) => e.note_id), ["n2"]);
 });
 
 Deno.test("Golden Vows: a main page plays its day's best line", () => {
@@ -103,7 +103,6 @@ Deno.test("Golden Vows: a note on the photo first; a caption is the label", () =
 
 // --- #422 -------------------------------------------------------------------
 
-import { skyCheckContext } from "./sky_story.ts";
 import { useFilmLengthRuleForTests } from "./film_length.ts";
 
 // These tests are about other rules: every film at its longest (#434).
@@ -134,12 +133,14 @@ function longDay(): TripData {
 }
 
 Deno.test("Sky Story sees logical days: the night after midnight is the evening's", () => {
-  const context = skyCheckContext(longDay());
-  assertEquals(context.photoDays.get("r2"), 1);
-  assertEquals(context.photoDays.get("m0"), 1);
+  const { pages } = buildSkySkeleton(longDay());
+  const dayOf = (id: string) =>
+    pages.find((p) => p.photos.some((x) => x.id === id))!.days;
+  assertEquals(dayOf("r2"), ["2026-09-01"]);
+  assertEquals(dayOf("m0"), ["2026-09-01"]);
 });
 
-Deno.test("Sky lines go on the page whose photos are nearest in time", () => {
+Deno.test("Sky lines go on the page whose photos they were written among", () => {
   const data = longDay();
   data.notes = [
     {
@@ -155,10 +156,8 @@ Deno.test("Sky lines go on the page whose photos are nearest in time", () => {
       content: "Это самый крутой сет который я слышал или это М?",
     },
   ];
-  // Every photo Always: more than one page shows, so day 1 gets two pages
-  // (#378) — the morning, then the night.
-  data.photos = data.photos.map((p) => ({ ...p, use_in_wrap_up: true }));
-  const sky = buildSkyContent(data, null)!;
+  // A long day in parts at its 9 h break (#463): the morning, the night.
+  const sky = skyStoryFilm(data, null).content!;
   const pages = sky.pages.map((p) => ({
     ids: [p.hero_photo_id, ...p.extra_photo_ids],
     lines: p.excerpts.map((e) => e.text),
