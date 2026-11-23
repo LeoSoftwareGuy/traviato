@@ -17,6 +17,7 @@ class PhotoModel extends PhotoEntity {
     super.imageUrl,
     super.filmPick,
     super.filmPickSetAt,
+    super.utcOffsetMinutes,
   });
 
   factory PhotoModel.fromJson(Map<String, dynamic> json) => PhotoModel(
@@ -40,6 +41,7 @@ class PhotoModel extends PhotoEntity {
     filmPickSetAt: json['use_in_wrap_up_set_at'] == null
         ? null
         : DateTime.parse(json['use_in_wrap_up_set_at'] as String),
+    utcOffsetMinutes: (json['utc_offset_minutes'] as num?)?.toInt(),
   );
 
   /// The row carries no `image_url` column — this attaches the signed URL
@@ -59,5 +61,6 @@ class PhotoModel extends PhotoEntity {
     imageUrl: imageUrl,
     filmPick: filmPick,
     filmPickSetAt: filmPickSetAt,
+    utcOffsetMinutes: utcOffsetMinutes,
   );
 }

@@ -70,6 +70,8 @@ class SupabasePhotoRemoteDataSource implements PhotoRemoteDataSource {
     double? lat,
     double? lng,
     DateTime? takenAt,
+    int? utcOffsetMinutes,
+    String? utcOffsetSource,
   }) async {
     _guardAuthenticated();
     final userId = _client.auth.currentUser!.id;
@@ -91,6 +93,8 @@ class SupabasePhotoRemoteDataSource implements PhotoRemoteDataSource {
             'lat': lat,
             'lng': lng,
             'taken_at': takenAt?.toIso8601String(),
+            'utc_offset_minutes': ?utcOffsetMinutes,
+            'utc_offset_source': ?utcOffsetSource,
           })
           .select()
           .single();

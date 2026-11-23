@@ -11,6 +11,7 @@ class JournalNoteModel extends JournalNoteEntity {
     super.dictated,
     super.photoId,
     super.legacy,
+    super.utcOffsetMinutes,
   });
 
   factory JournalNoteModel.fromJson(Map<String, dynamic> json) =>
@@ -24,5 +25,6 @@ class JournalNoteModel extends JournalNoteEntity {
         dictated: json['dictated'] as bool? ?? false,
         photoId: json['photo_id'] as String?,
         legacy: json['legacy'] as bool? ?? false,
+        utcOffsetMinutes: (json['utc_offset_minutes'] as num?)?.toInt(),
       );
 }

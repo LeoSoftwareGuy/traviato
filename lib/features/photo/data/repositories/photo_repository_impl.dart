@@ -41,6 +41,8 @@ class PhotoRepositoryImpl implements PhotoRepository {
     double? lat,
     double? lng,
     DateTime? takenAt,
+    int? utcOffsetMinutes,
+    String? utcOffsetSource,
   }) async {
     try {
       return Right(
@@ -55,6 +57,8 @@ class PhotoRepositoryImpl implements PhotoRepository {
           lat: lat,
           lng: lng,
           takenAt: takenAt,
+          utcOffsetMinutes: utcOffsetMinutes,
+          utcOffsetSource: utcOffsetSource,
         ),
       );
     } on AuthenticationException catch (e) {

@@ -71,6 +71,8 @@ class _FakePhotoRemoteDataSource implements PhotoRemoteDataSource {
     double? lat,
     double? lng,
     DateTime? takenAt,
+    int? utcOffsetMinutes,
+    String? utcOffsetSource,
   }) async {
     if (exception != null) throw exception!;
     lastAddedId = id;
