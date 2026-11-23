@@ -358,10 +358,8 @@ Post-MVP: `video_path`, `video_status`.
   carousel; the occasion with the word that set it), `gv_slots.ts` lists
   candidates per slot (`occasion`, `mainK.label`, `mainK.note` — fixed to
   a caption —, `chN.title`, `carousel.title`, `finale`), `gv_film.ts`
-  builds `content.golden_vows` (same shape) and trims it past 75 s; a
-  short album still past its `film_seconds` at its quickest also drops
-  its carousel, then its packing card (`gv_trims`: "… (for the
-  target)").
+  builds `content.golden_vows` (same shape) and trims it past 75 s (a
+  short album's "for the target" trims were removed in #460).
   Shared with Neon in `film_slots.ts`: ids, lines, names, a note's scene,
   picks, the chooser, day titles. One `pick_golden_vows_lines` call;
   `director.golden_vows = {picks_version: 2, picks}` (older sections
@@ -369,9 +367,27 @@ Post-MVP: `video_path`, `video_status`.
   and `gv_trigger` (the inspector). On open the picks are re-applied by id
   to the album cut from the memory now; a photo summary that set the
   occasion comes back from `gv_trigger`. `DIRECTOR_VERSION` 6. In the app
-  `GvFit` holds the album to 75 s on its own timeline (carousel, packing,
-  main pages, then `chapterDwellScale`). `tools/record_gv_picks.ts`
+  `GvFit` holds the album to 75 s on its own timeline (second pages of
+  prints since #460, carousel, packing, main pages, then
+  `chapterDwellScale`). `tools/record_gv_picks.ts`
   records a real answer for an exported memory.
+
+- **Golden Vows in time order** (#460, no schema change):
+  `content.golden_vows.heroes[].order` and `chapters[].pages: [{photo_ids,
+  layout, order}]` (1–2 pages, up to 6 prints in all; `photo_ids` keeps
+  every print, `layout` the first page's) give every page's place in the
+  play order, 0…N-1 after trims; older content has neither and plays main
+  pages first. Layout `B2` is a page of 2 prints. `gv_skeleton.ts` keeps
+  a day of 2+ photos its own chapter, ranks main pages by the notes
+  anchored to a photo (`noteAnchors`: its own photo counts 2, a photo
+  within 90 min 1) and builds `sequence`; `gv_slots.ts` places each note
+  on one page (`gvNoteHomes`), labels from captions or that page's note
+  phrases, and checks the director's free text against the user's words
+  (`gvWordGuard`: names as written, no first name or description-only
+  word). The "(for the target)" trims are gone; past 75 s second pages go
+  first ("…: one page of prints"). `DIRECTOR_VERSION` 7. Real-data
+  tests: `fixtures/budapest_birthday.json` (`budapest_birthday.ts`,
+  `gv_budapest.test.ts`).
 
 - **Limits** (#432, no schema change): `generate_wrap_up/wrap_up_limits.json`
   (minPhotos 15, maxFilmPhotos 60, minNotes 1, maxNoteLines 12, maxVibes 3)
