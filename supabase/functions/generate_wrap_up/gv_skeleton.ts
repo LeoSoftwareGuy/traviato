@@ -30,7 +30,7 @@ import type { TripData } from "./gather.ts";
 import { tripLogicalDays } from "./logical_day.ts";
 import { spreadEvenly } from "./assemble.ts";
 import { filmPhotoIds } from "./film_photos.ts";
-import { nearestPhoto, noteTime, SCENE_NEAR_MINUTES } from "./film_slots.ts";
+import { noteAnchors, photoRank, spreadPicks } from "./film_slots.ts";
 import {
   chapterLayout,
   GV_CHAPTER_PHOTOS,
@@ -225,48 +225,10 @@ function chapterGroups(
   return groups;
 }
 
-// How a photo ranks for a main page (#458): Always, then captioned, then
-// one a note was written on or among ([withNote], #460: a main page shows
-// a note), then its hero score. Higher is better.
-export function gvRank(
-  p: Photo,
-  heroScores: Readonly<Record<string, number>>,
-  withNote: ReadonlySet<string> | ReadonlyMap<string, number> = new Set(),
-): number {
-  // The more notes belong to it, the better (#460), up to 3 (a note
-  // written on it counts 2).
-  const notes = withNote instanceof Map
-    ? Math.min(3, withNote.get(p.id) ?? 0)
-    : withNote.has(p.id)
-    ? 1
-    : 0;
-  return (p.use_in_wrap_up === true ? 100 : 0) +
-    (p.caption?.trim() ? 20 : 0) + 10 * notes + (heroScores[p.id] ?? 0);
-}
-
-// The photos the notes belong to (#460): a note's own photo, else the
-// film photo taken nearest when it was written, within
-// SCENE_NEAR_MINUTES. A note written far from every photo anchors none.
-export function noteAnchors(
-  tripData: TripData,
-  photos: readonly Photo[],
-): Map<string, string> {
-  const anchors = new Map<string, string>();
-  const ids = new Set(photos.map((p) => p.id));
-  for (const n of tripData.notes) {
-    if (!n.id || !n.content.trim()) continue;
-    if (n.photo_id && ids.has(n.photo_id)) {
-      anchors.set(n.id, n.photo_id);
-      continue;
-    }
-    const near = nearestPhoto(photos, noteTime(n));
-    if (
-      near &&
-      Math.abs(timeOf(near) - noteTime(n)) <= SCENE_NEAR_MINUTES * 60_000
-    ) anchors.set(n.id, near.id);
-  }
-  return anchors;
-}
+// How a photo ranks for a page (#458; film_slots.ts's, shared with Sky
+// Story since #463).
+export const gvRank = photoRank;
+export { noteAnchors };
 
 // [n] prints as pages (#460): 2–3 on one page, 4 as 2 + 2, 5 as 3 + 2,
 // 6 as 3 + 3.
@@ -274,39 +236,7 @@ function pageSizes(n: number): number[] {
   return n <= GV_CHAPTER_PHOTOS ? [n] : [Math.ceil(n / 2), Math.floor(n / 2)];
 }
 
-// [count] of [photos] (time order) for a page of prints: Always picks
-// first, then the best shot of each equal stretch of the rest; in time
-// order.
-function printsOf(
-  photos: readonly Photo[],
-  count: number,
-  score: (p: Photo) => number,
-): Photo[] {
-  // The best of each stretch of [list], [room] of them.
-  const spread = (list: readonly Photo[], room: number, picked: Photo[]) => {
-    for (let k = 0; k < room && list.length > 0; k++) {
-      const from = Math.floor(k * list.length / room);
-      const to = Math.max(from + 1, Math.floor((k + 1) * list.length / room));
-      const best = list.slice(from, to).filter((p) => !picked.includes(p))
-        .sort((x, y) => score(y) - score(x))[0];
-      if (best) picked.push(best);
-    }
-  };
-  const always = photos.filter((p) => p.use_in_wrap_up === true);
-  const picked: Photo[] = [];
-  // More Always picks than room (#460): spread over the chapter too, not
-  // its first ones.
-  if (always.length >= count) spread(always, count, picked);
-  else {
-    picked.push(...always);
-    spread(
-      photos.filter((p) => !always.includes(p)),
-      count - always.length,
-      picked,
-    );
-  }
-  return photos.filter((p) => picked.includes(p));
-}
+const printsOf = spreadPicks;
 
 // The album of [tripData] (#458): every page and its photos.
 export function buildGvSkeleton(

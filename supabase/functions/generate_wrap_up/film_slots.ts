@@ -6,7 +6,7 @@
 
 import { localMs } from "./time_zones.ts";
 import type { TripData } from "./gather.ts";
-import { bannedPhraseIn, cleanAiLine } from "./film_plan.ts";
+import { bannedPhraseIn, cleanAiLine } from "./banned_phrases.ts";
 import { tripLogicalDays } from "./logical_day.ts";
 import {
   clausesOf,
@@ -19,7 +19,7 @@ import {
   sentencesOf,
   SPECIFIC_SCORE,
 } from "./excerpts.ts";
-import { timeOf } from "./neon_night.ts";
+import { sameLine, timeOf } from "./neon_night.ts";
 
 type Photo = TripData["photos"][number];
 type Note = TripData["notes"][number];
@@ -245,7 +245,7 @@ export function piecesOf(sentence: string): string[] {
 // pieces — and never any of a sentence with an explicit drug word (#450,
 // #454: "…курят косячки, очень необычно" gives no "очень необычно"
 // either).
-export function linesOf(note: Note, theme: LineTheme): Line[] {
+export function linesOf(note: Note, theme: LineTheme | null): Line[] {
   const out: Line[] = [];
   const seen = new Set<string>();
   for (const sentence of sentencesOf(note.content)) {
@@ -314,7 +314,7 @@ export function titleText(
   needsSpace: boolean,
   // A name is a fact, not a line: no score needed ("AMF").
   scored: boolean,
-  theme: LineTheme,
+  theme: LineTheme | null,
 ): string | null {
   const t = text.trim().replace(/[.!?…,;:]+$/u, "").trim();
   if (!t || [...t].length > max) return null;
@@ -588,7 +588,7 @@ export function shortClauses(
   max: number,
   language: "ru" | "en" | null,
   names: ReadonlySet<string>,
-  theme: LineTheme,
+  theme: LineTheme | null,
 ): SlotCandidate[] {
   const out: SlotCandidate[] = [];
   for (const l of lines) {
@@ -893,4 +893,334 @@ export function dayTitleFor(
       : `${day} · ${ORDINALS[lang][stretch][Math.min(n, 4) - 1]} ${name}`;
   });
   return (i) => titles[i];
+}
+
+// --- Shared with Golden Vows and Sky Story (#463) ---------------------------
+
+// Words that open a short phrase of a note (#460): "for a golden
+// coffee", "with famous spas", "to irish bar".
+const PHRASE_OPENERS = new Set([
+  "a",
+  "an",
+  "the",
+  "some",
+  "our",
+  "my",
+  "this",
+  "these",
+  "those",
+  "with",
+  "for",
+  "to",
+  "at",
+  "in",
+  "into",
+  "of",
+  "from",
+  "out",
+  "on",
+]);
+// Words a phrase stops before.
+const PHRASE_STOPS = new Set([
+  ...PHRASE_OPENERS,
+  "and",
+  "but",
+  "or",
+  "so",
+  "is",
+  "was",
+  "are",
+  "were",
+  "it",
+  "its",
+  "that",
+  "which",
+  "who",
+  "too",
+  "very",
+  "really",
+  "just",
+  "then",
+  "there",
+  "here",
+  "we",
+  "i",
+  "you",
+  "he",
+  "she",
+  "they",
+  "me",
+  "us",
+  "be",
+  "been",
+  "had",
+  "has",
+  "have",
+  "went",
+  "go",
+  "got",
+  "by",
+  "as",
+  "after",
+  "before",
+  "about",
+  "all",
+  "not",
+  "no",
+  "also",
+  "even",
+  "full",
+  "around",
+  "like",
+  "lots",
+  "lot",
+  "more",
+  "most",
+  "s",
+  "t",
+]);
+// A phrase never opens on a verb ("make things", "walk around").
+const PHRASE_VERBS = new Set([
+  "make",
+  "take",
+  "walk",
+  "check",
+  "see",
+  "start",
+  "explore",
+  "go",
+  "come",
+  "find",
+  "get",
+  "do",
+  "eat",
+  "drink",
+  "try",
+  "visit",
+  "keep",
+  "say",
+  "feel",
+  "look",
+  "meet",
+  "buy",
+  "sleep",
+  "stay",
+]);
+// What a birthday, a wedding, an anniversary names (#460): "Elmas
+// birthday", kept exactly as written.
+const OCCASION_NOUN = /^(birthday|wedding|anniversary|honeymoon|engagement)$/iu;
+
+// The short phrases of [text] that name something (#460): 2–3 words after
+// an article or preposition ("golden coffee", "famous spas"), and a name
+// with its occasion ("Elmas birthday") — the user's words as written,
+// English only (Russian has no articles to find them by).
+export function notePhrases(text: string): string[] {
+  const out: string[] = [];
+  for (const sentence of text.split(/[.!?;,:()\n]+/u)) {
+    const words = sentence.split(/\s+/u).filter(Boolean);
+    const bare = words.map((w) => w.toLowerCase().replace(/[^\p{L}'’-]/gu, ""));
+    for (let i = 0; i < words.length; i++) {
+      // "Elmas birthday": a capitalised word before an occasion noun.
+      if (
+        i + 1 < words.length && /^\p{Lu}/u.test(words[i]) &&
+        OCCASION_NOUN.test(bare[i + 1]) && !PHRASE_STOPS.has(bare[i])
+      ) out.push(`${words[i]} ${bare[i + 1]}`);
+      if (!PHRASE_OPENERS.has(bare[i])) continue;
+      const run: string[] = [];
+      for (let k = i + 1; k < words.length && run.length < 3; k++) {
+        if (PHRASE_STOPS.has(bare[k]) || !bare[k]) break;
+        run.push(words[k].replace(/[^\p{L}\p{N}'’-]/gu, ""));
+      }
+      if (
+        run.length >= 2 && !PHRASE_VERBS.has(run[0].toLowerCase()) &&
+        !hasVerb(run.join(" "))
+      ) out.push(run.join(" "));
+    }
+  }
+  return [...new Set(out)];
+}
+
+// [list] without lines that differ only in case, spacing or punctuation
+// from a better one before them.
+export function distinct(list: SlotCandidate[]): SlotCandidate[] {
+  const kept: SlotCandidate[] = [];
+  for (const c of [...list].sort((a, b) => b.score - a.score)) {
+    if (!kept.some((k) => sameLine(k.text, c.text))) kept.push(c);
+  }
+  return kept;
+}
+
+export const topDistinct = (list: SlotCandidate[]) => top(distinct(list));
+
+// The words the director's own text is checked against (#460).
+export interface WordGuard {
+  // The names the user wrote, as written, lowercased: the memory's name,
+  // capitalised words inside their notes' and captions' sentences, the
+  // place.
+  names: ReadonlySet<string>;
+  // Every word of the user's (notes, captions, memory name, place) and of
+  // code's own lines, lowercased.
+  own: ReadonlySet<string>;
+  // Words only the photo descriptions say.
+  described: ReadonlySet<string>;
+}
+
+const wordsOf = (text: string) =>
+  text.split(/[^\p{L}\p{N}'’]+/u).filter(Boolean);
+// A word without its possessive: "Elmas's" → "Elmas", "Elma's" → "Elma".
+const stem = (w: string) => w.replace(/['’]s?$/u, "").toLowerCase();
+
+// The guard for [tripData] (#460); [code] are the film's own lines.
+export function wordGuard(
+  tripData: TripData,
+  summaries: ReadonlyMap<string, string>,
+  code: readonly string[] = [],
+): WordGuard {
+  const texts = [
+    tripData.trip.name,
+    tripData.trip.destination ?? "",
+    ...tripData.notes.map((n) => n.content),
+    ...tripData.photos.map((p) => p.caption ?? ""),
+    ...tripData.photos.map((p) => p.place_text ?? ""),
+  ];
+  const names = new Set<string>();
+  for (const w of wordsOf(tripData.trip.name)) names.add(stem(w));
+  for (const w of wordsOf(tripData.trip.destination ?? "")) names.add(stem(w));
+  for (const t of texts.slice(2)) {
+    for (const sentence of t.split(/[.!?\n]+/u)) {
+      wordsOf(sentence).forEach((w, k) => {
+        if (k > 0 && /^\p{Lu}/u.test(w)) names.add(stem(w));
+      });
+    }
+  }
+  const own = new Set(
+    [...texts, ...code].flatMap((t) => wordsOf(t).map(stem)),
+  );
+  const described = new Set(
+    [...summaries.values()].flatMap((t) => wordsOf(t).map(stem))
+      .filter((w) => [...w].length >= 4 && !own.has(w)),
+  );
+  return { names, own, described };
+}
+
+// How many single-letter edits turn [a] into [b].
+function editDistance(a: string, b: string): number {
+  const row = Array.from({ length: b.length + 1 }, (_, k) => k);
+  for (let i = 1; i <= a.length; i++) {
+    let prev = row[0];
+    row[0] = i;
+    for (let k = 1; k <= b.length; k++) {
+      const next = row[k];
+      row[k] = Math.min(
+        row[k] + 1,
+        row[k - 1] + 1,
+        prev + (a[i - 1] === b[k - 1] ? 0 : 1),
+      );
+      prev = next;
+    }
+  }
+  return row[b.length];
+}
+
+// Why the director's own [text] can't play, or null (#460): it changes a
+// name the user wrote ("Elma's" for "Elmas" — the name, or the name and
+// "'s", only), names a person the user never wrote, or says what only
+// the photo descriptions say.
+export function wordsProblem(
+  text: string,
+  guard: WordGuard,
+): string | null {
+  for (const raw of wordsOf(text)) {
+    const w = stem(raw);
+    if (!w || guard.names.has(w)) continue;
+    for (const name of guard.names) {
+      if (
+        [...name].length >= 4 && w[0] === name[0] &&
+        editDistance(w, name) <= ([...name].length >= 6 ? 2 : 1)
+      ) return `«${raw}» changes the name «${name}»`;
+    }
+    if (guard.own.has(w)) continue;
+    if (FIRST_NAMES.has(w)) return `«${raw}»: a name the user never wrote`;
+    if (guard.described.has(w)) {
+      return `«${raw}»: only in the photo descriptions`;
+    }
+  }
+  return null;
+}
+
+// How a photo ranks for a main page (#458): Always, then captioned, then
+// one a note was written on or among ([withNote], #460: a main page shows
+// a note), then its hero score. Higher is better.
+export function photoRank(
+  p: Photo,
+  heroScores: Readonly<Record<string, number>>,
+  withNote: ReadonlySet<string> | ReadonlyMap<string, number> = new Set(),
+): number {
+  // The more notes belong to it, the better (#460), up to 3 (a note
+  // written on it counts 2).
+  const notes = withNote instanceof Map
+    ? Math.min(3, withNote.get(p.id) ?? 0)
+    : withNote.has(p.id)
+    ? 1
+    : 0;
+  return (p.use_in_wrap_up === true ? 100 : 0) +
+    (p.caption?.trim() ? 20 : 0) + 10 * notes + (heroScores[p.id] ?? 0);
+}
+
+// The photos the notes belong to (#460): a note's own photo, else the
+// film photo taken nearest when it was written, within
+// SCENE_NEAR_MINUTES. A note written far from every photo anchors none.
+export function noteAnchors(
+  tripData: TripData,
+  photos: readonly Photo[],
+): Map<string, string> {
+  const anchors = new Map<string, string>();
+  const ids = new Set(photos.map((p) => p.id));
+  for (const n of tripData.notes) {
+    if (!n.id || !n.content.trim()) continue;
+    if (n.photo_id && ids.has(n.photo_id)) {
+      anchors.set(n.id, n.photo_id);
+      continue;
+    }
+    const near = nearestPhoto(photos, noteTime(n));
+    if (
+      near &&
+      Math.abs(timeOf(near) - noteTime(n)) <= SCENE_NEAR_MINUTES * 60_000
+    ) anchors.set(n.id, near.id);
+  }
+  return anchors;
+}
+
+// [count] of [photos] (time order) for a page of prints: Always picks
+// first, then the best shot of each equal stretch of the rest; in time
+// order.
+export function spreadPicks(
+  photos: readonly Photo[],
+  count: number,
+  score: (p: Photo) => number,
+): Photo[] {
+  // The best of each stretch of [list], [room] of them.
+  const spread = (list: readonly Photo[], room: number, picked: Photo[]) => {
+    for (let k = 0; k < room && list.length > 0; k++) {
+      const from = Math.floor(k * list.length / room);
+      const to = Math.max(from + 1, Math.floor((k + 1) * list.length / room));
+      const best = list.slice(from, to).filter((p) => !picked.includes(p))
+        .sort((x, y) => score(y) - score(x))[0];
+      if (best) picked.push(best);
+    }
+  };
+  const always = photos.filter((p) => p.use_in_wrap_up === true);
+  const picked: Photo[] = [];
+  // More Always picks than room (#460): spread over the chapter too, not
+  // its first ones.
+  if (always.length >= count) spread(always, count, picked);
+  else {
+    picked.push(...always);
+    spread(
+      photos.filter((p) => !always.includes(p)),
+      count - always.length,
+      picked,
+    );
+  }
+  return photos.filter((p) => picked.includes(p));
 }
