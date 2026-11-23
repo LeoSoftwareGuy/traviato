@@ -9,6 +9,7 @@
 // What code fills in, never the AI: the plan rows (the user's quests with
 // times), every photo and its time, the totals, the signature.
 
+import { localMs } from "./time_zones.ts";
 import type { TripData } from "./gather.ts";
 import { sortPhotosChronologically, spreadEvenly } from "./assemble.ts";
 import { tripLogicalDays } from "./logical_day.ts";
@@ -114,6 +115,8 @@ export interface NeonNightContent {
     // Its place among the memory's notes, from 1: "NOTE 04".
     number: number;
     written_at: string | null;
+    // The note's id (#461), for its place's clock; absent before.
+    note_id?: string;
     photo_id: string | null;
   } | null;
   headline: string | null;
@@ -301,7 +304,7 @@ export function nnCheckContext(
     photoTimes: new Map(
       photos.filter((p) => p.taken_at).map((p) => [
         p.id,
-        Date.parse(p.taken_at!) + (tripData.utc_offset_minutes ?? 0) * 60_000,
+        localMs(tripData, p, p.taken_at!),
       ]),
     ),
     noteDays: (() => {
@@ -324,7 +327,7 @@ export function nnCheckContext(
         n,
       ) => [
         n.id!,
-        Date.parse(n.taken_at!) + (tripData.utc_offset_minutes ?? 0) * 60_000,
+        localMs(tripData, n, n.taken_at!),
       ]),
     ),
   };

@@ -6,6 +6,7 @@ import fixture from "./fixtures/budapest_birthday.json" with { type: "json" };
 import { withFilmPhotos } from "./film_photos.ts";
 import type { TripData } from "./gather.ts";
 import type { SlotPicks } from "./film_slots.ts";
+import { withLocalTimes } from "./time_zones.ts";
 
 // Every analysed photo's hero score.
 export function budapestHeroScores(): Record<string, number> {
@@ -28,9 +29,11 @@ export function budapestOrientations(): Record<string, string> {
 }
 
 // The memory as the director sees it: the film's photos, analysed ones
-// (and those left out) only.
+// (and those left out) only, on Budapest's clock (#461).
 export function budapestFilmMemory(): TripData {
-  const memory = structuredClone(fixture.trip_data) as unknown as TripData;
+  const memory = withLocalTimes(
+    structuredClone(fixture.trip_data) as unknown as TripData,
+  );
   const film = withFilmPhotos(memory, budapestHeroScores());
   const analysed = new Set(fixture.analyses.map((a) => a.photo_id));
   return {

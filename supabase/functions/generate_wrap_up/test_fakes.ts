@@ -4,7 +4,8 @@
 // accepted but not applied; each table's fixture rows are returned as-is.
 // Writes (insert/update/upsert) are recorded on the returned `writes` array,
 // along with the .eq/.is/.not filters applied to them, so tests can assert what
-// was saved and under which guard.
+// was saved and under which guard. The trip's resolved time zone (#461)
+// is recorded apart, on `tripWrites`.
 
 // deno-lint-ignore no-explicit-any
 type Row = Record<string, any>;
@@ -21,8 +22,10 @@ export function fakeSupabaseClient(
   errors: Record<string, { message: string }> = {},
 ) {
   const writes: RecordedWrite[] = [];
+  const tripWrites: RecordedWrite[] = [];
   return {
     writes,
+    tripWrites,
     from(table: string) {
       const rows = tables[table] ?? [];
       const error = errors[table] ?? null;
@@ -47,7 +50,7 @@ export function fakeSupabaseClient(
         },
         update(values: Row) {
           write = { table, op: "update", values, filters: [] };
-          writes.push(write);
+          (table === "trips" ? tripWrites : writes).push(write);
           return builder;
         },
         gte() {

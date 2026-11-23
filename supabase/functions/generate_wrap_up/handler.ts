@@ -38,6 +38,7 @@
 
 import { filmSecondsOf } from "./film_length.ts";
 import { gatherTripData, type TripData } from "./gather.ts";
+import { localTimesOf, withLocalTimes } from "./time_zones.ts";
 import { wrapUpMissing } from "./wrap_up_limits.ts";
 import { type PlayedTemplate, playedTemplate } from "./film_template.ts";
 import { withFilmPhotos } from "./film_photos.ts";
@@ -198,6 +199,7 @@ export async function handleRequest(
         slots,
         existing,
         language,
+        utcOffset,
       );
     }
     return json({
@@ -210,13 +212,12 @@ export async function handleRequest(
   // rebuilt from current data, so photo edits never leave it stale.
   let tripData: TripData;
   try {
-    tripData = await gatherTripData(deps.serviceClient, tripId);
+    tripData = await gatherLocal(deps, tripId, utcOffset);
   } catch (err) {
     return json({
       error: `failed to gather trip data: ${(err as Error).message}`,
     }, 500);
   }
-  if (utcOffset !== undefined) tripData.utc_offset_minutes = utcOffset;
 
   // Below the minimum (#432) there's no film to make — the Journal shows
   // what's missing instead. Checked before any AI call; kept films above
@@ -348,6 +349,8 @@ export async function handleRequest(
     film_style: played,
     // How long the film plays (#434): the app fits its scenes to it.
     film_seconds: filmSecondsOf(film),
+    // Each photo's and note's place clock (#461).
+    local_times: localTimesOf(tripData),
     ...(plan ? { plan_version: 2 as const, plan } : {}),
     ...(sky ? { sky } : {}),
     ...section.content,
@@ -405,13 +408,12 @@ async function rerunKeptDirector(
 ): Promise<Response> {
   let tripData: TripData;
   try {
-    tripData = await gatherTripData(deps.serviceClient, tripId);
+    tripData = await gatherLocal(deps, tripId, utcOffset);
   } catch (err) {
     return json({
       error: `failed to gather trip data: ${(err as Error).message}`,
     }, 500);
   }
-  if (utcOffset !== undefined) tripData.utc_offset_minutes = utcOffset;
   const director = await runCounted(
     deps,
     tripId,
@@ -449,10 +451,11 @@ async function rebuildKept(
   slots: MomentSlots,
   existing: { content: unknown; director?: unknown },
   language: WrapUpLanguage,
+  utcOffset: number | undefined,
 ): Promise<Response> {
   let tripData: TripData;
   try {
-    tripData = await gatherTripData(deps.serviceClient, tripId);
+    tripData = await gatherLocal(deps, tripId, utcOffset);
   } catch (err) {
     return json({
       error: `failed to gather trip data: ${(err as Error).message}`,
@@ -492,6 +495,8 @@ async function rebuildKept(
     ...("film_style" in kept ? { film_style: kept.film_style } : {}),
     // Rebuilt on the user's tap: its length follows its photos now (#434).
     film_seconds: filmSecondsOf(film),
+    // And its times follow each photo's place (#461).
+    local_times: localTimesOf(tripData),
     ...(sky ? { sky } : {}),
     ...section.content,
     ...(section.report ? { film_report: section.report } : {}),
@@ -619,4 +624,29 @@ function logGenerationFailure(
     detail,
   });
   return { code, detail };
+}
+
+// The memory's data with every photo and note on its own place's clock
+// (#461). A zone found for the first time is kept on the trip, so later
+// opens don't depend on what the lookup finds then; a failed write only
+// costs that.
+async function gatherLocal(
+  deps: Deps,
+  tripId: string,
+  utcOffset: number | undefined,
+): Promise<TripData> {
+  const gathered = await gatherTripData(deps.serviceClient, tripId);
+  if (utcOffset !== undefined) gathered.utc_offset_minutes = utcOffset;
+  const tripData = withLocalTimes(gathered);
+  const zone = tripData.zone;
+  if (zone?.zone && zone.source !== "stored") {
+    try {
+      const { error } = await deps.serviceClient.from("trips")
+        .update({ time_zone: zone.zone }).eq("id", tripId);
+      if (error) console.warn(`trip zone not saved: ${error.message}`);
+    } catch (err) {
+      console.warn(`trip zone not saved: ${(err as Error).message}`);
+    }
+  }
+  return tripData;
 }

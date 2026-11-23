@@ -4,6 +4,7 @@
 // which scene a note belongs to. Each film builds its own skeleton and
 // slots from these; neon_slots.ts and gv_slots.ts.
 
+import { localMs } from "./time_zones.ts";
 import type { TripData } from "./gather.ts";
 import { bannedPhraseIn, cleanAiLine } from "./film_plan.ts";
 import { tripLogicalDays } from "./logical_day.ts";
@@ -874,14 +875,14 @@ export function dayTitleFor(
 ): (chapter: number) => string {
   const all = [...new Set(chapters.flatMap((c) => c.days))].sort();
   const word = lang === "ru" ? "День" : "Day";
-  const offset = tripData.utc_offset_minutes ?? 0;
   const count = new Map<string, number>();
   const titles = chapters.map((c, i) => {
     const day = `${word} ${Math.max(0, all.indexOf(c.days[0] ?? "")) + 1}`;
     if (chapters.findIndex((x) => x.days[0] === c.days[0]) === i) return day;
-    const at = c.photos[0]?.taken_at ?? c.photos[0]?.created_at;
+    const first = c.photos[0];
+    const at = first?.taken_at ?? first?.created_at;
     const stretch = stretchOf(
-      at ? new Date(Date.parse(at) + offset * 60_000).getUTCHours() : 20,
+      at ? new Date(localMs(tripData, first, at)).getUTCHours() : 20,
     );
     const key = `${day}|${stretch}`;
     const n = count.get(key) ?? 0;

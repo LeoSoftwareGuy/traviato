@@ -11,6 +11,8 @@
 // photos.use_in_wrap_up is the user's per-photo pick (#294): null = Auto,
 // true = Always, false = Leave out. assemble.ts applies it.
 
+import type { OffsetSource, TripZone } from "./time_zones.ts";
+
 // deno-lint-ignore no-explicit-any
 type SupabaseClient = any;
 
@@ -31,6 +33,8 @@ export interface TripData {
     end_date: string | null;
     vibes: string[];
     cover_image_path: string | null;
+    // The memory's IANA zone once resolved (#461), else null.
+    time_zone?: string | null;
   };
   // created_at: when the note was first written — places a one-sentence
   // note in its day for collage captions (#302). Never sent to the AI.
@@ -48,6 +52,10 @@ export interface TripData {
     // One old one-per-day note (#400): its time is its last edit, not
     // when it happened.
     legacy?: boolean;
+    // The offset where it was written (#461): stored (the device's), or
+    // resolved by time_zones.ts.
+    utc_offset_minutes?: number | null;
+    utc_offset_source?: OffsetSource;
   }[];
   photos: {
     id: string;
@@ -61,6 +69,13 @@ export interface TripData {
     // Tagged on Photo detail; given to the director (#328) as facts.
     place_text?: string | null;
     people_tags?: string[];
+    // GPS, when the user allowed location (#461: its own zone).
+    lat?: number | null;
+    lng?: number | null;
+    // The offset where it was taken (#461): stored (EXIF or the device's),
+    // or resolved by time_zones.ts.
+    utc_offset_minutes?: number | null;
+    utc_offset_source?: OffsetSource;
   }[];
   completedBonusTasks: {
     completed_at: string;
@@ -89,9 +104,11 @@ export interface TripData {
   // The owner's profile name (#345): Sky Story signs notes with its first
   // word. Absent or null = no signature.
   username?: string | null;
-  // The app's offset from UTC when it asked, in minutes (#363): the
-  // director sees photo times as local wall-clock times. Absent = UTC.
+  // The app's offset from UTC when it asked, in minutes (#363). Since
+  // #461 only the last resort: each photo and note has its own.
   utc_offset_minutes?: number;
+  // The memory's zone and where it came from (#461, time_zones.ts).
+  zone?: TripZone;
 }
 
 export async function gatherTripData(
@@ -101,7 +118,7 @@ export async function gatherTripData(
   const { data: trip, error: tripError } = await client
     .from("trips")
     .select(
-      "name, destination, country_code, start_date, end_date, vibes, cover_image_path, user_id",
+      "name, destination, country_code, start_date, end_date, vibes, cover_image_path, time_zone, user_id",
     )
     .eq("id", tripId)
     .single();
@@ -121,14 +138,16 @@ export async function gatherTripData(
   ] = await Promise.all([
     client
       .from("journal_notes")
-      .select("id, day_date, content, created_at, taken_at, photo_id, legacy")
+      .select(
+        "id, day_date, content, created_at, taken_at, photo_id, legacy, utc_offset_minutes",
+      )
       .eq("trip_id", tripId)
       .order("day_date")
       .order("taken_at"),
     client
       .from("photos")
       .select(
-        "id, day_date, taken_at, created_at, storage_path, caption, use_in_wrap_up, place_text, people_tags",
+        "id, day_date, taken_at, created_at, storage_path, caption, use_in_wrap_up, place_text, people_tags, lat, lng, utc_offset_minutes, utc_offset_source",
       )
       .eq("trip_id", tripId)
       .order("day_date")
@@ -199,6 +218,7 @@ export async function gatherTripData(
       end_date: trip.end_date,
       vibes: trip.vibes ?? [],
       cover_image_path: trip.cover_image_path ?? null,
+      time_zone: (trip.time_zone as string | null) ?? null,
     },
     notes: (notesRes.data ?? []).map((n: Record<string, unknown>) => ({
       ...(typeof n.id === "string" ? { id: n.id } : {}),
@@ -208,6 +228,7 @@ export async function gatherTripData(
       taken_at: (n.taken_at as string | null) ?? null,
       photo_id: (n.photo_id as string | null) ?? null,
       legacy: n.legacy === true,
+      utc_offset_minutes: (n.utc_offset_minutes as number | null) ?? null,
     })),
     photos: (photosRes.data ?? []).map((p: Record<string, unknown>) => ({
       id: p.id as string,
@@ -219,6 +240,12 @@ export async function gatherTripData(
       use_in_wrap_up: (p.use_in_wrap_up as boolean | null) ?? null,
       place_text: (p.place_text as string | null) ?? null,
       people_tags: (p.people_tags as string[] | null) ?? [],
+      lat: (p.lat as number | null) ?? null,
+      lng: (p.lng as number | null) ?? null,
+      utc_offset_minutes: (p.utc_offset_minutes as number | null) ?? null,
+      ...(p.utc_offset_source
+        ? { utc_offset_source: p.utc_offset_source as OffsetSource }
+        : {}),
     })),
     completedBonusTasks: (bonusRes.data ?? []).map(
       (b: Record<string, unknown>) => {

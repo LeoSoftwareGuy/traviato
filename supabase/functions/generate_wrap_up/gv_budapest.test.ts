@@ -198,7 +198,10 @@ Deno.test("Budapest: each chapter's time of day is most of its photos'", () => {
   const words = ["Morning", "Afternoon", "Evening", "Night"];
   f.skeleton.chapters.forEach((c, i) => {
     const counts = [0, 0, 0, 0];
-    for (const p of c.photos) counts[gvPartOfTime(timeOf(p), OFFSET)]++;
+    // Each photo on Budapest's clock (#461), not the phone's +120.
+    for (const p of c.photos) {
+      counts[gvPartOfTime(timeOf(p), p.utc_offset_minutes ?? OFFSET)]++;
+    }
     const most = Math.max(...counts);
     const part = gvPartOf(c.photos, OFFSET)!;
     assertEquals(counts[part], most, `chapter ${i + 1}`);

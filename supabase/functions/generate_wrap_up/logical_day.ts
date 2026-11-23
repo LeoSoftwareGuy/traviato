@@ -44,11 +44,14 @@ export interface TimedItem {
   // An ISO instant; items without one keep [fallbackDay].
   at: string | null;
   fallbackDay: string | null;
+  // Its own place's offset (#461); absent = [utcOffsetMinutes].
+  offsetMinutes?: number | null;
 }
 
 // Every item's logical day, items taken together in time order (photos and
 // notes share the rule: a note written at 02:00 stays on the night's day).
-// [utcOffsetMinutes] turns instants into the phone's wall-clock time.
+// Each item is read on its own place's clock (#461: offsetMinutes), else
+// [utcOffsetMinutes]. Order is by the real instant.
 export function logicalDays(
   items: readonly TimedItem[],
   utcOffsetMinutes = 0,
@@ -66,7 +69,7 @@ export function logicalDays(
     .sort((a, b) => a.ms - b.ms);
   let previous: { localMs: number; day: string } | null = null;
   for (const { item, ms } of timed) {
-    const localMs = ms + utcOffsetMinutes * 60_000;
+    const localMs = ms + (item.offsetMinutes ?? utcOffsetMinutes) * 60_000;
     const day = logicalDayOf(localMs, previous);
     days.set(item.id, day);
     previous = { localMs, day };
@@ -88,12 +91,14 @@ export function tripLogicalDays(
         // neither falls back to the upload.
         at: p.taken_at ?? (p.day_date ? null : p.created_at),
         fallbackDay: p.day_date,
+        offsetMinutes: p.utc_offset_minutes,
       })),
       ...tripData.notes.filter((n) => n.id).map((n) => ({
         id: `note:${n.id}`,
         // A legacy note's time is its last edit: its day is its own.
         at: n.legacy ? null : n.taken_at ?? null,
         fallbackDay: n.day_date,
+        offsetMinutes: n.utc_offset_minutes,
       })),
     ],
     tripData.utc_offset_minutes ?? 0,

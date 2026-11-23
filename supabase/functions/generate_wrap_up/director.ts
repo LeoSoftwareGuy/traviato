@@ -22,6 +22,7 @@
 //
 // Model: claude-sonnet-5 for every call, same as the 4 AI lines (#93).
 
+import { localMs } from "./time_zones.ts";
 import type { TripData } from "./gather.ts";
 import { inclusiveDayCount, sortPhotosChronologically } from "./assemble.ts";
 import { type FetchLike, logEvent, type LogLike } from "./anthropic.ts";
@@ -110,10 +111,11 @@ export const MIN_PLANNABLE_PHOTOS = 6;
 export const MAX_DIRECTOR_RUNS = 4;
 // The director's rules (#398: logical days, excerpts, chronology; #433:
 // the template from vibes; #454 / #458: Neon Night and Golden Vows pick
-// from code's lists; #460: Golden Vows' new pages and slot lists). A
+// from code's lists; #460: Golden Vows' new pages and slot lists;
+// #461: photo and note times on their own place's clock). A
 // record made under older rules runs again once, within
 // MAX_DIRECTOR_RUNS.
-export const DIRECTOR_VERSION = 7;
+export const DIRECTOR_VERSION = 8;
 
 // emit_film_plan with the Sky Story section (#345). Composed here so the
 // films' modules don't import each other. No occasion choice since #433:
@@ -286,7 +288,11 @@ export function buildPlanInput(
         day_date: dayOf(`note:${n.id}`, n.day_date),
         text: n.content,
         // The note's own time and photo (#397); legacy notes have no photo.
-        written_at: localClock(n.taken_at ?? n.created_at ?? null, tripData),
+        written_at: localClock(
+          n.taken_at ?? n.created_at ?? null,
+          tripData,
+          n,
+        ),
         photo_id: n.photo_id ?? null,
       })),
     // Already in chronological order (day, then time).
@@ -296,7 +302,7 @@ export function buildPlanInput(
         photo_id: p.id,
         day: dayNumber(trip.start_date, dayOf(p.id, p.day_date)),
         day_date: dayOf(p.id, p.day_date),
-        time: localClock(p.taken_at ?? p.created_at, tripData),
+        time: localClock(p.taken_at ?? p.created_at, tripData, p),
         summary: a.summary,
         setting: a.setting,
         people: a.people,
@@ -641,7 +647,7 @@ export async function runDirector(
           cut.chapters,
           cut.slots,
           analyses,
-          (iso) => localClock(iso, seen),
+          (iso, item) => localClock(iso, seen, item),
         ),
         tool: pickNeonLinesTool,
       });
@@ -679,7 +685,7 @@ export async function runDirector(
           cut.skeleton,
           cut.slots,
           analyses,
-          (iso) => localClock(iso, seen),
+          (iso, item) => localClock(iso, seen, item),
         ),
         tool: pickGoldenVowsLinesTool,
       });
@@ -901,16 +907,17 @@ export function currentNeonNight(
     : { picks: null, source: "code" };
 }
 
-// [iso] as 'HH:MM' on the app's clock (TripData.utc_offset_minutes, #363),
-// or null.
+// [iso] as 'HH:MM' on the clock of [item]'s place (#461: its resolved
+// offset), else the app's (TripData.utc_offset_minutes, #363); or null.
 export function localClock(
   iso: string | null,
   tripData: TripData,
+  item?: { utc_offset_minutes?: number | null },
 ): string | null {
   if (!iso) return null;
   const ms = Date.parse(iso);
   if (Number.isNaN(ms)) return null;
-  const local = new Date(ms + (tripData.utc_offset_minutes ?? 0) * 60_000);
+  const local = new Date(localMs(tripData, item ?? {}, iso));
   const two = (v: number) => String(v).padStart(2, "0");
   return `${two(local.getUTCHours())}:${two(local.getUTCMinutes())}`;
 }
