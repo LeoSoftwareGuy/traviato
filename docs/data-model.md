@@ -404,6 +404,28 @@ Post-MVP: `video_path`, `video_status`.
   An unkept draft below the minimum gets `422 not_eligible` before any AI
   call; kept films are returned as stored.
 
+- **Times where they happened** (#461): `photos.utc_offset_minutes
+  smallint?` + `utc_offset_source` (`exif` | `device`) — the offset where
+  the photo was taken, from EXIF `OffsetTimeOriginal` (`taken_at` is then
+  the real instant), else the phone's for a photo taken within 10 minutes
+  of the upload; null = unknown. `journal_notes.utc_offset_minutes
+  smallint?` — the phone's when written (kept on edit by the update
+  trigger). `trips.time_zone text?` — the memory's IANA zone, resolved by
+  `generate_wrap_up` (`time_zones.ts`: GPS majority via
+  `@photostructure/tz-lookup`, else `country_code`, else a tz city or
+  country name in `destination` — EN/RU, `time_zones.json` from tzdb's
+  zone.tab; a country whose zones differ is "unresolved") and written
+  once (service-role column grant); also in `trip_card_view`. No backfill:
+  on every open each photo takes its own offset, else its GPS zone's,
+  else the memory zone's at that instant (Intl, so DST is right), else the
+  app's `utc_offset_minutes` (now only the last resort); a note its own,
+  else the nearest known photo's within 3 h, else the zone's.
+  `content.local_times` = `{zone, zone_source, zone_detail, photos: {id:
+  minutes}, notes: {id: minutes}, photo_sources, note_sources}` — the app
+  plays a film's times on it (`FilmClock`); a kept film without it keeps
+  the phone's clock until rebuilt. `content.neon_night.note.note_id` names
+  the Note scene's note. `DIRECTOR_VERSION` 8.
+
 ### `photo_analysis` (#328)
 `photo_id PK/FK photos cascade, trip_id FK cascade, storage_path (the file
 analysed — a new path means re-analyse), summary (≤12 words, visible only),
