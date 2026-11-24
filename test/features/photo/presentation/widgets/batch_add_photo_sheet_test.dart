@@ -6,9 +6,11 @@ import 'package:fpdart/fpdart.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/core/theme/app_theme.dart';
 import 'package:traviato/features/photo/data/services/photo_compressor.dart';
+import 'package:traviato/features/subscription/presentation/providers/subscription_providers.dart';
 import 'package:traviato/features/photo/presentation/providers/photo_providers.dart';
 import 'package:traviato/features/photo/presentation/widgets/batch_add_photo_sheet.dart';
 
+import '../../../subscription/fakes/fake_subscription_repository.dart';
 import '../../fakes/fake_photo_repository.dart';
 
 /// `PhotoCompressor.compress` calls a native plugin unavailable in widget
@@ -47,6 +49,10 @@ Future<void> _pump(
       overrides: [
         photoRepositoryProvider.overrideWithValue(photoRepo),
         photoCompressorProvider.overrideWithValue(const _IdentityCompressor()),
+        // A free user: the server's cap stands after the re-check (#466).
+        subscriptionRepositoryProvider.overrideWithValue(
+          FakeSubscriptionRepository(),
+        ),
       ],
       child: MaterialApp(
         theme: AppTheme.dark,
