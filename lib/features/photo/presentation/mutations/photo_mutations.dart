@@ -2,13 +2,16 @@ import 'dart:typed_data';
 
 import 'package:flutter_riverpod/experimental/mutation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/presentation_failure_exception.dart';
 import '../../../../core/events/global_event.dart';
 import '../../../../core/events/global_event_bus.dart';
 import '../../../journal/presentation/controllers/journal_controller.dart';
+import '../../../subscription/domain/entities/entitlement_entity.dart';
 import '../../../subscription/presentation/controllers/entitlement_controller.dart';
+import '../../../subscription/presentation/providers/subscription_providers.dart';
 import '../../domain/entities/film_pick.dart';
 import '../../domain/entities/photo_entity.dart';
 import '../../domain/photo_capture_time.dart';
@@ -53,7 +56,12 @@ Future<PhotoEntity> runAddPhoto({
         .then((entitlement) => entitlement.isPro, onError: (_) => true);
     final currentPhotoCount =
         tsx.get(journalControllerProvider(tripId)).value?.photos.length ?? 0;
-    if (!isPro && currentPhotoCount >= _freeTierPhotoLimit) {
+    // The row may be stale for a paying user (a missed renewal webhook, a
+    // DB reset — #466, as memories in #267): ask the server to re-check
+    // RevenueCat before showing the upsell.
+    if (!isPro &&
+        currentPhotoCount >= _freeTierPhotoLimit &&
+        !await _confirmedPro(tsx)) {
       throw PresentationFailureException(const PhotoLimitFailure());
     }
 
@@ -65,7 +73,7 @@ Future<PhotoEntity> runAddPhoto({
     );
     final compressed = await compressor.compress(rawBytes);
 
-    final result = await repo.addPhoto(
+    Future<Either<Failure, PhotoEntity>> add() => repo.addPhoto(
       tripId: tripId,
       dayDate: dayDate,
       bytes: compressed,
@@ -78,6 +86,15 @@ Future<PhotoEntity> runAddPhoto({
       utcOffsetMinutes: captured.utcOffsetMinutes,
       utcOffsetSource: captured.source,
     );
+    var result = await add();
+    // The server's cap (TRV02) read a stale row: once RevenueCat confirms
+    // Pro, retry once (a failed insert already removed its upload).
+    if (result case Left(value: PhotoLimitFailure())
+        when await _confirmedPro(
+          tsx,
+        )) {
+      result = await add();
+    }
     return result.fold(
       (failure) => throw PresentationFailureException(failure),
       (
@@ -89,6 +106,27 @@ Future<PhotoEntity> runAddPhoto({
       },
     );
   });
+}
+
+/// Whether the server, re-checking RevenueCat (`sync_entitlement`, #267),
+/// confirms Pro. If so the repaired entitlement is published, so every
+/// screen and the next photo see it. A refresh that fails confirms
+/// nothing.
+Future<bool> _confirmedPro(MutationTransaction tsx) async {
+  final EntitlementEntity? entitlement;
+  try {
+    entitlement =
+        (await tsx.get(subscriptionRepositoryProvider).refreshEntitlement())
+            .toNullable();
+  } catch (_) {
+    // Not confirmed: the cap stands as the server set it.
+    return false;
+  }
+  if (entitlement == null || !entitlement.isPro) return false;
+  tsx
+      .get(globalEventBusProvider)
+      .add(EntitlementUpdatedDispatched(entitlement: entitlement));
+  return true;
 }
 
 /// Deletes a photo optimistically (#165): the Journal's strip, day-tab

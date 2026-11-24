@@ -142,6 +142,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(photoRepo.addPhotoCallCount, 0);
+      // The server re-checked RevenueCat first and confirmed free (#466).
+      expect(subscriptionRepo.refreshEntitlementCallCount, 1);
       final state = container.read(addPhotoMutation);
       expect(state, isA<MutationError<PhotoEntity>>());
       final error = (state as MutationError<PhotoEntity>).error;
@@ -230,4 +232,74 @@ void main() {
       expect(photoRepo.addPhotoCallCount, 0);
     },
   );
+
+  group('a stale entitlements row (#466)', () {
+    testWidgets('a Pro user the row calls free passes the pre-check once '
+        'RevenueCat confirms Pro', (tester) async {
+      final photoRepo = _photoRepoWithCount(45);
+      final subscriptionRepo = FakeSubscriptionRepository()
+        ..refreshEntitlementResult = Right(buildProEntitlement());
+
+      await _pumpHarness(
+        tester,
+        photoRepo: photoRepo,
+        subscriptionRepo: subscriptionRepo,
+      );
+      await tester.tap(find.text('Add'));
+      await tester.pumpAndSettle();
+
+      expect(subscriptionRepo.refreshEntitlementCallCount, 1);
+      expect(photoRepo.addPhotoCallCount, 1);
+    });
+
+    testWidgets('the server cap (TRV02) on a stale row: retried once after '
+        'RevenueCat confirms Pro', (tester) async {
+      final photoRepo = _photoRepoWithCount(10)
+        ..addPhotoResultsQueue = [const Left(PhotoLimitFailure())];
+      final subscriptionRepo = FakeSubscriptionRepository()
+        ..refreshEntitlementResult = Right(buildProEntitlement());
+
+      final container = await _pumpHarness(
+        tester,
+        photoRepo: photoRepo,
+        subscriptionRepo: subscriptionRepo,
+      );
+      container.listen(addPhotoMutation, (_, _) {});
+      await tester.tap(find.text('Add'));
+      await tester.pumpAndSettle();
+
+      expect(photoRepo.addPhotoCallCount, 2);
+      expect(
+        container.read(addPhotoMutation),
+        isA<MutationSuccess<PhotoEntity>>(),
+      );
+    });
+
+    testWidgets('the server cap for a free user: no retry, the upsell', (
+      tester,
+    ) async {
+      final photoRepo = _photoRepoWithCount(10)
+        ..addPhotoResult = const Left(PhotoLimitFailure());
+      final subscriptionRepo = FakeSubscriptionRepository();
+
+      final container = await _pumpHarness(
+        tester,
+        photoRepo: photoRepo,
+        subscriptionRepo: subscriptionRepo,
+      );
+      container.listen(addPhotoMutation, (_, _) {});
+      await tester.tap(find.text('Add'));
+      await tester.pumpAndSettle();
+
+      expect(subscriptionRepo.refreshEntitlementCallCount, 1);
+      expect(photoRepo.addPhotoCallCount, 1);
+      final error =
+          (container.read(addPhotoMutation) as MutationError<PhotoEntity>)
+              .error;
+      expect(
+        (error as PresentationFailureException).failure,
+        isA<PhotoLimitFailure>(),
+      );
+    });
+  });
 }
