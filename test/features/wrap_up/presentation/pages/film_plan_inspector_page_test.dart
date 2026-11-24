@@ -11,9 +11,7 @@ import 'package:traviato/features/settings/presentation/controllers/app_language
 import 'package:traviato/features/wrap_up/domain/entities/film_neon_slot.dart';
 import 'package:traviato/features/wrap_up/domain/entities/film_director_report.dart';
 import 'package:traviato/features/wrap_up/domain/entities/film_photo_analysis.dart';
-import 'package:traviato/features/wrap_up/domain/entities/film_plan_chapter.dart';
 import 'package:traviato/features/wrap_up/domain/entities/film_plan_inspection.dart';
-import 'package:traviato/features/wrap_up/domain/entities/film_plan_scene.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_golden_vows.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_neon_night.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_sky.dart';
@@ -29,30 +27,7 @@ import '../../fakes/fake_wrap_up_repository.dart';
 
 const _planned = FilmDirectorReport(
   isPlanned: true,
-  occasion: 'city',
-  recipe: 'keepsake',
-  musicEnergy: 'calm',
-  reasoning: 'A quiet city trip.',
-  chapters: [
-    FilmPlanChapter(
-      bridgeLine: 'You came for the canals.',
-      scenes: [
-        FilmPlanScene(
-          type: 'card_flip',
-          photoIds: ['p1'],
-          durationSeconds: 5,
-          isHero: true,
-        ),
-        FilmPlanScene(
-          type: 'text_card',
-          text: 'Then the rain.',
-          durationSeconds: 4,
-        ),
-      ],
-    ),
-  ],
-  footnoteLine: 'Three days, one umbrella.',
-  closingLine: 'You left with dry socks, barely.',
+  template: 'sky_story',
   attempts: 1,
   model: 'claude-sonnet-5',
   inputTokens: 5800,
@@ -144,7 +119,7 @@ void main() {
     expect(find.textContaining('has not run'), findsOneWidget);
   });
 
-  testWidgets('shows the plan: recipe, chapters, scenes, lines and cost', (
+  testWidgets('shows who picked the words and the cost (#463)', (
     tester,
   ) async {
     final repo = FakeFilmDirectorRepository()
@@ -154,21 +129,11 @@ void main() {
     await _pump(tester, repo);
     await tester.pumpAndSettle();
 
-    expect(find.text('planned · keepsake · city'), findsOneWidget);
-    expect(find.text('You came for the canals.'), findsOneWidget);
-    expect(find.text('card_flip · 5.0s · HERO'), findsOneWidget);
-    expect(find.text('“Then the rain.”'), findsOneWidget);
-    expect(find.textContaining('A canal at dusk'), findsOneWidget);
-    expect(find.textContaining('0.0184', findRichText: true), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.textContaining('dry socks', findRichText: true),
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
     expect(
-      find.textContaining('dry socks', findRichText: true),
+      find.text('sky_story · words picked by the director'),
       findsOneWidget,
     );
+    expect(find.textContaining('0.0184', findRichText: true), findsOneWidget);
   });
 
   testWidgets('a fallback shows its problems', (tester) async {
@@ -177,15 +142,21 @@ void main() {
         FilmPlanInspection(
           report: FilmDirectorReport(
             isPlanned: false,
-            problems: ['closing_line: banned phrase "epic"'],
+            template: 'sky_story',
+            problems: ['only 3 analysed photos'],
           ),
         ),
       );
     await _pump(tester, repo);
     await tester.pumpAndSettle();
 
-    expect(find.text('fallback — the template film plays'), findsOneWidget);
-    expect(find.textContaining('banned phrase'), findsOneWidget);
+    expect(find.text('sky_story · words picked by code'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.textContaining('only 3 analysed'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.textContaining('only 3 analysed'), findsOneWidget);
   });
 
   testWidgets('Re-run director reruns in the UI language and reloads', (
@@ -226,14 +197,32 @@ void main() {
           scrollable: find.byType(Scrollable).first,
         );
 
-    testWidgets('shows the pages the film will play and why', (tester) async {
+    testWidgets('shows the pages, photos on pages, trims and slots (#463)', (
+      tester,
+    ) async {
       final repo = FakeFilmDirectorRepository()
         ..inspectionResult = const Right(
           FilmPlanInspection(
             report: FilmDirectorReport(
               isPlanned: true,
               runCount: 2,
-              skyProblems: ['sky_story.pages[0].days: [0, 9] is not within'],
+              skyProblems: ['code picked every slot'],
+              skyShownPages: 3,
+              skyShownPhotos: 4,
+              skyTrims: ['p1: a second line left out'],
+              skyUnlisted: ['Rain all day. — no page'],
+              skySlots: [
+                FilmNeonSlot(
+                  slot: 'p1.headline',
+                  candidates: [
+                    FilmNeonCandidate(id: 'p:1', text: 'Alfama', score: 30),
+                  ],
+                  chosenIds: ['p:1'],
+                  chosen: ['Alfama'],
+                  source: 'code',
+                  reason: "code's best",
+                ),
+              ],
             ),
           ),
         );
@@ -241,8 +230,20 @@ void main() {
       await tester.pumpAndSettle();
 
       await scrollTo(tester, find.byKey(const Key('film-plan-sky-preview')));
-      expect(find.text('code-built pages (fallback)'), findsOneWidget);
-      expect(find.textContaining('is not within'), findsOneWidget);
+      expect(find.text("code's words on code's pages"), findsOneWidget);
+      expect(find.textContaining('code picked every slot'), findsOneWidget);
+      expect(
+        find.textContaining('3 / 4 photos on pages', findRichText: true),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('a second line left out', findRichText: true),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('Rain all day. — no page', findRichText: true),
+        findsOneWidget,
+      );
       expect(find.text('Day 1 · fan · 3 photos'), findsOneWidget);
       expect(find.text('(Alfama — no headline)'), findsOneWidget);
       expect(
@@ -252,6 +253,14 @@ void main() {
       // 1 page: 5 + 2 + 14.5 + 3 + 8.
       expect(
         find.textContaining('1 page(s) · 32.5s', findRichText: true),
+        findsOneWidget,
+      );
+      await scrollTo(
+        tester,
+        find.byKey(const Key('film-plan-sky-slot-p1.headline')),
+      );
+      expect(
+        find.byKey(const Key('film-plan-sky-slot-p1.headline')),
         findsOneWidget,
       );
     });

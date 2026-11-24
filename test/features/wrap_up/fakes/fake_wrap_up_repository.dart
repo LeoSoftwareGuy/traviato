@@ -1,5 +1,4 @@
 import 'package:fpdart/fpdart.dart';
-import 'package:traviato/features/wrap_up/domain/entities/film_plan.dart';
 import 'package:traviato/core/errors/failures.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_cover_photo.dart';
 import 'package:traviato/features/wrap_up/domain/entities/wrap_up_dates.dart';
@@ -70,7 +69,6 @@ WrapUpEntity buildWrapUpEntity({
   WrapUpKeepsake? keepsake,
   DateTime? generatedAt,
   DateTime? publishedAt,
-  FilmPlan? plan,
   WrapUpSky? sky,
   WrapUpGoldenVows? goldenVows,
   WrapUpNeonNight? neonNight,
@@ -99,7 +97,6 @@ WrapUpEntity buildWrapUpEntity({
         ),
     generatedAt: generatedAt ?? DateTime(2026, 1, 1),
     publishedAt: publishedAt,
-    plan: plan,
     sky: sky,
     goldenVows: goldenVows,
     neonNight: neonNight,

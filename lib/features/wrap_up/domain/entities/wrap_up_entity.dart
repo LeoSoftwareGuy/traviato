@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 
 import 'film_clock.dart';
-import 'film_plan.dart';
 import 'wrap_up_cover_photo.dart';
 import 'wrap_up_dates.dart';
 import 'wrap_up_film_cut.dart';
@@ -35,7 +34,6 @@ class WrapUpEntity extends Equatable {
     required this.keepsake,
     required this.generatedAt,
     this.publishedAt,
-    this.plan,
     this.sky,
     this.goldenVows,
     this.neonNight,
@@ -67,12 +65,6 @@ class WrapUpEntity extends Equatable {
   final WrapUpKeepsake keepsake;
   final DateTime generatedAt;
   final DateTime? publishedAt;
-
-  /// The director's film plan (#328), read from `content.plan` (#344);
-  /// null when there's none or it isn't whole. Nothing plays it yet. A
-  /// kept film freezes the plan it was kept with, like the rest of
-  /// `content`.
-  final FilmPlan? plan;
 
   /// Sky Story's pages (#345), read from `content.sky`; null on kept films
   /// and on memories without photos, which play the classic film.
@@ -122,7 +114,6 @@ class WrapUpEntity extends Equatable {
     keepsake: keepsake,
     generatedAt: generatedAt,
     publishedAt: publishedAt != null ? publishedAt() : this.publishedAt,
-    plan: plan,
     sky: sky,
     goldenVows: goldenVows,
     neonNight: neonNight,
@@ -144,7 +135,6 @@ class WrapUpEntity extends Equatable {
     keepsake,
     generatedAt,
     publishedAt,
-    plan,
     sky,
     goldenVows,
     neonNight,

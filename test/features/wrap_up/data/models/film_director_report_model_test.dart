@@ -1,10 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:traviato/features/wrap_up/data/models/film_director_report_model.dart';
-import 'package:traviato/features/wrap_up/domain/entities/film_plan_scene.dart';
 
 void main() {
   group('FilmDirectorReportModel.fromJson', () {
-    test('parses a planned run: plan, photo counts and usage', () {
+    test('parses a planned run: photo counts and usage', () {
       final report = FilmDirectorReportModel.fromJson({
         'status': 'planned',
         'attempts': 1,
@@ -22,77 +21,71 @@ void main() {
           'output_tokens': 680,
           'estimated_usd': 0.0184,
         },
-        'plan': {
-          'plan_version': 2,
-          'occasion': 'party',
-          'recipe': 'rave',
-          'music': {'energy': 'high'},
-          'language': 'en',
-          'reasoning': 'Club photos, crowds.',
-          'footnote': {'line': 'Ears still ringing.'},
-          'closing_line': 'You danced it off.',
-          'chapters': [
-            {
-              'bridge_line': 'Doors at ten.',
-              'scenes': [
-                {
-                  'type': 'burst',
-                  'photo_ids': ['a', 'b', 'c'],
-                  'caption_note_id': 'n1',
-                  'text': null,
-                  'duration_s': 2.5,
-                  'emphasis': 'hero',
-                },
-                {
-                  'type': 'text_card',
-                  'photo_ids': <String>[],
-                  'text': 'Then it got loud.',
-                  'duration_s': 2,
-                  'emphasis': 'normal',
-                },
-              ],
-            },
-          ],
-        },
       })!;
 
+      // Planned: the director picked the words (#463), no plan needed.
       expect(report.isPlanned, isTrue);
-      expect(report.recipe, 'rave');
-      expect(report.occasion, 'party');
-      expect(report.musicEnergy, 'high');
-      expect(report.reasoning, 'Club photos, crowds.');
-      expect(report.footnoteLine, 'Ears still ringing.');
-      expect(report.closingLine, 'You danced it off.');
       expect(report.cachedPhotos, 10);
       expect(report.inputTokens, 5800);
       expect(report.estimatedUsd, 0.0184);
       expect(report.ranAt, DateTime.utc(2026, 11, 8, 12));
-      expect(report.durationSeconds, 4.5);
-      expect(
-        report.chapters.single.scenes.first,
-        const FilmPlanScene(
-          type: 'burst',
-          photoIds: ['a', 'b', 'c'],
-          captionNoteId: 'n1',
-          durationSeconds: 2.5,
-          isHero: true,
-        ),
-      );
-      expect(report.chapters.single.scenes.last.text, 'Then it got loud.');
     });
 
-    test('parses a fallback run with its problems and no plan', () {
+    test('parses a fallback run with its problems', () {
       final report = FilmDirectorReportModel.fromJson({
         'status': 'fallback',
         'plan': null,
-        'problems': ['closing_line: banned phrase "epic"'],
+        'problems': ['only 3 analysed photos'],
         'attempts': 2,
       })!;
 
       expect(report.isPlanned, isFalse);
-      expect(report.chapters, isEmpty);
-      expect(report.problems, ['closing_line: banned phrase "epic"']);
+      expect(report.problems, ['only 3 analysed photos']);
       expect(report.attempts, 2);
+    });
+
+    test('reads Sky Story: slots, trims, photos on pages, unlisted (#463)', () {
+      final report = FilmDirectorReportModel.fromJson({
+        'status': 'planned',
+        'problems': <String>[],
+        'sky': {'picks_version': 2, 'picks': <String, Object>{}},
+        'sky_slots': [
+          {
+            'slot': 'p1.line1',
+            'candidates': [
+              {'id': 'n:n1:abc', 'text': 'Tram 28 to the castle.', 'score': 80},
+            ],
+            'pick': {
+              'ids': ['p1.line1/n:n1:abc'],
+              'free_title': null,
+            },
+            'chosen': [
+              {'id': 'n:n1:abc', 'text': 'Tram 28 to the castle.'},
+            ],
+            'source': 'director',
+            'reason': "director's pick",
+          },
+        ],
+        'sky_trims': ['p5: a second line left out'],
+        'sky_shown': {'pages': 20, 'photos': 34},
+        'sky_unlisted': [
+          {'note_id': 'n4', 'text': 'Rain all day.', 'reason': 'no page'},
+        ],
+        'sky_problems': <String>[],
+      })!;
+      expect(report.skySlots.single.pickedIds, ['n:n1:abc']);
+      expect(report.skySlots.single.source, 'director');
+      expect(report.skyTrims, ['p5: a second line left out']);
+      expect(report.skyShownPages, 20);
+      expect(report.skyShownPhotos, 34);
+      expect(report.skyUnlisted, ['Rain all day. — no page']);
+      // A run from before #463: none of it.
+      final old = FilmDirectorReportModel.fromJson({
+        'status': 'planned',
+        'problems': <String>[],
+      })!;
+      expect(old.skySlots, isEmpty);
+      expect(old.skyShownPhotos, isNull);
     });
 
     test('reads the Golden Vows occasion and problems (#346)', () {
