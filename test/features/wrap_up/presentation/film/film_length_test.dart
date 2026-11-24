@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -90,7 +91,17 @@ void main() {
           expect(length, lessThanOrEqualTo(GvFit.secondsPerPhoto * photos));
         }
       } else {
-        expect(length, closeTo(target, tolerance));
+        // Sky Story (#463): a page per day, at most 75 s and 4 s a photo;
+        // it stretches for the target, never past that limit.
+        expect(
+          length,
+          lessThanOrEqualTo(
+            math.min(WrapUpLimits.longestFilmSeconds, 4.0 * photos),
+          ),
+        );
+        if (target > length) {
+          expect(length, greaterThan(target - tolerance));
+        }
       }
     });
   }

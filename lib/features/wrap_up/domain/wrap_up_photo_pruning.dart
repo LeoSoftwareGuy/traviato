@@ -64,9 +64,8 @@ WrapUpEntity pruneMissingPhotos(
     keepsake: wrapUp.keepsake,
     generatedAt: wrapUp.generatedAt,
     publishedAt: wrapUp.publishedAt,
-    // The plan's, Sky Story's, Golden Vows' and Neon Night's own photo ids
-    // are left to whatever plays them.
-    plan: wrapUp.plan,
+    // Sky Story's, Golden Vows' and Neon Night's own photo ids are left
+    // to whatever plays them.
     sky: wrapUp.sky,
     goldenVows: wrapUp.goldenVows,
     neonNight: wrapUp.neonNight,

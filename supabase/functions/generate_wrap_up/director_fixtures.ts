@@ -3,9 +3,8 @@
 import type { TripData } from "./gather.ts";
 import { goldenVowsFilm } from "./gv_film.ts";
 import type { SlotPicks } from "./film_slots.ts";
-import type { FilmPlan, PlanContext, PlanScene } from "./film_plan.ts";
 import type { PhotoAnalysis } from "./photo_analysis.ts";
-import type { SkyStoryPlan } from "./sky_story.ts";
+import { skyStoryFilm } from "./sky_film.ts";
 import { neonNightFilm } from "./neon_film.ts";
 import type { NnPicks } from "./neon_slots.ts";
 
@@ -65,126 +64,36 @@ export function analysisFor(id: string): PhotoAnalysis {
   };
 }
 
-function scene(
-  type: PlanScene["type"],
-  photo_ids: string[],
-  extra: Partial<PlanScene> = {},
-): PlanScene {
+// A pick_sky_lines answer for [data] (#463): code's own choices, page
+// 1's headline written by the director, and page 1's second line its
+// list's last candidate.
+export function skyPicksAnswer(data: TripData): {
+  picks: { slot: string; ids: string[]; free_title: string | null }[];
+} {
+  const { report } = skyStoryFilm(data, null);
   return {
-    type,
-    photo_ids,
-    caption_note_id: null,
-    text: type === "text_card" ? "And then the rain." : null,
-    duration_s: 5,
-    emphasis: "normal",
-    ...extra,
+    picks: report.map((r) => ({
+      slot: r.slot,
+      ids: r.slot === "p1.headline"
+        ? []
+        : r.slot === "p1.line2" && r.candidates.length > 1
+        ? [r.candidates.at(-1)!.id]
+        : r.chosen.length === 0
+        ? r.candidates.slice(0, 1).map((c) => c.id)
+        : r.chosen.map((c) => c.id),
+      free_title: r.slot === "p1.headline" ? "Bikes first" : null,
+    })),
   };
 }
 
-// A valid Sky Story section over directorTripData(): one page per day (4
-// photos a day), day 2 without a note so it carries a sky line.
-export function skyStoryPlan(ids = DIRECTOR_PHOTO_IDS): SkyStoryPlan {
-  return {
-    pages: [
-      {
-        days: [1, 1],
-        headline: "Bikes first, coffee later",
-        hero_photo_id: ids[1],
-        extra_photo_ids: [ids[0], ids[2], ids[3]],
-        note_id: "n1",
-        sky_line: null,
-      },
-      {
-        days: [2, 2],
-        headline: "The canal hour",
-        hero_photo_id: ids[5],
-        extra_photo_ids: [ids[4], ids[6]],
-        note_id: null,
-        sky_line: "You counted eleven bridges and lost count.",
-      },
-      {
-        days: [3, 3],
-        headline: "Rain on the stroopwafels",
-        hero_photo_id: ids[9],
-        extra_photo_ids: [ids[8], ids[10], ids[11]],
-        note_id: "n2",
-        sky_line: null,
-      },
-    ],
-  };
-}
-
-// keepsakePlan() as the model emits it: with its sky_story section.
-export function emittedPlan(
-  ids = DIRECTOR_PHOTO_IDS,
-): FilmPlan & { sky_story: SkyStoryPlan } {
-  return { ...keepsakePlan(ids), sky_story: skyStoryPlan(ids) };
-}
-
-// A valid keepsake plan over DIRECTOR_PHOTO_IDS: 10 scenes × 5s = 50s.
-export function keepsakePlan(ids = DIRECTOR_PHOTO_IDS): FilmPlan {
-  return {
-    plan_version: 2,
-    occasion: "city",
-    recipe: "keepsake",
-    music: { energy: "calm" },
-    language: "en",
-    chapters: [
-      {
-        bridge_line: "You came for the canals.",
-        scenes: [
-          scene("card_flip", [ids[0]], {
-            emphasis: "hero",
-            caption_note_id: "n1",
-          }),
-          scene("collage_3", ids.slice(1, 4)),
-          scene("card_flip", [ids[4]]),
-          scene("text_card", []),
-        ],
-      },
-      {
-        bridge_line: "Then the bikes won.",
-        scenes: [
-          scene("card_flip", [ids[5]]),
-          scene("collage_4", ids.slice(6, 10)),
-          scene("card_flip", [ids[10]]),
-          scene("card_flip", [ids[11]]),
-          scene("text_card", []),
-          scene("text_card", []),
-        ],
-      },
-    ],
-    footnote: { line: "Three days, one wet umbrella." },
-    closing_line: "You left with dry socks, barely.",
-    reasoning: "A quiet city trip, so keepsake.",
-  };
-}
-
-// keepsakePlan with the faults from the first hosted run (#332): no
-// plan_version, and a collage_3 holding only 2 photos.
-export function keepsakePlanWithFixableFaults(
-  ids = DIRECTOR_PHOTO_IDS,
-): Record<string, unknown> {
-  const plan = emittedPlan(ids) as unknown as Record<string, unknown>;
-  delete plan.plan_version;
-  const chapters = plan.chapters as FilmPlan["chapters"];
-  chapters[0].scenes[1] = scene("collage_3", ids.slice(1, 3), {
-    caption_note_id: "n2",
-  });
-  return plan;
-}
-
-export function planContext(
-  overrides: Partial<PlanContext> = {},
-): PlanContext {
-  return {
-    language: "en",
-    photoOrder: DIRECTOR_PHOTO_IDS,
-    excludedIds: new Set(),
-    mustIncludeIds: new Set(),
-    noteIds: new Set(["n1", "n2"]),
-    ...overrides,
-  };
+// [skyPicksAnswer] as the director record stores it.
+export function skyPicks(data: TripData): SlotPicks {
+  return Object.fromEntries(
+    skyPicksAnswer(data).picks.map((p) => [p.slot, {
+      ids: p.ids,
+      free_title: p.free_title,
+    }]),
+  );
 }
 
 // An Anthropic Messages response whose only block is a tool call.

@@ -11,7 +11,6 @@ import '../../domain/entities/wrap_up_moment.dart';
 import '../../domain/entities/wrap_up_photo_ref.dart';
 import '../../domain/entities/wrap_up_unlock.dart';
 import 'film_clock_model.dart';
-import 'film_plan_model.dart';
 import 'wrap_up_golden_vows_model.dart';
 import 'wrap_up_neon_night_model.dart';
 import 'wrap_up_sky_model.dart';
@@ -36,7 +35,6 @@ class WrapUpModel extends WrapUpEntity {
     required super.keepsake,
     required super.generatedAt,
     super.publishedAt,
-    super.plan,
     super.sky,
     super.goldenVows,
     super.neonNight,
@@ -66,7 +64,6 @@ class WrapUpModel extends WrapUpEntity {
       keepsake: _parseKeepsake(contentMap['keepsake']),
       generatedAt: _parseDateTime(row['generated_at']) ?? DateTime.now(),
       publishedAt: _parseDateTime(row['published_at']),
-      plan: parseFilmPlan(contentMap),
       sky: parseWrapUpSky(contentMap),
       goldenVows: parseWrapUpGoldenVows(contentMap),
       neonNight: parseWrapUpNeonNight(contentMap),

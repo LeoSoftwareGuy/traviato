@@ -495,6 +495,27 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   clock until "Rebuild film". The Plan inspector shows the zone and
   where each time came from. The Journal, photo viewer and Kept Memory
   page show the same times.
+- **Sky Story: code cuts, the director picks (#463, as Neon's #454 and
+  Golden Vows' #458):** code makes the pages — one per logical day; past
+  5 pages neighbouring days share evenly, never a day dropped; pages to
+  spare split a long day at its 2 h breaks — and holds the film to
+  75 s and 4 s a film photo at most. The hero is an Always photo, else
+  a captioned one, else one a note was written on, else the best shot.
+  A page plays only its own notes' lines (a grouped page one from each
+  of its days); a page without one may show a sky line made only of the
+  user's captions and places — else no line, never filler. Headlines
+  name the page (a place, a caption, a phrase of a note), never the
+  memory's name; without one the app shows "Day N". The director only
+  picks each place's words from code's lists, and its own words hold only
+  when made of the user's (names as written, nothing from the photo
+  descriptions). A page shows only what its box holds (a line too long
+  goes to a shorter clause of its note, else gives way). Only past 75 s:
+  a split day rejoins, then second lines, sky lines, shorter clauses,
+  then a page's last line — never a day. The classic film's lines now
+  come from the notes by code: no AI call writes them, and the classic
+  plan call is gone. The Plan inspector shows every Sky slot, "N / M
+  photos on pages", what was trimmed and the notes on no page. Kept
+  films keep their words.
 - **The user's words (#399, display only; which words are chosen is #398,
   multi-excerpt note moments #416):** captions and notes are never cut
   with "…". A text that doesn't fit gets smaller type or more lines, then

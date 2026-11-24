@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { bannedPhraseIn, withoutBannedPhrases } from "./film_plan.ts";
+import { bannedPhraseIn, withoutBannedPhrases } from "./banned_phrases.ts";
 
 Deno.test("banned phrases are removed from AI lines (#433)", () => {
   const cases: [string, string][] = [

@@ -35,7 +35,9 @@ Deno.test("content: Sky pages, chapters and album pages grow with photos", () =>
   const sky = FIXTURE_PHOTO_COUNTS.map((n) =>
     (lengthContent("sky_story", n).sky as { pages: unknown[] }).pages.length
   );
-  assertEquals(sky, [1, 2, 5]);
+  // A page per day (#463): the fixture's 3 days at every size — the length
+  // never takes a day away, it only groups days past what fits.
+  assertEquals(sky, [3, 3, 3]);
   const nn = FIXTURE_PHOTO_COUNTS.map((n) =>
     (lengthContent("neon_night", n).neon_night as { chapters: unknown[] })
       .chapters.length
@@ -67,8 +69,8 @@ Deno.test("content: Sky pages, chapters and album pages grow with photos", () =>
 Deno.test("film_lengths.json is up to date (deno run --allow-write write_film_lengths.ts)", () => {
   assertEquals(
     fixtures.length,
-    // …and ADE-Amsterdam (#448).
-    FIXTURE_FILMS.length * FIXTURE_PHOTO_COUNTS.length + 1,
+    // …and ADE-Amsterdam (#448), ADE and Budapest as Sky Story (#463).
+    FIXTURE_FILMS.length * FIXTURE_PHOTO_COUNTS.length + 3,
   );
   assertEquals(JSON.parse(JSON.stringify(filmLengthFixtures())), fixtures);
 });

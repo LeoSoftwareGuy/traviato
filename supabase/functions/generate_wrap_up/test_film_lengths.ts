@@ -9,12 +9,17 @@ import { directorTripData } from "./director_fixtures.ts";
 import { currentNeonNight } from "./director.ts";
 import { goldenVowsFilm } from "./gv_film.ts";
 import { buildNeonNightContent } from "./neon_film.ts";
-import { buildSkyContent } from "./sky_story.ts";
+import { skyStoryFilm } from "./sky_film.ts";
 import { withFilmPhotos } from "./film_photos.ts";
 import { filmSecondsOf } from "./film_length.ts";
 import type { PlayedTemplate } from "./film_template.ts";
 import type { TripData } from "./gather.ts";
 import { adeFilmMemory, adePicks } from "./ade_amsterdam.ts";
+import {
+  budapestFilmMemory,
+  budapestHeroScores,
+  budapestSummaries,
+} from "./budapest_birthday.ts";
 
 export const FIXTURE_PHOTO_COUNTS = [15, 25, 40];
 export const FIXTURE_FILMS: PlayedTemplate[] = [
@@ -99,7 +104,7 @@ export function lengthContent(
   const content: Record<string, unknown> = {
     film_style: film,
     film_seconds: filmSecondsOf(memory),
-    sky: buildSkyContent(memory, null, {}),
+    sky: skyStoryFilm(memory, null).content,
   };
   if (film === "golden_vows") {
     content.golden_vows = goldenVowsFilm(memory, null).content;
@@ -120,8 +125,39 @@ export function adeContent(): Record<string, unknown> {
   return {
     film_style: "neon_night",
     film_seconds: filmSecondsOf(memory),
-    sky: buildSkyContent(memory, null, heroScores),
+    sky: skyStoryFilm(memory, null, { heroScores }).content,
     neon_night: buildNeonNightContent(memory, adePicks(), heroScores),
+  };
+}
+
+// ADE-Amsterdam and "Elmas birthday" forced to Sky Story (#463), with
+// code's words: the app plays them with the film's own fonts.
+function skyRealFixture(
+  name: string,
+  memory: TripData,
+  heroScores: Record<string, number>,
+  summaries?: Map<string, string>,
+): LengthFixture {
+  const sky = { ...memory, trip: { ...memory.trip, vibes: ["Cultural"] } };
+  const film = skyStoryFilm(sky, null, { heroScores, summaries });
+  return {
+    film: "sky_story",
+    photos: sky.photos.length,
+    photo_ids: sky.photos.map((p) => p.id),
+    start_date: sky.trip.start_date!,
+    end_date: sky.trip.end_date!,
+    content: {
+      film_style: "sky_story",
+      film_seconds: filmSecondsOf(sky),
+      sky: film.content,
+      // What the edge function estimated, for the app to compare.
+      sky_estimate_seconds: film.seconds,
+      // The photos' captions (the hero's plays with its page).
+      photo_captions: Object.fromEntries(
+        sky.photos.flatMap((p) => p.caption?.trim() ? [[p.id, p.caption]] : []),
+      ),
+    },
+    case: name,
   };
 }
 
@@ -163,5 +199,18 @@ export function filmLengthFixtures(): {
     content: adeContent(),
     // ADE-Amsterdam's real data (#448, #454).
     case: "ade",
+  }, {
+    ...skyRealFixture(
+      "ade_sky",
+      adeFilmMemory().memory,
+      adeFilmMemory().heroScores,
+    ),
+  }, {
+    ...skyRealFixture(
+      "budapest_sky",
+      budapestFilmMemory(),
+      budapestHeroScores(),
+      budapestSummaries(),
+    ),
   }]);
 }

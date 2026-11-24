@@ -1,8 +1,6 @@
 import '../../domain/entities/film_director_report.dart';
 import '../../domain/entities/film_neon_slot.dart';
 import '../../domain/entities/film_photo_analysis.dart';
-import '../../domain/entities/film_plan_chapter.dart';
-import '../../domain/entities/film_plan_scene.dart';
 
 /// Hand-parsed like `WrapUpModel`: `wrap_ups.director` is function-written
 /// JSONB (#328), and a dev tool should show what it can of an odd shape
@@ -10,16 +8,13 @@ import '../../domain/entities/film_plan_scene.dart';
 class FilmDirectorReportModel extends FilmDirectorReport {
   const FilmDirectorReportModel({
     required super.isPlanned,
-    super.occasion,
-    super.recipe,
-    super.musicEnergy,
-    super.reasoning,
-    super.chapters,
-    super.footnoteLine,
-    super.closingLine,
     super.problems,
     super.skyProblems,
-    super.hasSkyStory,
+    super.skySlots,
+    super.skyTrims,
+    super.skyShownPages,
+    super.skyShownPhotos,
+    super.skyUnlisted,
     super.goldenVowsOccasion,
     super.goldenVowsProblems,
     super.hasNeonNight,
@@ -52,21 +47,19 @@ class FilmDirectorReportModel extends FilmDirectorReport {
     if (json is! Map) return null;
     final status = json['status'];
     if (status != 'planned' && status != 'fallback') return null;
-    final plan = _map(json['plan']);
     final photos = _map(json['photos']);
     final usage = _map(json['usage']);
     return FilmDirectorReportModel(
-      isPlanned: status == 'planned' && plan.isNotEmpty,
-      occasion: _string(plan['occasion']),
-      recipe: _string(plan['recipe']),
-      musicEnergy: _string(_map(plan['music'])['energy']),
-      reasoning: _string(plan['reasoning']),
-      chapters: _list(plan['chapters']).map(_chapter).toList(),
-      footnoteLine: _string(_map(plan['footnote'])['line']),
-      closingLine: _string(plan['closing_line']),
+      isPlanned: status == 'planned',
       problems: _list(json['problems']).whereType<String>().toList(),
       skyProblems: _list(json['sky_problems']).whereType<String>().toList(),
-      hasSkyStory: _map(json['sky_story']).isNotEmpty,
+      skySlots: _list(
+        json['sky_slots'],
+      ).map(_neonSlot).whereType<FilmNeonSlot>().toList(),
+      skyTrims: _list(json['sky_trims']).whereType<String>().toList(),
+      skyShownPages: _shown(json['sky_shown'], 'pages'),
+      skyShownPhotos: _shown(json['sky_shown'], 'photos'),
+      skyUnlisted: _unlisted(json['sky_unlisted']),
       goldenVowsOccasion: _string(_map(json['golden_vows'])['occasion']),
       goldenVowsProblems: _list(
         json['golden_vows_problems'],
@@ -83,17 +76,9 @@ class FilmDirectorReportModel extends FilmDirectorReport {
         json['gv_slots'],
       ).map(_neonSlot).whereType<FilmNeonSlot>().toList(),
       gvTrims: _list(json['gv_trims']).whereType<String>().toList(),
-      gvShownPages: _map(json['gv_shown'])['pages'] is num
-          ? _int(_map(json['gv_shown'])['pages'])
-          : null,
-      gvShownPhotos: _map(json['gv_shown'])['photos'] is num
-          ? _int(_map(json['gv_shown'])['photos'])
-          : null,
-      gvUnlisted: [
-        for (final n in _list(json['gv_unlisted']).map(_map))
-          if (_string(n['text']) case final text?)
-            '$text — ${_string(n['reason']) ?? '?'}',
-      ],
+      gvShownPages: _shown(json['gv_shown'], 'pages'),
+      gvShownPhotos: _shown(json['gv_shown'], 'photos'),
+      gvUnlisted: _unlisted(json['gv_unlisted']),
       gvTrigger: _trigger(_map(json['gv_trigger'])),
       template: _string(json['template']),
       filmSource: _string(json['${_string(json['template'])}_source']),
@@ -162,25 +147,16 @@ FilmNeonSlot? _neonSlot(dynamic json) {
   );
 }
 
-FilmPlanChapter _chapter(dynamic json) {
-  final map = _map(json);
-  return FilmPlanChapter(
-    bridgeLine: _string(map['bridge_line']) ?? '',
-    scenes: _list(map['scenes']).map(_scene).toList(),
-  );
-}
+/// A `{pages, photos}` count, or null when absent.
+int? _shown(dynamic json, String key) =>
+    _map(json)[key] is num ? _int(_map(json)[key]) : null;
 
-FilmPlanScene _scene(dynamic json) {
-  final map = _map(json);
-  return FilmPlanScene(
-    type: _string(map['type']) ?? '?',
-    photoIds: _list(map['photo_ids']).whereType<String>().toList(),
-    captionNoteId: _string(map['caption_note_id']),
-    text: _string(map['text']),
-    durationSeconds: _double(map['duration_s']),
-    isHero: map['emphasis'] == 'hero',
-  );
-}
+/// Notes on no page: "its text — why".
+List<String> _unlisted(dynamic json) => [
+  for (final n in _list(json).map(_map))
+    if (_string(n['text']) case final text?)
+      '$text — ${_string(n['reason']) ?? '?'}',
+];
 
 Map<String, dynamic> _map(dynamic json) =>
     json is Map ? json.cast<String, dynamic>() : const {};

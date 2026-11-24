@@ -29,7 +29,6 @@ import { excerptScore, isGeneric } from "./excerpts.ts";
 import {
   choose,
   dayTitleFor,
-  FIRST_NAMES,
   freeTextProblem,
   hash,
   hasVerb,
@@ -40,6 +39,7 @@ import {
   namesOf,
   noteChapters,
   noteLineId,
+  notePhrases,
   noteScene,
   noteTime,
   placeOf,
@@ -51,7 +51,10 @@ import {
   type SlotPicks,
   TIER_BONUS,
   titleText,
-  top,
+  topDistinct,
+  type WordGuard,
+  wordGuard,
+  wordsProblem,
   writtenLanguage,
 } from "./film_slots.ts";
 import { repeatsTitle, sameLine, timeOf } from "./neon_night.ts";
@@ -219,161 +222,6 @@ export function gvDayTitle(
 ): string {
   return dayTitleFor(tripData, skeleton.chapters, language)(i);
 }
-
-// Words that open a short phrase of a note (#460): "for a golden
-// coffee", "with famous spas", "to irish bar".
-const PHRASE_OPENERS = new Set([
-  "a",
-  "an",
-  "the",
-  "some",
-  "our",
-  "my",
-  "this",
-  "these",
-  "those",
-  "with",
-  "for",
-  "to",
-  "at",
-  "in",
-  "into",
-  "of",
-  "from",
-  "out",
-  "on",
-]);
-// Words a phrase stops before.
-const PHRASE_STOPS = new Set([
-  ...PHRASE_OPENERS,
-  "and",
-  "but",
-  "or",
-  "so",
-  "is",
-  "was",
-  "are",
-  "were",
-  "it",
-  "its",
-  "that",
-  "which",
-  "who",
-  "too",
-  "very",
-  "really",
-  "just",
-  "then",
-  "there",
-  "here",
-  "we",
-  "i",
-  "you",
-  "he",
-  "she",
-  "they",
-  "me",
-  "us",
-  "be",
-  "been",
-  "had",
-  "has",
-  "have",
-  "went",
-  "go",
-  "got",
-  "by",
-  "as",
-  "after",
-  "before",
-  "about",
-  "all",
-  "not",
-  "no",
-  "also",
-  "even",
-  "full",
-  "around",
-  "like",
-  "lots",
-  "lot",
-  "more",
-  "most",
-  "s",
-  "t",
-]);
-// A phrase never opens on a verb ("make things", "walk around").
-const PHRASE_VERBS = new Set([
-  "make",
-  "take",
-  "walk",
-  "check",
-  "see",
-  "start",
-  "explore",
-  "go",
-  "come",
-  "find",
-  "get",
-  "do",
-  "eat",
-  "drink",
-  "try",
-  "visit",
-  "keep",
-  "say",
-  "feel",
-  "look",
-  "meet",
-  "buy",
-  "sleep",
-  "stay",
-]);
-// What a birthday, a wedding, an anniversary names (#460): "Elmas
-// birthday", kept exactly as written.
-const OCCASION_NOUN = /^(birthday|wedding|anniversary|honeymoon|engagement)$/iu;
-
-// The short phrases of [text] that name something (#460): 2–3 words after
-// an article or preposition ("golden coffee", "famous spas"), and a name
-// with its occasion ("Elmas birthday") — the user's words as written,
-// English only (Russian has no articles to find them by).
-export function gvNotePhrases(text: string): string[] {
-  const out: string[] = [];
-  for (const sentence of text.split(/[.!?;,:()\n]+/u)) {
-    const words = sentence.split(/\s+/u).filter(Boolean);
-    const bare = words.map((w) => w.toLowerCase().replace(/[^\p{L}'’-]/gu, ""));
-    for (let i = 0; i < words.length; i++) {
-      // "Elmas birthday": a capitalised word before an occasion noun.
-      if (
-        i + 1 < words.length && /^\p{Lu}/u.test(words[i]) &&
-        OCCASION_NOUN.test(bare[i + 1]) && !PHRASE_STOPS.has(bare[i])
-      ) out.push(`${words[i]} ${bare[i + 1]}`);
-      if (!PHRASE_OPENERS.has(bare[i])) continue;
-      const run: string[] = [];
-      for (let k = i + 1; k < words.length && run.length < 3; k++) {
-        if (PHRASE_STOPS.has(bare[k]) || !bare[k]) break;
-        run.push(words[k].replace(/[^\p{L}\p{N}'’-]/gu, ""));
-      }
-      if (
-        run.length >= 2 && !PHRASE_VERBS.has(run[0].toLowerCase()) &&
-        !hasVerb(run.join(" "))
-      ) out.push(run.join(" "));
-    }
-  }
-  return [...new Set(out)];
-}
-
-// [list] without lines that differ only in case, spacing or punctuation
-// from a better one before them.
-function distinct(list: SlotCandidate[]): SlotCandidate[] {
-  const kept: SlotCandidate[] = [];
-  for (const c of [...list].sort((a, b) => b.score - a.score)) {
-    if (!kept.some((k) => sameLine(k.text, c.text))) kept.push(c);
-  }
-  return kept;
-}
-
-const topDistinct = (list: SlotCandidate[]) => top(distinct(list));
 
 const neutral = (
   list: readonly string[],
@@ -805,7 +653,7 @@ export interface GvResolveOptions {
   language: "ru" | "en";
   names: ReadonlySet<string>;
   // What the director's own words may say (#460); none: no check.
-  guard?: GvWordGuard;
+  guard?: WordGuard;
   // Chapter [i]'s title when nothing fits: "День N".
   dayTitle: (chapter: number) => string;
   // Words the album shows anyway: the memory's name and place on the
@@ -813,105 +661,21 @@ export interface GvResolveOptions {
   shown: readonly string[];
 }
 
-// The words the director's own text is checked against (#460).
-export interface GvWordGuard {
-  // The names the user wrote, as written, lowercased: the memory's name,
-  // capitalised words inside their notes' and captions' sentences, the
-  // place.
-  names: ReadonlySet<string>;
-  // Every word of the user's (notes, captions, memory name, place) and of
-  // code's own lines, lowercased.
-  own: ReadonlySet<string>;
-  // Words only the photo descriptions say.
-  described: ReadonlySet<string>;
-}
-
-const wordsOf = (text: string) =>
-  text.split(/[^\p{L}\p{N}'’]+/u).filter(Boolean);
-// A word without its possessive: "Elmas's" → "Elmas", "Elma's" → "Elma".
-const stem = (w: string) => w.replace(/['’]s?$/u, "").toLowerCase();
-
-// The guard for [tripData] (#460).
+// The guard for [tripData] (#460): film_slots.ts's, with the album's own
+// lines as the user's words.
+export type GvWordGuard = WordGuard;
 export function gvWordGuard(
   tripData: TripData,
   summaries: ReadonlyMap<string, string>,
-): GvWordGuard {
-  const texts = [
-    tripData.trip.name,
-    tripData.trip.destination ?? "",
-    ...tripData.notes.map((n) => n.content),
-    ...tripData.photos.map((p) => p.caption ?? ""),
-    ...tripData.photos.map((p) => p.place_text ?? ""),
-  ];
-  const names = new Set<string>();
-  for (const w of wordsOf(tripData.trip.name)) names.add(stem(w));
-  for (const w of wordsOf(tripData.trip.destination ?? "")) names.add(stem(w));
-  for (const t of texts.slice(2)) {
-    for (const sentence of t.split(/[.!?\n]+/u)) {
-      wordsOf(sentence).forEach((w, k) => {
-        if (k > 0 && /^\p{Lu}/u.test(w)) names.add(stem(w));
-      });
-    }
-  }
-  const code = [
+): WordGuard {
+  return wordGuard(tripData, summaries, [
     ...Object.values(OCCASION_LINES).flatMap((l) => Object.values(l).flat()),
     ...Object.values(CAROUSEL).flatMap((l) => [...l.wedding, ...l.other]),
     ...Object.values(FINALE).flatMap((l) => [...l.wedding, ...l.other]),
-  ];
-  const own = new Set(
-    [...texts, ...code].flatMap((t) => wordsOf(t).map(stem)),
-  );
-  const described = new Set(
-    [...summaries.values()].flatMap((t) => wordsOf(t).map(stem))
-      .filter((w) => [...w].length >= 4 && !own.has(w)),
-  );
-  return { names, own, described };
+  ]);
 }
-
-// How many single-letter edits turn [a] into [b].
-function editDistance(a: string, b: string): number {
-  const row = Array.from({ length: b.length + 1 }, (_, k) => k);
-  for (let i = 1; i <= a.length; i++) {
-    let prev = row[0];
-    row[0] = i;
-    for (let k = 1; k <= b.length; k++) {
-      const next = row[k];
-      row[k] = Math.min(
-        row[k] + 1,
-        row[k - 1] + 1,
-        prev + (a[i - 1] === b[k - 1] ? 0 : 1),
-      );
-      prev = next;
-    }
-  }
-  return row[b.length];
-}
-
-// Why the director's own [text] can't play, or null (#460): it changes a
-// name the user wrote ("Elma's" for "Elmas" — the name, or the name and
-// "'s", only), names a person the user never wrote, or says what only
-// the photo descriptions say.
-export function gvWordsProblem(
-  text: string,
-  guard: GvWordGuard,
-): string | null {
-  for (const raw of wordsOf(text)) {
-    const w = stem(raw);
-    if (!w || guard.names.has(w)) continue;
-    for (const name of guard.names) {
-      if (
-        [...name].length >= 4 && w[0] === name[0] &&
-        editDistance(w, name) <= ([...name].length >= 6 ? 2 : 1)
-      ) return `«${raw}» changes the name «${name}»`;
-    }
-    if (guard.own.has(w)) continue;
-    if (FIRST_NAMES.has(w)) return `«${raw}»: a name the user never wrote`;
-    if (guard.described.has(w)) {
-      return `«${raw}»: only in the photo descriptions`;
-    }
-  }
-  return null;
-}
+export const gvWordsProblem = wordsProblem;
+export const gvNotePhrases = notePhrases;
 
 // Picks in the order slots are resolved: the notes (the user's lines)
 // first, so a title never takes a line's words; then the title page and

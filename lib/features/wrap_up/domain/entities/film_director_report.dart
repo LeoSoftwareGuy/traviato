@@ -1,24 +1,21 @@
 import 'package:equatable/equatable.dart';
 
 import 'film_neon_slot.dart';
-import 'film_plan_chapter.dart';
 
-/// The last director run for a memory (#328, `wrap_ups.director`): the plan
-/// it made, or why it fell back to the template film, and what it cost.
+/// The last director run for a memory (#328, `wrap_ups.director`): the
+/// words it picked for the memory's film (#454, #458, #463), why code
+/// picked them instead, and what it cost.
 /// Read by the debug-only Plan inspector — never shown to users.
 class FilmDirectorReport extends Equatable {
   const FilmDirectorReport({
     required this.isPlanned,
-    this.occasion,
-    this.recipe,
-    this.musicEnergy,
-    this.reasoning,
-    this.chapters = const [],
-    this.footnoteLine,
-    this.closingLine,
     this.problems = const [],
     this.skyProblems = const [],
-    this.hasSkyStory = false,
+    this.skySlots = const [],
+    this.skyTrims = const [],
+    this.skyShownPages,
+    this.skyShownPhotos,
+    this.skyUnlisted = const [],
     this.goldenVowsOccasion,
     this.goldenVowsProblems = const [],
     this.hasNeonNight = false,
@@ -46,23 +43,28 @@ class FilmDirectorReport extends Equatable {
     this.estimatedUsd = 0,
   });
 
-  /// `planned` — false means the film fell back to the template.
+  /// `planned`: the director picked the film's words (#463) — false means
+  /// code picked every slot.
   final bool isPlanned;
-  final String? occasion;
-  final String? recipe;
-  final String? musicEnergy;
-  final String? reasoning;
-  final List<FilmPlanChapter> chapters;
-  final String? footnoteLine;
-  final String? closingLine;
   final List<String> problems;
 
-  /// Why the director's Sky Story pages weren't used (#345); empty when
-  /// [hasSkyStory].
+  /// Why the director's Sky Story words weren't used; empty when they
+  /// were.
   final List<String> skyProblems;
 
-  /// The run produced Sky Story pages.
-  final bool hasSkyStory;
+  /// Every Sky Story slot (#463), as [neonSlots]. Empty for a run from
+  /// before, or for a Golden Vows or Neon Night memory.
+  final List<FilmNeonSlot> skySlots;
+
+  /// What Sky Story gave up for its length, in order.
+  final List<String> skyTrims;
+
+  /// "N / M photos on pages" (the mosaic holds the rest).
+  final int? skyShownPages;
+  final int? skyShownPhotos;
+
+  /// Notes on no page, each "its text — why".
+  final List<String> skyUnlisted;
 
   /// The occasion of the run's Golden Vows section (#346); null when the
   /// director chose another occasion or its section stayed invalid.
@@ -125,22 +127,16 @@ class FilmDirectorReport extends Equatable {
   final int outputTokens;
   final double estimatedUsd;
 
-  double get durationSeconds =>
-      chapters.fold(0, (sum, chapter) => sum + chapter.durationSeconds);
-
   @override
   List<Object?> get props => [
     isPlanned,
-    occasion,
-    recipe,
-    musicEnergy,
-    reasoning,
-    chapters,
-    footnoteLine,
-    closingLine,
     problems,
     skyProblems,
-    hasSkyStory,
+    skySlots,
+    skyTrims,
+    skyShownPages,
+    skyShownPhotos,
+    skyUnlisted,
     goldenVowsOccasion,
     goldenVowsProblems,
     hasNeonNight,

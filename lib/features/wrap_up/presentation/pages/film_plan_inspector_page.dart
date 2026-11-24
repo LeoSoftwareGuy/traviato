@@ -15,10 +15,7 @@ import '../../../../core/widgets/async_error_retry_scaffold.dart';
 import '../../../../core/widgets/show_error_snackbar.dart';
 import '../../domain/entities/film_neon_slot.dart';
 import '../../domain/entities/film_director_report.dart';
-import '../../domain/entities/film_photo_analysis.dart';
-import '../../domain/entities/film_plan_chapter.dart';
 import '../../domain/entities/film_plan_inspection.dart';
-import '../../domain/entities/film_plan_scene.dart';
 import '../controllers/wrap_up_controller.dart';
 import '../controllers/wrap_up_state.dart';
 import '../film/film_storyboard.dart';
@@ -33,8 +30,9 @@ import '../mutations/film_director_mutations.dart';
 import '../providers/film_director_providers.dart';
 
 /// Debug-only Plan inspector (#328): what the wrap-up director decided for
-/// one memory — recipe and reasoning, chapters and scenes with their
-/// photos, the lines, and what the run cost — so plans can be judged on
+/// one memory — each film's pages, every slot's candidates and pick, what
+/// a film gave up for its length, and what the run cost — so films can be
+/// judged on
 /// real memories. Routed only in debug builds and never shown to users, so
 /// its copy is plain English rather than localized.
 class FilmPlanInspectorPage extends ConsumerWidget {
@@ -183,9 +181,6 @@ class _InspectionBody extends ConsumerWidget {
         ],
       );
     }
-    final urls =
-        ref.watch(filmPlanPhotoUrlsProvider(tripId)).value ??
-        const <String, String>{};
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.base),
       children: [
@@ -205,16 +200,14 @@ class _InspectionBody extends ConsumerWidget {
             slots: report.neonSlots,
           ),
         _SkyStoryCard(tripId: tripId, report: report),
+        if (report.skySlots.isNotEmpty)
+          _SlotsCard(
+            title: 'Sky Story slots',
+            keyPrefix: 'film-plan-sky-slot',
+            slots: report.skySlots,
+          ),
         if (report.problems.isNotEmpty)
           _ProblemsCard(problems: report.problems),
-        for (final (index, chapter) in report.chapters.indexed)
-          _ChapterCard(
-            index: index,
-            chapter: chapter,
-            urls: urls,
-            analyses: inspection.analyses,
-          ),
-        if (report.isPlanned) _LinesCard(report: report),
         _TimeZoneCard(tripId: tripId),
       ],
     );
@@ -283,15 +276,11 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // A Golden Vows or Neon Night memory makes no classic plan (#433): its
-    // own film always plays.
-    final ownFilm =
-        report.template == 'golden_vows' || report.template == 'neon_night';
+    // Code cuts every film; the director only picks its words (#454,
+    // #458, #463). Not planned: code picked them all.
     final status = report.isPlanned
-        ? 'planned · ${report.recipe} · ${report.occasion}'
-        : ownFilm
-        ? '${report.template} · plan by ${report.filmSource ?? '—'}'
-        : 'fallback — the template film plays';
+        ? '${report.template ?? 'film'} · words picked by the director'
+        : '${report.template ?? 'film'} · words picked by code';
     return _Card(
       title: 'Director',
       children: [
@@ -299,21 +288,10 @@ class _SummaryCard extends StatelessWidget {
           status,
           key: const Key('film-plan-status'),
           style: AppTypography.headlineSerif.copyWith(
-            color: report.isPlanned || ownFilm
-                ? AppColors.success
-                : AppColors.accentCoral,
+            color: report.isPlanned ? AppColors.success : AppColors.accentCoral,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        if (report.reasoning != null) _Line('Reasoning', report.reasoning!),
-        if (report.isPlanned) ...[
-          _Line('Music', report.musicEnergy ?? '—'),
-          _Line(
-            'Length',
-            '${report.durationSeconds.toStringAsFixed(1)}s of scenes in '
-                '${report.chapters.length} chapters',
-          ),
-        ],
         // The film from the vibes (#433), and what its plan needed.
         if (report.template != null)
           _Line(
@@ -335,7 +313,7 @@ class _SummaryCard extends StatelessWidget {
         ),
         _Line(
           'Run',
-          '${report.model} · ${report.attempts} plan attempt(s) · '
+          '${report.model} · ${report.attempts} attempt(s) · '
               'run ${report.runCount} · ${report.ranAt?.toLocal() ?? '—'}',
         ),
       ],
@@ -412,143 +390,6 @@ class _ProblemsCard extends StatelessWidget {
               ),
             ),
           ),
-      ],
-    );
-  }
-}
-
-class _ChapterCard extends StatelessWidget {
-  const _ChapterCard({
-    required this.index,
-    required this.chapter,
-    required this.urls,
-    required this.analyses,
-  });
-
-  final int index;
-  final FilmPlanChapter chapter;
-  final Map<String, String> urls;
-  final Map<String, FilmPhotoAnalysis> analyses;
-
-  @override
-  Widget build(BuildContext context) {
-    return _Card(
-      title:
-          'Chapter ${index + 1} · '
-          '${chapter.durationSeconds.toStringAsFixed(1)}s',
-      children: [
-        Text(chapter.bridgeLine, style: AppTypography.pullQuote),
-        const SizedBox(height: AppSpacing.sm),
-        for (final scene in chapter.scenes)
-          _SceneRow(scene: scene, urls: urls, analyses: analyses),
-      ],
-    );
-  }
-}
-
-class _SceneRow extends StatelessWidget {
-  const _SceneRow({
-    required this.scene,
-    required this.urls,
-    required this.analyses,
-  });
-
-  final FilmPlanScene scene;
-  final Map<String, String> urls;
-  final Map<String, FilmPhotoAnalysis> analyses;
-
-  @override
-  Widget build(BuildContext context) {
-    final header = [
-      scene.type,
-      '${scene.durationSeconds}s',
-      if (scene.isHero) 'HERO',
-      if (scene.captionNoteId != null) 'note ${scene.captionNoteId}',
-    ].join(' · ');
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            header,
-            style: AppTypography.mono.copyWith(color: AppColors.primary),
-          ),
-          if (scene.text != null)
-            Text('“${scene.text}”', style: AppTypography.bodyInput),
-          if (scene.photoIds.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.xs),
-            SizedBox(
-              height: 112,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  for (final id in scene.photoIds)
-                    _PhotoThumb(url: urls[id], analysis: analyses[id]),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _PhotoThumb extends StatelessWidget {
-  const _PhotoThumb({required this.url, required this.analysis});
-
-  final String? url;
-  final FilmPhotoAnalysis? analysis;
-
-  @override
-  Widget build(BuildContext context) {
-    final a = analysis;
-    return Container(
-      width: 88,
-      margin: const EdgeInsets.only(right: AppSpacing.sm),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppSpacing.xs),
-            child: SizedBox(
-              width: 88,
-              height: 66,
-              child: url == null
-                  ? const ColoredBox(color: AppColors.surfaceDisabled)
-                  : CachedNetworkImage(
-                      imageUrl: url!,
-                      fit: BoxFit.cover,
-                      memCacheWidth: 264,
-                    ),
-            ),
-          ),
-          if (a != null)
-            Text(
-              '★${a.heroScore} ${a.quality} · ${a.summary}',
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.caption,
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LinesCard extends StatelessWidget {
-  const _LinesCard({required this.report});
-
-  final FilmDirectorReport report;
-
-  @override
-  Widget build(BuildContext context) {
-    return _Card(
-      title: 'Lines',
-      children: [
-        _Line('Footnote', report.footnoteLine ?? '—'),
-        _Line('Closing', report.closingLine ?? '—'),
       ],
     );
   }
@@ -854,9 +695,9 @@ class _ProblemLine extends StatelessWidget {
   );
 }
 
-/// Sky Story's pages as the film will play them (#345): from the draft's
-/// `content.sky` with the memory's photos, plus why the director's own
-/// pages weren't used, if they weren't.
+/// Sky Story's pages as the film will play them (#345, #463): from the
+/// draft's `content.sky` with the memory's photos, its photos on pages,
+/// what it gave up for its length and the notes on no page.
 class _SkyStoryCard extends ConsumerWidget {
   const _SkyStoryCard({required this.tripId, required this.report});
 
@@ -888,8 +729,8 @@ class _SkyStoryCard extends ConsumerWidget {
           return [
             Text(
               sky.isFromDirector
-                  ? "director's pages"
-                  : 'code-built pages (fallback)',
+                  ? "director's words on code's pages"
+                  : "code's words on code's pages",
               key: const Key('film-plan-sky-source'),
               style: AppTypography.headlineSerif.copyWith(
                 color: sky.isFromDirector
@@ -905,6 +746,22 @@ class _SkyStoryCard extends ConsumerWidget {
                   '${story.momentCount} moments · '
                   'signed ${story.names ?? '—'}',
             ),
+            if (report?.skyShownPhotos case final total?)
+              _Line(
+                'Shown',
+                '${report!.skyShownPages} / $total photos on pages '
+                    '(the mosaic holds the rest)',
+                key: const Key('film-plan-sky-shown'),
+              ),
+            _Line(
+              'For length',
+              report == null || report!.skyTrims.isEmpty
+                  ? 'nothing'
+                  : report!.skyTrims.join(' · '),
+              key: const Key('film-plan-sky-trims'),
+            ),
+            for (final note in report?.skyUnlisted ?? const <String>[])
+              _Line('On no page', note),
             for (final problem in problems)
               Text(
                 '• $problem',

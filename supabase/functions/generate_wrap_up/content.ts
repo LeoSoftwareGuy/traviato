@@ -7,11 +7,9 @@
 // unlock.reason, keepsake.closing_quote) — see ai_fields.ts. Everything else
 // here is assembled deterministically in assemble.ts from plain queries.
 //
-// plan_version + plan (#328): the director's film plan, present on a draft
-// when the director ran for the memory and its plan still fits. The current
-// player ignores both; the plan-driven player reads them.
+// plan_version + plan (#328): the classic plan, on drafts built before
+// #463 only — no longer written; nothing plays it.
 
-import type { FilmPlan } from "./film_plan.ts";
 import type { SkyContent } from "./sky_story.ts";
 
 export interface PhotoRef {
@@ -77,7 +75,7 @@ export interface WrapUpContent {
     closing_quote: string;
   };
   plan_version?: 2;
-  plan?: FilmPlan;
+  plan?: unknown;
   // Sky Story's pages (#345, sky_story.ts): on every draft with photos.
   // Kept films never gain it.
   sky?: SkyContent;

@@ -9,22 +9,20 @@
 // so the current film keeps playing until the plan-driven player lands.
 //
 // The film's template comes from the memory's vibes, in code, before the
-// director runs (#433) — the director only fills that template's plan and
-// can never change it. One call after the photo analysis: a Sky Story
-// memory's emit_film_plan (classic plan + Sky Story), or a Golden Vows /
-// Neon Night memory's section on its own (one retry with the problems fed
-// back). A section is repaired in code, and when that isn't enough code
-// builds the same film's plan — the chosen film always plays.
+// director runs (#433) — the director can never change it. Every film is
+// cut by code — Neon Night (#454), Golden Vows (#458), Sky Story (#463):
+// pages or chapters, scenes, length — and one call after the photo
+// analysis only picks its words from code's candidates (pick_neon_lines,
+// pick_golden_vows_lines, pick_sky_lines); a pick that isn't in its
+// slot's list takes code's top candidate. One AI call per film. Since
+// #463 there is no classic plan call (emit_film_plan) and no call for the
+// classic film's four lines: those come from the notes (code_lines.ts).
 //
-// Neon Night (#454) is cut by code — chapters, scenes, length — and its
-// one call (pick_neon_lines) only picks the words from code's candidates;
-// a pick that isn't in its slot's list takes code's top candidate.
-//
-// Model: claude-sonnet-5 for every call, same as the 4 AI lines (#93).
+// Model: claude-sonnet-5 for every call.
 
 import { localMs } from "./time_zones.ts";
 import type { TripData } from "./gather.ts";
-import { inclusiveDayCount, sortPhotosChronologically } from "./assemble.ts";
+import { sortPhotosChronologically } from "./assemble.ts";
 import { type FetchLike, logEvent, type LogLike } from "./anthropic.ts";
 import {
   callAnthropicTool,
@@ -33,32 +31,14 @@ import {
 } from "./anthropic_tool.ts";
 import type { WrapUpLanguage } from "./language.ts";
 import { WRAP_UP_LIMITS } from "./wrap_up_limits.ts";
+import { skyPhotos } from "./sky_story.ts";
+import { type SkySlotReport, skyStoryFilm } from "./sky_film.ts";
 import {
-  BANNED_PHRASES,
-  describeFilmPlanProblems,
-  type FilmPlan,
-  filmPlanToolSchema,
-  MAX_BRIDGE_CHARS,
-  MAX_CLOSING_CHARS,
-  MAX_TEXT_CARD_CHARS,
-  MAX_TOTAL_SECONDS,
-  MIN_TOTAL_SECONDS,
-  type PlanContext,
-  RECIPE_RULES,
-  RECIPES,
-  repairFilmPlan,
-  SCENE_PHOTO_COUNT,
-} from "./film_plan.ts";
-import {
-  describeSkyStoryProblems,
-  repairSkyStory,
-  SKY_STORY_PROMPT_RULES,
-  skyCheckContext,
-  skyMaxPages,
-  skyPhotos,
-  type SkyStoryPlan,
-  skyStoryToolProperty,
-} from "./sky_story.ts";
+  buildSkyPickInput,
+  buildSkyPickSystemPrompt,
+  pickSkyLinesTool,
+  skyLanguage,
+} from "./sky_slots.ts";
 import { goldenVowsFilm, type GvSlotReport } from "./gv_film.ts";
 import {
   buildGvPickInput,
@@ -68,11 +48,6 @@ import {
 } from "./gv_slots.ts";
 import type { GvOccasionTrigger } from "./gv_skeleton.ts";
 import { parsePicks, type SlotPicks } from "./film_slots.ts";
-import {
-  nnChapterStarts,
-  nnCheckContext,
-  nnLogicalDays,
-} from "./neon_night.ts";
 import {
   buildNeonPickInput,
   buildNeonPickSystemPrompt,
@@ -112,28 +87,10 @@ export const MAX_DIRECTOR_RUNS = 4;
 // The director's rules (#398: logical days, excerpts, chronology; #433:
 // the template from vibes; #454 / #458: Neon Night and Golden Vows pick
 // from code's lists; #460: Golden Vows' new pages and slot lists;
-// #461: photo and note times on their own place's clock). A
-// record made under older rules runs again once, within
-// MAX_DIRECTOR_RUNS.
-export const DIRECTOR_VERSION = 8;
-
-// emit_film_plan with the Sky Story section (#345). Composed here so the
-// films' modules don't import each other. No occasion choice since #433:
-// the template comes from the vibes.
-export const directorToolSchema = {
-  ...filmPlanToolSchema,
-  input_schema: {
-    ...filmPlanToolSchema.input_schema,
-    properties: {
-      ...filmPlanToolSchema.input_schema.properties,
-      sky_story: skyStoryToolProperty,
-    },
-    required: [
-      ...filmPlanToolSchema.input_schema.required,
-      "sky_story",
-    ],
-  },
-};
+// #461: photo and note times on their own place's clock; #463: Sky Story
+// picks from code's lists, no classic plan call). A record made under
+// older rules runs again once, within MAX_DIRECTOR_RUNS.
+export const DIRECTOR_VERSION = 9;
 
 export type DirectorCall = TokenUsage & {
   call: "analysis" | "plan" | "section";
@@ -142,8 +99,13 @@ export type DirectorCall = TokenUsage & {
 export interface DirectorRecord {
   // DIRECTOR_VERSION when it ran; absent = before #398.
   director_version?: number;
+  // "planned": the director's picks came back (#463: Sky Story; Golden
+  // Vows and Neon Night keep "fallback", as before — the word was the
+  // classic plan's).
   status: "planned" | "fallback";
-  plan: FilmPlan | null;
+  // Before #463: the classic plan (emit_film_plan). No longer written or
+  // read.
+  plan?: unknown;
   // Why the plan fell back (or what the first attempt got wrong).
   problems: string[];
   attempts: number;
@@ -161,9 +123,17 @@ export interface DirectorRecord {
   // id → storage path of every photo the plan could use (inspector
   // thumbnails).
   photo_paths: Record<string, string>;
-  // The Sky Story pages (#345), kept on their own: valid even when the
-  // classic plan fell back. null = code-built pages; sky_problems says why.
-  sky_story?: SkyStoryPlan | null;
+  // Before #463: the director's own Sky Story pages. No longer read.
+  sky_story?: unknown;
+  // Sky Story's words (#463): the director's picks by slot, or null (code
+  // picks every slot); every slot when it ran, what the film gave up for
+  // its length, its photos on pages and the notes on no page (Plan
+  // inspector).
+  sky?: { picks_version: 2; picks: SlotPicks } | null;
+  sky_slots?: SkySlotReport[];
+  sky_trims?: string[];
+  sky_shown?: { pages: number; photos: number };
+  sky_unlisted?: { note_id: string; text: string; reason: string }[];
   sky_problems?: string[];
   // Golden Vows' words (#458): the director's picks by slot, or null
   // (code picks every slot). Records before #458 hold a whole section
@@ -229,215 +199,6 @@ export interface DirectorDeps {
 
 type Photo = TripData["photos"][number];
 
-function dayNumber(startDate: string | null, dayDate: string | null) {
-  if (!startDate || !dayDate) return null;
-  return inclusiveDayCount(startDate, dayDate);
-}
-
-// What call 2 sees — facts only, chronological, ids it may use.
-export function buildPlanInput(
-  tripData: TripData,
-  photos: Photo[],
-  analyses: ReadonlyMap<string, PhotoAnalysis>,
-  language: WrapUpLanguage,
-) {
-  const { trip } = tripData;
-  const bonusByPhoto = new Map(
-    tripData.completedBonusTasks
-      .filter((b) => b.photo_id)
-      .map((b) => [b.photo_id!, b.title]),
-  );
-  // Logical days (#398 R1): the night until about 08:00 is the evening's.
-  const logical = nnLogicalDays(tripData);
-  const dayOf = (id: string, fallback: string | null) =>
-    logical.get(id) ?? fallback;
-  // Where Neon Night's chapters must start (#426): each day and each part
-  // of a day after a long break.
-  // The same photos the check sees: the listed ones (and those left out).
-  const listed = new Set(photos.map((p) => p.id));
-  const nnContext = nnCheckContext({
-    ...tripData,
-    photos: tripData.photos.filter((p) =>
-      listed.has(p.id) || p.use_in_wrap_up === false
-    ),
-  });
-  const nnOrdered = [...nnContext.photoOrder.entries()].sort((a, b) =>
-    a[1] - b[1]
-  ).map(([id]) => id);
-  const chapterStarts = new Set(
-    nnChapterStarts(nnContext).map((at) => nnOrdered[at]),
-  );
-  return {
-    language,
-    memory: {
-      name: trip.name,
-      destination: trip.destination,
-      start_date: trip.start_date,
-      end_date: trip.end_date,
-      day_count: inclusiveDayCount(trip.start_date, trip.end_date),
-      vibes: trip.vibes,
-    },
-    // The film's length decides how many Sky Story pages it holds (#434).
-    sky_max_pages: skyMaxPages(tripData),
-    achievement: tripData.latestAchievement?.title ?? null,
-    notes: tripData.notes
-      .filter((n) => n.id)
-      .map((n) => ({
-        note_id: n.id,
-        day: dayNumber(trip.start_date, dayOf(`note:${n.id}`, n.day_date)),
-        day_date: dayOf(`note:${n.id}`, n.day_date),
-        text: n.content,
-        // The note's own time and photo (#397); legacy notes have no photo.
-        written_at: localClock(
-          n.taken_at ?? n.created_at ?? null,
-          tripData,
-          n,
-        ),
-        photo_id: n.photo_id ?? null,
-      })),
-    // Already in chronological order (day, then time).
-    photos: photos.map((p) => {
-      const a = analyses.get(p.id)!;
-      return {
-        photo_id: p.id,
-        day: dayNumber(trip.start_date, dayOf(p.id, p.day_date)),
-        day_date: dayOf(p.id, p.day_date),
-        time: localClock(p.taken_at ?? p.created_at, tripData, p),
-        summary: a.summary,
-        setting: a.setting,
-        people: a.people,
-        energy: a.energy,
-        quality: a.quality,
-        orientation: a.orientation,
-        hero_score: a.hero_score,
-        dup_group: a.dup_group,
-        place: p.place_text ?? null,
-        tagged_people: p.people_tags ?? [],
-        caption: p.caption,
-        bonus_task: bonusByPhoto.get(p.id) ?? null,
-        must_include: p.use_in_wrap_up === true,
-        chapter_start: chapterStarts.has(p.id),
-      };
-    }),
-  };
-}
-
-function recipeLines(): string {
-  return RECIPES.map((recipe) => {
-    const r = RECIPE_RULES[recipe];
-    return `- ${recipe}: fits ${r.fits}. Scenes: ${
-      r.scenes.join(", ")
-    }. Each scene ${r.minDuration}–${r.maxDuration}s, so at least ${
-      Math.ceil(MIN_TOTAL_SECONDS / r.maxDuration)
-    } scenes. Tone: ${r.tone}.`;
-  }).join("\n");
-}
-
-function sceneLines(): string {
-  return Object.entries(SCENE_PHOTO_COUNT).map(([type, [min, max]]) =>
-    `- ${type}: ${min === max ? min : `${min}–${max}`} photo${
-      max === 1 ? "" : "s"
-    }`
-  ).join("\n");
-}
-
-function languageRule(language: WrapUpLanguage): string {
-  return language === "ru"
-    ? 'Write every line in natural Russian, addressing the reader as "вы". Keep names of the memory, places and people exactly as given. Set "language" to "ru".'
-    : 'Write every line in English. Set "language" to "en".';
-}
-
-export function buildPlanSystemPrompt(language: WrapUpLanguage): string {
-  return [
-    "You are the director of a short film made from one person's memory ",
-    "(a trip, a night out, a wedding…). You choose how the film is told: ",
-    "the occasion, a recipe, and the scenes in order, using the person's ",
-    "own photos and notes. Emit the plan with the emit_film_plan tool.\n\n",
-    "Recipes:\n",
-    recipeLines(),
-    "\n\nPhotos per scene type:\n",
-    sceneLines(),
-    "\n- text_card: shows its `text` line instead of photos.\n",
-    "- A collage takes exactly its number of photos. Two photos left over ",
-    "make two card_flip scenes, never a collage.\n\n",
-    "Rules:\n",
-    "- Use only photo_ids and note_ids from the input. Never invent people, ",
-    "places or events.\n",
-    "- Chronological: photos appear in the order they are listed (day, then ",
-    "time), across scenes and chapters. Each photo at most once.\n",
-    "- Prefer sharp photos with hero_score ≥ 3 for full-screen scenes ",
-    '(card_flip, emphasis "hero"). Skip blurry or dark photos, and all but ',
-    "one photo of each dup_group.\n",
-    "- Every photo with must_include true must be in the plan.\n",
-    `- The scenes add up to ${MIN_TOTAL_SECONDS}–${MAX_TOTAL_SECONDS} seconds.\n`,
-    "- 2–3 chapters, each opening with a bridge_line.\n",
-    "- Lines are second person, specific — real details from notes, places ",
-    "and photos — never generic: quiet, wry.\n",
-    `- bridge_line ≤ ${MAX_BRIDGE_CHARS} characters; text_card text ≤ ${MAX_TEXT_CARD_CHARS}; `,
-    `footnote.line and closing_line ≤ ${MAX_CLOSING_CHARS}.\n`,
-    `- Never use: ${BANNED_PHRASES.map((p) => `"${p}"`).join(", ")}.\n`,
-    "- caption_note_id may point a scene at the note it illustrates, or null.\n",
-    "- When unsure which recipe fits, choose keepsake.\n",
-    "- reasoning: 2–3 sentences on why this occasion, recipe and shape.\n",
-    `- ${languageRule(language)}`,
-    SKY_STORY_PROMPT_RULES,
-  ].join("");
-}
-
-export function buildPlanUserPrompt(
-  input: ReturnType<typeof buildPlanInput>,
-  previousProblems: string[] = [],
-): string {
-  const base = `Plan the film for this memory:\n${JSON.stringify(input)}`;
-  if (previousProblems.length === 0) return base;
-  return `${base}\n\nYour previous plan broke these rules — emit a corrected plan:\n${
-    previousProblems.map((p) => `- ${p}`).join("\n")
-  }`;
-}
-
-// Fills the optional fields the model may leave out, so a stored plan
-// always has the full shape.
-function normalisePlan(input: unknown): FilmPlan {
-  const plan = structuredClone(input) as FilmPlan;
-  // Stored on its own (DirectorRecord.sky_story).
-  delete (plan as unknown as Record<string, unknown>).sky_story;
-  delete (plan as unknown as Record<string, unknown>).golden_vows;
-  delete (plan as unknown as Record<string, unknown>).neon_night;
-  delete (plan as unknown as Record<string, unknown>).special_film;
-  for (const chapter of plan.chapters) {
-    for (const scene of chapter.scenes) {
-      scene.caption_note_id = scene.caption_note_id ?? null;
-      scene.text = scene.type === "text_card" ? scene.text : null;
-    }
-  }
-  return plan;
-}
-
-export function planContextFor(
-  tripData: TripData,
-  plannable: Photo[],
-  language: WrapUpLanguage,
-  notRequiredIds: ReadonlySet<string> = new Set(),
-): PlanContext {
-  return {
-    language,
-    photoOrder: plannable.map((p) => p.id),
-    excludedIds: new Set(
-      tripData.photos.filter((p) => p.use_in_wrap_up === false).map((p) =>
-        p.id
-      ),
-    ),
-    mustIncludeIds: new Set(
-      plannable
-        .filter((p) => p.use_in_wrap_up === true && !notRequiredIds.has(p.id))
-        .map((p) => p.id),
-    ),
-    noteIds: new Set(
-      tripData.notes.map((n) => n.id).filter((id): id is string => !!id),
-    ),
-  };
-}
-
 function summariseUsage(calls: DirectorCall[]): DirectorRecord["usage"] {
   const input = calls.reduce((s, c) => s + c.input_tokens, 0);
   const output = calls.reduce((s, c) => s + c.output_tokens, 0);
@@ -458,7 +219,7 @@ async function pickLines(
   deps: DirectorDeps,
   calls: DirectorCall[],
   tripId: string,
-  film: "neon_night" | "golden_vows",
+  film: "neon_night" | "golden_vows" | "sky_story",
   call: { system: string; input: unknown; tool: ToolDefinition },
 ): Promise<{ picks: SlotPicks | null; problems: string[]; attempts: number }> {
   const log = deps.log ?? console.error;
@@ -498,7 +259,7 @@ async function pickLines(
 // What the inspector lists as put right (#454): each slot where the
 // director's pick didn't hold.
 function pickRepairs(
-  report: readonly (NnSlotReport | GvSlotReport)[],
+  report: readonly (NnSlotReport | GvSlotReport | SkySlotReport)[],
 ): string[] {
   return report.filter((r) => r.pick && r.source === "code").map((r) =>
     `${r.slot}: ${r.reason}`
@@ -521,7 +282,6 @@ export async function runDirector(
     director_version: DIRECTOR_VERSION,
     template,
     status: "fallback",
-    plan: null,
     problems: [],
     attempts: 0,
     model: DIRECTOR_MODEL,
@@ -529,7 +289,7 @@ export async function runDirector(
     photos: { plannable: 0, analysed_now: 0, cached: 0, failed: 0 },
     failed_ids: [],
     photo_paths: {},
-    sky_story: null,
+    sky: null,
     sky_problems: [],
     golden_vows: null,
     golden_vows_problems: [],
@@ -635,8 +395,6 @@ export async function runDirector(
       return record;
     }
 
-    const input = buildPlanInput(film, usable, analyses, language);
-
     if (template === "neon_night") {
       // Code cuts the film; one call picks its words (#454).
       const cut = neonNightFilm(seen, null, record.hero_scores);
@@ -661,8 +419,7 @@ export async function runDirector(
       record.neon_night_repairs = outcome.picks
         ? pickRepairs(played.report)
         : [...outcome.problems, "code picked every slot"];
-      record.problems = [`${template} memory: no classic plan call`];
-      record.sky_problems = [`${template} memory: code-built pages`];
+      record.sky_problems = [`${template} memory: code-picked words`];
       return record;
     }
 
@@ -703,74 +460,45 @@ export async function runDirector(
       record.golden_vows_repairs = outcome.picks
         ? pickRepairs(played.report)
         : [...outcome.problems, "code picked every slot"];
-      // The classic plan and Sky Story pages are code's (no call): the
-      // app's safety net if the chosen film fails while it plays.
-      record.problems = [`${template} memory: no classic plan call`];
-      record.sky_problems = [`${template} memory: code-built pages`];
+      // Sky Story's words are code's (no call): the app's safety net if
+      // the chosen film fails while it plays.
+      record.sky_problems = [`${template} memory: code-picked words`];
       return record;
     }
 
-    // A Sky Story memory: one call, the classic plan and Sky Story.
-    const context = planContextFor(film, usable, language);
-    const skyContext = skyCheckContext(seen);
-    const system = buildPlanSystemPrompt(language);
-    let problems: string[] = [];
-    let skyProblems: string[] = [];
-    for (let attempt = 1; attempt <= PLAN_ATTEMPTS; attempt++) {
-      record.attempts = attempt;
-      let toolInput: unknown;
-      try {
-        const result = await callAnthropicTool({
-          apiKey: deps.apiKey,
-          model: DIRECTOR_MODEL,
-          maxTokens: PLAN_MAX_TOKENS,
-          system,
-          content: buildPlanUserPrompt(input, [...problems, ...skyProblems]),
-          tool: directorToolSchema,
-          label: "plan",
-          fetchImpl: deps.fetchImpl,
-          log,
-        });
-        calls.push({ ...result.usage, call: "plan" });
-        toolInput = result.input;
-      } catch (err) {
-        // Keeps what an earlier attempt got right.
-        const failed = `plan call failed: ${(err as Error).message}`;
-        if (record.status !== "planned") problems = [failed];
-        if (!record.sky_story) skyProblems = [failed];
-        continue;
-      }
-      toolInput = repairFilmPlan(toolInput, context);
-      const sky = repairSkyStory(
-        typeof toolInput === "object" && toolInput !== null
-          ? (toolInput as Record<string, unknown>).sky_story
-          : undefined,
-        skyContext,
-      );
-      // Each half keeps the first attempt that got it right; only what's
-      // still wrong is fed back on the retry.
-      if (record.status !== "planned") {
-        problems = describeFilmPlanProblems(toolInput, context);
-        if (problems.length === 0) {
-          record.status = "planned";
-          record.plan = normalisePlan(toolInput);
-        }
-      }
-      if (!record.sky_story) {
-        skyProblems = describeSkyStoryProblems(sky, skyContext);
-        if (skyProblems.length === 0) {
-          record.sky_story = sky as SkyStoryPlan;
-        }
-      }
-      if (record.status === "planned" && record.sky_story) break;
-      logEvent(log, "director_plan_invalid", {
-        trip_id: tripId,
-        attempt,
-        problems: [...problems, ...skyProblems].slice(0, 30),
-      });
-    }
-    record.problems = problems;
-    record.sky_problems = skyProblems;
+    // A Sky Story memory: code cuts the pages; one call picks their
+    // words (#463).
+    const options = {
+      heroScores: record.hero_scores,
+      summaries: new Map([...analyses].map(([id, a]) => [id, a.summary])),
+      language,
+    };
+    const cut = skyStoryFilm(seen, null, options);
+    const outcome = await pickLines(deps, calls, tripId, "sky_story", {
+      system: buildSkyPickSystemPrompt(skyLanguage(seen, language)),
+      input: buildSkyPickInput(
+        seen,
+        cut.skeleton,
+        cut.slots,
+        analyses,
+        (iso, item) => localClock(iso, seen, item),
+      ),
+      tool: pickSkyLinesTool,
+    });
+    record.attempts = outcome.attempts;
+    const played = skyStoryFilm(seen, outcome.picks, options);
+    record.status = outcome.picks ? "planned" : "fallback";
+    record.sky = outcome.picks
+      ? { picks_version: 2, picks: outcome.picks }
+      : null;
+    record.sky_slots = played.report;
+    record.sky_trims = played.trims;
+    record.sky_shown = played.shown;
+    record.sky_unlisted = played.unlisted;
+    record.problems = outcome.problems;
+    record.sky_problems = outcome.picks
+      ? pickRepairs(played.report)
+      : [...outcome.problems, "code picked every slot"];
   } catch (err) {
     record.problems = [`director failed: ${(err as Error).message}`];
     record.sky_problems = record.problems;
@@ -796,33 +524,6 @@ export function isDirectorRecord(value: unknown): value is DirectorRecord {
   const r = value as Record<string, unknown>;
   return (r.status === "planned" || r.status === "fallback") &&
     Array.isArray(r.problems) && Array.isArray(r.failed_ids ?? []);
-}
-
-// The plan from [record] if it still fits the memory as it is now (no
-// deleted or left-out photos, every new "Always" pick in, same language) —
-// otherwise null and the film plays today's template.
-export function currentPlan(
-  record: unknown,
-  tripData: TripData,
-  language: WrapUpLanguage,
-): FilmPlan | null {
-  if (
-    !isDirectorRecord(record) || record.status !== "planned" || !record.plan
-  ) {
-    return null;
-  }
-  const photos = sortPhotosChronologically(
-    tripData.photos.filter((p) => p.use_in_wrap_up !== false),
-  );
-  const context = planContextFor(
-    tripData,
-    photos,
-    language,
-    new Set(record.failed_ids ?? []),
-  );
-  return describeFilmPlanProblems(record.plan, context).length === 0
-    ? record.plan
-    : null;
 }
 
 // The days with a photo the film could show, sorted. When they change, the
@@ -856,18 +557,18 @@ export function directorIsStale(record: unknown, tripData: TripData): boolean {
   return before.length !== now.length || before.some((d, i) => d !== now[i]);
 }
 
-// The director's Sky Story pages if they still fit the memory as it is now
-// (no deleted, moved or left-out photos, notes still there, every new
-// Always pick shown) — otherwise null, and the film uses code-built pages.
+// The Sky Story words a memory plays now (#463): the director's stored
+// picks, re-applied by id to the pages code cuts from the memory as it is
+// now (a gone or reworded line takes code's top candidate), else none.
+// Records before #463 held whole pages: not read. A Golden Vows or Neon
+// Night memory's Sky Story (the safety net) is always code's.
 export function currentSkyStory(
   record: unknown,
-  tripData: TripData,
-): SkyStoryPlan | null {
-  if (!isDirectorRecord(record) || !record.sky_story) return null;
-  const context = skyCheckContext(tripData, new Set(record.failed_ids ?? []));
-  return describeSkyStoryProblems(record.sky_story, context).length === 0
-    ? record.sky_story
-    : null;
+): { picks: SlotPicks | null; source: "director" | "code" } {
+  const stored = isDirectorRecord(record) ? record.sky ?? null : null;
+  return isPicksRecord(stored)
+    ? { picks: stored.picks, source: "director" }
+    : { picks: null, source: "code" };
 }
 
 // The Golden Vows words a Golden Vows memory plays now (#458): the
