@@ -426,6 +426,31 @@ Post-MVP: `video_path`, `video_status`.
   the phone's clock until rebuilt. `content.neon_night.note.note_id` names
   the Note scene's note. `DIRECTOR_VERSION` 8.
 
+- **Sky Story: code cuts, the director picks** (#463, no schema change;
+  replaces #345's director pages, `film_plan.ts`, the classic plan call
+  and the 4-AI-lines call): `sky_skeleton.ts` cuts the pages (logical
+  days, `groupDaysEvenly` past 5, parts at 2 h breaks, `skyLimitSeconds`
+  = min(75 s, 4 s × film photos)), `sky_slots.ts` lists candidates per
+  slot (`pK.line1`/`line2` on a single-day page, one line slot per day on
+  a grouped page, `pK.sky_line` only on a page without one, `pK.headline`;
+  notes placed by `skyNoteHomes`, a note written after the trip on its
+  saved `day_date`), `sky_film.ts` builds `content.sky` (same shape;
+  `excerpts` are the page's lines) and trims it (box: `SKY_CARD_CHARS` 80,
+  `SKY_SKY_CHARS` 90; past 75 s a split day fewer first). Its length
+  estimate mirrors `SkyStoryTimeline` (a page stretches for the target,
+  never below its reference). Shared helpers moved to `film_slots.ts`
+  (`notePhrases`, `wordGuard`, `photoRank`, `noteAnchors`, `spreadPicks`)
+  and `banned_phrases.ts`. One `pick_sky_lines` call for a Sky memory;
+  `director.sky = {picks_version: 2, picks}` (`sky_story` of older
+  records isn't read), plus `sky_slots`, `sky_trims`, `sky_shown`,
+  `sky_unlisted`; `plan` is no longer written. `code_lines.ts` writes the
+  classic film's `ai_fields` from the notes; `ai_input_hash` and
+  `ai_generation_count` are no longer written (columns kept). A film kept
+  as Sky Story rebuilds with its stored picks. `DIRECTOR_VERSION` 9.
+  Real-data tests: ADE and Budapest forced to Sky (`sky_real.test.ts`,
+  `film_lengths.json` cases `ade_sky`/`budapest_sky`, played on the real
+  fonts by the app); `tools/record_sky_picks.ts` records a real answer.
+
 ### `photo_analysis` (#328)
 `photo_id PK/FK photos cascade, trip_id FK cascade, storage_path (the file
 analysed — a new path means re-analyse), summary (≤12 words, visible only),
