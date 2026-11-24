@@ -70,6 +70,8 @@ export interface SkySkeleton {
   // The most pages its length holds, and the length it was cut for.
   max_pages: number;
   limit_seconds: number;
+  // Days cut into parts or continuation pages.
+  splits: number;
 }
 
 // Sky Story's limit (#463): 75 s, and about 4 s a film photo below.
@@ -158,14 +160,19 @@ function longestBreak(photos: readonly Photo[]):
 
 // Sky Story's pages of [tripData] (#463). [heroScores]: the photo
 // analysis's.
+// [maxSplits]: at most this many days cut into parts or continuation
+// pages (sky_film.ts lowers it when the parts would cost the user's
+// words; the film never gives up a day).
 export function buildSkySkeleton(
   tripData: TripData,
   heroScores: Readonly<Record<string, number>> = {},
+  maxSplits = Infinity,
 ): SkySkeleton {
   const photos = skyPhotos(tripData);
   const start = tripData.trip.start_date;
   const maxPages = skyPageRoom(photos.length);
   const empty: SkySkeleton = {
+    splits: 0,
     pages: [],
     mosaic: [],
     photos,
@@ -190,8 +197,9 @@ export function buildSkySkeleton(
     maxPages,
   ).map((g) => ({ photos: g.flat(), part: false }));
 
+  let splits = 0;
   // Pages to spare: a long day in parts (only single-day pages).
-  while (groups.length < maxPages) {
+  while (groups.length < maxPages && splits < maxSplits) {
     let cut: { g: number; at: number; gap: number } | null = null;
     groups.forEach((g, gi) => {
       const days = new Set(g.photos.map(dayOf));
@@ -201,6 +209,7 @@ export function buildSkySkeleton(
     });
     if (!cut) break;
     const { g, at } = cut as { g: number; at: number; gap: number };
+    splits++;
     const whole = groups[g].photos;
     groups.splice(
       g,
@@ -211,7 +220,7 @@ export function buildSkySkeleton(
   }
   // Still pages to spare: a page with more Always picks than it shows
   // gets a continuation page (#378), the most overflowing first.
-  while (groups.length < maxPages) {
+  while (groups.length < maxPages && splits < maxSplits) {
     let worst = -1;
     let over = 0;
     groups.forEach((g, gi) => {
@@ -222,6 +231,7 @@ export function buildSkySkeleton(
       }
     });
     if (worst < 0) break;
+    splits++;
     const whole = groups[worst].photos;
     const half = Math.ceil(whole.length / 2);
     groups.splice(
@@ -269,5 +279,5 @@ export function buildSkySkeleton(
     MAX_SKY_MOSAIC_PHOTOS,
   )
     .map((p) => p.id);
-  return { ...empty, pages, mosaic };
+  return { ...empty, pages, mosaic, splits };
 }

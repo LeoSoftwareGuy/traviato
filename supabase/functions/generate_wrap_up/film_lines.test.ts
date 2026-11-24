@@ -46,9 +46,13 @@ Deno.test("Sky Story: a page carries the best lines of its own notes (#463)", ()
     },
     { id: "n2", day_date: "2026-09-03", content: "Rain, then stroopwafels." },
   ]);
-  const sky = skyStoryFilm(data, null).content!;
+  const film = skyStoryFilm(data, null);
+  const sky = film.content!;
   const day1 = sky.pages.find((p) => p.first_day === 1)!;
-  assertEquals(day1.excerpts.map((e) => e.text), [RIBS, BIKES]);
+  // Both are day 1's best; the card holds 80 characters, so the second
+  // gives way (#463) rather than being cut off by the app.
+  assertEquals(day1.excerpts.map((e) => e.text), [RIBS]);
+  assertEquals(film.trims, ["p1: a line doesn't fit the page"]);
   assertEquals(day1.note_id, "n1");
   // Day 2 has no note: no lines; day 3 its own.
   assertEquals(sky.pages[1].excerpts, []);

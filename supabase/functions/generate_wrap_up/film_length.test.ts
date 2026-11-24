@@ -69,8 +69,8 @@ Deno.test("content: Sky pages, chapters and album pages grow with photos", () =>
 Deno.test("film_lengths.json is up to date (deno run --allow-write write_film_lengths.ts)", () => {
   assertEquals(
     fixtures.length,
-    // …and ADE-Amsterdam (#448).
-    FIXTURE_FILMS.length * FIXTURE_PHOTO_COUNTS.length + 1,
+    // …and ADE-Amsterdam (#448), ADE and Budapest as Sky Story (#463).
+    FIXTURE_FILMS.length * FIXTURE_PHOTO_COUNTS.length + 3,
   );
   assertEquals(JSON.parse(JSON.stringify(filmLengthFixtures())), fixtures);
 });

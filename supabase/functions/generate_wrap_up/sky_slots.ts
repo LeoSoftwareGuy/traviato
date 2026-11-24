@@ -70,7 +70,13 @@ export const SKY_LINES_PER_PAGE = 2;
 // A page of several days: a line of each of its days, at most this many.
 export const SKY_GROUP_LINES = 3;
 // A note line's most characters (the app shows only what fits its card).
-export const MAX_SKY_NOTE_LINE_CHARS = 90;
+// A page's words, as the app's fonts hold them (#463; measured on the
+// real fonts: a card's three lines ≈ 88 characters, the fly-out's sky ≈ 97
+// — Cyrillic runs wider), with room for word wrap. A line alone always
+// fits a card.
+export const SKY_CARD_CHARS = 80;
+export const SKY_SKY_CHARS = 90;
+export const MAX_SKY_NOTE_LINE_CHARS = SKY_CARD_CHARS;
 
 export type SkySlotKind = "line" | "sky_line" | "headline";
 

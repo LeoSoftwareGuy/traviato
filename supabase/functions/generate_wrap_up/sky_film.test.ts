@@ -267,8 +267,9 @@ Deno.test("a note's line plays on its own photo's page, never another day's", ()
 Deno.test("a grouped page shows a line from each of its days", () => {
   const data = memory(Array(10).fill(2), {
     notes: [
-      note("a", "2026-06-01", "Tram 28 up to the castle, the city below us."),
-      note("b", "2026-06-02", "Pastéis de nata at Manteigaria, still warm."),
+      // Short enough for a 5-page film (75 s) to read both.
+      note("a", "2026-06-01", "Tram 28 to the castle."),
+      note("b", "2026-06-02", "Pastéis at Manteigaria."),
     ],
   });
   const film = skyStoryFilm(data, null);
@@ -411,9 +412,9 @@ Deno.test("the director's picks: by id from the page's own list, else code's", (
 Deno.test("past 75 s the second lines go first, the last page first; never a day", () => {
   withLengthRule(() => {
     const long = (k: number) =>
-      `On day ${k} we walked the old harbour and ate grilled sardines at noon.`;
+      `Day ${k}: grilled sardines at the old harbour.`;
     const second = (k: number) =>
-      `Then a ferry to the island ${k}, and a swim in the green water.`;
+      `A ferry to island ${k}, a green swim.`;
     const data = memory(Array(5).fill(8), {
       notes: Array.from(
         { length: 5 },
@@ -428,8 +429,11 @@ Deno.test("past 75 s the second lines go first, the last page first; never a day
     const film = skyStoryFilm(data, null);
     assertEquals(film.content!.pages.length, 5);
     assert(film.seconds <= 75 + 1e-9 || film.trims.length > 0);
-    if (film.trims.length > 0) {
-      assertEquals(film.trims[0], "p5: a second line left out");
+    // Past what a page's box holds, the first to go for length is the
+    // last page's second line.
+    const forLength = film.trims.filter((t) => !t.includes("fit the page"));
+    if (forLength.length > 0) {
+      assertEquals(forLength[0], "p5: a second line left out");
     }
     // Every page keeps a line.
     assert(film.content!.pages.every((p) => p.excerpts.length >= 1));

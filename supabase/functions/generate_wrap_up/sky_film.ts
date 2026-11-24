@@ -36,6 +36,8 @@ import {
 import {
   buildSkySlots,
   resolveSkySlots,
+  SKY_CARD_CHARS,
+  SKY_SKY_CHARS,
   skyLanguage,
   type SkySlot,
   type SkySlotResult,
@@ -164,13 +166,20 @@ export function skySecondsAt(
       ? LAST_INTERLUDE
       : INTERLUDE;
   }
+  // As the app's fittedChapterDurs + forChapters: a fitted length is a
+  // page's minimum, so a page stretches for the target but never plays
+  // shorter than its reference.
   const scaled = (f: number) =>
     pages.reduce(
       (s, _, i) =>
-        s + (f === 1 ? chapterSeconds(i, count, mins[i]) : Math.max(
-          Math.max(chapterSeconds(i, count, 0) * f, MIN_CHAPTER),
-          mins[i],
-        )),
+        s + chapterSeconds(
+          i,
+          count,
+          f === 1 ? mins[i] : Math.max(
+            Math.max(chapterSeconds(i, count, 0) * f, MIN_CHAPTER),
+            mins[i],
+          ),
+        ),
       0,
     );
   if (target === null) return fixed + scaled(1);
@@ -200,13 +209,18 @@ function dateOf(start: string, day: number): string {
 
 // Sky Story for [tripData] with the director's [picks] (null: code picks
 // every slot).
+//
+// When the user's words would go past 75 s, the pages are cut again with
+// one split day fewer (a day's parts back on one page) before any line
+// gives way: a split is a spare page, the user's words aren't.
 export function skyStoryFilm(
   tripData: TripData,
   picks: SlotPicks | null,
   options: SkyFilmOptions = {},
+  maxSplits = Infinity,
 ): SkyFilm {
   const heroScores = options.heroScores ?? {};
-  const skeleton = buildSkySkeleton(tripData, heroScores);
+  const skeleton = buildSkySkeleton(tripData, heroScores, maxSplits);
   const appLanguage = options.language ?? "en";
   const language = skyLanguage(tripData, appLanguage);
   const slots = buildSkySlots(tripData, skeleton, appLanguage);
@@ -299,8 +313,64 @@ export function skyStoryFilm(
     for (const l of work[k].lines) dropped.set(l.slot, "page left out");
     work = work.filter((_, i) => i !== k);
   }
-  // 2–4. Past 75 s only: the user's words, the last page first.
+  // A page shows only the words its box holds (the app drops the rest):
+  // the last line to a shorter clause of its note, else left out.
+  const chars = (w: WorkPage) =>
+    [...w.lines.map((l) => l.text).join(" ")].length;
+  const room = (k: number) =>
+    skyLayout(
+        k,
+        work.length,
+        Math.min(MAX_SKY_EXTRAS, work[k].page.extras.length),
+      ) ===
+        "flyOut"
+      ? SKY_SKY_CHARS
+      : SKY_CARD_CHARS;
+  work.forEach((w, k) => {
+    while (w.lines.length > 0 && chars(w) > room(k)) {
+      const l = w.lines[w.lines.length - 1];
+      const others = new Set(
+        work.flatMap((o) => o.lines).filter((o) => o !== l).map((o) => o.text),
+      );
+      const shorter = slots.find((x) => x.slot === l.slot)!.candidates
+        .filter((c) =>
+          c.note_id === l.note_id &&
+          [...c.text].length < [...l.text].length && !others.has(c.text) &&
+          [...c.text].length - [...l.text].length + chars(w) <= room(k)
+        )
+        .sort((a, b) => b.score - a.score)[0];
+      if (shorter) {
+        l.text = shorter.text;
+        shortened.set(l.slot, shorter.text);
+        trims.push(`p${k + 1}: a line to a shorter clause to fit the page`);
+      } else {
+        w.lines.pop();
+        dropped.set(l.slot, "doesn't fit the page");
+        trims.push(`p${k + 1}: a line doesn't fit the page`);
+      }
+    }
+  });
+
+  // 2–4. Past 75 s only: first a split day fewer, then the user's words,
+  // the last page first.
   const past = () => seconds() > longest + 1e-9;
+  if (past() && skeleton.splits > 0) {
+    const fewer = skyStoryFilm(
+      tripData,
+      picks,
+      options,
+      skeleton.splits - 1,
+    );
+    return {
+      ...fewer,
+      trims: [
+        `${skeleton.splits} split day(s) → ${
+          skeleton.splits - 1
+        }: the words need the time`,
+        ...fewer.trims,
+      ],
+    };
+  }
   for (let k = work.length - 1; k >= 0 && past(); k--) {
     while (work[k].lines.length > 1 && past()) {
       const l = work[k].lines.pop()!;

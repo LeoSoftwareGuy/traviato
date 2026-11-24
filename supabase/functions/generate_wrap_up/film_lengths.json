@@ -2960,17 +2960,17 @@
     "moment_count": 29,
     "mosaic_photo_ids": [
      "39fea9d3-4931-4605-8f22-94c1714fa2e8",
-     "ac6c43bb-a98f-4c77-9a52-d84d0abb16f9",
+     "7b9eee86-d27a-4263-ae02-cdb2d829e792",
      "a3cc4c86-5ac2-4200-8bc8-1e303d6c594e",
-     "1325f261-7d4b-48d5-a9e7-dbc4e6cc423b",
      "34542056-43ea-4798-b5e4-18944e0c539a",
-     "2bd9809d-ae25-452e-b250-1c6397d7a674",
+     "cd74fdc4-2cb8-46e8-a3fc-8d1baa910293",
+     "10af0193-e773-4ffc-8b86-1066f3fe1530",
+     "1e84d7df-ead0-4193-abd0-3592e4cecd59",
      "620303b8-4aa3-4b7c-8c11-fe813dfd62a1",
-     "02d9ee87-6b80-457f-ab8f-c4c1bd67f73a",
+     "e5be04ce-b606-415f-9b03-70c08b0fe4a3",
      "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
-     "4b028163-05eb-4808-8995-2332f0e2e7a5",
      "ff6a1fde-b6bd-48d8-b87d-29687d647553",
-     "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc"
+     "da8f273e-2961-411b-b8e5-e286047a5e72"
     ],
     "pages": [
      {
@@ -3002,37 +3002,14 @@
       "last_day": null,
       "date": "2026-10-23",
       "end_date": null,
-      "photo_count": 5,
-      "headline": null,
+      "photo_count": 9,
+      "headline": "На Куко Unreal",
       "hero_photo_id": "2bd9809d-ae25-452e-b250-1c6397d7a674",
       "extra_photo_ids": [
        "6eca4520-d5b4-4e2a-aed2-7760f35a40f5",
-       "cd74fdc4-2cb8-46e8-a3fc-8d1baa910293",
        "10af0193-e773-4ffc-8b86-1066f3fe1530",
-       "1e84d7df-ead0-4193-abd0-3592e4cecd59"
-      ],
-      "note_id": "ece34f11-c106-4010-8d55-ccfcc3c7159c",
-      "note": "Мы выходим из дома сидели там пару часов, успели помыться поесть и выпить пивка. Конечно же пыхнули и взяли еще косячок с собой, бомбочки сделаны и тоже взяты с собой.",
-      "excerpts": [
-       {
-        "note_id": "ece34f11-c106-4010-8d55-ccfcc3c7159c",
-        "text": "успели помыться поесть и выпить пивка."
-       }
-      ],
-      "sky_line": null
-     },
-     {
-      "first_day": 1,
-      "last_day": null,
-      "date": "2026-10-23",
-      "end_date": null,
-      "photo_count": 4,
-      "headline": "На Куко Unreal",
-      "hero_photo_id": "764ecd51-0180-4683-b777-200e375078ed",
-      "extra_photo_ids": [
-       "620303b8-4aa3-4b7c-8c11-fe813dfd62a1",
-       "02d9ee87-6b80-457f-ab8f-c4c1bd67f73a",
-       "e5be04ce-b606-415f-9b03-70c08b0fe4a3"
+       "764ecd51-0180-4683-b777-200e375078ed",
+       "02d9ee87-6b80-457f-ab8f-c4c1bd67f73a"
       ],
       "note_id": "e2528865-8652-4b44-a65e-f698f5e30db0",
       "note": "Это самый крутой сет который я слышал или это М?",
@@ -3040,6 +3017,10 @@
        {
         "note_id": "e2528865-8652-4b44-a65e-f698f5e30db0",
         "text": "Это самый крутой сет который я слышал или это М?"
+       },
+       {
+        "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
+        "text": "сначало были на Куко Unreal"
        }
       ],
       "sky_line": null
@@ -3064,6 +3045,10 @@
        {
         "note_id": "f33b871c-c682-4680-bc74-260c570ad1a3",
         "text": "Идем завтракать в город нашли english breakfast."
+       },
+       {
+        "note_id": "43f91e23-1542-490d-b835-f31dfac55106",
+        "text": "держим кулочки за нашего слона."
        }
       ],
       "sky_line": null
@@ -3540,5 +3525,360 @@
    }
   },
   "case": "ade"
+ },
+ {
+  "film": "sky_story",
+  "photos": 29,
+  "photo_ids": [
+   "cd16a50b-3981-465d-ba60-33078d7f4eef",
+   "39fea9d3-4931-4605-8f22-94c1714fa2e8",
+   "ac6c43bb-a98f-4c77-9a52-d84d0abb16f9",
+   "7b9eee86-d27a-4263-ae02-cdb2d829e792",
+   "a3cc4c86-5ac2-4200-8bc8-1e303d6c594e",
+   "1188b05a-6581-4680-9b01-34c97a7f1b34",
+   "1325f261-7d4b-48d5-a9e7-dbc4e6cc423b",
+   "34542056-43ea-4798-b5e4-18944e0c539a",
+   "b884095d-4672-48cf-9da9-493aac62c69d",
+   "6eca4520-d5b4-4e2a-aed2-7760f35a40f5",
+   "2bd9809d-ae25-452e-b250-1c6397d7a674",
+   "cd74fdc4-2cb8-46e8-a3fc-8d1baa910293",
+   "10af0193-e773-4ffc-8b86-1066f3fe1530",
+   "1e84d7df-ead0-4193-abd0-3592e4cecd59",
+   "620303b8-4aa3-4b7c-8c11-fe813dfd62a1",
+   "764ecd51-0180-4683-b777-200e375078ed",
+   "e5be04ce-b606-415f-9b03-70c08b0fe4a3",
+   "02d9ee87-6b80-457f-ab8f-c4c1bd67f73a",
+   "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e",
+   "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
+   "48da458f-98c8-414f-9453-af81cec6f9da",
+   "ad570c04-90bf-4d84-9931-7a3e90db9caa",
+   "ff6a1fde-b6bd-48d8-b87d-29687d647553",
+   "4b028163-05eb-4808-8995-2332f0e2e7a5",
+   "b6c54800-0fd8-40e0-a2d8-fee12fcc2e55",
+   "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc",
+   "da8f273e-2961-411b-b8e5-e286047a5e72",
+   "9a9ccc19-f7b1-491d-a502-96217f7ca55c",
+   "8513fe91-5136-43bb-8d93-d930f1cecf54"
+  ],
+  "start_date": "2026-10-23",
+  "end_date": "2026-10-25",
+  "content": {
+   "film_style": "sky_story",
+   "film_seconds": 51.599999999999994,
+   "sky": {
+    "sky_version": 1,
+    "source": "code",
+    "title": "ADE-Amsterdam 2026",
+    "first_name": null,
+    "moment_count": 29,
+    "mosaic_photo_ids": [
+     "39fea9d3-4931-4605-8f22-94c1714fa2e8",
+     "7b9eee86-d27a-4263-ae02-cdb2d829e792",
+     "a3cc4c86-5ac2-4200-8bc8-1e303d6c594e",
+     "34542056-43ea-4798-b5e4-18944e0c539a",
+     "cd74fdc4-2cb8-46e8-a3fc-8d1baa910293",
+     "10af0193-e773-4ffc-8b86-1066f3fe1530",
+     "1e84d7df-ead0-4193-abd0-3592e4cecd59",
+     "620303b8-4aa3-4b7c-8c11-fe813dfd62a1",
+     "e5be04ce-b606-415f-9b03-70c08b0fe4a3",
+     "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
+     "ff6a1fde-b6bd-48d8-b87d-29687d647553",
+     "da8f273e-2961-411b-b8e5-e286047a5e72"
+    ],
+    "pages": [
+     {
+      "first_day": 1,
+      "last_day": null,
+      "date": "2026-10-23",
+      "end_date": null,
+      "photo_count": 8,
+      "headline": "В Амстердаме",
+      "hero_photo_id": "7b9eee86-d27a-4263-ae02-cdb2d829e792",
+      "extra_photo_ids": [
+       "cd16a50b-3981-465d-ba60-33078d7f4eef",
+       "ac6c43bb-a98f-4c77-9a52-d84d0abb16f9",
+       "1188b05a-6581-4680-9b01-34c97a7f1b34",
+       "1325f261-7d4b-48d5-a9e7-dbc4e6cc423b"
+      ],
+      "note_id": "3224a4be-3594-48c9-887b-c53053faa01a",
+      "note": "Прибыл в аэропорт за 10 минут до посадки, а там толпа людей- даже немного испугался что не успею на самолет.",
+      "excerpts": [
+       {
+        "note_id": "3224a4be-3594-48c9-887b-c53053faa01a",
+        "text": "Прибыл в аэропорт за 10 минут до посадки"
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 1,
+      "last_day": null,
+      "date": "2026-10-23",
+      "end_date": null,
+      "photo_count": 9,
+      "headline": "На Куко Unreal",
+      "hero_photo_id": "2bd9809d-ae25-452e-b250-1c6397d7a674",
+      "extra_photo_ids": [
+       "6eca4520-d5b4-4e2a-aed2-7760f35a40f5",
+       "10af0193-e773-4ffc-8b86-1066f3fe1530",
+       "764ecd51-0180-4683-b777-200e375078ed",
+       "02d9ee87-6b80-457f-ab8f-c4c1bd67f73a"
+      ],
+      "note_id": "e2528865-8652-4b44-a65e-f698f5e30db0",
+      "note": "Это самый крутой сет который я слышал или это М?",
+      "excerpts": [
+       {
+        "note_id": "e2528865-8652-4b44-a65e-f698f5e30db0",
+        "text": "Это самый крутой сет который я слышал или это М?"
+       },
+       {
+        "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
+        "text": "сначало были на Куко Unreal"
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 2,
+      "last_day": null,
+      "date": "2026-10-24",
+      "end_date": null,
+      "photo_count": 6,
+      "headline": "Против Мираба",
+      "hero_photo_id": "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
+      "extra_photo_ids": [
+       "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e",
+       "48da458f-98c8-414f-9453-af81cec6f9da",
+       "ad570c04-90bf-4d84-9931-7a3e90db9caa",
+       "4b028163-05eb-4808-8995-2332f0e2e7a5"
+      ],
+      "note_id": "f33b871c-c682-4680-bc74-260c570ad1a3",
+      "note": "Идем завтракать в город нашли english breakfast. Потом зашли в coffeeshop на втором этаже есть диваны где все кушают сладости и курят косячки, очень необычно. Зашли в продуктовый и поехали в дом откисать.",
+      "excerpts": [
+       {
+        "note_id": "f33b871c-c682-4680-bc74-260c570ad1a3",
+        "text": "Идем завтракать в город нашли english breakfast."
+       },
+       {
+        "note_id": "43f91e23-1542-490d-b835-f31dfac55106",
+        "text": "держим кулочки за нашего слона."
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 3,
+      "last_day": null,
+      "date": "2026-10-25",
+      "end_date": null,
+      "photo_count": 4,
+      "headline": "В Брюсель",
+      "hero_photo_id": "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc",
+      "extra_photo_ids": [
+       "9a9ccc19-f7b1-491d-a502-96217f7ca55c",
+       "da8f273e-2961-411b-b8e5-e286047a5e72",
+       "8513fe91-5136-43bb-8d93-d930f1cecf54"
+      ],
+      "note_id": "7b1c21ed-fe19-4c70-a6bd-d85f1c502768",
+      "note": "Проснулись собрались с силами и позавтракали, едем в аэропорт в Брюсель но подороге остановимся покушать и выпить вкусного бельгийского пиво на дорожку",
+      "excerpts": [
+       {
+        "note_id": "7b1c21ed-fe19-4c70-a6bd-d85f1c502768",
+        "text": "но подороге остановимся покушать и выпить вкусного бельгийского пиво на дорожку"
+       }
+      ],
+      "sky_line": null
+     }
+    ]
+   },
+   "sky_estimate_seconds": 68.5,
+   "photo_captions": {
+    "cd16a50b-3981-465d-ba60-33078d7f4eef": "fast check-in",
+    "39fea9d3-4931-4605-8f22-94c1714fa2e8": "Did not expect that many people in the airport, have 15m before boarding",
+    "ac6c43bb-a98f-4c77-9a52-d84d0abb16f9": "children are ready to get fucked",
+    "7b9eee86-d27a-4263-ae02-cdb2d829e792": "we are here",
+    "a3cc4c86-5ac2-4200-8bc8-1e303d6c594e": "coffee shop",
+    "1188b05a-6581-4680-9b01-34c97a7f1b34": "getting oatmeal with almonds and bananas",
+    "1325f261-7d4b-48d5-a9e7-dbc4e6cc423b": "our castle",
+    "34542056-43ea-4798-b5e4-18944e0c539a": "got some fun",
+    "b884095d-4672-48cf-9da9-493aac62c69d": "ждем автобус",
+    "6eca4520-d5b4-4e2a-aed2-7760f35a40f5": "боча пролил пиво",
+    "2bd9809d-ae25-452e-b250-1c6397d7a674": "back to the roots",
+    "10af0193-e773-4ffc-8b86-1066f3fe1530": "some peptides",
+    "1e84d7df-ead0-4193-abd0-3592e4cecd59": "боча застрял в толчке",
+    "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e": "morning hangover",
+    "f3d3f0b4-d645-45fd-a946-2aa8998df1cd": "on the walk with some lads",
+    "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc": "some sweets for Elmas"
+   }
+  },
+  "case": "ade_sky"
+ },
+ {
+  "film": "sky_story",
+  "photos": 27,
+  "photo_ids": [
+   "2a3015fb-9e76-48ac-bc8b-8d2920b65777",
+   "3001aefd-4cfb-4ebb-8b51-07f1ba6a73d0",
+   "f8710fb6-e80e-4c39-86c7-535b7c874318",
+   "5d120b72-72e5-45fa-9526-3a7f84e4375c",
+   "876cbe54-549e-442e-bc22-74b831752c2c",
+   "d9d0995e-43fe-4cd8-a03c-7cdd8f2591e5",
+   "501ce519-e1c5-432f-81f5-314a8abd9078",
+   "b776e84f-0242-4797-90b9-470beb656236",
+   "44871494-97ed-40df-af3f-c0adc7ecd541",
+   "c4addcfd-e459-4050-942c-d2bb63dd9211",
+   "bb322bba-1799-4a75-900a-87e5a4edbd79",
+   "662f69c6-c2d2-4035-b438-db36b4ad798d",
+   "a95bd32e-1ff4-4c1d-8656-17a276c06893",
+   "e72d4013-7abc-47c5-9efd-bee9220c1d5a",
+   "25661aa6-6ae6-482b-94f8-42d366fe911b",
+   "1a1ff08d-0651-4d0e-913e-03c5e64a4ca9",
+   "6137b255-2970-4f50-9c77-9fd6b2197b57",
+   "be26b00b-4468-4aa5-bc7c-360dfdd88362",
+   "5b209670-5ca9-43c3-9e26-9a36a8420a93",
+   "6438ee46-bb02-4ab2-b918-71750538e3bd",
+   "133bbde8-1a94-4e41-8c21-ef92537b7b86",
+   "d3863676-22e4-4005-8268-b57ec4116036",
+   "4e22d3a0-1515-4dba-938e-b561a24b4356",
+   "cf4afcdf-5436-4bc1-8213-7e211a10a59b",
+   "e24977fe-a9d6-47f7-9805-fda3b3b513ab",
+   "a4770d99-fc53-47e6-95ba-934ee8e925ef",
+   "be7ede64-e0e3-4778-9da3-83b72ec63bf2"
+  ],
+  "start_date": "2026-02-26",
+  "end_date": "2026-03-01",
+  "content": {
+   "film_style": "sky_story",
+   "film_seconds": 44.4,
+   "sky": {
+    "sky_version": 1,
+    "source": "code",
+    "title": "Elmas birthday",
+    "first_name": null,
+    "moment_count": 27,
+    "mosaic_photo_ids": [
+     "2a3015fb-9e76-48ac-bc8b-8d2920b65777",
+     "501ce519-e1c5-432f-81f5-314a8abd9078",
+     "44871494-97ed-40df-af3f-c0adc7ecd541",
+     "662f69c6-c2d2-4035-b438-db36b4ad798d",
+     "bb322bba-1799-4a75-900a-87e5a4edbd79",
+     "e72d4013-7abc-47c5-9efd-bee9220c1d5a",
+     "6438ee46-bb02-4ab2-b918-71750538e3bd",
+     "6137b255-2970-4f50-9c77-9fd6b2197b57",
+     "133bbde8-1a94-4e41-8c21-ef92537b7b86",
+     "4e22d3a0-1515-4dba-938e-b561a24b4356",
+     "cf4afcdf-5436-4bc1-8213-7e211a10a59b",
+     "a4770d99-fc53-47e6-95ba-934ee8e925ef"
+    ],
+    "pages": [
+     {
+      "first_day": 1,
+      "last_day": null,
+      "date": "2026-02-26",
+      "end_date": null,
+      "photo_count": 2,
+      "headline": "From Tallinn",
+      "hero_photo_id": "f8710fb6-e80e-4c39-86c7-535b7c874318",
+      "extra_photo_ids": [
+       "2a3015fb-9e76-48ac-bc8b-8d2920b65777"
+      ],
+      "note_id": "36265ad3-b2ea-49cf-bb9c-fd9d60d8573b",
+      "note": "Direct plane from Tallinn to Budapest is the best, just 2 hours and you are there.",
+      "excerpts": [
+       {
+        "note_id": "36265ad3-b2ea-49cf-bb9c-fd9d60d8573b",
+        "text": "Direct plane from Tallinn to Budapest is the best"
+       },
+       {
+        "note_id": "b525d33e-d7df-4763-922d-f1517785d477",
+        "text": "Mortimer is feeling lonely"
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 2,
+      "last_day": null,
+      "date": "2026-02-27",
+      "end_date": null,
+      "photo_count": 9,
+      "headline": "Local cousine breakfast",
+      "hero_photo_id": "a95bd32e-1ff4-4c1d-8656-17a276c06893",
+      "extra_photo_ids": [
+       "5d120b72-72e5-45fa-9526-3a7f84e4375c",
+       "c4addcfd-e459-4050-942c-d2bb63dd9211",
+       "bb322bba-1799-4a75-900a-87e5a4edbd79",
+       "25661aa6-6ae6-482b-94f8-42d366fe911b"
+      ],
+      "note_id": "2a28c39a-d3f8-44a2-8921-d5fece183c84",
+      "note": "Woke up and went for some local cousine breakfast, absolute delight. Prices are good too",
+      "excerpts": [
+       {
+        "note_id": "2a28c39a-d3f8-44a2-8921-d5fece183c84",
+        "text": "absolute delight."
+       },
+       {
+        "note_id": "ebac3e6c-9d6c-457d-9a69-9c31ce4f2955",
+        "text": "Went to really posh looking cafe for a golden coffee"
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 2,
+      "last_day": null,
+      "date": "2026-02-27",
+      "end_date": null,
+      "photo_count": 5,
+      "headline": "Szimpla Kert",
+      "hero_photo_id": "6438ee46-bb02-4ab2-b918-71750538e3bd",
+      "extra_photo_ids": [
+       "1a1ff08d-0651-4d0e-913e-03c5e64a4ca9",
+       "6137b255-2970-4f50-9c77-9fd6b2197b57",
+       "5b209670-5ca9-43c3-9e26-9a36a8420a93",
+       "be26b00b-4468-4aa5-bc7c-360dfdd88362"
+      ],
+      "note_id": "e8178b1a-6561-4781-bd65-d0444f6f2699",
+      "note": "Had a lovely meal and decided to check out famous bars. This particular is called Szimpla Kert it has 2 floors and has lots of rooms , feels like a maze full of bars and people",
+      "excerpts": [
+       {
+        "note_id": "e8178b1a-6561-4781-bd65-d0444f6f2699",
+        "text": "This particular is called Szimpla Kert it has 2 floors and has lots of rooms"
+       }
+      ],
+      "sky_line": null
+     },
+     {
+      "first_day": 3,
+      "last_day": null,
+      "date": "2026-02-28",
+      "end_date": null,
+      "photo_count": 7,
+      "headline": "Famous spas",
+      "hero_photo_id": "133bbde8-1a94-4e41-8c21-ef92537b7b86",
+      "extra_photo_ids": [
+       "d3863676-22e4-4005-8268-b57ec4116036",
+       "e24977fe-a9d6-47f7-9805-fda3b3b513ab",
+       "cf4afcdf-5436-4bc1-8213-7e211a10a59b",
+       "be7ede64-e0e3-4778-9da3-83b72ec63bf2"
+      ],
+      "note_id": "6c51e5b4-74d9-42d1-87cd-1e4d690c38d6",
+      "note": "Today is Elmas birthday so we decided to start our day with famous spas. It s massive building with lots of saunas and outside hot swimming pool. This was amazing, you can spend entire day there",
+      "excerpts": [
+       {
+        "note_id": "6c51e5b4-74d9-42d1-87cd-1e4d690c38d6",
+        "text": "Today is Elmas birthday so we decided to start our day with famous spas."
+       }
+      ],
+      "sky_line": null
+     }
+    ]
+   },
+   "sky_estimate_seconds": 68,
+   "photo_captions": {
+    "a95bd32e-1ff4-4c1d-8656-17a276c06893": "most beautiful parlament building i have seen"
+   }
+  },
+  "case": "budapest_sky"
  }
 ]

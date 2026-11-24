@@ -104,11 +104,28 @@ Deno.test("Budapest: the birthday line plays on the spa day, the flight on day o
   assert(lines[spa].includes("Elmas birthday"), lines[spa]);
 });
 
-Deno.test("ADE: the airport line types on the first page", () => {
+Deno.test("ADE and Budapest: the parts rejoin their days before a line goes", () => {
+  for (const { name, memory, heroScores, summaries } of memories()) {
+    const film = skyStoryFilm(memory, null, { heroScores, summaries });
+    // Nothing went for length: only a split day, and what a page's box
+    // doesn't hold.
+    assert(
+      film.trims.every((t) =>
+        t.includes("split day") || t.includes("fit the page")
+      ),
+      `${name}: ${film.trims.join(" · ")}`,
+    );
+    assert(film.content!.pages.every((p) => p.excerpts.length > 0), name);
+  }
+});
+
+Deno.test("ADE: day one's page plays day one's own lines", () => {
   const ade = adeFilmMemory();
-  const film = skyStoryFilm(asSky(ade.memory), null, {
-    heroScores: ade.heroScores,
-  });
-  const first = film.content!.pages[0].excerpts.map((e) => e.text);
-  assert(first.some((t) => t.includes("аэропорт")), first.join(" | "));
+  const memory = asSky(ade.memory);
+  const film = skyStoryFilm(memory, null, { heroScores: ade.heroScores });
+  const first = film.content!.pages[0];
+  const day = film.skeleton.pages[0].days[0];
+  const homes = skyNoteHomes(memory, film.skeleton);
+  for (const e of first.excerpts) assertEquals(homes.get(e.note_id), 0);
+  assertEquals(film.skeleton.pages[0].days, [day]);
 });
