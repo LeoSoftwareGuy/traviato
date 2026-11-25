@@ -146,6 +146,16 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   there when more than Sky Story's 5 pages × 5 photos are marked. A kept film whose photos changed offers "Photos
   changed · Rebuild film" (film HUD + Kept Memory page) — rebuilt on tap,
   keeping its AI lines. The all-days "Choose photos" screen is #294 part 2.
+- **Added later (#468):** a note written more than 24 h away from its day
+  shows "added later" instead of a time, at the end of the day (also on
+  the photo's notes and the Kept Memory page). Long-press → **Edit time**
+  sets when it happened on its day (at the offset of that day's photos);
+  then it shows and plays at that time.
+- **Taken on another day (#468):** adding gallery photos to a day other
+  than the one they were taken on (beyond the logical-day rule) asks
+  "This photo was taken on … Add it to … instead?" — Move / Keep here
+  (one question for a batch). Camera shots and photos without a capture
+  date never ask.
 - Days where `day_date > today` are locked (no note/photo entry, blurred
   balloon thumbnail); `day_date <= today` are open/bright. (Reinstated — see
   issue #118.)
@@ -516,6 +526,20 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   plan call is gone. The Plan inspector shows every Sky slot, "N / M
   photos on pages", what was trimmed and the notes on no page. Kept
   films keep their words.
+- **The Journal day is the truth (#468, after "Arabic retreat", made in
+  November for an April trip):** every film puts a photo and a note on
+  the Journal day it shows under — never a day recomputed from its time
+  (the time still orders things within the day). A note written more
+  than 24 h away from its day ("added later") has no time for the films:
+  it goes to the page or chapter of its day whose photos it talks about
+  (mosque, waterfall, fort — matched against the photos' descriptions,
+  captions and places), else the day's first. "вчера"/"yesterday" never
+  moves a note. A Journal day with photos always gets one in the film
+  (its best, past the 60 cap, never pushing out an Always pick), so a
+  long memory groups its days evenly onto 5 pages and drops none; a note
+  on a day without film photos plays on the nearest page of its group,
+  else in the Note scene. Lines never start with a bullet, and a
+  "Label: value" list never becomes a headline ("Size Measures").
 - **The user's words (#399, display only; which words are chosen is #398,
   multi-excerpt note moments #416):** captions and notes are never cut
   with "…". A text that doesn't fit gets smaller type or more lines, then
