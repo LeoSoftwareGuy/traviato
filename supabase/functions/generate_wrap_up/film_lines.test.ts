@@ -112,8 +112,9 @@ import { useFilmLengthRuleForTests } from "./film_length.ts";
 // These tests are about other rules: every film at its longest (#434).
 useFilmLengthRuleForTests(false);
 
-// One day with a morning and a night out past midnight (UTC = the clock).
-function longDay(): TripData {
+// One day with a morning and a night out past midnight (UTC = the clock),
+// the night under [nightDay] in the Journal (the app stamps the evening's).
+function longDay(nightDay = "2026-09-01"): TripData {
   const base = directorTripData().photos[0];
   const at = (id: string, day: string, time: string) => ({
     ...base,
@@ -130,18 +131,24 @@ function longDay(): TripData {
         at(`m${k}`, "2026-09-01", `${h}:00`)
       ),
       ...["22", "23"].map((h, k) => at(`n${k}`, "2026-09-01", `${h}:30`)),
-      ...["01", "02", "03"].map((h, k) => at(`r${k}`, "2026-09-02", `${h}:00`)),
+      ...["01", "02", "03"].map((h, k) => ({
+        ...at(`r${k}`, nightDay, `${h}:00`),
+        taken_at: `2026-09-02T${h}:00:00Z`,
+      })),
     ],
     notes: [],
   });
 }
 
-Deno.test("Sky Story sees logical days: the night after midnight is the evening's", () => {
-  const { pages } = buildSkySkeleton(longDay());
-  const dayOf = (id: string) =>
-    pages.find((p) => p.photos.some((x) => x.id === id))!.days;
-  assertEquals(dayOf("r2"), ["2026-09-01"]);
-  assertEquals(dayOf("m0"), ["2026-09-01"]);
+Deno.test("Sky Story follows the Journal day: the night stays where the Journal has it (#468)", () => {
+  const dayOf = (data: TripData, id: string) =>
+    buildSkySkeleton(data).pages.find((p) => p.photos.some((x) => x.id === id))!
+      .days;
+  // Stamped on the evening (the app's rule when saved): the evening's.
+  assertEquals(dayOf(longDay(), "r2"), ["2026-09-01"]);
+  // Put under the next day in the Journal: that day's, whatever its time.
+  assertEquals(dayOf(longDay("2026-09-02"), "r2"), ["2026-09-02"]);
+  assertEquals(dayOf(longDay("2026-09-02"), "m0"), ["2026-09-01"]);
 });
 
 Deno.test("Sky lines go on the page whose photos they were written among", () => {

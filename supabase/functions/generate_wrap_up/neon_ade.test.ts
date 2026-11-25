@@ -82,16 +82,23 @@ Deno.test("ADE: every chapter with notes has card candidates; Brussels has its l
   }
   const brussels = slot(slots, "ch5.card").candidates.map((c) => c.text);
   assert(brussels.includes(BRUSSELS_LINE), brussels.join(" | "));
-  // The AMF night's notes are ch4's (#454: they were on no list), on its
-  // moment of the stadium night's photos (#456).
-  const amf = slot(slots, "ch4.m1").candidates.map((c) => c.text);
+  // The AMF night's notes are in the Journal on 10-24 (#468: the Journal
+  // is the truth), so they type on 10-24's card — the stadium photos are
+  // under 10-25.
+  const amf = slot(slots, "ch4.card").candidates.map((c) => c.text);
   assert(amf.some((t) => t.startsWith("Выезжаем на AMF тусовку")));
   assert(amf.some((t) => t.startsWith("Мы на месте")));
-  // "вчера…" is the night before's: Kuko's card.
+  // "вчера…" stays on its own Journal day (#468), never the night before.
   assert(
+    slot(slots, "ch4.card").candidates.some((c) =>
+      c.text.includes("Куко Unreal")
+    ),
+  );
+  assertEquals(
     slot(slots, "ch3.card").candidates.some((c) =>
       c.text.includes("Куко Unreal")
     ),
+    false,
   );
 });
 
@@ -158,21 +165,26 @@ Deno.test("ADE replay: the director's picks hold, Brussels types its line", () =
   // Recorded before #456: these picks were lines of another scene's notes
   // (the airport line over the Amsterdam split, the ribs over the 01:14
   // split, the stadium night over the walk) — now on another list.
-  const moved = new Set(["ch1.m1", "ch2.m1", "ch4.card"]);
+  // Since #468 "вчера…" is 10-24's, not Kuko's (ch3).
+  const moved = new Set(["ch1.m1", "ch2.m1", "ch3.card", "ch3.title"]);
   for (const r of report) {
     // A director pick, or code's for the film's length only.
     assert(
       r.source === "director" ||
         r.reason.startsWith("a shorter line as good as the pick") ||
-        (moved.has(r.slot) && r.reason.includes("not in this slot's list")),
+        (moved.has(r.slot) && r.reason.includes("not in this slot's list")) ||
+        // The stadium photos are 10-25's in the Journal (#468): Brussels
+        // gains a moment the recorded run never saw.
+        (r.slot === "ch5.m1" && r.reason.startsWith("director left it")),
       `${r.slot}: ${r.reason}`,
     );
   }
   const titles = content.chapters.map((c) => c.title);
   assertEquals(titles[4], "Брюссель");
-  for (const t of titles) {
+  for (const [i, t] of titles.entries()) {
     assert([...t].length <= MAX_NN_TITLE_CHARS, t);
-    assertEquals(/^(День|Day) \d/.test(t), false, t);
+    // Kuko's night has no note of its own day left to name it (#468).
+    if (i !== 2) assertEquals(/^(День|Day) \d/.test(t), false, t);
   }
   assertEquals(content.chapters[4].note, BRUSSELS_LINE);
   assertEquals(content.note?.text, NOTE_LINE);
@@ -249,8 +261,9 @@ Deno.test("ADE: titles are names, the card line matches the card's photos (#454)
       }
     }
   }
+  // "Куко Unreal" is named in a 10-24 note: 10-24's title (#468).
   assert(
-    slot(slots, "ch3.title").candidates.some((k) =>
+    slot(slots, "ch4.title").candidates.some((k) =>
       k.text.includes("Куко Unreal")
     ),
   );
@@ -301,7 +314,8 @@ Deno.test("ADE replay: the recorded titles and headline play (#454)", () => {
   assertEquals(content.chapters.map((c) => c.title), [
     "Амстердам",
     "Полтора метра ребер",
-    "На Куко Unreal",
+    // Its recorded title came from 10-24's "вчера…" note (#468).
+    "День 1 · ночь",
     "AMF под ливнем",
     "Брюссель",
   ]);

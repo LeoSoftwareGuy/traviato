@@ -269,7 +269,7 @@ function twoParts(): TripData {
   });
 }
 
-Deno.test("note → chapter: its photo's, else the nearest part; after the last photo the last; yesterday the day before", () => {
+Deno.test("note → chapter: its photo's, else the nearest part; after the last photo the last; yesterday stays on its Journal day", () => {
   const data = twoParts();
   const { chapters } = neonNightFilm(data, null);
   assertEquals(chapters.length, 3);
@@ -280,8 +280,51 @@ Deno.test("note → chapter: its photo's, else the nearest part; after the last 
   assertEquals(owners.get("lunch"), [1]);
   // Written after the day's last photo: its last part.
   assertEquals(owners.get("late"), [2]);
-  // "Yesterday…": the day before's last part.
-  assertEquals(owners.get("yesterday"), [0]);
+  // "Yesterday…" stays on its Journal day (#468): never the day before.
+  assertEquals(owners.get("yesterday")?.every((i) => i > 0), true);
+});
+
+Deno.test("a backfilled note goes by what it says, within its own Journal day (#468)", () => {
+  const data = twoParts();
+  // The evening part shows the canal; the lunch part the café.
+  data.photos = data.photos.map((p) => ({
+    ...p,
+    summary: p.id === "t7"
+      ? "Boats on a canal at night"
+      : p.id === "t1"
+      ? "Plates of ribs on a café table"
+      : "A street",
+  }));
+  data.notes = [
+    {
+      id: "canal",
+      day_date: "2026-09-02",
+      // Typed two months later.
+      taken_at: "2026-11-20T18:00:00Z",
+      photo_id: null,
+      content: "The canal boats at night were the best part.",
+    },
+    {
+      id: "ribs",
+      day_date: "2026-09-02",
+      taken_at: "2026-11-20T18:05:00Z",
+      photo_id: null,
+      content: "Ribs at the café, three plates between us.",
+    },
+    {
+      id: "nothing",
+      day_date: "2026-09-02",
+      taken_at: "2026-11-20T18:10:00Z",
+      photo_id: null,
+      content: "Slept so well.",
+    },
+  ];
+  const { chapters } = neonNightFilm(data, null);
+  const owners = noteChapters(data, chapters);
+  assertEquals(owners.get("canal"), [2]);
+  assertEquals(owners.get("ribs"), [1]);
+  // Nothing matches: the day's first part — never day 1.
+  assertEquals(owners.get("nothing"), [1]);
 });
 
 Deno.test("every list is capped at 8 (a card keeps one line of each note it owns)", () => {

@@ -28,10 +28,12 @@ import type { WrapUpLanguage } from "./language.ts";
 import { excerptScore, isGeneric } from "./excerpts.ts";
 import {
   choose,
+  contentScene,
   dayTitleFor,
   freeTextProblem,
   hash,
   hasVerb,
+  isBackfilled,
   isNegative,
   linesOf,
   MAX_SLOT_CANDIDATES,
@@ -269,7 +271,7 @@ export function gvNoteHomes(
   skeleton: GvSkeleton,
 ): Map<string, GvNoteHome> {
   const byId = new Map(tripData.photos.map((p) => [p.id, p]));
-  const owners = noteChapters(tripData, skeleton.chapters);
+  const owners = noteChapters(tripData, skeleton.chapters, true);
   const { noteCaption } = gvCaptions(tripData);
   const nearMs = SCENE_NEAR_MINUTES * 60_000;
   const homes = new Map<string, GvNoteHome>();
@@ -298,6 +300,14 @@ export function gvNoteHomes(
     if (hosts.length === 0) {
       homes.set(n.id, "none");
       continue;
+    }
+    // A backfilled note (#468): the page that shows what it says.
+    if (isBackfilled(n) && !c.photos.some((p) => p.id === n.photo_id)) {
+      const k = contentScene(scenes, n);
+      if (k >= 0) {
+        homes.set(n.id, hosts[k]);
+        continue;
+      }
     }
     const times = c.photos.map(timeOf).filter((x) => x > 0);
     const t = noteTime(n);
@@ -328,7 +338,7 @@ export function buildGvSlots(
   const names = namesOf(tripData);
   const wedding = WEDDING_OCCASIONS.includes(skeleton.occasion);
   const notes = tripData.notes.filter((n) => n.id && n.content.trim());
-  const owners = noteChapters(tripData, skeleton.chapters);
+  const owners = noteChapters(tripData, skeleton.chapters, true);
   const byId = new Map(tripData.photos.map((p) => [p.id, p]));
   const slots: GvSlot[] = [];
   const title = (text: string, max: number, scored = true) =>
@@ -923,7 +933,7 @@ export function buildGvPickInput(
     notes: tripData.notes.filter((n) => n.id && n.content.trim()).map((n) => ({
       note_id: n.id,
       written_at: clock(
-        n.legacy ? null : n.taken_at ?? n.created_at ?? null,
+        n.legacy || isBackfilled(n) ? null : n.taken_at ?? n.created_at ?? null,
         n,
       ),
       photo_id: n.photo_id ?? null,

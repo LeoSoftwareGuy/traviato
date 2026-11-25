@@ -76,6 +76,9 @@ export interface TripData {
     // or resolved by time_zones.ts.
     utc_offset_minutes?: number | null;
     utc_offset_source?: OffsetSource;
+    // The photo analysis's summary (#468): what a backfilled note is
+    // matched to. Never shown, never the director's words.
+    summary?: string | null;
   }[];
   completedBonusTasks: {
     completed_at: string;

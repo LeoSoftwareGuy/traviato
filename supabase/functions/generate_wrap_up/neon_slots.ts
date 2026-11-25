@@ -63,6 +63,7 @@ import {
   hash,
   hasVerb,
   inOtherLanguage,
+  isBackfilled,
   isNegative,
   type Line,
   linesOf as linesOfTheme,
@@ -305,7 +306,10 @@ export function buildNeonSlots(
         photo_id: l.note.photo_id && filmIds.has(l.note.photo_id)
           ? l.note.photo_id
           : null,
-        score: l.score + TIER_BONUS[l.tier],
+        // A note of a day without a chapter plays here (#468): its lines
+        // come first, so it's never on no scene.
+        score: l.score + TIER_BONUS[l.tier] +
+          (owners.has(l.note.id!) ? 0 : NN_ORPHAN_NOTE_BONUS),
       })),
     ),
   });
@@ -547,6 +551,9 @@ export function buildNeonSlots(
 
 // The notes on no slot's list, and why (#454): every note without an
 // explicit drug word should be on one.
+// The Note scene's lead for a note on a day without a chapter (#468).
+export const NN_ORPHAN_NOTE_BONUS = 1000;
+
 export function unlistedNotes(
   tripData: TripData,
   chapters: readonly NnSkeletonChapter[],
@@ -967,7 +974,7 @@ export function buildNeonPickInput(
     notes: tripData.notes.filter((n) => n.id && n.content.trim()).map((n) => ({
       note_id: n.id,
       written_at: clock(
-        n.legacy ? null : n.taken_at ?? n.created_at ?? null,
+        n.legacy || isBackfilled(n) ? null : n.taken_at ?? n.created_at ?? null,
         n,
       ),
       photo_id: n.photo_id ?? null,

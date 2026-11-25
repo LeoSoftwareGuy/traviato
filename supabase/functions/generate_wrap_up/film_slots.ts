@@ -62,11 +62,211 @@ export function norm(text: string): string {
     .trim();
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// A note typed long after (or before) the Journal day it was added to
+// (#468): its time is more than 24 h outside its day, on the clock it was
+// typed on — a memory filled in after the trip. Its time says nothing
+// about the day, so it's never used to place it.
+export function isBackfilled(n: Note): boolean {
+  if (n.legacy || !n.taken_at || !n.day_date) return false;
+  const at = Date.parse(n.taken_at);
+  if (Number.isNaN(at)) return false;
+  const local = at + (n.utc_offset_minutes ?? 0) * 60_000;
+  const start = Date.parse(`${n.day_date}T00:00:00Z`);
+  return local < start - DAY_MS || local >= start + 2 * DAY_MS;
+}
+
 // When a note was written; NaN for an old one-a-day note (its time is its
-// last edit) or none.
+// last edit), a backfilled one (#468) or none.
 export function noteTime(n: Note): number {
-  if (n.legacy) return NaN;
+  if (n.legacy || isBackfilled(n)) return NaN;
   return Date.parse(n.taken_at ?? n.created_at ?? "");
+}
+
+// Words that say nothing about what a photo shows (#468).
+const CONTENT_STOP = new Set([
+  "about",
+  "after",
+  "again",
+  "also",
+  "basically",
+  "because",
+  "before",
+  "being",
+  "could",
+  "decided",
+  "didn",
+  "does",
+  "doesn",
+  "done",
+  "really",
+  "from",
+  "have",
+  "having",
+  "here",
+  "into",
+  "just",
+  "like",
+  "little",
+  "lovely",
+  "made",
+  "make",
+  "many",
+  "mean",
+  "more",
+  "most",
+  "much",
+  "nice",
+  "only",
+  "other",
+  "over",
+  "pretty",
+  "quite",
+  "same",
+  "some",
+  "something",
+  "still",
+  "such",
+  "than",
+  "that",
+  "their",
+  "them",
+  "then",
+  "there",
+  "these",
+  "they",
+  "thing",
+  "things",
+  "this",
+  "those",
+  "through",
+  "time",
+  "today",
+  "tomorrow",
+  "totally",
+  "very",
+  "visit",
+  "want",
+  "wanted",
+  "went",
+  "were",
+  "what",
+  "when",
+  "where",
+  "which",
+  "while",
+  "with",
+  "would",
+  "your",
+  "yesterday",
+  "amazing",
+  "beautiful",
+  "great",
+  "where",
+  "everything",
+  "everyone",
+  "first",
+  "last",
+  "next",
+  "back",
+  "around",
+  "best",
+  "good",
+  "come",
+  "came",
+  "going",
+  "gone",
+  "took",
+  "take",
+  "tried",
+  "people",
+  "place",
+  "local",
+  "right",
+  "left",
+  "approximately",
+  "сегодня",
+  "вчера",
+  "потом",
+  "очень",
+  "просто",
+  "было",
+  "были",
+  "была",
+  "когда",
+  "после",
+  "этот",
+  "этой",
+  "который",
+  "которая",
+  "тоже",
+  "здесь",
+]);
+
+function contentWords(text: string | null | undefined): string[] {
+  return [
+    ...new Set(
+      norm(text ?? "").split(" ").filter((w) =>
+        [...w].length >= 4 && !CONTENT_STOP.has(w) && !/^\d+$/.test(w)
+      ),
+    ),
+  ];
+}
+
+// The same word, or one a plural or ending of the other (5+ letters).
+function sameWord(a: string, b: string): boolean {
+  if (a === b) return true;
+  const [s, l] = a.length <= b.length ? [a, b] : [b, a];
+  return [...s].length >= 5 && l.startsWith(s) && l.length - s.length <= 3;
+}
+
+// How many of note [n]'s words photo [p] shows (#468): its caption,
+// place and analysis summary.
+export function contentScore(n: Note, p: Photo): number {
+  const words = contentWords(
+    [p.caption, p.place_text, p.summary].filter(Boolean).join(" "),
+  );
+  if (words.length === 0) return 0;
+  return contentWords(n.content).filter((w) =>
+    words.some((x) => sameWord(w, x))
+  ).length;
+}
+
+// The photo among [photos] that shows most of note [n]'s words, the
+// earliest on a tie; null when none shows any (#468).
+export function contentPhoto(
+  photos: readonly Photo[],
+  n: Note,
+): Photo | null {
+  let best: Photo | null = null;
+  let bestScore = 0;
+  for (const p of photos) {
+    const s = contentScore(n, p);
+    if (s > bestScore) {
+      best = p;
+      bestScore = s;
+    }
+  }
+  return best;
+}
+
+// The scene among [scenes] whose photos show most of note [n]'s words
+// (#468: a backfilled note goes by what it says); -1 when none does.
+export function contentScene(
+  scenes: readonly (readonly Photo[])[],
+  n: Note,
+): number {
+  let best = -1;
+  let bestScore = 0;
+  scenes.forEach((ps, k) => {
+    const s = ps.reduce((sum, p) => sum + contentScore(n, p), 0);
+    if (s > bestScore) {
+      best = k;
+      bestScore = s;
+    }
+  });
+  return best;
 }
 
 // The language the user writes in: Russian when the notes' (else the
@@ -124,27 +324,19 @@ export function inOtherLanguage(
   return own * 2 < words.length;
 }
 
-// "Yesterday …": a note about the day before (#454).
-export const YESTERDAY =
-  /(^|[^\p{L}])(вчера|yesterday|last night)([^\p{L}]|$)/iu;
-
-// The day before [day], 'YYYY-MM-DD'.
-export function dayBefore(day: string): string {
-  const d = new Date(`${day}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() - 1);
-  return d.toISOString().slice(0, 10);
-}
-
-// Which chapters a note's lines belong to (#454): the chapter with its
-// photo; else its logical day's — a note about yesterday ("вчера…") the
-// day before's last part — and within the day the part whose time range
-// is nearest to when it was written (after the day's last photo: its last
-// part). The user writes later — in the evening, the next morning — so
-// there is no window. An old one-a-day note (no time) belongs to every
-// part of its day; a note on no chapter's day to the nearest in time.
+// Which chapters a note's lines belong to (#454, #468): the chapter with
+// its photo; else a chapter of its Journal day (never another day — the
+// Journal is the truth, "вчера…" too): within the day the part whose time
+// range is nearest to when it was written (after the day's last photo:
+// its last part); a backfilled note (#468) the part whose photos show
+// what it says, else the day's first. An old one-a-day note (no time)
+// belongs to every part of its day. A note on a day without a chapter:
+// with [nearestDay], the chapter nearest its day (the earlier on a tie);
+// else none (Neon Night plays it in the Note scene).
 export function noteChapters(
   tripData: TripData,
   chapters: readonly SlotChapter[],
+  nearestDay = false,
 ): Map<string, number[]> {
   const days = tripLogicalDays(tripData);
   const spans = chapters.map((c) => {
@@ -173,28 +365,47 @@ export function noteChapters(
       continue;
     }
     const written = days.get(`note:${n.id}`) ?? n.day_date;
-    const onDay = (day: string) =>
-      chapters.flatMap((c, i) => c.days.includes(day) ? [i] : []);
-    if (YESTERDAY.test(n.content)) {
-      const before = onDay(dayBefore(written));
-      if (before.length > 0) {
-        owners.set(n.id, [before[before.length - 1]]);
-        continue;
-      }
-    }
-    const today = onDay(written);
-    const t = noteTime(n);
-    if (Number.isNaN(t)) {
-      if (today.length > 0) owners.set(n.id, today);
+    const today = chapters.flatMap((c, i) =>
+      c.days.includes(written) ? [i] : []
+    );
+    if (today.length === 0) {
+      const near = nearestDay ? nearestDayChapter(chapters, written) : -1;
+      if (near >= 0) owners.set(n.id, [near]);
       continue;
     }
-    if (today.length > 0) {
-      owners.set(n.id, [nearest(today, t)]);
-    } else if (chapters.length > 0) {
-      owners.set(n.id, [nearest(chapters.map((_, i) => i), t)]);
+    if (isBackfilled(n)) {
+      const k = contentScene(today.map((i) => chapters[i].photos), n);
+      owners.set(n.id, [today[k >= 0 ? k : 0]]);
+      continue;
     }
+    const t = noteTime(n);
+    if (Number.isNaN(t)) {
+      owners.set(n.id, today);
+      continue;
+    }
+    owners.set(n.id, [nearest(today, t)]);
   }
   return owners;
+}
+
+// The chapter whose days are nearest [day] (the earlier on a tie); -1
+// when there's none (#468).
+export function nearestDayChapter(
+  chapters: readonly { days: readonly string[] }[],
+  day: string,
+): number {
+  let best = -1;
+  let gap = Infinity;
+  chapters.forEach((c, k) => {
+    for (const d of c.days) {
+      const g = Math.abs(Date.parse(d) - Date.parse(day));
+      if (g < gap) {
+        gap = g;
+        best = k;
+      }
+    }
+  });
+  return best;
 }
 
 // How good a line is (#454): specific (details, feelings — scored),
@@ -254,7 +465,10 @@ export function linesOf(note: Note, theme: LineTheme | null): Line[] {
       ...([...sentence].length <= MAX_EXCERPT_CHARS ? [sentence] : []),
       ...piecesOf(sentence),
     ];
-    for (const text of pieces) {
+    for (const piece of pieces) {
+      // A list's bullet isn't the user's words (#468: "• Weight: …").
+      const text = piece.replace(/^[•·*–—\s-]+/u, "").trim();
+      if (!text) continue;
       if (seen.has(text) || [...text].length > MAX_EXCERPT_CHARS) continue;
       seen.add(text);
       const score = excerptScore(text, theme);
@@ -526,9 +740,14 @@ export const PREPOSITIONS = new Set([
 export function namePhrases(text: string, bare = false): string[] {
   const out: string[] = [];
   for (const sentence of sentencesOf(text)) {
-    const words = sentence.split(/\s+/u).map((w) =>
+    const raw = sentence.split(/\s+/u);
+    const words = raw.map((w) =>
       w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "")
     );
+    // A name never runs over a list's "Label:" or a bullet (#468: "• Size:
+    // Measures approximately…" is no "Size Measures").
+    const joins = (k: number) =>
+      !/[:;•·–—]$/u.test(raw[k]) && !/^[•·–—-]/u.test(raw[k + 1] ?? "");
     const cyrillic = /\p{Script=Cyrillic}/u.test(sentence);
     const isName = (w: string, k: number) => {
       if ([...w].length < 2 || hasVerb(w)) return false;
@@ -547,7 +766,9 @@ export function namePhrases(text: string, bare = false): string[] {
     for (let k = 0; k < words.length; k++) {
       if (!isName(words[k], k)) continue;
       let end = k;
-      while (end + 1 < words.length && isName(words[end + 1], end + 1)) end++;
+      while (
+        end + 1 < words.length && joins(end) && isName(words[end + 1], end + 1)
+      ) end++;
       const before = words[k - 1]?.toLowerCase();
       const run = words.slice(k, end + 1).join(" ");
       // Bare, a lone Russian word after a preposition is in its case
@@ -641,6 +862,8 @@ export function noteScene(
 ): number {
   const own = scenes.findIndex((ps) => ps.some((p) => p.id === n.photo_id));
   if (own >= 0) return own;
+  // A backfilled note (#468): the scene that shows what it says.
+  if (isBackfilled(n)) return Math.max(0, contentScene(scenes, n));
   const t = noteTime(n);
   if (Number.isNaN(t)) return 0;
   let best = 0;
@@ -1169,7 +1392,9 @@ export function photoRank(
 
 // The photos the notes belong to (#460): a note's own photo, else the
 // film photo taken nearest when it was written, within
-// SCENE_NEAR_MINUTES. A note written far from every photo anchors none.
+// SCENE_NEAR_MINUTES; a backfilled note (#468) the photo of its Journal
+// day that shows most of what it says. A note written far from every
+// photo anchors none.
 export function noteAnchors(
   tripData: TripData,
   photos: readonly Photo[],
@@ -1180,6 +1405,14 @@ export function noteAnchors(
     if (!n.id || !n.content.trim()) continue;
     if (n.photo_id && ids.has(n.photo_id)) {
       anchors.set(n.id, n.photo_id);
+      continue;
+    }
+    if (isBackfilled(n)) {
+      const match = contentPhoto(
+        photos.filter((p) => p.day_date === n.day_date),
+        n,
+      );
+      if (match) anchors.set(n.id, match.id);
       continue;
     }
     const near = nearestPhoto(photos, noteTime(n));

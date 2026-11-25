@@ -88,9 +88,10 @@ export const MAX_DIRECTOR_RUNS = 4;
 // the template from vibes; #454 / #458: Neon Night and Golden Vows pick
 // from code's lists; #460: Golden Vows' new pages and slot lists;
 // #461: photo and note times on their own place's clock; #463: Sky Story
-// picks from code's lists, no classic plan call). A record made under
+// picks from code's lists, no classic plan call; #468: the Journal day
+// is the film's day). A record made under
 // older rules runs again once, within MAX_DIRECTOR_RUNS.
-export const DIRECTOR_VERSION = 9;
+export const DIRECTOR_VERSION = 10;
 
 export type DirectorCall = TokenUsage & {
   call: "analysis" | "plan" | "section";
@@ -372,6 +373,8 @@ export async function runDirector(
       ...film,
       photos: film.photos.filter((p) =>
         analyses.has(p.id) || p.use_in_wrap_up === false
+      ).map((p) =>
+        analyses.has(p.id) ? { ...p, summary: analyses.get(p.id)!.summary } : p
       ),
     };
     if (usable.length < MIN_PLANNABLE_PHOTOS) {

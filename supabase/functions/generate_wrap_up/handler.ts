@@ -34,6 +34,7 @@
 // (`utc_offset_minutes`) so the director sees local photo times.
 
 import { filmSecondsOf } from "./film_length.ts";
+import { loadCachedAnalysis } from "./photo_analysis.ts";
 import { gatherTripData, type TripData } from "./gather.ts";
 import { localTimesOf, withLocalTimes } from "./time_zones.ts";
 import { wrapUpMissing } from "./wrap_up_limits.ts";
@@ -553,6 +554,25 @@ async function runCounted(
   return { ...record, run_count: runs + 1 };
 }
 
+// Each photo's cached analysis summary (#468: a backfilled note goes to
+// the photos that show what it says), for the file it was made from. A
+// failed read only costs that matching.
+async function attachSummaries(
+  deps: Deps,
+  tripId: string,
+  tripData: TripData,
+): Promise<void> {
+  try {
+    const cached = await loadCachedAnalysis(deps.serviceClient, tripId);
+    for (const p of tripData.photos) {
+      const a = cached.get(p.id);
+      if (a && a.storage_path === p.storage_path) p.summary = a.summary;
+    }
+  } catch (err) {
+    console.warn(`photo summaries not read: ${(err as Error).message}`);
+  }
+}
+
 // The memory's data with every photo and note on its own place's clock
 // (#461). A zone found for the first time is kept on the trip, so later
 // opens don't depend on what the lookup finds then; a failed write only
@@ -564,6 +584,7 @@ async function gatherLocal(
 ): Promise<TripData> {
   const gathered = await gatherTripData(deps.serviceClient, tripId);
   if (utcOffset !== undefined) gathered.utc_offset_minutes = utcOffset;
+  await attachSummaries(deps, tripId, gathered);
   const tripData = withLocalTimes(gathered);
   const zone = tripData.zone;
   if (zone?.zone && zone.source !== "stored") {

@@ -2969,7 +2969,7 @@
      "620303b8-4aa3-4b7c-8c11-fe813dfd62a1",
      "e5be04ce-b606-415f-9b03-70c08b0fe4a3",
      "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
-     "ff6a1fde-b6bd-48d8-b87d-29687d647553",
+     "9a9ccc19-f7b1-491d-a502-96217f7ca55c",
      "da8f273e-2961-411b-b8e5-e286047a5e72"
     ],
     "pages": [
@@ -3003,7 +3003,7 @@
       "date": "2026-10-23",
       "end_date": null,
       "photo_count": 9,
-      "headline": "На Куко Unreal",
+      "headline": null,
       "hero_photo_id": "2bd9809d-ae25-452e-b250-1c6397d7a674",
       "extra_photo_ids": [
        "6eca4520-d5b4-4e2a-aed2-7760f35a40f5",
@@ -3011,16 +3011,12 @@
        "764ecd51-0180-4683-b777-200e375078ed",
        "02d9ee87-6b80-457f-ab8f-c4c1bd67f73a"
       ],
-      "note_id": "e2528865-8652-4b44-a65e-f698f5e30db0",
-      "note": "Это самый крутой сет который я слышал или это М?",
+      "note_id": "ece34f11-c106-4010-8d55-ccfcc3c7159c",
+      "note": "Мы выходим из дома сидели там пару часов, успели помыться поесть и выпить пивка. Конечно же пыхнули и взяли еще косячок с собой, бомбочки сделаны и тоже взяты с собой.",
       "excerpts": [
        {
-        "note_id": "e2528865-8652-4b44-a65e-f698f5e30db0",
-        "text": "Это самый крутой сет который я слышал или это М?"
-       },
-       {
-        "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
-        "text": "сначало были на Куко Unreal"
+        "note_id": "ece34f11-c106-4010-8d55-ccfcc3c7159c",
+        "text": "успели помыться поесть и выпить пивка."
        }
       ],
       "sky_line": null
@@ -3030,25 +3026,24 @@
       "last_day": null,
       "date": "2026-10-24",
       "end_date": null,
-      "photo_count": 6,
-      "headline": "Против Мираба",
+      "photo_count": 4,
+      "headline": "На Куко Unreal",
       "hero_photo_id": "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
       "extra_photo_ids": [
        "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e",
        "48da458f-98c8-414f-9453-af81cec6f9da",
-       "ad570c04-90bf-4d84-9931-7a3e90db9caa",
-       "4b028163-05eb-4808-8995-2332f0e2e7a5"
+       "ad570c04-90bf-4d84-9931-7a3e90db9caa"
       ],
-      "note_id": "f33b871c-c682-4680-bc74-260c570ad1a3",
-      "note": "Идем завтракать в город нашли english breakfast. Потом зашли в coffeeshop на втором этаже есть диваны где все кушают сладости и курят косячки, очень необычно. Зашли в продуктовый и поехали в дом откисать.",
+      "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
+      "note": "В общем мы вчера пришли где-то в 8 утра,сначало были на Куко Unreal потом поехали в другую локацию так как купили билеты туда тоже заранее. Было супер весело и получили много позитивных эмоций но супер устали так что сегодня день начался поздно.",
       "excerpts": [
        {
-        "note_id": "f33b871c-c682-4680-bc74-260c570ad1a3",
-        "text": "Идем завтракать в город нашли english breakfast."
+        "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
+        "text": "сначало были на Куко Unreal"
        },
        {
-        "note_id": "43f91e23-1542-490d-b835-f31dfac55106",
-        "text": "держим кулочки за нашего слона."
+        "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
+        "text": "В общем мы вчера пришли где-то в 8 утра"
        }
       ],
       "sky_line": null
@@ -3058,12 +3053,13 @@
       "last_day": null,
       "date": "2026-10-25",
       "end_date": null,
-      "photo_count": 4,
+      "photo_count": 6,
       "headline": "В Брюсель",
       "hero_photo_id": "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc",
       "extra_photo_ids": [
+       "4b028163-05eb-4808-8995-2332f0e2e7a5",
+       "ff6a1fde-b6bd-48d8-b87d-29687d647553",
        "9a9ccc19-f7b1-491d-a502-96217f7ca55c",
-       "da8f273e-2961-411b-b8e5-e286047a5e72",
        "8513fe91-5136-43bb-8d93-d930f1cecf54"
       ],
       "note_id": "7b1c21ed-fe19-4c70-a6bd-d85f1c502768",
@@ -3071,7 +3067,11 @@
       "excerpts": [
        {
         "note_id": "7b1c21ed-fe19-4c70-a6bd-d85f1c502768",
-        "text": "но подороге остановимся покушать и выпить вкусного бельгийского пиво на дорожку"
+        "text": "едем в аэропорт в Брюсель"
+       },
+       {
+        "note_id": "9c2f7347-5352-4a47-8dcf-222090ed53a9",
+        "text": "Брюссель не меняется отличное пиво и вкусная еда."
        }
       ],
       "sky_line": null
@@ -3275,7 +3275,7 @@
       ]
      },
      {
-      "title": "На Куко Unreal",
+      "title": "День 1 · ночь",
       "photos": [
        {
         "id": "620303b8-4aa3-4b7c-8c11-fe813dfd62a1",
@@ -3308,17 +3308,9 @@
        "02d9ee87-6b80-457f-ab8f-c4c1bd67f73a",
        "e5be04ce-b606-415f-9b03-70c08b0fe4a3"
       ],
-      "note": "сначало были на Куко Unreal",
+      "note": null,
       "card_zooms": 1,
-      "excerpts": [
-       {
-        "text": "сначало были на Куко Unreal",
-        "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
-        "photo_id": "e5be04ce-b606-415f-9b03-70c08b0fe4a3",
-        "source": "code",
-        "score": 110
-       }
-      ],
+      "excerpts": [],
       "days": [
        "2026-10-23"
       ],
@@ -3326,22 +3318,6 @@
        {
         "text": "Это самый крутой сет который я слышал или это М?",
         "score": 109
-       },
-       {
-        "text": "В общем мы вчера пришли где-то в 8 утра",
-        "score": 103
-       },
-       {
-        "text": "потом поехали в другую локацию так как купили билеты туда тоже заранее.",
-        "score": 61
-       },
-       {
-        "text": "так что сегодня день начался поздно.",
-        "score": 61
-       },
-       {
-        "text": "но супер устали",
-        "score": 60
        }
       ],
       "moments": []
@@ -3372,7 +3348,55 @@
         "taken_at": "2026-10-24T17:30:00+00:00",
         "caption": null,
         "hero_score": 2
+       }
+      ],
+      "card_photo_ids": [
+       "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e",
+       "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
+       "48da458f-98c8-414f-9453-af81cec6f9da",
+       "ad570c04-90bf-4d84-9931-7a3e90db9caa"
+      ],
+      "note": "сначало были на Куко Unreal",
+      "card_zooms": 1,
+      "excerpts": [
+       {
+        "text": "сначало были на Куко Unreal",
+        "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
+        "photo_id": "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
+        "source": "code",
+        "score": 110
+       }
+      ],
+      "days": [
+       "2026-10-24"
+      ],
+      "rejected_excerpts": [
+       {
+        "text": "Откисаем и смотрим ufc Петр ян против Мираба",
+        "score": 103
        },
+       {
+        "text": "В общем мы вчера пришли где-то в 8 утра",
+        "score": 103
+       },
+       {
+        "text": "Идем завтракать в город нашли english breakfast.",
+        "score": 102
+       },
+       {
+        "text": "Выезжаем на AMF тусовку за окном ливень но мы готовы дать еще один бой.",
+        "score": 61
+       },
+       {
+        "text": "Мы на месте это просто огромный футбольный стадион",
+        "score": 61
+       }
+      ],
+      "moments": []
+     },
+     {
+      "title": "Брюссель",
+      "photos": [
        {
         "id": "4b028163-05eb-4808-8995-2332f0e2e7a5",
         "taken_at": "2026-10-25T02:43:43+00:00",
@@ -3384,57 +3408,7 @@
         "taken_at": "2026-10-25T02:43:44+00:00",
         "caption": null,
         "hero_score": 5
-       }
-      ],
-      "card_photo_ids": [
-       "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e",
-       "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
-       "48da458f-98c8-414f-9453-af81cec6f9da"
-      ],
-      "note": "Откисаем и смотрим ufc Петр ян против Мираба",
-      "card_zooms": 1,
-      "excerpts": [
-       {
-        "text": "Откисаем и смотрим ufc Петр ян против Мираба",
-        "note_id": "43f91e23-1542-490d-b835-f31dfac55106",
-        "photo_id": "48da458f-98c8-414f-9453-af81cec6f9da",
-        "source": "code",
-        "score": 103
-       }
-      ],
-      "days": [
-       "2026-10-24"
-      ],
-      "rejected_excerpts": [
-       {
-        "text": "Идем завтракать в город нашли english breakfast.",
-        "score": 102
        },
-       {
-        "text": "Зашли в продуктовый и поехали в дом откисать.",
-        "score": 61
-       },
-       {
-        "text": "держим кулочки за нашего слона.",
-        "score": 61
-       }
-      ],
-      "moments": [
-       {
-        "type": "split",
-        "photo_ids": [
-         "ad570c04-90bf-4d84-9931-7a3e90db9caa",
-         "4b028163-05eb-4808-8995-2332f0e2e7a5",
-         "ff6a1fde-b6bd-48d8-b87d-29687d647553"
-        ],
-        "words": [],
-        "place": null
-       }
-      ]
-     },
-     {
-      "title": "Брюссель",
-      "photos": [
        {
         "id": "9a9ccc19-f7b1-491d-a502-96217f7ca55c",
         "taken_at": "2026-10-25T16:19:39+00:00",
@@ -3461,10 +3435,9 @@
        }
       ],
       "card_photo_ids": [
-       "9a9ccc19-f7b1-491d-a502-96217f7ca55c",
-       "da8f273e-2961-411b-b8e5-e286047a5e72",
-       "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc",
-       "8513fe91-5136-43bb-8d93-d930f1cecf54"
+       "4b028163-05eb-4808-8995-2332f0e2e7a5",
+       "ff6a1fde-b6bd-48d8-b87d-29687d647553",
+       "9a9ccc19-f7b1-491d-a502-96217f7ca55c"
       ],
       "note": "Брюссель не меняется отличное пиво и вкусная еда.",
       "card_zooms": 1,
@@ -3490,7 +3463,23 @@
         "score": 61
        }
       ],
-      "moments": []
+      "moments": [
+       {
+        "type": "split",
+        "photo_ids": [
+         "da8f273e-2961-411b-b8e5-e286047a5e72",
+         "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc",
+         "8513fe91-5136-43bb-8d93-d930f1cecf54"
+        ],
+        "words": [
+         {
+          "photo_id": "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc",
+          "text": "some sweets for Elmas"
+         }
+        ],
+        "place": null
+       }
+      ]
      }
     ],
     "note": {
@@ -3582,7 +3571,7 @@
      "620303b8-4aa3-4b7c-8c11-fe813dfd62a1",
      "e5be04ce-b606-415f-9b03-70c08b0fe4a3",
      "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
-     "ff6a1fde-b6bd-48d8-b87d-29687d647553",
+     "9a9ccc19-f7b1-491d-a502-96217f7ca55c",
      "da8f273e-2961-411b-b8e5-e286047a5e72"
     ],
     "pages": [
@@ -3616,7 +3605,7 @@
       "date": "2026-10-23",
       "end_date": null,
       "photo_count": 9,
-      "headline": "На Куко Unreal",
+      "headline": null,
       "hero_photo_id": "2bd9809d-ae25-452e-b250-1c6397d7a674",
       "extra_photo_ids": [
        "6eca4520-d5b4-4e2a-aed2-7760f35a40f5",
@@ -3624,16 +3613,16 @@
        "764ecd51-0180-4683-b777-200e375078ed",
        "02d9ee87-6b80-457f-ab8f-c4c1bd67f73a"
       ],
-      "note_id": "e2528865-8652-4b44-a65e-f698f5e30db0",
-      "note": "Это самый крутой сет который я слышал или это М?",
+      "note_id": "6dc91f10-5646-4d6b-9859-839838d849eb",
+      "note": "Сидим в баре скоро принесут полтора метра ребер это 4.5kg мяса. Ну и конечно же взяли пиво!",
       "excerpts": [
+       {
+        "note_id": "6dc91f10-5646-4d6b-9859-839838d849eb",
+        "text": "Ну и конечно же взяли пиво!"
+       },
        {
         "note_id": "e2528865-8652-4b44-a65e-f698f5e30db0",
         "text": "Это самый крутой сет который я слышал или это М?"
-       },
-       {
-        "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
-        "text": "сначало были на Куко Unreal"
        }
       ],
       "sky_line": null
@@ -3643,25 +3632,24 @@
       "last_day": null,
       "date": "2026-10-24",
       "end_date": null,
-      "photo_count": 6,
-      "headline": "Против Мираба",
+      "photo_count": 4,
+      "headline": "На Куко Unreal",
       "hero_photo_id": "f3d3f0b4-d645-45fd-a946-2aa8998df1cd",
       "extra_photo_ids": [
        "20ed0ad1-2fa5-452a-9e3b-0b721f1ace2e",
        "48da458f-98c8-414f-9453-af81cec6f9da",
-       "ad570c04-90bf-4d84-9931-7a3e90db9caa",
-       "4b028163-05eb-4808-8995-2332f0e2e7a5"
+       "ad570c04-90bf-4d84-9931-7a3e90db9caa"
       ],
-      "note_id": "f33b871c-c682-4680-bc74-260c570ad1a3",
-      "note": "Идем завтракать в город нашли english breakfast. Потом зашли в coffeeshop на втором этаже есть диваны где все кушают сладости и курят косячки, очень необычно. Зашли в продуктовый и поехали в дом откисать.",
+      "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
+      "note": "В общем мы вчера пришли где-то в 8 утра,сначало были на Куко Unreal потом поехали в другую локацию так как купили билеты туда тоже заранее. Было супер весело и получили много позитивных эмоций но супер устали так что сегодня день начался поздно.",
       "excerpts": [
        {
-        "note_id": "f33b871c-c682-4680-bc74-260c570ad1a3",
-        "text": "Идем завтракать в город нашли english breakfast."
+        "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
+        "text": "сначало были на Куко Unreal"
        },
        {
-        "note_id": "43f91e23-1542-490d-b835-f31dfac55106",
-        "text": "держим кулочки за нашего слона."
+        "note_id": "695a05ea-8fc3-4e4c-b64f-0733c3f79911",
+        "text": "В общем мы вчера пришли где-то в 8 утра"
        }
       ],
       "sky_line": null
@@ -3671,12 +3659,13 @@
       "last_day": null,
       "date": "2026-10-25",
       "end_date": null,
-      "photo_count": 4,
+      "photo_count": 6,
       "headline": "В Брюсель",
       "hero_photo_id": "a6ffe1ff-b299-45c8-9136-3c3b82f0d0fc",
       "extra_photo_ids": [
+       "4b028163-05eb-4808-8995-2332f0e2e7a5",
+       "ff6a1fde-b6bd-48d8-b87d-29687d647553",
        "9a9ccc19-f7b1-491d-a502-96217f7ca55c",
-       "da8f273e-2961-411b-b8e5-e286047a5e72",
        "8513fe91-5136-43bb-8d93-d930f1cecf54"
       ],
       "note_id": "7b1c21ed-fe19-4c70-a6bd-d85f1c502768",
@@ -3684,14 +3673,18 @@
       "excerpts": [
        {
         "note_id": "7b1c21ed-fe19-4c70-a6bd-d85f1c502768",
-        "text": "но подороге остановимся покушать и выпить вкусного бельгийского пиво на дорожку"
+        "text": "едем в аэропорт в Брюсель"
+       },
+       {
+        "note_id": "9c2f7347-5352-4a47-8dcf-222090ed53a9",
+        "text": "Брюссель не меняется отличное пиво и вкусная еда."
        }
       ],
       "sky_line": null
      }
     ]
    },
-   "sky_estimate_seconds": 68.5,
+   "sky_estimate_seconds": 68.2,
    "photo_captions": {
     "cd16a50b-3981-465d-ba60-33078d7f4eef": "fast check-in",
     "39fea9d3-4931-4605-8f22-94c1714fa2e8": "Did not expect that many people in the airport, have 15m before boarding",
@@ -3843,7 +3836,7 @@
       "excerpts": [
        {
         "note_id": "e8178b1a-6561-4781-bd65-d0444f6f2699",
-        "text": "This particular is called Szimpla Kert it has 2 floors and has lots of rooms"
+        "text": "feels like a maze full of bars and people"
        }
       ],
       "sky_line": null

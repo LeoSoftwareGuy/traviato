@@ -628,14 +628,14 @@ Deno.test("currentGoldenVows: the stored picks, else none; older sections aren't
   assertEquals(currentGoldenVows(null).source, "code");
 });
 
-Deno.test("an older record runs again once (#463: DIRECTOR_VERSION 9)", () => {
-  assertEquals(DIRECTOR_VERSION, 9);
+Deno.test("an older record runs again once (#468: DIRECTOR_VERSION 10)", () => {
+  assertEquals(DIRECTOR_VERSION, 10);
   const record = {
     status: "fallback",
     plan: null,
     problems: [],
     failed_ids: [],
-    director_version: 8,
+    director_version: 9,
     run_count: 1,
   } as unknown as DirectorRecord;
   assertEquals(directorIsStale(record, romantic()), true);
