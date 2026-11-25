@@ -48,6 +48,26 @@ class JournalNoteEntity extends Equatable {
   /// its day, never for ordering.
   DateTime get localTakenAt => placeTime(takenAt, utcOffsetMinutes);
 
+  /// Typed long after (or before) its Journal day (#468): its time is more
+  /// than 24 h outside [dayDate] on the clock it was typed on — a memory
+  /// filled in after the trip. Shown as "added later", at the end of its
+  /// day, until "Edit time" sets when it happened. The films ignore its
+  /// time too (generate_wrap_up's `isBackfilled`).
+  bool get isBackfilled {
+    if (legacy) return false;
+    final local = localTakenAt;
+    final start = DateTime(dayDate.year, dayDate.month, dayDate.day);
+    final at = DateTime(
+      local.year,
+      local.month,
+      local.day,
+      local.hour,
+      local.minute,
+    );
+    return at.isBefore(start.subtract(const Duration(days: 1))) ||
+        !at.isBefore(DateTime(start.year, start.month, start.day + 2));
+  }
+
   /// [editedAt] on the same clock.
   DateTime get localEditedAt => placeTime(editedAt, utcOffsetMinutes);
 

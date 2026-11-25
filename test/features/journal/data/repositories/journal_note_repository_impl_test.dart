@@ -74,6 +74,19 @@ class _FakeJournalNoteRemoteDataSource implements JournalNoteRemoteDataSource {
     return _note(id: id, content: content);
   }
 
+  String? lastTimedId;
+
+  @override
+  Future<JournalNoteModel> setNoteTime({
+    required String id,
+    required DateTime takenAt,
+    required int utcOffsetMinutes,
+  }) async {
+    if (exception != null) throw exception!;
+    lastTimedId = id;
+    return _note(id: id, takenAt: takenAt);
+  }
+
   @override
   Future<void> deleteNote(String id) async {
     if (exception != null) throw exception!;

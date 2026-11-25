@@ -2888,4 +2888,42 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get timeline_photoDeleted => 'Фото удалено';
+
+  @override
+  String photo_movePromptTitle(String date) {
+    return 'Это фото снято $date';
+  }
+
+  @override
+  String photo_movePromptBody(String date) {
+    return 'Перенести его на $date?';
+  }
+
+  @override
+  String photo_moveBatchTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count фото сняты в другие дни',
+      many: '$count фото сняты в другие дни',
+      few: '$count фото сняты в другие дни',
+      one: '$count фото снято в другой день',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get photo_moveBatchBody => 'Перенести их на дни, когда они сняты?';
+
+  @override
+  String get photo_moveAction => 'Перенести';
+
+  @override
+  String get photo_keepHere => 'Оставить здесь';
+
+  @override
+  String get timeline_addedLater => 'добавлена позже';
+
+  @override
+  String get timeline_editTime => 'Изменить время';
 }

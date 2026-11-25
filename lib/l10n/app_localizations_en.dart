@@ -2829,4 +2829,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timeline_photoDeleted => 'Photo deleted';
+
+  @override
+  String photo_movePromptTitle(String date) {
+    return 'This photo was taken on $date';
+  }
+
+  @override
+  String photo_movePromptBody(String date) {
+    return 'Add it to $date instead?';
+  }
+
+  @override
+  String photo_moveBatchTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos were taken on other days',
+      one: '1 photo was taken on another day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get photo_moveBatchBody =>
+      'Add them to the days they were taken instead?';
+
+  @override
+  String get photo_moveAction => 'Move';
+
+  @override
+  String get photo_keepHere => 'Keep here';
+
+  @override
+  String get timeline_addedLater => 'added later';
+
+  @override
+  String get timeline_editTime => 'Edit time';
 }

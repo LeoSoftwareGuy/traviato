@@ -28,6 +28,14 @@ abstract interface class JournalNoteRemoteDataSource {
     required bool dictated,
   });
 
+  /// "Edit time" (#468): when the note happened, on its own day, at the
+  /// place's [utcOffsetMinutes]. Returns the note as saved.
+  Future<JournalNoteModel> setNoteTime({
+    required String id,
+    required DateTime takenAt,
+    required int utcOffsetMinutes,
+  });
+
   /// Deletes a note. Its star stays (#397).
   Future<void> deleteNote(String id);
 }

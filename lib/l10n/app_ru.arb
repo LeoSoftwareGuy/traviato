@@ -2746,5 +2746,21 @@
   "timeline_deletePhotoBody": "Оно исчезнет из этого дня и не попадёт в фильм. Это нельзя отменить.",
   "@timeline_deletePhotoBody": {"x-review": "pending"},
   "timeline_photoDeleted": "Фото удалено",
-  "@timeline_photoDeleted": {"x-review": "pending"}
+  "@timeline_photoDeleted": {"x-review": "pending"},
+  "photo_movePromptTitle": "Это фото снято {date}",
+  "@photo_movePromptTitle": {"x-review": "pending", "placeholders": {"date": {"type": "String"}}},
+  "photo_movePromptBody": "Перенести его на {date}?",
+  "@photo_movePromptBody": {"x-review": "pending", "placeholders": {"date": {"type": "String"}}},
+  "photo_moveBatchTitle": "{count, plural, one{{count} фото снято в другой день} few{{count} фото сняты в другие дни} many{{count} фото сняты в другие дни} other{{count} фото сняты в другие дни}}",
+  "@photo_moveBatchTitle": {"x-review": "pending", "placeholders": {"count": {"type": "int"}}},
+  "photo_moveBatchBody": "Перенести их на дни, когда они сняты?",
+  "@photo_moveBatchBody": {"x-review": "pending"},
+  "photo_moveAction": "Перенести",
+  "@photo_moveAction": {"x-review": "pending"},
+  "photo_keepHere": "Оставить здесь",
+  "@photo_keepHere": {"x-review": "pending"},
+  "timeline_addedLater": "добавлена позже",
+  "@timeline_addedLater": {"x-review": "pending"},
+  "timeline_editTime": "Изменить время",
+  "@timeline_editTime": {"x-review": "pending"}
 }

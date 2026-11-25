@@ -4254,6 +4254,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Photo deleted'**
   String get timeline_photoDeleted;
+
+  /// Adding a gallery photo to another Journal day than its capture date (#468); {date} is the capture day.
+  ///
+  /// In en, this message translates to:
+  /// **'This photo was taken on {date}'**
+  String photo_movePromptTitle(String date);
+
+  /// Move-photo prompt (#468).
+  ///
+  /// In en, this message translates to:
+  /// **'Add it to {date} instead?'**
+  String photo_movePromptBody(String date);
+
+  /// Move-photo prompt for a batch (#468).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 photo was taken on another day} other{{count} photos were taken on other days}}'**
+  String photo_moveBatchTitle(int count);
+
+  /// Move-photo prompt for a batch (#468).
+  ///
+  /// In en, this message translates to:
+  /// **'Add them to the days they were taken instead?'**
+  String get photo_moveBatchBody;
+
+  /// Move-photo prompt (#468): add it to its capture day.
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get photo_moveAction;
+
+  /// Move-photo prompt (#468): keep it on the chosen day.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep here'**
+  String get photo_keepHere;
+
+  /// In place of a note's time when it was written long after its day (#468).
+  ///
+  /// In en, this message translates to:
+  /// **'added later'**
+  String get timeline_addedLater;
+
+  /// Note actions sheet (#468): set when the note happened.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit time'**
+  String get timeline_editTime;
 }
 
 class _AppLocalizationsDelegate

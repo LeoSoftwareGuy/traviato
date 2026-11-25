@@ -73,7 +73,9 @@ class PhotoNotesPanel extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 child: _PhotoNoteCard(
                   note: note,
-                  time: clock.format(note.localTakenAt),
+                  time: note.isBackfilled
+                      ? context.l10n.timeline_addedLater
+                      : clock.format(note.localTakenAt),
                   isFresh: note.id == freshNoteId,
                 ),
               ),

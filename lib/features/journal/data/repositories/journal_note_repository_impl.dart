@@ -54,6 +54,19 @@ class JournalNoteRepositoryImpl implements JournalNoteRepository {
   );
 
   @override
+  Future<Either<Failure, JournalNoteEntity>> setNoteTime({
+    required String noteId,
+    required DateTime takenAt,
+    required int utcOffsetMinutes,
+  }) => _guard(
+    () => _remote.setNoteTime(
+      id: noteId,
+      takenAt: takenAt,
+      utcOffsetMinutes: utcOffsetMinutes,
+    ),
+  );
+
+  @override
   Future<Either<Failure, Unit>> deleteNote(String noteId) => _guard(() async {
     await _remote.deleteNote(noteId);
     return unit;
