@@ -98,7 +98,7 @@ class _TimelineNoteCardState extends State<TimelineNoteCard> {
     final chips = <Widget>[
       if (note.legacy) _Chip.earlier(l10n.timeline_earlierNote),
       if (widget.isFresh) _Chip.fresh(l10n.timeline_justNow),
-      if (widget.isLater && !note.legacy)
+      if (widget.isLater && !note.legacy && !note.isBackfilled)
         _Chip.plain(
           l10n.timeline_writtenOn(
             L10nDates.weekdayDayMonth(locale).format(note.localTakenAt),

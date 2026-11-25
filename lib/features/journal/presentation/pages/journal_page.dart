@@ -25,6 +25,7 @@ import '../../../photo/presentation/pages/photo_viewer_page.dart';
 import '../../../photo/presentation/widgets/add_photo_sheet.dart';
 import '../../../wrap_up/presentation/providers/film_pick_providers.dart';
 import '../../domain/entities/journal_note_entity.dart';
+import '../../domain/note_time.dart';
 import '../controllers/journal_controller.dart';
 import '../controllers/journal_state.dart';
 import '../mutations/journal_mutations.dart';
@@ -62,6 +63,7 @@ class JournalPage extends ConsumerWidget {
     ref.listen<MutationState<dynamic>>(createNoteMutation, showFailure);
     ref.listen<MutationState<dynamic>>(updateNoteMutation, showFailure);
     ref.listen<MutationState<dynamic>>(deleteNoteMutation, showFailure);
+    ref.listen<MutationState<dynamic>>(setNoteTimeMutation, showFailure);
     // Covers a failed delete of a day's last photo — the viewer has already
     // closed by then, so it can't show the error itself (#165).
     ref.listen<MutationState<void>>(deletePhotoMutation, (previous, next) {
@@ -262,8 +264,13 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
     );
   }
 
-  void _addPhoto(DateTime day) =>
-      AddPhotoSheet.show(context, tripId: _tripId, dayDate: day);
+  void _addPhoto(DateTime day) => AddPhotoSheet.show(
+    context,
+    tripId: _tripId,
+    dayDate: day,
+    memoryStart: _state.trip.startDate,
+    memoryEnd: _state.trip.endDate,
+  );
 
   void _openPhoto(PhotoEntity photo) {
     final dayPhotos = _state.photosForCurrentDay;
@@ -366,9 +373,46 @@ class _JournalContentState extends ConsumerState<_JournalContent> {
         await _editNote(note);
       case NoteAction.delete:
         await _confirmDelete(note);
+      case NoteAction.editTime:
+        await _editTime(note);
       case null:
         break;
     }
+  }
+
+  /// "Edit time" (#468): when the note happened, on its own day. A
+  /// backfilled note then shows that time in its place, and the films
+  /// read it as a real time.
+  Future<void> _editTime(JournalNoteEntity note) async {
+    final local = note.localTakenAt;
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: note.isBackfilled
+          ? const TimeOfDay(hour: 12, minute: 0)
+          : TimeOfDay(hour: local.hour, minute: local.minute),
+    );
+    if (picked == null || !mounted) return;
+    final offset = noteOffsetForDay(
+      day: note.dayDate,
+      photos: _state.photos,
+      zone: _state.trip.timeZone,
+      fallbackMinutes: DateTime.now().timeZoneOffset.inMinutes,
+    );
+    unawaited(
+      // Failures surface via the setNoteTimeMutation listener.
+      runSetNoteTime(
+        ref: ref,
+        tripId: _tripId,
+        noteId: note.id,
+        takenAt: noteInstantOn(
+          day: note.dayDate,
+          hour: picked.hour,
+          minute: picked.minute,
+          offsetMinutes: offset,
+        ),
+        utcOffsetMinutes: offset,
+      ).then((_) {}, onError: (Object _) {}),
+    );
   }
 
   /// The note page on one note; its time and day stay. Clearing it and

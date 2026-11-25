@@ -73,6 +73,35 @@ Future<JournalNoteEntity> runUpdateNote({
   });
 }
 
+final setNoteTimeMutation = Mutation<JournalNoteEntity>();
+
+/// "Edit time" (#468): sets when a note happened on its own day — a
+/// backfilled note then shows that time, and the films place it by it.
+Future<JournalNoteEntity> runSetNoteTime({
+  required WidgetRef ref,
+  required String tripId,
+  required String noteId,
+  required DateTime takenAt,
+  required int utcOffsetMinutes,
+}) {
+  return setNoteTimeMutation.run(ref, (tsx) async {
+    final repo = tsx.get(journalNoteRepositoryProvider);
+    final controller = tsx.get(journalControllerProvider(tripId).notifier);
+    final result = await repo.setNoteTime(
+      noteId: noteId,
+      takenAt: takenAt,
+      utcOffsetMinutes: utcOffsetMinutes,
+    );
+    return result.fold(
+      (failure) => throw PresentationFailureException(failure),
+      (note) {
+        controller.applyNoteSaved(note);
+        return note;
+      },
+    );
+  });
+}
+
 final deleteNoteMutation = Mutation<Unit>();
 
 /// Deletes one note (#401's long-press, or clearing it on the note page,

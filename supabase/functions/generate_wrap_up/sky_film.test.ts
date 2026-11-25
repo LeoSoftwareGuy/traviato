@@ -21,6 +21,7 @@ import {
 import { buildSkySlots, skyWordGuard, skyWordsProblem } from "./sky_slots.ts";
 import { skySecondsAt, skyStoryFilm } from "./sky_film.ts";
 import { withFilmPhotos } from "./film_photos.ts";
+import { isBackfilled } from "./film_slots.ts";
 import {
   SKY_REFERENCE_SECONDS,
   useFilmLengthRuleForTests,
@@ -284,14 +285,17 @@ Deno.test("a grouped page shows a line from each of its days", () => {
   );
 });
 
-Deno.test("a day without photos: its note only on a page without its own", () => {
+Deno.test("a day without photos: its note plays on the nearest page, even one with its own (#468)", () => {
   const notes = [
-    note("p1", "2026-06-01", "Tram 28 up to the castle, the city below us."),
-    note("gap", "2026-06-02", "A whole day of rain at the hotel, three films."),
+    note("p1", "2026-06-01", "Tram 28 up to the castle."),
+    note("gap", "2026-06-02", "A whole day of rain at the hotel."),
   ];
   const withOwn = skyStoryFilm(memory([4, 0, 4], { notes }), null);
-  assertEquals(withOwn.unlisted.map((u) => u.note_id), ["gap"]);
-  // Page 1 had no note of its own: the photoless day's note plays there.
+  assertEquals(withOwn.unlisted, []);
+  assertEquals(
+    withOwn.content!.pages[0].excerpts.map((e) => e.note_id),
+    ["p1", "gap"],
+  );
   const without = skyStoryFilm(memory([4, 0, 4], { notes: [notes[1]] }), null);
   assertEquals(
     without.content!.pages.flatMap((p) => p.excerpts.map((e) => e.note_id)),
@@ -413,8 +417,7 @@ Deno.test("past 75 s the second lines go first, the last page first; never a day
   withLengthRule(() => {
     const long = (k: number) =>
       `Day ${k}: grilled sardines at the old harbour.`;
-    const second = (k: number) =>
-      `A ferry to island ${k}, a green swim.`;
+    const second = (k: number) => `A ferry to island ${k}, a green swim.`;
     const data = memory(Array(5).fill(8), {
       notes: Array.from(
         { length: 5 },
@@ -438,4 +441,112 @@ Deno.test("past 75 s the second lines go first, the last page first; never a day
     // Every page keeps a line.
     assert(film.content!.pages.every((p) => p.excerpts.length >= 1));
   });
+});
+
+// --- #468: the Journal is the truth -------------------------------------
+
+Deno.test("8 days on the 5-page cap: grouped evenly, none dropped (#468)", () => {
+  const data = memory([3, 3, 3, 3, 3, 3, 3, 3]);
+  const pages = buildSkySkeleton(data).pages;
+  assertEquals(pages.length, MAX_SKY_PAGES);
+  assertEquals(pages.flatMap((p) => p.days), [
+    "2026-06-01",
+    "2026-06-02",
+    "2026-06-03",
+    "2026-06-04",
+    "2026-06-05",
+    "2026-06-06",
+    "2026-06-07",
+    "2026-06-08",
+  ]);
+  const sizes = pages.map((p) => p.days.length);
+  assert(Math.max(...sizes) - Math.min(...sizes) <= 1, sizes.join(","));
+});
+
+Deno.test("photos backfilled onto other Journal days play on those days (#468)", () => {
+  // Each day's photos were taken the day before (the camera's day), as
+  // in "Arabic retreat": the Journal day wins.
+  const data = memory([3, 3, 3]);
+  data.photos = data.photos.map((p) => ({
+    ...p,
+    taken_at: `${addDays(p.day_date!, -1)}${p.taken_at!.slice(10)}`,
+  }));
+  data.notes = [
+    note("d2", "2026-06-02", "The lighthouse at the end of the pier."),
+  ];
+  const film = skyStoryFilm(data, null);
+  assertEquals(film.skeleton.pages.map((p) => p.days), [
+    ["2026-06-01"],
+    ["2026-06-02"],
+    ["2026-06-03"],
+  ]);
+  assertEquals(film.content!.pages[1].excerpts.map((e) => e.note_id), ["d2"]);
+});
+
+Deno.test('"yesterday": written during the trip, the day before; backfilled, its Journal day (#468)', () => {
+  const data = memory([3, 3]);
+  data.notes = [
+    note("y", "2026-06-02", "Yesterday the tram 28 up to the castle."),
+  ];
+  let film = skyStoryFilm(data, null);
+  assertEquals(film.content!.pages[0].excerpts.map((e) => e.note_id), ["y"]);
+  assertEquals(film.content!.pages[1].excerpts, []);
+  // The same note typed in November: "yesterday" is about November.
+  data.notes = [
+    note("y", "2026-06-02", "Yesterday the tram 28 up to the castle.", {
+      taken_at: "2026-11-20T10:00:00Z",
+    }),
+  ];
+  film = skyStoryFilm(data, null);
+  assertEquals(film.content!.pages[1].excerpts.map((e) => e.note_id), ["y"]);
+  assertEquals(film.content!.pages[0].excerpts, []);
+});
+
+Deno.test("a backfilled note goes to the part of its day that shows what it says (#468)", () => {
+  // One long day in two parts (a 2 h+ break): the beach, then the fort.
+  const data = memory([10]);
+  data.photos = data.photos.map((p, k) => ({
+    ...p,
+    taken_at: `2026-06-01T${
+      String(k < 5 ? 8 + k : 16 + k).padStart(2, "0")
+    }:00:00Z`,
+    summary: k < 5 ? "Sandy beach with waves" : "Mud-brick fort walls",
+  }));
+  data.notes = [
+    note("fort", "2026-06-01", "The old fort walls were enormous.", {
+      taken_at: "2026-11-20T10:00:00Z",
+    }),
+    note("beach", "2026-06-01", "The beach water was so warm.", {
+      taken_at: "2026-11-20T10:05:00Z",
+    }),
+  ];
+  const film = skyStoryFilm(data, null);
+  assertEquals(film.skeleton.pages.length, 2);
+  const lineOn = (k: number) =>
+    film.content!.pages[k].excerpts.map((e) => e.note_id);
+  assertEquals(lineOn(0), ["beach"]);
+  assertEquals(lineOn(1), ["fort"]);
+});
+
+Deno.test("backfilled: typed more than 24 h outside its Journal day (#468)", () => {
+  const at = (taken_at: string, utc_offset_minutes = 0) =>
+    isBackfilled(
+      note("n", "2026-06-01", "x", { taken_at, utc_offset_minutes }),
+    );
+  assertEquals(at("2026-06-01T21:00:00Z"), false);
+  // The next morning, the next evening: still about the day.
+  assertEquals(at("2026-06-02T09:00:00Z"), false);
+  assertEquals(at("2026-06-02T23:30:00Z"), false);
+  assertEquals(at("2026-06-03T00:30:00Z"), true);
+  assertEquals(at("2026-11-20T10:00:00Z"), true);
+  assertEquals(at("2026-05-30T23:00:00Z"), true);
+  // On the clock it was typed on: 23:30 UTC is 01:30 at +120.
+  assertEquals(at("2026-06-02T23:30:00Z", 120), true);
+  assertEquals(
+    isBackfilled(note("l", "2026-06-01", "x", {
+      legacy: true,
+      taken_at: "2026-11-20T10:00:00Z",
+    })),
+    false,
+  );
 });

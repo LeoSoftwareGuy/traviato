@@ -104,7 +104,9 @@ class DayTimelineView extends StatelessWidget {
           isFresh: note.id == freshNoteId,
           child: TimelineRailRow(
             key: note.id == freshNoteId ? freshNoteKey : null,
-            label: isLater
+            label: note.isBackfilled
+                ? l10n.timeline_addedLater.toUpperCase()
+                : isLater
                 ? l10n.timeline_later.toUpperCase()
                 : clock.format(note.localTakenAt),
             isNote: true,

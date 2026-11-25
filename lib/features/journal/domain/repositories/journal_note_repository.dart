@@ -33,6 +33,15 @@ abstract interface class JournalNoteRepository {
     required bool dictated,
   });
 
+  /// "Edit time" (#468): when the note happened, on its own day, at
+  /// [utcOffsetMinutes] (the place's). Its day and stars never change; once
+  /// set, the films read it as a real time.
+  Future<Either<Failure, JournalNoteEntity>> setNoteTime({
+    required String noteId,
+    required DateTime takenAt,
+    required int utcOffsetMinutes,
+  });
+
   /// Deletes a note. Its star stays (#397).
   Future<Either<Failure, Unit>> deleteNote(String noteId);
 }

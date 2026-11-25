@@ -451,6 +451,34 @@ Post-MVP: `video_path`, `video_status`.
   `film_lengths.json` cases `ade_sky`/`budapest_sky`, played on the real
   fonts by the app); `tools/record_sky_picks.ts` records a real answer.
 
+- **The Journal day is the truth** (#468): `tripLogicalDays` returns each
+  photo's and note's `day_date` (computed only when it's missing); times
+  only order within a day. `isBackfilled` (film_slots.ts): a non-legacy
+  note whose local time is before its day − 24 h or from its day + 48 h —
+  its time is ignored and it's placed by content (`contentScene` /
+  `contentPhoto` over the photos' `summary` from `photo_analysis`,
+  caption and place). `noteAboutDay`: a note written during
+  the trip that says "вчера/yesterday" belongs to the day before (as
+  #454); a backfilled one never moves. `filmPhotoIds` adds each Journal
+  day's best photo when the cap left the day out. Sky homes a note on a
+  day without film photos on the nearest page of its day group
+  (`nearestDayChapter`); Neon puts such a note's lines first in the Note
+  slot. `DIRECTOR_VERSION` 10. Real-data test:
+  `fixtures/arabic_retreat.json` (`arabic_retreat.test.ts`);
+  `tools/diagnose_days.ts` prints each note's day and page.
+- **Wall-clock photo times** (#468, migration
+  `20261125201111_journal_day_truth_wall_clock_note_time`): an older
+  gallery photo without an EXIF offset uploads its wall clock as
+  `taken_at` (fields in UTC) with `utc_offset_source = 'wall'` — never a
+  naive time read in the phone's zone. `generate_wrap_up` resolves its
+  zone (GPS, else the memory's place, else the phone's offset) and writes
+  back the real instant, the offset and source `gps` / `place` / `phone`
+  (service-role column grant). `journal_notes`: the update trigger keeps
+  `taken_at` / `utc_offset_minutes` unless `set_journal_note_time(p_note_id,
+  p_taken_at, p_utc_offset_minutes)` (security invoker, owner via RLS)
+  sets them — only on the note's own day (or before 08:00 the next) — the
+  Journal's "Edit time"; then it's a real time for the films.
+
 ### `photo_analysis` (#328)
 `photo_id PK/FK photos cascade, trip_id FK cascade, storage_path (the file
 analysed — a new path means re-analyse), summary (≤12 words, visible only),

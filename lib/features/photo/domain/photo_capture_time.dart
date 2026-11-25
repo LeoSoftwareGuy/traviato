@@ -26,9 +26,21 @@ class PhotoCaptureTime {
         source: 'device',
       );
     }
-    // An older photo with no offset: its wall clock as read, the offset
-    // left to the film (the photo's GPS, else the memory's place).
-    return PhotoCaptureTime(takenAt: exifTakenAt);
+    // An older photo with no offset (#468): its wall clock as read, sent
+    // as UTC fields and marked 'wall' — never a naive local time the
+    // database would read as UTC. generate_wrap_up resolves the zone (the
+    // photo's GPS, else the memory's place) and stores the real instant.
+    return PhotoCaptureTime(
+      takenAt: DateTime.utc(
+        exifTakenAt.year,
+        exifTakenAt.month,
+        exifTakenAt.day,
+        exifTakenAt.hour,
+        exifTakenAt.minute,
+        exifTakenAt.second,
+      ),
+      source: wallClockSource,
+    );
   }
 
   /// What `taken_at` gets. A UTC instant whenever the offset is known.
@@ -38,8 +50,12 @@ class PhotoCaptureTime {
   /// from the photo's GPS or the memory's place).
   final int? utcOffsetMinutes;
 
-  /// 'exif' or 'device'; null with no offset.
+  /// 'exif', 'device' or [wallClockSource] (#468: [takenAt] is the wall
+  /// clock, its zone not known yet).
   final String? source;
+
+  /// `utc_offset_source` of a photo whose [takenAt] is its wall clock.
+  static const wallClockSource = 'wall';
 
   /// A photo without an EXIF offset counts as just taken — so the device's
   /// offset is right — when its time is within this of now (a camera shot,

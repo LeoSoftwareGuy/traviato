@@ -136,6 +136,39 @@ class SupabaseJournalNoteRemoteDataSource
   }
 
   @override
+  Future<JournalNoteModel> setNoteTime({
+    required String id,
+    required DateTime takenAt,
+    required int utcOffsetMinutes,
+  }) async {
+    _guardAuthenticated();
+    try {
+      // Only this RPC may move a note in its day (the update trigger keeps
+      // taken_at otherwise); it checks the time is on the note's day.
+      await _client.rpc(
+        DBFunctions.setJournalNoteTime,
+        params: {
+          'p_note_id': id,
+          'p_taken_at': takenAt.toUtc().toIso8601String(),
+          'p_utc_offset_minutes': utcOffsetMinutes,
+        },
+      );
+      final saved = await _client
+          .from(Tables.journalNotes)
+          .select()
+          .eq('id', id)
+          .single();
+      return JournalNoteModel.fromJson(saved);
+    } on PostgrestException catch (e) {
+      throw _mapPostgrestException(e);
+    } on SocketException {
+      throw const NetworkException();
+    } catch (e) {
+      throw UnknownException(message: e.toString());
+    }
+  }
+
+  @override
   Future<void> deleteNote(String id) async {
     _guardAuthenticated();
     try {

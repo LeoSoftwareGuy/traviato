@@ -67,7 +67,11 @@ KeptMemory buildKeptMemory({
   for (final dayIndex in dayIndexes) {
     final dayPhotos = (photosByDay[dayIndex] ?? [])..sort(_byTime);
     final dayNotes = (notesByDay[dayIndex] ?? [])
-      ..sort((a, b) => a.takenAt.compareTo(b.takenAt));
+      // Backfilled notes (#468) at the end of their day.
+      ..sort((a, b) {
+        if (a.isBackfilled != b.isBackfilled) return a.isBackfilled ? 1 : -1;
+        return a.takenAt.compareTo(b.takenAt);
+      });
     days.add(
       KeptMemoryDay(
         dayIndex: dayIndex,

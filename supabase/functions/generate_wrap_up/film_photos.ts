@@ -5,6 +5,10 @@
 // - Otherwise the Always picks plus the best Auto photos (hero_score, then
 //   spread over the memory), up to the cap.
 //
+// - Every Journal day with photos keeps at least one (#468): a day none
+//   of whose photos made it gets its best one (hero_score, then the
+//   earliest), past the cap — never in place of an Always pick.
+//
 // The photos that don't make it are marked left out in a copy of the
 // memory, so every template, check and the director see only the film's.
 
@@ -26,9 +30,31 @@ export function filmPhotoIds(
   const shown = sortPhotosChronologically(
     tripData.photos.filter((p) => p.use_in_wrap_up !== false),
   );
+  const picked = pickWithinCap(shown, heroScores, max);
+  // Every Journal day with photos keeps one (#468).
+  const score = (p: Photo) => heroScores[p.id] ?? UNKNOWN_SCORE;
+  const covered = new Set(
+    shown.filter((p) => picked.has(p.id)).map((p) => p.day_date),
+  );
+  for (const p of shown) {
+    if (!p.day_date || covered.has(p.day_date)) continue;
+    const best = shown.filter((x) => x.day_date === p.day_date)
+      .sort((a, b) => score(b) - score(a))[0];
+    picked.add(best.id);
+    covered.add(p.day_date);
+  }
+  return shown.filter((p) => picked.has(p.id)).map((p) => p.id);
+}
+
+// The film's photos within the cap (#432, #433).
+function pickWithinCap(
+  shown: Photo[],
+  heroScores: Readonly<Record<string, number>>,
+  max: number,
+): Set<string> {
   const always = shown.filter((p) => p.use_in_wrap_up === true);
   const pool = always.length >= WRAP_UP_LIMITS.minPhotos ? always : shown;
-  if (pool.length <= max) return pool.map((p) => p.id);
+  if (pool.length <= max) return new Set(pool.map((p) => p.id));
 
   const index = new Map(pool.map((p, i) => [p.id, i]));
   const score = (p: Photo) => heroScores[p.id] ?? UNKNOWN_SCORE;
@@ -55,7 +81,7 @@ export function filmPhotoIds(
     if (room <= 0) break;
     for (const p of spread(group, room)) picked.add(p.id);
   }
-  return pool.filter((p) => picked.has(p.id)).map((p) => p.id);
+  return picked;
 }
 
 // Up to [count] of [items], evenly spread, in order.

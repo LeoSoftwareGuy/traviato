@@ -85,6 +85,9 @@ class KeptMemoryDayChapter extends StatelessWidget {
                   // An old one-a-day note has no real time of its own.
                   note.legacy
                       ? context.l10n.timeline_earlierNote.toUpperCase()
+                      // Typed long after its day (#468): no real time.
+                      : note.isBackfilled
+                      ? context.l10n.timeline_addedLater.toUpperCase()
                       : KeptMemoryLabels.noteTime(
                           note.localTakenAt,
                           context.l10n.localeName,

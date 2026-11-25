@@ -198,7 +198,13 @@ export function skySecondsAt(
 interface WorkPage {
   page: SkySkeletonPage;
   headline: string | null;
-  lines: { slot: string; note_id: string; text: string; at: number }[];
+  lines: {
+    slot: string;
+    note_id: string;
+    text: string;
+    at: number;
+    day: string;
+  }[];
   sky_line: { slot: string; text: string } | null;
 }
 
@@ -253,10 +259,11 @@ export function skyStoryFilm(
             note_id: c.note_id,
             text: c.text,
             at: noteAt(c.note_id),
+            day: notes.get(c.note_id)?.day_date ?? "",
           }]
           : []
       )
-    ).sort((a, b) => a.at - b.at);
+    ).sort((a, b) => a.day.localeCompare(b.day) || a.at - b.at);
     const sky = of("sky_line")[0];
     const skyText = sky ? resolved.get(sky.slot)?.chosen[0]?.text : undefined;
     const head = resolved.get(`p${k + 1}.headline`)?.chosen[0]?.text ?? null;
@@ -326,22 +333,49 @@ export function skyStoryFilm(
         "flyOut"
       ? SKY_SKY_CHARS
       : SKY_CARD_CHARS;
+  // The longest line goes to a shorter clause first, so every line of a
+  // grouped page keeps its place (#468); only then the last line goes.
   work.forEach((w, k) => {
     while (w.lines.length > 0 && chars(w) > room(k)) {
+      const others = (l: WorkPage["lines"][number]) =>
+        new Set(
+          work.flatMap((o) => o.lines).filter((o) => o !== l).map((o) =>
+            o.text
+          ),
+        );
+      const shorterOf = (l: WorkPage["lines"][number]) =>
+        slots.find((x) => x.slot === l.slot)!.candidates
+          .filter((c) =>
+            c.note_id === l.note_id &&
+            [...c.text].length < [...l.text].length && !others(l).has(c.text)
+          )
+          .sort((a, b) =>
+            // The one that fits, then the user's best words.
+            Number(
+                [...b.text].length - [...l.text].length + chars(w) <= room(k),
+              ) -
+              Number(
+                [...a.text].length - [...l.text].length + chars(w) <= room(k),
+              ) ||
+            b.score - a.score
+          )[0];
+      const longest = [...w.lines].sort((a, b) =>
+        [...b.text].length - [...a.text].length
+      ).find((l) => shorterOf(l));
+      const shorter = longest ? shorterOf(longest) : undefined;
+      if (longest && shorter && w.lines.length > 1) {
+        longest.text = shorter.text;
+        shortened.set(longest.slot, shorter.text);
+        trims.push(`p${k + 1}: a line to a shorter clause to fit the page`);
+        continue;
+      }
       const l = w.lines[w.lines.length - 1];
-      const others = new Set(
-        work.flatMap((o) => o.lines).filter((o) => o !== l).map((o) => o.text),
-      );
-      const shorter = slots.find((x) => x.slot === l.slot)!.candidates
-        .filter((c) =>
-          c.note_id === l.note_id &&
-          [...c.text].length < [...l.text].length && !others.has(c.text) &&
-          [...c.text].length - [...l.text].length + chars(w) <= room(k)
-        )
-        .sort((a, b) => b.score - a.score)[0];
-      if (shorter) {
-        l.text = shorter.text;
-        shortened.set(l.slot, shorter.text);
+      const fit = shorterOf(l);
+      if (
+        fit && [...fit.text].length - [...l.text].length + chars(w) <= room(k)
+      ) {
+        l.text = fit.text;
+        shortened.set(l.slot, fit.text);
         trims.push(`p${k + 1}: a line to a shorter clause to fit the page`);
       } else {
         w.lines.pop();
@@ -371,11 +405,16 @@ export function skyStoryFilm(
       ],
     };
   }
-  for (let k = work.length - 1; k >= 0 && past(); k--) {
-    while (work[k].lines.length > 1 && past()) {
-      const l = work[k].lines.pop()!;
-      dropped.set(l.slot, "for length");
-      trims.push(`p${k + 1}: a second line left out`);
+  // A single day's second line before a grouped page's (#468: there each
+  // line is a day's own).
+  for (const grouped of [false, true]) {
+    for (let k = work.length - 1; k >= 0 && past(); k--) {
+      if ((work[k].page.days.length > 1) !== grouped) continue;
+      while (work[k].lines.length > 1 && past()) {
+        const l = work[k].lines.pop()!;
+        dropped.set(l.slot, "for length");
+        trims.push(`p${k + 1}: a second line left out`);
+      }
     }
   }
   for (let k = work.length - 1; k >= 0 && past(); k--) {

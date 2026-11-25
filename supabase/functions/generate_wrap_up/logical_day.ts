@@ -7,9 +7,9 @@ import type { TripData } from "./gather.ts";
 // that item — a night out keeps going. Otherwise, and at any time from
 // 08:00, it belongs to its own calendar date.
 //
-// The app stamps day_date with this rule when an item is saved; rows saved
-// before #401 carry their calendar date. The film recomputes it from the
-// times so every memory follows the rule.
+// The app stamps day_date with this rule when an item is saved. Since
+// #468 the film reads that day as it is (the Journal is the truth); the
+// rule over the times only fills a row without one.
 
 export const LOGICAL_DAY_CUTOFF_HOUR = 8;
 export const NEW_DAY_GAP_MS = 4 * 60 * 60 * 1000;
@@ -77,25 +77,25 @@ export function logicalDays(
   return days;
 }
 
-// Every photo's and note's logical day (#398 R1), photos and notes taken
-// together in time order, on the app's clock.
+// Every photo's and note's film day (#468): **the Journal day it shows
+// under** (its day_date) — the Journal is the truth, for photos and notes,
+// even when the user backfilled it onto another day than its capture or
+// typing time. The app already stamps day_date with the logical-day rule
+// when an item is saved, so a night out stays on the evening. Only a row
+// without a day falls back to the rule over the times (#398 R1).
 export function tripLogicalDays(
   tripData: TripData,
 ): Map<string, string | null> {
-  return logicalDays(
+  const computed = logicalDays(
     [
       ...tripData.photos.map((p) => ({
         id: p.id,
-        // An untimed photo keeps its stored day (#422): its upload time
-        // says when it was added, not when it happened. Only a photo with
-        // neither falls back to the upload.
         at: p.taken_at ?? (p.day_date ? null : p.created_at),
         fallbackDay: p.day_date,
         offsetMinutes: p.utc_offset_minutes,
       })),
       ...tripData.notes.filter((n) => n.id).map((n) => ({
         id: `note:${n.id}`,
-        // A legacy note's time is its last edit: its day is its own.
         at: n.legacy ? null : n.taken_at ?? null,
         fallbackDay: n.day_date,
         offsetMinutes: n.utc_offset_minutes,
@@ -103,29 +103,35 @@ export function tripLogicalDays(
     ],
     tripData.utc_offset_minutes ?? 0,
   );
+  const days = new Map<string, string | null>();
+  for (const p of tripData.photos) {
+    days.set(p.id, p.day_date ?? computed.get(p.id) ?? null);
+  }
+  for (const n of tripData.notes) {
+    if (!n.id) continue;
+    const id = `note:${n.id}`;
+    days.set(id, n.day_date || (computed.get(id) ?? null));
+  }
+  return days;
 }
 
-// [tripData] with every photo's and note's day_date set to its logical day
-// (#422), for films that group by day_date: Sky Story then sees the same
-// days the director does. The rule only ever keeps a night on the evening
-// before, so a stored day moves at most one day back; a row without a day
-// keeps none. Idempotent.
+// [tripData] with a day on every photo and note that has none (#468: a
+// stored day is never moved — the Journal is the truth). Idempotent.
 export function onLogicalDays(tripData: TripData): TripData {
+  if (
+    tripData.photos.every((p) => p.day_date) &&
+    tripData.notes.every((n) => n.day_date)
+  ) return tripData;
   const days = tripLogicalDays(tripData);
-  const moved = (stored: string | null, day: string | null | undefined) => {
-    if (!stored || !day || day === stored) return null;
-    const before = dateOf(Date.parse(`${stored}T00:00:00Z`) - DAY_MS);
-    return day === before ? day : null;
-  };
   return {
     ...tripData,
-    photos: tripData.photos.map((p) => {
-      const day = moved(p.day_date, days.get(p.id));
-      return day ? { ...p, day_date: day } : p;
-    }),
-    notes: tripData.notes.map((n) => {
-      const day = moved(n.day_date, n.id ? days.get(`note:${n.id}`) : null);
-      return day ? { ...n, day_date: day } : n;
-    }),
+    photos: tripData.photos.map((p) =>
+      p.day_date ? p : { ...p, day_date: days.get(p.id) ?? null }
+    ),
+    notes: tripData.notes.map((n) =>
+      n.day_date || !n.id
+        ? n
+        : { ...n, day_date: days.get(`note:${n.id}`) ?? n.day_date }
+    ),
   };
 }

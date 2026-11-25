@@ -79,7 +79,10 @@ List<TimelineEntry> buildDayTimeline({
   }
   for (final n in notes) {
     final at = n.localTakenAt;
-    items.add(_Item(at, note: n, isLater: isAfterDayOver(at, day)));
+    // A backfilled note (#468) goes to the end of its day too.
+    items.add(
+      _Item(at, note: n, isLater: n.isBackfilled || isAfterDayOver(at, day)),
+    );
   }
   items.sort((a, b) {
     if (a.isLater != b.isLater) return a.isLater ? 1 : -1;

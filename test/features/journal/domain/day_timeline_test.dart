@@ -203,4 +203,55 @@ void main() {
       expect(dayForNewItem(selectedDay: fri, now: _at(14, 0, day: 24)), fri);
     });
   });
+
+  group('a backfilled note (#468)', () {
+    JournalNoteEntity typedLater(String id, DateTime at) => JournalNoteEntity(
+      id: id,
+      tripId: 't1',
+      dayDate: _day,
+      takenAt: at.toUtc(),
+      editedAt: at.toUtc(),
+      content: 'Mosque',
+      utcOffsetMinutes: 120,
+    );
+
+    test('typed more than 24 h after its day is backfilled', () {
+      expect(
+        typedLater('n', DateTime.utc(2026, 11, 24, 18)).isBackfilled,
+        isTrue,
+      );
+      // The next morning or evening: still about the day.
+      expect(
+        typedLater('n', DateTime.utc(2026, 10, 24, 18)).isBackfilled,
+        isFalse,
+      );
+      expect(
+        typedLater('n', DateTime.utc(2026, 10, 23, 9)).isBackfilled,
+        isFalse,
+      );
+      // A legacy note never is.
+      expect(
+        buildJournalNoteEntity(
+          id: 'l',
+          dayDate: _day,
+          createdAt: DateTime(2026, 12, 1),
+          legacy: true,
+        ).isBackfilled,
+        isFalse,
+      );
+    });
+
+    test('it sits at the end of its day, after the photos', () {
+      final rows = buildDayTimeline(
+        day: _day,
+        photos: [_photo('a', _at(10, 0)), _photo('b', _at(18, 0))],
+        notes: [typedLater('late', DateTime.utc(2026, 11, 24, 18))],
+      );
+      expect(rows.first, isA<TimelinePhotoRow>());
+      expect(rows.whereType<TimelineLater>(), hasLength(1));
+      final last = rows.last as TimelineNoteRow;
+      expect(last.note.id, 'late');
+      expect(last.isLater, isTrue);
+    });
+  });
 }

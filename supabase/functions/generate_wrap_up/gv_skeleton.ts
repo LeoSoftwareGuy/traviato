@@ -28,7 +28,7 @@
 
 import type { TripData } from "./gather.ts";
 import { tripLogicalDays } from "./logical_day.ts";
-import { spreadEvenly } from "./assemble.ts";
+import { sortPhotosChronologically, spreadEvenly } from "./assemble.ts";
 import { filmPhotoIds } from "./film_photos.ts";
 import { noteAnchors, photoRank, spreadPicks } from "./film_slots.ts";
 import {
@@ -247,8 +247,10 @@ export function buildGvSkeleton(
 ): GvSkeleton {
   // The film's photos (at most maxFilmPhotos, Always picks kept).
   const film = new Set(filmPhotoIds(tripData, heroScores));
-  const photos = gvPhotos(tripData).filter((p) => film.has(p.id))
-    .sort((a, b) => timeOf(a) - timeOf(b));
+  // By Journal day, then time (#468: the Journal is the truth).
+  const photos = sortPhotosChronologically(
+    gvPhotos(tripData).filter((p) => film.has(p.id)),
+  );
   const days = tripLogicalDays(tripData);
   const groups = chapterGroups(photos, days);
   const { occasion, trigger } = gvOccasionOf(tripData, summaries);

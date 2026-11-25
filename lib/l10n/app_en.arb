@@ -2561,5 +2561,21 @@
   "timeline_deletePhotoBody": "It's removed from this day and won't appear in your film. This can't be undone.",
   "@timeline_deletePhotoBody": {"description": "Delete-photo confirm sheet (#424)."},
   "timeline_photoDeleted": "Photo deleted",
-  "@timeline_photoDeleted": {"description": "Toast after deleting a photo from the timeline (#424)."}
+  "@timeline_photoDeleted": {"description": "Toast after deleting a photo from the timeline (#424)."},
+  "photo_movePromptTitle": "This photo was taken on {date}",
+  "@photo_movePromptTitle": {"description": "Adding a gallery photo to another Journal day than its capture date (#468); {date} is the capture day.", "placeholders": {"date": {"type": "String"}}},
+  "photo_movePromptBody": "Add it to {date} instead?",
+  "@photo_movePromptBody": {"description": "Move-photo prompt (#468).", "placeholders": {"date": {"type": "String"}}},
+  "photo_moveBatchTitle": "{count, plural, one{1 photo was taken on another day} other{{count} photos were taken on other days}}",
+  "@photo_moveBatchTitle": {"description": "Move-photo prompt for a batch (#468).", "placeholders": {"count": {"type": "int"}}},
+  "photo_moveBatchBody": "Add them to the days they were taken instead?",
+  "@photo_moveBatchBody": {"description": "Move-photo prompt for a batch (#468)."},
+  "photo_moveAction": "Move",
+  "@photo_moveAction": {"description": "Move-photo prompt (#468): add it to its capture day."},
+  "photo_keepHere": "Keep here",
+  "@photo_keepHere": {"description": "Move-photo prompt (#468): keep it on the chosen day."},
+  "timeline_addedLater": "added later",
+  "@timeline_addedLater": {"description": "In place of a note's time when it was written long after its day (#468)."},
+  "timeline_editTime": "Edit time",
+  "@timeline_editTime": {"description": "Note actions sheet (#468): set when the note happened."}
 }

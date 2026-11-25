@@ -109,6 +109,40 @@ class FakeJournalNoteRepository implements JournalNoteRepository {
         );
   }
 
+  var setNoteTimeCallCount = 0;
+  DateTime? lastSetTakenAt;
+  int? lastSetOffset;
+  String? lastSetNoteId;
+
+  @override
+  Future<Either<Failure, JournalNoteEntity>> setNoteTime({
+    required String noteId,
+    required DateTime takenAt,
+    required int utcOffsetMinutes,
+  }) async {
+    setNoteTimeCallCount++;
+    lastSetNoteId = noteId;
+    lastSetTakenAt = takenAt;
+    lastSetOffset = utcOffsetMinutes;
+    final stored = notesForTripResult
+        ?.getOrElse((_) => const [])
+        .where((n) => n.id == noteId);
+    final base = stored == null || stored.isEmpty ? null : stored.first;
+    return Right(
+      JournalNoteEntity(
+        id: noteId,
+        tripId: base?.tripId ?? 't1',
+        dayDate: base?.dayDate ?? DateTime(2026, 1, 1),
+        takenAt: takenAt,
+        editedAt: takenAt,
+        content: base?.content ?? '',
+        dictated: base?.dictated ?? false,
+        photoId: base?.photoId,
+        utcOffsetMinutes: utcOffsetMinutes,
+      ),
+    );
+  }
+
   @override
   Future<Either<Failure, Unit>> deleteNote(String noteId) async {
     deleteNoteCallCount++;

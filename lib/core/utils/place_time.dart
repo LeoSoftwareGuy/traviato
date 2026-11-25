@@ -1,4 +1,5 @@
-import 'package:timezone/data/latest.dart' as tz_data;
+// latest_all: alias names too (Asia/Muscat, #468).
+import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
 /// Times on the clock of where something happened (#461), not the phone's

@@ -36,17 +36,21 @@ function local(day: string, hour: number, minute = 0): string {
 function amsterdam(): TripData {
   const base = directorTripData().photos[0];
   const photos: TripData["photos"] = [];
-  const add = (id: string, calendar: string, h: number) =>
+  // The Journal day (#468: the film's day) as the app stamps it — after
+  // midnight on the evening's — and the calendar date it was taken on.
+  const add = (id: string, calendar: string, h: number, journal = calendar) =>
     photos.push({
       ...base,
       id,
-      day_date: calendar, // old rows: their calendar date
+      day_date: journal,
       taken_at: local(calendar, h),
       storage_path: `u/t/${id}.jpg`,
       place_text: null,
     });
   for (let k = 0; k < 4; k++) add(`a${k}`, "2026-09-01", 20 + k);
-  for (let k = 0; k < 3; k++) add(`a${4 + k}`, "2026-09-02", 1 + k);
+  for (let k = 0; k < 3; k++) {
+    add(`a${4 + k}`, "2026-09-02", 1 + k, "2026-09-01");
+  }
   for (let k = 0; k < 6; k++) add(`b${k}`, "2026-09-02", 12 + k);
   for (let k = 0; k < 5; k++) add(`c${k}`, "2026-09-03", 11 + k);
   return directorTripData({
@@ -62,7 +66,7 @@ function amsterdam(): TripData {
       },
       {
         id: "n2",
-        day_date: "2026-09-02",
+        day_date: "2026-09-01",
         taken_at: local("2026-09-02", 2, 30),
         photo_id: "a5",
         content: "Danced at Shelter until 3, first time in a club since 2019!",

@@ -44,4 +44,23 @@ void main() {
       expect(photo.filmPickSetAt, DateTime.utc(2026, 6, 2, 10));
     });
   });
+
+  test('a wall-clock photo (#468) shows its taken_at as read', () {
+    final photo = PhotoModel.fromJson({
+      ..._row(),
+      'taken_at': '2026-04-13T21:57:00+00:00',
+      'utc_offset_source': 'wall',
+    });
+    expect(photo.utcOffsetMinutes, 0);
+    expect(photo.localTime.hour, 21);
+    expect(photo.localTime.minute, 57);
+    // Once the film resolved it: the instant at its own offset.
+    final resolved = PhotoModel.fromJson({
+      ..._row(),
+      'taken_at': '2026-04-13T17:57:00+00:00',
+      'utc_offset_minutes': 240,
+      'utc_offset_source': 'gps',
+    });
+    expect(resolved.localTime.hour, 21);
+  });
 }

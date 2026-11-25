@@ -10,7 +10,7 @@ import '../../../../photo/domain/entities/photo_entity.dart';
 import '../../../../photo/presentation/widgets/storage_photo_image.dart';
 import '../../../domain/entities/journal_note_entity.dart';
 
-enum NoteAction { edit, delete }
+enum NoteAction { edit, editTime, delete }
 
 enum PhotoAction { delete }
 
@@ -39,10 +39,12 @@ abstract final class NoteActionsSheet {
   }) {
     return _showSheet<NoteAction>(context, (context) {
       final l10n = context.l10n;
-      final time = L10nDates.clock(
-        l10n.localeName,
-        use24h: use24h,
-      ).format(note.localTakenAt);
+      final time = note.isBackfilled
+          ? l10n.timeline_addedLater
+          : L10nDates.clock(
+              l10n.localeName,
+              use24h: use24h,
+            ).format(note.localTakenAt);
       return BottomSheetChrome(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
@@ -81,6 +83,12 @@ abstract final class NoteActionsSheet {
                 label: l10n.timeline_editNote,
                 onTap: () => Navigator.of(context).pop(NoteAction.edit),
               ),
+              if (!note.legacy)
+                _SheetButton(
+                  key: const Key('note-sheet-edit-time'),
+                  label: l10n.timeline_editTime,
+                  onTap: () => Navigator.of(context).pop(NoteAction.editTime),
+                ),
               _SheetButton(
                 key: const Key('note-sheet-delete'),
                 label: l10n.timeline_deleteNote,

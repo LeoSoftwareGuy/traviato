@@ -43,6 +43,7 @@ Future<void> _pump(
   WidgetTester tester,
   FakePhotoRepository photoRepo, {
   required int imageCount,
+  List<DateTime>? dayDates,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
@@ -65,6 +66,7 @@ Future<void> _pump(
                   tripId: 't1',
                   dayDate: DateTime(2026, 8, 18),
                   images: List.generate(imageCount, (_) => _onePixelPng),
+                  dayDates: dayDates,
                 ),
                 child: const Text('open'),
               ),
@@ -239,4 +241,21 @@ void main() {
       await tester.pumpAndSettle();
     },
   );
+
+  testWidgets('moved photos upload on their own Journal days (#468)', (
+    tester,
+  ) async {
+    final photoRepo = FakePhotoRepository();
+    final days = <DateTime?>[];
+    photoRepo.onAddPhoto = (day) => days.add(day);
+    await _pump(
+      tester,
+      photoRepo,
+      imageCount: 2,
+      dayDates: [DateTime(2026, 4, 12), DateTime(2026, 4, 13)],
+    );
+    await _pumpUntilVisible(tester, find.text('+4 ✦ · 2 photos logged'));
+    expect(days, [DateTime(2026, 4, 12), DateTime(2026, 4, 13)]);
+    await tester.pumpAndSettle();
+  });
 }

@@ -28,18 +28,26 @@
 import type { TripData } from "./gather.ts";
 import type { ToolDefinition } from "./anthropic_tool.ts";
 import type { WrapUpLanguage } from "./language.ts";
-import { excerptScore, isGeneric, lineThemeFor } from "./excerpts.ts";
+import {
+  excerptScore,
+  isDrugReference,
+  isGeneric,
+  lineThemeFor,
+  sentencesOf,
+} from "./excerpts.ts";
 import { chosenTemplate } from "./film_template.ts";
 import {
   choose,
-  dayBefore,
   freeTextProblem,
   hash,
   hasVerb,
+  isBackfilled,
   linesOf,
   namePhrases,
   namesOf,
+  nearestDayChapter,
   norm,
+  noteAboutDay,
   noteLineId,
   notePhrases,
   noteScene,
@@ -55,7 +63,6 @@ import {
   wordGuard,
   wordsProblem,
   writtenLanguage,
-  YESTERDAY,
 } from "./film_slots.ts";
 import { repeatsTitle, sameLine } from "./neon_night.ts";
 import { tripLogicalDays } from "./logical_day.ts";
@@ -104,27 +111,23 @@ export function skyLanguage(
   return writtenLanguage(tripData) ?? language;
 }
 
-// A note's day (#463): its logical day while that's a day of the memory,
-// else the day it was saved on (a note written after the trip, about a
-// day of it); "вчера…" the day before.
+// A note's day (#468): the Journal day it was added to — never a day from
+// when it was typed; a note written during the trip that says "вчера…"
+// the day before (noteAboutDay), a backfilled one never.
 export function skyNoteDay(
   tripData: TripData,
   days: ReadonlyMap<string, string | null>,
   n: Note,
 ): string {
-  const { start_date, end_date } = tripData.trip;
-  const logical = days.get(`note:${n.id}`) ?? n.day_date;
-  const within = (d: string) =>
-    (!start_date || d >= start_date) && (!end_date || d <= end_date);
-  const day = within(logical) ? logical : n.day_date;
-  const before = dayBefore(day);
-  return YESTERDAY.test(n.content) && within(before) ? before : day;
+  return noteAboutDay(tripData, n, days.get(`note:${n.id}`) ?? n.day_date);
 }
 
-// Where each note plays (#463, the #456 rule): the page of its own photo,
-// else a page of its day — among a day's parts, the one whose photos it
-// was written among — else, for a day without photos, the nearest page
-// when that page's own days have no note; null: nowhere.
+// Where each note plays (#463, #468): the page of its own photo, else a
+// page of its Journal day — among a day's parts, the one whose photos it
+// was written among (a backfilled note: the one whose photos show what it
+// says) — else, for a day without film photos, the page nearest its day
+// (the earlier on a tie), even one with notes of its own: a note always
+// plays. null only without pages.
 export function skyNoteHomes(
   tripData: TripData,
   skeleton: SkySkeleton,
@@ -133,8 +136,6 @@ export function skyNoteHomes(
   const notes = tripData.notes.filter((n) => n.id && n.content.trim());
   const pages = skeleton.pages;
   const homes = new Map<string, number | null>();
-  const withOwn = new Set<number>();
-  const later: Note[] = [];
   for (const n of notes) {
     const own = pages.findIndex((p) =>
       p.photos.some((x) => x.id === n.photo_id)
@@ -143,37 +144,12 @@ export function skyNoteHomes(
     const onDay = pages.flatMap((p, k) => p.days.includes(day) ? [k] : []);
     const page = own >= 0
       ? own
-      : onDay.length === 0
-      ? null
       : onDay.length === 1
       ? onDay[0]
-      : onDay[noteScene(onDay.map((k) => pages[k].photos), n)];
-    if (page === null) {
-      later.push(n);
-      continue;
-    }
-    homes.set(n.id!, page);
-    withOwn.add(page);
-  }
-  // A day without photos: the nearest page by day, if it has no note.
-  const start = tripData.trip.start_date;
-  for (const n of later) {
-    const day = skyNoteDay(tripData, days, n);
-    let best: number | null = null;
-    let gap = Infinity;
-    pages.forEach((p, k) => {
-      const d = Math.min(
-        ...p.days.map((x) => Math.abs(Date.parse(x) - Date.parse(day))),
-      );
-      if (d < gap) {
-        gap = d;
-        best = k;
-      }
-    });
-    homes.set(
-      n.id!,
-      start && best !== null && !withOwn.has(best) ? best : null,
-    );
+      : onDay.length > 1
+      ? onDay[noteScene(onDay.map((k) => pages[k].photos), n)]
+      : nearestDayChapter(pages, day);
+    homes.set(n.id!, page >= 0 ? page : null);
   }
   return homes;
 }
@@ -224,10 +200,17 @@ export function buildSkySlots(
     const slot = `p${k + 1}`;
     const own = notes.filter((n) => homes.get(n.id!) === k);
 
-    // Its lines.
+    // Its lines. A note of a day without film photos homed here (#468)
+    // gets a slot of its own, so it always plays.
+    const foreign = [
+      ...new Set(
+        own.map(noteDay).filter((d) => !page.days.includes(d)),
+      ),
+    ].sort();
+    const mine = own.filter((n) => page.days.includes(noteDay(n)));
     let lineSlots: SkySlot[];
     if (page.days.length === 1) {
-      const candidates = lineCandidates(own);
+      const candidates = lineCandidates(mine);
       lineSlots = candidates.length === 0 ? [] : Array.from(
         { length: Math.min(SKY_LINES_PER_PAGE, candidates.length) },
         (_, j) => ({
@@ -241,17 +224,10 @@ export function buildSkySlots(
       );
     } else {
       // A line of each of its days with notes (#463), the best days when
-      // more have notes than fit; a note of a photoless day under its
-      // nearest day.
+      // more have notes than fit.
       const byDay = page.days.map((day) => ({
         day,
-        candidates: lineCandidates(
-          own.filter((n) =>
-            page.days.includes(noteDay(n))
-              ? noteDay(n) === day
-              : day === page.days[page.days.length - 1]
-          ),
-        ),
+        candidates: lineCandidates(mine.filter((n) => noteDay(n) === day)),
       })).filter((d) => d.candidates.length > 0);
       const best = [...byDay].sort((a, b) =>
         b.candidates[0].score - a.candidates[0].score
@@ -265,6 +241,19 @@ export function buildSkySlots(
         free: false,
         candidates: d.candidates,
       }));
+    }
+    for (const day of foreign) {
+      const candidates = lineCandidates(own.filter((n) => noteDay(n) === day));
+      if (candidates.length === 0) continue;
+      lineSlots.push({
+        slot: `${slot}.line${lineSlots.length + 1}`,
+        kind: "line" as const,
+        page: k,
+        day,
+        max_picks: 1,
+        free: false,
+        candidates,
+      });
     }
     slots.push(...lineSlots);
 
@@ -336,7 +325,9 @@ export function buildSkySlots(
         });
       }
     }
-    for (const n of own) {
+    // Its own days' notes only (#468: a photoless day's note plays here,
+    // it doesn't name the page).
+    for (const n of mine) {
       for (const phrase of namePhrases(n.content)) {
         // Several words: a lone capitalised word opens a sentence more
         // often than it names one.
@@ -599,9 +590,11 @@ export function skyUnlistedNotes(
   ).map((n) => {
     const lines = linesOf(n, theme);
     const reason = homes.get(n.id!) === null || !homes.has(n.id!)
-      ? "a day without photos, and the nearest page has a note of its own"
+      ? "on no page (the film has no pages)"
       : lines.length === 0
-      ? "no line left after the drug filter"
+      ? sentencesOf(n.content).every(isDrugReference)
+        ? "no line left after the drug filter"
+        : "no sentence or clause short enough for a line"
       : lines.every((l) => isGeneric(l.text))
       ? "only generic lines, and its page has a specific one"
       : `no line fits a page (≤ ${MAX_SKY_NOTE_LINE_CHARS} chars)`;
@@ -707,7 +700,7 @@ export function buildSkyPickInput(
     notes: tripData.notes.filter((n) => n.id && n.content.trim()).map((n) => ({
       note_id: n.id,
       written_at: clock(
-        n.legacy ? null : n.taken_at ?? n.created_at ?? null,
+        n.legacy || isBackfilled(n) ? null : n.taken_at ?? n.created_at ?? null,
         n,
       ),
       photo_id: n.photo_id ?? null,
