@@ -533,8 +533,10 @@ set. Mockup copy showing other numbers is adjusted at implementation.
   than 24 h away from its day ("added later") has no time for the films:
   it goes to the page or chapter of its day whose photos it talks about
   (mosque, waterfall, fort — matched against the photos' descriptions,
-  captions and places), else the day's first. "вчера"/"yesterday" never
-  moves a note. A Journal day with photos always gets one in the film
+  captions and places), else the day's first; its "вчера"/"yesterday" is
+  about when it was typed, so it stays on its day. A note written during
+  the trip that says "вчера" still belongs to the day before (ADE's Kuko
+  night). A Journal day with photos always gets one in the film
   (its best, past the 60 cap, never pushing out an Always pick), so a
   long memory groups its days evenly onto 5 pages and drops none; a note
   on a day without film photos plays on the nearest page of its group,

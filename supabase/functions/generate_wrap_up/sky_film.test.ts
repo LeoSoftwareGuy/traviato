@@ -483,12 +483,21 @@ Deno.test("photos backfilled onto other Journal days play on those days (#468)",
   assertEquals(film.content!.pages[1].excerpts.map((e) => e.note_id), ["d2"]);
 });
 
-Deno.test('"yesterday" never moves a note to another day (#468)', () => {
+Deno.test('"yesterday": written during the trip, the day before; backfilled, its Journal day (#468)', () => {
   const data = memory([3, 3]);
   data.notes = [
     note("y", "2026-06-02", "Yesterday the tram 28 up to the castle."),
   ];
-  const film = skyStoryFilm(data, null);
+  let film = skyStoryFilm(data, null);
+  assertEquals(film.content!.pages[0].excerpts.map((e) => e.note_id), ["y"]);
+  assertEquals(film.content!.pages[1].excerpts, []);
+  // The same note typed in November: "yesterday" is about November.
+  data.notes = [
+    note("y", "2026-06-02", "Yesterday the tram 28 up to the castle.", {
+      taken_at: "2026-11-20T10:00:00Z",
+    }),
+  ];
+  film = skyStoryFilm(data, null);
   assertEquals(film.content!.pages[1].excerpts.map((e) => e.note_id), ["y"]);
   assertEquals(film.content!.pages[0].excerpts, []);
 });

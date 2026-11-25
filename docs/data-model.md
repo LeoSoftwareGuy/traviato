@@ -457,7 +457,9 @@ Post-MVP: `video_path`, `video_status`.
   note whose local time is before its day − 24 h or from its day + 48 h —
   its time is ignored and it's placed by content (`contentScene` /
   `contentPhoto` over the photos' `summary` from `photo_analysis`,
-  caption and place). No "вчера" move. `filmPhotoIds` adds each Journal
+  caption and place). `noteAboutDay`: a note written during
+  the trip that says "вчера/yesterday" belongs to the day before (as
+  #454); a backfilled one never moves. `filmPhotoIds` adds each Journal
   day's best photo when the cap left the day out. Sky homes a note on a
   day without film photos on the nearest page of its day group
   (`nearestDayChapter`); Neon puts such a note's lines first in the Note

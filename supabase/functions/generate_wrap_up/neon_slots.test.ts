@@ -269,7 +269,7 @@ function twoParts(): TripData {
   });
 }
 
-Deno.test("note → chapter: its photo's, else the nearest part; after the last photo the last; yesterday stays on its Journal day", () => {
+Deno.test("note → chapter: its photo's, else the nearest part; after the last photo the last; yesterday the day before", () => {
   const data = twoParts();
   const { chapters } = neonNightFilm(data, null);
   assertEquals(chapters.length, 3);
@@ -280,8 +280,8 @@ Deno.test("note → chapter: its photo's, else the nearest part; after the last 
   assertEquals(owners.get("lunch"), [1]);
   // Written after the day's last photo: its last part.
   assertEquals(owners.get("late"), [2]);
-  // "Yesterday…" stays on its Journal day (#468): never the day before.
-  assertEquals(owners.get("yesterday")?.every((i) => i > 0), true);
+  // "Yesterday…", written during the trip: the day before's last part.
+  assertEquals(owners.get("yesterday"), [0]);
 });
 
 Deno.test("a backfilled note goes by what it says, within its own Journal day (#468)", () => {

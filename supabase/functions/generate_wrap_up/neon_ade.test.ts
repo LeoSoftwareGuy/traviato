@@ -88,17 +88,12 @@ Deno.test("ADE: every chapter with notes has card candidates; Brussels has its l
   const amf = slot(slots, "ch4.card").candidates.map((c) => c.text);
   assert(amf.some((t) => t.startsWith("Выезжаем на AMF тусовку")));
   assert(amf.some((t) => t.startsWith("Мы на месте")));
-  // "вчера…" stays on its own Journal day (#468), never the night before.
+  // "вчера…", written during the trip, is the night before's: Kuko's card
+  // (#468 keeps that move for notes typed during the trip).
   assert(
-    slot(slots, "ch4.card").candidates.some((c) =>
-      c.text.includes("Куко Unreal")
-    ),
-  );
-  assertEquals(
     slot(slots, "ch3.card").candidates.some((c) =>
       c.text.includes("Куко Unreal")
     ),
-    false,
   );
 });
 
@@ -165,8 +160,8 @@ Deno.test("ADE replay: the director's picks hold, Brussels types its line", () =
   // Recorded before #456: these picks were lines of another scene's notes
   // (the airport line over the Amsterdam split, the ribs over the 01:14
   // split, the stadium night over the walk) — now on another list.
-  // Since #468 "вчера…" is 10-24's, not Kuko's (ch3).
-  const moved = new Set(["ch1.m1", "ch2.m1", "ch3.card", "ch3.title"]);
+  // Since #468 the AMF notes are 10-24's card (their Journal day).
+  const moved = new Set(["ch1.m1", "ch2.m1", "ch4.card"]);
   for (const r of report) {
     // A director pick, or code's for the film's length only.
     assert(
@@ -181,10 +176,9 @@ Deno.test("ADE replay: the director's picks hold, Brussels types its line", () =
   }
   const titles = content.chapters.map((c) => c.title);
   assertEquals(titles[4], "Брюссель");
-  for (const [i, t] of titles.entries()) {
+  for (const t of titles) {
     assert([...t].length <= MAX_NN_TITLE_CHARS, t);
-    // Kuko's night has no note of its own day left to name it (#468).
-    if (i !== 2) assertEquals(/^(День|Day) \d/.test(t), false, t);
+    assertEquals(/^(День|Day) \d/.test(t), false, t);
   }
   assertEquals(content.chapters[4].note, BRUSSELS_LINE);
   assertEquals(content.note?.text, NOTE_LINE);
@@ -261,9 +255,9 @@ Deno.test("ADE: titles are names, the card line matches the card's photos (#454)
       }
     }
   }
-  // "Куко Unreal" is named in a 10-24 note: 10-24's title (#468).
+  // "Куко Unreal" is named in the "вчера…" note: Kuko's title.
   assert(
-    slot(slots, "ch4.title").candidates.some((k) =>
+    slot(slots, "ch3.title").candidates.some((k) =>
       k.text.includes("Куко Unreal")
     ),
   );
@@ -314,8 +308,7 @@ Deno.test("ADE replay: the recorded titles and headline play (#454)", () => {
   assertEquals(content.chapters.map((c) => c.title), [
     "Амстердам",
     "Полтора метра ребер",
-    // Its recorded title came from 10-24's "вчера…" note (#468).
-    "День 1 · ночь",
+    "На Куко Unreal",
     "AMF под ливнем",
     "Брюссель",
   ]);
@@ -421,4 +414,26 @@ Deno.test("ADE: every moment with captioned photos keeps a caption at any length
       }
     }
   }
+});
+
+// #468 follow-up: "вчера…" written during the trip is still the night
+// before's — only a backfilled note keeps its Journal day.
+const KUKO_NOTE = "695a05ea";
+
+Deno.test('ADE: the Kuko night keeps its title and the "вчера пришли в 8 утра" line (#468)', () => {
+  const { content } = played();
+  const kuko = content.chapters[2];
+  assert(kuko.title.includes("Куко"), kuko.title);
+  const { slots } = cut();
+  const card = slot(slots, "ch3.card");
+  assert(card.candidates.some((c) => c.note_id?.startsWith(KUKO_NOTE)));
+  const { memory } = adeFilmMemory();
+  const vchera = memory.notes.find((n) => n.id!.startsWith(KUKO_NOTE))!;
+  assert(kuko.note != null, "Kuko's card has a line");
+  assert(
+    vchera.content.replace(/\s+/g, " ").includes(
+      kuko.note!.replace(/\s+/g, " ").replace(/[.!?…]+$/u, ""),
+    ),
+    `${kuko.note} is not from the "вчера" note`,
+  );
 });

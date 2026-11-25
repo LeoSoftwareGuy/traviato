@@ -46,6 +46,7 @@ import {
   namePhrases,
   namesOf,
   nearestDayChapter,
+  noteAboutDay,
   norm,
   noteLineId,
   notePhrases,
@@ -110,14 +111,15 @@ export function skyLanguage(
   return writtenLanguage(tripData) ?? language;
 }
 
-// A note's day (#468): the Journal day it was added to — never another
-// (no "вчера…" move, no day from when it was typed).
+// A note's day (#468): the Journal day it was added to — never a day from
+// when it was typed; a note written during the trip that says "вчера…"
+// the day before (noteAboutDay), a backfilled one never.
 export function skyNoteDay(
-  _tripData: TripData,
+  tripData: TripData,
   days: ReadonlyMap<string, string | null>,
   n: Note,
 ): string {
-  return days.get(`note:${n.id}`) ?? n.day_date;
+  return noteAboutDay(tripData, n, days.get(`note:${n.id}`) ?? n.day_date);
 }
 
 // Where each note plays (#463, #468): the page of its own photo, else a

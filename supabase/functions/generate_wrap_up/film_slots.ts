@@ -324,9 +324,38 @@ export function inOtherLanguage(
   return own * 2 < words.length;
 }
 
+// "Yesterday …": a note about the day before (#454).
+export const YESTERDAY =
+  /(^|[^\p{L}])(вчера|yesterday|last night)([^\p{L}]|$)/iu;
+
+// The day before [day], 'YYYY-MM-DD'.
+export function dayBefore(day: string): string {
+  const d = new Date(`${day}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+// The day a note is about (#454, #468): its Journal day — or, for a note
+// written during the trip (not backfilled) that says "вчера…/yesterday",
+// the day before, when that's a day of the memory. A backfilled note's
+// "вчера" is about when it was typed, so it stays on its Journal day.
+export function noteAboutDay(
+  tripData: TripData,
+  n: Note,
+  journalDay: string,
+): string {
+  if (isBackfilled(n) || !YESTERDAY.test(n.content)) return journalDay;
+  const { start_date, end_date } = tripData.trip;
+  const before = dayBefore(journalDay);
+  const within = (!start_date || before >= start_date) &&
+    (!end_date || before <= end_date);
+  return within ? before : journalDay;
+}
+
 // Which chapters a note's lines belong to (#454, #468): the chapter with
-// its photo; else a chapter of its Journal day (never another day — the
-// Journal is the truth, "вчера…" too): within the day the part whose time
+// its photo; else a chapter of its Journal day — a note written during
+// the trip about yesterday ("вчера…") the day before's last part, never a
+// backfilled one (noteAboutDay): within the day the part whose time
 // range is nearest to when it was written (after the day's last photo:
 // its last part); a backfilled note (#468) the part whose photos show
 // what it says, else the day's first. An old one-a-day note (no time)
@@ -365,9 +394,17 @@ export function noteChapters(
       continue;
     }
     const written = days.get(`note:${n.id}`) ?? n.day_date;
-    const today = chapters.flatMap((c, i) =>
-      c.days.includes(written) ? [i] : []
-    );
+    const onDay = (day: string) =>
+      chapters.flatMap((c, i) => c.days.includes(day) ? [i] : []);
+    const about = noteAboutDay(tripData, n, written);
+    if (about !== written) {
+      const before = onDay(about);
+      if (before.length > 0) {
+        owners.set(n.id, [before[before.length - 1]]);
+        continue;
+      }
+    }
+    const today = onDay(written);
     if (today.length === 0) {
       const near = nearestDay ? nearestDayChapter(chapters, written) : -1;
       if (near >= 0) owners.set(n.id, [near]);
