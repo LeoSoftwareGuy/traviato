@@ -554,6 +554,33 @@ async function runCounted(
   return { ...record, run_count: runs + 1 };
 }
 
+// A wall-clock photo (#468: an EXIF time without an offset) resolved by
+// withLocalTimes is written back once — its real instant, offset and where
+// that came from — so the app and every later open read the same time. A
+// failed write only means it's resolved again next time.
+async function keepWallClockTimes(
+  deps: Deps,
+  gathered: TripData,
+  resolved: TripData,
+): Promise<void> {
+  const byId = new Map(resolved.photos.map((p) => [p.id, p]));
+  for (const raw of gathered.photos) {
+    if (raw.utc_offset_source !== "wall") continue;
+    const p = byId.get(raw.id);
+    if (!p || p.utc_offset_source === "wall") continue;
+    try {
+      const { error } = await deps.serviceClient.from("photos").update({
+        taken_at: p.taken_at,
+        utc_offset_minutes: p.utc_offset_minutes,
+        utc_offset_source: p.utc_offset_source,
+      }).eq("id", p.id).eq("utc_offset_source", "wall");
+      if (error) console.warn(`photo time not saved: ${error.message}`);
+    } catch (err) {
+      console.warn(`photo time not saved: ${(err as Error).message}`);
+    }
+  }
+}
+
 // Each photo's cached analysis summary (#468: a backfilled note goes to
 // the photos that show what it says), for the file it was made from. A
 // failed read only costs that matching.
@@ -586,6 +613,7 @@ async function gatherLocal(
   if (utcOffset !== undefined) gathered.utc_offset_minutes = utcOffset;
   await attachSummaries(deps, tripId, gathered);
   const tripData = withLocalTimes(gathered);
+  await keepWallClockTimes(deps, gathered, tripData);
   const zone = tripData.zone;
   if (zone?.zone && zone.source !== "stored") {
     try {

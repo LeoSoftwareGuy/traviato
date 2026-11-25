@@ -251,3 +251,28 @@ Deno.test("withLocalTimes is idempotent and keeps stored offsets", () => {
   assertEquals(once.photos[0].utc_offset_minutes, 330);
   assertEquals(once.photos[1].utc_offset_minutes, 60);
 });
+
+Deno.test("a wall-clock photo (#468: EXIF without an offset) is read at its place", () => {
+  const local = withLocalTimes(memory(
+    { destination: "Budapest Hungary" },
+    [
+      // 21:57 on the camera, in Budapest (UTC+1 in February).
+      {
+        taken_at: "2026-02-26T21:57:00Z",
+        utc_offset_source: "wall",
+        ...BUDAPEST,
+      },
+      // No GPS: the memory's zone.
+      { taken_at: "2026-02-26T10:00:00Z", utc_offset_source: "wall" },
+    ],
+  ));
+  const [gps, place] = local.photos;
+  assertEquals(gps.taken_at, "2026-02-26T20:57:00.000Z");
+  assertEquals(gps.utc_offset_minutes, 60);
+  assertEquals(gps.utc_offset_source, "gps");
+  assertEquals(localClock(gps.taken_at, local, gps), "21:57");
+  assertEquals(place.taken_at, "2026-02-26T09:00:00.000Z");
+  assertEquals(place.utc_offset_source, "place");
+  // Idempotent.
+  assertEquals(withLocalTimes(local).photos, local.photos);
+});

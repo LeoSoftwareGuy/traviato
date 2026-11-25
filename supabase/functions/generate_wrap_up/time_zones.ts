@@ -37,6 +37,10 @@ export interface TripZone {
 export type OffsetSource =
   | "exif"
   | "device"
+  // Stored by the app (#468): taken_at is the EXIF wall clock (as UTC
+  // fields), its zone unknown — read at the photo's GPS zone, else the
+  // memory's, else the app's; resolved to "gps", "place" or "phone".
+  | "wall"
   | "gps"
   | "nearby"
   | "place"
@@ -223,6 +227,7 @@ export function withLocalTimes(tripData: TripData): TripData {
   const app = tripData.utc_offset_minutes ?? 0;
   const place = (ms: number) => zone.zone ? offsetIn(zone.zone, ms) : null;
   const photos = tripData.photos.map((p) => {
+    if (p.utc_offset_source === "wall" && p.taken_at) return fromWall(p);
     if (p.utc_offset_minutes != null && p.utc_offset_source) return p;
     if (p.utc_offset_minutes != null) {
       return { ...p, utc_offset_source: p.utc_offset_source ?? "exif" };
@@ -246,6 +251,26 @@ export function withLocalTimes(tripData: TripData): TripData {
       }
       : { ...p, utc_offset_minutes: app, utc_offset_source: "phone" as const };
   });
+  // A wall-clock photo (#468): its offset where it was, and its taken_at
+  // the real instant.
+  function fromWall(p: Photo): Photo {
+    const wall = Date.parse(p.taken_at!);
+    if (Number.isNaN(wall)) return { ...p, utc_offset_source: "phone" };
+    const own = p.lat != null && p.lng != null ? zoneAt(p.lat, p.lng) : null;
+    const gps = own ? offsetIn(own, wall) : null;
+    const fromPlace = gps === null ? place(wall) : null;
+    const offset = gps ?? fromPlace ?? app;
+    return {
+      ...p,
+      taken_at: new Date(wall - offset * 60_000).toISOString(),
+      utc_offset_minutes: offset,
+      utc_offset_source: gps !== null
+        ? "gps"
+        : fromPlace !== null
+        ? "place"
+        : "phone",
+    };
+  }
   // Photos whose offset says where they were (not the place's guess).
   const known = photos.filter((p) =>
     p.utc_offset_source === "exif" || p.utc_offset_source === "device" ||
