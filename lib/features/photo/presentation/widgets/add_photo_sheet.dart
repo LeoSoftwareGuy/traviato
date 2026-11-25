@@ -14,10 +14,13 @@ import '../../../../core/widgets/bottom_sheet_chrome.dart';
 import '../../../../core/widgets/show_failure_snackbar.dart';
 import '../../../../core/widgets/star_award_toast.dart';
 import '../../../trip/presentation/widgets/create_memory_field.dart';
+import '../../data/services/photo_exif_reader.dart';
 import '../../domain/entities/photo_entity.dart';
+import '../../domain/photo_day_check.dart';
 import '../mutations/photo_mutations.dart';
 import 'batch_add_photo_sheet.dart';
 import 'location_permission_prompt.dart';
+import 'move_photo_day_sheet.dart';
 
 /// Entry point for issue #30 — the Journal "Add ✦2" tile and any future
 /// day-tab-context add affordance both call this. [dayDate] is whichever
@@ -28,11 +31,15 @@ import 'location_permission_prompt.dart';
 class AddPhotoSheet {
   const AddPhotoSheet._();
 
+  /// [memoryStart] / [memoryEnd]: the memory's days — given, a gallery
+  /// photo taken on another of its days asks to move there (#468).
   static Future<void> show(
     BuildContext context, {
     required String tripId,
     required DateTime dayDate,
     Future<void> Function(PhotoEntity photo)? onSaved,
+    DateTime? memoryStart,
+    DateTime? memoryEnd,
   }) {
     return showAppBottomSheet<void>(
       context: context,
@@ -40,6 +47,8 @@ class AddPhotoSheet {
         tripId: tripId,
         dayDate: dayDate,
         onSaved: onSaved,
+        memoryStart: memoryStart,
+        memoryEnd: memoryEnd,
       ),
     );
   }
@@ -50,11 +59,58 @@ class _SourcePicker extends StatelessWidget {
     required this.tripId,
     required this.dayDate,
     this.onSaved,
+    this.memoryStart,
+    this.memoryEnd,
   });
 
   final String tripId;
   final DateTime dayDate;
   final Future<void> Function(PhotoEntity photo)? onSaved;
+  final DateTime? memoryStart;
+  final DateTime? memoryEnd;
+
+  /// Each image's own Journal day when it was taken on another day of the
+  /// memory (#468), else null. Camera shots are never asked.
+  Future<List<DateTime?>> _takenOn(List<Uint8List> images) async {
+    if (memoryStart == null && memoryEnd == null) {
+      return List.filled(images.length, null);
+    }
+    const reader = PhotoExifReader();
+    final today = DateTime.now();
+    return Future.wait(
+      images.map((bytes) async {
+        final exif = await reader.read(bytes);
+        return suggestedPhotoDay(
+          captureWallClock: exif.wallClock,
+          journalDay: dayDate,
+          start: memoryStart,
+          end: memoryEnd,
+          today: today,
+        );
+      }),
+    );
+  }
+
+  /// The day each image goes to: its own day when the user chose Move.
+  Future<List<DateTime>?> _daysFor(
+    BuildContext context,
+    List<Uint8List> images,
+  ) async {
+    final takenOn = await _takenOn(images);
+    final other = takenOn.whereType<DateTime>().toList();
+    if (other.isEmpty || !context.mounted) {
+      return List.filled(images.length, dayDate);
+    }
+    final move = await MovePhotoDaySheet.ask(
+      context,
+      count: other.length,
+      takenOn: other.first,
+    );
+    if (!context.mounted) return null;
+    return [
+      for (final day in takenOn) move && day != null ? day : dayDate,
+    ];
+  }
 
   Future<void> _pick(BuildContext context, ImageSource source) async {
     final file = await ImagePicker().pickImage(source: source);
@@ -84,11 +140,13 @@ class _SourcePicker extends StatelessWidget {
     if (files.length == 1) {
       final bytes = await files.single.readAsBytes();
       if (!context.mounted) return;
+      final days = await _daysFor(context, [bytes]);
+      if (days == null || !context.mounted) return;
       Navigator.of(context).pop();
       await AddPhotoDetailsSheet.show(
         context,
         tripId: tripId,
-        dayDate: dayDate,
+        dayDate: days.single,
         bytes: bytes,
       );
       return;
@@ -96,12 +154,15 @@ class _SourcePicker extends StatelessWidget {
 
     final images = await Future.wait(files.map((f) => f.readAsBytes()));
     if (!context.mounted) return;
+    final days = await _daysFor(context, images);
+    if (days == null || !context.mounted) return;
     Navigator.of(context).pop();
     await BatchAddPhotoSheet.show(
       context,
       tripId: tripId,
       dayDate: dayDate,
       images: images,
+      dayDates: days,
     );
   }
 

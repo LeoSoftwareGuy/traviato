@@ -17,6 +17,15 @@ class PhotoExif {
   final int? utcOffsetMinutes;
 
   bool get hasGps => lat != null && lng != null;
+
+  /// The capture time as the clock read where it was taken (#468): a
+  /// [DateTime] whose fields are that wall clock; null without a time.
+  DateTime? get wallClock {
+    final at = takenAt;
+    if (at == null) return null;
+    final offset = utcOffsetMinutes;
+    return offset == null ? at : at.toUtc().add(Duration(minutes: offset));
+  }
 }
 
 /// Wraps the `exif` package. Parsing runs on the raw picked bytes — image

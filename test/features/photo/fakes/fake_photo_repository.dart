@@ -21,6 +21,9 @@ class FakePhotoRepository implements PhotoRepository {
   Uint8List? lastAddedBytes;
   DateTime? lastAddedDayDate;
 
+  /// Called with each added photo's day (#468: a batch's own days).
+  void Function(DateTime? dayDate)? onAddPhoto;
+
   Either<Failure, void>? deletePhotoResult;
   final deletedPhotoIds = <String>[];
 
@@ -53,6 +56,7 @@ class FakePhotoRepository implements PhotoRepository {
     addPhotoCallCount++;
     lastAddedBytes = bytes;
     lastAddedDayDate = dayDate;
+    onAddPhoto?.call(dayDate);
     final queue = addPhotoResultsQueue;
     if (queue != null && callIndex < queue.length) return queue[callIndex];
     return addPhotoResult ??

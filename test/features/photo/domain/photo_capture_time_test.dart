@@ -39,15 +39,19 @@ void main() {
     expect(t.source, 'device');
   });
 
-  test('an older gallery photo, no offset: left to the film', () {
+  test('an older gallery photo, no offset: its wall clock, marked wall '
+      '(#468)', () {
     final old = DateTime(2026, 2, 26, 21, 57);
     final t = PhotoCaptureTime.of(
       exifTakenAt: old,
       exifOffsetMinutes: null,
       now: now,
     );
-    expect(t.takenAt, old);
+    // Sent with its zone marker: never a naive local time read as UTC.
+    expect(t.takenAt, DateTime.utc(2026, 2, 26, 21, 57));
+    expect(t.takenAt!.isUtc, isTrue);
+    expect(t.takenAt!.toIso8601String(), endsWith('Z'));
     expect(t.utcOffsetMinutes, isNull);
-    expect(t.source, isNull);
+    expect(t.source, PhotoCaptureTime.wallClockSource);
   });
 }

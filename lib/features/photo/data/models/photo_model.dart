@@ -1,3 +1,4 @@
+import '../../domain/photo_capture_time.dart';
 import '../../domain/entities/film_pick.dart';
 import '../../domain/entities/photo_entity.dart';
 
@@ -41,7 +42,13 @@ class PhotoModel extends PhotoEntity {
     filmPickSetAt: json['use_in_wrap_up_set_at'] == null
         ? null
         : DateTime.parse(json['use_in_wrap_up_set_at'] as String),
-    utcOffsetMinutes: (json['utc_offset_minutes'] as num?)?.toInt(),
+    // A wall-clock photo (#468) shows its taken_at as read until the film
+    // resolves its zone: offset 0 reads the wall clock's fields.
+    utcOffsetMinutes:
+        (json['utc_offset_minutes'] as num?)?.toInt() ??
+        (json['utc_offset_source'] == PhotoCaptureTime.wallClockSource
+            ? 0
+            : null),
   );
 
   /// The row carries no `image_url` column — this attaches the signed URL

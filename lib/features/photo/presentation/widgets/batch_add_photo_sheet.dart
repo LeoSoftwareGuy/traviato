@@ -19,9 +19,12 @@ import 'location_permission_prompt.dart';
 enum _BatchItemStatus { pending, uploading, success, failed }
 
 class _BatchItem {
-  _BatchItem(this.bytes);
+  _BatchItem(this.bytes, this.dayDate);
 
   final Uint8List bytes;
+
+  /// The Journal day it goes to (#468: its own when the user moved it).
+  final DateTime dayDate;
   _BatchItemStatus status = _BatchItemStatus.pending;
 }
 
@@ -36,6 +39,7 @@ class BatchAddPhotoSheet extends ConsumerStatefulWidget {
     required this.tripId,
     required this.dayDate,
     required this.images,
+    this.dayDates,
     super.key,
   });
 
@@ -43,11 +47,15 @@ class BatchAddPhotoSheet extends ConsumerStatefulWidget {
   final DateTime dayDate;
   final List<Uint8List> images;
 
+  /// Each image's Journal day (#468), else [dayDate] for all.
+  final List<DateTime>? dayDates;
+
   static Future<void> show(
     BuildContext context, {
     required String tripId,
     required DateTime dayDate,
     required List<Uint8List> images,
+    List<DateTime>? dayDates,
   }) {
     return showAppBottomSheet<void>(
       context: context,
@@ -55,6 +63,7 @@ class BatchAddPhotoSheet extends ConsumerStatefulWidget {
         tripId: tripId,
         dayDate: dayDate,
         images: images,
+        dayDates: dayDates,
       ),
     );
   }
@@ -64,9 +73,10 @@ class BatchAddPhotoSheet extends ConsumerStatefulWidget {
 }
 
 class _BatchAddPhotoSheetState extends ConsumerState<BatchAddPhotoSheet> {
-  late final List<_BatchItem> _items = widget.images
-      .map(_BatchItem.new)
-      .toList();
+  late final List<_BatchItem> _items = [
+    for (final (k, bytes) in widget.images.indexed)
+      _BatchItem(bytes, widget.dayDates?[k] ?? widget.dayDate),
+  ];
   var _isRunning = false;
 
   /// The most recent upload error, shown under the summary so a failed
@@ -100,7 +110,7 @@ class _BatchAddPhotoSheetState extends ConsumerState<BatchAddPhotoSheet> {
         await runAddPhoto(
           ref: ref,
           tripId: widget.tripId,
-          dayDate: widget.dayDate,
+          dayDate: item.dayDate,
           rawBytes: item.bytes,
           locationPermissionGranted: locationGranted,
         );
