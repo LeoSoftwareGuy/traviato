@@ -62,6 +62,9 @@ declare
   v_day date;
   v_local timestamp;
 begin
+  if auth.uid() is null then
+    raise exception 'not authenticated' using errcode = '42501';
+  end if;
   if p_utc_offset_minutes is null
     or p_utc_offset_minutes not between -1080 and 1080 then
     raise exception 'invalid offset' using errcode = '22023';
@@ -83,6 +86,10 @@ begin
     set taken_at = p_taken_at,
         utc_offset_minutes = p_utc_offset_minutes
     where id = p_note_id;
+  -- Deleted between the select and the update: say so, don't no-op.
+  if not found then
+    raise exception 'note not found' using errcode = 'P0002';
+  end if;
   perform set_config('traviato.note_time', '', true);
 end;
 $$;
